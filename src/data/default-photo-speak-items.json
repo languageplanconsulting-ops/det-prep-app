@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ph-speak-1",
+    "titleEn": "Busy street",
+    "titleTh": "ถนนคึกคัก",
+    "imageUrl": "https://picsum.photos/seed/speakphoto-street/640/400",
+    "promptEn": "Describe what you see in the photo. Say what might be happening and how the place feels. Use your own experience if you can.",
+    "promptTh": "อธิบายสิ่งที่เห็นในภาพ บอกว่าน่าจะเกิดอะไรขึ้น และบรรยากาศเป็นอย่างไร ถ้าได้ลองผูกกับประสบการณ์ตัวเอง",
+    "keywords": ["street", "city", "people", "buildings", "traffic", "urban"]
+  },
+  {
+    "id": "ph-speak-2",
+    "titleEn": "Quiet park",
+    "titleTh": "สวนสงบ",
+    "imageUrl": "https://picsum.photos/seed/speakphoto-park/640/400",
+    "promptEn": "Talk about the scene: nature, weather, and what someone might do there. Give at least one personal memory if possible.",
+    "promptTh": "พูดถึงฉากในภาพ ธรรมชาติ สภาพอากาศ และคนทั่วไปอาจทำอะไรที่นั่น ถ้าได้ยกความทรงจำส่วนตัวสักหนึ่งอย่าง",
+    "keywords": ["park", "trees", "green", "nature", "walk", "relax", "outdoor"]
+  }
+]

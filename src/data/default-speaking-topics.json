@@ -1,0 +1,50 @@
+[
+  {
+    "id": "rs-topic-1",
+    "titleEn": "Goals and habits",
+    "titleTh": "เป้าหมายและนิสัย",
+    "promptEn": "Read the situation below. Then choose one card and speak for several minutes in English.",
+    "promptTh": "อ่านสถานการณ์ด้านล่าง แล้วเลือกการ์ดหนึ่งใบ แล้วพูดเป็นภาษาอังกฤษหลายนาที",
+    "questions": [
+      {
+        "id": "rs-topic-1-q1",
+        "thumbnail": "🎯",
+        "promptEn": "Describe one goal you want to achieve this year. Explain why it is important and what you will do each week to move closer to it.",
+        "promptTh": "อธิบายเป้าหมายหนึ่งอย่างที่อยากทำให้สำเร็จในปีนี้ บอกว่าทำไมจึงสำคัญ และคุณจะทำอะไรทุกสัปดาห์เพื่อเข้าใกล้เป้าหมาย"
+      },
+      {
+        "id": "rs-topic-1-q2",
+        "thumbnail": "https://picsum.photos/seed/readspeak-habit/320/200",
+        "promptEn": "Talk about a daily or weekly habit that helps you study or work. Say how you built the habit and one problem you sometimes face.",
+        "promptTh": "พูดถึงนิสัยประจำวันหรือสัปดาห์ที่ช่วยเรียนหรือทำงาน บอกว่าสร้างนิสัยอย่างไร และปัญหาหนึ่งอย่างที่บางครั้งเจอ"
+      }
+    ]
+  },
+  {
+    "id": "rs-topic-2",
+    "titleEn": "Travel and places",
+    "titleTh": "การท่องเที่ยวและสถานที่",
+    "promptEn": "Read the introduction, pick a card, then give a spoken answer.",
+    "promptTh": "อ่านคำแนะนำ เลือกการ์ด แล้วตอบด้วยการพูด",
+    "questions": [
+      {
+        "id": "rs-topic-2-q1",
+        "thumbnail": "✈️",
+        "promptEn": "Describe a trip you remember well. Where did you go, who were you with, and what was the best part?",
+        "promptTh": "อธิบายทริปที่จำได้ชัด ไปไหน ไปกับใคร และส่วนที่ดีที่สุดคืออะไร"
+      },
+      {
+        "id": "rs-topic-2-q2",
+        "thumbnail": "🏙️",
+        "promptEn": "If you could live in another city for one year, which city would you choose and why?",
+        "promptTh": "ถ้าอยู่เมืองอื่นได้หนึ่งปี จะเลือกเมืองไหนและทำไม"
+      },
+      {
+        "id": "rs-topic-2-q3",
+        "thumbnail": "🌿",
+        "promptEn": "Talk about a natural place (park, beach, mountain) you enjoy. What do you usually do there?",
+        "promptTh": "พูดถึงธรรมชาติที่ชอบ (สวน ชายหาด ภูเขา) มักไปทำอะไรที่นั่น"
+      }
+    ]
+  }
+]

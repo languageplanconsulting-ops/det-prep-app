@@ -1,0 +1,37 @@
+================================================================================
+  IF localhost:3000 DOES NOT LOAD — READ THIS
+================================================================================
+
+VERY COMMON: PORT 3000 IS ALREADY TAKEN
+  When you run "npm run dev", look at the Terminal text.
+
+  If you see:
+    "Port 3000 is in use ... using port 3001 instead"
+
+  Then open THIS in your browser (not 3000):
+
+    http://localhost:3001
+
+  The app is running there. Port 3000 is another program (old server, other app).
+
+TO FREE PORT 3000 (optional, Mac Terminal)
+  lsof -ti :3000
+  (shows a number, e.g. 23145)
+
+  kill 23145
+  (use the number you saw)
+
+  Then run "npm run dev" again — it should say Local: http://localhost:3000
+
+================================================================================
+  NORMAL STEPS (when nothing is on 3000)
+================================================================================
+  cd "/Users/natchanonongjui/Documents/DET APP"
+  npm install
+  npm run dev
+
+  Open the URL that Terminal prints after "Local:" — usually http://localhost:3000
+
+  Leave Terminal OPEN while you use the site.
+
+================================================================================
