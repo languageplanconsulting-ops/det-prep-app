@@ -644,11 +644,6 @@ export function LandingPageClient({
                 </Link>
               </li>
               <li>
-                <Link href="/login#admin-login" className="hover:text-ep-yellow">
-                  Admin (code login)
-                </Link>
-              </li>
-              <li>
                 <Link href="/practice" className="hover:text-ep-yellow">
                   Practice
                 </Link>

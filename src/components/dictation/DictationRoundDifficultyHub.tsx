@@ -75,7 +75,7 @@ export function DictationRoundDifficultyHub({ round }: { round: DictationRoundNu
                 <span className="ep-stat mt-3 block text-sm font-bold text-neutral-800">
                   {count > 0
                     ? `${count} set${count === 1 ? "" : "s"} · max ${DICTATION_MAX_SCORE[d]} pts`
-                    : "Coming soon"}
+                    : "COMING SOON"}
                 </span>
               </Link>
             );

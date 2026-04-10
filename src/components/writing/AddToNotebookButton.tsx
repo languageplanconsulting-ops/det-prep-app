@@ -182,7 +182,7 @@ export function AddToNotebookButton({
           className="fixed bottom-6 left-1/2 z-[100] w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 border-2 border-black bg-white px-4 py-3 text-center text-sm font-bold shadow-[4px_4px_0_0_#000]"
           role="status"
         >
-          Don&apos;t forget to study me later :)
+          added to notebook. don&apos;t forget to study me later! :)
         </div>
       ) : null}
 

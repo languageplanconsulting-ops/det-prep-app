@@ -44,7 +44,7 @@ export function FitbSetGrid({
   if (rows.length === 0) {
     return (
       <div className="ep-brutal rounded-sm border-4 border-black bg-neutral-100 p-6 shadow-[4px_4px_0_0_#000]">
-        <p className="text-lg font-black text-neutral-800">Coming soon</p>
+        <p className="text-lg font-black text-neutral-800">COMING SOON</p>
         <p className="mt-2 text-sm text-neutral-600">
           No uploaded sets for this round and level yet.
         </p>

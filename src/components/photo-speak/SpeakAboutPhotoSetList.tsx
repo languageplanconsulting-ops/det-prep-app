@@ -76,31 +76,48 @@ export function SpeakAboutPhotoSetList() {
       <ul className="grid gap-4 sm:grid-cols-2">
         {([1, 2, 3, 4, 5] as const).map((round) => {
           const stats = getSpeakAboutPhotoRoundStats(round);
+          const isComingSoon = counts[round] === 0;
           return (
             <li key={round}>
-              <Link href={`/practice/production/speak-about-photo/round/${round}`}>
-                <BrutalPanel className="h-full p-5 hover:bg-ep-yellow/15">
-                  <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-ep-blue">
-                    {counts[round]} photo{counts[round] === 1 ? "" : "s"} uploaded
+              {isComingSoon ? (
+                <BrutalPanel className="h-full cursor-not-allowed border-dashed p-5 opacity-80">
+                  <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-neutral-600">
+                    0 photos uploaded
                   </p>
                   <p className="mt-2 text-lg font-extrabold">{ROUND_LABELS[round].en}</p>
                   <p className="text-sm text-neutral-600">{ROUND_LABELS[round].th}</p>
                   <div className="mt-4 space-y-1 border-t-2 border-neutral-200 pt-3 text-sm">
-                    <p className="font-bold text-neutral-800">
-                      Avg score (speaking):{" "}
-                      <span className="text-ep-blue">
-                        {stats.averageScore !== null ? `${stats.averageScore}/160` : "—"}
-                      </span>
-                    </p>
+                    <p className="font-black uppercase tracking-wide text-amber-700">COMING SOON</p>
                     <p className="ep-stat text-xs text-neutral-600">
-                      Last speak attempt:{" "}
-                      <span className="font-semibold text-neutral-800">
-                        {formatWhen(stats.lastAttemptedAt)}
-                      </span>
+                      This round is not uploaded yet.
                     </p>
                   </div>
                 </BrutalPanel>
-              </Link>
+              ) : (
+                <Link href={`/practice/production/speak-about-photo/round/${round}`}>
+                  <BrutalPanel className="h-full p-5 hover:bg-ep-yellow/15">
+                    <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-ep-blue">
+                      {counts[round]} photo{counts[round] === 1 ? "" : "s"} uploaded
+                    </p>
+                    <p className="mt-2 text-lg font-extrabold">{ROUND_LABELS[round].en}</p>
+                    <p className="text-sm text-neutral-600">{ROUND_LABELS[round].th}</p>
+                    <div className="mt-4 space-y-1 border-t-2 border-neutral-200 pt-3 text-sm">
+                      <p className="font-bold text-neutral-800">
+                        Avg score (speaking):{" "}
+                        <span className="text-ep-blue">
+                          {stats.averageScore !== null ? `${stats.averageScore}/160` : "—"}
+                        </span>
+                      </p>
+                      <p className="ep-stat text-xs text-neutral-600">
+                        Last speak attempt:{" "}
+                        <span className="font-semibold text-neutral-800">
+                          {formatWhen(stats.lastAttemptedAt)}
+                        </span>
+                      </p>
+                    </div>
+                  </BrutalPanel>
+                </Link>
+              )}
             </li>
           );
         })}

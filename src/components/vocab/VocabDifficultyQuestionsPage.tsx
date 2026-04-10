@@ -62,7 +62,7 @@ export function VocabDifficultyQuestionsPage({
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" key={v}>
         {rows.length === 0 ? (
           <div className="ep-brutal-reading col-span-full rounded-sm bg-neutral-100 p-4 text-sm font-bold text-neutral-600">
-            Coming soon
+            COMING SOON
           </div>
         ) : (
           rows.map((row, idx) => {

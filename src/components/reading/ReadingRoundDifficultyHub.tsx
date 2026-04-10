@@ -61,7 +61,7 @@ export function ReadingRoundDifficultyHub({ round }: { round: ReadingRoundNum })
                 <span className="ep-stat mt-3 block text-sm font-bold text-neutral-800">
                   {count > 0
                     ? `${count} set${count === 1 ? "" : "s"} · max ${READING_DIFFICULTY_MAX[d]} pts / exam`
-                    : "Coming soon"}
+                    : "COMING SOON"}
                 </span>
               </Link>
             );

@@ -87,7 +87,7 @@ function SetList({
       </div>
       <ul className="divide-y-4 divide-black">
         {rows.length === 0 ? (
-          <li className="px-4 py-6 text-sm font-bold text-neutral-600">Coming soon — no admin-uploaded sets here yet.</li>
+          <li className="px-4 py-6 text-sm font-bold text-neutral-600">COMING SOON — no admin-uploaded sets here yet.</li>
         ) : (
           rows.map((ws) => {
             const setNumber = ws.setNumber;

@@ -50,12 +50,12 @@ export function ReadSpeakRoundTopicsPage({ round }: { round: number }) {
         <h1 className="mt-2 text-3xl font-black">Round {r}</h1>
         <p className="mt-2 text-sm text-neutral-600">
           {topics.length === 0
-            ? "Coming soon — no admin-uploaded topics in this round yet."
+            ? "COMING SOON — no admin-uploaded topics in this round yet."
             : "Choose a topic. Plan 1–5 minutes, pick a question card, then record or type your answer."}
         </p>
       </header>
       {topics.length === 0 ? (
-        <BrutalPanel title="Coming soon">
+        <BrutalPanel title="COMING SOON">
           <p className="text-sm text-neutral-700">
             Topics for this round will appear here after they are uploaded in the admin panel. Round 1 is used for
             current uploads.

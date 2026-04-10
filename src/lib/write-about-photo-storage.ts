@@ -33,6 +33,40 @@ function isRound(n: number): n is WriteAboutPhotoRoundNum {
   return n === 1 || n === 2 || n === 3 || n === 4 || n === 5;
 }
 
+function toSafeString(v: unknown, fallback: string): string {
+  if (typeof v === "string" && v.trim()) return v;
+  return fallback;
+}
+
+function normalizePhotoSpeakItem(raw: unknown, index: number): PhotoSpeakItem | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const id = toSafeString(r.id, `auto-${Date.now()}-${index}`);
+  const titleEn = toSafeString(r.titleEn, "Untitled photo task");
+  const titleTh = toSafeString(r.titleTh, titleEn);
+  const imageUrl = toSafeString(r.imageUrl, "");
+  const promptEn = toSafeString(r.promptEn, titleEn);
+  const promptTh = toSafeString(r.promptTh, promptEn);
+  const contextEn = typeof r.contextEn === "string" ? r.contextEn : undefined;
+  const keywordsRaw = r.keywords;
+  const keywords = Array.isArray(keywordsRaw)
+    ? keywordsRaw.filter((k): k is string => typeof k === "string" && k.trim().length > 0)
+    : [];
+
+  if (!imageUrl) return null;
+
+  return {
+    id,
+    titleEn,
+    titleTh,
+    imageUrl,
+    promptEn,
+    promptTh,
+    keywords,
+    contextEn,
+  };
+}
+
 export function loadWriteAboutPhotoRounds(): WriteAboutPhotoRoundsState {
   if (typeof window === "undefined") return emptyRounds();
   try {
@@ -46,7 +80,9 @@ export function loadWriteAboutPhotoRounds(): WriteAboutPhotoRoundsState {
     for (const n of WRITE_ABOUT_PHOTO_ROUND_NUMBERS) {
       const arr = (r as Record<string, unknown>)[String(n)];
       if (Array.isArray(arr)) {
-        base.rounds[n] = arr.filter((x) => x && typeof x === "object") as PhotoSpeakItem[];
+        base.rounds[n] = arr
+          .map((x, i) => normalizePhotoSpeakItem(x, i))
+          .filter((x): x is PhotoSpeakItem => x !== null);
       }
     }
     return base;

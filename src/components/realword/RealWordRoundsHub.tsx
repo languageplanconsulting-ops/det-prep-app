@@ -72,7 +72,7 @@ function RoundCard({ round }: { round: RealWordRoundNum }) {
     >
       <span className="text-2xl font-black">Round {round}</span>
       <span className="ep-stat mt-2 text-sm font-bold text-neutral-800">
-        {totalSets > 0 ? `${totalSets} set(s) uploaded` : "Coming soon"}
+        {totalSets > 0 ? `${totalSets} set(s) uploaded` : "COMING SOON"}
       </span>
       <span className="ep-stat mt-3 block text-xs font-black uppercase tracking-wide text-neutral-700">
         Avg score

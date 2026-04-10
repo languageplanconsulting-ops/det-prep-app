@@ -37,10 +37,6 @@ export default async function Home({ searchParams }: HomeProps) {
         <Link className="font-bold text-ep-blue underline" href="/?fastTrack=1">
           activate Duolingo Fast Track VIP
         </Link>
-        . <strong>Staff:</strong>{" "}
-        <Link className="font-bold text-ep-blue underline" href="/login#admin-login">
-          Admin code login
-        </Link>
         .
       </section>
       <LandingPageClient initialFastTrackOpen={initialFastTrackOpen} />

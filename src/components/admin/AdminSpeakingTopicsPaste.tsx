@@ -111,7 +111,7 @@ export function AdminSpeakingTopicsPaste() {
     <BrutalPanel title="Read, then speak — JSON (copy & paste)">
       <p className="mb-2 text-sm font-bold text-ep-blue">
         Merged topics are placed in <strong>Round {SPEAKING_ADMIN_UPLOAD_ROUND}</strong> for learners (other rounds
-        show &quot;Coming soon&quot; until you upload there in a future update).
+        show &quot;COMING SOON&quot; until you upload there in a future update).
       </p>
       <p className="mb-2 text-sm text-neutral-600">
         Paste an array of topics. Each needs <code className="ep-stat text-xs">id</code>,{" "}

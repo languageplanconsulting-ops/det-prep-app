@@ -30,7 +30,7 @@ export function ReadingSetGrid({
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {rows.length === 0 ? (
         <div className="ep-brutal-reading col-span-full rounded-sm bg-neutral-100 p-4 text-sm font-bold text-neutral-600">
-          Coming soon
+          COMING SOON
         </div>
       ) : rows.map((set) => {
         const setNum = set.setNumber;

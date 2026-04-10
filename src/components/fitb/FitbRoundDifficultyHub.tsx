@@ -61,7 +61,7 @@ export function FitbRoundDifficultyHub({ round }: { round: FitbRoundNum }) {
                 <span className="ep-stat mt-3 block text-sm font-bold text-neutral-800">
                   {count > 0
                     ? `${count} set${count === 1 ? "" : "s"} · max ${FITB_MAX_SCORE[d]} pts`
-                    : "Coming soon"}
+                    : "COMING SOON"}
                 </span>
               </Link>
             );

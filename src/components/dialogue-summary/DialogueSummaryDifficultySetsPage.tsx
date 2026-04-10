@@ -101,7 +101,7 @@ function SetList({
       </div>
       <ul className="divide-y-4 divide-black">
         {rows.length === 0 ? (
-          <li className="px-4 py-6 text-sm font-bold text-neutral-600">Coming soon</li>
+          <li className="px-4 py-6 text-sm font-bold text-neutral-600">COMING SOON</li>
         ) : rows.map((ex) => {
           const setNumber = ex.setNumber;
           const prog = getDialogueSummaryProgress(round, difficulty, setNumber);

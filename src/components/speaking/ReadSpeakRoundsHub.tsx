@@ -58,7 +58,7 @@ function RoundCard({ round }: { round: SpeakingRoundNum }) {
     >
       <span className="text-2xl font-black">Round {round}</span>
       <span className="ep-stat mt-2 text-sm font-bold text-neutral-800">
-        {empty ? "Coming soon" : `${n} topic${n === 1 ? "" : "s"}`}
+        {empty ? "COMING SOON" : `${n} topic${n === 1 ? "" : "s"}`}
       </span>
       <span className="ep-stat mt-3 text-xs text-neutral-600">{empty ? "No content yet" : "Open round"}</span>
     </Link>

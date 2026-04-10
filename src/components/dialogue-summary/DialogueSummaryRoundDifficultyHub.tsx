@@ -61,7 +61,7 @@ export function DialogueSummaryRoundDifficultyHub({ round }: { round: DialogueSu
                 <span className="ep-stat mt-3 block text-sm font-bold text-neutral-800">
                   {count > 0
                     ? `${count} set${count === 1 ? "" : "s"} · max ${DIALOGUE_SUMMARY_MAX_SCORE} pts`
-                    : "Coming soon"}
+                    : "COMING SOON"}
                 </span>
               </Link>
             );

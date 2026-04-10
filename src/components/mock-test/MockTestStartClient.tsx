@@ -100,7 +100,7 @@ export function MockTestStartClient() {
           >
             แบบทดสอบจำลอง — เร็ว ๆ นี้
           </h1>
-          <p className="mt-1 text-sm text-neutral-600">Coming soon · 22 April 2026</p>
+          <p className="mt-1 text-sm text-neutral-600">COMING SOON · 22 APRIL 2026</p>
         </header>
 
         <section className={`${mt.border} ${mt.shadow} bg-white p-6`}>

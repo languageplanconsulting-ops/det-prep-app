@@ -102,6 +102,7 @@ const hubs = [
 
 export default function PracticeHubPage() {
   const { effectiveTier } = useEffectiveTier();
+  const isVip = effectiveTier === "vip";
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
@@ -158,7 +159,7 @@ export default function PracticeHubPage() {
                     >
                       <span>{item.label}</span>
                       <span className="ep-stat text-xs text-neutral-500">
-                        {item.progress}
+                        {isVip && hub.title !== "Mock test" ? "Unlimited" : item.progress}
                       </span>
                     </Link>
                   </li>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
 const links = [
   { href: "/", label: "Home" },
@@ -12,11 +13,12 @@ const links = [
   { href: "/notebook", label: "Notebook" },
   { href: "/practice", label: "Practice" },
   { href: "/mock-test/start", label: "Mock test" },
-  { href: "/admin", label: "Admin" },
 ] as const;
 
 export function MainNav() {
   const pathname = usePathname();
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const showAdminLinks = isAdmin || previewEligible;
   if (pathname === "/") {
     return (
       <nav
@@ -47,12 +49,14 @@ export function MainNav() {
         >
           Create account
         </Link>
-        <Link
-          href="/login#admin-login"
-          className="ep-interactive shrink-0 rounded-sm border-2 border-black bg-neutral-900 px-3 py-1.5 text-xs font-bold text-white sm:text-sm"
-        >
-          Admin code login
-        </Link>
+        {showAdminLinks ? (
+          <Link
+            href="/admin"
+            className="ep-interactive shrink-0 rounded-sm border-2 border-black bg-neutral-900 px-3 py-1.5 text-xs font-bold text-white sm:text-sm"
+          >
+            Admin
+          </Link>
+        ) : null}
       </nav>
     );
   }
@@ -82,6 +86,14 @@ export function MainNav() {
           {l.label}
         </Link>
       ))}
+      {showAdminLinks ? (
+        <Link
+          href="/admin"
+          className="ep-interactive rounded-sm border-2 border-black bg-neutral-900 px-2 py-1 text-sm font-semibold text-white hover:bg-neutral-800"
+        >
+          Admin
+        </Link>
+      ) : null}
       <div className="ml-auto flex shrink-0 items-center">
         <LogoutButton />
       </div>

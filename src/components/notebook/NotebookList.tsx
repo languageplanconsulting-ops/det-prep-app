@@ -123,6 +123,56 @@ function premadeHashtagId(id: string): string {
   return id;
 }
 
+function renderFeedbackRichText(text: string) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trimEnd())
+    .filter((line, idx, arr) => !(line === "" && arr[idx - 1] === ""));
+
+  return lines.map((line, idx) => {
+    const clean = line.trim();
+    const key = `${idx}-${clean.slice(0, 24)}`;
+    if (!clean) {
+      return <div key={key} className="h-2" />;
+    }
+
+    const isHeading =
+      clean.endsWith(":") ||
+      /^score\b/i.test(clean) ||
+      /^overall\b/i.test(clean) ||
+      /^grammar\b/i.test(clean) ||
+      /^vocabulary\b/i.test(clean) ||
+      /^coherence\b/i.test(clean) ||
+      /^strengths?\b/i.test(clean) ||
+      /^improvement\b/i.test(clean) ||
+      /^suggestions?\b/i.test(clean);
+    const isBullet = /^([-*•]|\d+[.)])\s+/.test(clean);
+
+    if (isHeading) {
+      return (
+        <p key={key} className="mt-3 text-xs font-black uppercase tracking-wide text-ep-blue">
+          {clean}
+        </p>
+      );
+    }
+
+    if (isBullet) {
+      return (
+        <p key={key} className="pl-4 text-sm leading-relaxed text-neutral-800">
+          <span className="mr-2 font-black text-ep-blue">•</span>
+          {clean.replace(/^([-*•]|\d+[.)])\s+/, "")}
+        </p>
+      );
+    }
+
+    return (
+      <p key={key} className="text-sm leading-relaxed text-neutral-900">
+        {clean}
+      </p>
+    );
+  });
+}
+
 function refreshAll(): {
   entries: NotebookEntry[];
   categories: NotebookCustomCategory[];
@@ -471,25 +521,21 @@ export function NotebookList() {
                         {showFull ? "Show less" : "See in full"}
                       </button>
                       {showFull ? (
-                        <div className="mt-3 max-h-[min(70vh,32rem)] space-y-4 overflow-y-auto rounded-xl border border-amber-200/80 bg-white/90 p-4 text-left shadow-inner">
+                        <div className="mt-3 max-h-[min(70vh,32rem)] space-y-4 overflow-y-auto rounded-xl border border-amber-200/80 bg-gradient-to-b from-white to-amber-50/20 p-4 text-left shadow-inner">
                           {e.fullBodyEn?.trim() ? (
-                            <div>
-                              <p className="ep-stat text-[10px] font-bold uppercase text-ep-blue">
+                            <div className="rounded-lg border border-ep-blue/20 bg-white p-3">
+                              <p className="ep-stat inline-flex rounded-full border border-ep-blue/30 bg-ep-blue/10 px-2 py-0.5 text-[10px] font-bold uppercase text-ep-blue">
                                 Full feedback (EN)
                               </p>
-                              <pre className="mt-2 whitespace-pre-wrap ep-stat text-sm leading-relaxed text-neutral-900">
-                                {e.fullBodyEn}
-                              </pre>
+                              <div className="mt-3 space-y-1">{renderFeedbackRichText(e.fullBodyEn)}</div>
                             </div>
                           ) : null}
                           {e.fullBodyTh?.trim() ? (
-                            <div>
-                              <p className="ep-stat text-[10px] font-bold uppercase text-ep-blue">
+                            <div className="rounded-lg border border-amber-300/40 bg-white p-3">
+                              <p className="ep-stat inline-flex rounded-full border border-amber-400/40 bg-amber-100/60 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-800">
                                 Full feedback (TH)
                               </p>
-                              <pre className="mt-2 whitespace-pre-wrap ep-stat text-sm leading-relaxed text-neutral-800">
-                                {e.fullBodyTh}
-                              </pre>
+                              <div className="mt-3 space-y-1">{renderFeedbackRichText(e.fullBodyTh)}</div>
                             </div>
                           ) : null}
                         </div>

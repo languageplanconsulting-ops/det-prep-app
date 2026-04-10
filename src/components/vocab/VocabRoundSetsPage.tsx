@@ -80,7 +80,7 @@ function DifficultyGrid({ round, bankVersion }: { round: VocabRoundNum; bankVers
         >
           <span className="block text-2xl font-black uppercase">{VOCAB_SESSION_LABEL[lv]}</span>
           <span className="ep-stat mt-3 block text-sm font-bold text-neutral-800">
-            {counts[lv] > 0 ? `${counts[lv]} questions · max ${VOCAB_SESSION_MAX[lv]}` : "Coming soon"}
+            {counts[lv] > 0 ? `${counts[lv]} questions · max ${VOCAB_SESSION_MAX[lv]}` : "COMING SOON"}
           </span>
         </Link>
       ))}
