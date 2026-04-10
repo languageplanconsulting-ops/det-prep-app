@@ -28,9 +28,14 @@ function cn(...parts: (string | false | undefined)[]) {
   return parts.filter(Boolean).join(" ");
 }
 
-export function LandingPageClient() {
+export function LandingPageClient({
+  initialFastTrackOpen = false,
+}: {
+  /** Set from `/?fastTrack=1` so shortcuts can open the enrollment modal. */
+  initialFastTrackOpen?: boolean;
+}) {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [fastTrackOpen, setFastTrackOpen] = useState(false);
+  const [fastTrackOpen, setFastTrackOpen] = useState(initialFastTrackOpen);
   const [ftEmail, setFtEmail] = useState("");
   const [ftName, setFtName] = useState("");
   const [ftCode, setFtCode] = useState("");
@@ -39,6 +44,12 @@ export function LandingPageClient() {
   const [ftLinkedEmail, setFtLinkedEmail] = useState<string | null>(null);
   const [ftErr, setFtErr] = useState<string | null>(null);
   const [stickyOn, setStickyOn] = useState(false);
+
+  useEffect(() => {
+    if (initialFastTrackOpen) {
+      setFastTrackOpen(true);
+    }
+  }, [initialFastTrackOpen]);
 
   useEffect(() => {
     const onScroll = () => {

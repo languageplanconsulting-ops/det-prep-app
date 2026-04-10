@@ -30,6 +30,12 @@ export function MainNav() {
           Practice
         </Link>
         <Link
+          href="/?fastTrack=1"
+          className="ep-interactive shrink-0 rounded-sm border-2 border-black bg-ep-yellow/90 px-3 py-1.5 text-xs font-black uppercase text-black shadow-[2px_2px_0_0_#000] sm:text-sm"
+        >
+          Fast Track VIP
+        </Link>
+        <Link
           href="/login"
           className="ep-interactive shrink-0 rounded-sm border-2 border-black bg-white px-3 py-1.5 text-xs font-bold text-neutral-900 sm:text-sm"
         >
