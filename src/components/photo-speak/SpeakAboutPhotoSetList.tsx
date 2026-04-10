@@ -85,7 +85,7 @@ export function SpeakAboutPhotoSetList() {
         <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">
           Speak about photo
         </p>
-        <h1 className="mt-2 text-3xl font-black">Choose a round</h1>
+        <h1 className="mt-2 text-3xl font-black">Choose a photo</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Quick mode: all uploaded photos are shown below (with round labels), using the same image bank as{" "}
           <strong>Write about photo</strong>. Tap <strong>Start</strong> to open a speaking attempt.
@@ -110,7 +110,9 @@ export function SpeakAboutPhotoSetList() {
       {items.length === 0 ? (
         <BrutalPanel className="h-full cursor-not-allowed border-dashed p-5 opacity-80">
           <p className="font-black uppercase tracking-wide text-amber-700">COMING SOON</p>
-          <p className="ep-stat text-xs text-neutral-600">No photos uploaded yet.</p>
+          <p className="ep-stat text-xs text-neutral-600">
+            No photos uploaded yet (or sync latest upload from admin browser).
+          </p>
         </BrutalPanel>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

@@ -52,7 +52,7 @@ export function WriteAboutPhotoSetList() {
         <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">
           Write about photo
         </p>
-        <h1 className="mt-2 text-3xl font-black">Choose a round</h1>
+        <h1 className="mt-2 text-3xl font-black">Choose a photo</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Quick mode: all uploaded photos are shown below (with round labels), so you can practise now
           without entering round pages. Admins upload image URLs and context in{" "}
@@ -65,7 +65,7 @@ export function WriteAboutPhotoSetList() {
       </header>
       {items.length === 0 ? (
         <p className="rounded-sm border-2 border-dashed border-neutral-400 bg-neutral-50 p-6 text-sm font-bold text-neutral-700">
-          COMING SOON
+          COMING SOON (or sync latest upload from admin browser)
         </p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

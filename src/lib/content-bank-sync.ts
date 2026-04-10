@@ -4,6 +4,7 @@ import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 export const CONTENT_BANK_KEYS = [
   "ep-conversation-bank-v2",
+  "ep-write-about-photo-rounds-v1",
   "ep-fitb-bank-v1",
   "ep-fitb-admin-uploaded-v2",
   "ep-reading-sets",
