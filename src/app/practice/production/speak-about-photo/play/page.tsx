@@ -1,4 +1,4 @@
-import { PhotoSpeakSession } from "@/components/photo-speak/PhotoSpeakSession";
+import { PhotoAssessmentSession } from "@/components/photo-speak/PhotoAssessmentSession";
 
 export default async function SpeakAboutPhotoPlayPage({
   searchParams,
@@ -8,5 +8,5 @@ export default async function SpeakAboutPhotoPlayPage({
   const sp = await searchParams;
   const raw = sp.itemId;
   const itemId = Array.isArray(raw) ? (raw[0] ?? "") : (raw ?? "");
-  return <PhotoSpeakSession itemId={itemId} />;
+  return <PhotoAssessmentSession mode="speak" itemId={itemId} />;
 }

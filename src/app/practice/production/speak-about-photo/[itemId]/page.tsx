@@ -1,4 +1,4 @@
-import { PhotoSpeakSession } from "@/components/photo-speak/PhotoSpeakSession";
+import { PhotoAssessmentSession } from "@/components/photo-speak/PhotoAssessmentSession";
 
 export default async function SpeakAboutPhotoSessionPage({
   params,
@@ -6,5 +6,5 @@ export default async function SpeakAboutPhotoSessionPage({
   params: Promise<{ itemId: string }>;
 }) {
   const { itemId } = await params;
-  return <PhotoSpeakSession itemId={itemId} />;
+  return <PhotoAssessmentSession mode="speak" itemId={itemId} />;
 }
