@@ -41,6 +41,7 @@ export function applyLocalContentBankSnapshot(snapshot: ContentBankSnapshot): nu
     written += 1;
   }
   if (written > 0) {
+    window.dispatchEvent(new Event("ep-write-about-photo-rounds"));
     window.dispatchEvent(new Event("ep-conversation-storage"));
     window.dispatchEvent(new Event("ep-dictation-storage"));
     window.dispatchEvent(new Event("ep-fitb-storage"));
