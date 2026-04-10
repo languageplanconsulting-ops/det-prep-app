@@ -17,8 +17,8 @@ const links = [
 
 export function MainNav() {
   const pathname = usePathname();
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const showAdminLinks = isAdmin || previewEligible;
+  const { isAdmin } = useEffectiveTier();
+  const showAdminLinks = isAdmin;
   if (pathname === "/") {
     return (
       <nav
