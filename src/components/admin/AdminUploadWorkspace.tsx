@@ -13,6 +13,7 @@ import { AdminSpeakingTopicsPaste } from "@/components/admin/AdminSpeakingTopics
 import { AdminVocabSetsPaste } from "@/components/admin/AdminVocabSetsPaste";
 import { AdminUploadLogPanel } from "@/components/admin/AdminUploadLogPanel";
 import { AdminWritingTopicsUpload } from "@/components/admin/AdminWritingTopicsUpload";
+import { AdminContentBankSyncPanel } from "@/components/admin/AdminContentBankSyncPanel";
 import { getAllConversationExams } from "@/lib/conversation-storage";
 import { countDictationSetsInBank, ensureDictationBankReady } from "@/lib/dictation-storage";
 import { countFitbSetsInBank } from "@/lib/fitb-storage";
@@ -173,6 +174,7 @@ export function AdminUploadWorkspace() {
         {active === "speaking" ? <AdminSpeakingTopicsPaste /> : null}
         {active === "writeAboutPhoto" ? <AdminWriteAboutPhotoPaste /> : null}
         <AdminUploadLogPanel examKind={active} />
+        <AdminContentBankSyncPanel />
       </div>
     </section>
   );

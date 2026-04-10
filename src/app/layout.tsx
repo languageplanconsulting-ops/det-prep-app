@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { PreviewBanner } from "@/components/admin/PreviewBanner";
+import { ContentBankHydrator } from "@/components/content/ContentBankHydrator";
 import { MainNav } from "@/components/layout/MainNav";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { PageTransition } from "@/components/layout/PageTransition";
@@ -37,6 +38,7 @@ export default function RootLayout({
       >
         <NavigationProgress />
         <EffectiveTierProvider>
+          <ContentBankHydrator />
           <PreviewBanner />
           <VipCourseAnnouncementGuard />
           <MainNav />
