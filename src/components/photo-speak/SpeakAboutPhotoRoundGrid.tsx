@@ -21,7 +21,21 @@ export function SpeakAboutPhotoRoundGrid({ roundParam }: { roundParam: string })
 
   useEffect(() => {
     if (!round) return;
-    const load = () => setItems([...(getWriteAboutPhotoSetByRound(round) ?? [])]);
+    const load = () => {
+      try {
+        const raw = getWriteAboutPhotoSetByRound(round) ?? [];
+        const safe = raw.filter(
+          (it): it is PhotoSpeakItem =>
+            !!it &&
+            typeof it === "object" &&
+            typeof it.id === "string" &&
+            it.id.trim().length > 0,
+        );
+        setItems([...safe]);
+      } catch {
+        setItems([]);
+      }
+    };
     load();
     const onStorage = () => load();
     window.addEventListener("storage", onStorage);
