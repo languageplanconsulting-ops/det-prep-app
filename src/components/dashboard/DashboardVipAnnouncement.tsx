@@ -2,50 +2,54 @@
 
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
-const ANNOUNCEMENT_PARAGRAPHS: string[] = [
-  "นี่คือเวอร์ชัน 3.0 ของ English Plan DET PREP APP ครับ",
-  "ขณะนี้เรากำลังอัปเดตรูปแบบข้อสอบให้สอดคล้องกับแนวข้อสอบปี 2026 ครับ การอัปเดตจะดำเนินการตั้งแต่วันที่ 10 เมษายน ถึง 25 เมษายน ครับ",
-];
+const VIP_ANNOUNCEMENT_V3 = `ยินดีต้อนรับสู่ Duolingo English Plan Prep Version 3.0 ครับ
 
-const AVAILABLE_FEATURES = [
-  "Fill in the blank question",
-  "Interactive conversation",
-  "Dialogue summary",
-  "Vocabulary building",
-  "Reading skill building",
-  "Listen and write",
-  "Write about photo",
-  "Read, then write",
-  "Read, then speak",
-  "Speak about photo",
-];
+พวกเรารู้สึกยินดีและตื่นเต้นมากที่ได้ต้อนรับทุกคนเข้าสู่ Version 3.0 ของ Duolingo English Plan Prep ครับ
 
-const AI_FEEDBACK_FEATURES = [
-  "Write about photo",
-  "Read, then write",
-  "Read, then speak",
-  "Speak about photo",
-  "Dialogue summary",
-];
+ในเวอร์ชันใหม่นี้ เราไม่ได้อัปเดตแค่ข้อสอบให้สอดคล้องกับ รูปแบบล่าสุดของปี 2026 เท่านั้น แต่เรายังพัฒนาประสบการณ์การเรียนของนักเรียนให้ดีขึ้นอย่างมาก โดยเฉพาะในส่วนของ AI feedback ครับ
 
-const AI_INTRO_TH =
-  "สิ่งใหม่ที่สำคัญคือ ตอนนี้นักเรียนสามารถใช้ AI feedback ที่พัฒนาจากฐานข้อมูลของ English Plan ตลอด 4 ปีที่ผ่านมาได้แล้วครับ สำหรับ";
+สำหรับนักเรียนคอร์ส Duolingo ของ English Plan นักเรียนจะได้รับสิทธิ์ใช้ AI feedback ได้ 15 ครั้งต่อสัปดาห์ ครอบคลุมทุกพาร์ตที่รองรับ โดยสิทธิ์นี้จะ รีเซ็ตใหม่ทุกวันจันทร์ และ จะไม่สะสมไปสัปดาห์ถัดไป นะครับ ดังนั้นแนะนำให้วางแผนใช้ให้คุ้มค่าในแต่ละสัปดาห์ครับ
 
-const AI_SCORE_TH =
-  "AI จะช่วยประเมิน production score ของนักเรียน พร้อมทั้งให้คำแนะนำว่าควรพัฒนาอย่างไรในด้านต่าง ๆ เช่น grammar, vocabulary, coherence และองค์ประกอบสำคัญอื่น ๆ ครับ";
+AI feedback นี้พัฒนาขึ้นจากฐานข้อมูลและประสบการณ์การสอนที่ English Plan สะสมมาตลอด 4 ปี เพื่อช่วยให้นักเรียนได้ฝึกอย่างมีทิศทางมากขึ้น ได้รับคำแนะนำที่เฉพาะเจาะจงมากขึ้น และพัฒนาได้อย่างมีประสิทธิภาพยิ่งขึ้นครับ
 
-const CLOSING_PARAGRAPHS: string[] = [
-  "นอกจากนี้ นักเรียนยังสามารถใช้ฟังก์ชัน notebook ได้ด้วยครับ โดยสามารถเพิ่มคำศัพท์ใหม่ที่ต้องการเรียนรู้ รวมถึงบันทึก production feedback ไว้ใช้ทบทวนในภายหลังได้ครับ",
-  "แบบทดสอบจำลองเต็มชุด (Mock test) มีกำหนดพร้อมให้บริการในวันที่ 22 เมษายน 2026 ครับ ทีม English Plan กำลังทำงานอย่างหนักเพื่อพัฒนาและปรับปรุงระบบให้เกิดประโยชน์สูงสุดแก่นักเรียน โดยอิงฐานข้อมูลจากข้อสอบจริง",
-];
+นักเรียนสามารถใช้ 15 submissions ต่อสัปดาห์ นี้กับข้อสอบประเภทต่อไปนี้ครับ
+
+Write About Photo
+Speak About Photo
+Read, then Write
+Read, then Speak
+Dialog Summary
+
+ข้อสอบกลุ่มนี้เป็นพาร์ตที่ต้องใช้การวิเคราะห์เชิงลึกจากฐานข้อมูลของสถาบันเรา จึงเป็นส่วนที่นักเรียนจะได้รับ feedback ที่ละเอียดและมีคุณค่ามากที่สุดครับ
+
+นอกจากนี้ ตอนนี้ในแอปก็มีข้อสอบและแบบฝึกหัดที่อัปโหลดไว้แล้วหลายส่วน นักเรียนสามารถเริ่มฝึกได้ทันที เช่น
+
+Reading Skills
+Fill in the Blank
+Dictation (Listen, then Type)
+Interactive Conversation
+Production Score component
+
+และตลอดเดือนเมษายนนี้ โดยเฉพาะจนถึงวันที่ 15 เมษายน ทีมงานจะทยอยอัปโหลดคลังข้อสอบเพิ่มเติมอย่างต่อเนื่อง เพื่อให้นักเรียนได้ฝึกมากขึ้น เช่น Vocabulary Practice และชุดข้อสอบอื่น ๆ ที่สำคัญครับ
+
+นอกจากนี้ ในวันที่ 22 เมษายน จะมีฟีเจอร์ใหม่ที่สำคัญมากเพิ่มเข้ามา คือ Mock Tests ครับ
+
+นักเรียนจะสามารถจำลองการสอบเสมือนจริงเป็นเวลา 1 ชั่วโมงเต็ม และได้รับ รายงานผลเฉพาะบุคคล เพื่อช่วยวิเคราะห์จุดแข็ง จุดที่ควรพัฒนา และแนวทางในการเตรียมตัวต่อไปได้อย่างชัดเจนมากขึ้น ซึ่งจะช่วยให้นักเรียนเตรียมตัวสำหรับการสอบจริงได้อย่างมีประสิทธิภาพมากขึ้นครับ
+
+ขอแจ้งให้ทราบว่า ขณะนี้แอปยังอยู่ในช่วง beta version นะครับ ทีมงานของเรากำลังตั้งใจทำงานอย่างเต็มที่ เพื่อพัฒนาและปรับปรุงแอปให้สมบูรณ์ที่สุดโดยเร็วครับ
+
+หากนักเรียนมีคำถาม พบปัญหา หรืออยากรายงาน bug ใด ๆ สามารถติดต่อเราได้ทางอีเมล languageplanconsulting@gmail.com
+ หรือผ่านทาง LINE ของทีมงานได้เลยครับ ซึ่งนักเรียนทุกคนน่าจะมีช่องทางติดต่อไว้เรียบร้อยแล้วครับ
+
+ขอบคุณมากที่เรียนกับ English Plan ครับ และพวกเราหวังว่า Version 3.0 จะช่วยให้นักเรียนเตรียมสอบได้อย่างมั่นใจขึ้น มีทิศทางมากขึ้น และได้ผลลัพธ์ที่ดีขึ้นครับ`;
 
 /**
  * Shown on the Practice hub for VIP users (course or paid subscription).
  */
 export function DashboardVipAnnouncement() {
-  const { effectiveTier, loading } = useEffectiveTier();
+  const { vipGrantedByCourse, loading } = useEffectiveTier();
 
-  if (loading || effectiveTier !== "vip") {
+  if (loading || !vipGrantedByCourse) {
     return null;
   }
 
@@ -62,44 +66,8 @@ export function DashboardVipAnnouncement() {
         ประกาศแก่นักเรียน · English Plan · Version 3.0
       </h2>
 
-      <div className="mt-4 space-y-4 text-sm leading-relaxed text-neutral-900">
-        {ANNOUNCEMENT_PARAGRAPHS.map((p, i) => (
-          <p key={`vip-ann-intro-${i}`}>{p}</p>
-        ))}
-
-        <div>
-          <p className="font-black text-neutral-900">ตอนนี้นักเรียนสามารถเข้าใช้งานได้ในส่วนต่อไปนี้ครับ</p>
-          <ul className="mt-2 list-inside list-disc space-y-1 pl-1 font-medium text-neutral-800">
-            {AVAILABLE_FEATURES.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <p className="font-medium text-neutral-900">{AI_INTRO_TH}</p>
-          <ul className="mt-2 list-inside list-disc space-y-1 pl-1 font-medium text-neutral-800">
-            {AI_FEEDBACK_FEATURES.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-          <p className="mt-3 font-medium text-neutral-900">{AI_SCORE_TH}</p>
-        </div>
-
-        {CLOSING_PARAGRAPHS.map((p, i) => (
-          <p key={`vip-ann-close-${i}`}>{p}</p>
-        ))}
-
-        <p className="font-medium text-neutral-900">
-          นักเรียนสามารถลองสำรวจฟังก์ชันต่าง ๆ ในแอปได้ตามสะดวกเลยครับ หากมีคำถาม ติดต่อทางอีเมลได้ที่{" "}
-          <a
-            href="mailto:languageplanconsulting@gmail.com"
-            className="font-black text-ep-blue underline decoration-2 underline-offset-2 hover:text-ep-blue/90"
-          >
-            languageplanconsulting@gmail.com
-          </a>{" "}
-          หรือทาง LINE ของผมได้เลยครับ
-        </p>
+      <div className="mt-4 text-sm leading-relaxed text-neutral-900">
+        <pre className="whitespace-pre-wrap font-sans">{VIP_ANNOUNCEMENT_V3}</pre>
       </div>
     </section>
   );

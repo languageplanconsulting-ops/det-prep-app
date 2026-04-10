@@ -5,7 +5,6 @@ import { ContentBankHydrator } from "@/components/content/ContentBankHydrator";
 import { MainNav } from "@/components/layout/MainNav";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { VipCourseAnnouncementGuard } from "@/components/vip/VipCourseAnnouncementGuard";
 import { EffectiveTierProvider } from "@/hooks/useEffectiveTier";
 import "./globals.css";
 
@@ -40,7 +39,6 @@ export default function RootLayout({
         <EffectiveTierProvider>
           <ContentBankHydrator />
           <PreviewBanner />
-          <VipCourseAnnouncementGuard />
           <MainNav />
           <PageTransition>{children}</PageTransition>
         </EffectiveTierProvider>
