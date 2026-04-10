@@ -17,8 +17,9 @@ const links = [
 
 export function MainNav() {
   const pathname = usePathname();
-  const { isAdmin } = useEffectiveTier();
-  const showAdminLinks = isAdmin;
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  /** DB `role === admin'` can lag behind the server session check; include `previewEligible` so real admins (and code-login admins) always see Admin. VIP-only users should never get `previewEligible` from `/api/admin/session`. */
+  const showAdminLinks = isAdmin || previewEligible === true;
   if (pathname === "/") {
     return (
       <nav

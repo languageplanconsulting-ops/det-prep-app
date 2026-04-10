@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateSpeakingReportWithGemini } from "@/lib/gemini-speaking";
+import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { isSpeakingRound } from "@/lib/speaking-constants";
 
 export const maxDuration = 120;
@@ -73,8 +74,10 @@ export async function POST(req: Request) {
   }
 
   try {
+    const model = await resolveGeminiTextModel();
     const report = await generateSpeakingReportWithGemini({
       apiKey: key,
+      model,
       attemptId,
       topicId,
       topicTitleEn,

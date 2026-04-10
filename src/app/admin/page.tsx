@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminGeminiModelSettings } from "@/components/admin/AdminGeminiModelSettings";
 import { AdminSimpleLogout } from "@/components/admin/AdminSimpleLogout";
 import { AdminPreviewStarter } from "@/components/admin/AdminPreviewStarter";
 import { AdminUploadWorkspace } from "@/components/admin/AdminUploadWorkspace";
@@ -48,6 +49,8 @@ export default function AdminPage() {
           </Link>
         </p>
       </header>
+
+      <AdminGeminiModelSettings />
 
       <AdminPreviewStarter />
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generatePhotoSpeakReportWithGemini } from "@/lib/gemini-photo-speak";
+import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 
 export const maxDuration = 120;
 
@@ -78,8 +79,10 @@ export async function POST(req: Request) {
     : [];
 
   try {
+    const model = await resolveGeminiTextModel();
     const report = await generatePhotoSpeakReportWithGemini({
       apiKey: key,
+      model,
       attemptId,
       itemId,
       titleEn,

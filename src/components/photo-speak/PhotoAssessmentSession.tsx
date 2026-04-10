@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
@@ -343,18 +344,7 @@ export function PhotoAssessmentSession({
           {submitError ? <p className="mt-3 text-sm font-bold text-red-700">{submitError}</p> : null}
         </BrutalPanel>
 
-        {submitting ? (
-          <div className="rounded-sm border-2 border-black bg-white p-4 shadow-[3px_3px_0_0_#000]">
-            <p className="text-sm font-black text-ep-blue">{loadingPercent}%</p>
-            <div className="mt-2 h-3 w-full overflow-hidden rounded border border-black">
-              <div
-                className="h-full bg-ep-blue transition-[width] duration-150"
-                style={{ width: `${loadingPercent}%` }}
-              />
-            </div>
-            <p className="mt-3 text-sm text-neutral-800">{loadingLabel(loadingPercent)}</p>
-          </div>
-        ) : null}
+        {submitting ? <GradingProgressLoader eyebrow="Grading your response" variant="premium" /> : null}
       </div>
     </StudySessionBoundary>
   );

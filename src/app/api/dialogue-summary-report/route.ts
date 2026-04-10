@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { DIALOGUE_SUMMARY_MIN_WORDS } from "@/lib/dialogue-summary-constants";
 import { generateDialogueSummaryReportWithGemini } from "@/lib/gemini-dialogue-summary";
+import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import type { DialogueSummaryExam } from "@/types/dialogue-summary";
 
 export const maxDuration = 120;
@@ -67,8 +68,10 @@ export async function POST(req: Request) {
   const submittedAt = typeof o.submittedAt === "string" ? o.submittedAt : new Date().toISOString();
 
   try {
+    const model = await resolveGeminiTextModel();
     const report = await generateDialogueSummaryReportWithGemini({
       apiKey: key,
+      model,
       attemptId,
       exam,
       summary,

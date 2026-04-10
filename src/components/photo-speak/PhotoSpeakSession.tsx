@@ -246,7 +246,7 @@ export function PhotoSpeakSession({ itemId }: { itemId: string }) {
       setId={itemId}
     >
     <div className="relative mx-auto max-w-3xl space-y-6 px-4 py-8">
-      {submitting ? <GradingProgressLoader eyebrow="Grading your response" /> : null}
+      {submitting ? <GradingProgressLoader eyebrow="Grading your response" variant="premium" /> : null}
       <Link
         href={
           round !== undefined

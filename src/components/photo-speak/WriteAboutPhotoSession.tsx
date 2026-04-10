@@ -235,7 +235,7 @@ export function WriteAboutPhotoSession({ itemId }: { itemId: string }) {
       setId={itemId}
     >
     <div className="relative mx-auto max-w-3xl space-y-6 px-4 py-8">
-      {submitting ? <GradingProgressLoader eyebrow="Grading your response" /> : null}
+      {submitting ? <GradingProgressLoader eyebrow="Grading your response" variant="premium" /> : null}
       <div className="flex flex-wrap gap-3 text-sm font-bold text-ep-blue">
         <Link href="/practice/production/write-about-photo" className="hover:underline">
           ← All rounds

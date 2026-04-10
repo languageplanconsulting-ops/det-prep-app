@@ -1,6 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
+
 export type GraderResult = {
   score: number;
   feedback: string;
@@ -66,7 +68,8 @@ export async function gradeDetResponse(
   }
 
   const gen = new GoogleGenerativeAI(geminiKey);
-  const model = gen.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const modelName = await resolveGeminiTextModel();
+  const model = gen.getGenerativeModel({ model: modelName });
   const res = await model.generateContent(
     `${SYSTEM}\n\n${prompt}\n\nRespond with JSON only.`,
   );
@@ -106,7 +109,8 @@ export async function generateInsightSummary(
   }
 
   const gen = new GoogleGenerativeAI(geminiKey);
-  const model = gen.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const modelName = await resolveGeminiTextModel();
+  const model = gen.getGenerativeModel({ model: modelName });
   const res = await model.generateContent(
     `Subscores (0-160): literacy ${subscores.literacy}, comprehension ${subscores.comprehension}, conversation ${subscores.conversation}, production ${subscores.production}.
 Return JSON only: { "bullets": [ { "en": string, "th": string } ] } with exactly 3 items: strongest skill, weakest skill + action, one grammar/vocab tip.`,

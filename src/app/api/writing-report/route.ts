@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateWritingReportWithGemini } from "@/lib/gemini-writing";
+import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import type { WritingTopic } from "@/types/writing";
 
 export const maxDuration = 120;
@@ -75,8 +76,10 @@ export async function POST(req: Request) {
   }
 
   try {
+    const model = await resolveGeminiTextModel();
     const report = await generateWritingReportWithGemini({
       apiKey: key,
+      model,
       attemptId,
       topic,
       essay,
