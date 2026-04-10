@@ -32,6 +32,8 @@ type LegacyNotebookRow = {
   titleTh: string;
   bodyEn: string;
   bodyTh: string;
+  fullBodyEn?: string;
+  fullBodyTh?: string;
   excerpt?: string;
   attemptId?: string;
   createdAt: string;

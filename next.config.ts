@@ -22,8 +22,6 @@ const legacyConversationRedirects = VOCAB_LEVELS.map((difficulty) => ({
 }));
 
 const nextConfig: NextConfig = {
-  // Work around missing native lightningcss binary on this machine.
-  useLightningcss: false,
   async redirects() {
     return [
       ...legacyVocabRedirects,

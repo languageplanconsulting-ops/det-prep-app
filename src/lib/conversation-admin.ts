@@ -16,7 +16,7 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 }
 
 /** Accepts JSON that used string indices (e.g. "2") from spreadsheets or generators. */
-function parseIntegerField(v: unknown, fieldLabel: string): number | null {
+function parseIntegerField(v: unknown, fieldLabel: string): number {
   if (typeof v === "number" && Number.isInteger(v)) return v;
   if (typeof v === "string" && /^\s*-?\d+\s*$/.test(v)) {
     const n = Number.parseInt(v.trim(), 10);
