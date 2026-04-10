@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { SpeakAboutPhotoExamCard } from "@/components/photo-speak/SpeakAboutPhotoExamCard";
 import {
   getSpeakAboutPhotoRoundStats,
 } from "@/lib/speak-about-photo-progress";
 import {
-  getWriteAboutPhotoRoundCounts,
+  loadWriteAboutPhotoRounds,
   type WriteAboutPhotoRoundNum,
 } from "@/lib/write-about-photo-storage";
 
@@ -33,14 +34,33 @@ function formatWhen(iso: string | null): string {
 }
 
 export function SpeakAboutPhotoSetList() {
-  const [counts, setCounts] = useState<Record<WriteAboutPhotoRoundNum, number>>(() =>
-    getWriteAboutPhotoRoundCounts(),
-  );
+  const [counts, setCounts] = useState<Record<WriteAboutPhotoRoundNum, number>>({
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+  });
+  const [items, setItems] = useState<
+    { id: string; round: WriteAboutPhotoRoundNum; item: Parameters<typeof SpeakAboutPhotoExamCard>[0]["item"] }[]
+  >([]);
   const [, setRefresh] = useState(0);
 
   useEffect(() => {
     const refresh = () => {
-      setCounts(getWriteAboutPhotoRoundCounts());
+      const state = loadWriteAboutPhotoRounds();
+      setCounts({
+        1: state.rounds[1].length,
+        2: state.rounds[2].length,
+        3: state.rounds[3].length,
+        4: state.rounds[4].length,
+        5: state.rounds[5].length,
+      });
+      const next: { id: string; round: WriteAboutPhotoRoundNum; item: Parameters<typeof SpeakAboutPhotoExamCard>[0]["item"] }[] = [];
+      ([1, 2, 3, 4, 5] as const).forEach((round) => {
+        state.rounds[round].forEach((item) => next.push({ id: `${round}:${item.id}`, round, item }));
+      });
+      setItems(next);
       setRefresh((n) => n + 1);
     };
     refresh();
@@ -67,61 +87,43 @@ export function SpeakAboutPhotoSetList() {
         </p>
         <h1 className="mt-2 text-3xl font-black">Choose a round</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Five rounds — same image bank as <strong>Write about photo</strong> (one admin upload). Each card
-          shows your <strong>average speaking score</strong> in that round and when you last finished a
-          speak task. Open a round to see blurred thumbnails; tap <strong>Start</strong> to see the photo
-          clearly in the exam flow.
+          Quick mode: all uploaded photos are shown below (with round labels), using the same image bank as{" "}
+          <strong>Write about photo</strong>. Tap <strong>Start</strong> to open a speaking attempt.
         </p>
       </header>
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
         {([1, 2, 3, 4, 5] as const).map((round) => {
           const stats = getSpeakAboutPhotoRoundStats(round);
-          const isComingSoon = counts[round] === 0;
           return (
-            <li key={round}>
-              {isComingSoon ? (
-                <BrutalPanel className="h-full cursor-not-allowed border-dashed p-5 opacity-80">
-                  <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-neutral-600">
-                    0 photos uploaded
-                  </p>
-                  <p className="mt-2 text-lg font-extrabold">{ROUND_LABELS[round].en}</p>
-                  <p className="text-sm text-neutral-600">{ROUND_LABELS[round].th}</p>
-                  <div className="mt-4 space-y-1 border-t-2 border-neutral-200 pt-3 text-sm">
-                    <p className="font-black uppercase tracking-wide text-amber-700">COMING SOON</p>
-                    <p className="ep-stat text-xs text-neutral-600">
-                      This round is not uploaded yet.
-                    </p>
-                  </div>
-                </BrutalPanel>
-              ) : (
-                <Link href={`/practice/production/speak-about-photo/round/${round}`}>
-                  <BrutalPanel className="h-full p-5 hover:bg-ep-yellow/15">
-                    <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-ep-blue">
-                      {counts[round]} photo{counts[round] === 1 ? "" : "s"} uploaded
-                    </p>
-                    <p className="mt-2 text-lg font-extrabold">{ROUND_LABELS[round].en}</p>
-                    <p className="text-sm text-neutral-600">{ROUND_LABELS[round].th}</p>
-                    <div className="mt-4 space-y-1 border-t-2 border-neutral-200 pt-3 text-sm">
-                      <p className="font-bold text-neutral-800">
-                        Avg score (speaking):{" "}
-                        <span className="text-ep-blue">
-                          {stats.averageScore !== null ? `${stats.averageScore}/160` : "—"}
-                        </span>
-                      </p>
-                      <p className="ep-stat text-xs text-neutral-600">
-                        Last speak attempt:{" "}
-                        <span className="font-semibold text-neutral-800">
-                          {formatWhen(stats.lastAttemptedAt)}
-                        </span>
-                      </p>
-                    </div>
-                  </BrutalPanel>
-                </Link>
-              )}
-            </li>
+            <div key={`sum-${round}`} className="rounded-sm border-2 border-black/20 bg-white p-3 text-sm">
+              <p className="font-black">{ROUND_LABELS[round].en}</p>
+              <p className="ep-stat text-xs text-neutral-600">{counts[round]} photo(s)</p>
+              <p className="ep-stat mt-2 text-xs text-neutral-600">
+                Avg: {stats.averageScore !== null ? `${stats.averageScore}/160` : "—"}
+              </p>
+              <p className="ep-stat text-xs text-neutral-600">Last: {formatWhen(stats.lastAttemptedAt)}</p>
+            </div>
           );
         })}
-      </ul>
+      </div>
+
+      {items.length === 0 ? (
+        <BrutalPanel className="h-full cursor-not-allowed border-dashed p-5 opacity-80">
+          <p className="font-black uppercase tracking-wide text-amber-700">COMING SOON</p>
+          <p className="ep-stat text-xs text-neutral-600">No photos uploaded yet.</p>
+        </BrutalPanel>
+      ) : (
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {items.map(({ id, round, item }) => (
+            <li key={id} className="space-y-1">
+              <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-ep-blue">
+                Round {round}
+              </p>
+              <SpeakAboutPhotoExamCard item={item} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

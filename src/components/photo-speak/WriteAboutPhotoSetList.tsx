@@ -2,27 +2,36 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { WriteAboutPhotoExamCard } from "@/components/photo-speak/WriteAboutPhotoExamCard";
 import {
-  getWriteAboutPhotoRoundCounts,
+  loadWriteAboutPhotoRounds,
   type WriteAboutPhotoRoundNum,
 } from "@/lib/write-about-photo-storage";
 
-const ROUND_LABELS: Record<WriteAboutPhotoRoundNum, { en: string; th: string }> = {
-  1: { en: "Round 1", th: "รอบที่ 1" },
-  2: { en: "Round 2", th: "รอบที่ 2" },
-  3: { en: "Round 3", th: "รอบที่ 3" },
-  4: { en: "Round 4", th: "รอบที่ 4" },
-  5: { en: "Round 5", th: "รอบที่ 5" },
+type CardItem = {
+  round: WriteAboutPhotoRoundNum;
+  id: string;
+  item: Parameters<typeof WriteAboutPhotoExamCard>[0]["item"];
 };
 
 export function WriteAboutPhotoSetList() {
-  const [counts, setCounts] = useState<Record<WriteAboutPhotoRoundNum, number>>(() =>
-    getWriteAboutPhotoRoundCounts(),
-  );
+  const [items, setItems] = useState<CardItem[]>([]);
 
   useEffect(() => {
-    const refresh = () => setCounts(getWriteAboutPhotoRoundCounts());
+    const refresh = () => {
+      const state = loadWriteAboutPhotoRounds();
+      const next: CardItem[] = [];
+      ([1, 2, 3, 4, 5] as const).forEach((round) => {
+        state.rounds[round].forEach((item) => {
+          next.push({
+            round,
+            id: `${round}:${item.id}`,
+            item,
+          });
+        });
+      });
+      setItems(next);
+    };
     refresh();
     window.addEventListener("storage", refresh);
     window.addEventListener("ep-write-about-photo-rounds", refresh);
@@ -45,29 +54,31 @@ export function WriteAboutPhotoSetList() {
         </p>
         <h1 className="mt-2 text-3xl font-black">Choose a round</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Five rounds (no difficulty). Admins upload image URLs and context in{" "}
+          Quick mode: all uploaded photos are shown below (with round labels), so you can practise now
+          without entering round pages. Admins upload image URLs and context in{" "}
           <Link href="/admin" className="font-bold text-ep-blue underline">
             Admin
           </Link>
-          . Thumbnails stay blurred until you open an item. After you submit, tiles show your latest score;
+          . Thumbnails stay blurred until you open an item. After you submit, cards show your latest score;
           open <strong>Redeem</strong> to review your report if you are not at 160/160.
         </p>
       </header>
-      <ul className="grid gap-4 sm:grid-cols-2">
-        {([1, 2, 3, 4, 5] as const).map((round) => (
-          <li key={round}>
-            <Link href={`/practice/production/write-about-photo/round/${round}`}>
-              <BrutalPanel className="h-full p-5 hover:bg-ep-yellow/15">
-                <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-ep-blue">
-                  {counts[round]} photo{counts[round] === 1 ? "" : "s"}
-                </p>
-                <p className="mt-2 text-lg font-extrabold">{ROUND_LABELS[round].en}</p>
-                <p className="text-sm text-neutral-600">{ROUND_LABELS[round].th}</p>
-              </BrutalPanel>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {items.length === 0 ? (
+        <p className="rounded-sm border-2 border-dashed border-neutral-400 bg-neutral-50 p-6 text-sm font-bold text-neutral-700">
+          COMING SOON
+        </p>
+      ) : (
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {items.map(({ id, round, item }) => (
+            <li key={id} className="space-y-1">
+              <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-ep-blue">
+                Round {round}
+              </p>
+              <WriteAboutPhotoExamCard item={item} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
