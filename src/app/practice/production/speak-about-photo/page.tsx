@@ -1,5 +1,5 @@
-import { PhotoPracticeSafe } from "@/components/photo-speak/PhotoPracticeSafe";
+import { SpeakAboutPhotoSetList } from "@/components/photo-speak/SpeakAboutPhotoSetList";
 
 export default function SpeakAboutPhotoPage() {
-  return <PhotoPracticeSafe mode="speak" />;
+  return <SpeakAboutPhotoSetList />;
 }
