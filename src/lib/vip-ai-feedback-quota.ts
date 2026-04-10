@@ -82,12 +82,12 @@ export function recordVipAiFeedbackUse(userId: string): void {
 }
 
 export function thExhaustedQuotaMessage(): string {
-  return `คุณใช้สิทธิ์ AI feedback ครบ ${VIP_AI_FEEDBACK_WEEKLY_LIMIT} ครั้งแล้วในสัปดาห์นี้ (รวมทุกพาร์ตที่ใช้ AI จากเซิร์ฟเวอร์ของเรา)\n\nโควต้าไม่สะสม — จะรีเซ็ตใหม่เมื่อเริ่มสัปดาห์ใหม่ (วันจันทร์ตามเวลาเครื่องของคุณ)\n\nโปรดลองใหม่ในสัปดาห์ถัดไปครับ`;
+  return `AI FEEDBACK: VIP users can submit up to ${VIP_AI_FEEDBACK_WEEKLY_LIMIT} times per week.\n\nYou have reached the weekly limit.\n\nThis resets every Monday (local time).`;
 }
 
 /** `remaining` = uses left before this submit (same as limit - used). */
 export function thConfirmBeforeAiSubmit(remaining: number): string {
-  return `สัปดาห์นี้คุณเหลือสิทธิ์ AI feedback อีก ${remaining} ครั้ง จาก ${VIP_AI_FEEDBACK_WEEKLY_LIMIT} ครั้ง\n\nโควต้าไม่สะสม — ถ้าไม่ใช้หมดในสัปดาห์นี้ จำนวนที่เหลือจะไม่ย้ายไปสัปดาห์ถัดไป และจะรีเซ็ตใหม่ทุกต้นสัปดาห์ (วันจันทร์ตามเวลาเครื่องของคุณ)\n\nยืนยันส่งให้ AI ประเมินครั้งนี้?`;
+  return `AI FEEDBACK: VIP users can submit up to ${VIP_AI_FEEDBACK_WEEKLY_LIMIT} times per week.\n\nRemaining this week: ${remaining}/${VIP_AI_FEEDBACK_WEEKLY_LIMIT}\n\nDo you want to submit now?`;
 }
 
 export const TH_QUOTA_BANNER_LINE = (remaining: number, limit: number) =>
