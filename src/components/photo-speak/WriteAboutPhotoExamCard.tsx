@@ -9,6 +9,7 @@ import type { PhotoSpeakItem } from "@/types/photo-speak";
 const MAX_SCORE = 160;
 
 function subscribeProgress(cb: () => void) {
+  if (typeof window === "undefined") return () => {};
   window.addEventListener("storage", cb);
   window.addEventListener("ep-write-about-photo-progress", cb);
   return () => {
@@ -18,9 +19,15 @@ function subscribeProgress(cb: () => void) {
 }
 
 export function WriteAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
+  const itemId = typeof item.id === "string" && item.id.trim() ? item.id : "unknown-item";
+  const imageUrl = typeof item.imageUrl === "string" ? item.imageUrl : "";
+  const titleEn = typeof item.titleEn === "string" && item.titleEn.trim() ? item.titleEn : "Untitled photo";
+  const titleTh = typeof item.titleTh === "string" ? item.titleTh : titleEn;
+  const contextEn = typeof item.contextEn === "string" ? item.contextEn : "";
+
   const progress = useSyncExternalStore(
     subscribeProgress,
-    () => getWriteAboutPhotoProgressForItem(item.id),
+    () => getWriteAboutPhotoProgressForItem(itemId),
     () => undefined as ReturnType<typeof getWriteAboutPhotoProgressForItem>,
   );
 
@@ -29,7 +36,7 @@ export function WriteAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
   const perfect = latest !== null && latest >= MAX_SCORE;
   const showRedeem = started && !perfect;
 
-  const sessionHref = `/practice/production/write-about-photo/${item.id}`;
+  const sessionHref = `/practice/production/write-about-photo/${encodeURIComponent(itemId)}`;
 
   return (
     <BrutalPanel className="h-full overflow-hidden p-0">
@@ -37,23 +44,29 @@ export function WriteAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
         <Link href={sessionHref} className="block hover:bg-ep-yellow/10">
           <div className="relative aspect-[4/3] w-full overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={item.imageUrl}
-              alt=""
-              className="h-full w-full scale-105 object-cover blur-md"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt=""
+                className="h-full w-full scale-105 object-cover blur-md"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-neutral-200 text-xs font-bold text-neutral-600">
+                NO IMAGE
+              </div>
+            )}
             <p className="ep-stat absolute bottom-2 left-2 rounded-sm border border-black/30 bg-white/90 px-2 py-0.5 text-[10px] font-bold uppercase text-neutral-700">
               Blurred until you start
             </p>
           </div>
           <div className="space-y-1 p-3">
-            <p className="text-sm font-extrabold leading-tight">{item.titleEn}</p>
-            {item.contextEn ? (
-              <p className="ep-stat line-clamp-2 text-xs text-neutral-600">{item.contextEn}</p>
+            <p className="text-sm font-extrabold leading-tight">{titleEn}</p>
+            {contextEn ? (
+              <p className="ep-stat line-clamp-2 text-xs text-neutral-600">{contextEn}</p>
             ) : (
-              <p className="ep-stat line-clamp-2 text-xs text-neutral-600">{item.titleTh}</p>
+              <p className="ep-stat line-clamp-2 text-xs text-neutral-600">{titleTh}</p>
             )}
           </div>
         </Link>
