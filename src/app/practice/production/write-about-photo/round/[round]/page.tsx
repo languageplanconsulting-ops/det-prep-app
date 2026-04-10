@@ -3,8 +3,8 @@ import { WriteAboutPhotoRoundGrid } from "@/components/photo-speak/WriteAboutPho
 export default async function WriteAboutPhotoRoundPage({
   params,
 }: {
-  params: { round: string };
+  params: Promise<{ round: string }>;
 }) {
-  const { round } = params;
+  const { round } = await params;
   return <WriteAboutPhotoRoundGrid roundParam={round} />;
 }
