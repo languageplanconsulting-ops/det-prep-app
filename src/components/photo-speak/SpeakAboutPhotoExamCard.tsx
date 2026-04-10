@@ -36,7 +36,7 @@ export function SpeakAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
   const perfect = latest !== null && latest >= MAX_SCORE;
   const showRedeem = started && !perfect;
 
-  const sessionHref = `/practice/production/speak-about-photo/${encodeURIComponent(itemId)}`;
+  const sessionHref = `/practice/production/speak-about-photo/play?itemId=${encodeURIComponent(itemId)}`;
 
   return (
     <BrutalPanel className="h-full overflow-hidden p-0">
