@@ -67,8 +67,9 @@ function buildSystemInstruction(): string {
 The learner read a prompt and spoke. You receive a raw ASR transcript (may lack punctuation).
 
 WORKFLOW (mandatory):
-1) First, infer proper punctuation and sentence boundaries. Produce punctuatedTranscript: the full text with capitals, full stops, commas, and question marks where appropriate. Do not change meaning or add new ideas—only punctuate and lightly normalize spacing.
-2) Score ONLY using punctuatedTranscript (all excerpts and quotes must be exact substrings of punctuatedTranscript).
+1) Keep the transcript RAW. Do NOT add punctuation, capitalization, or sentence-boundary corrections.
+2) Return punctuatedTranscript exactly equal to the raw transcript input (same wording/content).
+3) Score ONLY using the raw transcript text (all excerpts and quotes must be exact substrings of the raw transcript).
 
 Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
 Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
@@ -78,11 +79,11 @@ For EACH criterion summary (grammarSummaryEn/Th, etc.), include TWO parts:
 (B) A line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" followed by a concrete action tied to THIS learner's wording (not generic advice).
 
 Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, taskBreakdown):
-- excerpt: exact short quote from punctuatedTranscript (use quotation marks in JSON string only).
+- excerpt: exact short quote from the raw transcript (use quotation marks in JSON string only).
 - issueEn / issueTh: what is wrong (bilingual).
 - suggestionEn / suggestionTh: a concrete correction or better wording (bilingual)—for vocabulary, name 1–3 better words or collocations when possible.
 
-Improvement points: up to 10. Each MUST quote an exact phrase from punctuatedTranscript (e.g. "In your phrase '…', …") and give a specific fix—not generic tips.
+Improvement points: up to 10. Each MUST quote an exact phrase from the raw transcript (e.g. "In your phrase '…', …") and give a specific fix—not generic tips.
 
 Apply band targets when choosing percentages (same as before):
 
@@ -99,10 +100,10 @@ IMPORTANT — task score boost:
 - Set taskPersonalExperienceBoost to true if the learner uses (a) authentic personal experience OR (b) hypothetical personal experience (e.g. "If I were…", "I would…", "Imagine I…", "In my experience…"). The grading system adds +10 to the task percentage (cap 100) when this is true—mention that bonus briefly in taskSummaryEn/Th.
 
 Vocabulary upgrade suggestions (separate from criterion breakdown):
-- vocabularyUpgradeSuggestions: up to 10 items. Each: originalWord (exact word/phrase as used in punctuatedTranscript), upgradedWord (B2/C1 alternative), meaningTh (Thai gloss), exampleEn, exampleTh (short example sentence using upgradedWord).
+- vocabularyUpgradeSuggestions: up to 10 items. Each: originalWord (exact word/phrase as used in raw transcript), upgradedWord (B2/C1 alternative), meaningTh (Thai gloss), exampleEn, exampleTh (short example sentence using upgradedWord).
 
 Transcript highlights (for interactive hover on punctuated text):
-- transcriptHighlights: up to 18 items. Each: exactQuote (verbatim substring of punctuatedTranscript), isPositive (true=strength, false=weakness), noteEn, noteTh (short tooltip, one line each). Cover grammar, vocabulary, coherence, and task where useful. No overlapping quotes if possible.
+- transcriptHighlights: up to 18 items. Each: exactQuote (verbatim substring of raw transcript), isPositive (true=strength, false=weakness), noteEn, noteTh (short tooltip, one line each). Cover grammar, vocabulary, coherence, and task where useful. No overlapping quotes if possible.
 
 Return ONLY valid JSON (no markdown). Use issueEn/issueTh (not "en"/"th") for breakdown issue lines.`;
 }
@@ -125,7 +126,7 @@ function buildUserPayload(
       prepMinutes,
       transcript,
       requiredJsonShape: {
-        punctuatedTranscript: "string — full punctuated version of the raw transcript",
+        punctuatedTranscript: "string — MUST be exactly the same as the raw transcript input (no punctuation rewrite)",
         grammarScorePercent: "number 0-100",
         vocabularyScorePercent: "number 0-100",
         coherenceScorePercent: "number 0-100",
@@ -140,7 +141,7 @@ function buildUserPayload(
         taskSummaryTh: "string",
         grammarBreakdown: [
           {
-            excerpt: "string exact from punctuatedTranscript",
+            excerpt: "string exact from raw transcript",
             issueEn: "string",
             issueTh: "string",
             suggestionEn: "string",
@@ -190,7 +191,7 @@ function buildUserPayload(
         ],
         transcriptHighlights: [
           {
-            exactQuote: "string verbatim from punctuatedTranscript",
+            exactQuote: "string verbatim from raw transcript",
             isPositive: "boolean",
             noteEn: "string",
             noteTh: "string",
