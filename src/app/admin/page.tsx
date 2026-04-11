@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { AdminGeminiModelSettings } from "@/components/admin/AdminGeminiModelSettings";
-import { AdminSimpleLogout } from "@/components/admin/AdminSimpleLogout";
 import { AdminPreviewStarter } from "@/components/admin/AdminPreviewStarter";
 import { AdminUploadWorkspace } from "@/components/admin/AdminUploadWorkspace";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -21,9 +20,6 @@ export default function AdminPage() {
         <p className="mt-2 text-sm text-neutral-600">
           Validate JSON against the TypeScript contracts, then push to your content
           service. This form is UI-only until you connect an API route.
-        </p>
-        <p className="mt-2">
-          <AdminSimpleLogout />
         </p>
         <p className="mt-4 flex flex-wrap gap-2 text-sm">
           <Link

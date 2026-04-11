@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
 
 const GoogleIcon = () => (
@@ -46,6 +47,22 @@ export function LandingPageClient({
   const [ftLinkedEmail, setFtLinkedEmail] = useState<string | null>(null);
   const [ftErr, setFtErr] = useState<string | null>(null);
   const [stickyOn, setStickyOn] = useState(false);
+  const {
+    isAdmin,
+    previewEligible,
+    realTier,
+    vipGrantedByCourse,
+    hasStripeSubscription,
+    loading: tierLoading,
+  } = useEffectiveTier();
+  const canAccessPracticeHub =
+    !tierLoading &&
+    (isAdmin ||
+      previewEligible === true ||
+      realTier !== "free" ||
+      vipGrantedByCourse ||
+      hasStripeSubscription);
+  const practiceHref = canAccessPracticeHub ? "/practice" : "#pricing";
 
   useEffect(() => {
     if (initialFastTrackOpen) {
@@ -647,7 +664,7 @@ export function LandingPageClient({
                 </a>
               </li>
               <li>
-                <Link href="/practice" className="hover:text-ep-yellow">
+                <Link href={practiceHref} className="hover:text-ep-yellow">
                   Practice hub
                 </Link>
               </li>
@@ -664,7 +681,7 @@ export function LandingPageClient({
                 </Link>
               </li>
               <li>
-                <Link href="/practice" className="hover:text-ep-yellow">
+                <Link href={practiceHref} className="hover:text-ep-yellow">
                   Practice
                 </Link>
               </li>

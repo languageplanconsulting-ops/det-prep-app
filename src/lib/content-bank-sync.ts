@@ -1,10 +1,16 @@
 "use client";
 
+import {
+  getDictationBankJsonForContentSync,
+  reconcileDictationBankAfterContentPull,
+} from "@/lib/dictation-storage";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 export const CONTENT_BANK_KEYS = [
   "ep-conversation-bank-v2",
   "ep-write-about-photo-rounds-v1",
+  "ep-writing-topics",
+  "ep-speaking-topics",
   "ep-fitb-bank-v1",
   "ep-fitb-admin-uploaded-v2",
   "ep-reading-sets",
@@ -43,6 +49,8 @@ export function applyLocalContentBankSnapshot(snapshot: ContentBankSnapshot): nu
   }
   if (written > 0) {
     window.dispatchEvent(new Event("ep-write-about-photo-rounds"));
+    window.dispatchEvent(new Event("ep-writing-topics"));
+    window.dispatchEvent(new Event("ep-speaking-storage"));
     window.dispatchEvent(new Event("ep-conversation-storage"));
     window.dispatchEvent(new Event("ep-dictation-storage"));
     window.dispatchEvent(new Event("ep-fitb-storage"));
@@ -54,41 +62,76 @@ export function applyLocalContentBankSnapshot(snapshot: ContentBankSnapshot): nu
   return written;
 }
 
-export async function pushContentBankSnapshotToSupabase(): Promise<{ ok: boolean; error?: string }> {
+export async function pushContentBankSnapshotToSupabase(): Promise<{
+  ok: boolean;
+  error?: string;
+  serverUpdatedAt: string | null;
+}> {
   const supabase = getBrowserSupabase();
-  if (!supabase) return { ok: false, error: "Supabase not configured" };
+  if (!supabase) return { ok: false, error: "Supabase not configured", serverUpdatedAt: null };
   const payload = readLocalContentBankSnapshot();
+  try {
+    payload["ep-dictation-bank-v1"] = await getDictationBankJsonForContentSync();
+  } catch (err) {
+    console.warn("[content-bank-sync] Could not merge dictation bank for push", err);
+  }
   const { data: auth } = await supabase.auth.getUser();
   const updatedBy = auth.user?.id ?? null;
-  const { error } = await supabase.from("content_bank_snapshots").upsert(
-    {
-      id: "global",
-      payload,
-      updated_at: new Date().toISOString(),
-      updated_by: updatedBy,
-    },
-    { onConflict: "id" },
-  );
-  if (error) return { ok: false, error: error.message };
-  return { ok: true };
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("content_bank_snapshots")
+    .upsert(
+      {
+        id: "global",
+        payload,
+        updated_at: now,
+        updated_by: updatedBy,
+      },
+      { onConflict: "id" },
+    )
+    .select("updated_at")
+    .maybeSingle();
+  if (error) return { ok: false, error: error.message, serverUpdatedAt: null };
+  const serverUpdatedAt =
+    data && typeof (data as { updated_at?: unknown }).updated_at === "string"
+      ? (data as { updated_at: string }).updated_at
+      : now;
+  return { ok: true, serverUpdatedAt };
 }
 
 export async function pullContentBankSnapshotFromSupabase(): Promise<{
   ok: boolean;
   applied: number;
   error?: string;
+  /** When the global snapshot was last written on the server (ISO). */
+  serverUpdatedAt: string | null;
 }> {
   const supabase = getBrowserSupabase();
-  if (!supabase) return { ok: false, applied: 0, error: "Supabase not configured" };
+  if (!supabase) {
+    return { ok: false, applied: 0, error: "Supabase not configured", serverUpdatedAt: null };
+  }
   const { data, error } = await supabase
     .from("content_bank_snapshots")
-    .select("payload")
+    .select("payload, updated_at")
     .eq("id", "global")
     .maybeSingle();
-  if (error) return { ok: false, applied: 0, error: error.message };
-  if (!data?.payload || typeof data.payload !== "object") return { ok: true, applied: 0 };
+  if (error) {
+    return { ok: false, applied: 0, error: error.message, serverUpdatedAt: null };
+  }
+  const serverUpdatedAt =
+    data && typeof (data as { updated_at?: unknown }).updated_at === "string"
+      ? ((data as { updated_at: string }).updated_at as string)
+      : null;
+  if (!data?.payload || typeof data.payload !== "object") {
+    return { ok: true, applied: 0, serverUpdatedAt };
+  }
   const snapshot = data.payload as ContentBankSnapshot;
   const applied = applyLocalContentBankSnapshot(snapshot);
-  return { ok: true, applied };
+  try {
+    await reconcileDictationBankAfterContentPull();
+  } catch (err) {
+    console.warn("[content-bank-sync] Dictation reconcile after pull failed", err);
+  }
+  return { ok: true, applied, serverUpdatedAt };
 }
 

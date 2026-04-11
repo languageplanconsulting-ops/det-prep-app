@@ -19,6 +19,27 @@ function requiresProtectedSession(pathname: string): boolean {
   );
 }
 
+function isPracticePath(pathname: string): boolean {
+  return pathname === "/practice" || pathname.startsWith("/practice/");
+}
+
+type ProfileGate = {
+  role: string | null;
+  tier: string | null;
+  vip_granted_by_course: boolean | null;
+  stripe_subscription_id: string | null;
+};
+
+function isPayingMember(p: ProfileGate | null | undefined): boolean {
+  if (!p) return false;
+  if (p.vip_granted_by_course === true) return true;
+  if (typeof p.stripe_subscription_id === "string" && p.stripe_subscription_id.trim().length > 0) {
+    return true;
+  }
+  const t = p.tier;
+  return t === "basic" || t === "premium" || t === "vip";
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const previewTier = request.cookies.get(ADMIN_PREVIEW_COOKIE)?.value;
@@ -31,7 +52,8 @@ export async function middleware(request: NextRequest) {
   const simpleAdminBypass =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/notebook") ||
-    pathname.startsWith("/mock-test");
+    pathname.startsWith("/mock-test") ||
+    pathname.startsWith("/practice");
   let hasSimpleAdminToken = false;
   if (simpleAdminBypass) {
     const raw = request.cookies.get(SIMPLE_ADMIN_COOKIE)?.value;
@@ -57,6 +79,9 @@ export async function middleware(request: NextRequest) {
     console.error(
       "[middleware] Missing Supabase URL/anon (set NEXT_PUBLIC_* in .env or Admin → Supabase)",
     );
+    if (isPracticePath(pathname) || pathname.startsWith("/admin")) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
     return NextResponse.next();
   }
 
@@ -79,6 +104,8 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const practicePath = isPracticePath(pathname);
+
   // Allow code-admin previewing to enter normal protected subscriber routes.
   if (!user && requiresProtectedSession(pathname)) {
     if (!hasSimpleAdminToken) {
@@ -97,15 +124,41 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (pathname.startsWith("/admin") && user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
+  // Practice hub: subscribers, DB admins, or code-admin (with optional preview tier).
+  if (practicePath && !user) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
+  const needsProfileGate =
+    !!user && (practicePath || pathname.startsWith("/admin"));
+
+  let profile: ProfileGate | null = null;
+  if (needsProfileGate) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("role, tier, vip_granted_by_course, stripe_subscription_id")
+      .eq("id", user!.id)
+      .maybeSingle();
+    profile = data as ProfileGate | null;
+  }
+
+  if (practicePath && user) {
+    if (profile?.role === "admin" || isPayingMember(profile)) {
+      // ok
+    } else {
+      const raw = request.cookies.get(SIMPLE_ADMIN_COOKIE)?.value;
+      const codeOk = await verifySimpleAdminToken(raw);
+      if (codeOk && previewActive) {
+        // Logged-in user using admin code + preview-as-tier
+      } else {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    }
+  }
+
+  if (pathname.startsWith("/admin") && user) {
     if (profile?.role !== "admin") {
-      return NextResponse.redirect(new URL("/practice", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 

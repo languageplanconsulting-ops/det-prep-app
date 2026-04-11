@@ -549,6 +549,42 @@ export function countDictationSetsInBank(): number {
   return n;
 }
 
+/**
+ * Full bank JSON for content-bank sync push. Uses memory/IndexedDB (authoritative), not only
+ * localStorage — LS may be empty after QuotaExceededError while the bank still lives in IDB.
+ */
+export async function getDictationBankJsonForContentSync(): Promise<string> {
+  await ensureDictationBankReady();
+  return JSON.stringify(loadDictationBank());
+}
+
+/**
+ * After a content-bank pull writes `ep-dictation-bank-v1` to localStorage, mirror into IndexedDB
+ * and memory. Otherwise `ensureDictationBankReady` prefers stale IDB and counts stay wrong on
+ * other devices/browsers.
+ */
+export async function reconcileDictationBankAfterContentPull(): Promise<void> {
+  if (typeof window === "undefined") return;
+  const raw = localStorage.getItem(DICTATION_BANK_KEY);
+  if (!raw?.trim()) {
+    dictationBankMemoryCache = emptyDictationFullBank();
+    try {
+      await clearDictationBankJson();
+    } catch {
+      /* ignore */
+    }
+    emitDictationUpdate();
+    return;
+  }
+  try {
+    await saveDictationBankJson(raw);
+  } catch (err) {
+    console.warn("[dictation-storage] Failed to mirror dictation bank to IndexedDB after pull", err);
+  }
+  dictationBankMemoryCache = parseStoredBank(raw);
+  emitDictationUpdate();
+}
+
 export function getDictationRoundStats(round: DictationRoundNum): {
   avgPercent: number | null;
   latestAttemptDate: string | null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AdminConversationPaste } from "@/components/admin/AdminConversationPaste";
 import { AdminDictationPaste } from "@/components/admin/AdminDictationPaste";
@@ -13,7 +13,11 @@ import { AdminSpeakingTopicsPaste } from "@/components/admin/AdminSpeakingTopics
 import { AdminVocabSetsPaste } from "@/components/admin/AdminVocabSetsPaste";
 import { AdminUploadLogPanel } from "@/components/admin/AdminUploadLogPanel";
 import { AdminWritingTopicsUpload } from "@/components/admin/AdminWritingTopicsUpload";
-import { AdminContentBankSyncPanel } from "@/components/admin/AdminContentBankSyncPanel";
+import {
+  AdminContentBankSyncPanel,
+  type ContentBankRemoteResult,
+} from "@/components/admin/AdminContentBankSyncPanel";
+import { pullContentBankSnapshotFromSupabase } from "@/lib/content-bank-sync";
 import { getAllConversationExams } from "@/lib/conversation-storage";
 import { countDictationSetsInBank, ensureDictationBankReady } from "@/lib/dictation-storage";
 import { countFitbSetsInBank } from "@/lib/fitb-storage";
@@ -65,8 +69,25 @@ function getCounts(): UploadCounts {
   };
 }
 
+function formatPublishedAt(iso: string | null): string {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  } catch {
+    return iso;
+  }
+}
+
 export function AdminUploadWorkspace() {
   const [active, setActive] = useState<UploadKind>("fitb");
+  const [bankMeta, setBankMeta] = useState<{
+    loading: boolean;
+    serverPublishedAt: string | null;
+    error: string | null;
+  }>({ loading: true, serverPublishedAt: null, error: null });
   const [counts, setCounts] = useState<UploadCounts>({
     writing: 0,
     speaking: 0,
@@ -83,26 +104,56 @@ export function AdminUploadWorkspace() {
     dialogueSummary: 0,
   });
 
+  const applyRemoteResult = useCallback((r: ContentBankRemoteResult) => {
+    setBankMeta({
+      loading: false,
+      serverPublishedAt: r.serverUpdatedAt ?? null,
+      error: r.ok ? null : r.error ?? null,
+    });
+    setCounts(getCounts());
+  }, []);
+
   useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      await ensureDictationBankReady();
+      if (cancelled) return;
+      const r = await pullContentBankSnapshotFromSupabase();
+      if (cancelled) return;
+      applyRemoteResult(r);
+    })();
+
     const refresh = () => setCounts(getCounts());
-    void ensureDictationBankReady().then(() => refresh());
-    const id = window.setInterval(refresh, 1500);
+    const id = window.setInterval(refresh, 2000);
     window.addEventListener("focus", refresh);
     window.addEventListener("storage", refresh);
     window.addEventListener("ep-write-about-photo-rounds", refresh);
     window.addEventListener("ep-writing-topics", refresh);
+    window.addEventListener("ep-speaking-storage", refresh);
     window.addEventListener("ep-conversation-storage", refresh);
     window.addEventListener("ep-dictation-storage", refresh);
+    window.addEventListener("ep-fitb-storage", refresh);
+    window.addEventListener("ep-reading-storage", refresh);
+    window.addEventListener("ep-vocab-storage", refresh);
+    window.addEventListener("ep-realword-storage", refresh);
+    window.addEventListener("ep-dialogue-summary-storage", refresh);
     return () => {
+      cancelled = true;
       window.clearInterval(id);
       window.removeEventListener("focus", refresh);
       window.removeEventListener("storage", refresh);
       window.removeEventListener("ep-write-about-photo-rounds", refresh);
       window.removeEventListener("ep-writing-topics", refresh);
+      window.removeEventListener("ep-speaking-storage", refresh);
       window.removeEventListener("ep-conversation-storage", refresh);
       window.removeEventListener("ep-dictation-storage", refresh);
+      window.removeEventListener("ep-fitb-storage", refresh);
+      window.removeEventListener("ep-reading-storage", refresh);
+      window.removeEventListener("ep-vocab-storage", refresh);
+      window.removeEventListener("ep-realword-storage", refresh);
+      window.removeEventListener("ep-dialogue-summary-storage", refresh);
     };
-  }, []);
+  }, [applyRemoteResult]);
 
   const menu = useMemo(
     () =>
@@ -124,6 +175,20 @@ export function AdminUploadWorkspace() {
   return (
     <section className="grid gap-4 lg:grid-cols-[260px_1fr]">
       <aside className="rounded-[4px] border-4 border-black bg-white p-3 shadow-[4px_4px_0_0_#000]">
+        <p className="mb-2 rounded-[4px] border-2 border-black bg-neutral-50 px-2 py-2 text-[10px] leading-snug text-neutral-700">
+          <span className="font-black text-neutral-900">Published bank (what learners get after login):</span>{" "}
+          {bankMeta.loading ? (
+            <span className="text-ep-blue">Loading from server…</span>
+          ) : bankMeta.error ? (
+            <span className="text-red-700">{bankMeta.error}</span>
+          ) : (
+            <span className="ep-stat">{formatPublishedAt(bankMeta.serverPublishedAt)}</span>
+          )}
+          <br />
+          <span className="text-neutral-500">
+            Numbers match that snapshot. New uploads here are local until you use &quot;Sync to server now&quot;.
+          </span>
+        </p>
         <p className="mb-2 text-xs font-black uppercase text-neutral-700">
           Question type / ประเภทข้อสอบ
         </p>
@@ -152,7 +217,7 @@ export function AdminUploadWorkspace() {
           })}
         </div>
         <p className="mt-3 text-xs text-neutral-500">
-          Count shows entries currently loaded in browser bank.
+          Counts = items in this browser after the last server load (same data learners receive when they sign in).
         </p>
         {active === "conversation" ? (
           <p className="mt-2 rounded-[4px] border-2 border-black bg-neutral-50 px-2 py-2 ep-stat text-[10px] font-bold text-neutral-700">
@@ -174,7 +239,7 @@ export function AdminUploadWorkspace() {
         {active === "speaking" ? <AdminSpeakingTopicsPaste /> : null}
         {active === "writeAboutPhoto" ? <AdminWriteAboutPhotoPaste /> : null}
         <AdminUploadLogPanel examKind={active} />
-        <AdminContentBankSyncPanel />
+        <AdminContentBankSyncPanel onAfterRemoteChange={applyRemoteResult} />
       </div>
     </section>
   );

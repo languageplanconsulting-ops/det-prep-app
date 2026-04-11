@@ -11,6 +11,7 @@ import {
   isVocabWordNotebookSaved,
   markVocabWordNotebookSaved,
 } from "@/lib/vocab-storage";
+import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
 import type {
   VocabExamResultRow,
   VocabPassageUnit,
@@ -44,87 +45,119 @@ export function VocabReport({
   const score = Math.round((correctCount / 6) * maxScore);
 
   return (
-    <div className="space-y-8">
-      <header className="ep-brutal-reading rounded-sm bg-white p-6">
-        <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">
-          Report — R{round} · {VOCAB_SESSION_LABEL[sessionLevel]} · Set {setNumber} · Passage {passageNumber}
-        </p>
-        <p className="ep-stat mt-4 text-2xl font-bold tracking-tight text-neutral-900">
-          SCORE: {score}/{maxScore}
-        </p>
-        <p className="mt-2 text-sm text-neutral-600">
-          {correctCount} of 6 correct · weighted by your chosen level.
-        </p>
-      </header>
+    <div className="min-h-screen bg-[#fafafa] text-neutral-900">
+      <div className={`px-4 py-8 sm:px-6 sm:py-12 ${LANDING_PAGE_GRID_BG}`}>
+        <div className="mx-auto max-w-[900px] space-y-8">
+          <header className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-6 shadow-[4px_4px_0_0_#000]">
+            <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">
+              Report — R{round} · {VOCAB_SESSION_LABEL[sessionLevel]} · Set {setNumber} · Passage {passageNumber}
+            </p>
+            <p className="ep-stat mt-4 text-2xl font-bold tracking-tight text-neutral-900">
+              SCORE: {score}/{maxScore}
+            </p>
+            <p className="mt-2 text-sm text-neutral-600">
+              {correctCount} of 6 correct · weighted by your chosen level.
+            </p>
+          </header>
 
-      <section className="ep-brutal-reading rounded-sm bg-neutral-50 p-5">
-        <h2 className="text-lg font-black uppercase">Question review</h2>
-        <ul className="mt-4 space-y-6">
-          {rows.map((r) => (
-            <li
-              key={r.blankIndex}
-              className="border-b-4 border-neutral-200 pb-6 last:border-b-0 last:pb-0"
+          <section className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#000]">
+            <h2 className="text-lg font-black uppercase tracking-tight text-neutral-900">
+              Question review
+            </h2>
+            <ul className="mt-6 space-y-6">
+              {rows.map((r) => (
+                <li
+                  key={r.blankIndex}
+                  className={`ep-brutal-reading rounded-sm border-4 p-5 shadow-[4px_4px_0_0_#000] ${
+                    r.isCorrect
+                      ? "border-emerald-600 bg-emerald-50/90"
+                      : "border-red-600 bg-red-50/90"
+                  }`}
+                >
+                  <p
+                    className={`ep-stat text-xs font-bold uppercase tracking-[0.2em] ${
+                      r.isCorrect ? "text-emerald-800" : "text-red-800"
+                    }`}
+                  >
+                    Blank {r.blankIndex}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-neutral-900">{r.question}</p>
+                  <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
+                    <div
+                      className={`rounded-sm border-4 bg-white p-3 shadow-[2px_2px_0_0_#000] ${
+                        r.isCorrect ? "border-emerald-700" : "border-red-700"
+                      }`}
+                    >
+                      <p
+                        className={`ep-stat text-[10px] font-bold uppercase ${
+                          r.isCorrect ? "text-emerald-800" : "text-red-800"
+                        }`}
+                      >
+                        Your answer
+                      </p>
+                      <p
+                        className={`mt-1 font-medium ${
+                          r.isCorrect ? "text-emerald-950" : "text-red-950"
+                        }`}
+                      >
+                        {r.userAnswer || "—"}
+                      </p>
+                    </div>
+                    <div className="rounded-sm border-4 border-black bg-ep-yellow/35 p-3 shadow-[2px_2px_0_0_#000]">
+                      <p className="ep-stat text-[10px] font-bold uppercase text-neutral-700">
+                        Correct answer
+                      </p>
+                      <p className="mt-1 font-medium text-neutral-900">{r.correctAnswer}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 rounded-sm border-4 border-black bg-white p-3 text-sm shadow-[2px_2px_0_0_#000]">
+                    <p className="font-bold text-ep-blue">Explanation (ไทย)</p>
+                    <p className="mt-2 whitespace-pre-wrap text-neutral-800">{r.explanationThai}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#000]">
+            <h2 className="text-lg font-black uppercase tracking-tight text-neutral-900">
+              Correct words & synonyms
+            </h2>
+            <ul className="mt-4 space-y-4">
+              {passage.correctWords.map((cw, i) => (
+                <WordNotebookRow
+                  key={cw.word + i}
+                  round={round}
+                  setNumber={setNumber}
+                  passageNumber={passageNumber}
+                  entry={cw}
+                />
+              ))}
+            </ul>
+          </section>
+
+          <div className="flex flex-col gap-4">
+            <button
+              type="button"
+              onClick={onRedeem}
+              className="ep-redeem-pulse ep-brutal-reading w-full border-4 border-black bg-ep-yellow py-4 text-center text-lg font-black uppercase tracking-widest text-black shadow-[4px_4px_0_0_#000] transition hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_#000]"
             >
-              <p className="text-xs font-bold uppercase text-ep-blue">Blank {r.blankIndex}</p>
-              <p className="mt-1 text-sm font-semibold text-neutral-800">{r.question}</p>
-              <div className="mt-3 grid gap-2 text-sm md:grid-cols-2">
-                <div className="rounded-sm border-2 border-black bg-white p-3">
-                  <p className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
-                    Your answer
-                  </p>
-                  <p className="mt-1 font-medium">{r.userAnswer || "—"}</p>
-                </div>
-                <div className="rounded-sm border-2 border-black bg-ep-yellow/20 p-3">
-                  <p className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
-                    Correct answer
-                  </p>
-                  <p className="mt-1 font-medium">{r.correctAnswer}</p>
-                </div>
-              </div>
-              <div className="mt-3 rounded-sm border-2 border-black bg-white p-3 text-sm">
-                <p className="font-bold text-ep-blue">Explanation (ไทย)</p>
-                <p className="mt-2 whitespace-pre-wrap text-neutral-800">{r.explanationThai}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="ep-brutal-reading rounded-sm bg-white p-5">
-        <h2 className="text-lg font-black uppercase">Correct words & synonyms</h2>
-        <ul className="mt-4 space-y-4">
-          {passage.correctWords.map((cw, i) => (
-            <WordNotebookRow
-              key={cw.word + i}
-              round={round}
-              setNumber={setNumber}
-              passageNumber={passageNumber}
-              entry={cw}
-            />
-          ))}
-        </ul>
-      </section>
-
-      <div className="flex flex-col gap-4">
-        <button
-          type="button"
-          onClick={onRedeem}
-          className="ep-redeem-pulse ep-brutal-reading w-full bg-ep-yellow py-4 text-center text-lg font-black uppercase tracking-widest text-black"
-        >
-          Redeem yourself
-        </button>
-        <Link
-          href={setListHref}
-          className="ep-brutal-reading block bg-neutral-100 py-3 text-center text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
-        >
-          Back to passages in this set
-        </Link>
-        <Link
-          href={bankHref}
-          className="ep-brutal-reading block bg-white py-3 text-center text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
-        >
-          Back to levels
-        </Link>
+              Redeem yourself
+            </button>
+            <Link
+              href={setListHref}
+              className="ep-brutal-reading block border-4 border-black bg-neutral-100 py-3 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] transition hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_#000]"
+            >
+              Back to passages in this set
+            </Link>
+            <Link
+              href={bankHref}
+              className="ep-brutal-reading block border-4 border-black bg-white py-3 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] transition hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_#000]"
+            >
+              Back to levels
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -170,8 +203,8 @@ function WordNotebookRow({
   };
 
   return (
-    <li className="ep-brutal-reading rounded-sm bg-neutral-50 p-4">
-      <p className="text-lg font-black">{entry.word}</p>
+    <li className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+      <p className="text-lg font-black text-neutral-900">{entry.word}</p>
       <p className="mt-2 text-sm text-neutral-700">
         <span className="font-bold">Synonyms: </span>
         <span className="ep-stat">{synText}</span>

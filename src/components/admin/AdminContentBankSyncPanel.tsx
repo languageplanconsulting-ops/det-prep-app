@@ -2,9 +2,21 @@
 
 import { useState } from "react";
 
-import { pullContentBankSnapshotFromSupabase, pushContentBankSnapshotToSupabase } from "@/lib/content-bank-sync";
+import {
+  pullContentBankSnapshotFromSupabase,
+  pushContentBankSnapshotToSupabase,
+} from "@/lib/content-bank-sync";
 
-export function AdminContentBankSyncPanel() {
+export type ContentBankRemoteResult = Awaited<
+  ReturnType<typeof pullContentBankSnapshotFromSupabase>
+>;
+
+export function AdminContentBankSyncPanel({
+  onAfterRemoteChange,
+}: {
+  /** Called after a successful push or pull so parent can align counts and &quot;published&quot; time. */
+  onAfterRemoteChange?: (result: ContentBankRemoteResult) => void;
+}) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -18,6 +30,11 @@ export function AdminContentBankSyncPanel() {
       setErr(r.error ?? "Failed to sync to server.");
     } else {
       setMsg("Synced current browser bank to server snapshot.");
+      onAfterRemoteChange?.({
+        ok: true,
+        applied: 0,
+        serverUpdatedAt: r.serverUpdatedAt,
+      });
     }
     setBusy(false);
   };
@@ -31,6 +48,7 @@ export function AdminContentBankSyncPanel() {
       setErr(r.error ?? "Failed to load snapshot from server.");
     } else {
       setMsg(`Loaded snapshot from server. Applied ${r.applied} key(s).`);
+      onAfterRemoteChange?.(r);
     }
     setBusy(false);
   };
