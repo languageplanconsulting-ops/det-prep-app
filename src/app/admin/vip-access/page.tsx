@@ -45,7 +45,65 @@ type PreviewRow = {
   vipGrantedByCourse: boolean;
 };
 
-type TabId = "list" | "add" | "stats";
+type TabId = "list" | "add" | "stats" | "activity";
+
+const SKILL_LABELS: Record<string, string> = {
+  literacy: "Literacy",
+  comprehension: "Comprehension",
+  conversation: "Conversation",
+  production: "Production",
+  mock_test: "Mock test",
+};
+
+type VIPStudyRow = {
+  userId: string;
+  email: string;
+  fullName: string | null;
+  vipGrantedByCourse: boolean;
+  hasStripeSubscription: boolean;
+  totalSeconds: number;
+  totalMinutes: number;
+  secondsBySkill: Record<string, number>;
+  byExerciseType: { type: string; seconds: number; sessions: number }[];
+  timedSessionCount: number;
+  endedSessionCount: number;
+  lastActivityAt: string | null;
+  mockTestCount: number;
+};
+
+function vipSourceLabel(r: {
+  vipGrantedByCourse: boolean;
+  hasStripeSubscription: boolean;
+}) {
+  if (r.vipGrantedByCourse && r.hasStripeSubscription) return "Course + Stripe";
+  if (r.vipGrantedByCourse) return "Course";
+  if (r.hasStripeSubscription) return "Stripe";
+  return "VIP";
+}
+
+function formatSkillLine(secondsBySkill: Record<string, number>): string {
+  const parts: string[] = [];
+  for (const [k, sec] of Object.entries(secondsBySkill)) {
+    if (sec <= 0) continue;
+    const m = Math.round((sec / 60) * 10) / 10;
+    const label = SKILL_LABELS[k] ?? k;
+    parts.push(`${label} ${m}m`);
+  }
+  return parts.length ? parts.join(" · ") : "—";
+}
+
+function formatExerciseLine(
+  rows: { type: string; seconds: number; sessions: number }[],
+): string {
+  if (!rows.length) return "—";
+  return rows
+    .slice(0, 8)
+    .map((r) => {
+      const m = Math.round((r.seconds / 60) * 10) / 10;
+      return `${r.type} ${m}m (${r.sessions})`;
+    })
+    .join(" · ");
+}
 
 /** Looks like an email inside free text (handles `user@gmail.com` plus codes on the same/next line). */
 const EMAIL_IN_TEXT =
@@ -154,6 +212,30 @@ export default function AdminVIPAccessPage() {
   } | null>(null);
   const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
 
+  const [studyRows, setStudyRows] = useState<VIPStudyRow[]>([]);
+  const [studyLoading, setStudyLoading] = useState(false);
+  const [studyLoaded, setStudyLoaded] = useState(false);
+
+  const loadStudyActivity = useCallback(async () => {
+    setStudyLoading(true);
+    try {
+      const res = await fetch("/api/admin/vip-study-activity", {
+        credentials: "include",
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      const data = (await res.json()) as { rows: VIPStudyRow[] };
+      setStudyRows(data.rows);
+      setStudyLoaded(true);
+    } catch (e) {
+      console.error(e);
+      setStudyRows([]);
+    } finally {
+      setStudyLoading(false);
+    }
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -179,6 +261,12 @@ export default function AdminVIPAccessPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (tab === "activity" && !studyLoaded && !studyLoading) {
+      void loadStudyActivity();
+    }
+  }, [tab, studyLoaded, studyLoading, loadStudyActivity]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -354,6 +442,7 @@ export default function AdminVIPAccessPage() {
             ["list", "Grant List / รายการ VIP"],
             ["add", "Add VIP / เพิ่ม VIP"],
             ["stats", "Statistics / สถิติ"],
+            ["activity", "Study activity / กิจกรรมเรียน"],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -800,6 +889,131 @@ student3@gmail.com
                       </td>
                       <td className="border-b-2 border-black px-3 py-2 text-xs">
                         {a.adminName ?? a.adminId ?? "—"}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {tab === "activity" && (
+        <section className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="max-w-3xl text-sm text-neutral-700">
+              Time on task and session counts from recorded study sessions (same as the learner
+              dashboard). VIP = current <code className="ep-stat text-xs">profiles.tier = vip</code>{" "}
+              (course and/or Stripe). / เวลาเรียนและจำนวนเซสชันตามข้อมูลในระบบ
+            </p>
+            <button
+              type="button"
+              disabled={studyLoading}
+              onClick={() => void loadStudyActivity()}
+              className="shrink-0 rounded-[4px] border-4 border-black bg-white px-4 py-2 text-xs font-black uppercase shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none disabled:opacity-60"
+            >
+              {studyLoading ? "Loading…" : "Refresh / รีเฟรช"}
+            </button>
+          </div>
+
+          <div className="overflow-x-auto rounded-[4px] border-4 border-black bg-white shadow-[4px_4px_0_0_#000]">
+            <table className="w-full min-w-[960px] border-collapse text-left text-sm">
+              <thead className="bg-[#004AAD] text-[#FFCC00]">
+                <tr>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    Name / ชื่อ
+                  </th>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    Email
+                  </th>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    VIP source
+                  </th>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    Total time
+                  </th>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    Sessions
+                  </th>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    Mock tests
+                  </th>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    Last active
+                  </th>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    By skill (DET)
+                  </th>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    By exercise type
+                  </th>
+                  <th className="border-b-4 border-black px-3 py-2 font-black">
+                    Admin
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {studyLoading && studyRows.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={10}
+                      className="px-3 py-6 ep-stat text-neutral-500"
+                    >
+                      Loading activity… / กำลังโหลดกิจกรรม
+                    </td>
+                  </tr>
+                ) : studyRows.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={10}
+                      className="px-3 py-6 ep-stat text-neutral-500"
+                    >
+                      No VIP profiles or no data yet. / ยังไม่มีผู้ใช้ VIP หรือยังไม่มีข้อมูล
+                    </td>
+                  </tr>
+                ) : (
+                  studyRows.map((r) => (
+                    <tr key={r.userId} className="odd:bg-neutral-50 align-top">
+                      <td className="border-b-2 border-black px-3 py-2">
+                        {r.fullName ?? "—"}
+                      </td>
+                      <td className="border-b-2 border-black px-3 py-2 font-mono text-xs">
+                        {r.email}
+                      </td>
+                      <td className="border-b-2 border-black px-3 py-2 text-xs">
+                        {vipSourceLabel(r)}
+                      </td>
+                      <td className="border-b-2 border-black px-3 py-2 ep-stat whitespace-nowrap">
+                        {r.totalMinutes} min
+                        <span className="block text-[10px] text-neutral-500">
+                          ({r.timedSessionCount} timed)
+                        </span>
+                      </td>
+                      <td className="border-b-2 border-black px-3 py-2 ep-stat text-xs">
+                        {r.endedSessionCount} ended
+                      </td>
+                      <td className="border-b-2 border-black px-3 py-2 ep-stat">
+                        {r.mockTestCount}
+                      </td>
+                      <td className="border-b-2 border-black px-3 py-2 ep-stat text-xs whitespace-nowrap">
+                        {r.lastActivityAt
+                          ? new Date(r.lastActivityAt).toLocaleString()
+                          : "—"}
+                      </td>
+                      <td className="border-b-2 border-black px-3 py-2 text-xs max-w-[220px]">
+                        {formatSkillLine(r.secondsBySkill)}
+                      </td>
+                      <td className="border-b-2 border-black px-3 py-2 text-xs max-w-[280px]">
+                        {formatExerciseLine(r.byExerciseType)}
+                      </td>
+                      <td className="border-b-2 border-black px-3 py-2">
+                        <a
+                          href={`/admin/subscriptions/${r.userId}`}
+                          className="text-[#004AAD] font-bold underline text-xs"
+                        >
+                          Open / เปิด
+                        </a>
                       </td>
                     </tr>
                   ))

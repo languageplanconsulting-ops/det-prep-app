@@ -19,6 +19,7 @@ export function SpeakingVocabularyUpgradePanel({
 
   return (
     <BrutalPanel
+      variant="elevated"
       eyebrow="Up to 10 items · B2/C1 alternatives"
       title="Vocabulary suggestions"
     >
@@ -26,7 +27,7 @@ export function SpeakingVocabularyUpgradePanel({
         {upgrades.map((u) => (
           <li
             key={u.id}
-            className="rounded-sm border-2 border-neutral-200 bg-neutral-50 p-4 text-sm"
+            className="rounded-sm border-2 border-black bg-[#fafafa] p-4 text-sm shadow-[2px_2px_0_0_#000]"
           >
             <p className="text-base font-medium text-neutral-900">
               <span className="line-through decoration-neutral-400 text-neutral-500">

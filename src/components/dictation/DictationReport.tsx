@@ -65,44 +65,52 @@ function RedeemRow({
   onChange: (v: string) => void;
 }) {
   const wch = Math.max(slot.expected.length, 2);
+  const peek = slot.expected.replace(/\s/g, "·");
+  const ariaHint = slot.isPunctuation
+    ? `Type this punctuation: ${slot.expected}`
+    : slot.isWhitespace
+      ? "Type the missing space or spaces here (use the space bar)."
+      : slot.hintLetter
+        ? `Retype this word. Hint: it starts with the letter ${slot.hintLetter}.`
+        : "Retype the missing or incorrect word.";
+
   return (
-    <span className="relative mx-0.5 inline-flex align-baseline">
+    <span className="mx-0.5 inline-flex max-w-full flex-col gap-0.5 align-baseline">
       {slot.isPunctuation ? (
-        <span
-          className="mr-0.5 inline-flex h-8 w-6 items-center justify-center border-2 border-ep-blue/40 text-[10px] text-ep-blue"
-          title="Punctuation missing"
-          aria-hidden
-        >
-          ⁂
+        <span className="text-[10px] font-bold leading-tight text-ep-blue">
+          Punctuation:{" "}
+          <kbd className="rounded border border-black/20 bg-white px-1.5 py-0.5 font-mono text-xs text-neutral-900">
+            {peek || "—"}
+          </kbd>
         </span>
       ) : null}
       {slot.isWhitespace ? (
-        <span
-          className="mr-0.5 text-[9px] font-bold uppercase tracking-tighter text-neutral-400"
-          title="Whitespace"
-        >
-          sp
+        <span className="text-[10px] font-bold leading-tight text-neutral-600">
+          Space between words (press Space)
         </span>
       ) : null}
-      <span className="relative inline-block">
-        {!slot.isPunctuation && slot.hintLetter ? (
-          <span
-            className="pointer-events-none absolute left-1 top-1/2 z-0 -translate-y-1/2 font-mono text-sm opacity-20 select-none"
-            aria-hidden
-          >
-            {slot.hintLetter}
-          </span>
-        ) : null}
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ width: `min(100%, ${wch + 1}ch)` }}
-          className="relative z-10 max-w-full min-w-0 border-b-4 border-black bg-ep-yellow/15 px-1 py-0.5 font-mono text-sm font-semibold text-neutral-900 outline-none focus:bg-ep-yellow/30"
-          aria-label="Fix incorrect segment"
-          spellCheck={false}
-        />
-      </span>
+      {!slot.isPunctuation && !slot.isWhitespace && slot.hintLetter ? (
+        <span className="text-[10px] font-semibold leading-tight text-neutral-600">
+          Hint: starts with <span className="font-mono text-neutral-900">{slot.hintLetter}</span>
+        </span>
+      ) : null}
+      {!slot.isPunctuation && !slot.isWhitespace && !slot.hintLetter ? (
+        <span className="text-[10px] font-semibold leading-tight text-neutral-600">
+          Retype this part
+        </span>
+      ) : null}
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        title={`Expected: ${peek}`}
+        style={{ width: `min(100%, ${wch + 2}ch)` }}
+        className="max-w-full min-w-[2.5rem] border-b-4 border-black bg-ep-yellow/15 px-1 py-0.5 font-mono text-sm font-semibold text-neutral-900 outline-none focus:bg-ep-yellow/40"
+        aria-label={ariaHint}
+        spellCheck={false}
+        autoCapitalize="off"
+        autoCorrect="off"
+      />
     </span>
   );
 }
@@ -204,8 +212,8 @@ export function DictationReport({
           <div className="mt-6 min-w-0 border-t-4 border-dashed border-neutral-300 pt-6">
             <p className="text-xs font-bold uppercase tracking-wide text-ep-blue">Redeem your score</p>
             <p className="ep-stat mt-1 text-xs text-neutral-600">
-              Type the correct words in the yellow slots. Locked segments are already correct. Punctuation
-              slots show ⁂ when a mark is missing.
+              Green text is already correct. Yellow boxes are only what needs fixing — each label says what to
+              type (word hint, space, or punctuation mark).
             </p>
 
             {showRedeem ? (

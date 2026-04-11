@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import { DIALOGUE_SUMMARY_RUBRIC_WEIGHTS } from "@/lib/dialogue-summary-constants";
 import type {
   DialogueSummaryAttemptReport,
@@ -192,14 +193,7 @@ export async function generateDialogueSummaryReportWithGemini(params: {
 
   const result = await model.generateContent(buildUserPayload(exam, summary));
   const text = result.response.text();
-  let raw: Record<string, unknown>;
-  try {
-    raw = JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    const m = text.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error("Gemini returned non-JSON");
-    raw = JSON.parse(m[0]) as Record<string, unknown>;
-  }
+  const raw = parseGeminiJsonObjectResponse(text);
 
   const rel = clampPercent(raw.relevancyScorePercent);
   const gram = clampPercent(raw.grammarScorePercent);

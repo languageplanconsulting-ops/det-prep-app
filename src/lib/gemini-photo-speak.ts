@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findTextSpan } from "@/lib/find-text-span";
+import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 import type { SpeakingTranscriptHighlight, SpeakingVocabularyUpgrade } from "@/types/speaking";
@@ -247,14 +248,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
     ),
   );
   const text = result.response.text();
-  let raw: Record<string, unknown>;
-  try {
-    raw = JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    const m = text.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error("Gemini returned non-JSON");
-    raw = JSON.parse(m[0]) as Record<string, unknown>;
-  }
+  const raw = parseGeminiJsonObjectResponse(text);
 
   const g = clampPercent(raw.grammarScorePercent);
   const v = clampPercent(raw.vocabularyScorePercent);

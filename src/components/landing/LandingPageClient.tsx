@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
+
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden>
     <path
@@ -121,9 +123,6 @@ export function LandingPageClient({
     }
   }, [ftEmail, ftName, ftCode]);
 
-  const gridBg =
-    "bg-[length:24px_24px] [background-image:repeating-linear-gradient(0deg,transparent,transparent_calc(24px-1px),#e5e5e5_calc(24px-1px),#e5e5e5_24px),repeating-linear-gradient(90deg,transparent,transparent_calc(24px-1px),#e5e5e5_calc(24px-1px),#e5e5e5_24px)]";
-
   return (
     <div className="min-h-screen bg-[#fafafa] text-neutral-900">
       <nav className="sticky top-0 z-[1000] border-b-4 border-black bg-white">
@@ -143,6 +142,15 @@ export function LandingPageClient({
             </div>
           </Link>
           <div className="flex w-full shrink-0 flex-wrap items-center justify-stretch gap-2 sm:w-auto sm:justify-end sm:gap-4">
+            <a
+              href="#preview"
+              className="ep-stat inline-flex min-h-[44px] flex-1 items-center justify-center border-2 border-black bg-white px-3 py-2 text-center text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-neutral-50 sm:flex-initial sm:text-sm"
+            >
+              <span className="leading-tight">
+                Preview
+                <span className="hidden sm:inline"> / ดูตัวอย่าง</span>
+              </span>
+            </a>
             <button
               type="button"
               onClick={() => setFastTrackOpen(true)}
@@ -166,7 +174,7 @@ export function LandingPageClient({
         </div>
       </nav>
 
-      <section className={cn("px-4 py-16 sm:px-6 sm:py-24", gridBg)}>
+      <section className={cn("px-4 py-16 sm:px-6 sm:py-24", LANDING_PAGE_GRID_BG)}>
         <div className="mx-auto grid max-w-[1400px] items-center gap-12 lg:grid-cols-2 lg:gap-20">
           <div>
             <h1 className="text-4xl font-black leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
@@ -203,6 +211,12 @@ export function LandingPageClient({
                 className="inline-block border-4 border-black bg-white px-8 py-5 text-center text-lg font-bold text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-100 hover:shadow-[4px_4px_0_0_#000]"
               >
                 See features / ดูฟีเจอร์
+              </a>
+              <a
+                href="#preview"
+                className="inline-block border-4 border-black bg-white px-8 py-5 text-center text-lg font-bold text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-100 hover:shadow-[4px_4px_0_0_#000]"
+              >
+                Preview / ดูตัวอย่าง
               </a>
               <Link
                 href="/login"
@@ -284,7 +298,7 @@ export function LandingPageClient({
         </div>
       </div>
 
-      <section className={cn("px-4 py-20 sm:px-6 sm:py-28", gridBg)}>
+      <section className={cn("px-4 py-20 sm:px-6 sm:py-28", LANDING_PAGE_GRID_BG)}>
         <div className="mx-auto max-w-[1400px]">
           <header className="mb-16 text-center">
             <p className="ep-stat mb-4 text-sm font-bold uppercase tracking-widest text-ep-blue">
@@ -332,7 +346,10 @@ export function LandingPageClient({
         </div>
       </section>
 
-      <section className="bg-white px-4 py-20 sm:px-6 sm:py-28" id="preview">
+      <section
+        className="scroll-mt-28 bg-white px-4 py-20 sm:scroll-mt-32 sm:px-6 sm:py-28"
+        id="preview"
+      >
         <div className="mx-auto max-w-[1400px]">
           <header className="mb-12 text-center">
             <p className="ep-stat mb-4 text-sm font-bold uppercase tracking-widest text-ep-blue">
@@ -426,7 +443,10 @@ export function LandingPageClient({
         </div>
       </section>
 
-      <section className={cn("px-4 py-20 sm:px-6 sm:py-28", gridBg)} id="pricing">
+      <section
+        className={cn("px-4 py-20 sm:px-6 sm:py-28", LANDING_PAGE_GRID_BG)}
+        id="pricing"
+      >
         <div className="mx-auto max-w-[1400px]">
           <header className="mb-16 text-center">
             <p className="ep-stat mb-4 text-sm font-bold uppercase tracking-widest text-ep-blue">

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
@@ -8,6 +7,7 @@ import { SpeakingVocabularyUpgradePanel } from "@/components/speaking/SpeakingVo
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { AnnotatedEssay } from "@/components/writing/AnnotatedEssay";
 import { FullReportNotebookButton } from "@/components/writing/FullReportNotebookButton";
+import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import {
   buildWritingReportNotebookFullBodies,
@@ -44,6 +44,7 @@ function CriterionBlock({
 }) {
   return (
     <BrutalPanel
+      variant="elevated"
       eyebrow={`${Math.round(report.scorePercent)}% · weight ${report.weight * 100}%`}
       title={title}
     >
@@ -56,7 +57,7 @@ function CriterionBlock({
         {report.breakdown.map((b) => (
           <li
             key={b.id}
-            className="rounded-sm border-2 border-neutral-200 bg-neutral-50 p-3 text-sm"
+            className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]"
           >
             {b.excerpt ? (
               <p className="ep-stat mb-2 text-xs italic text-neutral-700">“{b.excerpt}”</p>
@@ -107,7 +108,7 @@ function StudySentenceRow({
   attemptId: string;
 }) {
   return (
-    <li className="rounded-sm border-2 border-neutral-200 bg-neutral-50 p-3 text-sm">
+    <li className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]">
       <p className="font-medium text-neutral-900">{s.en}</p>
       <p className="mt-1 text-neutral-600">{s.th}</p>
       <AddToNotebookButton
@@ -133,7 +134,7 @@ function StudyVocabRow({
   attemptId: string;
 }) {
   return (
-    <li className="rounded-sm border-2 border-neutral-200 bg-neutral-50 p-3 text-sm">
+    <li className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]">
       <p className="font-bold text-neutral-900">
         {v.termEn}
         {v.termTh ? (
@@ -169,67 +170,59 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
     (fullReport.studyVocabulary?.length ?? 0) > 0;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-      <Link
-        href={`/practice/production/read-and-write/round/${roundBack}`}
-        className="text-sm font-bold text-ep-blue underline-offset-2 hover:underline"
-      >
-        ← Topics
-      </Link>
-
-      <header className="ep-brutal rounded-sm border-black bg-white p-6">
-        <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">
-          Read & write report
-        </p>
-        <h1 className="mt-2 text-2xl font-black">{fullReport.topicTitleEn}</h1>
-        <p className="text-sm text-neutral-600">{fullReport.topicTitleTh}</p>
-        <div className="mt-4 flex flex-wrap items-end gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase text-neutral-500">Score</p>
-            <p className="ep-stat text-5xl font-black text-ep-blue">{fullReport.score160}</p>
-            <p className="text-xs text-neutral-500">out of 160</p>
-            <p className="ep-stat mt-2 inline-block border-2 border-black px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
-              {fullReport.gradingSource === "gemini" ? GRADING_BADGE_PRIMARY : GRADING_BADGE_OFFLINE}
-            </p>
-            {fullReport.taskPersonalExperienceBoostApplied ? (
-              <p className="ep-stat mt-2 max-w-md text-xs font-bold text-emerald-800">
-                Task relevancy includes +10% for personal or hypothetical personal experience (max
-                100%).
-              </p>
-            ) : null}
-          </div>
-          <p className="ep-stat text-xs text-neutral-600">
-            grammar {SPEAKING_RUBRIC_WEIGHTS.grammar * 100}% · vocab{" "}
+    <div className="min-h-screen bg-[#fafafa]">
+      <ProductionReportLandingHero
+        backHref={`/practice/production/read-and-write/round/${roundBack}`}
+        backLabel="← Topics"
+        eyebrow="Read & write — report"
+        titleEn={fullReport.topicTitleEn}
+        titleTh={fullReport.topicTitleTh}
+        score160={fullReport.score160}
+        gradingBadgeText={
+          fullReport.gradingSource === "gemini" ? GRADING_BADGE_PRIMARY : GRADING_BADGE_OFFLINE
+        }
+        rubricLine={
+          <>
+            Rubric weights: grammar {SPEAKING_RUBRIC_WEIGHTS.grammar * 100}% · vocabulary{" "}
             {SPEAKING_RUBRIC_WEIGHTS.vocabulary * 100}% · coherence{" "}
             {SPEAKING_RUBRIC_WEIGHTS.coherence * 100}% · task{" "}
-            {SPEAKING_RUBRIC_WEIGHTS.taskRelevancy * 100}%
-          </p>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() =>
-              router.push(`/practice/production/read-and-write/${fullReport.topicId}`)
-            }
-            className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
-          >
-            Try again
-          </button>
-          <FullReportNotebookButton
-            attemptId={fullReport.attemptId}
-            entrySource="writing-read-and-write"
-            build={() => {
-              const preview = buildWritingReportNotebookPreview(fullReport);
-              const { fullBodyEn, fullBodyTh } =
-                buildWritingReportNotebookFullBodies(fullReport);
-              return { ...preview, fullBodyEn, fullBodyTh };
-            }}
-          />
-        </div>
-      </header>
+            {SPEAKING_RUBRIC_WEIGHTS.taskRelevancy * 100}%.
+          </>
+        }
+        taskBoostSlot={
+          fullReport.taskPersonalExperienceBoostApplied ? (
+            <p className="ep-stat max-w-2xl text-xs font-bold text-emerald-800">
+              Task relevancy includes +10% for personal or hypothetical personal experience (max
+              100%).
+            </p>
+          ) : undefined
+        }
+      >
+        <button
+          type="button"
+          onClick={() =>
+            router.push(`/practice/production/read-and-write/${fullReport.topicId}`)
+          }
+          className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
+        >
+          Try again
+        </button>
+        <FullReportNotebookButton
+          attemptId={fullReport.attemptId}
+          entrySource="writing-read-and-write"
+          build={() => {
+            const preview = buildWritingReportNotebookPreview(fullReport);
+            const { fullBodyEn, fullBodyTh } =
+              buildWritingReportNotebookFullBodies(fullReport);
+            return { ...preview, fullBodyEn, fullBodyTh };
+          }}
+        />
+      </ProductionReportLandingHero>
 
+      <section className="border-y-4 border-black bg-white">
+        <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
       {topic ? (
-        <BrutalPanel title="Prompt">
+        <BrutalPanel variant="elevated" title="Prompt">
           <p className="text-sm font-medium text-neutral-900">{topic.promptEn}</p>
           <p className="mt-2 text-sm text-neutral-600">{topic.promptTh}</p>
           {(topic.followUps ?? []).length > 0 ? (
@@ -248,7 +241,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
         </BrutalPanel>
       ) : null}
 
-      <BrutalPanel title="Your submission">
+      <BrutalPanel variant="elevated" title="Your submission">
         <p className="ep-stat text-xs text-neutral-500">
           {fullReport.wordCount} words · prep {fullReport.prepMinutes} min · punctuated for
           feedback
@@ -281,7 +274,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           return (
             <div
               key={`${fullReport.attemptId}-fu-${i}`}
-              className="mt-3 rounded-sm border-2 border-neutral-200 bg-neutral-50 p-3"
+              className="mt-3 rounded-sm border-2 border-black bg-[#fafafa] p-3 shadow-[2px_2px_0_0_#000]"
             >
               <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-neutral-500">
                 Follow-up {i + 1}
@@ -325,7 +318,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
       ) : null}
 
       {showStudyVocabFallback ? (
-        <BrutalPanel eyebrow="Up to 10" title="Vocabulary suggestions">
+        <BrutalPanel variant="elevated" eyebrow="Up to 10" title="Vocabulary suggestions">
           <p className="mb-3 text-xs text-neutral-600">
             Useful words and notes for this task. Add any item to the notebook (vocabulary
             suggested by default).
@@ -338,7 +331,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
         </BrutalPanel>
       ) : null}
 
-      <BrutalPanel eyebrow="Up to 7" title="Sentence suggestions (bilingual)">
+      <BrutalPanel variant="elevated" eyebrow="Up to 7" title="Sentence suggestions (bilingual)">
         <p className="mb-3 text-xs text-neutral-600">
           Practise these patterns, then save any line to your notebook — you choose the
           folder.
@@ -385,10 +378,13 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
         />
       </div>
 
-      <BrutalPanel title="Key learning (bilingual)">
+      <BrutalPanel variant="elevated" title="Key learning (bilingual)">
         <ul className="space-y-3">
           {fullReport.improvementPoints.map((p) => (
-            <li key={p.id} className="rounded-sm border-2 border-black bg-white p-3 text-sm">
+            <li
+              key={p.id}
+              className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]"
+            >
               <p className="font-bold">{p.en}</p>
               <p className="mt-1 text-neutral-600">{p.th}</p>
               <div className="relative z-10 mt-2">
@@ -410,11 +406,17 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           ))}
         </ul>
       </BrutalPanel>
+        </div>
+      </section>
 
-      <p className="text-xs text-neutral-500">
-        Task scoring uses your punctuated submission and the prompts above. Add lines to the
-        notebook with the same categories as other production reports.
-      </p>
+      <section className="bg-[#fafafa] px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-5xl">
+          <p className="text-xs text-neutral-500">
+            Task scoring uses your punctuated submission and the prompts above. Add lines to the
+            notebook with the same categories as other production reports.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
