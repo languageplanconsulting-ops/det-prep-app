@@ -41,7 +41,6 @@ export function LandingPageClient({
   const [fastTrackOpen, setFastTrackOpen] = useState(initialFastTrackOpen);
   const [ftEmail, setFtEmail] = useState("");
   const [ftName, setFtName] = useState("");
-  const [ftCode, setFtCode] = useState("");
   const [ftLoading, setFtLoading] = useState(false);
   const [ftMsg, setFtMsg] = useState<string | null>(null);
   const [ftLinkedEmail, setFtLinkedEmail] = useState<string | null>(null);
@@ -103,42 +102,37 @@ export function LandingPageClient({
     setFtMsg(null);
     setFtLinkedEmail(null);
     try {
-      const res = await fetch("/api/enrollment/duolingo-fast-track", {
+      const res = await fetch("/api/enrollment/fast-track-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: ftEmail,
-          fullName: ftName,
-          passcode: ftCode,
+          email: ftEmail.trim(),
+          fullName: ftName.trim() || null,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
-        email?: string;
         message?: string;
-        expiresAt?: string;
         error?: string;
+        alreadyPending?: boolean;
       };
       if (!res.ok) {
         setFtErr(data.error ?? "Something went wrong.");
         return;
       }
-      const linked =
-        typeof data.email === "string" && data.email.includes("@")
-          ? data.email
-          : ftEmail.trim();
-      setFtLinkedEmail(linked);
+      if (ftEmail.trim().includes("@")) {
+        setFtLinkedEmail(ftEmail.trim().toLowerCase());
+      }
       setFtMsg(
         data.message ??
-          `Access activated until ${data.expiresAt ? new Date(data.expiresAt).toLocaleDateString() : "—"}. Sign in with Google using this email.`,
+          "Request received. After we verify your course enrollment, you will get an email from English Plan with VIP access and your password.",
       );
-      setFtCode("");
     } catch {
       setFtErr("Network error. Try again.");
     } finally {
       setFtLoading(false);
     }
-  }, [ftEmail, ftName, ftCode]);
+  }, [ftEmail, ftName]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-neutral-900">
@@ -746,12 +740,17 @@ export function LandingPageClient({
               </button>
             </div>
             <p className="mt-3 text-sm text-neutral-600">
-              Enter the email you will use with Google sign-in, your name, and the passcode from your
-              course. We activate <strong>6 months of VIP</strong> on that email after verification.
+              If you are a student from the <strong>Duolingo Fast Track</strong> course, type the
+              email you will use to sign in. We will email our team to verify your enrollment. After
+              approval, you will receive an email from <strong>English Plan</strong> with{" "}
+              <strong>VIP access for 6 months</strong> (counted from the date you submit this form)
+              and your <strong>personal password</strong>.
             </p>
             <p className="mt-2 text-sm text-neutral-600">
-              ใส่อีเมลที่จะใช้ล็อกอิน Google ชื่อ และรหัสจากคอร์ส ระบบจะเปิดสิทธิ์{" "}
-              <strong>VIP 6 เดือน</strong> ให้หลังตรวจสอบ
+              หากคุณเป็นนักเรียนจากคอร์ส <strong>Duolingo Fast Track</strong> ให้ใส่อีเมลที่จะใช้ล็อกอิน
+              เราจะส่งเรื่องให้ทีมตรวจสอบ หลังอนุมัติ คุณจะได้รับอีเมลจาก{" "}
+              <strong>English Plan</strong> พร้อมสิทธิ์ <strong>VIP 6 เดือน</strong> (นับจากวันที่ส่งคำขอ)
+              และ<strong>รหัสผ่านส่วนตัว</strong>
             </p>
             <label className="mt-6 block text-xs font-bold uppercase tracking-wide">
               Email
@@ -773,16 +772,6 @@ export function LandingPageClient({
                 className="mt-1 w-full border-2 border-black px-3 py-2 ep-stat text-sm"
               />
             </label>
-            <label className="mt-4 block text-xs font-bold uppercase tracking-wide">
-              Course passcode / รหัสคอร์ส
-              <input
-                type="password"
-                autoComplete="off"
-                value={ftCode}
-                onChange={(e) => setFtCode(e.target.value)}
-                className="mt-1 w-full border-2 border-black px-3 py-2 ep-stat text-sm"
-              />
-            </label>
             {ftErr ? <p className="mt-4 text-sm font-bold text-red-700">{ftErr}</p> : null}
             {ftMsg ? (
               <div className="mt-4 rounded border-2 border-green-800/30 bg-green-50 p-3">
@@ -799,34 +788,32 @@ export function LandingPageClient({
                   </p>
                 ) : null}
                 {ftLinkedEmail ? (
-                  <Link
-                    href="/login"
-                    className="mt-4 flex w-full items-center justify-center border-4 border-black bg-ep-yellow py-3 text-center text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#000] hover:bg-ep-yellow/90"
-                  >
-                    Sign in &amp; use VIP / เข้าใช้แอพด้วย VIP
-                  </Link>
+                  <p className="mt-3 text-xs text-green-900">
+                    Submitted email / อีเมลที่ส่ง:{" "}
+                    <span className="break-all font-mono font-bold">{ftLinkedEmail}</span>
+                  </p>
                 ) : null}
               </div>
             ) : null}
             <button
               type="button"
-              disabled={ftLoading}
+              disabled={ftLoading || !ftEmail.trim().includes("@")}
               onClick={() => void submitFastTrack()}
               className="mt-6 w-full border-4 border-black bg-ep-blue py-4 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#000] hover:bg-ep-blue/90 disabled:opacity-50"
             >
-              {ftLoading ? "…" : "Activate VIP / เปิดสิทธิ์ VIP"}
+              {ftLoading ? "…" : "Send request / ส่งคำขอ"}
             </button>
             {!ftMsg ? (
               <p className="mt-4 text-center text-xs text-neutral-500">
-                Then{" "}
+                After you receive our approval email, use{" "}
                 <Link href="/login" className="font-bold text-ep-blue underline">
-                  sign in with Google
+                  Sign in
                 </Link>{" "}
-                using the same email.
+                with Google or email + password. / หลังได้รับอีเมลอนุมัติแล้วค่อยเข้า Sign in
               </p>
             ) : (
               <p className="mt-4 text-center text-xs text-neutral-500">
-                Use Google with the linked address — the app unlocks VIP after login. No confirmation email is sent.
+                Watch your inbox for an email from English Plan. / รออีเมลจาก English Plan
               </p>
             )}
           </div>

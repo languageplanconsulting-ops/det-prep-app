@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
 import {
+  approveFastTrackPending,
+  listFastTrackPending,
+  rejectFastTrackPending,
+} from "@/lib/fast-track-pending";
+import {
   bulkGrantVIP,
   getRecentVIPActivity,
   getVIPGrantList,
@@ -17,13 +22,14 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const [grants, stats, activity] = await Promise.all([
+  const [grants, stats, activity, fastTrackPending] = await Promise.all([
     getVIPGrantList(),
     getVIPGrantStats(),
     getRecentVIPActivity(10),
+    listFastTrackPending(),
   ]);
 
-  return NextResponse.json({ grants, stats, activity });
+  return NextResponse.json({ grants, stats, activity, fastTrackPending });
 }
 
 export async function POST(request: Request) {
@@ -77,6 +83,30 @@ export async function POST(request: Request) {
     if (action === "revoke") {
       const email = String(body?.email ?? "");
       await revokeVIPAccess(email, adminId);
+      return NextResponse.json({ ok: true });
+    }
+
+    if (action === "fast-track-approve") {
+      const id = String(body?.id ?? "");
+      if (!id) {
+        return NextResponse.json({ error: "Missing id" }, { status: 400 });
+      }
+      const r = await approveFastTrackPending(id, adminId);
+      if (!r.ok) {
+        return NextResponse.json({ error: r.error }, { status: 400 });
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    if (action === "fast-track-reject") {
+      const id = String(body?.id ?? "");
+      if (!id) {
+        return NextResponse.json({ error: "Missing id" }, { status: 400 });
+      }
+      const r = await rejectFastTrackPending(id, adminId);
+      if (!r.ok) {
+        return NextResponse.json({ error: r.error }, { status: 400 });
+      }
       return NextResponse.json({ ok: true });
     }
 

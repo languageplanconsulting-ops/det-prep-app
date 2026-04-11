@@ -47,6 +47,17 @@ type PreviewRow = {
 
 type TabId = "list" | "add" | "stats" | "activity";
 
+type FastTrackPendingRow = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  submitted_at: string;
+  status: "pending" | "approved" | "rejected";
+  processed_at: string | null;
+  grant_expires_at: string | null;
+  access_password: string | null;
+};
+
 const SKILL_LABELS: Record<string, string> = {
   literacy: "Literacy",
   comprehension: "Comprehension",
@@ -216,6 +227,11 @@ export default function AdminVIPAccessPage() {
   const [studyLoading, setStudyLoading] = useState(false);
   const [studyLoaded, setStudyLoaded] = useState(false);
 
+  const [fastTrackPending, setFastTrackPending] = useState<FastTrackPendingRow[]>(
+    [],
+  );
+  const [fastTrackBusyId, setFastTrackBusyId] = useState<string | null>(null);
+
   const loadStudyActivity = useCallback(async () => {
     setStudyLoading(true);
     try {
@@ -247,10 +263,12 @@ export default function AdminVIPAccessPage() {
         grants: GrantRow[];
         stats: Stats;
         activity: ActivityRow[];
+        fastTrackPending?: FastTrackPendingRow[];
       };
       setGrants(data.grants);
       setStats(data.stats);
       setActivity(data.activity);
+      setFastTrackPending(data.fastTrackPending ?? []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -365,6 +383,56 @@ export default function AdminVIPAccessPage() {
     }
   }
 
+  async function approveFastTrack(id: string) {
+    const ok = window.confirm(
+      "Grant 6 months VIP from their request date, set password, and email the student? / ให้ VIP 6 เดือนนับจากวันส่งคำขอ และส่งอีเมลให้นักเรียน?",
+    );
+    if (!ok) return;
+    setFastTrackBusyId(id);
+    try {
+      const res = await fetch("/api/admin/vip-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action: "fast-track-approve", id }),
+      });
+      if (!res.ok) {
+        const j = (await res.json().catch(() => null)) as { error?: string };
+        throw new Error(j?.error ?? "Approve failed");
+      }
+      await load();
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : "Error");
+    } finally {
+      setFastTrackBusyId(null);
+    }
+  }
+
+  async function rejectFastTrack(id: string) {
+    const ok = window.confirm(
+      "Reject this Fast Track request? / ปฏิเสธคำขอนี้?",
+    );
+    if (!ok) return;
+    setFastTrackBusyId(id);
+    try {
+      const res = await fetch("/api/admin/vip-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action: "fast-track-reject", id }),
+      });
+      if (!res.ok) {
+        const j = (await res.json().catch(() => null)) as { error?: string };
+        throw new Error(j?.error ?? "Reject failed");
+      }
+      await load();
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : "Error");
+    } finally {
+      setFastTrackBusyId(null);
+    }
+  }
+
   async function runBulkGrant() {
     if (!previewRows?.length) return;
     setBulkBusy(true);
@@ -462,6 +530,123 @@ export default function AdminVIPAccessPage() {
 
       {tab === "list" && (
         <section className="space-y-4">
+          <div className="rounded-[4px] border-4 border-black bg-amber-50 p-4 shadow-[4px_4px_0_0_#000]">
+            <h2 className="text-lg font-black text-neutral-900">
+              Pending Fast Track (Duolingo) / รออนุมัติ Fast Track
+            </h2>
+            <p className="mt-1 text-sm text-neutral-700">
+              Students submit from the landing page. Approve to grant 6 months VIP from their
+              request date, create their password, and send the English Plan email. / นักเรียนส่งจาก
+              Landing — กดอนุมัติเพื่อให้ VIP 6 เดือนนับจากวันส่งคำขอ สร้างรหัสผ่าน และส่งอีเมล
+            </p>
+            {fastTrackPending.filter((r) => r.status === "pending").length ===
+            0 ? (
+              <p className="mt-3 text-sm font-bold text-neutral-600">
+                No pending requests. / ไม่มีคำขอค้าง
+              </p>
+            ) : (
+              <div className="mt-4 overflow-x-auto rounded-[4px] border-4 border-black bg-white">
+                <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+                  <thead className="bg-neutral-800 text-white">
+                    <tr>
+                      <th className="border-b-2 border-black px-3 py-2 font-black">
+                        Email
+                      </th>
+                      <th className="border-b-2 border-black px-3 py-2 font-black">
+                        Name
+                      </th>
+                      <th className="border-b-2 border-black px-3 py-2 font-black">
+                        Submitted (UTC)
+                      </th>
+                      <th className="border-b-2 border-black px-3 py-2 font-black">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {fastTrackPending
+                      .filter((r) => r.status === "pending")
+                      .map((r) => (
+                        <tr key={r.id} className="border-b border-neutral-200">
+                          <td className="px-3 py-2 ep-stat font-mono text-xs">
+                            {r.email}
+                          </td>
+                          <td className="px-3 py-2">{r.full_name ?? "—"}</td>
+                          <td className="px-3 py-2 ep-stat text-xs">
+                            {new Date(r.submitted_at).toISOString().slice(0, 16).replace("T", " ")}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                disabled={fastTrackBusyId === r.id}
+                                onClick={() => void approveFastTrack(r.id)}
+                                className="rounded-[4px] border-2 border-black bg-[#004AAD] px-2 py-1 text-xs font-black text-[#FFCC00] disabled:opacity-50"
+                              >
+                                {fastTrackBusyId === r.id ? "…" : "Grant / อนุมัติ"}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={fastTrackBusyId === r.id}
+                                onClick={() => void rejectFastTrack(r.id)}
+                                className="rounded-[4px] border-2 border-black bg-white px-2 py-1 text-xs font-black text-neutral-800 disabled:opacity-50"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {fastTrackPending.some((r) => r.status === "approved") ? (
+              <div className="mt-6">
+                <h3 className="text-sm font-black uppercase text-neutral-800">
+                  Approved Fast Track (password on file) / อนุมัติแล้ว (เก็บรหัส)
+                </h3>
+                <div className="mt-2 overflow-x-auto rounded-[4px] border-4 border-black bg-white">
+                  <table className="w-full min-w-[880px] border-collapse text-left text-sm">
+                    <thead className="bg-[#004AAD] text-[#FFCC00]">
+                      <tr>
+                        <th className="border-b-4 border-black px-3 py-2 font-black">
+                          Email
+                        </th>
+                        <th className="border-b-4 border-black px-3 py-2 font-black">
+                          Password / รหัส
+                        </th>
+                        <th className="border-b-4 border-black px-3 py-2 font-black">
+                          VIP until / ถึงวันที่
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {fastTrackPending
+                        .filter((r) => r.status === "approved")
+                        .map((r) => (
+                          <tr key={r.id} className="border-b border-neutral-200">
+                            <td className="px-3 py-2 ep-stat font-mono text-xs">
+                              {r.email}
+                            </td>
+                            <td className="px-3 py-2 font-mono text-xs font-bold text-neutral-900">
+                              {r.access_password ?? "—"}
+                            </td>
+                            <td className="px-3 py-2 ep-stat text-xs">
+                              {r.grant_expires_at
+                                ? new Date(r.grant_expires_at).toLocaleString()
+                                : "—"}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
+          </div>
+
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <label className="block flex-1 text-sm font-bold">
               Search / ค้นหา (email or name)

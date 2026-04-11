@@ -167,13 +167,20 @@ export async function checkVIPEligibility(email: string): Promise<boolean> {
   return true;
 }
 
-type ProfileVIPOutcome = "immediate" | "pending" | { error: string };
+export type ProfileVIPOutcome = "immediate" | "pending" | { error: string };
 
-async function applyProfileVIPAfterGrant(
+/**
+ * Applies VIP to profile after `vip_course_grants` row exists. Optionally sets tier expiry
+ * (Fast Track 6 months from submission) and skips generic grant email when a custom email is sent.
+ */
+export async function applyProfileVIPAfterGrant(
   norm: string,
   initialPassword: string | null,
+  options?: { tierExpiresAt?: string | null; skipNotificationEmail?: boolean },
 ): Promise<ProfileVIPOutcome> {
   const supabase = createServiceRoleSupabase();
+  const tierExpiresAt = options?.tierExpiresAt ?? null;
+  const skipNotificationEmail = options?.skipNotificationEmail === true;
   let authUserId: string | null = null;
   if (initialPassword?.trim()) {
     const r = await provisionCourseStudentAuth(norm, initialPassword.trim());
@@ -193,7 +200,7 @@ async function applyProfileVIPAfterGrant(
       .update({
         tier: "vip",
         vip_granted_by_course: true,
-        tier_expires_at: null,
+        tier_expires_at: tierExpiresAt,
         updated_at: new Date().toISOString(),
       })
       .eq("id", profile.id);
@@ -202,7 +209,7 @@ async function applyProfileVIPAfterGrant(
       console.error("[vip-access] applyProfileVIPAfterGrant update", error.message);
       return { error: error.message };
     }
-    await sendVIPGrantEmail(norm);
+    if (!skipNotificationEmail) await sendVIPGrantEmail(norm);
     return "immediate";
   }
 
@@ -213,7 +220,7 @@ async function applyProfileVIPAfterGrant(
         email: norm,
         tier: "vip",
         vip_granted_by_course: true,
-        tier_expires_at: null,
+        tier_expires_at: tierExpiresAt,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "id" },
@@ -222,7 +229,7 @@ async function applyProfileVIPAfterGrant(
       console.error("[vip-access] applyProfileVIPAfterGrant upsert", error.message);
       return { error: error.message };
     }
-    await sendVIPGrantEmail(norm);
+    if (!skipNotificationEmail) await sendVIPGrantEmail(norm);
     return "immediate";
   }
 
@@ -326,7 +333,7 @@ export async function grantVIPManually(
     throw new Error(upsertError.message);
   }
 
-  const outcome = await applyProfileVIPAfterGrant(norm, pwt || null);
+  const outcome = await applyProfileVIPAfterGrant(norm, pwt || null, undefined);
   if (typeof outcome === "object" && "error" in outcome) {
     throw new Error(outcome.error);
   }
@@ -456,7 +463,7 @@ export async function bulkGrantVIP(
         continue;
       }
 
-      const outcome = await applyProfileVIPAfterGrant(norm, pwt || null);
+      const outcome = await applyProfileVIPAfterGrant(norm, pwt || null, undefined);
       if (typeof outcome === "object" && "error" in outcome) {
         failed.push(norm);
         continue;
