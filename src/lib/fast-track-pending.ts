@@ -34,7 +34,9 @@ export async function submitFastTrackRequest(
   emailRaw: string,
   fullNameRaw: string | null,
 ): Promise<
-  { ok: true } | { ok: false; error: string } | { ok: true; alreadyPending: true }
+  | { ok: true; emailSent: boolean; emailError?: string }
+  | { ok: false; error: string }
+  | { ok: true; alreadyPending: true }
 > {
   const norm = normalizeEmail(emailRaw);
   if (!norm.includes("@")) {
@@ -68,13 +70,20 @@ export async function submitFastTrackRequest(
     return { ok: false, error: "Could not save your request. Try again later." };
   }
 
-  await sendFastTrackRequestToAdmin({
+  const mail = await sendFastTrackRequestToAdmin({
     studentEmail: norm,
     studentName: fullName,
     submittedAtIso: submittedAt,
   });
 
-  return { ok: true };
+  if (!mail.ok) {
+    console.error(
+      "[fast-track-pending] Admin notification email failed (request still saved):",
+      mail.error,
+    );
+  }
+
+  return { ok: true, emailSent: mail.ok, emailError: mail.error };
 }
 
 export async function listFastTrackPending(): Promise<FastTrackPendingRow[]> {
@@ -97,7 +106,10 @@ export async function listFastTrackPending(): Promise<FastTrackPendingRow[]> {
 export async function approveFastTrackPending(
   id: string,
   adminId: string | null,
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; emailSent: boolean; emailError?: string }
+  | { ok: false; error: string }
+> {
   const supabase = createServiceRoleSupabase();
   const { data: row, error: fetchErr } = await supabase
     .from("fast_track_pending_requests")
@@ -167,13 +179,20 @@ export async function approveFastTrackPending(
     return { ok: false, error: updErr.message };
   }
 
-  await sendFastTrackApprovedToStudent({
+  const mail = await sendFastTrackApprovedToStudent({
     to: norm,
     accessPassword: password,
     accessUntilIso: expiresIso,
   });
 
-  return { ok: true };
+  if (!mail.ok) {
+    console.error(
+      "[fast-track-pending] Student approval email failed (VIP already granted):",
+      mail.error,
+    );
+  }
+
+  return { ok: true, emailSent: mail.ok, emailError: mail.error };
 }
 
 export async function rejectFastTrackPending(

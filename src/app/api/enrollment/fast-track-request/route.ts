@@ -32,9 +32,19 @@ export async function POST(request: Request) {
     });
   }
 
+  const emailSent = "emailSent" in result ? result.emailSent : true;
+  const emailError = "emailError" in result ? result.emailError : undefined;
+
   return NextResponse.json({
     ok: true,
     message:
       "Request received. After we verify your course enrollment, you will get an email from English Plan with your VIP access and password.",
+    emailSent,
+    ...(emailSent === false && emailError
+      ? {
+          emailNote:
+            "Your request was saved. If our team email did not arrive, we will still see it in Admin — or contact support.",
+        }
+      : {}),
   });
 }

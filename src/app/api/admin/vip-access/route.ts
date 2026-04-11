@@ -95,7 +95,13 @@ export async function POST(request: Request) {
       if (!r.ok) {
         return NextResponse.json({ error: r.error }, { status: 400 });
       }
-      return NextResponse.json({ ok: true });
+      return NextResponse.json({
+        ok: true,
+        emailSent: r.emailSent,
+        ...(r.emailSent === false && r.emailError
+          ? { emailError: r.emailError }
+          : {}),
+      });
     }
 
     if (action === "fast-track-reject") {

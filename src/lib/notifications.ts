@@ -18,7 +18,7 @@ export async function sendFastTrackRequestToAdmin(params: {
   studentEmail: string;
   studentName: string | null;
   submittedAtIso: string;
-}): Promise<void> {
+}): Promise<{ ok: boolean; error?: string }> {
   const to = notifyEmailDefault();
   const name = params.studentName?.trim() || "—";
   const html = `
@@ -32,12 +32,15 @@ export async function sendFastTrackRequestToAdmin(params: {
     <p>อีเมล: ${escapeHtml(params.studentEmail)}<br/>ชื่อ: ${escapeHtml(name)}<br/>เวลาส่ง (UTC): ${escapeHtml(params.submittedAtIso)}</p>
     <p>ตรวจในแอดมิน → VIP course access → ส่วน Pending Fast Track</p>
   `;
-  await sendResendEmail({
+  const r = await sendResendEmail({
     to,
     subject: `[English Plan] Fast Track VIP request — ${params.studentEmail}`,
     html,
-    replyTo: params.studentEmail,
   });
+  if (!r.ok) {
+    console.error("[notifications] sendFastTrackRequestToAdmin failed:", r.error);
+  }
+  return r;
 }
 
 /** Student receives access confirmation + personalized password after admin approval. */
@@ -45,7 +48,7 @@ export async function sendFastTrackApprovedToStudent(params: {
   to: string;
   accessPassword: string;
   accessUntilIso: string;
-}): Promise<void> {
+}): Promise<{ ok: boolean; error?: string }> {
   const until = new Date(params.accessUntilIso).toLocaleString("en-GB", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -69,11 +72,15 @@ export async function sendFastTrackApprovedToStudent(params: {
     <p>สิทธิ์ VIP ใช้ได้ถึง: <strong>${escapeHtml(untilTh)}</strong></p>
     <p>— English Plan (Language Plan Consulting)</p>
   `;
-  await sendResendEmail({
+  const r = await sendResendEmail({
     to: params.to,
     subject: "Your ENGLISH PLAN VIP access is ready / สิทธิ์ VIP พร้อมแล้ว",
     html,
   });
+  if (!r.ok) {
+    console.error("[notifications] sendFastTrackApprovedToStudent failed:", r.error);
+  }
+  return r;
 }
 
 function escapeHtml(s: string): string {

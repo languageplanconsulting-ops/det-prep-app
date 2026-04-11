@@ -396,9 +396,18 @@ export default function AdminVIPAccessPage() {
         credentials: "include",
         body: JSON.stringify({ action: "fast-track-approve", id }),
       });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        emailSent?: boolean;
+        emailError?: string;
+      };
       if (!res.ok) {
-        const j = (await res.json().catch(() => null)) as { error?: string };
-        throw new Error(j?.error ?? "Approve failed");
+        throw new Error(data?.error ?? "Approve failed");
+      }
+      if (data.emailSent === false) {
+        window.alert(
+          `VIP was granted and password saved, but the student email failed to send.\n\nResend error: ${data.emailError ?? "unknown"}\n\nCheck Vercel → Environment: RESEND_API_KEY, RESEND_FROM. Logs: Vercel → Functions.\n\nนักเรียนยังได้สิทธิ์แล้ว แต่ส่งอีเมลไม่สำเร็จ — ดู RESEND ใน Vercel`,
+        );
       }
       await load();
     } catch (e) {
