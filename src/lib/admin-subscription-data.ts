@@ -409,26 +409,59 @@ export async function fetchUserSubscriptionDetail(userId: string) {
 
   if (error || !profile) return null;
 
-  const [{ data: payments }, { data: notes }, { data: actions }] =
-    await Promise.all([
-      supabase
-        .from("payment_history")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(12),
-      supabase
-        .from("subscription_notes")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("admin_actions")
-        .select("*")
-        .eq("target_user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(80),
-    ]);
+  const [
+    { data: payments },
+    { data: notes },
+    { data: actions },
+    { data: sessions },
+    { data: mockResults },
+    { data: notebookEntries },
+    { data: notebookSync },
+  ] = await Promise.all([
+    supabase
+      .from("payment_history")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(12),
+    supabase
+      .from("subscription_notes")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("admin_actions")
+      .select("*")
+      .eq("target_user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(80),
+    supabase
+      .from("study_sessions")
+      .select(
+        "id, skill, exercise_type, difficulty, score, duration_seconds, started_at, ended_at, completed",
+      )
+      .eq("user_id", userId),
+    supabase
+      .from("mock_test_results")
+      .select(
+        "id, session_id, overall_score, literacy_score, comprehension_score, conversation_score, production_score, duration_seconds, created_at",
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(80),
+    supabase
+      .from("notebook_entries")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(200),
+    supabase
+      .from("notebook_sync")
+      .select("id, client_entry_id, payload, created_at, updated_at")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false })
+      .limit(400),
+  ]);
 
   const adminIds = [
     ...new Set(
@@ -452,16 +485,6 @@ export async function fetchUserSubscriptionDetail(userId: string) {
       );
     }
   }
-
-  const { data: sessions } = await supabase
-    .from("study_sessions")
-    .select("skill, duration_seconds, started_at, completed")
-    .eq("user_id", userId);
-
-  const { data: mocks } = await supabase
-    .from("mock_test_results")
-    .select("id, created_at")
-    .eq("user_id", userId);
 
   const skillSec: Record<string, number> = {};
   let totalSec = 0;
@@ -518,9 +541,17 @@ export async function fetchUserSubscriptionDetail(userId: string) {
       favoriteSkill,
       favoritePct: favPct,
       weeklyMinutes: [...weekBuckets],
-      mockTestsTotal: (mocks ?? []).length,
+      mockTestsTotal: (mockResults ?? []).length,
     },
     totalPaidSatang,
+    notebookEntries: notebookEntries ?? [],
+    notebookSync: notebookSync ?? [],
+    mockTestScores: mockResults ?? [],
+    studySessionScores: [...(sessions ?? [])].sort(
+      (a, b) =>
+        new Date((b.started_at as string) ?? 0).getTime() -
+        new Date((a.started_at as string) ?? 0).getTime(),
+    ),
   };
 }
 

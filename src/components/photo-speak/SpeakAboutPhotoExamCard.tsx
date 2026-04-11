@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
-import { getSpeakAboutPhotoProgressForItem } from "@/lib/speak-about-photo-progress";
+import {
+  getSpeakAboutPhotoProgressForItem,
+  type SpeakAboutPhotoItemProgress,
+} from "@/lib/speak-about-photo-progress";
 import type { PhotoSpeakItem } from "@/types/photo-speak";
 
 const MAX_SCORE = 160;
 
-function subscribeProgress(cb: () => void) {
+function subscribeSpeakProgress(cb: () => void) {
   if (typeof window === "undefined") return () => {};
   window.addEventListener("storage", cb);
   window.addEventListener("ep-speak-about-photo-progress", cb);
@@ -25,21 +28,21 @@ export function SpeakAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
   const titleTh = typeof item.titleTh === "string" ? item.titleTh : titleEn;
   const contextEn = typeof item.contextEn === "string" ? item.contextEn : "";
 
-  const progress = useSyncExternalStore(
-    subscribeProgress,
-    () => getSpeakAboutPhotoProgressForItem(itemId),
-    () => undefined as ReturnType<typeof getSpeakAboutPhotoProgressForItem>,
-  );
+  const [progress, setProgress] = useState<SpeakAboutPhotoItemProgress | undefined>(undefined);
+
+  useEffect(() => {
+    setProgress(getSpeakAboutPhotoProgressForItem(itemId));
+    return subscribeSpeakProgress(() => {
+      setProgress(getSpeakAboutPhotoProgressForItem(itemId));
+    });
+  }, [itemId]);
 
   const started = !!progress;
   const latest = progress?.latestScore160 ?? null;
   const perfect = latest !== null && latest >= MAX_SCORE;
   const showRedeem = started && !perfect;
 
-  const sessionHref = {
-    pathname: "/practice/production/speak-about-photo/play",
-    query: { itemId },
-  } as const;
+  const sessionHref = `/practice/production/speak-about-photo/play?itemId=${encodeURIComponent(itemId)}`;
 
   return (
     <BrutalPanel className="h-full overflow-hidden p-0">

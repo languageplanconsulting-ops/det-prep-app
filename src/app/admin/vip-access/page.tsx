@@ -1012,8 +1012,11 @@ student3@gmail.com
                           href={`/admin/subscriptions/${r.userId}`}
                           className="text-[#004AAD] font-bold underline text-xs"
                         >
-                          Open / เปิด
+                          Details / รายละเอียด
                         </a>
+                        <span className="block text-[10px] font-normal text-neutral-500">
+                          notebook &amp; scores
+                        </span>
                       </td>
                     </tr>
                   ))

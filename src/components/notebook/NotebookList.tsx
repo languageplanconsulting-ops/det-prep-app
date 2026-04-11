@@ -11,6 +11,7 @@ const notebookHand = Caveat({
 });
 import {
   addCustomCategory,
+  backfillNotebookEntriesToServer,
   canRemovePremadeCategory,
   deleteCustomCategory,
   deleteNotebookEntry,
@@ -241,6 +242,20 @@ export function NotebookList() {
     persistMigratedNotebook();
     reload();
   }, [reload]);
+
+  useEffect(() => {
+    const key = "ep-notebook-server-backfill-v1";
+    if (typeof sessionStorage === "undefined") return;
+    if (sessionStorage.getItem(key)) return;
+    const snapshot = loadNotebook();
+    if (snapshot.length === 0) {
+      sessionStorage.setItem(key, "1");
+      return;
+    }
+    void backfillNotebookEntriesToServer(snapshot).finally(() => {
+      sessionStorage.setItem(key, "1");
+    });
+  }, []);
 
   const tabs = useMemo(() => {
     const built = [

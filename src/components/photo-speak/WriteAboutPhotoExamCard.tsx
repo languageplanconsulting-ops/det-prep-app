@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
-import { getWriteAboutPhotoProgressForItem } from "@/lib/write-about-photo-storage";
+import {
+  getWriteAboutPhotoProgressForItem,
+  type WriteAboutPhotoItemProgress,
+} from "@/lib/write-about-photo-storage";
 import type { PhotoSpeakItem } from "@/types/photo-speak";
 
 const MAX_SCORE = 160;
 
-function subscribeProgress(cb: () => void) {
+function subscribeWriteProgress(cb: () => void) {
   if (typeof window === "undefined") return () => {};
   window.addEventListener("storage", cb);
   window.addEventListener("ep-write-about-photo-progress", cb);
@@ -25,21 +28,21 @@ export function WriteAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
   const titleTh = typeof item.titleTh === "string" ? item.titleTh : titleEn;
   const contextEn = typeof item.contextEn === "string" ? item.contextEn : "";
 
-  const progress = useSyncExternalStore(
-    subscribeProgress,
-    () => getWriteAboutPhotoProgressForItem(itemId),
-    () => undefined as ReturnType<typeof getWriteAboutPhotoProgressForItem>,
-  );
+  const [progress, setProgress] = useState<WriteAboutPhotoItemProgress | undefined>(undefined);
+
+  useEffect(() => {
+    setProgress(getWriteAboutPhotoProgressForItem(itemId));
+    return subscribeWriteProgress(() => {
+      setProgress(getWriteAboutPhotoProgressForItem(itemId));
+    });
+  }, [itemId]);
 
   const started = !!progress;
   const latest = progress?.latestScore160 ?? null;
   const perfect = latest !== null && latest >= MAX_SCORE;
   const showRedeem = started && !perfect;
 
-  const sessionHref = {
-    pathname: "/practice/production/write-about-photo/play",
-    query: { itemId },
-  } as const;
+  const sessionHref = `/practice/production/write-about-photo/play?itemId=${encodeURIComponent(itemId)}`;
 
   return (
     <BrutalPanel className="h-full overflow-hidden p-0">

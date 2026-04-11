@@ -1,4 +1,11 @@
+import {
+  backfillNotebookEntriesToServer,
+  deleteNotebookEntryOnServer,
+  syncNotebookEntryToServer,
+} from "@/lib/notebook-server-sync";
 import type { NotebookCustomCategory, NotebookEntry } from "@/types/writing";
+
+export { backfillNotebookEntriesToServer };
 
 const ENTRIES_KEY = "ep-notebook-entries";
 const CATEGORIES_KEY = "ep-notebook-categories";
@@ -242,6 +249,7 @@ export function addNotebookEntry(
       "Notebook save failed — this browser may block storage or be full.",
     );
   }
+  syncNotebookEntryToServer(full);
   return full;
 }
 
@@ -258,10 +266,12 @@ export function updateNotebookEntry(
   }
   list[i] = next;
   saveNotebook(list);
+  syncNotebookEntryToServer(next);
 }
 
 export function deleteNotebookEntry(id: string): void {
   saveNotebook(loadNotebook().filter((e) => e.id !== id));
+  deleteNotebookEntryOnServer(id);
 }
 
 /** One-time rewrite after migration (optional compact). */

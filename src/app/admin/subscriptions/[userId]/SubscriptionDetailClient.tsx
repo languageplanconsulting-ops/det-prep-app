@@ -17,6 +17,25 @@ import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { formatBahtFromSatang } from "@/lib/money-format";
 
+function notebookPayloadLine(payload: unknown): {
+  source: string;
+  title: string;
+  preview: string;
+} {
+  if (!payload || typeof payload !== "object") {
+    return { source: "—", title: "—", preview: "" };
+  }
+  const p = payload as Record<string, unknown>;
+  const source = typeof p.source === "string" ? p.source : "—";
+  const titleEn = typeof p.titleEn === "string" ? p.titleEn : "";
+  const titleTh = typeof p.titleTh === "string" ? p.titleTh : "";
+  const title = [titleEn, titleTh].filter(Boolean).join(" / ") || "—";
+  const bodyEn = typeof p.bodyEn === "string" ? p.bodyEn : "";
+  const bodyTh = typeof p.bodyTh === "string" ? p.bodyTh : "";
+  const preview = [bodyEn, bodyTh].join("\n").trim().slice(0, 500);
+  return { source, title, preview };
+}
+
 export function SubscriptionDetailClient() {
   const params = useParams();
   const userId = params.userId as string;
@@ -64,6 +83,10 @@ export function SubscriptionDetailClient() {
   const study = (data?.study ?? {}) as Record<string, unknown>;
   const weekly = (study.weeklyMinutes as number[]) ?? [0, 0, 0, 0];
   const chartData = weekly.map((v, i) => ({ week: `W${i + 1}`, minutes: v }));
+  const notebookEntries = (data?.notebookEntries ?? []) as Record<string, unknown>[];
+  const notebookSync = (data?.notebookSync ?? []) as Record<string, unknown>[];
+  const mockTestScores = (data?.mockTestScores ?? []) as Record<string, unknown>[];
+  const studySessionScores = (data?.studySessionScores ?? []) as Record<string, unknown>[];
 
   const saveName = async () => {
     const res = await fetch(`/api/admin/subscriptions/${userId}`, {
@@ -355,6 +378,216 @@ export function SubscriptionDetailClient() {
                 </p>
               </div>
             ))}
+          </section>
+
+          <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+            <h2 className="text-lg font-black">Notebook (cloud sync) / สมุดโน้ต (ซิงค์)</h2>
+            <p className="mt-1 text-xs text-neutral-600">
+              Saved cards sync while the student is signed in (add, edit, delete). Visiting the Notebook
+              page once backfills existing local saves. / บันทึกลงคลาวด์เมื่อล็อกอิน — เปิดหน้า Notebook
+              เพื่อซิงค์ของเก่าจากเครื่อง
+            </p>
+            {notebookSync.length === 0 ? (
+              <p className="mt-3 text-sm text-neutral-500">
+                No synced cards yet. / ยังไม่มีการซิงค์
+              </p>
+            ) : (
+              <div className="mt-3 max-h-96 overflow-auto rounded-sm border-2 border-neutral-200">
+                <table className="w-full min-w-[640px] text-left text-xs">
+                  <thead className="sticky top-0 bg-neutral-100">
+                    <tr>
+                      <th className="border-b-2 border-black p-2">Updated</th>
+                      <th className="border-b-2 border-black p-2">Source</th>
+                      <th className="border-b-2 border-black p-2">Title</th>
+                      <th className="border-b-2 border-black p-2">Preview</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notebookSync.map((row) => {
+                      const { source, title, preview } = notebookPayloadLine(row.payload);
+                      return (
+                        <tr key={String(row.id)} className="align-top">
+                          <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
+                            {row.updated_at
+                              ? new Date(row.updated_at as string).toLocaleString()
+                              : "—"}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 font-mono text-[10px]">
+                            {source}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 max-w-[200px] break-words font-semibold">
+                            {title}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 max-w-xl break-words text-[11px] leading-snug text-neutral-800">
+                            {preview}
+                            {preview.length >= 500 ? "…" : ""}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <h3 className="mt-6 text-sm font-black text-neutral-800">
+              Legacy mock quick-save / บันทึก mock แบบเดิม
+            </h3>
+            <p className="mt-1 text-xs text-neutral-500">
+              Older &quot;Save to Notebook&quot; from mock results (plain text row). / แถวข้อความจาก mock
+            </p>
+            {notebookEntries.length === 0 ? (
+              <p className="mt-2 text-sm text-neutral-500">None. / ไม่มี</p>
+            ) : (
+              <div className="mt-2 max-h-56 overflow-auto rounded-sm border-2 border-neutral-200">
+                <table className="w-full min-w-[560px] text-left text-xs">
+                  <thead className="sticky top-0 bg-neutral-100">
+                    <tr>
+                      <th className="border-b-2 border-black p-2">Date</th>
+                      <th className="border-b-2 border-black p-2">Type</th>
+                      <th className="border-b-2 border-black p-2">Source</th>
+                      <th className="border-b-2 border-black p-2">Score</th>
+                      <th className="border-b-2 border-black p-2">Content</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {notebookEntries.map((row) => (
+                      <tr key={String(row.id)} className="align-top">
+                        <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
+                          {row.created_at
+                            ? new Date(row.created_at as string).toLocaleString()
+                            : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2">{String(row.type ?? "—")}</td>
+                        <td className="border-b border-neutral-200 p-2">
+                          <span className="block">{String(row.source_exercise_type ?? "—")}</span>
+                          <span className="text-[10px] text-neutral-500">
+                            {String(row.source_skill ?? "")}
+                          </span>
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 ep-stat">
+                          {row.score_at_save != null ? String(row.score_at_save) : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 max-w-md break-words text-[11px] leading-snug">
+                          {String(row.content ?? "").slice(0, 400)}
+                          {String(row.content ?? "").length > 400 ? "…" : ""}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+            <h2 className="text-lg font-black">Mock test scores / คะแนน mock test</h2>
+            {mockTestScores.length === 0 ? (
+              <p className="mt-3 text-sm text-neutral-500">No mock test results yet. / ยังไม่มีผล mock</p>
+            ) : (
+              <div className="mt-3 max-h-72 overflow-auto rounded-sm border-2 border-neutral-200">
+                <table className="w-full min-w-[720px] text-left text-xs">
+                  <thead className="sticky top-0 bg-neutral-100">
+                    <tr>
+                      <th className="border-b-2 border-black p-2">Date</th>
+                      <th className="border-b-2 border-black p-2">Overall</th>
+                      <th className="border-b-2 border-black p-2">Lit</th>
+                      <th className="border-b-2 border-black p-2">Comp</th>
+                      <th className="border-b-2 border-black p-2">Conv</th>
+                      <th className="border-b-2 border-black p-2">Prod</th>
+                      <th className="border-b-2 border-black p-2">Duration</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mockTestScores.map((row) => (
+                      <tr key={String(row.id)}>
+                        <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
+                          {row.created_at
+                            ? new Date(row.created_at as string).toLocaleString()
+                            : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 font-bold">
+                          {row.overall_score != null ? String(row.overall_score) : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 ep-stat">
+                          {row.literacy_score != null ? String(row.literacy_score) : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 ep-stat">
+                          {row.comprehension_score != null ? String(row.comprehension_score) : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 ep-stat">
+                          {row.conversation_score != null ? String(row.conversation_score) : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 ep-stat">
+                          {row.production_score != null ? String(row.production_score) : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 ep-stat">
+                          {row.duration_seconds != null
+                            ? `${Math.round(Number(row.duration_seconds) / 60)} min`
+                            : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+            <h2 className="text-lg font-black">Practice sessions &amp; scores / แบบฝึกและคะแนน</h2>
+            <p className="mt-1 text-xs text-neutral-600">
+              Per-attempt scores when the app recorded them (dictation, FITB, etc.). Blank score means not
+              stored for that session. / คะแนนรายครั้งตามที่ระบบบันทึก
+            </p>
+            {studySessionScores.length === 0 ? (
+              <p className="mt-3 text-sm text-neutral-500">No study sessions yet. / ยังไม่มีเซสชัน</p>
+            ) : (
+              <div className="mt-3 max-h-80 overflow-auto rounded-sm border-2 border-neutral-200">
+                <table className="w-full min-w-[640px] text-left text-xs">
+                  <thead className="sticky top-0 bg-neutral-100">
+                    <tr>
+                      <th className="border-b-2 border-black p-2">Started</th>
+                      <th className="border-b-2 border-black p-2">Skill</th>
+                      <th className="border-b-2 border-black p-2">Exercise</th>
+                      <th className="border-b-2 border-black p-2">Difficulty</th>
+                      <th className="border-b-2 border-black p-2">Score</th>
+                      <th className="border-b-2 border-black p-2">Duration</th>
+                      <th className="border-b-2 border-black p-2">Done</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {studySessionScores.map((row) => (
+                      <tr key={String(row.id)}>
+                        <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
+                          {row.started_at
+                            ? new Date(row.started_at as string).toLocaleString()
+                            : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2">{String(row.skill ?? "—")}</td>
+                        <td className="border-b border-neutral-200 p-2 font-mono text-[10px]">
+                          {String(row.exercise_type ?? "—")}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2">
+                          {String(row.difficulty ?? "—")}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 font-semibold">
+                          {row.score != null ? String(row.score) : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 ep-stat">
+                          {row.duration_seconds != null && Number(row.duration_seconds) > 0
+                            ? `${Math.round(Number(row.duration_seconds) / 60)} min`
+                            : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2">
+                          {row.completed ? "✓" : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
 
           <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
