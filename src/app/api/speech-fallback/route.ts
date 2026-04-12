@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { synthesizeEnglishSpeechWithElevenLabs } from "@/lib/elevenlabs-synthesize";
 import { synthesizeEnglishSpeechWithGemini } from "@/lib/gemini-synthesize";
-import {
-  isPollyEnvConfigured,
-  POLLY_MAX_CHARS,
-  synthesizeEnglishSpeechWithPolly,
-} from "@/lib/polly-synthesize";
+import { INWORLD_MAX_CHARS, synthesizeEnglishSpeechWithInworld } from "@/lib/inworld-synthesize";
 import { SPEECH_SYNTHESIS_MAX_CHARS } from "@/lib/speech-api-limits";
 
 export const maxDuration = 120;
@@ -15,6 +11,7 @@ export async function POST(req: Request) {
   const geminiEnv = process.env.GEMINI_API_KEY?.trim();
   const geminiHeader = req.headers.get("x-gemini-api-key")?.trim();
   const geminiKey = geminiEnv || geminiHeader;
+  const inworldKey = process.env.INWORLD_API_KEY?.trim() || req.headers.get("x-inworld-api-key")?.trim();
 
   let body: unknown;
   try {
@@ -30,9 +27,11 @@ export async function POST(req: Request) {
   const text = o.text;
   const providerRaw = o.provider;
   const provider =
-    providerRaw === "elevenlabs" || providerRaw === "gemini" || providerRaw === "polly"
+    providerRaw === "elevenlabs" || providerRaw === "gemini" || providerRaw === "inworld"
       ? providerRaw
-      : undefined;
+      : providerRaw === "polly"
+        ? "inworld"
+        : undefined;
 
   if (typeof text !== "string" || !text.trim()) {
     return NextResponse.json({ error: "text required" }, { status: 400 });
@@ -82,26 +81,32 @@ export async function POST(req: Request) {
       return await runGemini();
     }
 
-    if (provider === "polly") {
-      if (!isPollyEnvConfigured()) {
+    if (provider === "inworld") {
+      if (!inworldKey) {
         return NextResponse.json(
           {
             error:
-              "Polly not configured. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.",
+              "Inworld TTS not configured. Set INWORLD_API_KEY in .env.local (or x-inworld-api-key).",
           },
           { status: 503 },
         );
       }
-      if (trimmed.length > POLLY_MAX_CHARS) {
+      if (trimmed.length > INWORLD_MAX_CHARS) {
         return await runGemini();
       }
-      const out = await synthesizeEnglishSpeechWithPolly({ text: trimmed });
+      const out = await synthesizeEnglishSpeechWithInworld({
+        text: trimmed,
+        apiKey: inworldKey,
+      });
       return NextResponse.json(out);
     }
 
-    if (isPollyEnvConfigured() && trimmed.length <= POLLY_MAX_CHARS) {
+    if (inworldKey && trimmed.length <= INWORLD_MAX_CHARS) {
       try {
-        const out = await synthesizeEnglishSpeechWithPolly({ text: trimmed });
+        const out = await synthesizeEnglishSpeechWithInworld({
+          text: trimmed,
+          apiKey: inworldKey,
+        });
         return NextResponse.json(out);
       } catch {
         /* fall through */

@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { synthesizeEnglishSpeechWithElevenLabs } from "@/lib/elevenlabs-synthesize";
 import { synthesizeEnglishSpeechWithGemini } from "@/lib/gemini-synthesize";
 import {
-  isPollyEnvConfigured,
-  POLLY_MAX_CHARS,
-  synthesizeEnglishSpeechWithPolly,
-} from "@/lib/polly-synthesize";
+  INWORLD_MAX_CHARS,
+  isInworldEnvConfigured,
+  synthesizeEnglishSpeechWithInworld,
+} from "@/lib/inworld-synthesize";
 import { SPEECH_SYNTHESIS_MAX_CHARS } from "@/lib/speech-api-limits";
 
 export const maxDuration = 120;
@@ -16,11 +16,12 @@ function errorHttpStatus(err: unknown): number | undefined {
   return typeof s === "number" && s >= 400 && s < 600 ? s : undefined;
 }
 
-type TtsProvider = "polly" | "elevenlabs" | "gemini";
+type TtsProvider = "inworld" | "elevenlabs" | "gemini";
 
 function resolveProvider(raw: unknown): TtsProvider {
-  if (raw === "polly" || raw === "elevenlabs" || raw === "gemini") return raw;
-  return isPollyEnvConfigured() ? "polly" : "gemini";
+  if (raw === "polly") return "inworld";
+  if (raw === "inworld" || raw === "elevenlabs" || raw === "gemini") return raw;
+  return isInworldEnvConfigured() ? "inworld" : "gemini";
 }
 
 export async function POST(req: Request) {
@@ -51,6 +52,9 @@ export async function POST(req: Request) {
 
   const geminiKey =
     process.env.GEMINI_API_KEY?.trim() || req.headers.get("x-gemini-api-key")?.trim() || "";
+
+  const inworldKey =
+    process.env.INWORLD_API_KEY?.trim() || req.headers.get("x-inworld-api-key")?.trim() || "";
 
   const runGemini = async () => {
     if (!geminiKey) {
@@ -84,20 +88,23 @@ export async function POST(req: Request) {
       return NextResponse.json(out);
     }
 
-    if (provider === "polly") {
-      if (!isPollyEnvConfigured()) {
+    if (provider === "inworld") {
+      if (!inworldKey) {
         return NextResponse.json(
           {
             error:
-              "Polly not configured. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (and optional AWS_REGION / POLLY_VOICE_ID).",
+              "Inworld TTS not configured. Set INWORLD_API_KEY in .env.local (optional header x-inworld-api-key).",
           },
           { status: 503 },
         );
       }
-      if (trimmed.length > POLLY_MAX_CHARS) {
+      if (trimmed.length > INWORLD_MAX_CHARS) {
         return runGemini();
       }
-      const out = await synthesizeEnglishSpeechWithPolly({ text: trimmed });
+      const out = await synthesizeEnglishSpeechWithInworld({
+        text: trimmed,
+        apiKey: inworldKey,
+      });
       return NextResponse.json(out);
     }
 

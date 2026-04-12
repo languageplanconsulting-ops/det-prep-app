@@ -51,7 +51,7 @@ const DICTATION_BULK_TEMPLATE = `[
 ]`;
 
 export function AdminDictationPaste() {
-  const [audioProvider, setAudioProvider] = useState<"polly" | "elevenlabs" | "gemini">("polly");
+  const [audioProvider, setAudioProvider] = useState<"inworld" | "elevenlabs" | "gemini">("inworld");
   const [tab, setTab] = useState<"upload" | "manage">("upload");
   const [text, setText] = useState("");
   const [selectedSet, setSelectedSet] = useState<number>(1);
@@ -359,8 +359,8 @@ export function AdminDictationPaste() {
       `Audio generation complete (${
         audioProvider === "elevenlabs"
           ? "ElevenLabs"
-          : audioProvider === "polly"
-            ? "Amazon Polly"
+          : audioProvider === "inworld"
+            ? "Inworld TTS"
             : "Gemini"
       }). Success: ${success} · Failed: ${fail}`,
     );
@@ -621,12 +621,12 @@ export function AdminDictationPaste() {
             <select
               value={audioProvider}
               onChange={(e) =>
-                setAudioProvider(e.target.value as "polly" | "elevenlabs" | "gemini")
+                setAudioProvider(e.target.value as "inworld" | "elevenlabs" | "gemini")
               }
               disabled={running}
               className="border-2 border-black bg-white px-2 py-1 text-xs font-bold"
             >
-              <option value="polly">Amazon Polly (AWS keys)</option>
+              <option value="inworld">Inworld TTS (INWORLD_API_KEY on server)</option>
               <option value="elevenlabs">ElevenLabs</option>
               <option value="gemini">Gemini</option>
             </select>

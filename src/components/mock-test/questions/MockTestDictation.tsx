@@ -18,7 +18,7 @@ type Props = {
 
 /**
  * Dictation for mock tests: plays `audio_url` when set; otherwise synthesizes
- * speech from `reference_sentence` via `/api/speech-synthesize` (Amazon Polly by default).
+ * speech from `reference_sentence` via `/api/speech-synthesize` (Inworld TTS by default when configured).
  */
 export function MockTestDictation({ content, onSubmit }: Props) {
   const [text, setText] = useState("");
@@ -58,7 +58,7 @@ export function MockTestDictation({ content, onSubmit }: Props) {
       try {
         const { audioBase64, mimeType } = await synthesizeSpeechWithRetry({
           text: refSentence,
-          provider: "polly",
+          provider: "inworld",
           headers: {},
         });
         const mime = mimeType?.trim() || "audio/mpeg";
@@ -73,7 +73,7 @@ export function MockTestDictation({ content, onSubmit }: Props) {
           setError(
             e instanceof Error
               ? e.message
-              : "Could not synthesize audio. Set AWS keys for Polly (or GEMINI_API_KEY) or add audio_url.",
+              : "Could not synthesize audio. Set INWORLD_API_KEY (or GEMINI_API_KEY) or add audio_url.",
           );
         }
       }

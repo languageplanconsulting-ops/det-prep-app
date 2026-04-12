@@ -44,9 +44,38 @@ function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
+/** Short click when the answer window opens (prep → record). */
+function playAnswerCueSound(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const AC =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(1400, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.1, t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.06);
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.07);
+    osc.onended = () => {
+      void ctx.close();
+    };
+  } catch {
+    /* ignore */
+  }
+}
+
 async function playQuestionAudioFromApi(
   text: string,
-  provider: "polly" | "gemini" | "elevenlabs",
+  provider: "inworld" | "gemini" | "elevenlabs",
 ): Promise<boolean> {
   try {
     const res = await fetch("/api/speech-synthesize", {
@@ -69,10 +98,10 @@ async function playQuestionAudioFromApi(
   }
 }
 
-/** Prefer Amazon Polly (low cost); fall back to Gemini. Optional ElevenLabs if wired. */
+/** Prefer Inworld TTS; fall back to Gemini. Optional ElevenLabs if wired. */
 async function playQuestionTts(text: string): Promise<void> {
   const ok =
-    (await playQuestionAudioFromApi(text, "polly")) ||
+    (await playQuestionAudioFromApi(text, "inworld")) ||
     (await playQuestionAudioFromApi(text, "gemini")) ||
     (await playQuestionAudioFromApi(text, "elevenlabs"));
   if (!ok) {
@@ -110,8 +139,10 @@ export function InteractiveSpeakingSession({
   const [transcribing, setTranscribing] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showQuestionHint, setShowQuestionHint] = useState(false);
 
   const transcriptRef = useRef("");
+  const answerCueTurnRef = useRef(0);
   const completedRef = useRef<CompletedTurn[]>([]);
   const currentQRef = useRef({ en: "", th: "" });
   const recordGenRef = useRef(0);
@@ -132,6 +163,17 @@ export function InteractiveSpeakingSession({
   useEffect(() => {
     currentQRef.current = currentQ;
   }, [currentQ]);
+
+  useEffect(() => {
+    setShowQuestionHint(false);
+  }, [currentQ.en, turn]);
+
+  useEffect(() => {
+    if (phase !== "record") return;
+    if (answerCueTurnRef.current === turn) return;
+    answerCueTurnRef.current = turn;
+    playAnswerCueSound();
+  }, [phase, turn]);
 
   const forceStopMedia = useCallback(() => {
     recordGenRef.current += 1;
@@ -440,15 +482,15 @@ export function InteractiveSpeakingSession({
 
   const answerPlaceholder = useMemo(() => {
     if (phase === "playing") {
-      return "Listen to the question above. You can type notes during prep.";
+      return "Notes (optional) — you’ll speak in a moment.";
     }
     if (phase === "prep") {
-      return "Optional: type notes or an outline. After recording, your speech is typed verbatim (mistakes kept).";
+      return "Optional notes before you speak…";
     }
     if (phase === "record") {
-      return "Your words appear here after recording — edit on the next step if needed.";
+      return "Your reply will show here after this turn.";
     }
-    return "Add more if needed, then tap Continue.";
+    return "Add more if you need to, then continue.";
   }, [phase]);
 
   return (
@@ -498,10 +540,8 @@ export function InteractiveSpeakingSession({
                   </div>
                 ) : null}
                 <p className="text-sm text-neutral-700">
-                  You will hear each question once (English audio). Then you have{" "}
-                  {INTERACTIVE_SPEAKING_PREP_SECONDS} seconds to think before recording starts. When you finish
-                  speaking (or time runs out), the next question loads automatically — no button between turns. If
-                  your answer is too short, you can add more and tap Continue.
+                  Listen to each prompt, take a short breath to think, then answer out loud. Follow-ups are shaped by
+                  what you say. If a turn is too short, you can add more on the next step.
                 </p>
                 <button
                   type="button"
@@ -516,8 +556,8 @@ export function InteractiveSpeakingSession({
             ) : null}
 
             {phase === "loading-q" ? (
-              <BrutalPanel variant="elevated" title="Next question">
-                <GradingProgressLoader eyebrow="Preparing your next question" />
+              <BrutalPanel variant="elevated" title="Next turn">
+                <GradingProgressLoader eyebrow="We are creating questions according to your answer" />
               </BrutalPanel>
             ) : null}
 
@@ -529,61 +569,108 @@ export function InteractiveSpeakingSession({
               <BrutalPanel
                 variant="elevated"
                 eyebrow={`Turn ${turn} / ${INTERACTIVE_SPEAKING_TURN_COUNT}`}
-                title="Question"
+                title="Conversation"
               >
-                <p className="text-base font-bold text-neutral-900">{currentQ.en}</p>
-                <p className="mt-2 text-sm text-neutral-600">{currentQ.th}</p>
+                <div className="flex gap-3">
+                  <div
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-black bg-ep-blue text-xs font-black text-white shadow-[3px_3px_0_0_#000]"
+                    aria-hidden
+                  >
+                    AI
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-3">
+                    {phase === "playing" ? (
+                      <div
+                        className="ep-is-chat-bubble-typing rounded-2xl border-2 border-black bg-white px-4 py-4 shadow-[5px_5px_0_0_#000]"
+                        role="status"
+                        aria-live="polite"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span className="ep-typing-dot" />
+                          <span className="ep-typing-dot" />
+                          <span className="ep-typing-dot" />
+                        </div>
+                        <p className="mt-3 text-xs font-bold text-neutral-500">
+                          Listen — the question is playing.
+                        </p>
+                      </div>
+                    ) : null}
 
-                {phase === "playing" ? (
-                  <p className="mt-4 border-t-2 border-dashed border-neutral-200 pt-4 text-center text-sm font-bold text-ep-blue">
-                    Playing question audio…
-                  </p>
-                ) : null}
-                {phase === "prep" ? (
-                  <p className="mt-4 border-t-2 border-dashed border-neutral-200 pt-4 text-center text-lg font-black text-ep-blue">
-                    Prepare your answer — {prepLeft}s
-                  </p>
-                ) : null}
+                    {phase === "prep" ? (
+                      <div className="rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-3">
+                        <p className="text-sm font-bold text-neutral-800">Your turn soon</p>
+                        <p className="mt-1 text-2xl font-black tabular-nums text-ep-blue">{prepLeft}s</p>
+                        <p className="mt-1 text-xs text-neutral-500">Think through your answer.</p>
+                      </div>
+                    ) : null}
+
+                    {(phase === "record" || phase === "review") && !showQuestionHint ? (
+                      <p className="text-xs text-neutral-500">
+                        The prompt was audio-only. Use <span className="font-bold">Hint</span> if you want to read it.
+                      </p>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      onClick={() => setShowQuestionHint((v) => !v)}
+                      className="rounded-sm border-2 border-black bg-ep-yellow px-3 py-1.5 text-xs font-bold shadow-[2px_2px_0_0_#000] hover:bg-ep-yellow/90"
+                    >
+                      {showQuestionHint ? "Hide question text" : "Hint — show question text"}
+                    </button>
+
+                    {showQuestionHint ? (
+                      <div className="rounded-xl border-2 border-black bg-white p-3 shadow-[3px_3px_0_0_#000]">
+                        <p className="text-sm font-bold text-neutral-900">{currentQ.en}</p>
+                        {currentQ.th.trim() ? (
+                          <p className="mt-2 text-xs text-neutral-600">{currentQ.th}</p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+
                 {phase === "record" ? (
-                  <div className="mt-4 border-t-2 border-dashed border-neutral-200 pt-4">
-                    <p className="text-center text-sm font-bold text-neutral-800">
-                      {listening
-                        ? "Recording…"
-                        : transcribing
-                          ? "Turning your speech into text (keeps your wording, including mistakes)…"
-                          : "Mic stopped"}
-                    </p>
-                    <p className="text-center text-2xl font-black tabular-nums text-ep-blue">{recLeft}s</p>
+                  <div className="mt-6 border-t-2 border-dashed border-neutral-200 pt-4">
+                    <div className="mb-3 flex items-start justify-end gap-2">
+                      <div className="max-w-[85%] rounded-2xl border-2 border-black bg-ep-yellow/40 px-3 py-2 shadow-[3px_3px_0_0_#000]">
+                        <p className="text-center text-xs font-black uppercase tracking-wide text-neutral-800">
+                          You
+                        </p>
+                        <p className="text-center text-sm font-bold text-neutral-900">
+                          {listening
+                            ? "Recording…"
+                            : transcribing
+                              ? "Finishing up…"
+                              : `${recLeft}s left`}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 ) : null}
 
                 <div className="mt-4 border-t-2 border-dashed border-neutral-200 pt-4">
                   <label className="block text-sm font-bold text-neutral-900">
-                    Your answer
+                    Your reply
                     <textarea
                       value={transcript}
                       onChange={(e) => onAnswerTranscriptChange(e.target.value)}
                       readOnly={
                         phase === "playing" || (phase === "record" && (listening || transcribing))
                       }
-                      rows={8}
+                      rows={6}
                       placeholder={answerPlaceholder}
                       className="mt-2 w-full border-2 border-black bg-neutral-50 p-3 ep-stat text-sm text-neutral-900 placeholder:text-neutral-400 read-only:opacity-80"
                     />
                   </label>
-                  <p className="ep-stat mt-2 text-xs text-neutral-500">
-                    We record your voice and transcribe it on the server so grammar isn’t auto-corrected. If
-                    something looks wrong, you can fix it when you review a short answer.
-                  </p>
                 </div>
 
                 {phase === "record" && listening && !transcribing ? (
                   <button
                     type="button"
                     onClick={finishRecordingEarly}
-                    className="mt-4 w-full border-2 border-black bg-white py-2 text-sm font-bold"
+                    className="mt-4 w-full border-2 border-black bg-white py-2 text-sm font-bold shadow-[2px_2px_0_0_#000]"
                   >
-                    Stop (go to next question)
+                    I’m done speaking
                   </button>
                 ) : null}
 
@@ -593,7 +680,7 @@ export function InteractiveSpeakingSession({
                       <p className="mb-2 text-xs font-bold text-red-700">{submitError}</p>
                     ) : (
                       <p className="mb-2 text-xs text-neutral-600">
-                        Continue when you are ready (e.g. after adding words, or if you cancelled AI feedback).
+                        Ready when you are — add to your reply if needed, then continue.
                       </p>
                     )}
                     <button

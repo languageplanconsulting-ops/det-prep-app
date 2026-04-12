@@ -50,7 +50,7 @@ function buildUploadNotes(phase: number): string[] {
       "Phase 1 — fill_in_blanks: (1) Prefix mode: blank_prefix (1–6 chars) + sentence_before / sentence_after + optional blank_hint; remove sentence; all 4 options must start with that prefix. (2) Legacy: content.sentence with ___ and 4 options — omit blank_prefix.",
     ],
     2: [
-      "Phase 2 — dictation: reference_sentence required. Omit audio_url → server generates audio via Amazon Polly (AWS keys) or Gemini fallback. Optional audio_url: hosted MP3 URL instead.",
+      "Phase 2 — dictation: reference_sentence required. Omit audio_url → server generates audio via Inworld TTS (INWORLD_API_KEY) or Gemini fallback. Optional audio_url: hosted MP3 URL instead.",
     ],
     3: [
       "Phase 3 — real_english_word: legacy sentence + 4 spellings is typical. Prefix mode works only if every option shares the same leading letters as blank_prefix.",
@@ -98,7 +98,7 @@ function buildQuestionPayload(
     };
   }
 
-  // Dictation: optional `audio_url`; if omitted, mock test synthesizes audio from `reference_sentence` via Polly/Gemini.
+  // Dictation: optional `audio_url`; if omitted, mock test synthesizes audio from `reference_sentence` via Inworld/Gemini.
   if (phase === 2) {
     return {
       ...base,

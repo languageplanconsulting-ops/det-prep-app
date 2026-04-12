@@ -1,8 +1,8 @@
 /** Space between ElevenLabs calls to reduce 429 / quota bursts (ms). */
 export const ELEVENLABS_INTER_REQUEST_MS = 900;
 
-/** Space between Polly calls (light throttle; AWS has TPS limits). */
-export const POLLY_INTER_REQUEST_MS = 200;
+/** Space between Inworld TTS calls (light throttle). */
+export const INWORLD_INTER_REQUEST_MS = 200;
 
 export function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
@@ -15,7 +15,7 @@ type SynthesizeJson = { audioBase64?: string; mimeType?: string; error?: string 
  */
 export async function synthesizeSpeechWithRetry(args: {
   text: string;
-  provider: "polly" | "elevenlabs" | "gemini";
+  provider: "inworld" | "elevenlabs" | "gemini";
   headers: Record<string, string>;
 }): Promise<{ audioBase64: string; mimeType?: string }> {
   const maxAttempts = 5;
@@ -65,9 +65,9 @@ export async function synthesizeSpeechWithRetry(args: {
   throw new Error("Synthesis failed after retries");
 }
 
-/** ElevenLabs: one at a time. Polly / Gemini: small parallel pool. */
+/** ElevenLabs: one at a time. Inworld / Gemini: small parallel pool. */
 export function speechSynthesisWorkerCount(
-  provider: "polly" | "elevenlabs" | "gemini",
+  provider: "inworld" | "elevenlabs" | "gemini",
   total: number,
 ): number {
   if (provider === "elevenlabs") return 1;

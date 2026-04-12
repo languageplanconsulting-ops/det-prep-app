@@ -116,7 +116,7 @@ export function AdminConversationPaste() {
   const [manageSet, setManageSet] = useState<number>(0);
   const [selectedLineIds, setSelectedLineIds] = useState<Set<string>>(new Set());
   const [running, setRunning] = useState(false);
-  const [audioProvider, setAudioProvider] = useState<"polly" | "elevenlabs" | "gemini">("polly");
+  const [audioProvider, setAudioProvider] = useState<"inworld" | "elevenlabs" | "gemini">("inworld");
   const [progress, setProgress] = useState({
     current: 0,
     total: 0,
@@ -389,8 +389,8 @@ export function AdminConversationPaste() {
       `Conversation audio generation done (${
         audioProvider === "elevenlabs"
           ? "ElevenLabs"
-          : audioProvider === "polly"
-            ? "Amazon Polly"
+          : audioProvider === "inworld"
+            ? "Inworld TTS"
             : "Gemini"
       }). Success: ${success} · Fail: ${fail}`,
     );
@@ -401,7 +401,7 @@ export function AdminConversationPaste() {
         .map(([m, n]) => `(${n}×) ${m}`)
         .join("\n");
       setError(
-        `${fail} row(s) failed. Most common messages:\n${top || failReason || "Unknown"}\n\nTips: scenario text must be under ~12k chars per line (Polly uses 3k per request — long lines fall back to Gemini on the server). ElevenLabs 401/402 = key or billing. Save errors = browser storage / console.`,
+        `${fail} row(s) failed. Most common messages:\n${top || failReason || "Unknown"}\n\nTips: scenario text must be under ~12k chars per line (Inworld uses 2k per request — long lines fall back to Gemini on the server). ElevenLabs 401/402 = key or billing. Save errors = browser storage / console.`,
       );
     }
   };
@@ -733,7 +733,7 @@ export function AdminConversationPaste() {
       ) : (
         <div className="space-y-3">
           <p className="text-sm text-neutral-600">
-            Amazon Polly and Gemini use a small parallel pool with retries. ElevenLabs runs one request at a time.
+            Inworld TTS and Gemini use a small parallel pool with retries. ElevenLabs runs one request at a time.
             Learners hear saved clips first; missing lines use API then browser voice.
           </p>
           <label className="block text-xs font-bold uppercase tracking-wide text-neutral-700">
@@ -741,11 +741,11 @@ export function AdminConversationPaste() {
             <select
               value={audioProvider}
               onChange={(e) =>
-                setAudioProvider(e.target.value as "polly" | "elevenlabs" | "gemini")
+                setAudioProvider(e.target.value as "inworld" | "elevenlabs" | "gemini")
               }
               className="mt-1 w-full max-w-xs border-2 border-black bg-white px-2 py-2 text-sm font-bold"
             >
-              <option value="polly">Amazon Polly (AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY)</option>
+              <option value="inworld">Inworld TTS (INWORLD_API_KEY on server)</option>
               <option value="elevenlabs">ElevenLabs (ELEVENLABS_API_KEY)</option>
               <option value="gemini">Gemini (Setup key or GEMINI_API_KEY)</option>
             </select>
