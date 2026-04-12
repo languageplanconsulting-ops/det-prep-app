@@ -3,7 +3,7 @@ import {
   deleteNotebookEntryOnServer,
   syncNotebookEntryToServer,
 } from "@/lib/notebook-server-sync";
-import type { NotebookCustomCategory, NotebookEntry } from "@/types/writing";
+import type { NotebookCustomCategory, NotebookEntry, RubricHighlightNotebookCard } from "@/types/writing";
 
 export { backfillNotebookEntriesToServer };
 
@@ -48,6 +48,37 @@ type LegacyNotebookRow = {
 
 function isLegacyRow(o: Record<string, unknown>): o is LegacyNotebookRow {
   return typeof o.category === "string" && !Array.isArray(o.categoryIds);
+}
+
+function parseRubricHighlightCard(raw: unknown): RubricHighlightNotebookCard | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const o = raw as Record<string, unknown>;
+  const kindRaw = o.kind;
+  const kind: RubricHighlightNotebookCard["kind"] =
+    kindRaw === "read-write-highlight"
+      ? "read-write-highlight"
+      : "read-speak-highlight";
+  if (typeof o.score160 !== "number") return undefined;
+  if (typeof o.highlightedSnippet !== "string") return undefined;
+  if (typeof o.highlightPositive !== "boolean") return undefined;
+  return {
+    kind,
+    score160: o.score160,
+    topicTitleEn: String(o.topicTitleEn ?? ""),
+    topicTitleTh: String(o.topicTitleTh ?? ""),
+    grammarPercent: Number(o.grammarPercent ?? 0),
+    vocabularyPercent: Number(o.vocabularyPercent ?? 0),
+    coherencePercent: Number(o.coherencePercent ?? 0),
+    taskPercent: Number(o.taskPercent ?? 0),
+    grammarPoints160: Number(o.grammarPoints160 ?? 0),
+    vocabularyPoints160: Number(o.vocabularyPoints160 ?? 0),
+    coherencePoints160: Number(o.coherencePoints160 ?? 0),
+    taskPoints160: Number(o.taskPoints160 ?? 0),
+    highlightedSnippet: o.highlightedSnippet,
+    highlightPositive: o.highlightPositive,
+    noteEn: String(o.noteEn ?? ""),
+    noteTh: String(o.noteTh ?? ""),
+  };
 }
 
 function migrateEntry(raw: unknown): NotebookEntry | null {
@@ -115,6 +146,9 @@ function migrateEntry(raw: unknown): NotebookEntry | null {
     excerpt: o.excerpt != null ? String(o.excerpt) : undefined,
     attemptId: o.attemptId != null ? String(o.attemptId) : undefined,
     createdAt: String(o.createdAt),
+    rubricHighlightCard:
+      parseRubricHighlightCard((o as Record<string, unknown>).rubricHighlightCard) ??
+      parseRubricHighlightCard((o as Record<string, unknown>).speakingHighlightCard),
   };
 }
 

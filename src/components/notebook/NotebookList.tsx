@@ -2,6 +2,7 @@
 
 import { Caveat } from "next/font/google";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { NotebookSpeakingHighlightCard } from "@/components/notebook/NotebookSpeakingHighlightCard";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 
 const notebookHand = Caveat({
@@ -67,6 +68,16 @@ function entryHaystack(e: NotebookEntry): string {
     e.fullBodyTh ?? "",
     e.userNote,
     e.excerpt ?? "",
+    e.rubricHighlightCard
+      ? [
+          e.rubricHighlightCard.highlightedSnippet,
+          e.rubricHighlightCard.noteEn,
+          e.rubricHighlightCard.noteTh,
+          e.rubricHighlightCard.topicTitleEn,
+          e.rubricHighlightCard.topicTitleTh,
+          String(e.rubricHighlightCard.score160),
+        ].join(" ")
+      : "",
   ]
     .join(" ")
     .toLowerCase();
@@ -499,7 +510,15 @@ export function NotebookList() {
                     ) : null}
                   </p>
 
-                  {genericTitle ? (
+                  {e.rubricHighlightCard ? (
+                    <div className="mt-3">
+                      <NotebookSpeakingHighlightCard
+                        data={e.rubricHighlightCard}
+                        titleEn={e.titleEn}
+                        titleTh={e.titleTh}
+                      />
+                    </div>
+                  ) : genericTitle ? (
                     (() => {
                       const bodyEn = e.bodyEn.trim();
                       const titleTh = e.titleTh.trim();
@@ -560,7 +579,7 @@ export function NotebookList() {
                     </>
                   )}
 
-                  {e.excerpt ? (
+                  {e.excerpt && !e.rubricHighlightCard ? (
                     <p className="ep-stat mt-3 border-l-2 border-ep-blue/40 pl-3 text-xs italic text-neutral-500">
                       {e.excerpt}
                     </p>

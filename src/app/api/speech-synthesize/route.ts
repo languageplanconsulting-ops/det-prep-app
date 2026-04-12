@@ -56,7 +56,7 @@ export async function POST(req: Request) {
   const inworldKey =
     process.env.INWORLD_API_KEY?.trim() || req.headers.get("x-inworld-api-key")?.trim() || "";
 
-  const runGemini = async () => {
+  const runGemini = async (meta?: { fallbackReason?: "inworld_text_limit" }) => {
     if (!geminiKey) {
       return NextResponse.json(
         {
@@ -70,7 +70,11 @@ export async function POST(req: Request) {
       apiKey: geminiKey,
       text: trimmed,
     });
-    return NextResponse.json(out);
+    return NextResponse.json({
+      ...out,
+      providerUsed: "gemini" as const,
+      ...(meta?.fallbackReason ? { ttsFallbackReason: meta.fallbackReason } : {}),
+    });
   };
 
   try {
@@ -85,7 +89,7 @@ export async function POST(req: Request) {
       if (!out.audioBase64) {
         throw new Error("Synthesis returned no audio.");
       }
-      return NextResponse.json(out);
+      return NextResponse.json({ ...out, providerUsed: "elevenlabs" as const });
     }
 
     if (provider === "inworld") {
@@ -99,13 +103,13 @@ export async function POST(req: Request) {
         );
       }
       if (trimmed.length > INWORLD_MAX_CHARS) {
-        return runGemini();
+        return runGemini({ fallbackReason: "inworld_text_limit" });
       }
       const out = await synthesizeEnglishSpeechWithInworld({
         text: trimmed,
         apiKey: inworldKey,
       });
-      return NextResponse.json(out);
+      return NextResponse.json({ ...out, providerUsed: "inworld" as const });
     }
 
     /* gemini */

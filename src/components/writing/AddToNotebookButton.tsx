@@ -9,7 +9,7 @@ import {
   NOTEBOOK_BUILTIN_LABELS,
   normalizeCategoryIds,
 } from "@/lib/notebook-storage";
-import type { NotebookCustomCategory, NotebookEntry } from "@/types/writing";
+import type { NotebookCustomCategory, NotebookEntry, RubricHighlightNotebookCard } from "@/types/writing";
 
 export type SuggestedNotebookPremade =
   | typeof NOTEBOOK_BUILTIN.grammar
@@ -93,6 +93,8 @@ export function AddToNotebookButton({
     bodyEn: string;
     bodyTh: string;
     excerpt?: string;
+    /** Read-then-speak / read-then-write: full score card for notebook layout. */
+    rubricHighlightCard?: RubricHighlightNotebookCard;
   };
   className?: string;
   /** Where this note came from (notebook filter / label). */
@@ -149,6 +151,7 @@ export function AddToNotebookButton({
         userNote: "",
         excerpt: p.excerpt,
         attemptId,
+        ...(p.rubricHighlightCard ? { rubricHighlightCard: p.rubricHighlightCard } : {}),
       });
     } catch (e) {
       setSaveError(

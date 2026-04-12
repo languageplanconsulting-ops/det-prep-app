@@ -106,8 +106,21 @@ async function playQuestionAudioFromApi(
       body: JSON.stringify({ text, provider }),
     });
     if (!res.ok) return false;
-    const data = (await res.json()) as { audioBase64?: string; mimeType?: string; error?: string };
+    const data = (await res.json()) as {
+      audioBase64?: string;
+      mimeType?: string;
+      error?: string;
+      providerUsed?: string;
+      ttsFallbackReason?: string;
+    };
     if (!data.audioBase64 || !data.mimeType) return false;
+    if (process.env.NODE_ENV === "development") {
+      const extra =
+        data.ttsFallbackReason === "inworld_text_limit" ? " (prompt too long for Inworld)" : "";
+      console.info(
+        `[interactive-speaking TTS] requested ${provider} → server used ${data.providerUsed ?? "?"}${extra}`,
+      );
+    }
     await new Promise<void>((resolve) => {
       const audio = new Audio(`data:${data.mimeType};base64,${data.audioBase64}`);
       audio.onended = () => resolve();

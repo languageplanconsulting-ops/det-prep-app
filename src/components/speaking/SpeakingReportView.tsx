@@ -184,6 +184,9 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
             <SpeakingAnnotatedTranscript
               text={submission}
               highlights={report.transcriptHighlights}
+              readSpeakReport={report}
+              attemptId={report.attemptId}
+              uiLocale={uiLocale}
             />
           </div>
         ) : (

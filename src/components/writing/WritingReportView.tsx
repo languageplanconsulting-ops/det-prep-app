@@ -314,6 +314,9 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
               <SpeakingAnnotatedTranscript
                 text={mainSubmission}
                 highlights={fullReport.mainSubmissionHighlights}
+                writingReport={fullReport}
+                attemptId={fullReport.attemptId}
+                uiLocale={uiLocale}
               />
             </div>
           ) : fullReport.highlights && fullReport.highlights.length > 0 ? (
@@ -341,7 +344,13 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
               </p>
               {hi.length > 0 ? (
                 <div className="mt-2 max-w-full overflow-x-auto">
-                  <SpeakingAnnotatedTranscript text={text} highlights={hi} />
+                  <SpeakingAnnotatedTranscript
+                    text={text}
+                    highlights={hi}
+                    writingReport={fullReport}
+                    attemptId={fullReport.attemptId}
+                    uiLocale={uiLocale}
+                  />
                 </div>
               ) : (
                 <p className="mt-2 whitespace-pre-wrap text-sm text-neutral-900">{text}</p>

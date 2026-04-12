@@ -159,6 +159,32 @@ export interface NotebookCustomCategory {
   createdAt: string;
 }
 
+/**
+ * Rich card when saving a punctuated-submission highlight (read-then-speak or read-then-write).
+ * Renders as a score strip + criterion grid + highlighted quote + grader notes.
+ */
+export interface RubricHighlightNotebookCard {
+  kind: "read-speak-highlight" | "read-write-highlight";
+  score160: number;
+  topicTitleEn: string;
+  topicTitleTh: string;
+  grammarPercent: number;
+  vocabularyPercent: number;
+  coherencePercent: number;
+  taskPercent: number;
+  grammarPoints160: number;
+  vocabularyPoints160: number;
+  coherencePoints160: number;
+  taskPoints160: number;
+  highlightedSnippet: string;
+  highlightPositive: boolean;
+  noteEn: string;
+  noteTh: string;
+}
+
+/** @deprecated Use RubricHighlightNotebookCard */
+export type SpeakingNotebookHighlightCard = RubricHighlightNotebookCard;
+
 /** Saved notebook row. Always includes built-in `all` plus ≥1 of grammar | vocabulary | production-feedback; optional custom category ids. */
 export interface NotebookEntry {
   id: string;
@@ -190,4 +216,6 @@ export interface NotebookEntry {
   excerpt?: string;
   attemptId?: string;
   createdAt: string;
+  /** Read-then-speak / read-then-write: structured layout for a saved submission highlight. */
+  rubricHighlightCard?: RubricHighlightNotebookCard;
 }
