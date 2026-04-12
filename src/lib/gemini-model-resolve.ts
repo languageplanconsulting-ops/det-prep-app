@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+import { isAnthropicGradingModel } from "@/lib/grading-llm-generate";
 import {
   DEFAULT_GEMINI_TEXT_MODEL,
   GEMINI_TEXT_MODEL_ROW_KEY,
@@ -28,12 +29,24 @@ export async function getPersistedGeminiTextModel(): Promise<string | null> {
   }
 }
 
-/** Model used for text grading + audio transcription routes (not TTS). */
+/** Model used for text grading (Gemini or Claude per admin). */
 export async function resolveGeminiTextModel(): Promise<string> {
   const persisted = await getPersistedGeminiTextModel();
   if (persisted) return persisted;
   const env = process.env.GEMINI_MODEL?.trim();
   if (env) return env;
+  return DEFAULT_GEMINI_TEXT_MODEL;
+}
+
+/**
+ * Speech transcription must use a Gemini multimodal model — never Claude.
+ * If admin picked Claude for grading, fall back to env or default Gemini.
+ */
+export async function resolveTranscriptionGeminiModel(): Promise<string> {
+  const persisted = await getPersistedGeminiTextModel();
+  if (persisted && !isAnthropicGradingModel(persisted)) return persisted;
+  const env = process.env.GEMINI_MODEL?.trim();
+  if (env && !isAnthropicGradingModel(env)) return env;
   return DEFAULT_GEMINI_TEXT_MODEL;
 }
 

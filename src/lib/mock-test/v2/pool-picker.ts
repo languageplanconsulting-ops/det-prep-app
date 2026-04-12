@@ -101,7 +101,15 @@ export async function pickPoolQuestion(
     return true;
   });
 
-  if (filtered.length === 0) return null;
+  if (filtered.length === 0) {
+    /** Admin often uploads medium-only for productive tasks; v1 does the same. Retry 125 pool. */
+    const canFallbackToMedium =
+      !UNIFIED_VOCAB_READING_TYPES.includes(questionType) && bandUse !== 125;
+    if (canFallbackToMedium) {
+      return pickPoolQuestion(supabase, questionType, 125, opts);
+    }
+    return null;
+  }
   const choice = shuffle(filtered)[0];
   return choice ?? null;
 }

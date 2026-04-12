@@ -58,6 +58,9 @@ export function getInteractiveSpeakingScenarioById(
 
 export function saveInteractiveSpeakingReport(report: InteractiveSpeakingAttemptReport): void {
   localStorage.setItem(`${INTERACTIVE_SPEAKING_REPORT_PREFIX}${report.attemptId}`, JSON.stringify(report));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("ep-interactive-speaking-report-saved"));
+  }
 }
 
 export function loadInteractiveSpeakingReport(attemptId: string): InteractiveSpeakingAttemptReport | null {
@@ -69,4 +72,39 @@ export function loadInteractiveSpeakingReport(attemptId: string): InteractiveSpe
   } catch {
     return null;
   }
+}
+
+/** All saved interactive-speaking reports in localStorage (client only). */
+export function loadAllInteractiveSpeakingReports(): InteractiveSpeakingAttemptReport[] {
+  if (typeof window === "undefined") return [];
+  const out: InteractiveSpeakingAttemptReport[] = [];
+  const prefix = INTERACTIVE_SPEAKING_REPORT_PREFIX;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key?.startsWith(prefix)) continue;
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const r = JSON.parse(raw) as InteractiveSpeakingAttemptReport;
+      if (r?.kind === "interactive-speaking" && typeof r.scenarioId === "string") {
+        out.push(r);
+      }
+    } catch {
+      /* skip corrupt */
+    }
+  }
+  return out;
+}
+
+/** Most recent attempt for a scenario (by `submittedAt`). */
+export function getLatestInteractiveSpeakingReportForScenario(
+  scenarioId: string,
+): InteractiveSpeakingAttemptReport | null {
+  const matches = loadAllInteractiveSpeakingReports().filter((r) => r.scenarioId === scenarioId);
+  if (matches.length === 0) return null;
+  return matches.reduce((best, r) => {
+    const ta = Date.parse(r.submittedAt);
+    const tb = Date.parse(best.submittedAt);
+    return Number.isFinite(ta) && Number.isFinite(tb) && ta >= tb ? r : best;
+  });
 }

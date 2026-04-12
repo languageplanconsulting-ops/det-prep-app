@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { transcribeEnglishAudioWithGemini } from "@/lib/gemini-transcribe";
-import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
+import { resolveTranscriptionGeminiModel } from "@/lib/gemini-model-resolve";
 
 export const maxDuration = 120;
 
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const model = await resolveGeminiTextModel();
+    const model = await resolveTranscriptionGeminiModel();
     const transcript = await transcribeEnglishAudioWithGemini({
       apiKey: key,
       model,

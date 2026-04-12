@@ -1,5 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findTextSpan } from "@/lib/find-text-span";
+import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import type {
   ImprovementPoint,
@@ -278,6 +278,8 @@ function countWords(text: string): number {
 
 export async function generateWritingReportWithGemini(params: {
   apiKey: string;
+  /** Required when `model` is a Claude id. */
+  anthropicApiKey?: string;
   model?: string;
   attemptId: string;
   topic: WritingTopic;
@@ -294,20 +296,16 @@ export async function generateWritingReportWithGemini(params: {
   const modelName =
     params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
+  const text = await generateGradingJsonCompletion({
     model: modelName,
-    systemInstruction: buildSystemInstruction(),
-    generationConfig: {
-      temperature: 0.35,
-      responseMimeType: "application/json",
+    keys: {
+      geminiApiKey: apiKey,
+      anthropicApiKey: params.anthropicApiKey,
     },
+    systemInstruction: buildSystemInstruction(),
+    userPayload: buildUserPayload(topic, essay, followUpRaw, prepMinutes),
+    temperature: 0.35,
   });
-
-  const result = await model.generateContent(
-    buildUserPayload(topic, essay, followUpRaw, prepMinutes),
-  );
-  const text = result.response.text();
   const raw = parseGeminiJsonObjectResponse(text);
 
   const g = clampPercent(raw.grammarScorePercent);

@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { InteractiveSpeakingSession } from "@/components/interactive-speaking/InteractiveSpeakingSession";
 import { getInteractiveSpeakingScenarioById } from "@/lib/interactive-speaking-storage";
 
 export default function InteractiveSpeakingScenarioPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const scenarioId = typeof params?.scenarioId === "string" ? params.scenarioId : "";
   const scenario = scenarioId ? getInteractiveSpeakingScenarioById(scenarioId) : undefined;
+  const startWithRedeem =
+    searchParams.get("redeem") === "1" || searchParams.get("redeem") === "true";
 
   if (!scenarioId) {
     return (
@@ -32,5 +35,7 @@ export default function InteractiveSpeakingScenarioPage() {
     );
   }
 
-  return <InteractiveSpeakingSession scenario={scenario} />;
+  return (
+    <InteractiveSpeakingSession scenario={scenario} startWithRedeem={startWithRedeem} />
+  );
 }

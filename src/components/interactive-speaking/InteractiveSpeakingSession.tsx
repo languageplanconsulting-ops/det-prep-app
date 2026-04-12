@@ -16,11 +16,11 @@ import {
   INTERACTIVE_SPEAKING_PREP_SECONDS,
   INTERACTIVE_SPEAKING_TURN_COUNT,
 } from "@/lib/interactive-speaking-constants";
-import { saveInteractiveSpeakingReport } from "@/lib/interactive-speaking-storage";
 import {
-  getSpeechRecognitionCtor,
-  handleSpeechRecognitionError,
-} from "@/lib/speech-recognition-helpers";
+  getLatestInteractiveSpeakingReportForScenario,
+  saveInteractiveSpeakingReport,
+} from "@/lib/interactive-speaking-storage";
+import { pickMediaRecorderMimeType, transcribeAudioBlobClient } from "@/lib/client-audio-transcribe";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
 import type { InteractiveSpeakingAttemptReport } from "@/types/interactive-speaking";
 import type { InteractiveSpeakingScenario } from "@/types/interactive-speaking";
@@ -46,7 +46,7 @@ function countWords(text: string): number {
 
 async function playQuestionAudioFromApi(
   text: string,
-  provider: "elevenlabs" | "gemini",
+  provider: "polly" | "gemini" | "elevenlabs",
 ): Promise<boolean> {
   try {
     const res = await fetch("/api/speech-synthesize", {
@@ -69,19 +69,31 @@ async function playQuestionAudioFromApi(
   }
 }
 
-/** Prefer ElevenLabs for question audio; fall back to Gemini if unavailable. */
+/** Prefer Amazon Polly (low cost); fall back to Gemini. Optional ElevenLabs if wired. */
 async function playQuestionTts(text: string): Promise<void> {
   const ok =
-    (await playQuestionAudioFromApi(text, "elevenlabs")) ||
-    (await playQuestionAudioFromApi(text, "gemini"));
+    (await playQuestionAudioFromApi(text, "polly")) ||
+    (await playQuestionAudioFromApi(text, "gemini")) ||
+    (await playQuestionAudioFromApi(text, "elevenlabs"));
   if (!ok) {
     /* optional: no audio */
   }
 }
 
-export function InteractiveSpeakingSession({ scenario }: { scenario: InteractiveSpeakingScenario }) {
+export function InteractiveSpeakingSession({
+  scenario,
+  startWithRedeem = false,
+}: {
+  scenario: InteractiveSpeakingScenario;
+  /** When URL has `?redeem=1`, show last score and pulse the start button. */
+  startWithRedeem?: boolean;
+}) {
   const router = useRouter();
   const vipGate = useVipAiFeedbackGate();
+  const lastAttempt = useMemo(
+    () => getLatestInteractiveSpeakingReportForScenario(scenario.id),
+    [scenario.id],
+  );
   const attemptId = useMemo(() => {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
     return `is_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
@@ -95,21 +107,19 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
   const [recLeft, setRecLeft] = useState(INTERACTIVE_SPEAKING_MAX_SPEAK_SECONDS);
   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const recRef = useRef<SpeechRecognitionInstance | null>(null);
-  const listeningRef = useRef(false);
-  const finalTranscriptRef = useRef("");
   const transcriptRef = useRef("");
   const completedRef = useRef<CompletedTurn[]>([]);
   const currentQRef = useRef({ en: "", th: "" });
-  const recordFinalizeStartedRef = useRef(false);
-  const networkRetriesRef = useRef(0);
-
-  useEffect(() => {
-    listeningRef.current = listening;
-  }, [listening]);
+  const recordGenRef = useRef(0);
+  const typedBeforeMicRef = useRef("");
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const mediaChunksRef = useRef<BlobPart[]>([]);
+  const runTurnSubmissionRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     transcriptRef.current = transcript;
@@ -123,20 +133,34 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
     currentQRef.current = currentQ;
   }, [currentQ]);
 
-  const stopRecognition = useCallback(() => {
-    setListening(false);
-    setRecLeft(0);
-    try {
-      recRef.current?.stop();
-    } catch {
-      /* ignore */
+  const forceStopMedia = useCallback(() => {
+    recordGenRef.current += 1;
+    const mr = mediaRecorderRef.current;
+    if (mr && (mr.state === "recording" || mr.state === "paused")) {
+      try {
+        mr.stop();
+      } catch {
+        /* ignore */
+      }
     }
-    recRef.current = null;
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+    mediaRecorderRef.current = null;
+    mediaStreamRef.current = null;
+    mediaChunksRef.current = [];
+    setListening(false);
+    setTranscribing(false);
   }, []);
 
   useEffect(() => {
-    return () => stopRecognition();
-  }, [stopRecognition]);
+    return () => forceStopMedia();
+  }, [forceStopMedia]);
+
+  const stopRecordingAfterAnswer = useCallback(() => {
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state === "recording") {
+      mr.stop();
+    }
+  }, []);
 
   useEffect(() => {
     if (phase !== "prep") return;
@@ -146,7 +170,7 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
           window.setTimeout(() => {
             setPhase("record");
             setRecLeft(INTERACTIVE_SPEAKING_MAX_SPEAK_SECONDS);
-            startListeningRef.current?.();
+            startRecordingRef.current?.();
           }, 0);
           return 0;
         }
@@ -156,99 +180,108 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
     return () => window.clearInterval(id);
   }, [phase]);
 
-  const startListeningRef = useRef<(() => void) | null>(null);
+  const startRecordingRef = useRef<(() => void) | null>(null);
 
-  const startListening = useCallback(() => {
-    const Ctor = getSpeechRecognitionCtor();
-    if (!Ctor) {
-      setSpeechError(
-        "Speech recognition is not available in this browser. Try Chrome or Edge on desktop, or type your answer in the box.",
-      );
-      return;
-    }
-    recordFinalizeStartedRef.current = false;
-    setSpeechError(null);
-    networkRetriesRef.current = 0;
-    setRecLeft(INTERACTIVE_SPEAKING_MAX_SPEAK_SECONDS);
+  const startRecording = useCallback(() => {
+    void (async () => {
+      const myGen = recordGenRef.current + 1;
+      recordGenRef.current = myGen;
+      typedBeforeMicRef.current = transcriptRef.current;
 
-    const rec = new Ctor();
-    rec.lang = "en-US";
-    rec.continuous = true;
-    rec.interimResults = true;
-    recRef.current = rec;
-
-    rec.onresult = (event: SpeechRecognitionEventLike) => {
-      networkRetriesRef.current = 0;
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const r = event.results[i];
-        const piece = r[0]?.transcript ?? "";
-        if (r.isFinal) {
-          finalTranscriptRef.current = `${finalTranscriptRef.current} ${piece}`.trim();
-        } else {
-          interim += piece;
-        }
+      if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+        setSpeechError(
+          "Recording is not supported in this browser. Type your answer in the box below.",
+        );
+        setRecLeft(0);
+        return;
       }
-      const fin = finalTranscriptRef.current;
-      const combined = `${fin}${interim ? (fin ? " " : "") + interim : ""}`.trim();
-      transcriptRef.current = combined;
-      setTranscript(combined);
-    };
 
-    rec.onerror = (ev: SpeechRecognitionErrorEventLike) => {
-      handleSpeechRecognitionError(ev, {
-        listeningRef,
-        networkRetriesRef,
-        setSpeechError,
-        setListening,
-        onFatal: () => setRecLeft(0),
-      });
-    };
+      setSpeechError(null);
+      setRecLeft(INTERACTIVE_SPEAKING_MAX_SPEAK_SECONDS);
+      mediaChunksRef.current = [];
 
-    rec.onend = () => {
-      if (!listeningRef.current || recRef.current !== rec) return;
-      window.setTimeout(() => {
-        if (!listeningRef.current || recRef.current !== rec) return;
-        try {
-          rec.start();
-        } catch {
-          setListening(false);
-          setRecLeft(0);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (myGen !== recordGenRef.current) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
         }
-      }, 200);
-    };
+        mediaStreamRef.current = stream;
+        const mime = pickMediaRecorderMimeType();
+        const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
 
-    try {
-      rec.start();
-      setListening(true);
-    } catch {
-      setSpeechError("Could not start the microphone.");
-      setListening(false);
-      setRecLeft(0);
-    }
+        mr.ondataavailable = (e) => {
+          if (e.data.size > 0) mediaChunksRef.current.push(e.data);
+        };
+
+        mr.onstop = async () => {
+          if (myGen !== recordGenRef.current) return;
+          stream.getTracks().forEach((t) => t.stop());
+          mediaStreamRef.current = null;
+          mediaRecorderRef.current = null;
+
+          const chunks = mediaChunksRef.current;
+          mediaChunksRef.current = [];
+          const blob = new Blob(chunks, { type: mime || "audio/webm" });
+
+          setListening(false);
+          setTranscribing(true);
+          try {
+            const text = await transcribeAudioBlobClient(blob);
+            if (myGen !== recordGenRef.current) return;
+            const merged = [typedBeforeMicRef.current.trim(), text].filter(Boolean).join(" ").trim();
+            transcriptRef.current = merged;
+            setTranscript(merged);
+            setSpeechError(null);
+          } catch (e) {
+            if (myGen !== recordGenRef.current) return;
+            setSpeechError(
+              e instanceof Error
+                ? e.message
+                : "Could not transcribe audio. Edit your text below or try again.",
+            );
+          } finally {
+            if (myGen !== recordGenRef.current) return;
+            setTranscribing(false);
+            void runTurnSubmissionRef.current?.();
+          }
+        };
+
+        mediaRecorderRef.current = mr;
+        mr.start(250);
+        setListening(true);
+      } catch {
+        if (myGen !== recordGenRef.current) return;
+        setSpeechError("Microphone permission denied or unavailable. You can type your answer.");
+        setRecLeft(0);
+        setListening(false);
+      }
+    })();
   }, []);
 
   useEffect(() => {
-    startListeningRef.current = startListening;
-  }, [startListening]);
+    startRecordingRef.current = () => {
+      startRecording();
+    };
+  }, [startRecording]);
 
   useEffect(() => {
     if (phase !== "record" || !listening) return;
     const id = window.setInterval(() => {
       setRecLeft((s) => {
         if (s <= 1) {
-          window.setTimeout(() => stopRecognition(), 0);
+          window.setTimeout(() => stopRecordingAfterAnswer(), 0);
           return 0;
         }
         return s - 1;
       });
     }, 1000);
     return () => window.clearInterval(id);
-  }, [phase, listening, stopRecognition]);
+  }, [phase, listening, stopRecordingAfterAnswer]);
 
   const beginTurn = useCallback(async (_turnNumber: number, qEn: string, qTh: string) => {
+    forceStopMedia();
     setTranscript("");
-    finalTranscriptRef.current = "";
     transcriptRef.current = "";
     setSubmitError(null);
     setCurrentQ({ en: qEn, th: qTh });
@@ -256,7 +289,7 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
     await playQuestionTts(qEn);
     setPrepLeft(INTERACTIVE_SPEAKING_PREP_SECONDS);
     setPhase("prep");
-  }, []);
+  }, [forceStopMedia]);
 
   const startExam = useCallback(async () => {
     setSubmitError(null);
@@ -320,9 +353,8 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
       }
       setCompleted(nextCompleted);
       completedRef.current = nextCompleted;
-      stopRecognition();
+      forceStopMedia();
       setTranscript("");
-      finalTranscriptRef.current = "";
       transcriptRef.current = "";
       setPhase("grading");
       const key = getStoredGeminiKey();
@@ -362,9 +394,8 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
       return;
     }
 
-    stopRecognition();
+    forceStopMedia();
     setTranscript("");
-    finalTranscriptRef.current = "";
     transcriptRef.current = "";
     setCompleted(nextCompleted);
     completedRef.current = nextCompleted;
@@ -388,38 +419,34 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
     scenario.titleEn,
     scenario.titleTh,
     vipGate,
-    stopRecognition,
+    forceStopMedia,
   ]);
 
-  /** After recording stops (timer or Stop), advance automatically when the answer is long enough. */
   useEffect(() => {
-    if (phase !== "record") return;
-    if (listening) return;
-    if (recLeft > 0) return;
-    if (recordFinalizeStartedRef.current) return;
-    recordFinalizeStartedRef.current = true;
-    void runTurnSubmission();
-  }, [phase, listening, recLeft, runTurnSubmission]);
+    runTurnSubmissionRef.current = () => {
+      void runTurnSubmission();
+    };
+  }, [runTurnSubmission]);
 
   const finishRecordingEarly = () => {
-    stopRecognition();
+    setRecLeft(0);
+    stopRecordingAfterAnswer();
   };
 
   const onAnswerTranscriptChange = useCallback((value: string) => {
     transcriptRef.current = value;
     setTranscript(value);
-    finalTranscriptRef.current = value;
   }, []);
 
   const answerPlaceholder = useMemo(() => {
     if (phase === "playing") {
-      return "Listen to the question above. When prep starts, you can type here; live captions appear when recording starts.";
+      return "Listen to the question above. You can type notes during prep.";
     }
     if (phase === "prep") {
-      return "Optional: start typing your answer. Live transcription fills this box when recording starts.";
+      return "Optional: type notes or an outline. After recording, your speech is typed verbatim (mistakes kept).";
     }
     if (phase === "record") {
-      return "Live transcription appears here while you speak — edit if needed.";
+      return "Your words appear here after recording — edit on the next step if needed.";
     }
     return "Add more if needed, then tap Continue.";
   }, [phase]);
@@ -458,6 +485,18 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
           <div className="mt-8 space-y-6">
             {phase === "intro" ? (
               <BrutalPanel variant="elevated" title="Ready">
+                {startWithRedeem && lastAttempt ? (
+                  <div className="mb-4 rounded-sm border-2 border-black bg-ep-yellow/35 px-3 py-3 text-sm text-neutral-900 shadow-[3px_3px_0_0_#000]">
+                    <p className="font-black uppercase tracking-wide text-neutral-800">Redeem / try again</p>
+                    <p className="mt-1 text-neutral-800">
+                      Last attempt: <strong>{lastAttempt.score160}</strong>/160 ·{" "}
+                      {new Date(lastAttempt.submittedAt).toLocaleString(undefined, {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </p>
+                  </div>
+                ) : null}
                 <p className="text-sm text-neutral-700">
                   You will hear each question once (English audio). Then you have{" "}
                   {INTERACTIVE_SPEAKING_PREP_SECONDS} seconds to think before recording starts. When you finish
@@ -467,7 +506,9 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
                 <button
                   type="button"
                   onClick={() => void startExam()}
-                  className="mt-4 border-2 border-black bg-ep-yellow px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
+                  className={`mt-4 border-2 border-black bg-ep-yellow px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000] ${
+                    startWithRedeem && lastAttempt ? "ep-redeem-pulse" : ""
+                  }`}
                 >
                   Start scenario
                 </button>
@@ -506,7 +547,11 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
                 {phase === "record" ? (
                   <div className="mt-4 border-t-2 border-dashed border-neutral-200 pt-4">
                     <p className="text-center text-sm font-bold text-neutral-800">
-                      {listening ? "Recording…" : "Mic stopped"}
+                      {listening
+                        ? "Recording…"
+                        : transcribing
+                          ? "Turning your speech into text (keeps your wording, including mistakes)…"
+                          : "Mic stopped"}
                     </p>
                     <p className="text-center text-2xl font-black tabular-nums text-ep-blue">{recLeft}s</p>
                   </div>
@@ -514,23 +559,25 @@ export function InteractiveSpeakingSession({ scenario }: { scenario: Interactive
 
                 <div className="mt-4 border-t-2 border-dashed border-neutral-200 pt-4">
                   <label className="block text-sm font-bold text-neutral-900">
-                    Your answer (live transcription — edit if needed)
+                    Your answer
                     <textarea
                       value={transcript}
                       onChange={(e) => onAnswerTranscriptChange(e.target.value)}
-                      readOnly={phase === "playing"}
+                      readOnly={
+                        phase === "playing" || (phase === "record" && (listening || transcribing))
+                      }
                       rows={8}
                       placeholder={answerPlaceholder}
                       className="mt-2 w-full border-2 border-black bg-neutral-50 p-3 ep-stat text-sm text-neutral-900 placeholder:text-neutral-400 read-only:opacity-80"
                     />
                   </label>
                   <p className="ep-stat mt-2 text-xs text-neutral-500">
-                    Live captions need Chrome or Edge (network). If they fail, type here — your answer is
-                    still saved.
+                    We record your voice and transcribe it on the server so grammar isn’t auto-corrected. If
+                    something looks wrong, you can fix it when you review a short answer.
                   </p>
                 </div>
 
-                {phase === "record" && listening ? (
+                {phase === "record" && listening && !transcribing ? (
                   <button
                     type="button"
                     onClick={finishRecordingEarly}

@@ -10,6 +10,7 @@ import {
 } from "@/lib/mock-test/mock-difficulty-tiers";
 import { mt } from "@/lib/mock-test/mock-test-styles";
 import {
+  MOCK_PHASES_FIXED_MEDIUM_POOL,
   MOCK_TEST_PHASE_COUNT,
   PHASE_QUESTION_COUNTS,
   PHASE_QUESTION_TYPE,
@@ -48,7 +49,9 @@ export function MockTestAdminBankWorkspace() {
   }, [loadCounts]);
 
   const tierFor = (phase: number): MockBankTierKey =>
-    tierByPhase[phase] ?? "medium";
+    MOCK_PHASES_FIXED_MEDIUM_POOL.has(phase)
+      ? "medium"
+      : (tierByPhase[phase] ?? "medium");
 
   const setTier = (phase: number, tier: MockBankTierKey) => {
     setTierByPhase((prev) => ({ ...prev, [phase]: tier }));
@@ -128,13 +131,15 @@ export function MockTestAdminBankWorkspace() {
           Mock question bank — upload by phase
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-neutral-600">
-          Each phase has its own JSON box. Choose a DET pool tier (85 / 125 / 150) — it maps to{" "}
+          Each phase has its own JSON box.{" "}
+          <strong>Phases 1–3:</strong> choose a DET pool tier (85 / 125 / 150) — it maps to{" "}
           <code className="font-mono text-xs">easy</code>,{" "}
           <code className="font-mono text-xs">medium</code>,{" "}
-          <code className="font-mono text-xs">hard</code> in the database. The selected tier is applied
-          to every valid row on upload (even if the JSON says something else). Copied templates include
-          an <code className="font-mono text-xs">_notes</code> array (ignored on upload) with FITB prefix
-          mode, dictation audio / TTS, and v2 unified vocab-reading pool reminders.
+          <code className="font-mono text-xs">hard</code> on insert.{" "}
+          <strong>Phases 4–10:</strong> no tier control — the mock test (v1) always uses the{" "}
+          <code className="font-mono text-xs">medium</code> pool for those sections (vocab+reading composite,
+          writing, speaking, photos, interactive speaking, conversation summary). Copied templates include{" "}
+          <code className="font-mono text-xs">_notes</code> (ignored on upload).
         </p>
       </header>
 
@@ -213,30 +218,45 @@ export function MockTestAdminBankWorkspace() {
                       {qt?.replace(/_/g, " ")} · learner steps n={n}
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {MOCK_DET_TIERS.map((t) => (
-                      <button
-                        key={t.key}
-                        type="button"
-                        onClick={() => setTier(phase, t.key)}
-                        className={`rounded-[4px] border-2 border-black px-2 py-1 text-xs font-black ${
-                          tier === t.key
-                            ? "bg-[#004AAD] text-[#FFCC00]"
-                            : "bg-white text-neutral-800"
-                        }`}
-                        title={t.description}
-                      >
-                        {t.detPoints}
-                      </button>
-                    ))}
-                  </div>
+                  {MOCK_PHASES_FIXED_MEDIUM_POOL.has(phase) ? (
+                    <span className="rounded-[4px] border-2 border-dashed border-neutral-400 px-2 py-1 text-[11px] font-bold text-neutral-600">
+                      Pool: 125 → medium (fixed)
+                    </span>
+                  ) : (
+                    <div className="flex flex-wrap gap-1">
+                      {MOCK_DET_TIERS.map((t) => (
+                        <button
+                          key={t.key}
+                          type="button"
+                          onClick={() => setTier(phase, t.key)}
+                          className={`rounded-[4px] border-2 border-black px-2 py-1 text-xs font-black ${
+                            tier === t.key
+                              ? "bg-[#004AAD] text-[#FFCC00]"
+                              : "bg-white text-neutral-800"
+                          }`}
+                          title={t.description}
+                        >
+                          {t.detPoints}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <p className="mt-2 text-[11px] text-neutral-600">
-                  Pool for this upload:{" "}
-                  <strong>
-                    {MOCK_DET_TIERS.find((x) => x.key === tier)?.detPoints} → {tier}
-                  </strong>
+                  {MOCK_PHASES_FIXED_MEDIUM_POOL.has(phase) ? (
+                    <>
+                      Uploads use the standard pool{" "}
+                      <strong>125 / medium</strong> only (matches v1 session + vocab/reading unified band in v2).
+                    </>
+                  ) : (
+                    <>
+                      Pool for this upload:{" "}
+                      <strong>
+                        {MOCK_DET_TIERS.find((x) => x.key === tier)?.detPoints} → {tier}
+                      </strong>
+                    </>
+                  )}
                 </p>
 
                 <div className="mt-3 flex flex-wrap gap-2">

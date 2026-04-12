@@ -79,7 +79,7 @@ export function AdminGeminiModelSettings() {
         className="rounded-sm border-2 border-black bg-red-50 p-4 text-sm text-red-900"
         style={{ fontFamily: "var(--font-jetbrains), monospace" }}
       >
-        <p className="font-black">Gemini model</p>
+        <p className="font-black">Grading model</p>
         <p className="mt-1">{loadError}</p>
       </div>
     );
@@ -91,7 +91,7 @@ export function AdminGeminiModelSettings() {
         className="rounded-sm border-2 border-dashed border-black bg-neutral-50 p-4 text-sm text-neutral-600"
         style={{ fontFamily: "var(--font-jetbrains), monospace" }}
       >
-        Loading Gemini model settings…
+        Loading grading model settings…
       </div>
     );
   }
@@ -108,10 +108,14 @@ export function AdminGeminiModelSettings() {
       className="rounded-sm border-2 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]"
       style={{ fontFamily: "var(--font-jetbrains), monospace" }}
     >
-      <p className="text-sm font-black text-neutral-900">Gemini — text grading &amp; transcription</p>
+      <p className="text-sm font-black text-neutral-900">AI grading model (Gemini or Claude)</p>
       <p className="mt-1 text-xs text-neutral-600">
-        Chooses the model for speaking/writing/photo/dialogue reports, mock-test Gemini fallback, and
-        speech transcription. TTS still uses <span className="font-bold">GEMINI_TTS_MODEL</span>.
+        Chooses the LLM for production reports and mock-test grading. Pick{" "}
+        <span className="font-bold">Gemini 2.5 Flash</span> vs{" "}
+        <span className="font-bold">Claude Haiku 4.5</span> to compare speed and style. Claude requires{" "}
+        <span className="font-mono">ANTHROPIC_API_KEY</span> on the server.
+        Speech transcription always uses a Gemini model (falls back if you select Claude for grading). TTS
+        still uses <span className="font-bold">GEMINI_TTS_MODEL</span>.
       </p>
       <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-ep-blue">{sourceLabel}</p>
       <p className="mt-1 ep-stat text-xs text-neutral-500">

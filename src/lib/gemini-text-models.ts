@@ -1,8 +1,15 @@
 export type GeminiTextModelOption = { id: string; label: string };
 
-/** Curated list for the admin UI; ids must match Generative Language API model codes. */
+/** Curated list for the admin UI — Gemini ids match Google AI; Claude ids match Anthropic Messages API. */
 export const GEMINI_TEXT_MODEL_OPTIONS: GeminiTextModelOption[] = [
-  { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash (default, fast)" },
+  {
+    id: "gemini-2.5-flash",
+    label: "Gemini 2.5 Flash (default, fast — compare with Haiku)",
+  },
+  {
+    id: "claude-haiku-4-5",
+    label: "Claude Haiku 4.5 (Anthropic — compare with Flash)",
+  },
   { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   { id: "gemini-3-flash-preview", label: "Gemini 3 Flash (preview)" },
   { id: "gemini-3.1-flash-lite-preview", label: "Gemini 3.1 Flash-Lite (preview)" },

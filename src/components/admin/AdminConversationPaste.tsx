@@ -116,7 +116,7 @@ export function AdminConversationPaste() {
   const [manageSet, setManageSet] = useState<number>(0);
   const [selectedLineIds, setSelectedLineIds] = useState<Set<string>>(new Set());
   const [running, setRunning] = useState(false);
-  const [audioProvider, setAudioProvider] = useState<"elevenlabs" | "gemini">("elevenlabs");
+  const [audioProvider, setAudioProvider] = useState<"polly" | "elevenlabs" | "gemini">("polly");
   const [progress, setProgress] = useState({
     current: 0,
     total: 0,
@@ -386,7 +386,13 @@ export function AdminConversationPaste() {
     }
     setRunning(false);
     setMessage(
-      `Conversation audio generation done (${audioProvider === "elevenlabs" ? "ElevenLabs" : "Gemini"}). Success: ${success} · Fail: ${fail}`,
+      `Conversation audio generation done (${
+        audioProvider === "elevenlabs"
+          ? "ElevenLabs"
+          : audioProvider === "polly"
+            ? "Amazon Polly"
+            : "Gemini"
+      }). Success: ${success} · Fail: ${fail}`,
     );
     if (fail > 0) {
       const top = [...errorHistogram.entries()]
@@ -395,7 +401,7 @@ export function AdminConversationPaste() {
         .map(([m, n]) => `(${n}×) ${m}`)
         .join("\n");
       setError(
-        `${fail} row(s) failed. Most common messages:\n${top || failReason || "Unknown"}\n\nTips: scenario text must be under ~12k chars per line. ElevenLabs 401/402 = key or billing. 400 text too long = shorten that line. Save errors = browser storage / console.`,
+        `${fail} row(s) failed. Most common messages:\n${top || failReason || "Unknown"}\n\nTips: scenario text must be under ~12k chars per line (Polly uses 3k per request — long lines fall back to Gemini on the server). ElevenLabs 401/402 = key or billing. Save errors = browser storage / console.`,
       );
     }
   };
@@ -727,18 +733,20 @@ export function AdminConversationPaste() {
       ) : (
         <div className="space-y-3">
           <p className="text-sm text-neutral-600">
-            ElevenLabs runs <strong>one request at a time</strong> with pauses and automatic retries on rate limits.
-            Gemini still uses a small parallel pool. Learners hear saved clips first; missing lines use API then
-            browser voice.
+            Amazon Polly and Gemini use a small parallel pool with retries. ElevenLabs runs one request at a time.
+            Learners hear saved clips first; missing lines use API then browser voice.
           </p>
           <label className="block text-xs font-bold uppercase tracking-wide text-neutral-700">
             TTS provider
             <select
               value={audioProvider}
-              onChange={(e) => setAudioProvider(e.target.value as "elevenlabs" | "gemini")}
+              onChange={(e) =>
+                setAudioProvider(e.target.value as "polly" | "elevenlabs" | "gemini")
+              }
               className="mt-1 w-full max-w-xs border-2 border-black bg-white px-2 py-2 text-sm font-bold"
             >
-              <option value="elevenlabs">ElevenLabs (needs ELEVENLABS_API_KEY in .env.local)</option>
+              <option value="polly">Amazon Polly (AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY)</option>
+              <option value="elevenlabs">ElevenLabs (ELEVENLABS_API_KEY)</option>
               <option value="gemini">Gemini (Setup key or GEMINI_API_KEY)</option>
             </select>
           </label>

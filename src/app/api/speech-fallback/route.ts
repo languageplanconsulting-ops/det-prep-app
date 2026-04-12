@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { synthesizeEnglishSpeechWithElevenLabs } from "@/lib/elevenlabs-synthesize";
 import { synthesizeEnglishSpeechWithGemini } from "@/lib/gemini-synthesize";
+import {
+  isPollyEnvConfigured,
+  POLLY_MAX_CHARS,
+  synthesizeEnglishSpeechWithPolly,
+} from "@/lib/polly-synthesize";
 import { SPEECH_SYNTHESIS_MAX_CHARS } from "@/lib/speech-api-limits";
 
 export const maxDuration = 120;
@@ -25,7 +30,9 @@ export async function POST(req: Request) {
   const text = o.text;
   const providerRaw = o.provider;
   const provider =
-    providerRaw === "elevenlabs" || providerRaw === "gemini" ? providerRaw : undefined;
+    providerRaw === "elevenlabs" || providerRaw === "gemini" || providerRaw === "polly"
+      ? providerRaw
+      : undefined;
 
   if (typeof text !== "string" || !text.trim()) {
     return NextResponse.json({ error: "text required" }, { status: 400 });
@@ -75,15 +82,29 @@ export async function POST(req: Request) {
       return await runGemini();
     }
 
-    if (elevenKey) {
+    if (provider === "polly") {
+      if (!isPollyEnvConfigured()) {
+        return NextResponse.json(
+          {
+            error:
+              "Polly not configured. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.",
+          },
+          { status: 503 },
+        );
+      }
+      if (trimmed.length > POLLY_MAX_CHARS) {
+        return await runGemini();
+      }
+      const out = await synthesizeEnglishSpeechWithPolly({ text: trimmed });
+      return NextResponse.json(out);
+    }
+
+    if (isPollyEnvConfigured() && trimmed.length <= POLLY_MAX_CHARS) {
       try {
-        const out = await synthesizeEnglishSpeechWithElevenLabs({
-          apiKey: elevenKey,
-          text: trimmed,
-        });
+        const out = await synthesizeEnglishSpeechWithPolly({ text: trimmed });
         return NextResponse.json(out);
       } catch {
-        /* fall through to Gemini when both keys may exist */
+        /* fall through */
       }
     }
 
@@ -93,4 +114,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: msg }, { status: 502 });
   }
 }
-

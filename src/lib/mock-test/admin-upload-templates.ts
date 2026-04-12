@@ -1,4 +1,5 @@
 import {
+  MOCK_PHASES_FIXED_MEDIUM_POOL,
   MOCK_TEST_PHASE_COUNT,
   PHASE_QUESTION_TYPE,
 } from "@/lib/mock-test/constants";
@@ -39,9 +40,9 @@ function buildUploadNotes(phase: number): string[] {
   const unified = READING_VOCAB_UNIFIED_BAND;
   const global: string[] = [
     "Only the \"questions\" array is uploaded. This _notes block is documentation.",
-    `Mock test v2: question_type fill_in_blanks, real_english_word, vocabulary_reading use one pool — upload at target_band ${unified} (choose pool tier "125 / medium" in the admin UI).`,
-    "Mock test v2: dictation, interactive_listening, read_then_speak, write_about_photo, speak_about_photo, read_and_write, interactive_speaking, conversation_summary follow routed 85 / 125 / 150 from Stage 1 performance.",
-    "Mock test v1 (10-phase): difficulty tiers easy|medium|hard still apply per phase; UI tier overrides JSON difficulty on insert.",
+    `Mock test v2: fill_in_blanks, real_english_word, vocabulary_reading share one calibrated pool at target_band ${unified} (125 / medium in DB).`,
+    "Mock test v2: dictation, interactive_listening, read_then_speak, write_about_photo, speak_about_photo, read_and_write, interactive_speaking use routed 85 / 125 / 150 from Stage 1 — bank rows must exist at each band; engine falls back to medium if a band is empty.",
+    "Mock test v1: phases 1–3 use adaptive easy|medium|hard. Phases 4–10 always draw the medium pool (no per-item level in the learner UI).",
   ];
 
   const byPhase: Record<number, string[]> = {
@@ -49,7 +50,7 @@ function buildUploadNotes(phase: number): string[] {
       "Phase 1 — fill_in_blanks: (1) Prefix mode: blank_prefix (1–6 chars) + sentence_before / sentence_after + optional blank_hint; remove sentence; all 4 options must start with that prefix. (2) Legacy: content.sentence with ___ and 4 options — omit blank_prefix.",
     ],
     2: [
-      "Phase 2 — dictation: reference_sentence required. Omit audio_url → server generates audio via ElevenLabs from reference_sentence (needs ELEVENLABS_API_KEY). Optional audio_url: hosted MP3 URL instead.",
+      "Phase 2 — dictation: reference_sentence required. Omit audio_url → server generates audio via Amazon Polly (AWS keys) or Gemini fallback. Optional audio_url: hosted MP3 URL instead.",
     ],
     3: [
       "Phase 3 — real_english_word: legacy sentence + 4 spellings is typical. Prefix mode works only if every option shares the same leading letters as blank_prefix.",
@@ -69,12 +70,15 @@ function buildQuestionPayload(
   const qt = PHASE_QUESTION_TYPE[phase];
   const skill = PHASE_SKILL[phase] ?? "literacy";
   const isAi = phase >= 5 && phase <= 10;
+  const poolTier: MockBankTierKey = MOCK_PHASES_FIXED_MEDIUM_POOL.has(phase)
+    ? "medium"
+    : tier;
 
   const base: Record<string, unknown> = {
     phase,
     question_type: qt,
     skill,
-    difficulty: tier,
+    difficulty: poolTier,
     is_ai_graded: isAi,
   };
 
@@ -94,7 +98,7 @@ function buildQuestionPayload(
     };
   }
 
-  // Dictation: optional `audio_url`; if omitted, mock test synthesizes audio from `reference_sentence` via ElevenLabs.
+  // Dictation: optional `audio_url`; if omitted, mock test synthesizes audio from `reference_sentence` via Polly/Gemini.
   if (phase === 2) {
     return {
       ...base,
@@ -233,7 +237,7 @@ function buildQuestionPayload(
   return base;
 }
 
-/** Copy-paste JSON for one phase; `tier` is easy|medium|hard (shown in admin as 85/125/150). */
+/** Copy-paste JSON for one phase; phases 1–3 respect `tier`; phases 4–10 always use medium. */
 export function buildMockUploadTemplateJson(
   phase: number,
   tier: MockBankTierKey,
@@ -245,7 +249,8 @@ export function buildMockUploadTemplateJson(
       2,
     );
   }
-  const q = buildQuestionPayload(phase, tier);
+  const tierUse = MOCK_PHASES_FIXED_MEDIUM_POOL.has(phase) ? "medium" : tier;
+  const q = buildQuestionPayload(phase, tierUse);
   return JSON.stringify(
     {
       _notes: buildUploadNotes(phase),

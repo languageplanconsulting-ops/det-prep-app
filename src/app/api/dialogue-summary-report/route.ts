@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { DIALOGUE_SUMMARY_MIN_WORDS } from "@/lib/dialogue-summary-constants";
 import { generateDialogueSummaryReportWithGemini } from "@/lib/gemini-dialogue-summary";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
+import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import type { DialogueSummaryExam } from "@/types/dialogue-summary";
 
 export const maxDuration = 120;
@@ -19,19 +20,6 @@ function isExam(v: unknown): v is DialogueSummaryExam {
 }
 
 export async function POST(req: Request) {
-  const fromEnv = process.env.GEMINI_API_KEY?.trim();
-  const fromHeader = req.headers.get("x-gemini-api-key")?.trim();
-  const key = fromEnv || fromHeader;
-  if (!key) {
-    return NextResponse.json(
-      {
-        error:
-          "No Gemini key. Set GEMINI_API_KEY in .env.local (or your server environment).",
-      },
-      { status: 503 },
-    );
-  }
-
   let body: unknown;
   try {
     body = await req.json();
@@ -69,8 +57,10 @@ export async function POST(req: Request) {
 
   try {
     const model = await resolveGeminiTextModel();
+    const keys = resolveGradingKeysFromRequest(req, model);
     const report = await generateDialogueSummaryReportWithGemini({
-      apiKey: key,
+      apiKey: keys.geminiApiKey,
+      anthropicApiKey: keys.anthropicApiKey,
       model,
       attemptId,
       exam,

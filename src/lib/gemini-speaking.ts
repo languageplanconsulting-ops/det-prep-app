@@ -1,5 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findTextSpan } from "@/lib/find-text-span";
+import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
 import type {
@@ -212,6 +212,7 @@ function asArr(v: unknown): unknown[] {
 
 export async function generateSpeakingReportWithGemini(params: {
   apiKey: string;
+  anthropicApiKey?: string;
   model?: string;
   attemptId: string;
   topicId: string;
@@ -241,18 +242,11 @@ export async function generateSpeakingReportWithGemini(params: {
   const modelName =
     params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
+  const text = await generateGradingJsonCompletion({
     model: modelName,
+    keys: { geminiApiKey: apiKey, anthropicApiKey: params.anthropicApiKey },
     systemInstruction: buildSystemInstruction(),
-    generationConfig: {
-      temperature: 0.35,
-      responseMimeType: "application/json",
-    },
-  });
-
-  const result = await model.generateContent(
-    buildUserPayload(
+    userPayload: buildUserPayload(
       topicTitleEn,
       topicTitleTh,
       questionPromptEn,
@@ -260,8 +254,8 @@ export async function generateSpeakingReportWithGemini(params: {
       prepMinutes,
       transcript,
     ),
-  );
-  const text = result.response.text();
+    temperature: 0.35,
+  });
   const raw = parseGeminiJsonObjectResponse(text);
 
   const g = clampPercent(raw.grammarScorePercent);

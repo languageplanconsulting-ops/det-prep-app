@@ -1,5 +1,5 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
+import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import { DIALOGUE_SUMMARY_RUBRIC_WEIGHTS } from "@/lib/dialogue-summary-constants";
 import type {
@@ -172,6 +172,7 @@ function buildUserPayload(exam: DialogueSummaryExam, summary: string): string {
 
 export async function generateDialogueSummaryReportWithGemini(params: {
   apiKey: string;
+  anthropicApiKey?: string;
   model?: string;
   attemptId: string;
   exam: DialogueSummaryExam;
@@ -182,18 +183,13 @@ export async function generateDialogueSummaryReportWithGemini(params: {
   const { apiKey, attemptId, exam, summary, submittedAt, wordCount } = params;
   const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
+  const text = await generateGradingJsonCompletion({
     model: modelName,
+    keys: { geminiApiKey: apiKey, anthropicApiKey: params.anthropicApiKey },
     systemInstruction: buildSystemInstruction(),
-    generationConfig: {
-      temperature: 0.35,
-      responseMimeType: "application/json",
-    },
+    userPayload: buildUserPayload(exam, summary),
+    temperature: 0.35,
   });
-
-  const result = await model.generateContent(buildUserPayload(exam, summary));
-  const text = result.response.text();
   const raw = parseGeminiJsonObjectResponse(text);
 
   const rel = clampPercent(raw.relevancyScorePercent);

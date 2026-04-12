@@ -52,3 +52,12 @@ export const ADAPTIVE_PHASE_MAX = 4;
 export function isAdaptivePhase(phase: number): boolean {
   return phase >= 1 && phase <= ADAPTIVE_PHASE_MAX;
 }
+
+/**
+ * Admin upload + v1 session: no author-facing 85/125/150 control — v1 always draws the
+ * **medium** pool for these phases (phase 4 composite reading uses one bank tier; see mock-test v2 config for unified vocab/reading band).
+ * Phases 1–3 stay tiered (adaptive MCQ / dictation / REW).
+ */
+export const MOCK_PHASES_FIXED_MEDIUM_POOL: ReadonlySet<number> = new Set([
+  4, 5, 6, 7, 8, 9, 10,
+]);

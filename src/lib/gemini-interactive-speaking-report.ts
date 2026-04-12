@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { INTERACTIVE_SPEAKING_TURN_COUNT } from "@/lib/interactive-speaking-constants";
 import { findTextSpan } from "@/lib/find-text-span";
+import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
@@ -106,6 +106,7 @@ function asArr(v: unknown): unknown[] {
 
 export async function generateInteractiveSpeakingReportWithGemini(params: {
   apiKey: string;
+  anthropicApiKey?: string;
   model?: string;
   attemptId: string;
   scenarioId: string;
@@ -122,15 +123,6 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
   }
 
   const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: modelName,
-    systemInstruction: buildSystemInstruction(),
-    generationConfig: {
-      temperature: 0.35,
-      responseMimeType: "application/json",
-    },
-  });
 
   const userPayload = JSON.stringify(
     {
@@ -187,8 +179,13 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
     2,
   );
 
-  const result = await model.generateContent(userPayload);
-  const text = result.response.text();
+  const text = await generateGradingJsonCompletion({
+    model: modelName,
+    keys: { geminiApiKey: apiKey, anthropicApiKey: params.anthropicApiKey },
+    systemInstruction: buildSystemInstruction(),
+    userPayload,
+    temperature: 0.35,
+  });
   const raw = parseGeminiJsonObjectResponse(text);
 
   const g = clampPercent(raw.grammarScorePercent);

@@ -7,6 +7,8 @@ export interface InteractiveSpeakingScenario {
   titleTh: string;
   starterQuestionEn: string;
   starterQuestionTh: string;
+  /** Optional: image URL, `/path`, `data:…`, or a short emoji / label shown in the hub tile. */
+  thumbnail?: string;
   /** Learner hub round (1–5). Admin merge defaults to 1. */
   round?: 1 | 2 | 3 | 4 | 5;
   uploadedByAdmin?: boolean;

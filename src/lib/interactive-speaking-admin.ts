@@ -29,6 +29,9 @@ export function parseInteractiveSpeakingScenariosJson(raw: string): InteractiveS
     if (!titleEn) throw new Error(`Scenario ${id}: titleEn required.`);
     if (!starterQuestionEn) throw new Error(`Scenario ${id}: starterQuestionEn required.`);
     if (!starterQuestionTh) throw new Error(`Scenario ${id}: starterQuestionTh required.`);
+    const thumbRaw = o.thumbnail;
+    const thumbnail =
+      typeof thumbRaw === "string" && thumbRaw.trim() ? thumbRaw.trim() : undefined;
     const scenario: InteractiveSpeakingScenario = {
       id,
       titleEn,
@@ -36,6 +39,7 @@ export function parseInteractiveSpeakingScenariosJson(raw: string): InteractiveS
       starterQuestionEn,
       starterQuestionTh,
       uploadedByAdmin: true,
+      ...(thumbnail ? { thumbnail } : {}),
       ...(isRound(o.round) ? { round: o.round } : {}),
     };
     out.push(scenario);
