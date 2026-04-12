@@ -20,6 +20,11 @@ import {
   getLatestInteractiveSpeakingReportForScenario,
   saveInteractiveSpeakingReport,
 } from "@/lib/interactive-speaking-storage";
+import {
+  createBrowserSpeechRecognition,
+  isBrowserSpeechRecognitionAvailable,
+  type WebSpeechRecognitionInstance,
+} from "@/lib/browser-speech-recognition";
 import { pickMediaRecorderMimeType, transcribeAudioBlobClient } from "@/lib/client-audio-transcribe";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
 import type { InteractiveSpeakingAttemptReport } from "@/types/interactive-speaking";
@@ -73,6 +78,23 @@ function playAnswerCueSound(): void {
   }
 }
 
+const DEFAULT_INTERACTIVE_TTS_ORDER = [
+  "inworld",
+  "gemini",
+  "elevenlabs",
+] as const satisfies readonly ("inworld" | "gemini" | "elevenlabs")[];
+
+function interactiveSpeakingTtsTryOrder(): ("inworld" | "gemini" | "elevenlabs")[] {
+  const raw = process.env.NEXT_PUBLIC_INTERACTIVE_SPEAKING_TTS_ORDER?.trim();
+  if (!raw) return [...DEFAULT_INTERACTIVE_TTS_ORDER];
+  const allowed = new Set<string>(["inworld", "gemini", "elevenlabs"]);
+  const parsed = raw
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => allowed.has(s)) as ("inworld" | "gemini" | "elevenlabs")[];
+  return parsed.length > 0 ? parsed : [...DEFAULT_INTERACTIVE_TTS_ORDER];
+}
+
 async function playQuestionAudioFromApi(
   text: string,
   provider: "inworld" | "gemini" | "elevenlabs",
@@ -98,14 +120,13 @@ async function playQuestionAudioFromApi(
   }
 }
 
-/** Prefer Inworld TTS; fall back to Gemini. Optional ElevenLabs if wired. */
+/**
+ * Tries providers in order (default: Inworld → Gemini → ElevenLabs).
+ * Set `NEXT_PUBLIC_INTERACTIVE_SPEAKING_TTS_ORDER=elevenlabs,inworld,gemini` on the server to prefer ElevenLabs when you have a key (often faster).
+ */
 async function playQuestionTts(text: string): Promise<void> {
-  const ok =
-    (await playQuestionAudioFromApi(text, "inworld")) ||
-    (await playQuestionAudioFromApi(text, "gemini")) ||
-    (await playQuestionAudioFromApi(text, "elevenlabs"));
-  if (!ok) {
-    /* optional: no audio */
+  for (const provider of interactiveSpeakingTtsTryOrder()) {
+    if (await playQuestionAudioFromApi(text, provider)) return;
   }
 }
 
@@ -137,6 +158,8 @@ export function InteractiveSpeakingSession({
   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
+  /** True while the Web Speech API is capturing (no server transcribe). */
+  const [browserSttActive, setBrowserSttActive] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showQuestionHint, setShowQuestionHint] = useState(false);
@@ -150,6 +173,11 @@ export function InteractiveSpeakingSession({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const mediaChunksRef = useRef<BlobPart[]>([]);
+  /** Browser Web Speech API — no Gemini upload when active. */
+  const speechRecognitionRef = useRef<WebSpeechRecognitionInstance | null>(null);
+  const browserSttUserStopRef = useRef(false);
+  const browserSttDiscardRef = useRef(false);
+  const browserSpeechFinalRef = useRef("");
   const runTurnSubmissionRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -177,6 +205,17 @@ export function InteractiveSpeakingSession({
 
   const forceStopMedia = useCallback(() => {
     recordGenRef.current += 1;
+    const sr = speechRecognitionRef.current;
+    if (sr) {
+      browserSttDiscardRef.current = true;
+      browserSttUserStopRef.current = false;
+      try {
+        sr.abort();
+      } catch {
+        /* ignore */
+      }
+      speechRecognitionRef.current = null;
+    }
     const mr = mediaRecorderRef.current;
     if (mr && (mr.state === "recording" || mr.state === "paused")) {
       try {
@@ -191,6 +230,7 @@ export function InteractiveSpeakingSession({
     mediaChunksRef.current = [];
     setListening(false);
     setTranscribing(false);
+    setBrowserSttActive(false);
   }, []);
 
   useEffect(() => {
@@ -198,6 +238,16 @@ export function InteractiveSpeakingSession({
   }, [forceStopMedia]);
 
   const stopRecordingAfterAnswer = useCallback(() => {
+    const sr = speechRecognitionRef.current;
+    if (sr) {
+      browserSttUserStopRef.current = true;
+      try {
+        sr.stop();
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
     const mr = mediaRecorderRef.current;
     if (mr && mr.state === "recording") {
       mr.stop();
@@ -230,7 +280,11 @@ export function InteractiveSpeakingSession({
       recordGenRef.current = myGen;
       typedBeforeMicRef.current = transcriptRef.current;
 
-      if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      const canUploadTranscribe =
+        typeof MediaRecorder !== "undefined" && !!navigator.mediaDevices?.getUserMedia;
+      const canBrowserStt = isBrowserSpeechRecognitionAvailable();
+
+      if (!canBrowserStt && !canUploadTranscribe) {
         setSpeechError(
           "Recording is not supported in this browser. Type your answer in the box below.",
         );
@@ -241,6 +295,103 @@ export function InteractiveSpeakingSession({
       setSpeechError(null);
       setRecLeft(INTERACTIVE_SPEAKING_MAX_SPEAK_SECONDS);
       mediaChunksRef.current = [];
+
+      const tryStartBrowserSpeech = (): boolean => {
+        if (!canBrowserStt) return false;
+        const recognition = createBrowserSpeechRecognition();
+        if (!recognition) return false;
+
+        browserSttDiscardRef.current = false;
+        browserSttUserStopRef.current = false;
+        browserSpeechFinalRef.current = "";
+
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
+        recognition.maxAlternatives = 1;
+
+        recognition.onresult = (event) => {
+          if (myGen !== recordGenRef.current) return;
+          let interim = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const r = event.results[i]!;
+            if (r.isFinal) {
+              browserSpeechFinalRef.current += r[0].transcript;
+            } else {
+              interim += r[0].transcript;
+            }
+          }
+          const speech = (browserSpeechFinalRef.current + interim).trim();
+          const merged = [typedBeforeMicRef.current.trim(), speech].filter(Boolean).join(" ").trim();
+          transcriptRef.current = merged;
+          setTranscript(merged);
+        };
+
+        recognition.onerror = (event) => {
+          if (event.error === "aborted") return;
+          if (myGen !== recordGenRef.current) return;
+          if (event.error === "not-allowed") {
+            setSpeechError(
+              "Speech recognition was blocked. Allow the microphone or type your answer below.",
+            );
+            setRecLeft(0);
+            setListening(false);
+            setBrowserSttActive(false);
+            speechRecognitionRef.current = null;
+          }
+        };
+
+        recognition.onend = () => {
+          if (myGen !== recordGenRef.current) return;
+          if (browserSttDiscardRef.current) {
+            speechRecognitionRef.current = null;
+            setListening(false);
+            setBrowserSttActive(false);
+            return;
+          }
+          if (browserSttUserStopRef.current) {
+            speechRecognitionRef.current = null;
+            setListening(false);
+            setBrowserSttActive(false);
+            setSpeechError(null);
+            void runTurnSubmissionRef.current?.();
+            return;
+          }
+          const r = speechRecognitionRef.current;
+          if (r) {
+            try {
+              r.start();
+            } catch {
+              /* already running */
+            }
+          }
+        };
+
+        try {
+          recognition.start();
+        } catch {
+          return false;
+        }
+
+        speechRecognitionRef.current = recognition;
+        setBrowserSttActive(true);
+        setListening(true);
+        return true;
+      };
+
+      if (tryStartBrowserSpeech()) {
+        return;
+      }
+
+      if (!canUploadTranscribe) {
+        setSpeechError(
+          "Speech recognition did not start. Type your answer in the box below.",
+        );
+        setRecLeft(0);
+        return;
+      }
+
+      setBrowserSttActive(false);
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -638,7 +789,9 @@ export function InteractiveSpeakingSession({
                         </p>
                         <p className="text-center text-sm font-bold text-neutral-900">
                           {listening
-                            ? "Recording…"
+                            ? browserSttActive
+                              ? "Listening (live captions)…"
+                              : "Recording…"
                             : transcribing
                               ? "Finishing up…"
                               : `${recLeft}s left`}
@@ -646,6 +799,13 @@ export function InteractiveSpeakingSession({
                       </div>
                     </div>
                   </div>
+                ) : null}
+
+                {phase === "record" && listening && browserSttActive ? (
+                  <p className="mt-2 text-xs text-neutral-600">
+                    Using your browser’s speech-to-text (no upload for transcription). Text fills in as you speak; you
+                    can edit it on the next step.
+                  </p>
                 ) : null}
 
                 <div className="mt-4 border-t-2 border-dashed border-neutral-200 pt-4">
