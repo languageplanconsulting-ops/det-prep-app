@@ -13,6 +13,10 @@ export default function AdminSubscriptionsBulkPage() {
   const [extendDays, setExtendDays] = useState(30);
   const [expiringTab, setExpiringTab] = useState<"7" | "14" | "expired">("7");
   const [expiring, setExpiring] = useState<Record<string, unknown>[]>([]);
+  const [massExpiryAt, setMassExpiryAt] = useState("");
+  const [massExpiryTierFilter, setMassExpiryTierFilter] = useState("all");
+  const [massExpiryClear, setMassExpiryClear] = useState(false);
+  const [massExpiryReason, setMassExpiryReason] = useState("");
 
   const loadExpiring = useCallback(async () => {
     const res = await fetch(
@@ -91,6 +95,140 @@ export default function AdminSubscriptionsBulkPage() {
       type: "success",
       titleEn: "Bulk extend applied.",
       titleTh: "ต่ออายุแล้ว",
+    });
+  };
+
+  const setExpiryForAllMembers = async () => {
+    const r = massExpiryReason.trim();
+    if (!r) {
+      push({
+        type: "error",
+        titleEn: "Reason required.",
+        titleTh: "ต้องใส่เหตุผล",
+      });
+      return;
+    }
+    if (!massExpiryClear && !massExpiryAt.trim()) {
+      push({
+        type: "error",
+        titleEn: "Pick a date/time or check Clear expiry.",
+        titleTh: "เลือกวันหรือติ๊กล้างวันหมดอายุ",
+      });
+      return;
+    }
+    const ok = window.confirm(
+      "This updates tier_expires_at for EVERY account that matches the tier filter. Continue? / จะอัปเดตวันหมดอายุให้ทุกบัญชีที่ตรงตัวกรอง — ต้องการทำต่อหรือไม่",
+    );
+    if (!ok) return;
+    let tier_expires_at: string | null = null;
+    if (!massExpiryClear) {
+      const d = new Date(massExpiryAt);
+      if (Number.isNaN(d.getTime())) {
+        push({
+          type: "error",
+          titleEn: "Invalid date/time.",
+          titleTh: "วันที่ไม่ถูกต้อง",
+        });
+        return;
+      }
+      tier_expires_at = d.toISOString();
+    }
+    const res = await fetch("/api/admin/subscriptions/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        action: "set_expiry_date",
+        scope: "all",
+        tier_filter: massExpiryTierFilter,
+        tier_expires_at,
+        reason: r,
+      }),
+    });
+    if (!res.ok) {
+      push({ type: "error", titleEn: "Bulk expiry failed", titleTh: "ล้มเหลว" });
+      return;
+    }
+    const j = (await res.json()) as { count?: number };
+    push({
+      type: "success",
+      titleEn: `Updated ${j.count ?? 0} member(s).`,
+      titleTh: `อัปเดต ${j.count ?? 0} คน`,
+    });
+    void loadExpiring();
+  };
+
+  const setExpiryForListedEmails = async () => {
+    const r = massExpiryReason.trim();
+    if (!r) {
+      push({
+        type: "error",
+        titleEn: "Reason required.",
+        titleTh: "ต้องใส่เหตุผล",
+      });
+      return;
+    }
+    let emails: string[] = [];
+    try {
+      emails = JSON.parse(jsonEmails) as string[];
+    } catch {
+      push({
+        type: "error",
+        titleEn: "Invalid JSON email list.",
+        titleTh: "รายการอีเมล JSON ไม่ถูกต้อง",
+      });
+      return;
+    }
+    if (!Array.isArray(emails) || emails.length === 0) {
+      push({
+        type: "error",
+        titleEn: "Provide a JSON array of emails.",
+        titleTh: "ใส่ array ของอีเมล",
+      });
+      return;
+    }
+    if (!massExpiryClear && !massExpiryAt.trim()) {
+      push({
+        type: "error",
+        titleEn: "Pick a date/time or check Clear expiry.",
+        titleTh: "เลือกวันหรือติ๊กล้างวันหมดอายุ",
+      });
+      return;
+    }
+    let tier_expires_at: string | null = null;
+    if (!massExpiryClear) {
+      const d = new Date(massExpiryAt);
+      if (Number.isNaN(d.getTime())) {
+        push({
+          type: "error",
+          titleEn: "Invalid date/time.",
+          titleTh: "วันที่ไม่ถูกต้อง",
+        });
+        return;
+      }
+      tier_expires_at = d.toISOString();
+    }
+    const res = await fetch("/api/admin/subscriptions/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        action: "set_expiry_date",
+        scope: "list",
+        emails,
+        tier_expires_at,
+        reason: r,
+      }),
+    });
+    if (!res.ok) {
+      push({ type: "error", titleEn: "Bulk expiry failed", titleTh: "ล้มเหลว" });
+      return;
+    }
+    const j = (await res.json()) as { count?: number; failed?: string[] };
+    push({
+      type: "success",
+      titleEn: `Updated ${j.count ?? 0} of ${emails.length}. Failed: ${(j.failed ?? []).length}`,
+      titleTh: `สำเร็จ ${j.count ?? 0} รายการ`,
     });
   };
 
@@ -179,6 +317,78 @@ export default function AdminSubscriptionsBulkPage() {
         >
           Preview &amp; confirm tier change / ยืนยัน
         </button>
+      </section>
+
+      <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+        <h2 className="text-lg font-black">
+          Set membership expiry (all members) / กำหนดวันหมดอายุทุกคน
+        </h2>
+        <p className="mt-1 text-xs text-neutral-600">
+          Sets the same <code className="font-mono">tier_expires_at</code> for every profile (optionally only
+          one tier). Use Clear to remove a stored expiry date. / ตั้งวันหมดอายุเดียวกันทั้งระบบ หรือเฉพาะ tier
+          ที่เลือก — ติ๊กล้างเพื่อลบวันที่
+        </p>
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <label className="flex flex-col text-xs font-bold">
+            Tier filter / กรอง tier
+            <select
+              value={massExpiryTierFilter}
+              onChange={(e) => setMassExpiryTierFilter(e.target.value)}
+              className="mt-1 rounded-[4px] border-4 border-black px-2 py-1"
+            >
+              {["all", "free", "basic", "premium", "vip"].map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={`flex flex-col text-xs font-bold ${massExpiryClear ? "opacity-40" : ""}`}>
+            Expires at (local) / หมดอายุ
+            <input
+              type="datetime-local"
+              value={massExpiryAt}
+              onChange={(e) => setMassExpiryAt(e.target.value)}
+              disabled={massExpiryClear}
+              className="mt-1 rounded-[4px] border-4 border-black px-2 py-1 ep-stat text-sm"
+            />
+          </label>
+          <label className="flex items-center gap-2 text-xs font-bold">
+            <input
+              type="checkbox"
+              checked={massExpiryClear}
+              onChange={(e) => setMassExpiryClear(e.target.checked)}
+            />
+            Clear expiry / ล้างวันหมดอายุ
+          </label>
+        </div>
+        <label className="mt-3 block text-sm font-bold">
+          Reason / เหตุผล (required)
+          <input
+            value={massExpiryReason}
+            onChange={(e) => setMassExpiryReason(e.target.value)}
+            className="mt-1 w-full rounded-[4px] border-4 border-black px-2 py-1"
+          />
+        </label>
+        <p className="mt-2 text-xs text-red-700">
+          WARNING: Affects many accounts. Cannot auto-undo. / คำเตือน
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => void setExpiryForAllMembers()}
+            className="rounded-[4px] border-4 border-black bg-red-700 px-4 py-2 text-sm font-black text-white shadow-[4px_4px_0_0_#000]"
+          >
+            Apply to all matching members / ใช้กับทุกคนที่ตรงตัวกรอง
+          </button>
+          <button
+            type="button"
+            onClick={() => void setExpiryForListedEmails()}
+            className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black shadow-[4px_4px_0_0_#000]"
+          >
+            Apply to JSON email list only / ใช้กับอีเมลใน JSON ด้านบน
+          </button>
+        </div>
       </section>
 
       <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">

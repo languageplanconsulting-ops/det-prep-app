@@ -22,6 +22,7 @@ export const CONTENT_BANK_KEYS = [
   "ep-realword-admin-uploaded-v1",
   "ep-dialogue-summary-bank-v1",
   "ep-dialogue-summary-admin-uploaded-v1",
+  "ep-interactive-speaking-scenarios-v1",
 ] as const;
 
 type ContentBankSnapshot = Record<string, string>;
@@ -58,6 +59,7 @@ export function applyLocalContentBankSnapshot(snapshot: ContentBankSnapshot): nu
     window.dispatchEvent(new Event("ep-vocab-storage"));
     window.dispatchEvent(new Event("ep-realword-storage"));
     window.dispatchEvent(new Event("ep-dialogue-summary-storage"));
+    window.dispatchEvent(new Event("ep-interactive-speaking-storage"));
   }
   return written;
 }

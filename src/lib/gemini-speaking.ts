@@ -8,6 +8,7 @@ import type {
   SpeakingTranscriptHighlight,
   SpeakingVocabularyUpgrade,
 } from "@/types/speaking";
+import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
 
 function pointsOn160(percent: number, weight: number): number {
@@ -106,7 +107,7 @@ Vocabulary upgrade suggestions (separate from criterion breakdown):
 Transcript highlights (for interactive hover on punctuated text):
 - transcriptHighlights: up to 18 items. Each: exactQuote (verbatim substring of raw transcript), isPositive (true=strength, false=weakness), noteEn, noteTh (short tooltip, one line each). Cover grammar, vocabulary, coherence, and task where useful. No overlapping quotes if possible.
 
-Return ONLY valid JSON (no markdown). Use issueEn/issueTh (not "en"/"th") for breakdown issue lines.`;
+Return ONLY valid JSON (no markdown). Use issueEn/issueTh (not "en"/"th") for breakdown issue lines.${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
 
 function buildUserPayload(

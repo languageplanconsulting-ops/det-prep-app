@@ -296,7 +296,7 @@ export function buildSpeakImprovementPoints(
       id: "sg1",
       category: "grammar",
       en: "Record once, then add one subordinate clause (because / although / if).",
-      th: "อัดเสียงครั้งหนึ่ง แล้วเพิ่มประโยคขยายด้วย because / although / if",
+      th: "อัดเสียงครั้งหนึ่ง แล้วลองต่อท้ายด้วย because / although / if สั้นๆ",
     });
   }
   if (v < 85) {
@@ -304,7 +304,7 @@ export function buildSpeakImprovementPoints(
       id: "sv1",
       category: "vocabulary",
       en: "Swap three simple words for topic-specific or B2+ items you know well.",
-      th: "แทนที่คำง่ายสามคำด้วยคำเฉพาะหัวข้อหรือ B2+ ที่ใช้มั่นใจ",
+      th: "เปลี่ยนคำง่ายๆ สามคำ เป็นคำที่ตรงหัวข้อมากขึ้น",
     });
   }
   if (c < 85) {
@@ -389,34 +389,34 @@ export function buildSpeakingAttemptReport(
     score160,
     grammar: criterion("grammar", SPEAKING_RUBRIC_WEIGHTS.grammar, g, {
       en: grammarEn,
-      th: `ไวยากรณ์ (คะแนนประมาณจากรูปแบบประโยคและข้อผิดพลาดที่ตรวจจับได้): ${g}%`,
+      th: `พูด/เขียนให้ถูกต้องแค่ไหน (คะแนนประมาณจากโปรแกรม): ${g}%`,
     }, [
       {
         excerpt,
         en: "Complex structures counted from subordinate clauses in longer sentences.",
-        th: "นับโครงสร้างซับซ้อนจากประโยคย่อยในประโยคที่ยาวพอสมควร",
+        th: "ประโยคที่มี because/if ฯลฯ ในประโยคยาวๆ นับว่า “ขั้นสูง” มากขึ้น",
       },
       {
         en: "Run-ons (very long sentences) and simple SVA cues lower the band.",
-        th: "ประโยคยาวผิดปกติและสัญญาณ SVA เบื้องต้นลดแบนด์",
+        th: "ประโยคยาวเกินไป หรือใครทำอะไรไม่ตรงกัน จะทำให้คะแนนต่ำลง",
       },
     ]),
     vocabulary: criterion("vocabulary", SPEAKING_RUBRIC_WEIGHTS.vocabulary, v, {
       en: `Vocabulary (C1/B2 used well ~90%; weak bands down to ~30% if only A2). Score: ${v}%.`,
-      th: `คำศัพท์ (ประมาณจากระดับคำที่ตรวจพบ): ${v}%`,
+      th: `ใช้คำหลากหลายแค่ไหน (คะแนนประมาณ): ${v}%`,
     }, [
       {
         en: "Advanced lexis list match + density vs basic words.",
-        th: "จับคู่คำระดับสูงและความหนาแน่นเทียบคำพื้นฐาน",
+        th: "มีคำที่หนักขึ้นบ้างไหม เทียบกับคำง่ายๆ ที่ใช้บ่อย",
       },
     ]),
     coherence: criterion("coherence", SPEAKING_RUBRIC_WEIGHTS.coherence, c, {
       en: `Coherence (transitions + referencing vs run-ons). Score: ${c}%.`,
-      th: `ความต่อเนื่อง (คำเชื่อม + การอ้างอิง): ${c}%`,
+      th: `ฟังแล้วต่อเรื่องกันหรือเปล่า: ${c}%`,
     }, [
       {
         en: "Markers like However / Therefore / First boost coherence when paired with this/that referencing.",
-        th: "คำเชื่อมคู่กับ this/that ช่วยความต่อเนื่อง",
+        th: "มีคำเชื่อม และบอกให้รู้ว่าหมายถึงอะไร เช่น this/that",
       },
     ]),
     taskRelevancy: criterion("task", SPEAKING_RUBRIC_WEIGHTS.taskRelevancy, tk, {

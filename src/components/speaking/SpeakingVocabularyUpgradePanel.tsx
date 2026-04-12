@@ -10,18 +10,26 @@ export function SpeakingVocabularyUpgradePanel({
   upgrades,
   attemptId,
   entrySource,
+  uiLocale = "en",
 }: {
   upgrades: SpeakingVocabularyUpgrade[];
   attemptId: string;
   entrySource: NotebookEntry["source"];
+  uiLocale?: "en" | "th";
 }) {
   if (upgrades.length === 0) return null;
+
+  const th = uiLocale === "th";
 
   return (
     <BrutalPanel
       variant="elevated"
-      eyebrow="Up to 10 items · B2/C1 alternatives"
-      title="Vocabulary suggestions"
+      eyebrow={
+        th
+          ? "สูงสุด 10 คำ · ทางเลือกระดับ B2/C1"
+          : "Up to 10 items · B2/C1 alternatives"
+      }
+      title={th ? "แนะนำคำศัพท์" : "Vocabulary suggestions"}
     >
       <ul className="space-y-4">
         {upgrades.map((u) => (
@@ -39,24 +47,45 @@ export function SpeakingVocabularyUpgradePanel({
             {u.meaningTh ? (
               <p className="mt-2 text-neutral-700">
                 <span className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
-                  Meaning (TH){" "}
+                  {th ? "ความหมาย " : "Meaning (TH) "}
                 </span>
                 {u.meaningTh}
               </p>
             ) : null}
-            {u.exampleEn ? (
-              <p className="mt-2 font-medium text-neutral-900">
-                <span className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
-                  Example{" "}
-                </span>
-                {u.exampleEn}
-              </p>
-            ) : null}
-            {u.exampleTh ? <p className="mt-1 text-neutral-600">{u.exampleTh}</p> : null}
+            {th ? (
+              u.exampleTh ? (
+                <p className="mt-2 text-neutral-800">
+                  <span className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
+                    ตัวอย่าง{" "}
+                  </span>
+                  {u.exampleTh}
+                </p>
+              ) : u.exampleEn ? (
+                <p className="mt-2 font-medium text-neutral-800">
+                  <span className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
+                    ตัวอย่าง{" "}
+                  </span>
+                  {u.exampleEn}
+                </p>
+              ) : null
+            ) : (
+              <>
+                {u.exampleEn ? (
+                  <p className="mt-2 font-medium text-neutral-900">
+                    <span className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
+                      Example{" "}
+                    </span>
+                    {u.exampleEn}
+                  </p>
+                ) : null}
+                {u.exampleTh ? <p className="mt-1 text-neutral-600">{u.exampleTh}</p> : null}
+              </>
+            )}
             <div className="relative z-10 mt-3">
               <AddToNotebookButton
                 entrySource={entrySource}
                 attemptId={attemptId}
+                uiLocale={uiLocale}
                 suggestedPremade={NOTEBOOK_BUILTIN.vocabulary}
                 getPayload={() => ({
                   titleEn: `Vocabulary: ${u.upgradedWord}`,

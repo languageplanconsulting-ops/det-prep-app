@@ -13,11 +13,25 @@ import type { NotebookEntry } from "@/types/writing";
 const BTN_CLASS =
   "inline-flex items-center border-2 border-black bg-ep-yellow px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none";
 
+const COPY = {
+  en: {
+    add: "Add to notebook",
+    toast: "added to notebook. don't forget to study me later! :)",
+    error: "Could not save — check that browser storage is allowed.",
+  },
+  th: {
+    add: "เพิ่มรายงานเต็มในสมุด",
+    toast: "บันทึกในสมุดแล้ว อย่าลืมกลับมาทบทวนนะ :)",
+    error: "บันทึกไม่สำเร็จ — ตรวจสอบว่าอนุญาตการเก็บข้อมูลในเบราว์เซอร์",
+  },
+} as const;
+
 export function FullReportNotebookButton({
   attemptId,
   entrySource,
   build,
   className = BTN_CLASS,
+  uiLocale = "en",
 }: {
   attemptId: string;
   entrySource: NotebookEntry["source"];
@@ -31,7 +45,10 @@ export function FullReportNotebookButton({
     fullBodyTh: string;
   };
   className?: string;
+  /** `th` = Thai button label and toasts (production report full view). */
+  uiLocale?: "en" | "th";
 }) {
+  const t = COPY[uiLocale];
   const btnRef = useRef<HTMLButtonElement>(null);
   const [toast, setToast] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +74,7 @@ export function FullReportNotebookButton({
       setError(
         e instanceof Error
           ? e.message
-          : "Could not save — check that browser storage is allowed.",
+          : t.error,
       );
       return;
     }
@@ -71,7 +88,7 @@ export function FullReportNotebookButton({
   return (
     <>
       <button ref={btnRef} type="button" onClick={onClick} className={className}>
-        Add to notebook
+        {t.add}
       </button>
       {error ? <p className="mt-2 text-xs font-bold text-red-700">{error}</p> : null}
       {toast ? (
@@ -79,7 +96,7 @@ export function FullReportNotebookButton({
           className="fixed bottom-6 left-1/2 z-[100] w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 border-2 border-black bg-white px-4 py-3 text-center text-sm font-bold shadow-[4px_4px_0_0_#000]"
           role="status"
         >
-          added to notebook. don&apos;t forget to study me later! :)
+          {t.toast}
         </div>
       ) : null}
     </>

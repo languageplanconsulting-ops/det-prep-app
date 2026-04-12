@@ -73,6 +73,8 @@ export function MockTestProcessingClient({ sessionId }: { sessionId: string }) {
       "Writing coherence / ความสอดคล้องในการเขียน",
       "Speaking clarity / ความชัดเจนในการพูด",
       "Response relevance / ความเกี่ยวข้องของคำตอบ",
+      "Vocabulary + reading integration / การอ่านเชื่อมศัพท์",
+      "Conversation & summary / บทสนทนาและการสรุป",
     ],
     [],
   );
@@ -121,10 +123,10 @@ function Card1({
   return (
     <div className="space-y-3">
       <h2 className="text-lg font-black text-[#004AAD]">
-        Analyzing your English ability across 9 dimensions…
+        Analyzing your English ability across 10 dimensions…
       </h2>
       <p className="text-sm font-bold text-neutral-700">
-        วิเคราะห์ความสามารถภาษาอังกฤษของคุณใน 9 มิติ…
+        วิเคราะห์ความสามารถภาษาอังกฤษของคุณใน 10 มิติ…
       </p>
       <p className="text-xs text-neutral-500">
         Your results will be ready in 10 minutes / ผลลัพธ์ของคุณจะพร้อมใน 10 นาที

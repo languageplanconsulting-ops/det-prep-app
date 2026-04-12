@@ -7,6 +7,17 @@ import {
   getPhaseTimeLimitSeconds,
 } from "@/lib/mock-test/phase-timer";
 
+function resolvePhaseSeconds(phase: number, overrideSeconds?: number): number {
+  if (
+    typeof overrideSeconds === "number" &&
+    Number.isFinite(overrideSeconds) &&
+    overrideSeconds > 0
+  ) {
+    return Math.max(1, Math.floor(overrideSeconds));
+  }
+  return getPhaseTimeLimitSeconds(phase);
+}
+
 export type PhaseTimerControls = {
   secondsRemaining: number;
   isWarning: boolean;
@@ -14,10 +25,10 @@ export type PhaseTimerControls = {
   isExpired: boolean;
   formattedTime: string;
   progress: number;
-  startTimer: (phase: number) => void;
+  startTimer: (phase: number, overrideSeconds?: number) => void;
   pauseTimer: () => void;
   resumeTimer: () => void;
-  resetTimer: (phase: number) => void;
+  resetTimer: (phase: number, overrideSeconds?: number) => void;
 };
 
 /**
@@ -45,8 +56,8 @@ export function usePhaseTimer(): PhaseTimerControls {
     return () => window.clearInterval(id);
   }, [running]);
 
-  const startTimer = useCallback((nextPhase: number) => {
-    const t = getPhaseTimeLimitSeconds(nextPhase);
+  const startTimer = useCallback((nextPhase: number, overrideSeconds?: number) => {
+    const t = resolvePhaseSeconds(nextPhase, overrideSeconds);
     setTotalSeconds(t);
     setSecondsRemaining(t);
     setRunning(true);
@@ -61,8 +72,8 @@ export function usePhaseTimer(): PhaseTimerControls {
     setRunning(true);
   }, [secondsRemaining]);
 
-  const resetTimer = useCallback((nextPhase: number) => {
-    const t = getPhaseTimeLimitSeconds(nextPhase);
+  const resetTimer = useCallback((nextPhase: number, overrideSeconds?: number) => {
+    const t = resolvePhaseSeconds(nextPhase, overrideSeconds);
     setTotalSeconds(t);
     setSecondsRemaining(t);
     setRunning(true);

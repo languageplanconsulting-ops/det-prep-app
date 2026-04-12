@@ -54,7 +54,9 @@ function entryHaystack(e: NotebookEntry): string {
                   ? "real english word vocabulary authentic fake"
                   : e.source === "dialogue-summary"
                     ? "dialogue summary listening scenario transcript"
-                    : "writing write";
+                    : e.source === "interactive-speaking"
+                      ? "interactive speaking interview follow up conversation"
+                      : "writing write";
   return [
     origin,
     e.titleEn,
@@ -113,6 +115,7 @@ function sourceHashtag(e: NotebookEntry): string {
     "interactive-conversation": "conversation",
     "real-word": "real-word",
     "dialogue-summary": "dialogue-summary",
+    "interactive-speaking": "interactive-speaking",
   };
   return m[e.source] ?? "note";
 }

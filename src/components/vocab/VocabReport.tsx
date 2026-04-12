@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   VOCAB_SESSION_LABEL,
   VOCAB_SESSION_MAX,
@@ -177,9 +177,16 @@ function WordNotebookRow({
   const [saved, setSaved] = useState(() =>
     isVocabWordNotebookSaved(round, setNumber, passageNumber, entry.word),
   );
+  const [showAddedCelebration, setShowAddedCelebration] = useState(false);
 
   const synText =
     entry.synonyms.length > 0 ? entry.synonyms.join(", ") : "—";
+
+  useEffect(() => {
+    if (!showAddedCelebration) return;
+    const id = window.setTimeout(() => setShowAddedCelebration(false), 3800);
+    return () => window.clearTimeout(id);
+  }, [showAddedCelebration]);
 
   const save = () => {
     if (saved) return;
@@ -197,13 +204,18 @@ function WordNotebookRow({
       });
       markVocabWordNotebookSaved(round, setNumber, passageNumber, entry.word);
       setSaved(true);
+      setShowAddedCelebration(true);
     } catch {
       /* ignore */
     }
   };
 
   return (
-    <li className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+    <li
+      className={`relative ep-brutal-reading rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000] ${
+        showAddedCelebration ? "mb-1 pb-16 sm:pb-14" : ""
+      }`}
+    >
       <p className="text-lg font-black text-neutral-900">{entry.word}</p>
       <p className="mt-2 text-sm text-neutral-700">
         <span className="font-bold">Synonyms: </span>
@@ -212,12 +224,32 @@ function WordNotebookRow({
       <button
         type="button"
         onClick={save}
-        className={`mt-3 border-4 border-black px-3 py-2 text-xs font-black uppercase shadow-[4px_4px_0_0_#000] ${
-          saved ? "bg-green-600 text-white" : "bg-ep-yellow text-black"
+        disabled={saved}
+        className={`mt-3 border-4 border-black px-3 py-2 text-xs font-black uppercase shadow-[4px_4px_0_0_#000] transition-transform active:translate-x-px active:translate-y-px ${
+          saved ? "bg-green-600 text-white" : "bg-ep-yellow text-black hover:bg-[#ffe033]"
         }`}
       >
         {saved ? "Saved!" : "Add to notebook"}
       </button>
+      {showAddedCelebration ? (
+        <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 w-[min(100%,19rem)] -translate-x-1/2">
+          <div
+            role="status"
+            aria-live="polite"
+            className="ep-vocab-notebook-toast rounded-[6px] border-[3px] border-black bg-[#e8fff3] px-3 py-2.5 text-center shadow-[4px_4px_0_0_#000]"
+          >
+            <p className="text-sm font-black leading-snug text-emerald-900">
+              <span className="inline-block" aria-hidden>
+                📓{" "}
+              </span>
+              Added to notebook!
+            </p>
+            <p className="mt-1 text-xs font-semibold leading-snug text-emerald-800/95">
+              Don&apos;t forget to study later :)
+            </p>
+          </div>
+        </div>
+      ) : null}
     </li>
   );
 }

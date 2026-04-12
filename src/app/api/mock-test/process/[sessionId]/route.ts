@@ -41,6 +41,10 @@ export async function POST(
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
+    if (session.engine_version === 2 && session.status === "completed") {
+      return NextResponse.json({ ok: true, skipped: "v2_already_scored" });
+    }
+
     const now = new Date().toISOString();
     await supabase
       .from("mock_test_sessions")
@@ -51,7 +55,7 @@ export async function POST(
       JSON.stringify(session.phase_responses ?? {}),
     ) as ScoringSessionInput["phase_responses"];
 
-    const aiPhases = [5, 6, 7, 8, 9] as const;
+    const aiPhases = [5, 6, 7, 8, 9, 10] as const;
     for (const p of aiPhases) {
       const block = phaseResponses?.[String(p)];
       if (!block?.items) continue;

@@ -83,29 +83,26 @@ export function mapToDetScale(rawScore: number, maxRaw: number): number {
 }
 
 export function calculateAllSubscores(session: ScoringSessionInput): Subscores {
-  // Literacy: phases 1,2,4 — adaptive MCQ
-  const lit = sumAdaptivePoints(session, [1, 2, 4]);
+  // Literacy: phases 1–3 — adaptive (FITB, dictation, real word)
+  const lit = sumAdaptivePoints(session, [1, 2, 3]);
   const literacy = mapToDetScale(lit.earned, lit.max);
 
-  // Comprehension: phase 3 (interactive listening) + phase 8 (summarize) AI
-  const compAd = sumAdaptivePoints(session, [3]);
-  const compAi = avgAiFromPhaseItems(session, [8]);
+  // Comprehension: phase 4 (vocab + reading) adaptive + phase 10 (conversation → summary) AI
+  const compAd = sumAdaptivePoints(session, [4]);
+  const compAi = avgAiFromPhaseItems(session, [10]);
   const compAdaptivePart = mapToDetScale(compAd.earned, compAd.max);
   const compAiPart = compAi.count ? (compAi.avg / 10) * 160 : 0;
   const comprehension = Math.round(
     compAi.count ? compAdaptivePart * 0.5 + compAiPart * 0.5 : compAdaptivePart,
   );
 
-  // Conversation: phase 3 + phase 7 (speak about photo) AI
-  const convAi = avgAiFromPhaseItems(session, [7]);
-  const convAdaptivePart = mapToDetScale(compAd.earned, compAd.max);
-  const convAiPart = convAi.count ? (convAi.avg / 10) * 160 : 0;
-  const conversation = Math.round(
-    convAi.count ? convAdaptivePart * 0.5 + convAiPart * 0.5 : convAdaptivePart,
-  );
+  // Conversation: phase 9 — interactive speaking (open response, AI-scored)
+  const convAi = avgAiFromPhaseItems(session, [9]);
+  const conversation =
+    convAi.count > 0 ? Math.round((convAi.avg / 10) * 160) : 0;
 
-  // Production: read_then_speak, write_about_photo, speak_about_photo, essay
-  const prod = avgAiFromPhaseItems(session, [5, 6, 7, 9]);
+  // Production: read & write, read-then-speak, write/speak about photo
+  const prod = avgAiFromPhaseItems(session, [5, 6, 7, 8]);
   const production =
     prod.count > 0 ? Math.round((prod.avg / 10) * 160) : 0;
 

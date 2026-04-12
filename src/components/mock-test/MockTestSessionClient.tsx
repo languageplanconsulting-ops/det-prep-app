@@ -13,11 +13,14 @@ import {
 } from "@/lib/mock-test/adaptive-engine";
 import {
   isAdaptivePhase,
+  MOCK_TEST_PHASE_COUNT,
   PHASE_QUESTION_COUNTS,
   PHASE_QUESTION_TYPE,
 } from "@/lib/mock-test/constants";
 import { mt } from "@/lib/mock-test/mock-test-styles";
 import { abandonStaleMockSessions } from "@/lib/mock-test/session-integrity";
+import type { VocabularyReadingMockContent } from "@/lib/mock-test/vocabulary-reading-mock";
+import { gradeVocabularyReadingStep } from "@/lib/mock-test/vocabulary-reading-mock";
 import type { AdaptiveState, MockQuestionRow, PhaseResponseItem } from "@/lib/mock-test/types";
 import { usePhaseTimer } from "@/hooks/usePhaseTimer";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
@@ -25,13 +28,44 @@ import type { Difficulty } from "@/lib/access-control";
 
 type PhaseResponses = Record<string, { items: PhaseResponseItem[] }>;
 
+function normalizeTyped(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[^a-z0-9\s']/g, "");
+}
+
 function parseCorrectAnswer(q: MockQuestionRow, answer: unknown): boolean {
+  if (q.question_type === "vocabulary_reading") {
+    const inner =
+      typeof answer === "object" && answer && "answer" in answer
+        ? (answer as { answer: { step: number; choice: string } }).answer
+        : (answer as { step: number; choice: string });
+    if (
+      typeof inner !== "object" ||
+      inner === null ||
+      typeof inner.step !== "number" ||
+      typeof inner.choice !== "string"
+    ) {
+      return false;
+    }
+    return gradeVocabularyReadingStep(
+      q.content as unknown as VocabularyReadingMockContent,
+      inner.step,
+      inner.choice,
+    );
+  }
+
   const ca = q.correct_answer as { answer?: string } | null;
   if (!ca || typeof ca.answer !== "string") return false;
   const raw =
     typeof answer === "object" && answer && "answer" in answer
       ? String((answer as { answer: string }).answer)
       : String(answer);
+  if (q.question_type === "dictation") {
+    return normalizeTyped(raw) === normalizeTyped(ca.answer);
+  }
   return raw.trim().toLowerCase() === ca.answer.trim().toLowerCase();
 }
 
@@ -59,11 +93,17 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
 
   const fetchPool = useCallback(
     async (p: number, difficulty: Difficulty): Promise<MockQuestionRow[]> => {
+      const primary = PHASE_QUESTION_TYPE[p];
+      const typeAlts = [primary];
+      if (primary === "read_and_write") typeAlts.push("essay_writing");
+      if (primary === "conversation_summary") typeAlts.push("summarize_conversation");
+
       const { data, error: e } = await supabase
         .from("mock_questions")
         .select("*")
         .eq("phase", p)
         .eq("difficulty", difficulty)
+        .in("question_type", typeAlts)
         .eq("is_active", true);
       if (e) {
         setError(e.message);
@@ -130,7 +170,7 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
 
   useEffect(() => {
     if (!timer.isExpired) return;
-    if (phase >= 9) {
+    if (phase >= MOCK_TEST_PHASE_COUNT) {
       router.push(`/mock-test/processing/${sessionId}`);
       return;
     }
@@ -185,7 +225,13 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
       [key]: { items: newItems },
     };
     setPhaseResponses(nextPr);
-    const nextUsed = [...usedIds, currentQ.id];
+
+    const isVocabComposite =
+      phase === 4 && currentQ.question_type === "vocabulary_reading";
+    const nextUsed =
+      isVocabComposite && newItems.length < needed
+        ? usedIds
+        : [...usedIds, currentQ.id];
     setUsedIds(nextUsed);
 
     await persistSession({
@@ -197,7 +243,7 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
     });
 
     if (newItems.length >= needed) {
-      if (phase >= 9) {
+      if (phase >= MOCK_TEST_PHASE_COUNT) {
         router.push(`/mock-test/processing/${sessionId}`);
         return;
       }
@@ -215,9 +261,14 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
     let rows = pool;
     if (
       isAdaptivePhase(phase) &&
+      !isVocabComposite &&
       nextAdaptive.currentDifficulty !== difficulty
     ) {
       rows = await fetchPool(phase, nextAdaptive.currentDifficulty);
+    }
+    if (isVocabComposite) {
+      setCurrentQ(currentQ);
+      return;
     }
     const nextQ = getNextQuestion(phase, diffForNext, nextUsed, rows);
     setCurrentQ(nextQ);
@@ -263,7 +314,15 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-black text-[#004AAD]">
-            Phase {phase} of 9 · {PHASE_QUESTION_TYPE[phase]?.replace(/_/g, " ")}
+            Phase {phase} of {MOCK_TEST_PHASE_COUNT} ·{" "}
+            {PHASE_QUESTION_TYPE[phase]?.replace(/_/g, " ")}
+            {phase === 4 &&
+            currentQ?.question_type === "vocabulary_reading" ? (
+              <span className="font-mono text-xs text-neutral-600">
+                {" "}
+                · {phaseResponses["4"]?.items?.length ?? 0}/{needed}
+              </span>
+            ) : null}
           </p>
           {isAdaptivePhase(phase) ? (
             <span
@@ -280,7 +339,7 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
         <div className="mt-2 h-2 w-full border-4 border-black bg-neutral-200">
           <div
             className="h-full bg-[#004AAD]"
-            style={{ width: `${(phase / 9) * 100}%` }}
+            style={{ width: `${(phase / MOCK_TEST_PHASE_COUNT) * 100}%` }}
           />
         </div>
       </div>
@@ -294,7 +353,16 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
 
       {currentQ ? (
         <div className={`${mt.border} ${mt.shadow} bg-white p-4`}>
-          <QuestionRouter question={currentQ} onSubmit={handleSubmit} />
+          <QuestionRouter
+            question={currentQ}
+            phaseProgress={
+              phase === 4 &&
+              currentQ.question_type === "vocabulary_reading"
+                ? (phaseResponses[String(phase)]?.items?.length ?? 0)
+                : 0
+            }
+            onSubmit={handleSubmit}
+          />
         </div>
       ) : (
         <p className="text-center font-bold">กำลังเตรียมข้อสอบ…</p>

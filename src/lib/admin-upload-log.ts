@@ -16,6 +16,7 @@ import { revertDialogueSummarySlots } from "@/lib/dialogue-summary-storage";
 import { revertRealWordSetToDefault } from "@/lib/realword-storage";
 import { removeSpeakingTopicsByIds } from "@/lib/speaking-storage";
 import { removeVocabPassagesFromAdmin } from "@/lib/vocab-storage";
+import { removeInteractiveSpeakingScenariosByIds } from "@/lib/interactive-speaking-storage";
 import { removeWritingTopicsByIds } from "@/lib/writing-storage";
 
 export type AdminExamUploadKind =
@@ -29,7 +30,8 @@ export type AdminExamUploadKind =
   | "fitb"
   | "conversation"
   | "realword"
-  | "dialogueSummary";
+  | "dialogueSummary"
+  | "interactiveSpeaking";
 
 export type AdminUploadRevertSpec =
   | {
@@ -58,7 +60,8 @@ export type AdminUploadRevertSpec =
   | { kind: "writing"; topicIds: string[] }
   | { kind: "speaking"; topicIds: string[] }
   | { kind: "photo"; itemIds: string[] }
-  | { kind: "writeAboutPhoto"; itemIds: string[] };
+  | { kind: "writeAboutPhoto"; itemIds: string[] }
+  | { kind: "interactiveSpeaking"; ids: string[] };
 
 export type AdminUploadLogEntry = {
   id: string;
@@ -298,6 +301,9 @@ export async function applyAdminUploadRevert(
         break;
       case "writeAboutPhoto":
         removeWriteAboutPhotoItemsByIds(spec.itemIds);
+        break;
+      case "interactiveSpeaking":
+        removeInteractiveSpeakingScenariosByIds(spec.ids);
         break;
     }
     removeAdminUploadLogEntry(entry.id);

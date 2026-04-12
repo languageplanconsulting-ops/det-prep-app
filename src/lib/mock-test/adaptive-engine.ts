@@ -76,7 +76,7 @@ export function shouldDowngrade(state: AdaptiveState): boolean {
 
 /**
  * Apply one answer and return updated adaptive state for phases 1–4.
- * Phases 5–9 return state unchanged (non-adaptive).
+ * Phases 5+ return state unchanged (non-adaptive).
  */
 export function applyAdaptiveAnswer(
   state: AdaptiveState,

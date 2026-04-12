@@ -1,4 +1,4 @@
-import { MockTestSessionClient } from "@/components/mock-test/MockTestSessionClient";
+import { MockTestSessionRouter } from "@/components/mock-test/MockTestSessionRouter";
 
 export default async function MockTestSessionPage({
   params,
@@ -6,5 +6,5 @@ export default async function MockTestSessionPage({
   params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = await params;
-  return <MockTestSessionClient sessionId={sessionId} />;
+  return <MockTestSessionRouter sessionId={sessionId} />;
 }

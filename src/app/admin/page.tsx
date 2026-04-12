@@ -43,6 +43,13 @@ export default function AdminPage() {
           >
             Supabase URL &amp; key (browser) →
           </Link>
+          <Link
+            href="/admin/mock-test/upload"
+            className="inline-flex items-center rounded-[4px] border-4 border-black bg-[#FFCC00] px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            Mock test — upload question bank →
+          </Link>
         </p>
       </header>
 

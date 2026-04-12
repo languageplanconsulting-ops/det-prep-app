@@ -1,23 +1,25 @@
 import { NextResponse } from "next/server";
 
 import { isMockTestAvailableNow } from "@/lib/mock-test/mock-test-availability";
+import { isUserAdminRole } from "@/lib/mock-test/mock-test-server-access";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 
 export async function POST() {
   try {
-    if (!isMockTestAvailableNow()) {
-      return NextResponse.json(
-        { error: "Mock test is not available yet." },
-        { status: 403 },
-      );
-    }
-
     const supabase = await createRouteHandlerSupabase();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const publicOpen = isMockTestAvailableNow();
+    if (!publicOpen && !(await isUserAdminRole(supabase, user.id))) {
+      return NextResponse.json(
+        { error: "Mock test is not available yet." },
+        { status: 403 },
+      );
     }
 
     const { data, error } = await supabase

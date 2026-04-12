@@ -172,7 +172,8 @@ export interface NotebookEntry {
     | "fill-in-blank"
     | "interactive-conversation"
     | "real-word"
-    | "dialogue-summary";
+    | "dialogue-summary"
+    | "interactive-speaking";
   categoryIds: string[];
   titleEn: string;
   titleTh: string;

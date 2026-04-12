@@ -13,9 +13,9 @@ import {
   buildWritingReportNotebookFullBodies,
   buildWritingReportNotebookPreview,
 } from "@/lib/writing-report-notebook";
-import { GRADING_BADGE_OFFLINE, GRADING_BADGE_PRIMARY } from "@/lib/report-branding";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
+import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
 import { withStudyPackDefaults } from "@/lib/writing-report";
 import { getTopicById } from "@/lib/writing-storage";
 import type { SpeakingVocabularyUpgrade } from "@/types/speaking";
@@ -34,6 +34,7 @@ function CriterionBlock({
   report,
   attemptId,
   suggestedPremade,
+  uiLocale = "en",
 }: {
   title: string;
   titleEn: string;
@@ -41,17 +42,28 @@ function CriterionBlock({
   report: WritingCriterionReport;
   attemptId: string;
   suggestedPremade: SuggestedNotebookPremade;
+  uiLocale?: "en" | "th";
 }) {
+  const th = uiLocale === "th";
+  const panelTitle = th ? titleTh : title;
+  const eyebrow = th
+    ? `${Math.round(report.scorePercent)}% · น้ำหนัก ${report.weight * 100}%`
+    : `${Math.round(report.scorePercent)}% · weight ${report.weight * 100}%`;
+
   return (
-    <BrutalPanel
-      variant="elevated"
-      eyebrow={`${Math.round(report.scorePercent)}% · weight ${report.weight * 100}%`}
-      title={title}
-    >
-      <p className="text-sm font-medium text-neutral-800">{report.summary.en}</p>
-      <p className="mt-2 text-sm text-neutral-600">{report.summary.th}</p>
+    <BrutalPanel variant="elevated" eyebrow={eyebrow} title={panelTitle}>
+      {th ? (
+        <p className="text-sm text-neutral-800">{report.summary.th}</p>
+      ) : (
+        <>
+          <p className="text-sm font-medium text-neutral-800">{report.summary.en}</p>
+          <p className="mt-2 text-sm text-neutral-600">{report.summary.th}</p>
+        </>
+      )}
       <p className="ep-stat mt-3 text-xs font-bold text-ep-blue">
-        ≈ {report.pointsOn160} / 160 from this criterion
+        {th
+          ? `≈ ${report.pointsOn160} / 160 จากเกณฑ์นี้`
+          : `≈ ${report.pointsOn160} / 160 from this criterion`}
       </p>
       <ul className="mt-4 space-y-3">
         {report.breakdown.map((b) => (
@@ -63,27 +75,42 @@ function CriterionBlock({
               <p className="ep-stat mb-2 text-xs italic text-neutral-700">“{b.excerpt}”</p>
             ) : null}
             <p className="ep-stat text-[10px] font-bold uppercase tracking-wide text-neutral-500">
-              Issue
+              {th ? "ประเด็น" : "Issue"}
             </p>
-            <p className="font-medium text-neutral-900">{b.en}</p>
-            <p className="mt-1 text-neutral-600">{b.th}</p>
+            {th ? (
+              <p className="font-medium text-neutral-900">{b.th?.trim() ? b.th : b.en}</p>
+            ) : (
+              <>
+                <p className="font-medium text-neutral-900">{b.en}</p>
+                <p className="mt-1 text-neutral-600">{b.th}</p>
+              </>
+            )}
             {b.suggestionEn?.trim() || b.suggestionTh?.trim() ? (
               <div className="mt-3 border-t border-neutral-200 pt-3">
                 <p className="ep-stat text-[10px] font-bold uppercase tracking-wide text-ep-blue">
-                  Suggestion
+                  {th ? "คำแนะนำ" : "Suggestion"}
                 </p>
-                {b.suggestionEn?.trim() ? (
-                  <p className="mt-1 font-medium text-neutral-900">{b.suggestionEn}</p>
-                ) : null}
-                {b.suggestionTh?.trim() ? (
-                  <p className="mt-1 text-neutral-600">{b.suggestionTh}</p>
-                ) : null}
+                {th ? (
+                  <p className="mt-1 text-neutral-800">
+                    {(b.suggestionTh?.trim() ? b.suggestionTh : b.suggestionEn) ?? ""}
+                  </p>
+                ) : (
+                  <>
+                    {b.suggestionEn?.trim() ? (
+                      <p className="mt-1 font-medium text-neutral-900">{b.suggestionEn}</p>
+                    ) : null}
+                    {b.suggestionTh?.trim() ? (
+                      <p className="mt-1 text-neutral-600">{b.suggestionTh}</p>
+                    ) : null}
+                  </>
+                )}
               </div>
             ) : null}
             <div className="relative z-10 mt-2">
               <AddToNotebookButton
                 attemptId={attemptId}
                 suggestedPremade={suggestedPremade}
+                uiLocale={uiLocale}
                 getPayload={() => ({
                   titleEn,
                   titleTh,
@@ -103,17 +130,27 @@ function CriterionBlock({
 function StudySentenceRow({
   s,
   attemptId,
+  uiLocale = "en",
 }: {
   s: StudySentenceSuggestion;
   attemptId: string;
+  uiLocale?: "en" | "th";
 }) {
+  const th = uiLocale === "th";
   return (
     <li className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]">
-      <p className="font-medium text-neutral-900">{s.en}</p>
-      <p className="mt-1 text-neutral-600">{s.th}</p>
+      {th ? (
+        <p className="font-medium text-neutral-900">{s.th?.trim() ? s.th : s.en}</p>
+      ) : (
+        <>
+          <p className="font-medium text-neutral-900">{s.en}</p>
+          <p className="mt-1 text-neutral-600">{s.th}</p>
+        </>
+      )}
       <AddToNotebookButton
         attemptId={attemptId}
         suggestedPremade="default"
+        uiLocale={uiLocale}
         getPayload={() => ({
           titleEn: "Practice sentence",
           titleTh: "ประโยคฝึก",
@@ -129,23 +166,33 @@ function StudySentenceRow({
 function StudyVocabRow({
   v,
   attemptId,
+  uiLocale = "en",
 }: {
   v: StudyVocabularySuggestion;
   attemptId: string;
+  uiLocale?: "en" | "th";
 }) {
+  const th = uiLocale === "th";
   return (
     <li className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]">
       <p className="font-bold text-neutral-900">
-        {v.termEn}
-        {v.termTh ? (
+        {th ? v.termTh?.trim() || v.termEn : v.termEn}
+        {!th && v.termTh ? (
           <span className="ml-2 font-normal text-neutral-600">({v.termTh})</span>
         ) : null}
       </p>
-      <p className="mt-1 text-neutral-800">{v.noteEn}</p>
-      <p className="mt-1 text-neutral-600">{v.noteTh}</p>
+      {th ? (
+        <p className="mt-1 text-neutral-800">{v.noteTh?.trim() ? v.noteTh : v.noteEn}</p>
+      ) : (
+        <>
+          <p className="mt-1 text-neutral-800">{v.noteEn}</p>
+          <p className="mt-1 text-neutral-600">{v.noteTh}</p>
+        </>
+      )}
       <AddToNotebookButton
         attemptId={attemptId}
         suggestedPremade={NOTEBOOK_BUILTIN.vocabulary}
+        uiLocale={uiLocale}
         getPayload={() => ({
           titleEn: `Vocabulary: ${v.termEn}`,
           titleTh: `คำศัพท์: ${v.termTh || v.termEn}`,
@@ -169,31 +216,37 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
     (!vocabUpgrades || vocabUpgrades.length === 0) &&
     (fullReport.studyVocabulary?.length ?? 0) > 0;
 
+  const uiLocale = "th" as const;
+  const rubricTh = (
+    <>
+      น้ำหนักเกณฑ์: ไวยากรณ์ {SPEAKING_RUBRIC_WEIGHTS.grammar * 100}% · คำศัพท์{" "}
+      {SPEAKING_RUBRIC_WEIGHTS.vocabulary * 100}% · ความต่อเนื่อง{" "}
+      {SPEAKING_RUBRIC_WEIGHTS.coherence * 100}% · การตอบโจทย์{" "}
+      {SPEAKING_RUBRIC_WEIGHTS.taskRelevancy * 100}%
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-[#fafafa]">
       <ProductionReportLandingHero
+        locale="th"
         backHref={`/practice/production/read-and-write/round/${roundBack}`}
-        backLabel="← Topics"
-        eyebrow="Read & write — report"
+        backLabel="← หัวข้อ"
+        eyebrow="รายงาน · อ่านแล้วเขียน"
         titleEn={fullReport.topicTitleEn}
         titleTh={fullReport.topicTitleTh}
         score160={fullReport.score160}
         gradingBadgeText={
-          fullReport.gradingSource === "gemini" ? GRADING_BADGE_PRIMARY : GRADING_BADGE_OFFLINE
+          fullReport.gradingSource === "gemini"
+            ? "ฐานข้อมูล 4 ปี ของ English Plan"
+            : "ให้คะแนนแบบสาธิต (ออฟไลน์)"
         }
-        rubricLine={
-          <>
-            Rubric weights: grammar {SPEAKING_RUBRIC_WEIGHTS.grammar * 100}% · vocabulary{" "}
-            {SPEAKING_RUBRIC_WEIGHTS.vocabulary * 100}% · coherence{" "}
-            {SPEAKING_RUBRIC_WEIGHTS.coherence * 100}% · task{" "}
-            {SPEAKING_RUBRIC_WEIGHTS.taskRelevancy * 100}%.
-          </>
-        }
+        rubricLine={rubricTh}
         taskBoostSlot={
           fullReport.taskPersonalExperienceBoostApplied ? (
             <p className="ep-stat max-w-2xl text-xs font-bold text-emerald-800">
-              Task relevancy includes +10% for personal or hypothetical personal experience (max
-              100%).
+              เกณฑ์การตอบโจทย์รับน้ำหนัก +10% เมื่อเล่าประสบการณ์ส่วนตัวหรือสมมติในลักษณะประสบการณ์ส่วนตัว
+              (สูงสุด 100%)
             </p>
           ) : undefined
         }
@@ -205,11 +258,12 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           }
           className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
         >
-          Try again
+          ทำอีกครั้ง
         </button>
         <FullReportNotebookButton
           attemptId={fullReport.attemptId}
           entrySource="writing-read-and-write"
+          uiLocale={uiLocale}
           build={() => {
             const preview = buildWritingReportNotebookPreview(fullReport);
             const { fullBodyEn, fullBodyTh } =
@@ -219,21 +273,24 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
         />
       </ProductionReportLandingHero>
 
-      <section className="border-y-4 border-black bg-white">
-        <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
+      <section className="border-y-4 border-black">
+        <div className={`${LANDING_PAGE_GRID_BG} py-8 sm:py-10`}>
+          <div className="mx-auto max-w-5xl space-y-8 px-4 sm:px-6">
       {topic ? (
-        <BrutalPanel variant="elevated" title="Prompt">
-          <p className="text-sm font-medium text-neutral-900">{topic.promptEn}</p>
-          <p className="mt-2 text-sm text-neutral-600">{topic.promptTh}</p>
+        <BrutalPanel variant="elevated" title="โจทย์">
+          <p className="text-sm font-medium text-neutral-900">
+            {topic.promptTh?.trim() ? topic.promptTh : topic.promptEn}
+          </p>
           {(topic.followUps ?? []).length > 0 ? (
             <ul className="mt-4 space-y-3 border-t-2 border-dashed border-neutral-200 pt-4">
               {(topic.followUps ?? []).map((fu, i) => (
                 <li key={`${topic.id}-fu-${i}`} className="text-sm">
                   <p className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
-                    Follow-up {i + 1}
+                    คำถามเสริม {i + 1}
                   </p>
-                  <p className="mt-1 font-medium text-neutral-900">{fu.promptEn}</p>
-                  <p className="mt-1 text-neutral-600">{fu.promptTh}</p>
+                  <p className="mt-1 font-medium text-neutral-900">
+                    {fu.promptTh?.trim() ? fu.promptTh : fu.promptEn}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -241,15 +298,15 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
         </BrutalPanel>
       ) : null}
 
-      <BrutalPanel variant="elevated" title="Your submission">
+      <BrutalPanel variant="elevated" title="ข้อความของคุณ">
         <p className="ep-stat text-xs text-neutral-500">
-          {fullReport.wordCount} words · prep {fullReport.prepMinutes} min · punctuated for
-          feedback
+          {fullReport.wordCount} คำ · เตรียม {fullReport.prepMinutes} นาที ·
+          จัดวรรคตอนเพื่อให้ข้อเสนอแนะ
         </p>
 
         <div className="mt-3 rounded-sm border-2 border-black bg-white p-3">
           <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-neutral-500">
-            Main question answer
+            คำตอบข้อหลัก
           </p>
           {fullReport.mainSubmissionHighlights &&
           fullReport.mainSubmissionHighlights.length > 0 ? (
@@ -277,10 +334,11 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
               className="mt-3 rounded-sm border-2 border-black bg-[#fafafa] p-3 shadow-[2px_2px_0_0_#000]"
             >
               <p className="ep-stat text-[10px] font-bold uppercase tracking-widest text-neutral-500">
-                Follow-up {i + 1}
+                คำถามเสริม {i + 1}
               </p>
-              <p className="mt-1 text-sm font-medium text-neutral-900">{fu.promptEn}</p>
-              <p className="mt-1 text-xs text-neutral-600">{fu.promptTh}</p>
+              <p className="mt-1 text-sm font-medium text-neutral-900">
+                {fu.promptTh?.trim() ? fu.promptTh : fu.promptEn}
+              </p>
               {hi.length > 0 ? (
                 <div className="mt-2 max-w-full overflow-x-auto">
                   <SpeakingAnnotatedTranscript text={text} highlights={hi} />
@@ -297,6 +355,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
             suggestedPremade={NOTEBOOK_BUILTIN.productionFeedback}
             directSaveToProductionFeedback
             entrySource="writing-read-and-write"
+            uiLocale={uiLocale}
             getPayload={() => ({
               titleEn: "Your submission (read & write)",
               titleTh: "ข้อความของคุณ (อ่านแล้วเขียน)",
@@ -314,36 +373,45 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           upgrades={vocabUpgrades as SpeakingVocabularyUpgrade[]}
           attemptId={fullReport.attemptId}
           entrySource="writing-read-and-write"
+          uiLocale={uiLocale}
         />
       ) : null}
 
       {showStudyVocabFallback ? (
-        <BrutalPanel variant="elevated" eyebrow="Up to 10" title="Vocabulary suggestions">
+        <BrutalPanel variant="elevated" eyebrow="สูงสุด 10 คำ" title="แนะนำคำศัพท์">
           <p className="mb-3 text-xs text-neutral-600">
-            Useful words and notes for this task. Add any item to the notebook (vocabulary
-            suggested by default).
+            คำและโน้ตที่เกี่ยวข้องกับโจทย์นี้ กดเพิ่มในสมุดได้ทุกรายการ (ค่าเริ่มต้นเป็นหมวดคำศัพท์)
           </p>
           <ul className="space-y-3">
             {fullReport.studyVocabulary?.map((v) => (
-              <StudyVocabRow key={v.id} v={v} attemptId={fullReport.attemptId} />
+              <StudyVocabRow
+                key={v.id}
+                v={v}
+                attemptId={fullReport.attemptId}
+                uiLocale={uiLocale}
+              />
             ))}
           </ul>
         </BrutalPanel>
       ) : null}
 
-      <BrutalPanel variant="elevated" eyebrow="Up to 7" title="Sentence suggestions (bilingual)">
+      <BrutalPanel variant="elevated" eyebrow="สูงสุด 7 ประโยค" title="ประโยคฝึกแนะนำ">
         <p className="mb-3 text-xs text-neutral-600">
-          Practise these patterns, then save any line to your notebook — you choose the
-          folder.
+          ฝึกรูปแบบเหล่านี้ แล้วบันทึกบรรทัดใดก็ได้ลงสมุด — เลือกโฟลเดอร์เองได้
         </p>
         <ul className="space-y-3">
           {fullReport.studySentences?.map((s) => (
-            <StudySentenceRow key={s.id} s={s} attemptId={fullReport.attemptId} />
+            <StudySentenceRow
+              key={s.id}
+              s={s}
+              attemptId={fullReport.attemptId}
+              uiLocale={uiLocale}
+            />
           ))}
         </ul>
       </BrutalPanel>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2">
         <CriterionBlock
           title="Grammar"
           titleEn="Grammar (read & write)"
@@ -351,6 +419,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           report={fullReport.grammar}
           attemptId={fullReport.attemptId}
           suggestedPremade={NOTEBOOK_BUILTIN.grammar}
+          uiLocale={uiLocale}
         />
         <CriterionBlock
           title="Vocabulary"
@@ -359,6 +428,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           report={fullReport.vocabulary}
           attemptId={fullReport.attemptId}
           suggestedPremade={NOTEBOOK_BUILTIN.vocabulary}
+          uiLocale={uiLocale}
         />
         <CriterionBlock
           title="Coherence"
@@ -367,6 +437,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           report={fullReport.coherence}
           attemptId={fullReport.attemptId}
           suggestedPremade={NOTEBOOK_BUILTIN.productionFeedback}
+          uiLocale={uiLocale}
         />
         <CriterionBlock
           title="Task relevancy"
@@ -375,18 +446,18 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           report={fullReport.taskRelevancy}
           attemptId={fullReport.attemptId}
           suggestedPremade={NOTEBOOK_BUILTIN.productionFeedback}
+          uiLocale={uiLocale}
         />
       </div>
 
-      <BrutalPanel variant="elevated" title="Key learning (bilingual)">
+      <BrutalPanel variant="elevated" title="สิ่งที่ได้เรียนรู้">
         <ul className="space-y-3">
           {fullReport.improvementPoints.map((p) => (
             <li
               key={p.id}
               className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]"
             >
-              <p className="font-bold">{p.en}</p>
-              <p className="mt-1 text-neutral-600">{p.th}</p>
+              <p className="font-bold text-neutral-900">{p.th?.trim() ? p.th : p.en}</p>
               <div className="relative z-10 mt-2">
                 <AddToNotebookButton
                   entrySource="writing-read-and-write"
@@ -394,6 +465,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
                   suggestedPremade={NOTEBOOK_BUILTIN.productionFeedback}
                   directSaveToProductionFeedback
                   className="border-ep-blue/30 bg-ep-yellow/80"
+                  uiLocale={uiLocale}
                   getPayload={() => ({
                     titleEn: "Key learning (read & write)",
                     titleTh: "สิ่งที่ได้เรียนรู้ (อ่านแล้วเขียน)",
@@ -406,14 +478,15 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           ))}
         </ul>
       </BrutalPanel>
+          </div>
         </div>
       </section>
 
       <section className="bg-[#fafafa] px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-5xl">
           <p className="text-xs text-neutral-500">
-            Task scoring uses your punctuated submission and the prompts above. Add lines to the
-            notebook with the same categories as other production reports.
+            การให้คะแนนอิงข้อความที่จัดวรรคตอนแล้วและโจทย์ด้านบน
+            บันทึกประเด็นลงสมุดได้ด้วยหมวดเดียวกับรายงาน production อื่น
           </p>
         </div>
       </section>

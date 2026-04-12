@@ -17,6 +17,14 @@ import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import { formatBahtFromSatang } from "@/lib/money-format";
 
+function isoToDatetimeLocalValue(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function notebookPayloadLine(payload: unknown): {
   source: string;
   title: string;
@@ -51,6 +59,7 @@ export function SubscriptionDetailClient() {
     reason: string;
   }>({ kind: null, reason: "" });
   const [tierSel, setTierSel] = useState("free");
+  const [expiryLocal, setExpiryLocal] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -79,6 +88,12 @@ export function SubscriptionDetailClient() {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (!data?.profile) return;
+    const p = data.profile as Record<string, unknown>;
+    setExpiryLocal(isoToDatetimeLocalValue(p.tier_expires_at as string | null | undefined));
+  }, [data]);
+
   const profile = (data?.profile ?? {}) as Record<string, unknown>;
   const study = (data?.study ?? {}) as Record<string, unknown>;
   const weekly = (study.weeklyMinutes as number[]) ?? [0, 0, 0, 0];
@@ -100,6 +115,39 @@ export function SubscriptionDetailClient() {
       return;
     }
     push({ type: "success", titleEn: "Name updated.", titleTh: "อัปเดตชื่อแล้ว" });
+    void load();
+  };
+
+  const saveMembershipExpiry = async (clear: boolean) => {
+    if (!clear && !expiryLocal.trim()) {
+      push({
+        type: "error",
+        titleEn: "Choose a date/time or use Clear expiry.",
+        titleTh: "เลือกวันและเวลา หรือกดล้างวันหมดอายุ",
+      });
+      return;
+    }
+    const tier_expires_at = clear
+      ? null
+      : expiryLocal.trim()
+        ? new Date(expiryLocal).toISOString()
+        : null;
+    const res = await fetch(`/api/admin/subscriptions/${userId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        tier_expires_at,
+        reason: clear
+          ? "Admin cleared membership expiry"
+          : "Admin set membership expiry",
+      }),
+    });
+    if (!res.ok) {
+      push({ type: "error", titleEn: "Could not save expiry.", titleTh: "บันทึกวันหมดอายุไม่สำเร็จ" });
+      return;
+    }
+    push({ type: "success", titleEn: "Expiry updated.", titleTh: "อัปเดตวันหมดอายุแล้ว" });
     void load();
   };
 
@@ -240,9 +288,41 @@ export function SubscriptionDetailClient() {
               {profile.tier_expires_at
                 ? new Date(
                     profile.tier_expires_at as string,
-                  ).toLocaleDateString()
+                  ).toLocaleString()
                 : "∞ course VIP"}
             </p>
+            <div className="mt-3 flex flex-col gap-2 border-t-2 border-neutral-200 pt-3">
+              <p className="text-xs font-bold">Set expiry / กำหนดวันหมดอายุ</p>
+              <div className="flex flex-wrap items-end gap-2">
+                <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                  Date &amp; time (local) / วันและเวลา
+                  <input
+                    type="datetime-local"
+                    value={expiryLocal}
+                    onChange={(e) => setExpiryLocal(e.target.value)}
+                    className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => void saveMembershipExpiry(false)}
+                  className="rounded-[4px] border-4 border-black bg-[#004AAD] px-3 py-2 text-xs font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
+                >
+                  Save date / บันทึกวัน
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void saveMembershipExpiry(true)}
+                  className="rounded-[4px] border-4 border-black bg-white px-3 py-2 text-xs font-black shadow-[4px_4px_0_0_#000]"
+                >
+                  Clear expiry / ล้างวันหมดอายุ
+                </button>
+              </div>
+              <p className="text-[10px] text-neutral-500">
+                Clears stored expiry (Stripe or course VIP may still control access separately). /
+                ล้างวันที่บันทึกไว้ (สิทธิ์ Stripe หรือ VIP คอร์สอาจยังมีผลแยก)
+              </p>
+            </div>
             <p className="ep-stat mt-1 text-xs">
               Stripe customer: {String(profile.stripe_customer_id ?? "—")}
             </p>
@@ -381,7 +461,16 @@ export function SubscriptionDetailClient() {
           </section>
 
           <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
-            <h2 className="text-lg font-black">Notebook (cloud sync) / สมุดโน้ต (ซิงค์)</h2>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <h2 className="text-lg font-black">Notebook (cloud sync) / สมุดโน้ต (ซิงค์)</h2>
+              <Link
+                href={`/admin/subscriptions/${userId}/notebook`}
+                className="shrink-0 rounded-[4px] border-4 border-black bg-[#FFCC00] px-3 py-2 text-xs font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+                style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+              >
+                Full notebook / ดูสมุดเต็ม →
+              </Link>
+            </div>
             <p className="mt-1 text-xs text-neutral-600">
               Saved cards sync while the student is signed in (add, edit, delete). Visiting the Notebook
               page once backfills existing local saves. / บันทึกลงคลาวด์เมื่อล็อกอิน — เปิดหน้า Notebook

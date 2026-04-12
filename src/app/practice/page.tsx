@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { PracticePageOverview } from "@/components/practice/PracticePageOverview";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { canAccessSkill } from "@/lib/access-control";
+import { mockTestHubProgressLabel } from "@/lib/mock-test/mock-test-availability";
 
-const hubs = [
+const hubsWithoutMock = [
   {
     title: "Production",
     subtitle: "Writing & speaking tasks",
@@ -30,6 +32,11 @@ const hubs = [
         label: "Read, then speak",
         progress: "0/1",
         href: "/practice/production/read-and-speak",
+      },
+      {
+        label: "Interactive speaking",
+        progress: "6 turns / scenario",
+        href: "/practice/production/interactive-speaking",
       },
     ],
   },
@@ -87,22 +94,29 @@ const hubs = [
       },
     ],
   },
-  {
-    title: "Mock test",
-    subtitle: "Full exam simulation",
-    items: [
-      {
-        label: "Full mock test",
-        progress: "Opens 22 Apr 2026",
-        href: "/mock-test/start",
-      },
-    ],
-  },
 ] as const;
 
 export default function PracticeHubPage() {
   const { effectiveTier } = useEffectiveTier();
   const isVip = effectiveTier === "vip";
+
+  const hubs = useMemo(
+    () => [
+      ...hubsWithoutMock,
+      {
+        title: "Mock test",
+        subtitle: "Full exam simulation",
+        items: [
+          {
+            label: "Full mock test",
+            progress: mockTestHubProgressLabel(),
+            href: "/mock-test/start",
+          },
+        ],
+      },
+    ],
+    [],
+  );
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">

@@ -4,6 +4,7 @@ import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 import type { SpeakingTranscriptHighlight, SpeakingVocabularyUpgrade } from "@/types/speaking";
+import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
 
 function pointsOn160(percent: number, weight: number): number {
@@ -86,7 +87,7 @@ Improvement points: each MUST quote an exact phrase from punctuatedTranscript an
 
 Grammar bands: ~30% A1–A2 issues; ~50% B1–B2; ~70% clean; ~90% ≥1 complex structure; 100% ≥3 complex structures.
 
-Return ONLY valid JSON (no markdown). Use issueEn/issueTh for breakdown issues.`;
+Return ONLY valid JSON (no markdown). Use issueEn/issueTh for breakdown issues.${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
 
 function buildUserPayload(

@@ -226,7 +226,8 @@ function findVocabMatch(
   return best;
 }
 
-function HighlightedReadingText({
+/** Shared with mock-test vocabulary + reading (same passage + clickable vocab). */
+export function HighlightedReadingText({
   text,
   vocab,
   activeWord,

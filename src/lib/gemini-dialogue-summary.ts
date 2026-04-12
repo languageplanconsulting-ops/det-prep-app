@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import { DIALOGUE_SUMMARY_RUBRIC_WEIGHTS } from "@/lib/dialogue-summary-constants";
 import type {
@@ -115,7 +116,7 @@ For each highlight, isPositive true = strength; false = weakness.
 
 Provide up to 8 improvement points (bilingual EN/TH). Categories: relevancy, grammar, flow, vocabulary, general.
 
-All user-facing strings: both English and Thai (_En / _Th suffixes in JSON keys as specified).`;
+All user-facing strings: both English and Thai (_En / _Th suffixes in JSON keys as specified).${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
 
 function buildUserPayload(exam: DialogueSummaryExam, summary: string): string {

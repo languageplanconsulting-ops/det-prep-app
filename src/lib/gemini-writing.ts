@@ -11,6 +11,7 @@ import type {
   WritingTopic,
   WritingVocabularyUpgrade,
 } from "@/types/writing";
+import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import {
   WRITING_RUBRIC_WEIGHTS,
   buildLocalStudyPack,
@@ -104,7 +105,7 @@ Improvement points: each MUST quote an exact phrase from the learner's punctuate
 
 studySentences (max 7), studyVocabulary (max 10): bilingual revision tied to this submission.
 
-Return ONLY valid JSON (no markdown).`;
+Return ONLY valid JSON (no markdown).${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
 
 function buildUserPayload(

@@ -21,6 +21,7 @@ const LABELS: Record<AdminExamUploadKind, string> = {
   photo: "Speak about photo (legacy)",
   writeAboutPhoto: "Write & speak about photo (rounds)",
   dialogueSummary: "Dialogue → summary",
+  interactiveSpeaking: "Interactive speaking",
 };
 
 export function AdminUploadLogPanel({ examKind }: { examKind: AdminExamUploadKind }) {

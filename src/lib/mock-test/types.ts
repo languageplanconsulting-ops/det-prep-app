@@ -1,13 +1,23 @@
 import type { Difficulty } from "@/lib/access-control";
 
+/**
+ * Mock-test-only question kinds (stored in `mock_questions`; separate from practice banks).
+ * Legacy aliases kept for older uploaded rows.
+ */
 export type MockQuestionType =
   | "fill_in_blanks"
-  | "read_and_select"
-  | "interactive_listening"
-  | "vocabulary_in_context"
+  | "dictation"
+  | "real_english_word"
+  | "vocabulary_reading"
+  | "read_and_write"
   | "read_then_speak"
   | "write_about_photo"
   | "speak_about_photo"
+  | "interactive_speaking"
+  | "conversation_summary"
+  | "read_and_select"
+  | "interactive_listening"
+  | "vocabulary_in_context"
   | "summarize_conversation"
   | "essay_writing";
 

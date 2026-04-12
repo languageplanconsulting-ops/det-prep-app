@@ -24,28 +24,56 @@ function premadeToSlug(p: RadioPremade): string {
   return p;
 }
 
-const RADIO_OPTIONS: { value: RadioPremade; label: string; hint: string }[] = [
-  {
-    value: NOTEBOOK_BUILTIN.grammar,
-    label: NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.grammar],
-    hint: "Structures, agreement, clauses",
-  },
-  {
-    value: NOTEBOOK_BUILTIN.vocabulary,
-    label: NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.vocabulary],
-    hint: "Words, collocations, precision",
-  },
-  {
-    value: NOTEBOOK_BUILTIN.productionFeedback,
-    label: NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.productionFeedback],
-    hint: "Task, coherence, examiner-style feedback",
-  },
-  {
-    value: "default",
-    label: "Default",
-    hint: "General folder — use when unsure (same as production feedback)",
-  },
-];
+function radioOptions(
+  locale: "en" | "th",
+): { value: RadioPremade; label: string; hint: string }[] {
+  if (locale === "th") {
+    return [
+      {
+        value: NOTEBOOK_BUILTIN.grammar,
+        label: "ไวยากรณ์",
+        hint: "โครงสร้างประโยค การสอดคล้อง อนุประโยค",
+      },
+      {
+        value: NOTEBOOK_BUILTIN.vocabulary,
+        label: "คำศัพท์",
+        hint: "คำและการใช้คำให้ตรงและลื่นไหล",
+      },
+      {
+        value: NOTEBOOK_BUILTIN.productionFeedback,
+        label: "ข้อเสนอแนะการทำข้อสอบ",
+        hint: "โจทย์ ความต่อเนื่อง สไตล์ผู้ตรวจ",
+      },
+      {
+        value: "default",
+        label: "ค่าเริ่มต้น",
+        hint: "โฟลเดอร์ทั่วไป — เลือกเมื่อไม่แน่ใจ (เทียบเท่าข้อเสนอแนะการทำข้อสอบ)",
+      },
+    ];
+  }
+  return [
+    {
+      value: NOTEBOOK_BUILTIN.grammar,
+      label: NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.grammar],
+      hint: "Structures, agreement, clauses",
+    },
+    {
+      value: NOTEBOOK_BUILTIN.vocabulary,
+      label: NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.vocabulary],
+      hint: "Words, collocations, precision",
+    },
+    {
+      value: NOTEBOOK_BUILTIN.productionFeedback,
+      label: NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.productionFeedback],
+      hint: "Task, coherence, examiner-style feedback",
+    },
+    {
+      value: "default",
+      label: "Default",
+      hint: "General folder — use when unsure (same as production feedback)",
+    },
+  ];
+}
 
 export function AddToNotebookButton({
   attemptId,
@@ -55,6 +83,7 @@ export function AddToNotebookButton({
   entrySource = "writing-read-and-write",
   /** Save immediately to Production feedback (no dialog). Use for full submissions on speaking reports. */
   directSaveToProductionFeedback = false,
+  uiLocale = "en",
 }: {
   attemptId: string;
   suggestedPremade: SuggestedNotebookPremade;
@@ -69,7 +98,11 @@ export function AddToNotebookButton({
   /** Where this note came from (notebook filter / label). */
   entrySource?: NotebookEntry["source"];
   directSaveToProductionFeedback?: boolean;
+  /** `th` = Thai labels for production report flows. */
+  uiLocale?: "en" | "th";
 }) {
+  const th = uiLocale === "th";
+  const opts = radioOptions(uiLocale);
   const dialogTitleId = useId();
   const [open, setOpen] = useState(false);
   const [premade, setPremade] = useState<RadioPremade>(suggestedPremade);
@@ -121,7 +154,9 @@ export function AddToNotebookButton({
       setSaveError(
         e instanceof Error
           ? e.message
-          : "Could not save — check that browser storage is allowed.",
+          : th
+            ? "บันทึกไม่สำเร็จ — ตรวจสอบว่าอนุญาตการเก็บข้อมูลในเบราว์เซอร์"
+            : "Could not save — check that browser storage is allowed.",
       );
       return false;
     }
@@ -165,12 +200,14 @@ export function AddToNotebookButton({
         }}
         title={
           directSaveToProductionFeedback
-            ? "Saves straight to the suggested folder (no extra step)"
+            ? th
+              ? "บันทึกไปยังโฟลเดอร์ที่แนะนำทันที (ไม่ต้องเลือกเพิ่ม)"
+              : "Saves straight to the suggested folder (no extra step)"
             : undefined
         }
         className={`border-2 border-black bg-ep-yellow px-2 py-1 text-xs font-bold shadow-[2px_2px_0_0_#000] ${className}`}
       >
-        Add to notebook
+        {th ? "เพิ่มในสมุด" : "Add to notebook"}
       </button>
 
       {directSaveToProductionFeedback && saveError && !open ? (
@@ -182,7 +219,9 @@ export function AddToNotebookButton({
           className="fixed bottom-6 left-1/2 z-[100] w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 border-2 border-black bg-white px-4 py-3 text-center text-sm font-bold shadow-[4px_4px_0_0_#000]"
           role="status"
         >
-          added to notebook. don&apos;t forget to study me later! :)
+          {th
+            ? "บันทึกในสมุดแล้ว อย่าลืมกลับมาทบทวนนะ :)"
+            : "added to notebook. don't forget to study me later! :)"}
         </div>
       ) : null}
 
@@ -201,19 +240,29 @@ export function AddToNotebookButton({
             className="max-h-[90vh] w-full max-w-md overflow-y-auto border-2 border-black bg-white p-5 shadow-[6px_6px_0_0_#000]"
           >
             <h2 id={dialogTitleId} className="text-lg font-black">
-              Save to notebook
+              {th ? "บันทึกลงสมุด" : "Save to notebook"}
             </h2>
             <p className="mt-2 text-xs text-neutral-600">
-              Pick a folder. Everything also stays under{" "}
-              <strong>{NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.all]}</strong>. If
-              nothing fits, choose <strong>Default</strong>.
+              {th ? (
+                <>
+                  เลือกโฟลเดอร์ รายการทั้งหมดยังอยู่ภายใต้{" "}
+                  <strong>ทั้งหมด</strong> เสมอ หากไม่แน่ใจให้เลือก{" "}
+                  <strong>ค่าเริ่มต้น</strong>
+                </>
+              ) : (
+                <>
+                  Pick a folder. Everything also stays under{" "}
+                  <strong>{NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.all]}</strong>. If
+                  nothing fits, choose <strong>Default</strong>.
+                </>
+              )}
             </p>
 
             <fieldset className="mt-4 space-y-2">
               <legend className="text-xs font-bold uppercase text-ep-blue">
-                Category (required)
+                {th ? "หมวด (จำเป็น)" : "Category (required)"}
               </legend>
-              {RADIO_OPTIONS.map((opt) => (
+              {opts.map((opt) => (
                 <label
                   key={opt.value}
                   className="flex cursor-pointer gap-2 rounded-sm border-2 border-neutral-200 bg-neutral-50 p-2 text-sm has-[:checked]:border-black has-[:checked]:bg-ep-yellow/30"
@@ -237,7 +286,7 @@ export function AddToNotebookButton({
             {customCats.length > 0 ? (
               <div className="mt-4 border-t-2 border-neutral-200 pt-3">
                 <p className="text-xs font-bold uppercase text-neutral-500">
-                  Your categories (optional)
+                  {th ? "หมวดของคุณ (ถ้ามี)" : "Your categories (optional)"}
                 </p>
                 <div className="mt-2 flex flex-col gap-2">
                   {customCats.map((c) => (
@@ -267,14 +316,14 @@ export function AddToNotebookButton({
                 onClick={() => setOpen(false)}
                 className="border-2 border-black bg-white px-3 py-2 text-sm font-bold"
               >
-                Cancel
+                {th ? "ยกเลิก" : "Cancel"}
               </button>
               <button
                 type="button"
                 onClick={confirm}
                 className="border-2 border-black bg-ep-blue px-3 py-2 text-sm font-bold text-white shadow-[3px_3px_0_0_#000]"
               >
-                Save
+                {th ? "บันทึก" : "Save"}
               </button>
             </div>
           </div>

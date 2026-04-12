@@ -4,16 +4,35 @@ import { useState } from "react";
 
 import type { MockQuestionRow } from "@/lib/mock-test/types";
 
+import { ConversationSummaryMock } from "@/components/mock-test/questions/ConversationSummaryMock";
+import { VocabularyReadingMockExam } from "@/components/mock-test/questions/VocabularyReadingMockExam";
+import { isInteractiveConversationSummaryContent } from "@/lib/mock-test/conversation-summary-mock";
+
 type Props = {
   question: MockQuestionRow;
+  /** Phase 4 composite: how many sub-questions already recorded (0…9). */
+  phaseProgress?: number;
   onSubmit: (answer: unknown) => void;
 };
 
-export function QuestionRouter({ question, onSubmit }: Props) {
+export function QuestionRouter({
+  question,
+  phaseProgress = 0,
+  onSubmit,
+}: Props) {
   const c = question.content as Record<string, unknown>;
 
   switch (question.question_type) {
     case "fill_in_blanks":
+      return (
+        <FillInBlanks
+          content={c}
+          onSubmit={(ans) => onSubmit({ answer: ans })}
+        />
+      );
+    case "dictation":
+      return <Dictation content={c} onSubmit={(ans) => onSubmit({ answer: ans })} />;
+    case "real_english_word":
       return (
         <FillInBlanks
           content={c}
@@ -25,6 +44,14 @@ export function QuestionRouter({ question, onSubmit }: Props) {
         <ReadAndSelect
           content={c}
           onSubmit={(ans) => onSubmit({ answer: ans })}
+        />
+      );
+    case "vocabulary_reading":
+      return (
+        <VocabularyReadingMockExam
+          content={c}
+          completedSteps={phaseProgress}
+          onSubmit={onSubmit}
         />
       );
     case "interactive_listening":
@@ -61,10 +88,28 @@ export function QuestionRouter({ question, onSubmit }: Props) {
           onSubmit={(text) => onSubmit({ text })}
         />
       );
+    case "interactive_speaking":
+      return (
+        <OpenTextarea
+          labelEn={String(c.prompt_en ?? c.instruction ?? "Respond to the prompt.")}
+          labelTh={String(c.prompt_th ?? c.instruction_th ?? "ตอบตามโจทย์")}
+          onSubmit={(text) => onSubmit({ text })}
+        />
+      );
     case "summarize_conversation":
+    case "conversation_summary":
+      if (isInteractiveConversationSummaryContent(c)) {
+        return (
+          <ConversationSummaryMock
+            content={c}
+            onSubmit={(payload) => onSubmit(payload)}
+          />
+        );
+      }
       return (
         <SummarizeConv content={c} onSubmit={(text) => onSubmit({ text })} />
       );
+    case "read_and_write":
     case "essay_writing":
       return (
         <EssayWriting content={c} onSubmit={(text) => onSubmit({ text })} />
@@ -72,6 +117,46 @@ export function QuestionRouter({ question, onSubmit }: Props) {
     default:
       return <p className="text-sm">Unsupported question type.</p>;
   }
+}
+
+function Dictation({
+  content,
+  onSubmit,
+}: {
+  content: Record<string, unknown>;
+  onSubmit: (a: string) => void;
+}) {
+  const [text, setText] = useState("");
+  const url = String(content.audio_url ?? "");
+  return (
+    <div className="space-y-4">
+      <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
+      <p className="text-xs text-neutral-600">{String(content.instruction ?? "")}</p>
+      {url ? (
+        <audio controls className="w-full" src={url}>
+          <track kind="captions" />
+        </audio>
+      ) : (
+        <p className="rounded-[4px] border-4 border-black bg-neutral-50 p-3 text-sm">
+          {String(content.reference_sentence ?? "")}
+        </p>
+      )}
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={4}
+        className="w-full rounded-[4px] border-4 border-black bg-white p-3 text-sm"
+        placeholder="Type what you hear / พิมพ์สิ่งที่ได้ยิน"
+      />
+      <button
+        type="button"
+        onClick={() => onSubmit(text)}
+        className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
+      >
+        ส่งคำตอบ / Submit
+      </button>
+    </div>
+  );
 }
 
 function FillInBlanks({
@@ -324,9 +409,18 @@ function SummarizeConv({
 }) {
   const [text, setText] = useState("");
   const url = String(content.audio_url ?? "");
+  const lines = Array.isArray(content.dialogue_lines) ? (content.dialogue_lines as string[]) : [];
   return (
     <div className="space-y-3">
       <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
+      <p className="text-xs text-neutral-600">{String(content.instruction ?? "")}</p>
+      {lines.length > 0 ? (
+        <ul className="list-inside list-disc space-y-1 rounded-[4px] border-4 border-black bg-neutral-50 p-3 text-sm">
+          {lines.map((line, i) => (
+            <li key={i}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
       {url ? <audio controls className="w-full" src={url} /> : null}
       <textarea
         value={text}

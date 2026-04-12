@@ -9,6 +9,7 @@ import { AdminWriteAboutPhotoPaste } from "@/components/admin/AdminWriteAboutPho
 import { AdminReadingSetsPaste } from "@/components/admin/AdminReadingSetsPaste";
 import { AdminDialogueSummaryPaste } from "@/components/admin/AdminDialogueSummaryPaste";
 import { AdminRealWordPaste } from "@/components/admin/AdminRealWordPaste";
+import { AdminInteractiveSpeakingPaste } from "@/components/admin/AdminInteractiveSpeakingPaste";
 import { AdminSpeakingTopicsPaste } from "@/components/admin/AdminSpeakingTopicsPaste";
 import { AdminVocabSetsPaste } from "@/components/admin/AdminVocabSetsPaste";
 import { AdminUploadLogPanel } from "@/components/admin/AdminUploadLogPanel";
@@ -24,6 +25,7 @@ import { countFitbSetsInBank } from "@/lib/fitb-storage";
 import { getWriteAboutPhotoRoundCounts } from "@/lib/write-about-photo-storage";
 import { countReadingSetsInBank } from "@/lib/reading-storage";
 import { countDialogueSummarySetsInBank } from "@/lib/dialogue-summary-storage";
+import { loadInteractiveSpeakingScenarios } from "@/lib/interactive-speaking-storage";
 import { countRealWordSetsInBank } from "@/lib/realword-storage";
 import { loadSpeakingTopics } from "@/lib/speaking-storage";
 import { countVocabSetsInBank } from "@/lib/vocab-storage";
@@ -39,7 +41,8 @@ type UploadKind =
   | "fitb"
   | "conversation"
   | "realword"
-  | "dialogueSummary";
+  | "dialogueSummary"
+  | "interactiveSpeaking";
 
 type UploadCounts = Record<UploadKind, number> & {
   conversationEasy: number;
@@ -66,6 +69,7 @@ function getCounts(): UploadCounts {
     conversationHard: conv.filter((e) => e.difficulty === "hard").length,
     realword: countRealWordSetsInBank(),
     dialogueSummary: countDialogueSummarySetsInBank(),
+    interactiveSpeaking: loadInteractiveSpeakingScenarios().length,
   };
 }
 
@@ -102,6 +106,7 @@ export function AdminUploadWorkspace() {
     conversationHard: 0,
     realword: 0,
     dialogueSummary: 0,
+    interactiveSpeaking: 0,
   });
 
   const applyRemoteResult = useCallback((r: ContentBankRemoteResult) => {
@@ -137,6 +142,7 @@ export function AdminUploadWorkspace() {
     window.addEventListener("ep-vocab-storage", refresh);
     window.addEventListener("ep-realword-storage", refresh);
     window.addEventListener("ep-dialogue-summary-storage", refresh);
+    window.addEventListener("ep-interactive-speaking-storage", refresh);
     return () => {
       cancelled = true;
       window.clearInterval(id);
@@ -152,6 +158,7 @@ export function AdminUploadWorkspace() {
       window.removeEventListener("ep-vocab-storage", refresh);
       window.removeEventListener("ep-realword-storage", refresh);
       window.removeEventListener("ep-dialogue-summary-storage", refresh);
+      window.removeEventListener("ep-interactive-speaking-storage", refresh);
     };
   }, [applyRemoteResult]);
 
@@ -168,6 +175,7 @@ export function AdminUploadWorkspace() {
         { key: "writing", label: "Writing topics" },
         { key: "speaking", label: "Read, then speak" },
         { key: "writeAboutPhoto", label: "Write & speak about photo (rounds)" },
+        { key: "interactiveSpeaking", label: "Interactive speaking" },
       ] as { key: UploadKind; label: string }[],
     [],
   );
@@ -238,6 +246,7 @@ export function AdminUploadWorkspace() {
         {active === "writing" ? <AdminWritingTopicsUpload /> : null}
         {active === "speaking" ? <AdminSpeakingTopicsPaste /> : null}
         {active === "writeAboutPhoto" ? <AdminWriteAboutPhotoPaste /> : null}
+        {active === "interactiveSpeaking" ? <AdminInteractiveSpeakingPaste /> : null}
         <AdminUploadLogPanel examKind={active} />
         <AdminContentBankSyncPanel onAfterRemoteChange={applyRemoteResult} />
       </div>

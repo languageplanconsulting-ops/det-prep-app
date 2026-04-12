@@ -1,0 +1,12 @@
+import "server-only";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+/** Server-only: profile role admin. */
+export async function isUserAdminRole(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<boolean> {
+  const { data } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
+  return data?.role === "admin";
+}

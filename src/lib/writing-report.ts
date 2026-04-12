@@ -115,25 +115,25 @@ function buildHighlights(essay: string): EssayHighlight[] {
     const notes: Record<(typeof types)[number], { e: string; t: string; pe: string; pt: string }> = {
       grammar: {
         e: "Tighten agreement or shorten very long sentences.",
-        t: "ตรวจ subject–verb หรือแบ่งประโยคยาว",
+        t: "ดูว่าใครทำอะไรให้ตรงกัน หรือตัดประโยคให้สั้นลง",
         pe: "Clear grammar in this segment.",
-        pt: "ไวยากรณ์ชัดในส่วนนี้",
+        pt: "ส่วนนี้เขียนโครงสร้างชัดดี",
       },
       vocabulary: {
         e: "Use a more precise word here if you can.",
-        t: "ลองใช้คำที่เฉพาะเจาะจงขึ้น",
+        t: "ลองใช้คำที่ตรงความหมายมากขึ้น",
         pe: "Good word choice.",
         pt: "เลือกคำได้ดี",
       },
       coherence: {
         e: "Add a linker or clearer reference between ideas.",
-        t: "เพิ่มคำเชื่อมหรืออ้างอิงให้ชัด",
+        t: "ใส่คำเชื่อมหรือบอกให้รู้ว่าหมายถึงอะไร",
         pe: "Logical flow here.",
-        pt: "ลำดับความคิดดี",
+        pt: "อ่านแล้วต่อเรื่องกันดี",
       },
       task: {
         e: "Tie this part more directly to the prompt.",
-        t: "ผูกกับโจทย์ให้ตรงขึ้น",
+        t: "ให้ส่วนนี้ตอบคำถามตรงๆ มากขึ้น",
         pe: "On-task detail.",
         pt: "อยู่ในโจทย์",
       },
@@ -166,9 +166,9 @@ function buildHighlights(essay: string): EssayHighlight[] {
             : undefined,
       patternTh:
         type === "grammar" && isPositive
-          ? "รูปแบบ: Although + ประธาน + กริยา, ประธาน + กริยา"
+          ? "ดี: ขึ้นต้นด้วย Although แล้วตามด้วยประโยคหลัก"
           : type === "grammar" && !isPositive
-            ? "ตรวจ: ประธานกับกริยาต้องสอดคล้อง (เอกพจน์/พหูพจน์)"
+            ? "เช็ก: คน/สิ่งกับคำว่าทำอะไร ต้องใช้คู่กันถูก"
             : undefined,
       scoreLineEn: isPositive
         ? `+ ${label}: supports your score on this criterion.`
@@ -187,12 +187,12 @@ function buildHighlights(essay: string): EssayHighlight[] {
         : undefined,
       fixTh: !isPositive
         ? type === "grammar"
-          ? "แก้ไข: ให้กริยาตรงกับประธาน หรือแบ่งประโยคถ้ายาวเกินไป"
+          ? "แก้: ให้คำว่าทำอะไรตรงกับใคร หรือแบ่งประโยคถ้ายาวเกินไป"
           : type === "vocabulary"
-            ? "แก้ไข: เลือกคำที่เฉพาะเจาะจงกับหัวข้อ"
+            ? "แก้: เลือกคำที่ตรงกับหัวข้อมากขึ้น"
             : type === "coherence"
-              ? "แก้ไข: เพิ่มคำเชื่อมหรืออ้างอิง (this/that)"
-              : "แก้ไข: เพิ่มรายละเอียดที่ตอบโจทย์"
+              ? "แก้: ใส่คำเชื่อม หรือใช้ this/that ให้รู้ว่าหมายถึงอะไร"
+              : "แก้: เพิ่มรายละเอียดที่ตอบคำถาม"
         : undefined,
     });
     i += 1;
@@ -235,7 +235,7 @@ function buildImprovementPoints(
       id: "g1",
       category: "grammar",
       en: "Proofread subject–verb agreement after linking words.",
-      th: "ตรวจ subject–verb หลังคำเชื่อม",
+      th: "หลังคำเชื่อม ดูว่าใครทำอะไรให้ตรงกัน",
     });
   }
   if (v < 80) {
@@ -266,7 +266,7 @@ function buildImprovementPoints(
     id: "x1",
     category: "general",
     en: "Read aloud once — awkward rhythm flags grammar issues.",
-    th: "อ่านออกเสียง — จังหวะแปลกมักมีปัญหาไวยากรณ์",
+    th: "อ่านออกเสียงครั้งหนึ่ง ถ้าจังหวะแปลกๆ มักมีจุดที่ผิด",
   });
   if (countWords(essay) < 80) {
     pool.push({
@@ -345,70 +345,70 @@ export function buildLocalStudyPack(
       termEn: "nevertheless",
       termTh: "ถึงอย่างไร",
       noteEn: "Contrast politely after stating a fact.",
-      noteTh: "ใช้แสดงความตัดกันหลังยกข้อเท็จจริง",
+      noteTh: "พูดความต่างแบบสุภาพ หลังบอกข้อเท็จจริง",
     },
     {
       id: "sv2",
       termEn: "furthermore",
       termTh: "นอกจากนี้",
       noteEn: "Adds a second supporting point in formal tone.",
-      noteTh: "เพิ่มข้อสนับสนุนที่สองในโทนทางการ",
+      noteTh: "เพิ่มเหตุผลข้อที่สอง โทนเป็นทางการหน่อย",
     },
     {
       id: "sv3",
       termEn: "consequently",
       termTh: "ด้วยเหตุนั้น",
       noteEn: "Shows result; stronger than 'so' in essays.",
-      noteTh: "แสดงผลลัพธ์ แข็งแรงกว่า so ในเรียงความ",
+      noteTh: "บอกว่าเกิดอะไรตามมา แรงกว่า so ในการเขียน",
     },
     {
       id: "sv4",
       termEn: "perspective",
       termTh: "มุมมอง",
       noteEn: "Use instead of repeating 'opinion' many times.",
-      noteTh: "ใช้แทนการพูดว่า opinion ซ้ำๆ",
+      noteTh: "ใช้แทนคำว่า opinion ที่พูดซ้ำๆ",
     },
     {
       id: "sv5",
       termEn: "significant",
-      termTh: "สำคัญอย่างมีนัย",
+      termTh: "สำคัญมาก",
       noteEn: "Upgrade from 'important' when the idea is central.",
-      noteTh: "อัปเกรดจาก important เมื่อไอเดียเป็นแกนหลัก",
+      noteTh: "แรงกว่า important เวลาอยากเน้นว่าสำคัญจริงๆ",
     },
     {
       id: "sv6",
       termEn: "demonstrate",
       termTh: "แสดงให้เห็น",
       noteEn: "Verb for showing evidence or skill.",
-      noteTh: "กริยาสำหรับแสดงหลักฐานหรือทักษะ",
+      noteTh: "บอกว่า “โชว์ให้เห็น” ว่ามีจริงหรือทำเป็น",
     },
     {
       id: "sv7",
       termEn: "coherent",
-      termTh: "สอดคล้องกัน",
+      termTh: "อ่านแล้วต่อเรื่องกัน",
       noteEn: "Describes ideas that connect clearly.",
-      noteTh: "อธิบายไอเดียที่เชื่อมกันชัด",
+      noteTh: "ความคิดต่อกัน ไม่งง",
     },
     {
       id: "sv8",
       termEn: "address the prompt",
       termTh: "ตอบให้ตรงโจทย์",
       noteEn: "Collocation examiners like for task focus.",
-      noteTh: "คำสันธานที่ผู้ตรวจชอบใช้เรื่องตรงโจทย์",
+      noteTh: "พูดถึงคำถามที่ให้ ไม่หลุดไปเรื่องอื่น",
     },
     {
       id: "sv9",
       termEn: "nuanced",
-      termTh: "ละเอียดอ่อน / หลายมิติ",
+      termTh: "มองหลายด้าน",
       noteEn: "Shows you see more than one side.",
-      noteTh: "บอกว่ามองหลายด้าน ไม่ขาวดำเกินไป",
+      noteTh: "ไม่มองแค่ขาวหรือดำอย่างเดียว",
     },
     {
       id: "sv10",
       termEn: "takeaway",
       termTh: "สิ่งที่ได้ไป",
       noteEn: "One-sentence lesson at the end.",
-      noteTh: "บทเรียนหนึ่งประโยคตอนจบ",
+      noteTh: "สรุปสั้นๆ ท้ายเรื่องว่าได้อะไร",
     },
   ];
 
@@ -465,35 +465,35 @@ export function buildWritingAttemptReport(
     score160,
     grammar: criterion("grammar", WRITING_RUBRIC_WEIGHTS.grammar, g, {
       en: `Grammar (target complex structures when appropriate). Score: ${g}%.`,
-      th: `ไวยากรณ์ (เป้าหมายคือโครงสร้างที่ซับซ้อนเมื่อเหมาะสม) คะแนน: ${g}%`,
+      th: `เรื่องการเขียนให้ถูกต้อง คะแนน: ${g}%`,
     }, [
-      { excerpt: ex, en: "Check opening for one clear main clause.", th: "ตรวจประโยคเปิดให้มี main clause ชัด" },
-      { en: "Keep tense consistent with the prompt.", th: "ให้ tense สอดคล้องโจทย์" },
-      { en: "With FANBOYS, both sides should be full clauses.", th: "ใช้ FANBOYS ทั้งสองข้างต้องเป็น clause สมบูรณ์" },
+      { excerpt: ex, en: "Check opening for one clear main clause.", th: "ประโยคแรกควรบอกใจความหลักชัดๆ" },
+      { en: "Keep tense consistent with the prompt.", th: "เรื่องเวลา (อดีต/ปัจจุบัน) ให้ตรงกับโจทย์" },
+      { en: "With FANBOYS, both sides should be full clauses.", th: "ถ้าใช้คำเชื่อมพวก for, and, but ทั้งสองข้างควรเป็นประโยคสมบูรณ์" },
     ]),
     vocabulary: criterion("vocabulary", WRITING_RUBRIC_WEIGHTS.vocabulary, v, {
       en: `Vocabulary precision (B2/C1 when correct). Score: ${v}%.`,
-      th: `ความแม่นยำของคำศัพท์ (B2/C1 เมื่อใช้ถูก) คะแนน: ${v}%`,
+      th: `เลือกคำให้ตรงและดีขึ้น คะแนน: ${v}%`,
     }, [
-      { en: "Use collocations that match the register.", th: "ใช้คำสันธานให้เหมาะระดับภาษา" },
-      { en: "Avoid repeating the same adjective.", th: "ลดการใช้คำคุณศัพท์ซ้ำ" },
-      { en: "Watch for false friends from Thai.", th: "ระวัง false friends จากไทย" },
+      { en: "Use collocations that match the register.", th: "ใช้คำคู่กันที่เข้ากับโทนเรื่อง" },
+      { en: "Avoid repeating the same adjective.", th: "อย่าใช้คำคุณศัพท์คำเดิมซ้ำๆ" },
+      { en: "Watch for false friends from Thai.", th: "ระวังคำที่หน้าตาเหมือนไทยแต่ความหมายคนละอย่าง" },
     ]),
     coherence: criterion("coherence", WRITING_RUBRIC_WEIGHTS.coherence, c, {
       en: `Coherence (transitions + referencing). Score: ${c}%.`,
-      th: `ความต่อเนื่อง (คำเชื่อม + การอ้างอิง) คะแนน: ${c}%`,
+      th: `อ่านแล้วต่อเรื่องกัน คะแนน: ${c}%`,
     }, [
-      { en: "Use this/that to refer back clearly.", th: "ใช้ this/that อ้างกลับให้ชัด" },
-      { en: "One main idea per paragraph.", th: "หนึ่งย่อหน้าหนึ่งไอเดียหลัก" },
-      { en: "Signal contrast with However / On the other hand.", th: "ใช้ However / On the other hand เมื่อเปรียบเทียบ" },
+      { en: "Use this/that to refer back clearly.", th: "ใช้ this/that ให้รู้ว่าหมายถึงอะไรก่อนหน้า" },
+      { en: "One main idea per paragraph.", th: "ย่อหน้าละหนึ่งหัวข้อหลัก" },
+      { en: "Signal contrast with However / On the other hand.", th: "เวลาเปรียบเทียบใช้ However หรือ On the other hand" },
     ]),
     taskRelevancy: criterion("task", WRITING_RUBRIC_WEIGHTS.taskRelevancy, tk, {
       en: `Task relevancy (specific + on-prompt). Score: ${tk}%.`,
-      th: `การตอบโจทย์ (เฉพาะเจาะจง + ตรงคำถาม) คะแนน: ${tk}%`,
+      th: `ตอบตรงคำถามหรือเปล่า คะแนน: ${tk}%`,
     }, [
-      { en: "Echo key words from the question.", th: "ดึงคำสำคัญจากคำถามมาใช้" },
-      { en: "Balance general claims with one concrete example.", th: "สมดุลข้อความกว้างกับตัวอย่างจริง" },
-      { en: "Close by restating the question in new words.", th: "ปิดท้ายโดยสรุปโจทย์อีกครั้งด้วยถ้อยคำใหม่" },
+      { en: "Echo key words from the question.", th: "เอาคำสำคัญจากโจทย์มาใช้ในคำตอบ" },
+      { en: "Balance general claims with one concrete example.", th: "มีทั้งข้อความกว้างๆ กับตัวอย่างจริงสักอย่าง" },
+      { en: "Close by restating the question in new words.", th: "จบด้วยการพูดถึงคำถามอีกครั้งด้วยคำใหม่" },
     ]),
     improvementPoints: buildImprovementPoints(g, v, c, tk, essay),
     highlights: buildHighlights(essay),
