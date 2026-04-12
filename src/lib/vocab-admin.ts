@@ -63,6 +63,11 @@ function parseCorrectWord(raw: unknown, ctx: string): VocabCorrectWordEntry {
   };
 }
 
+/** Converts `[BLANK 1]`, `[BLANK 2]`, `[BLANK1]`, etc. to canonical `[BLANK]` (matches VocabExam). */
+export function normalizeVocabPassageBlanks(passageText: string): string {
+  return passageText.replace(/\[\s*BLANK\s*\d+\s*\]/gi, "[BLANK]");
+}
+
 function countBlanks(text: string): number {
   const m = text.match(/\[BLANK\]/g);
   return m ? m.length : 0;
@@ -74,11 +79,12 @@ function parsePassageUnit(raw: unknown, ctx: string): VocabPassageUnit {
   if (typeof passageNumber !== "number" || !Number.isInteger(passageNumber) || passageNumber < 1) {
     throw new Error(`${ctx}: passageNumber must be a positive integer`);
   }
-  const passageText = expectString(raw, "passageText", ctx);
+  const passageTextRaw = expectString(raw, "passageText", ctx);
+  const passageText = normalizeVocabPassageBlanks(passageTextRaw);
   const blanksInText = countBlanks(passageText);
   if (blanksInText < 1) {
     throw new Error(
-      `${ctx}: passageText must contain at least 1 [BLANK] placeholder (found ${blanksInText})`,
+      `${ctx}: passageText must contain at least 1 [BLANK] or [BLANK 1]…[BLANK N] placeholder (found ${blanksInText})`,
     );
   }
   const blanksRaw = raw.blanks;

@@ -347,8 +347,11 @@ export function AdminVocabSetsPaste() {
         <p className="mt-2 text-xs font-bold text-ep-blue">Uploaded file: {selectedFileName}</p>
       ) : null}
       <p className="mb-2 mt-3 text-sm text-neutral-600">
-        Each passage must include <code className="ep-stat text-xs">passageText</code> with{" "}
-        <code className="ep-stat text-xs">[BLANK]</code> markers matching the lengths of{" "}
+        Each passage must include <code className="ep-stat text-xs">passageText</code> (or legacy{" "}
+        <code className="ep-stat text-xs">passage</code>) with{" "}
+        <code className="ep-stat text-xs">[BLANK]</code> or numbered{" "}
+        <code className="ep-stat text-xs">[BLANK 1]</code>…<code className="ep-stat text-xs">[BLANK N]</code>{" "}
+        markers matching the lengths of{" "}
         <code className="ep-stat text-xs">blanks</code> and <code className="ep-stat text-xs">correctWords</code>.
         Max {VOCAB_MAX_PASSAGES_PER_SET} passages per slot.
       </p>

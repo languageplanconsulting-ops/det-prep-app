@@ -5,6 +5,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { QuestionRouter } from "@/components/mock-test/questions/QuestionRouter";
 import { MockTestTimerBar } from "@/components/mock-test/MockTestTimerBar";
+import {
+  MockTestTransitionOverlay,
+  type MockTestTransitionVariant,
+} from "@/components/mock-test/MockTestTransitionOverlay";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import {
   applyAdaptiveAnswer,
@@ -85,7 +89,8 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
   const [pool, setPool] = useState<MockQuestionRow[]>([]);
   const [currentQ, setCurrentQ] = useState<MockQuestionRow | null>(null);
   const [phaseResponses, setPhaseResponses] = useState<PhaseResponses>({});
-  const [transition, setTransition] = useState(false);
+  const [transitionOverlay, setTransitionOverlay] =
+    useState<MockTestTransitionVariant | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -174,9 +179,9 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
       router.push(`/mock-test/processing/${sessionId}`);
       return;
     }
-    setTransition(true);
+    setTransitionOverlay("nextSection");
     setTimeout(() => {
-      setTransition(false);
+      setTransitionOverlay(null);
       setPhase((p) => p + 1);
     }, 2000);
   }, [timer.isExpired, phase, router, sessionId]);
@@ -202,10 +207,11 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
     const pts = isCorrect ? pointsForDifficulty(difficulty) : 0;
 
     let nextAdaptive = adaptive;
-    if (isAdaptivePhase(phase) && !currentQ.is_ai_graded) {
+    // Phases 1–3: adaptive difficulty. Phase 4 is vocabulary_reading only — single bank tier per item; do not drift tier between sub-steps.
+    if (isAdaptivePhase(phase) && !currentQ.is_ai_graded && phase < 4) {
       nextAdaptive = applyAdaptiveAnswer({ ...adaptive, phase }, isCorrect);
-      setAdaptive(nextAdaptive);
     }
+    setAdaptive(nextAdaptive);
 
     const item: PhaseResponseItem = {
       questionId: currentQ.id,
@@ -247,12 +253,22 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
         router.push(`/mock-test/processing/${sessionId}`);
         return;
       }
-      setTransition(true);
+      setTransitionOverlay("nextSection");
       setTimeout(() => {
-        setTransition(false);
+        setTransitionOverlay(null);
         setPhase((p) => p + 1);
       }, 2000);
       return;
+    }
+
+    if (isVocabComposite) {
+      setCurrentQ(currentQ);
+      return;
+    }
+
+    const showAdaptingOverlay = phase >= 1 && phase <= 3;
+    if (showAdaptingOverlay) {
+      setTransitionOverlay("adapting");
     }
 
     const diffForNext = isAdaptivePhase(phase)
@@ -266,11 +282,12 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
     ) {
       rows = await fetchPool(phase, nextAdaptive.currentDifficulty);
     }
-    if (isVocabComposite) {
-      setCurrentQ(currentQ);
-      return;
-    }
     const nextQ = getNextQuestion(phase, diffForNext, nextUsed, rows);
+
+    const minMs = showAdaptingOverlay ? 850 : 0;
+    await new Promise((r) => setTimeout(r, minMs));
+
+    setTransitionOverlay(null);
     setCurrentQ(nextQ);
     if (!nextQ) {
       setError("หาข้อถัดไปไม่ได้ — ฐานข้อสอบไม่เพียงพอ / Could not load next question.");
@@ -292,22 +309,15 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
 
   return (
     <StudySessionBoundary skill="mock_test" exerciseType="mock_test" setId={sessionId}>
+      <MockTestTransitionOverlay
+        open={transitionOverlay != null}
+        variant={transitionOverlay ?? "adapting"}
+      />
       {error ? (
         <div className="mx-auto max-w-lg p-8 text-center">
           <p className="font-bold text-red-800">{error}</p>
         </div>
-      ) : transition ? (
-        <div
-          className={`mx-auto max-w-2xl p-12 text-center ${mt.border} ${mt.shadow} bg-white`}
-        >
-          <p className="text-lg font-black text-[#004AAD]">
-            Phase complete. Moving to next section…
-          </p>
-          <p className="mt-2 text-sm text-neutral-600">
-            จบเฟสแล้ว กำลังไปส่วนถัดไป…
-          </p>
-        </div>
-      ) : (
+      ) : transitionOverlay != null ? null : (
     <div className="mx-auto max-w-3xl space-y-4 px-4 py-6">
       <div
         className={`${mt.gridBg} ${mt.border} ${mt.shadow} rounded-[4px] p-4`}

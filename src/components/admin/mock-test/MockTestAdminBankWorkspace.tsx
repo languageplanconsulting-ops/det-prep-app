@@ -132,7 +132,9 @@ export function MockTestAdminBankWorkspace() {
           <code className="font-mono text-xs">easy</code>,{" "}
           <code className="font-mono text-xs">medium</code>,{" "}
           <code className="font-mono text-xs">hard</code> in the database. The selected tier is applied
-          to every valid row on upload (even if the JSON says something else).
+          to every valid row on upload (even if the JSON says something else). Copied templates include
+          an <code className="font-mono text-xs">_notes</code> array (ignored on upload) with FITB prefix
+          mode, dictation audio / TTS, and v2 unified vocab-reading pool reminders.
         </p>
       </header>
 
@@ -266,7 +268,7 @@ export function MockTestAdminBankWorkspace() {
                   }
                   rows={12}
                   className={`mt-3 w-full flex-1 ${mt.border} bg-white p-3 font-mono text-[11px] leading-relaxed`}
-                  placeholder={`{ "questions": [ { "phase": ${phase}, "question_type": "${qt}", ... } ] }`}
+                  placeholder={`{ "_notes": ["optional docs — ignored on upload"], "questions": [ { "phase": ${phase}, "question_type": "${qt}", ... } ] }`}
                   spellCheck={false}
                 />
 

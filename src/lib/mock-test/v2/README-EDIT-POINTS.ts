@@ -6,8 +6,10 @@
  *   → src/lib/mock-test/v2/stage-sequences.ts
  *      STAGE1_TEMPLATES, stage2Templates(), stage3Templates(), stage4Templates()
  *
- * Routing thresholds (stage1_det_like → 85 / 125 / 150 internal band):
+ * Routing thresholds (stage1_det_like → 85 / 125 / 150 internal band for **non** vocab/reading tasks):
  *   → src/lib/mock-test/v2/config.ts — ROUTING_THRESHOLDS, routeFromStage1DetLike()
+ * Vocabulary + reading (real_english_word, fill_in_blanks, vocabulary_reading): **single** pool — READING_VOCAB_UNIFIED_BAND
+ * FITB / real English word: optional `blank_prefix` (1–6 chars) + `sentence_before` / `sentence_after` / `blank_hint` (see validate-upload + MockTestFillInBlanks)
  *
  * Stage 1 anchor formulas (per-task 0–100, then aggregate & det-like for routing):
  *   → src/lib/mock-test/v2/config.ts — STAGE1_FORMULAS

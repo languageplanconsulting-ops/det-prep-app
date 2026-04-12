@@ -5,6 +5,8 @@ import { useState } from "react";
 import type { MockQuestionRow } from "@/lib/mock-test/types";
 
 import { ConversationSummaryMock } from "@/components/mock-test/questions/ConversationSummaryMock";
+import { MockTestDictation } from "@/components/mock-test/questions/MockTestDictation";
+import { MockTestFillInBlanks } from "@/components/mock-test/questions/MockTestFillInBlanks";
 import { VocabularyReadingMockExam } from "@/components/mock-test/questions/VocabularyReadingMockExam";
 import { isInteractiveConversationSummaryContent } from "@/lib/mock-test/conversation-summary-mock";
 
@@ -25,16 +27,16 @@ export function QuestionRouter({
   switch (question.question_type) {
     case "fill_in_blanks":
       return (
-        <FillInBlanks
+        <MockTestFillInBlanks
           content={c}
           onSubmit={(ans) => onSubmit({ answer: ans })}
         />
       );
     case "dictation":
-      return <Dictation content={c} onSubmit={(ans) => onSubmit({ answer: ans })} />;
+      return <MockTestDictation content={c} onSubmit={(ans) => onSubmit({ answer: ans })} />;
     case "real_english_word":
       return (
-        <FillInBlanks
+        <MockTestFillInBlanks
           content={c}
           onSubmit={(ans) => onSubmit({ answer: ans })}
         />
@@ -117,88 +119,6 @@ export function QuestionRouter({
     default:
       return <p className="text-sm">Unsupported question type.</p>;
   }
-}
-
-function Dictation({
-  content,
-  onSubmit,
-}: {
-  content: Record<string, unknown>;
-  onSubmit: (a: string) => void;
-}) {
-  const [text, setText] = useState("");
-  const url = String(content.audio_url ?? "");
-  return (
-    <div className="space-y-4">
-      <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
-      <p className="text-xs text-neutral-600">{String(content.instruction ?? "")}</p>
-      {url ? (
-        <audio controls className="w-full" src={url}>
-          <track kind="captions" />
-        </audio>
-      ) : (
-        <p className="rounded-[4px] border-4 border-black bg-neutral-50 p-3 text-sm">
-          {String(content.reference_sentence ?? "")}
-        </p>
-      )}
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={4}
-        className="w-full rounded-[4px] border-4 border-black bg-white p-3 text-sm"
-        placeholder="Type what you hear / พิมพ์สิ่งที่ได้ยิน"
-      />
-      <button
-        type="button"
-        onClick={() => onSubmit(text)}
-        className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
-      >
-        ส่งคำตอบ / Submit
-      </button>
-    </div>
-  );
-}
-
-function FillInBlanks({
-  content,
-  onSubmit,
-}: {
-  content: Record<string, unknown>;
-  onSubmit: (a: string) => void;
-}) {
-  const [pick, setPick] = useState<string | null>(null);
-  const opts = (content.options as string[]) ?? [];
-  return (
-    <div className="space-y-4">
-      <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
-      <p className="text-xs text-neutral-600">{String(content.instruction ?? "")}</p>
-      <p className="rounded-[4px] border-4 border-black bg-white p-4 text-base font-medium">
-        {String(content.sentence ?? "")}
-      </p>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {opts.map((o) => (
-          <button
-            key={o}
-            type="button"
-            onClick={() => setPick(o)}
-            className={`rounded-[4px] border-4 border-black px-3 py-2 text-left text-sm font-bold shadow-[4px_4px_0_0_#000] ${
-              pick === o ? "bg-[#FFCC00]" : "bg-white"
-            }`}
-          >
-            {o}
-          </button>
-        ))}
-      </div>
-      <button
-        type="button"
-        disabled={!pick}
-        onClick={() => pick && onSubmit(pick)}
-        className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
-      >
-        ส่งคำตอบ / Submit
-      </button>
-    </div>
-  );
 }
 
 function ReadAndSelect({

@@ -70,7 +70,13 @@ export function VocabExam({
             <span key={i}>
               {segment}
               {i < blankCount ? (
-                <span className="mx-0.5 inline-block min-w-[4.5rem] border-b-4 border-ep-blue px-1 text-center font-black text-ep-blue">
+                <span
+                  className={`mx-0.5 inline-block min-w-[4.5rem] border-b-4 border-ep-blue px-1 text-center font-black transition-[color,background-color,border-color,transform] duration-300 ease-out ${
+                    filledCorrect[i] !== undefined
+                      ? "scale-[1.02] text-ep-blue"
+                      : "text-ep-blue/90"
+                  }`}
+                >
                   {filledCorrect[i] !== undefined ? filledCorrect[i] : "[BLANK]"}
                 </span>
               ) : null}
@@ -80,23 +86,25 @@ export function VocabExam({
       </section>
 
       <section className="ep-brutal-reading rounded-sm bg-neutral-50 p-5">
-        <p className="ep-stat text-xs font-bold uppercase text-neutral-500">
-          Blank {questionIndex + 1} of {blankCount}
-        </p>
-        <p className="mt-2 text-base font-bold text-neutral-900">{currentBlank.question}</p>
-        <ul className="mt-4 space-y-2">
-          {shuffled.map((opt) => (
-            <li key={opt + questionIndex}>
-              <button
-                type="button"
-                onClick={() => selectOption(opt)}
-                className="w-full border-4 border-black bg-white px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition hover:bg-ep-yellow/40"
-              >
-                {opt}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div key={questionIndex} className="ep-comp-step-in">
+          <p className="ep-stat text-xs font-bold uppercase text-neutral-500">
+            Blank {questionIndex + 1} of {blankCount}
+          </p>
+          <p className="mt-2 text-base font-bold text-neutral-900">{currentBlank.question}</p>
+          <ul className="mt-4 space-y-2">
+            {shuffled.map((opt) => (
+              <li key={opt + questionIndex}>
+                <button
+                  type="button"
+                  onClick={() => selectOption(opt)}
+                  className="w-full border-4 border-black bg-white px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition duration-200 ease-out hover:bg-ep-yellow/40 active:translate-y-px active:shadow-[3px_3px_0_0_#000]"
+                >
+                  {opt}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     </div>
   );

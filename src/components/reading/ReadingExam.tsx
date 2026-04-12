@@ -122,13 +122,16 @@ export function ReadingExam({
           </p>
           {step === 0 && !q1Revealed ? (
             <div
-              className="rounded-sm border-4 border-dashed border-black bg-ep-yellow/40 px-4 py-10 text-center text-lg font-black uppercase tracking-widest text-neutral-800"
+              className="rounded-sm border-4 border-dashed border-black bg-ep-yellow/40 px-4 py-10 text-center text-lg font-black uppercase tracking-widest text-neutral-800 transition-opacity duration-300"
               aria-label="Missing paragraph placeholder"
             >
               [MISSING PARAGRAPH]
             </div>
           ) : (
-            <p className="whitespace-pre-wrap border-l-4 border-ep-blue pl-3">
+            <p
+              key={q1Revealed ? "p2-revealed" : "p2-step"}
+              className="whitespace-pre-wrap border-l-4 border-ep-blue pl-3 ep-comp-step-in"
+            >
               <HighlightedReadingText
                 text={correctP2}
                 vocab={readingExam.highlightedVocab}
@@ -153,47 +156,49 @@ export function ReadingExam({
       </section>
 
       <section className="ep-brutal-reading rounded-sm bg-neutral-50 p-5">
-        <p className="ep-stat text-xs font-bold uppercase text-neutral-500">{current.label}</p>
-        <p className="mt-2 text-base font-bold text-neutral-900">{block.question}</p>
-        <ul className="mt-4 space-y-2">
-          {shuffled.map((opt) => {
-            const chosen = answers[current.key];
-            const active = chosen === opt;
-            const onPick =
-              step === 0 ? () => selectQ1(opt) : () => selectOther(opt);
-            return (
-              <li key={opt.slice(0, 48) + opt.length}>
-                <button
-                  type="button"
-                  onClick={onPick}
-                  className={`w-full border-4 border-black px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition hover:bg-ep-yellow/30 ${
-                    active ? "bg-ep-yellow/50" : "bg-white"
-                  }`}
-                >
-                  {opt}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="mt-5 flex flex-wrap justify-end gap-2">
-          {step > 0 ? (
+        <div key={step} className="ep-comp-step-in">
+          <p className="ep-stat text-xs font-bold uppercase text-neutral-500">{current.label}</p>
+          <p className="mt-2 text-base font-bold text-neutral-900">{block.question}</p>
+          <ul className="mt-4 space-y-2">
+            {shuffled.map((opt) => {
+              const chosen = answers[current.key];
+              const active = chosen === opt;
+              const onPick =
+                step === 0 ? () => selectQ1(opt) : () => selectOther(opt);
+              return (
+                <li key={opt.slice(0, 48) + opt.length}>
+                  <button
+                    type="button"
+                    onClick={onPick}
+                    className={`w-full border-4 border-black px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition duration-200 ease-out hover:bg-ep-yellow/30 active:translate-y-px active:shadow-[3px_3px_0_0_#000] ${
+                      active ? "bg-ep-yellow/50" : "bg-white"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="mt-5 flex flex-wrap justify-end gap-2">
+            {step > 0 ? (
+              <button
+                type="button"
+                onClick={() => setStep((s) => Math.max(0, s - 1))}
+                className="border-4 border-black bg-white px-4 py-2 text-sm font-bold shadow-[4px_4px_0_0_#000] transition hover:bg-neutral-100"
+              >
+                Back
+              </button>
+            ) : null}
             <button
               type="button"
-              onClick={() => setStep((s) => Math.max(0, s - 1))}
-              className="border-4 border-black bg-white px-4 py-2 text-sm font-bold shadow-[4px_4px_0_0_#000]"
+              disabled={!canAdvance}
+              onClick={goNext}
+              className="border-4 border-black bg-ep-blue px-4 py-2 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] transition enabled:hover:brightness-110 disabled:opacity-40"
             >
-              Back
+              {step < ORDER.length - 1 ? "Next question" : "See score report"}
             </button>
-          ) : null}
-          <button
-            type="button"
-            disabled={!canAdvance}
-            onClick={goNext}
-            className="border-4 border-black bg-ep-blue px-4 py-2 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] disabled:opacity-40"
-          >
-            {step < ORDER.length - 1 ? "Next question" : "See score report"}
-          </button>
+          </div>
         </div>
       </section>
     </div>

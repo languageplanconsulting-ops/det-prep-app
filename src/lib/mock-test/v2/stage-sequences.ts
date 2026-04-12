@@ -7,7 +7,10 @@
  * Stage 1 (anchor, all 125-band pool): ~7:00 total
  *   1 Real English Word set 1:00 · 1 Fill in the Blanks set 2:00 · 3 Dictation 3:00 · 1 Write About the Photo 1:00
  *
- * Stage 2 (same task types for every route; only `target_band` differs): ~25:45–26:45
+ * Stage 2: Vocabulary + reading tasks use READING_VOCAB_UNIFIED_BAND only (not the routed 85/125/150 pool).
+ * Listening/speaking/writing slots still follow the routed band.
+ *
+ * Stage 2 (mixed): ~25:45–26:45
  *   1 REW · 1 FITB · 3 Dictation · 1 Interactive Reading · 1 Interactive Listening ·
  *   1 Read, Then Speak · 1 Speak About the Photo
  *
@@ -17,6 +20,7 @@
  */
 
 import type { MockQuestionType } from "@/lib/mock-test/types";
+import { READING_VOCAB_UNIFIED_BAND } from "@/lib/mock-test/v2/config";
 import type { RoutingBand } from "@/lib/mock-test/v2/types";
 import { TASK } from "@/lib/mock-test/v2/task-registry";
 
@@ -45,10 +49,10 @@ export const STAGE1_TEMPLATES: SlotTemplate[] = [
  */
 export function stage2Templates(routed: RoutingBand): SlotTemplate[] {
   return [
-    { questionType: TASK.realEnglishWord, band: routed, count: 1 },
-    { questionType: TASK.fillInBlanks, band: routed, count: 1 },
+    { questionType: TASK.realEnglishWord, band: READING_VOCAB_UNIFIED_BAND, count: 1 },
+    { questionType: TASK.fillInBlanks, band: READING_VOCAB_UNIFIED_BAND, count: 1 },
     { questionType: TASK.listenAndType, band: routed, count: 3 },
-    { questionType: TASK.interactiveReading, band: routed, count: 1 },
+    { questionType: TASK.interactiveReading, band: READING_VOCAB_UNIFIED_BAND, count: 1 },
     { questionType: TASK.interactiveListening, band: routed, count: 1 },
     { questionType: TASK.readThenSpeak, band: routed, count: 1 },
     { questionType: TASK.speakAboutPhoto, band: routed, count: 1 },
@@ -60,8 +64,8 @@ export function stage2Templates(routed: RoutingBand): SlotTemplate[] {
  */
 export function stage3Templates(routed: RoutingBand): SlotTemplate[] {
   return [
-    { questionType: TASK.realEnglishWord, band: routed, count: 1 },
-    { questionType: TASK.fillInBlanks, band: routed, count: 1 },
+    { questionType: TASK.realEnglishWord, band: READING_VOCAB_UNIFIED_BAND, count: 1 },
+    { questionType: TASK.fillInBlanks, band: READING_VOCAB_UNIFIED_BAND, count: 1 },
     { questionType: TASK.listenAndType, band: routed, count: 1 },
     { questionType: TASK.writeAboutPhoto, band: routed, count: 1 },
     { questionType: TASK.readThenSpeak, band: routed, count: 1 },

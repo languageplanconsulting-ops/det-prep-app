@@ -70,24 +70,27 @@ export function ReadingSessionClient({
       </div>
 
       {phase === "exam" ? (
-        <ReadingExam
-          key={examKey}
-          setNumber={setNumber}
-          examNumber={examNumber}
-          readingExam={readingExam}
-          onComplete={onComplete}
-        />
+        <div key={`exam-${examKey}`} className="ep-comp-step-in">
+          <ReadingExam
+            setNumber={setNumber}
+            examNumber={examNumber}
+            readingExam={readingExam}
+            onComplete={onComplete}
+          />
+        </div>
       ) : resultRows ? (
-        <ReadingReport
-          round={round}
-          difficulty={difficulty}
-          setNumber={setNumber}
-          examNumber={examNumber}
-          readingExam={readingExam}
-          rows={resultRows}
-          onRedeem={redeem}
-          setListHref={setListHref}
-        />
+        <div key="report" className="ep-comp-step-in">
+          <ReadingReport
+            round={round}
+            difficulty={difficulty}
+            setNumber={setNumber}
+            examNumber={examNumber}
+            readingExam={readingExam}
+            rows={resultRows}
+            onRedeem={redeem}
+            setListHref={setListHref}
+          />
+        </div>
       ) : null}
     </div>
   );

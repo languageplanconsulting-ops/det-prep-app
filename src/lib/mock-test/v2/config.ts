@@ -22,6 +22,14 @@ export function routeFromStage1DetLike(stage1DetLike: number): RoutingBand {
   return 150;
 }
 
+/**
+ * Single calibrated pool tier for **vocabulary + reading** task types (not routed with 85/125/150).
+ * Types: `real_english_word`, `fill_in_blanks`, `vocabulary_reading`.
+ * Admin should upload those `question_type`s only at this `target_band` (125 = mid DET-style band on the ~10–160 scale).
+ * Other tasks (dictation, speaking, etc.) still follow `routeFromStage1DetLike`.
+ */
+export const READING_VOCAB_UNIFIED_BAND: RoutingBand = 125;
+
 /** ─── Stage 1 anchor scoring (0–100 per task) → aggregate ─── */
 export const STAGE1_FORMULAS = {
   /** Mean of all Stage 1 task scores (each already 0–100). */

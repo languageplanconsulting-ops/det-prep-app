@@ -23,7 +23,7 @@ export interface VocabPassageUnit {
   contentLevel: VocabPassageContentLevel;
   /** Shown in the passage list */
   titleEn?: string;
-  /** Must contain exactly six `[BLANK]` placeholders, in order. */
+  /** Use `[BLANK]` for each gap, or numbered `[BLANK 1]` … `[BLANK N]` (normalized on import). */
   passageText: string;
   blanks: VocabBlankQuestion[];
   /** Six entries, same order as blanks / blanks in the passage. */

@@ -58,6 +58,71 @@ function requireInstructionPair(c: Record<string, unknown>, errors: string[]) {
   }
 }
 
+/** fill_in_blanks / real_english_word: legacy `sentence` or prefix mode (blank_prefix 1–6 chars). */
+function validateFitbPrefixOrLegacy(
+  qType: MockQuestionType,
+  cObj: Record<string, unknown>,
+  ca: Record<string, unknown> | null,
+  errors: string[],
+) {
+  if (qType !== "fill_in_blanks" && qType !== "real_english_word") return;
+
+  if (Array.isArray(cObj.blank_prefixes)) {
+    errors.push('use blank_prefix (string, 1–6 chars), not blank_prefixes[]');
+    return;
+  }
+
+  const raw = cObj.blank_prefix ?? cObj.prefix;
+  if (raw != null && typeof raw !== "string") {
+    errors.push("blank_prefix (or prefix) must be a string");
+    return;
+  }
+
+  const prefix = typeof raw === "string" && raw.trim().length > 0 ? raw.trim() : null;
+
+  if (prefix == null) {
+    if (typeof cObj.sentence !== "string" || !String(cObj.sentence).trim()) {
+      errors.push(
+        "fill_in_blanks / real_english_word: set content.sentence, or blank_prefix (1–6 chars) with optional sentence_before, sentence_after, blank_hint",
+      );
+    }
+    return;
+  }
+
+  if (prefix.length < 1 || prefix.length > 6) {
+    errors.push("blank_prefix (or prefix) must be 1–6 characters");
+  }
+
+  const opts = cObj.options;
+  if (!Array.isArray(opts) || opts.length !== 4) return;
+
+  if (typeof cObj.sentence === "string" && String(cObj.sentence).trim() !== "") {
+    errors.push("prefix mode: remove content.sentence (use sentence_before / sentence_after)");
+  }
+
+  for (const key of ["sentence_before", "sentence_after", "blank_hint"] as const) {
+    const v = cObj[key];
+    if (v != null && typeof v !== "string") {
+      errors.push(`content.${key} must be a string if present`);
+    }
+  }
+
+  const ans = ca && typeof ca.answer === "string" ? ca.answer.trim() : "";
+  for (const o of opts) {
+    if (typeof o !== "string" || !o.toLowerCase().startsWith(prefix.toLowerCase())) {
+      errors.push(`each option must start with blank_prefix "${prefix}"`);
+      break;
+    }
+  }
+
+  if (!ans.toLowerCase().startsWith(prefix.toLowerCase())) {
+    errors.push("correct_answer.answer must start with blank_prefix");
+  }
+  if (ans.length <= prefix.length) {
+    errors.push("correct_answer.answer must extend beyond blank_prefix");
+  }
+}
+
 export function validateQuestionRow(raw: Record<string, unknown>): ParsedQuestion {
   const errors: string[] = [];
   const phase = Number(raw.phase);
@@ -115,6 +180,10 @@ export function validateQuestionRow(raw: Record<string, unknown>): ParsedQuestio
       if (!Array.isArray(opts) || opts.length !== 4) {
         errors.push("options must be array of 4");
       }
+    }
+
+    if (qType === "fill_in_blanks" || qType === "real_english_word") {
+      validateFitbPrefixOrLegacy(qType, cObj, (ca ?? null) as Record<string, unknown> | null, errors);
     }
 
     if (qType === "interactive_listening") {

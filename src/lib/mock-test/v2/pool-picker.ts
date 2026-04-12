@@ -5,12 +5,29 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { MockQuestionType } from "@/lib/mock-test/types";
+import { READING_VOCAB_UNIFIED_BAND } from "@/lib/mock-test/v2/config";
 import {
   extractAssetKeysFromContent,
   loadFamiliesToAvoid,
   shuffle,
 } from "@/lib/mock-test/v2/anti-repeat";
 import type { RoutingBand } from "@/lib/mock-test/v2/types";
+
+/** Vocabulary + reading: one pool tier (see READING_VOCAB_UNIFIED_BAND), not routed bands. */
+const UNIFIED_VOCAB_READING_TYPES: MockQuestionType[] = [
+  "real_english_word",
+  "fill_in_blanks",
+  "vocabulary_reading",
+];
+
+function effectiveBand(
+  questionType: MockQuestionType,
+  routedBand: RoutingBand,
+): RoutingBand {
+  return UNIFIED_VOCAB_READING_TYPES.includes(questionType)
+    ? READING_VOCAB_UNIFIED_BAND
+    : routedBand;
+}
 
 export type PoolQuestionRow = {
   id: string;
@@ -49,7 +66,8 @@ export async function pickPoolQuestion(
 ): Promise<PoolQuestionRow | null> {
   const { excludeFamilies, excludeIds, excludeAssetKeys, historicalFamilies } =
     opts;
-  const { target, difficulty } = bandFallbackOr(band);
+  const bandUse = effectiveBand(questionType, band);
+  const { target, difficulty } = bandFallbackOr(bandUse);
 
   const sel =
     "id, question_type, content, correct_answer, target_band, difficulty, max_points, time_limit_sec, content_family, is_active";

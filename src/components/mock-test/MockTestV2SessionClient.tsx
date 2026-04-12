@@ -5,6 +5,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { QuestionRouter } from "@/components/mock-test/questions/QuestionRouter";
 import { MockTestTimerBar } from "@/components/mock-test/MockTestTimerBar";
+import {
+  MockTestTransitionOverlay,
+  type MockTestTransitionVariant,
+} from "@/components/mock-test/MockTestTransitionOverlay";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { usePhaseTimer } from "@/hooks/usePhaseTimer";
 import { VOCAB_READING_MOCK_STEPS } from "@/lib/mock-test/vocabulary-reading-mock";
@@ -40,7 +44,8 @@ export function MockTestV2SessionClient({ sessionId }: { sessionId: string }) {
   const [vocabStep, setVocabStep] = useState(0);
   const [vocabScores, setVocabScores] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [transitionOverlay, setTransitionOverlay] =
+    useState<MockTestTransitionVariant | null>(null);
 
   const slots = session?.assembly?.slots ?? [];
   const stageSlots = useMemo(
@@ -90,33 +95,36 @@ export function MockTestV2SessionClient({ sessionId }: { sessionId: string }) {
   }, [supabase, currentSlot]);
 
   const submitWholeStage = async (answers: Record<string, unknown>) => {
-    setBusy(true);
+    setTransitionOverlay("submittingStage");
     setError(null);
-    const res = await fetch(`/api/mock-test/v2/session/${sessionId}/submit-stage`, {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        stage,
-        responses: Object.entries(answers).map(([slotId, answer]) => ({ slotId, answer })),
-      }),
-    });
-    const j = (await res.json()) as { error?: string; complete?: boolean; placement?: unknown };
-    setBusy(false);
-    if (!res.ok || j.error) {
-      setError(j.error ?? "Submit failed");
-      return;
+    try {
+      const res = await fetch(`/api/mock-test/v2/session/${sessionId}/submit-stage`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          stage,
+          responses: Object.entries(answers).map(([slotId, answer]) => ({ slotId, answer })),
+        }),
+      });
+      const j = (await res.json()) as { error?: string; complete?: boolean; placement?: unknown };
+      if (!res.ok || j.error) {
+        setError(j.error ?? "Submit failed");
+        return;
+      }
+      if (j.complete) {
+        router.push(`/mock-test/results/${sessionId}`);
+        return;
+      }
+      await loadSession();
+      setStage((s) => s + 1);
+      setSlotIdx(0);
+      setStageAnswers({});
+      setVocabStep(0);
+      setVocabScores([]);
+    } finally {
+      setTransitionOverlay(null);
     }
-    if (j.complete) {
-      router.push(`/mock-test/results/${sessionId}`);
-      return;
-    }
-    await loadSession();
-    setStage((s) => s + 1);
-    setSlotIdx(0);
-    setStageAnswers({});
-    setVocabStep(0);
-    setVocabScores([]);
   };
 
   const onSlotAnswer = async (answer: unknown) => {
@@ -146,9 +154,12 @@ export function MockTestV2SessionClient({ sessionId }: { sessionId: string }) {
       if (slotIdx + 1 >= stageSlots.length) {
         await submitWholeStage(next);
       } else {
+        setTransitionOverlay("adapting");
+        await new Promise((r) => setTimeout(r, 800));
         setSlotIdx((i) => i + 1);
         setVocabStep(0);
         setVocabScores([]);
+        setTransitionOverlay(null);
       }
       return;
     }
@@ -158,7 +169,10 @@ export function MockTestV2SessionClient({ sessionId }: { sessionId: string }) {
     if (slotIdx + 1 >= stageSlots.length) {
       await submitWholeStage(next);
     } else {
+      setTransitionOverlay("adapting");
+      await new Promise((r) => setTimeout(r, 800));
       setSlotIdx((i) => i + 1);
+      setTransitionOverlay(null);
     }
   };
 
@@ -173,6 +187,10 @@ export function MockTestV2SessionClient({ sessionId }: { sessionId: string }) {
 
   return (
     <StudySessionBoundary skill="mock_test" exerciseType="mock_test" setId={sessionId}>
+      <MockTestTransitionOverlay
+        open={transitionOverlay != null}
+        variant={transitionOverlay ?? "adapting"}
+      />
       <div className="mx-auto max-w-3xl space-y-4 px-4 py-6">
         <div className={`${mt.gridBg} ${mt.border} ${mt.shadow} rounded-[4px] p-4`}>
           <p className="text-sm font-black text-[#004AAD]">
@@ -197,7 +215,6 @@ export function MockTestV2SessionClient({ sessionId }: { sessionId: string }) {
             onSubmit={onSlotAnswer}
           />
         </div>
-        {busy ? <p className="text-sm font-bold text-[#004AAD]">Submitting stage…</p> : null}
       </div>
     </StudySessionBoundary>
   );

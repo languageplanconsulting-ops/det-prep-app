@@ -71,25 +71,28 @@ export function VocabSessionClient({
       </div>
 
       {phase === "exam" ? (
-        <VocabExam
-          key={examKey}
-          passage={passage}
-          setNumber={setNumber}
-          passageNumber={passageNumber}
-          onComplete={onComplete}
-        />
+        <div key={`exam-${examKey}`} className="ep-comp-step-in">
+          <VocabExam
+            passage={passage}
+            setNumber={setNumber}
+            passageNumber={passageNumber}
+            onComplete={onComplete}
+          />
+        </div>
       ) : resultRows ? (
-        <VocabReport
-          round={round}
-          sessionLevel={sessionLevel}
-          setNumber={setNumber}
-          passageNumber={passageNumber}
-          passage={passage}
-          rows={resultRows}
-          onRedeem={redeem}
-          setListHref={setListHref}
-          bankHref={bankHref}
-        />
+        <div key="report" className="ep-comp-step-in">
+          <VocabReport
+            round={round}
+            sessionLevel={sessionLevel}
+            setNumber={setNumber}
+            passageNumber={passageNumber}
+            passage={passage}
+            rows={resultRows}
+            onRedeem={redeem}
+            setListHref={setListHref}
+            bankHref={bankHref}
+          />
+        </div>
       ) : null}
     </div>
   );

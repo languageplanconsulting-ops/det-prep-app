@@ -4,6 +4,7 @@ import {
 } from "@/lib/mock-test/constants";
 import type { MockBankTierKey } from "@/lib/mock-test/mock-difficulty-tiers";
 import type { MockSkill } from "@/lib/mock-test/types";
+import { READING_VOCAB_UNIFIED_BAND } from "@/lib/mock-test/v2/config";
 
 const PHASE_SKILL: Record<number, MockSkill> = {
   1: "literacy",
@@ -33,6 +34,34 @@ function instructionPair() {
   };
 }
 
+/** Shown in copied JSON as `_notes` (ignored by parseUploadJson — only `questions` is read). */
+function buildUploadNotes(phase: number): string[] {
+  const unified = READING_VOCAB_UNIFIED_BAND;
+  const global: string[] = [
+    "Only the \"questions\" array is uploaded. This _notes block is documentation.",
+    `Mock test v2: question_type fill_in_blanks, real_english_word, vocabulary_reading use one pool — upload at target_band ${unified} (choose pool tier "125 / medium" in the admin UI).`,
+    "Mock test v2: dictation, interactive_listening, read_then_speak, write_about_photo, speak_about_photo, read_and_write, interactive_speaking, conversation_summary follow routed 85 / 125 / 150 from Stage 1 performance.",
+    "Mock test v1 (10-phase): difficulty tiers easy|medium|hard still apply per phase; UI tier overrides JSON difficulty on insert.",
+  ];
+
+  const byPhase: Record<number, string[]> = {
+    1: [
+      "Phase 1 — fill_in_blanks: (1) Prefix mode: blank_prefix (1–6 chars) + sentence_before / sentence_after + optional blank_hint; remove sentence; all 4 options must start with that prefix. (2) Legacy: content.sentence with ___ and 4 options — omit blank_prefix.",
+    ],
+    2: [
+      "Phase 2 — dictation: reference_sentence required. Omit audio_url → server generates audio via ElevenLabs from reference_sentence (needs ELEVENLABS_API_KEY). Optional audio_url: hosted MP3 URL instead.",
+    ],
+    3: [
+      "Phase 3 — real_english_word: legacy sentence + 4 spellings is typical. Prefix mode works only if every option shares the same leading letters as blank_prefix.",
+    ],
+    4: [
+      `Phase 4 — vocabulary_reading: composite passage + MC blocks. For v2, upload at band ${unified} only (unified reading/vocab pool).`,
+    ],
+  };
+
+  return [...global, ...(byPhase[phase] ?? [])];
+}
+
 function buildQuestionPayload(
   phase: number,
   tier: MockBankTierKey,
@@ -49,27 +78,31 @@ function buildQuestionPayload(
     is_ai_graded: isAi,
   };
 
+  // Phase 1 FITB: optional blank_prefix (1–6 chars) + sentence_before / sentence_after / blank_hint; else legacy `sentence`.
   if (phase === 1) {
     return {
       ...base,
       content: {
         ...instructionPair(),
-        sentence: "The weather was ___ yesterday.",
-        options: ["nice", "nicely", "nicest", "nicer"],
+        blank_prefix: "pr",
+        sentence_before: "We use the ",
+        sentence_after: " tense in this clause.",
+        blank_hint: "(= present)",
+        options: ["present", "prevent", "prepare", "presume"],
       },
-      correct_answer: { answer: "nice" },
+      correct_answer: { answer: "present" },
     };
   }
 
+  // Dictation: optional `audio_url`; if omitted, mock test synthesizes audio from `reference_sentence` via ElevenLabs.
   if (phase === 2) {
     return {
       ...base,
       content: {
         ...instructionPair(),
-        reference_sentence: "Type exactly what you hear in the audio.",
-        audio_url: "",
+        reference_sentence: "She rarely arrives late to class.",
       },
-      correct_answer: { answer: "Type exactly what you hear in the audio." },
+      correct_answer: { answer: "She rarely arrives late to class." },
     };
   }
 
@@ -206,8 +239,19 @@ export function buildMockUploadTemplateJson(
   tier: MockBankTierKey,
 ): string {
   if (phase < 1 || phase > MOCK_TEST_PHASE_COUNT) {
-    return JSON.stringify({ questions: [] }, null, 2);
+    return JSON.stringify(
+      { _notes: ["phase must be 1–10"], questions: [] },
+      null,
+      2,
+    );
   }
   const q = buildQuestionPayload(phase, tier);
-  return JSON.stringify({ questions: [q] }, null, 2);
+  return JSON.stringify(
+    {
+      _notes: buildUploadNotes(phase),
+      questions: [q],
+    },
+    null,
+    2,
+  );
 }
