@@ -92,8 +92,10 @@ export function MockTestResultsClient({ sessionId }: { sessionId: string }) {
         final_score_raw: number | null;
         created_at: string;
       };
-      const pts = (hist ?? [])
-        .map((h: H) => {
+      type HistoryPoint = { date: string; score: number };
+      const rawHist = (hist ?? []) as H[];
+      const pts = rawHist
+        .map((h): HistoryPoint | null => {
           const score =
             typeof h.final_score_raw === "number" && Number.isFinite(h.final_score_raw)
               ? h.final_score_raw
@@ -106,7 +108,7 @@ export function MockTestResultsClient({ sessionId }: { sessionId: string }) {
             score,
           };
         })
-        .filter((p): p is { date: string; score: number } => p != null);
+        .filter((p: HistoryPoint | null): p is HistoryPoint => p != null);
       setHistory(pts);
       if (pts.length >= 2) {
         setPrevScore(pts[pts.length - 2]!.score);
@@ -124,7 +126,7 @@ export function MockTestResultsClient({ sessionId }: { sessionId: string }) {
 
   const v2 = isV2Result(row);
   const overall = v2 ? row.final_score_raw! : row.overall_score!;
-  const band = !v2 ? getScoreBand(overall) : null;
+  const scoreBand = getScoreBand(overall);
   const delta = prevScore != null ? overall - prevScore : null;
 
   const skillsV1 = [
@@ -228,7 +230,7 @@ export function MockTestResultsClient({ sessionId }: { sessionId: string }) {
           </>
         ) : (
           <p className="mt-2 text-lg font-bold">
-            {band.labelEn} / {band.labelTh}
+            {scoreBand.labelEn} / {scoreBand.labelTh}
           </p>
         )}
         {delta != null ? (
