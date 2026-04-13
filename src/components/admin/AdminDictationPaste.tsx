@@ -51,7 +51,9 @@ const DICTATION_BULK_TEMPLATE = `[
 ]`;
 
 export function AdminDictationPaste() {
-  const [audioProvider, setAudioProvider] = useState<"inworld" | "elevenlabs" | "gemini">("inworld");
+  const [audioProvider, setAudioProvider] = useState<
+    "deepgram" | "inworld" | "elevenlabs" | "gemini"
+  >("deepgram");
   const [tab, setTab] = useState<"upload" | "manage">("upload");
   const [text, setText] = useState("");
   const [selectedSet, setSelectedSet] = useState<number>(1);
@@ -359,9 +361,11 @@ export function AdminDictationPaste() {
       `Audio generation complete (${
         audioProvider === "elevenlabs"
           ? "ElevenLabs"
-          : audioProvider === "inworld"
-            ? "Inworld TTS"
-            : "Gemini"
+          : audioProvider === "deepgram"
+            ? "Deepgram TTS"
+            : audioProvider === "inworld"
+              ? "Inworld TTS"
+              : "Gemini"
       }). Success: ${success} · Failed: ${fail}`,
     );
     if (fail > 0) {
@@ -621,11 +625,14 @@ export function AdminDictationPaste() {
             <select
               value={audioProvider}
               onChange={(e) =>
-                setAudioProvider(e.target.value as "inworld" | "elevenlabs" | "gemini")
+                setAudioProvider(
+                  e.target.value as "deepgram" | "inworld" | "elevenlabs" | "gemini",
+                )
               }
               disabled={running}
               className="border-2 border-black bg-white px-2 py-1 text-xs font-bold"
             >
+              <option value="deepgram">Deepgram Aura (DEEPGRAM_API_KEY on server)</option>
               <option value="inworld">Inworld TTS (INWORLD_API_KEY on server)</option>
               <option value="elevenlabs">ElevenLabs</option>
               <option value="gemini">Gemini</option>

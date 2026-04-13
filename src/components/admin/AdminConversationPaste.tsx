@@ -116,7 +116,9 @@ export function AdminConversationPaste() {
   const [manageSet, setManageSet] = useState<number>(0);
   const [selectedLineIds, setSelectedLineIds] = useState<Set<string>>(new Set());
   const [running, setRunning] = useState(false);
-  const [audioProvider, setAudioProvider] = useState<"inworld" | "elevenlabs" | "gemini">("inworld");
+  const [audioProvider, setAudioProvider] = useState<
+    "deepgram" | "inworld" | "elevenlabs" | "gemini"
+  >("deepgram");
   const [progress, setProgress] = useState({
     current: 0,
     total: 0,
@@ -389,9 +391,11 @@ export function AdminConversationPaste() {
       `Conversation audio generation done (${
         audioProvider === "elevenlabs"
           ? "ElevenLabs"
-          : audioProvider === "inworld"
-            ? "Inworld TTS"
-            : "Gemini"
+          : audioProvider === "deepgram"
+            ? "Deepgram TTS"
+            : audioProvider === "inworld"
+              ? "Inworld TTS"
+              : "Gemini"
       }). Success: ${success} · Fail: ${fail}`,
     );
     if (fail > 0) {
@@ -733,7 +737,7 @@ export function AdminConversationPaste() {
       ) : (
         <div className="space-y-3">
           <p className="text-sm text-neutral-600">
-            Inworld TTS and Gemini use a small parallel pool with retries. ElevenLabs runs one request at a time.
+            Deepgram, Inworld, and Gemini use a small parallel pool with retries. ElevenLabs runs one request at a time.
             Learners hear saved clips first; missing lines use API then browser voice.
           </p>
           <label className="block text-xs font-bold uppercase tracking-wide text-neutral-700">
@@ -741,10 +745,13 @@ export function AdminConversationPaste() {
             <select
               value={audioProvider}
               onChange={(e) =>
-                setAudioProvider(e.target.value as "inworld" | "elevenlabs" | "gemini")
+                setAudioProvider(
+                  e.target.value as "deepgram" | "inworld" | "elevenlabs" | "gemini",
+                )
               }
               className="mt-1 w-full max-w-xs border-2 border-black bg-white px-2 py-2 text-sm font-bold"
             >
+              <option value="deepgram">Deepgram Aura (DEEPGRAM_API_KEY on server)</option>
               <option value="inworld">Inworld TTS (INWORLD_API_KEY on server)</option>
               <option value="elevenlabs">ElevenLabs (ELEVENLABS_API_KEY)</option>
               <option value="gemini">Gemini (Setup key or GEMINI_API_KEY)</option>

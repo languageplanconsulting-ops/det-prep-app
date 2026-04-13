@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  DEEPGRAM_TTS_MAX_CHARS,
+  synthesizeEnglishSpeechWithDeepgram,
+} from "@/lib/deepgram-synthesize";
 import { synthesizeEnglishSpeechWithElevenLabs } from "@/lib/elevenlabs-synthesize";
 import { synthesizeEnglishSpeechWithGemini } from "@/lib/gemini-synthesize";
 import { INWORLD_MAX_CHARS, synthesizeEnglishSpeechWithInworld } from "@/lib/inworld-synthesize";
@@ -12,6 +16,7 @@ export async function POST(req: Request) {
   const geminiHeader = req.headers.get("x-gemini-api-key")?.trim();
   const geminiKey = geminiEnv || geminiHeader;
   const inworldKey = process.env.INWORLD_API_KEY?.trim() || req.headers.get("x-inworld-api-key")?.trim();
+  const deepgramKey = process.env.DEEPGRAM_API_KEY?.trim() || req.headers.get("x-deepgram-api-key")?.trim();
 
   let body: unknown;
   try {
@@ -27,7 +32,10 @@ export async function POST(req: Request) {
   const text = o.text;
   const providerRaw = o.provider;
   const provider =
-    providerRaw === "elevenlabs" || providerRaw === "gemini" || providerRaw === "inworld"
+    providerRaw === "elevenlabs" ||
+    providerRaw === "gemini" ||
+    providerRaw === "inworld" ||
+    providerRaw === "deepgram"
       ? providerRaw
       : providerRaw === "polly"
         ? "inworld"
@@ -63,6 +71,23 @@ export async function POST(req: Request) {
   };
 
   try {
+    if (provider === "deepgram") {
+      if (!deepgramKey) {
+        return NextResponse.json(
+          { error: "No Deepgram key. Set DEEPGRAM_API_KEY in .env.local." },
+          { status: 503 },
+        );
+      }
+      if (trimmed.length > DEEPGRAM_TTS_MAX_CHARS) {
+        return await runGemini();
+      }
+      const out = await synthesizeEnglishSpeechWithDeepgram({
+        apiKey: deepgramKey,
+        text: trimmed,
+      });
+      return NextResponse.json(out);
+    }
+
     if (provider === "elevenlabs") {
       if (!elevenKey) {
         return NextResponse.json(
@@ -99,6 +124,18 @@ export async function POST(req: Request) {
         apiKey: inworldKey,
       });
       return NextResponse.json(out);
+    }
+
+    if (deepgramKey && trimmed.length <= DEEPGRAM_TTS_MAX_CHARS) {
+      try {
+        const out = await synthesizeEnglishSpeechWithDeepgram({
+          text: trimmed,
+          apiKey: deepgramKey,
+        });
+        return NextResponse.json(out);
+      } catch {
+        /* fall through */
+      }
     }
 
     if (inworldKey && trimmed.length <= INWORLD_MAX_CHARS) {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminGeminiModelSettings } from "@/components/admin/AdminGeminiModelSettings";
 import { AdminPreviewStarter } from "@/components/admin/AdminPreviewStarter";
+import { AdminTtsProviderTest } from "@/components/admin/AdminTtsProviderTest";
 import { AdminUploadWorkspace } from "@/components/admin/AdminUploadWorkspace";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 
@@ -50,10 +51,19 @@ export default function AdminPage() {
           >
             Mock test — upload question bank →
           </Link>
+          <a
+            href="#admin-tts-debug"
+            className="inline-flex items-center rounded-[4px] border-4 border-black bg-lime-200 px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            TTS test (debug) ↓
+          </a>
         </p>
       </header>
 
       <AdminGeminiModelSettings />
+
+      <AdminTtsProviderTest />
 
       <AdminPreviewStarter />
 

@@ -15,7 +15,8 @@ type SynthesizeJson = { audioBase64?: string; mimeType?: string; error?: string 
  */
 export async function synthesizeSpeechWithRetry(args: {
   text: string;
-  provider: "inworld" | "elevenlabs" | "gemini";
+  /** Omit to use server default (Deepgram when DEEPGRAM_API_KEY is set). */
+  provider?: "deepgram" | "inworld" | "elevenlabs" | "gemini";
   headers: Record<string, string>;
 }): Promise<{ audioBase64: string; mimeType?: string }> {
   const maxAttempts = 5;
@@ -23,7 +24,10 @@ export async function synthesizeSpeechWithRetry(args: {
     const res = await fetch("/api/speech-synthesize", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...args.headers },
-      body: JSON.stringify({ text: args.text, provider: args.provider }),
+      body: JSON.stringify({
+        text: args.text,
+        ...(args.provider ? { provider: args.provider } : {}),
+      }),
     });
     let data: SynthesizeJson;
     try {
@@ -67,7 +71,7 @@ export async function synthesizeSpeechWithRetry(args: {
 
 /** ElevenLabs: one at a time. Inworld / Gemini: small parallel pool. */
 export function speechSynthesisWorkerCount(
-  provider: "inworld" | "elevenlabs" | "gemini",
+  provider: "deepgram" | "inworld" | "elevenlabs" | "gemini",
   total: number,
 ): number {
   if (provider === "elevenlabs") return 1;

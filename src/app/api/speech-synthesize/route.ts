@@ -1,4 +1,9 @@
 import { NextResponse } from "next/server";
+import {
+  DEEPGRAM_TTS_MAX_CHARS,
+  isDeepgramTtsConfigured,
+  synthesizeEnglishSpeechWithDeepgram,
+} from "@/lib/deepgram-synthesize";
 import { synthesizeEnglishSpeechWithElevenLabs } from "@/lib/elevenlabs-synthesize";
 import { synthesizeEnglishSpeechWithGemini } from "@/lib/gemini-synthesize";
 import {
@@ -16,12 +21,21 @@ function errorHttpStatus(err: unknown): number | undefined {
   return typeof s === "number" && s >= 400 && s < 600 ? s : undefined;
 }
 
-type TtsProvider = "inworld" | "elevenlabs" | "gemini";
+type TtsProvider = "deepgram" | "inworld" | "elevenlabs" | "gemini";
 
 function resolveProvider(raw: unknown): TtsProvider {
   if (raw === "polly") return "inworld";
-  if (raw === "inworld" || raw === "elevenlabs" || raw === "gemini") return raw;
-  return isInworldEnvConfigured() ? "inworld" : "gemini";
+  if (
+    raw === "deepgram" ||
+    raw === "inworld" ||
+    raw === "elevenlabs" ||
+    raw === "gemini"
+  ) {
+    return raw;
+  }
+  if (isDeepgramTtsConfigured()) return "deepgram";
+  if (isInworldEnvConfigured()) return "inworld";
+  return "gemini";
 }
 
 export async function POST(req: Request) {
@@ -56,7 +70,12 @@ export async function POST(req: Request) {
   const inworldKey =
     process.env.INWORLD_API_KEY?.trim() || req.headers.get("x-inworld-api-key")?.trim() || "";
 
-  const runGemini = async (meta?: { fallbackReason?: "inworld_text_limit" }) => {
+  const deepgramKey =
+    process.env.DEEPGRAM_API_KEY?.trim() || req.headers.get("x-deepgram-api-key")?.trim() || "";
+
+  const runGemini = async (meta?: {
+    fallbackReason?: "inworld_text_limit" | "deepgram_text_limit";
+  }) => {
     if (!geminiKey) {
       return NextResponse.json(
         {
@@ -90,6 +109,26 @@ export async function POST(req: Request) {
         throw new Error("Synthesis returned no audio.");
       }
       return NextResponse.json({ ...out, providerUsed: "elevenlabs" as const });
+    }
+
+    if (provider === "deepgram") {
+      if (!deepgramKey) {
+        return NextResponse.json(
+          {
+            error:
+              "Deepgram TTS not configured. Set DEEPGRAM_API_KEY in .env.local (optional header x-deepgram-api-key).",
+          },
+          { status: 503 },
+        );
+      }
+      if (trimmed.length > DEEPGRAM_TTS_MAX_CHARS) {
+        return runGemini({ fallbackReason: "deepgram_text_limit" });
+      }
+      const out = await synthesizeEnglishSpeechWithDeepgram({
+        apiKey: deepgramKey,
+        text: trimmed,
+      });
+      return NextResponse.json({ ...out, providerUsed: "deepgram" as const });
     }
 
     if (provider === "inworld") {
@@ -126,6 +165,12 @@ export async function POST(req: Request) {
     if (provider === "elevenlabs" && !process.env.ELEVENLABS_API_KEY?.trim()) {
       return NextResponse.json(
         { error: "No ElevenLabs key. Set ELEVENLABS_API_KEY in .env.local." },
+        { status: 503 },
+      );
+    }
+    if (provider === "deepgram" && !process.env.DEEPGRAM_API_KEY?.trim()) {
+      return NextResponse.json(
+        { error: "No Deepgram key. Set DEEPGRAM_API_KEY in .env.local." },
         { status: 503 },
       );
     }

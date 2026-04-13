@@ -79,25 +79,26 @@ function playAnswerCueSound(): void {
 }
 
 const DEFAULT_INTERACTIVE_TTS_ORDER = [
+  "deepgram",
   "inworld",
   "gemini",
   "elevenlabs",
-] as const satisfies readonly ("inworld" | "gemini" | "elevenlabs")[];
+] as const satisfies readonly ("deepgram" | "inworld" | "gemini" | "elevenlabs")[];
 
-function interactiveSpeakingTtsTryOrder(): ("inworld" | "gemini" | "elevenlabs")[] {
+function interactiveSpeakingTtsTryOrder(): ("deepgram" | "inworld" | "gemini" | "elevenlabs")[] {
   const raw = process.env.NEXT_PUBLIC_INTERACTIVE_SPEAKING_TTS_ORDER?.trim();
   if (!raw) return [...DEFAULT_INTERACTIVE_TTS_ORDER];
-  const allowed = new Set<string>(["inworld", "gemini", "elevenlabs"]);
+  const allowed = new Set<string>(["deepgram", "inworld", "gemini", "elevenlabs"]);
   const parsed = raw
     .split(",")
     .map((s) => s.trim().toLowerCase())
-    .filter((s) => allowed.has(s)) as ("inworld" | "gemini" | "elevenlabs")[];
+    .filter((s) => allowed.has(s)) as ("deepgram" | "inworld" | "gemini" | "elevenlabs")[];
   return parsed.length > 0 ? parsed : [...DEFAULT_INTERACTIVE_TTS_ORDER];
 }
 
 async function playQuestionAudioFromApi(
   text: string,
-  provider: "inworld" | "gemini" | "elevenlabs",
+  provider: "deepgram" | "inworld" | "gemini" | "elevenlabs",
 ): Promise<boolean> {
   try {
     const res = await fetch("/api/speech-synthesize", {
@@ -116,7 +117,11 @@ async function playQuestionAudioFromApi(
     if (!data.audioBase64 || !data.mimeType) return false;
     if (process.env.NODE_ENV === "development") {
       const extra =
-        data.ttsFallbackReason === "inworld_text_limit" ? " (prompt too long for Inworld)" : "";
+        data.ttsFallbackReason === "inworld_text_limit"
+          ? " (prompt too long for Inworld)"
+          : data.ttsFallbackReason === "deepgram_text_limit"
+            ? " (prompt too long for Deepgram)"
+            : "";
       console.info(
         `[interactive-speaking TTS] requested ${provider} → server used ${data.providerUsed ?? "?"}${extra}`,
       );
@@ -134,8 +139,8 @@ async function playQuestionAudioFromApi(
 }
 
 /**
- * Tries providers in order (default: Inworld → Gemini → ElevenLabs).
- * Set `NEXT_PUBLIC_INTERACTIVE_SPEAKING_TTS_ORDER=elevenlabs,inworld,gemini` on the server to prefer ElevenLabs when you have a key (often faster).
+ * Tries providers in order (default: Deepgram → Inworld → Gemini → ElevenLabs).
+ * Override with `NEXT_PUBLIC_INTERACTIVE_SPEAKING_TTS_ORDER` (comma-separated: deepgram, inworld, gemini, elevenlabs).
  */
 async function playQuestionTts(text: string): Promise<void> {
   for (const provider of interactiveSpeakingTtsTryOrder()) {
