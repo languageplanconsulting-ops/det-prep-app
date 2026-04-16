@@ -2,6 +2,7 @@
 export type ConversationSummaryTurn = {
   question_en: string;
   question_th?: string;
+  question_audio_url?: string;
   /** Shown after the conversation as the “right” / model line in the recap. */
   reference_answer_en: string;
   reference_answer_th?: string;

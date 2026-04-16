@@ -41,6 +41,32 @@ function normalizeTyped(s: string): string {
 }
 
 function parseCorrectAnswer(q: MockQuestionRow, answer: unknown): boolean {
+  if (q.question_type === "fill_in_blanks") {
+    const content = q.content as {
+      missingWords?: Array<{ correctWord?: string }>;
+    };
+    const mw = Array.isArray(content.missingWords) ? content.missingWords : [];
+    if (mw.length > 0) {
+      const rawAnswer =
+        typeof answer === "object" && answer && "answer" in answer
+          ? (answer as { answer: unknown }).answer
+          : answer;
+      const attemptArr =
+        rawAnswer &&
+        typeof rawAnswer === "object" &&
+        "answers" in (rawAnswer as Record<string, unknown>) &&
+        Array.isArray((rawAnswer as { answers?: unknown[] }).answers)
+          ? ((rawAnswer as { answers: unknown[] }).answers as unknown[])
+          : [];
+      if (attemptArr.length !== mw.length) return false;
+      return mw.every((w, i) => {
+        const correct = String(w?.correctWord ?? "").trim().toLowerCase();
+        const got = String(attemptArr[i] ?? "").trim().toLowerCase();
+        return correct.length > 0 && got === correct;
+      });
+    }
+  }
+
   if (q.question_type === "vocabulary_reading") {
     const inner =
       typeof answer === "object" && answer && "answer" in answer

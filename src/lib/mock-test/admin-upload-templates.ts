@@ -6,6 +6,10 @@ import {
 import type { MockBankTierKey } from "@/lib/mock-test/mock-difficulty-tiers";
 import type { MockSkill } from "@/lib/mock-test/types";
 import { READING_VOCAB_UNIFIED_BAND } from "@/lib/mock-test/v2/config";
+import {
+  buildFixedTemplateCsv as buildFixedTemplateCsvCore,
+  buildFixedTemplateJson as buildFixedTemplateJsonCore,
+} from "@/lib/mock-test/fixed-upload";
 
 const PHASE_SKILL: Record<number, MockSkill> = {
   1: "literacy",
@@ -237,6 +241,72 @@ function buildQuestionPayload(
   return base;
 }
 
+function buildPhase1BulkTemplateQuestions(tier: MockBankTierKey): Record<string, unknown>[] {
+  const base = {
+    phase: 1,
+    question_type: "fill_in_blanks",
+    skill: "literacy",
+    difficulty: tier,
+    is_ai_graded: false,
+  } as const;
+  return [
+    {
+      ...base,
+      content: {
+        ...instructionPair(),
+        sentence: "Before getting on the airplane, every ___ must show their ticket.",
+        options: ["passenger", "passion", "passage", "passing"],
+      },
+      correct_answer: { answer: "passenger" },
+    },
+    {
+      ...base,
+      content: {
+        ...instructionPair(),
+        sentence: "You must hand over your ___ at immigration.",
+        options: ["passport", "postcard", "parachute", "passage"],
+      },
+      correct_answer: { answer: "passport" },
+    },
+    {
+      ...base,
+      content: {
+        ...instructionPair(),
+        sentence: "Then, you walk through the ___ checkpoint for safety.",
+        options: ["security", "section", "secrecy", "secondary"],
+      },
+      correct_answer: { answer: "security" },
+    },
+    {
+      ...base,
+      content: {
+        ...instructionPair(),
+        sentence: "You check the screen for your exact ___ time.",
+        options: ["departure", "decision", "delight", "defender"],
+      },
+      correct_answer: { answer: "departure" },
+    },
+    {
+      ...base,
+      content: {
+        ...instructionPair(),
+        sentence: "The plane flies to your final ___.",
+        options: ["destination", "destruction", "designation", "description"],
+      },
+      correct_answer: { answer: "destination" },
+    },
+    {
+      ...base,
+      content: {
+        ...instructionPair(),
+        sentence: "After landing, you collect your ___.",
+        options: ["luggage", "language", "lineage", "leverage"],
+      },
+      correct_answer: { answer: "luggage" },
+    },
+  ];
+}
+
 /** Copy-paste JSON for one phase; phases 1–3 respect `tier`; phases 4–10 always use medium. */
 export function buildMockUploadTemplateJson(
   phase: number,
@@ -245,6 +315,20 @@ export function buildMockUploadTemplateJson(
   if (phase < 1 || phase > MOCK_TEST_PHASE_COUNT) {
     return JSON.stringify(
       { _notes: ["phase must be 1–10"], questions: [] },
+      null,
+      2,
+    );
+  }
+  if (phase === 1) {
+    return JSON.stringify(
+      {
+        _notes: [
+          ...buildUploadNotes(phase),
+          "Phase 1 bulk tip: one question object = one blank. If one passage has 6 blanks, create 6 objects.",
+          "For large uploads (e.g. 10 passages x 6 blanks), put 60 objects in questions[].",
+        ],
+        questions: buildPhase1BulkTemplateQuestions(tier),
+      },
       null,
       2,
     );
@@ -259,4 +343,12 @@ export function buildMockUploadTemplateJson(
     null,
     2,
   );
+}
+
+export function buildFixedMockUploadTemplateJson(): string {
+  return buildFixedTemplateJsonCore();
+}
+
+export function buildFixedMockUploadTemplateCsv(): string {
+  return buildFixedTemplateCsvCore();
 }

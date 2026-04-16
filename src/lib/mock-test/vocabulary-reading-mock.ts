@@ -16,12 +16,28 @@ export type VocabularyReadingMockContent = {
 };
 
 export const VOCAB_READING_MOCK_STEPS = 9;
+// Combined fixed-mock steps: 6 vocab MCQs + missing paragraph + 3 reading MCQs
+// (information location, best title, main idea).
+export const VOCAB_READING_COMBINED_STEPS = 10;
 
 export function getVocabularyReadingBlocks(
   content: VocabularyReadingMockContent,
 ): ReadingMcBlock[] {
   return [
     ...content.vocabularyQuestions,
+    content.missingParagraph,
+    content.informationLocation,
+    content.bestTitle,
+    content.mainIdea,
+  ];
+}
+
+/** Fixed mock combined mode: 6 vocab (with p2 hidden) + missing paragraph. */
+export function getVocabularyReadingCombinedBlocks(
+  content: VocabularyReadingMockContent,
+): ReadingMcBlock[] {
+  return [
+    ...content.vocabularyQuestions.slice(0, 6),
     content.missingParagraph,
     content.informationLocation,
     content.bestTitle,

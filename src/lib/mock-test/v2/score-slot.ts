@@ -67,6 +67,7 @@ export async function scoreSlot(
   engineStage: import("@/lib/mock-test/v2/types").EngineStage,
   question: PoolQuestionRow,
   answer: unknown,
+  userId: string | null,
 ): Promise<V2ResponseRecord> {
   const qt = question.question_type;
   const band = (question.target_band ?? 125) as RoutingBand;
@@ -112,6 +113,7 @@ export async function scoreSlot(
       const g = await gradeDetResponse(
         text,
         `Task type: ${qt}. Score as DET open response (map internally to 0–160 scale).`,
+        { userId },
       );
       const score160 = (g.score / 10) * 160;
       taskScore100 = score160ToTask100(score160);

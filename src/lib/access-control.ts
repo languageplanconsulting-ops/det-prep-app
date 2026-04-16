@@ -121,9 +121,9 @@ export const AI_TYPES: readonly AIProductType[] = [
 /** Mock tests allowed per month (approximate cap; callers enforce month window). */
 export const MOCK_TEST_MONTHLY_LIMIT: Record<Tier, number> = {
   free: 0,
-  basic: 1,
+  basic: 2,
   premium: 5,
-  vip: Number.POSITIVE_INFINITY,
+  vip: 10,
 };
 
 /** Streak freeze grants per month (VIP = unlimited → use Infinity). */

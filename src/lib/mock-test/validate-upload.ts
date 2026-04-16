@@ -67,6 +67,45 @@ function validateFitbPrefixOrLegacy(
 ) {
   if (qType !== "fill_in_blanks" && qType !== "real_english_word") return;
 
+  const hasPracticeLike =
+    typeof cObj.passage === "string" &&
+    Array.isArray(cObj.missingWords) &&
+    cObj.missingWords.length > 0;
+  if (hasPracticeLike) {
+    if (qType !== "fill_in_blanks") {
+      errors.push("practice-like passage+missingWords is supported only for fill_in_blanks");
+      return;
+    }
+    const arr = cObj.missingWords as unknown[];
+    arr.forEach((m, i) => {
+      if (!m || typeof m !== "object") {
+        errors.push(`missingWords[${i}] must be object`);
+        return;
+      }
+      const mm = m as Record<string, unknown>;
+      if (typeof mm.correctWord !== "string" || !String(mm.correctWord).trim()) {
+        errors.push(`missingWords[${i}].correctWord required`);
+      }
+      if (
+        typeof mm.prefix_length !== "number" ||
+        !Number.isFinite(mm.prefix_length) ||
+        mm.prefix_length < 1 ||
+        mm.prefix_length > 5
+      ) {
+        errors.push(`missingWords[${i}].prefix_length must be 1–5`);
+      }
+    });
+    const hasMarkers = /\[BLANK\s*\d+\]/i.test(String(cObj.passage));
+    if (!hasMarkers) {
+      errors.push("content.passage must include [BLANK 1]...[BLANK n] markers");
+    }
+    const ansArr = ca && Array.isArray(ca.answers) ? (ca.answers as unknown[]) : null;
+    if (ansArr == null || ansArr.length !== arr.length) {
+      errors.push("correct_answer.answers must match missingWords length");
+    }
+    return;
+  }
+
   if (Array.isArray(cObj.blank_prefixes)) {
     errors.push('use blank_prefix (string, 1–6 chars), not blank_prefixes[]');
     return;
@@ -302,13 +341,53 @@ export function parseUploadJson(text: string): {
   parseError?: string;
 } {
   try {
-    const j = JSON.parse(text) as { questions?: unknown[] };
-    if (!j.questions || !Array.isArray(j.questions)) {
-      return { questions: [], parseError: "JSON must have { questions: [...] }" };
+    const parsed = JSON.parse(text) as unknown;
+
+    const toValidated = (rows: unknown[]) =>
+      rows
+        .filter((q) => q && typeof q === "object")
+        .map((q) => validateQuestionRow(q as Record<string, unknown>));
+
+    if (Array.isArray(parsed)) {
+      // Convenience import for phase 1 using practice-style FITB rows:
+      // [{ passage, difficulty?, missingWords:[{correctWord,...}] }, ...]
+      const mapped = parsed.map((row) => {
+        const r = (row ?? {}) as Record<string, unknown>;
+        const difficultyRaw = typeof r.difficulty === "string" ? r.difficulty : "medium";
+        const missing = Array.isArray(r.missingWords) ? r.missingWords : [];
+        const answers = missing.map((m) => {
+          const mm = (m ?? {}) as Record<string, unknown>;
+          return typeof mm.correctWord === "string" ? mm.correctWord : "";
+        });
+        return {
+          phase: 1,
+          question_type: "fill_in_blanks",
+          skill: "literacy",
+          difficulty: difficultyRaw,
+          is_ai_graded: false,
+          content: {
+            instruction: "Fill all blanks, then submit.",
+            instruction_th: "เติมคำให้ครบทุกช่อง แล้วกดส่ง",
+            passage: r.passage,
+            missingWords: missing,
+          },
+          correct_answer: {
+            answers,
+          },
+        };
+      });
+      return { questions: toValidated(mapped) };
     }
-    const questions = j.questions
-      .filter((q) => q && typeof q === "object")
-      .map((q) => validateQuestionRow(q as Record<string, unknown>));
+
+    const j = parsed as { questions?: unknown[] };
+    if (!j.questions || !Array.isArray(j.questions)) {
+      return {
+        questions: [],
+        parseError:
+          "JSON must be either { questions: [...] } or a phase-1 FITB array [{ passage, missingWords, ... }]",
+      };
+    }
+    const questions = toValidated(j.questions);
     return { questions };
   } catch {
     return { questions: [], parseError: "Invalid JSON" };

@@ -1,3 +1,4 @@
+import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { GRADING_TEACHER_TONE } from "@/lib/gemini-production-thai-style";
@@ -35,21 +36,33 @@ function parseJson(raw: string): GraderResult | null {
 export async function gradeDetResponse(
   studentResponse: string,
   taskDescription: string,
+  log?: { userId: string | null },
 ): Promise<GraderResult> {
   const prompt = `${taskDescription}\n\nStudent response:\n${studentResponse}`;
   const modelName = await resolveGeminiTextModel();
   const geminiKey = process.env.GEMINI_API_KEY?.trim() ?? "";
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();
+  const openAiKey = process.env.OPENAI_API_KEY?.trim();
 
   try {
-    const text = await generateGradingJsonCompletion({
+    const { text, usage } = await generateGradingJsonCompletion({
       model: modelName,
-      keys: { geminiApiKey: geminiKey, anthropicApiKey: anthropicKey },
+      keys: { geminiApiKey: geminiKey, anthropicApiKey: anthropicKey, openAiApiKey: openAiKey },
       systemInstruction: SYSTEM,
       userPayload: `${prompt}\n\nRespond with JSON only.`,
       temperature: 0.2,
     });
     const parsed = parseJson(text);
+    if (parsed && usage) {
+      scheduleApiUsageLog({
+        userId: log?.userId ?? null,
+        operation: "mock_test_open_grade",
+        provider: usage.provider,
+        model: usage.model,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+      });
+    }
     if (parsed) return parsed;
   } catch {
     /* fall through */
@@ -68,6 +81,7 @@ export async function gradeDetResponse(
 
 export async function generateInsightSummary(
   subscores: { literacy: number; comprehension: number; conversation: number; production: number },
+  log?: { userId: string | null },
 ): Promise<{ bullets: { en: string; th: string }[] }> {
   const fallback = {
     bullets: [
@@ -89,11 +103,12 @@ export async function generateInsightSummary(
   const modelName = await resolveGeminiTextModel();
   const geminiKey = process.env.GEMINI_API_KEY?.trim() ?? "";
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();
+  const openAiKey = process.env.OPENAI_API_KEY?.trim();
 
   try {
-    const text = await generateGradingJsonCompletion({
+    const { text, usage } = await generateGradingJsonCompletion({
       model: modelName,
-      keys: { geminiApiKey: geminiKey, anthropicApiKey: anthropicKey },
+      keys: { geminiApiKey: geminiKey, anthropicApiKey: anthropicKey, openAiApiKey: openAiKey },
       systemInstruction:
         "You write short bilingual study tips. Return JSON only." + GRADING_TEACHER_TONE,
       userPayload: `Subscores (0-160): literacy ${subscores.literacy}, comprehension ${subscores.comprehension}, conversation ${subscores.conversation}, production ${subscores.production}.
@@ -103,6 +118,16 @@ Thai lines: supportive teacher tone; you may end a Thai line with ครับ o
     });
     const j = JSON.parse(text.replace(/```json\n?|\n?```/g, "").trim());
     if (typeof j === "object" && Array.isArray(j.bullets)) {
+      if (usage) {
+        scheduleApiUsageLog({
+          userId: log?.userId ?? null,
+          operation: "mock_test_insight_summary",
+          provider: usage.provider,
+          model: usage.model,
+          inputTokens: usage.inputTokens,
+          outputTokens: usage.outputTokens,
+        });
+      }
       return { bullets: j.bullets.slice(0, 3) };
     }
   } catch {

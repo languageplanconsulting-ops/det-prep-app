@@ -13,6 +13,7 @@ export type MockQuestionType =
   | "read_then_speak"
   | "write_about_photo"
   | "speak_about_photo"
+  | "interactive_conversation_mcq"
   | "interactive_speaking"
   | "conversation_summary"
   | "read_and_select"

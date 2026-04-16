@@ -14,13 +14,20 @@ function base64ToBlob(base64: string, mime: string): Blob {
 type Props = {
   content: Record<string, unknown>;
   onSubmit: (answer: string) => void;
+  onAudioPlaybackFinished?: () => void;
+  submitting?: boolean;
 };
 
 /**
  * Dictation for mock tests: plays `audio_url` when set; otherwise synthesizes
  * speech from `reference_sentence` via `/api/speech-synthesize` (Deepgram first when configured).
  */
-export function MockTestDictation({ content, onSubmit }: Props) {
+export function MockTestDictation({
+  content,
+  onSubmit,
+  onAudioPlaybackFinished,
+  submitting = false,
+}: Props) {
   const [text, setText] = useState("");
   const refSentence = String(content.reference_sentence ?? "").trim();
   const audioUrl = String(content.audio_url ?? "").trim();
@@ -33,6 +40,7 @@ export function MockTestDictation({ content, onSubmit }: Props) {
   const [error, setError] = useState<string | null>(() =>
     !audioUrl && !refSentence ? "Dictation needs reference_sentence (or audio_url)." : null,
   );
+  const [playFinishedNotified, setPlayFinishedNotified] = useState(false);
 
   useEffect(() => {
     if (audioUrl) {
@@ -86,6 +94,14 @@ export function MockTestDictation({ content, onSubmit }: Props) {
 
   const playSrc = audioUrl || blobUrl || undefined;
 
+  useEffect(() => {
+    if (playFinishedNotified) return;
+    if (!playSrc) {
+      onAudioPlaybackFinished?.();
+      setPlayFinishedNotified(true);
+    }
+  }, [onAudioPlaybackFinished, playFinishedNotified, playSrc]);
+
   return (
     <div className="space-y-4">
       <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
@@ -99,9 +115,33 @@ export function MockTestDictation({ content, onSubmit }: Props) {
         <p className="rounded-[4px] border-4 border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>
       ) : null}
       {playSrc ? (
-        <audio controls className="w-full" src={playSrc} key={playSrc}>
+        <audio
+          controls
+          autoPlay
+          className="w-full"
+          src={playSrc}
+          key={playSrc}
+          onEnded={() => {
+            if (!playFinishedNotified) {
+              onAudioPlaybackFinished?.();
+              setPlayFinishedNotified(true);
+            }
+          }}
+        >
           <track kind="captions" />
         </audio>
+      ) : null}
+      {playSrc && !playFinishedNotified ? (
+        <button
+          type="button"
+          onClick={() => {
+            onAudioPlaybackFinished?.();
+            setPlayFinishedNotified(true);
+          }}
+          className="rounded-[4px] border-2 border-black bg-neutral-50 px-3 py-2 text-xs font-bold"
+        >
+          I finished listening (start timer)
+        </button>
       ) : null}
       <textarea
         value={text}
@@ -109,13 +149,15 @@ export function MockTestDictation({ content, onSubmit }: Props) {
         rows={4}
         className="w-full rounded-[4px] border-4 border-black bg-white p-3 text-sm"
         placeholder="Type what you hear / พิมพ์สิ่งที่ได้ยิน"
+        disabled={submitting}
       />
       <button
         type="button"
+        disabled={submitting}
         onClick={() => onSubmit(text)}
-        className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
+        className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        ส่งคำตอบ / Submit
+        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );

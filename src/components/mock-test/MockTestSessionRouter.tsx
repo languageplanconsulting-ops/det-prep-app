@@ -2,14 +2,22 @@
 
 import { useEffect, useState } from "react";
 
+import { MockFixedSessionClient } from "@/components/mock-test/MockFixedSessionClient";
 import { MockTestSessionClient } from "@/components/mock-test/MockTestSessionClient";
 import { MockTestV2SessionClient } from "@/components/mock-test/MockTestV2SessionClient";
 
 export function MockTestSessionRouter({ sessionId }: { sessionId: string }) {
-  const [engine, setEngine] = useState<1 | 2 | null>(null);
+  const [engine, setEngine] = useState<1 | 2 | 3 | null>(null);
 
   useEffect(() => {
     void (async () => {
+      const fixedRes = await fetch(`/api/mock-test/fixed/session/${sessionId}`, {
+        credentials: "same-origin",
+      });
+      if (fixedRes.ok) {
+        setEngine(3);
+        return;
+      }
       const res = await fetch(`/api/mock-test/session/${sessionId}`, {
         credentials: "same-origin",
       });
@@ -24,6 +32,9 @@ export function MockTestSessionRouter({ sessionId }: { sessionId: string }) {
   }
   if (engine === 2) {
     return <MockTestV2SessionClient sessionId={sessionId} />;
+  }
+  if (engine === 3) {
+    return <MockFixedSessionClient sessionId={sessionId} />;
   }
   return <MockTestSessionClient sessionId={sessionId} />;
 }

@@ -5,8 +5,15 @@ import { useState } from "react";
 import type { MockQuestionRow } from "@/lib/mock-test/types";
 
 import { ConversationSummaryMock } from "@/components/mock-test/questions/ConversationSummaryMock";
+import { ConversationSummaryFromInteractiveMock } from "@/components/mock-test/questions/ConversationSummaryFromInteractiveMock";
+import { InteractiveConversationMock } from "@/components/mock-test/questions/InteractiveConversationMock";
+import { InteractiveConversationMcqMock } from "@/components/mock-test/questions/InteractiveConversationMcqMock";
+import { MockInteractiveSpeakingSession } from "@/components/mock-test/questions/MockInteractiveSpeakingSession";
 import { MockTestDictation } from "@/components/mock-test/questions/MockTestDictation";
 import { MockTestFillInBlanks } from "@/components/mock-test/questions/MockTestFillInBlanks";
+import { ReadThenSpeakMock } from "@/components/mock-test/questions/MockReadThenSpeakFixed";
+import { RealEnglishWordRoundsMock } from "@/components/mock-test/questions/RealEnglishWordRoundsMock";
+import { SpeakAboutPhotoMock } from "@/components/mock-test/questions/MockSpeakAboutPhotoFixed";
 import { VocabularyReadingMockExam } from "@/components/mock-test/questions/VocabularyReadingMockExam";
 import { isInteractiveConversationSummaryContent } from "@/lib/mock-test/conversation-summary-mock";
 
@@ -14,12 +21,16 @@ type Props = {
   question: MockQuestionRow;
   /** Phase 4 composite: how many sub-questions already recorded (0…9). */
   phaseProgress?: number;
+  submitting?: boolean;
+  onDictationAudioFinished?: () => void;
   onSubmit: (answer: unknown) => void;
 };
 
 export function QuestionRouter({
   question,
   phaseProgress = 0,
+  submitting = false,
+  onDictationAudioFinished,
   onSubmit,
 }: Props) {
   const c = question.content as Record<string, unknown>;
@@ -29,16 +40,24 @@ export function QuestionRouter({
       return (
         <MockTestFillInBlanks
           content={c}
+          submitting={submitting}
           onSubmit={(ans) => onSubmit({ answer: ans })}
         />
       );
     case "dictation":
-      return <MockTestDictation content={c} onSubmit={(ans) => onSubmit({ answer: ans })} />;
+      return (
+        <MockTestDictation
+          content={c}
+          submitting={submitting}
+          onAudioPlaybackFinished={onDictationAudioFinished}
+          onSubmit={(ans) => onSubmit({ answer: ans })}
+        />
+      );
     case "real_english_word":
       return (
-        <MockTestFillInBlanks
+        <RealEnglishWordRoundsMock
           content={c}
-          onSubmit={(ans) => onSubmit({ answer: ans })}
+          onSubmit={(payload) => onSubmit(payload)}
         />
       );
     case "read_and_select":
@@ -46,6 +65,7 @@ export function QuestionRouter({
         <ReadAndSelect
           content={c}
           onSubmit={(ans) => onSubmit({ answer: ans })}
+          submitting={submitting}
         />
       );
     case "vocabulary_reading":
@@ -53,6 +73,8 @@ export function QuestionRouter({
         <VocabularyReadingMockExam
           content={c}
           completedSteps={phaseProgress}
+          aggregateMode={c.mock_combined_mode === true}
+          submitting={submitting}
           onSubmit={onSubmit}
         />
       );
@@ -60,6 +82,7 @@ export function QuestionRouter({
       return (
         <InteractiveListening
           content={c}
+          submitting={submitting}
           onSubmit={(ans) => onSubmit({ answer: ans })}
         />
       );
@@ -67,39 +90,57 @@ export function QuestionRouter({
       return (
         <VocabContext
           content={c}
+          submitting={submitting}
           onSubmit={(ans) => onSubmit({ answer: ans })}
         />
       );
     case "read_then_speak":
       return (
-        <OpenTextarea
-          labelEn="Read the passage, then record or type your spoken response."
-          labelTh="อ่านบทความ แล้วอัดเสียงหรือพิมพ์คำตอบ"
-          onSubmit={(text) => onSubmit({ text })}
-        />
+        <ReadThenSpeakMock content={c} submitting={submitting} onSubmit={(payload) => onSubmit(payload)} />
       );
     case "write_about_photo":
       return (
-        <WritePhoto content={c} onSubmit={(text) => onSubmit({ text })} />
+        <WritePhoto content={c} submitting={submitting} onSubmit={(text) => onSubmit({ text })} />
       );
     case "speak_about_photo":
       return (
-        <OpenTextarea
-          labelEn="Describe the photo (record or type)."
-          labelTh="อธิบายรูป (อัดเสียงหรือพิมพ์)"
-          onSubmit={(text) => onSubmit({ text })}
-        />
+        <SpeakAboutPhotoMock content={c} submitting={submitting} onSubmit={(payload) => onSubmit(payload)} />
       );
     case "interactive_speaking":
       return (
-        <OpenTextarea
-          labelEn={String(c.prompt_en ?? c.instruction ?? "Respond to the prompt.")}
-          labelTh={String(c.prompt_th ?? c.instruction_th ?? "ตอบตามโจทย์")}
-          onSubmit={(text) => onSubmit({ text })}
+        <MockInteractiveSpeakingSession
+          content={c}
+          submitting={submitting}
+          onSubmit={(payload) => onSubmit(payload)}
+        />
+      );
+    case "interactive_conversation_mcq":
+      if (Array.isArray(c.turns)) {
+        return (
+          <InteractiveConversationMcqMock
+            content={c}
+            submitting={submitting}
+            onSubmit={(payload) => onSubmit(payload)}
+          />
+        );
+      }
+      return (
+        <InteractiveConversationMock
+          content={c}
+          submitting={submitting}
+          onSubmit={(payload) => onSubmit(payload)}
         />
       );
     case "summarize_conversation":
     case "conversation_summary":
+      if (Array.isArray(c.turns) && c.mock_linked_from_interactive === true) {
+        return (
+          <ConversationSummaryFromInteractiveMock
+            content={c}
+            onSubmit={(payload) => onSubmit(payload)}
+          />
+        );
+      }
       if (isInteractiveConversationSummaryContent(c)) {
         return (
           <ConversationSummaryMock
@@ -109,12 +150,16 @@ export function QuestionRouter({
         );
       }
       return (
-        <SummarizeConv content={c} onSubmit={(text) => onSubmit({ text })} />
+        <SummarizeConv
+          content={c}
+          submitting={submitting}
+          onSubmit={(text) => onSubmit({ text })}
+        />
       );
     case "read_and_write":
     case "essay_writing":
       return (
-        <EssayWriting content={c} onSubmit={(text) => onSubmit({ text })} />
+        <EssayWriting content={c} submitting={submitting} onSubmit={(text) => onSubmit({ text })} />
       );
     default:
       return <p className="text-sm">Unsupported question type.</p>;
@@ -124,9 +169,11 @@ export function QuestionRouter({
 function ReadAndSelect({
   content,
   onSubmit,
+  submitting,
 }: {
   content: Record<string, unknown>;
   onSubmit: (a: string) => void;
+  submitting: boolean;
 }) {
   const [pick, setPick] = useState<string | null>(null);
   const opts = (content.options as string[]) ?? [];
@@ -144,6 +191,7 @@ function ReadAndSelect({
             key={o}
             type="button"
             onClick={() => setPick(o)}
+            disabled={submitting}
             className={`rounded-[4px] border-4 border-black px-3 py-2 text-left text-sm font-bold shadow-[4px_4px_0_0_#000] ${
               pick === o ? "bg-[#FFCC00]" : "bg-white"
             }`}
@@ -154,11 +202,11 @@ function ReadAndSelect({
       </div>
       <button
         type="button"
-        disabled={!pick}
+        disabled={submitting || !pick}
         onClick={() => pick && onSubmit(pick)}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
       >
-        ส่งคำตอบ / Submit
+        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );
@@ -167,9 +215,11 @@ function ReadAndSelect({
 function InteractiveListening({
   content,
   onSubmit,
+  submitting,
 }: {
   content: Record<string, unknown>;
   onSubmit: (a: string) => void;
+  submitting: boolean;
 }) {
   const [pick, setPick] = useState<string | null>(null);
   const opts = (content.options as string[]) ?? [];
@@ -189,6 +239,7 @@ function InteractiveListening({
             key={o}
             type="button"
             onClick={() => setPick(o)}
+            disabled={submitting}
             className={`rounded-[4px] border-4 border-black px-3 py-2 text-left text-sm font-bold shadow-[4px_4px_0_0_#000] ${
               pick === o ? "bg-[#FFCC00]" : "bg-white"
             }`}
@@ -199,11 +250,11 @@ function InteractiveListening({
       </div>
       <button
         type="button"
-        disabled={!pick}
+        disabled={submitting || !pick}
         onClick={() => pick && onSubmit(pick)}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
       >
-        ส่งคำตอบ / Submit
+        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );
@@ -212,9 +263,11 @@ function InteractiveListening({
 function VocabContext({
   content,
   onSubmit,
+  submitting,
 }: {
   content: Record<string, unknown>;
   onSubmit: (a: string) => void;
+  submitting: boolean;
 }) {
   const [pick, setPick] = useState<string | null>(null);
   const opts = (content.options as string[]) ?? [];
@@ -234,6 +287,7 @@ function VocabContext({
             key={o}
             type="button"
             onClick={() => setPick(o)}
+            disabled={submitting}
             className={`rounded-[4px] border-4 border-black px-3 py-2 text-sm font-bold shadow-[4px_4px_0_0_#000] ${
               pick === o ? "bg-[#FFCC00]" : "bg-white"
             }`}
@@ -244,11 +298,11 @@ function VocabContext({
       </div>
       <button
         type="button"
-        disabled={!pick}
+        disabled={submitting || !pick}
         onClick={() => pick && onSubmit(pick)}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
       >
-        ส่งคำตอบ / Submit
+        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );
@@ -258,10 +312,12 @@ function OpenTextarea({
   labelEn,
   labelTh,
   onSubmit,
+  submitting,
 }: {
   labelEn: string;
   labelTh: string;
   onSubmit: (t: string) => void;
+  submitting: boolean;
 }) {
   const [text, setText] = useState("");
   return (
@@ -277,10 +333,11 @@ function OpenTextarea({
       />
       <button
         type="button"
+        disabled={submitting}
         onClick={() => onSubmit(text)}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
       >
-        ส่งคำตอบ / Submit
+        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );
@@ -289,19 +346,23 @@ function OpenTextarea({
 function WritePhoto({
   content,
   onSubmit,
+  submitting,
 }: {
   content: Record<string, unknown>;
   onSubmit: (t: string) => void;
+  submitting: boolean;
 }) {
   const [text, setText] = useState("");
-  const url = String(content.image_url ?? "");
+  const url = String(
+    content.image_url ?? content.imageUrl ?? content.photo_url ?? content.photoUrl ?? "",
+  );
   return (
     <div className="space-y-3">
       <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
       <p className="text-xs text-neutral-600">{String(content.instruction ?? "")}</p>
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element -- dynamic admin URLs
-        <img src={url} alt="" className="max-h-64 w-auto border-4 border-black" />
+        <img src={url} alt="" className="max-h-72 w-full rounded-[4px] border-4 border-black object-cover" />
       ) : null}
       <textarea
         value={text}
@@ -311,10 +372,11 @@ function WritePhoto({
       />
       <button
         type="button"
+        disabled={submitting}
         onClick={() => onSubmit(text)}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
       >
-        ส่งคำตอบ / Submit
+        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );
@@ -323,9 +385,11 @@ function WritePhoto({
 function SummarizeConv({
   content,
   onSubmit,
+  submitting,
 }: {
   content: Record<string, unknown>;
   onSubmit: (t: string) => void;
+  submitting: boolean;
 }) {
   const [text, setText] = useState("");
   const url = String(content.audio_url ?? "");
@@ -350,10 +414,11 @@ function SummarizeConv({
       />
       <button
         type="button"
+        disabled={submitting}
         onClick={() => onSubmit(text)}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
       >
-        ส่งคำตอบ / Submit
+        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );
@@ -362,16 +427,18 @@ function SummarizeConv({
 function EssayWriting({
   content,
   onSubmit,
+  submitting,
 }: {
   content: Record<string, unknown>;
   onSubmit: (t: string) => void;
+  submitting: boolean;
 }) {
   const [text, setText] = useState("");
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   return (
     <div className="space-y-3">
-      <p className="text-sm font-bold">{String(content.prompt_th ?? content.instruction_th ?? "")}</p>
-      <p className="text-xs text-neutral-600">{String(content.prompt ?? content.instruction ?? "")}</p>
+      <p className="text-base font-black text-neutral-900">{String(content.prompt_th ?? content.instruction_th ?? "")}</p>
+      <p className="text-sm text-neutral-600">{String(content.prompt ?? content.instruction ?? "")}</p>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -381,10 +448,11 @@ function EssayWriting({
       <p className="text-xs font-mono text-neutral-600">Words: {words}</p>
       <button
         type="button"
+        disabled={submitting}
         onClick={() => onSubmit(text)}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
       >
-        ส่งคำตอบ / Submit
+        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );
