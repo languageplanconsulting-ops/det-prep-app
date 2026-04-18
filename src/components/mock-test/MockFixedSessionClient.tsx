@@ -61,8 +61,14 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   const [submittingStep, setSubmittingStep] = useState(false);
   const [loadingReason, setLoadingReason] = useState<"init" | "adapting" | "rest">("init");
   const [resting, setResting] = useState(false);
+  const [singleStepResult, setSingleStepResult] = useState<{
+    stepIndex: number;
+    taskType: string;
+    score: number;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dictationTimerStarted, setDictationTimerStarted] = useState(true);
+  const [speakPhotoTimerStarted, setSpeakPhotoTimerStarted] = useState(true);
   const timer = usePhaseTimer();
 
   const answeredCount = session?.responses?.length ?? 0;
@@ -132,7 +138,14 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       timer.pauseTimer();
       return;
     }
+    if (current.task_type === "speak_about_photo") {
+      setSpeakPhotoTimerStarted(false);
+      timer.startTimer(stepIndex, current.time_limit_sec);
+      timer.pauseTimer();
+      return;
+    }
     setDictationTimerStarted(true);
+    setSpeakPhotoTimerStarted(true);
     timer.resetTimer(stepIndex, current.time_limit_sec);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.step_index, current?.task_type, skipTimerMode]);
@@ -186,7 +199,14 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       credentials: "same-origin",
       body: JSON.stringify({ stepIndex: current.step_index, answer }),
     });
-    const json = (await res.json()) as { complete?: boolean; error?: string };
+    const json = (await res.json()) as {
+      complete?: boolean;
+      error?: string;
+      singleStepPreview?: boolean;
+      stepScore?: number;
+      stepIndex?: number;
+      taskType?: string;
+    };
     if (!res.ok || json.error) {
       if (json.error === "Step already submitted") {
         // Step is already recorded; reload session so UI can move on.
@@ -205,6 +225,14 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
 
     if (json.complete) {
       setSubmittingStep(false);
+      if (json.singleStepPreview) {
+        setSingleStepResult({
+          stepIndex: Number(json.stepIndex ?? current.step_index),
+          taskType: String(json.taskType ?? current.task_type),
+          score: Number(json.stepScore ?? 0),
+        });
+        return;
+      }
       router.push(`/mock-test/fixed/results-loading/${sessionId}`);
       return;
     }
@@ -283,6 +311,33 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     );
   }
 
+  if (singleStepResult) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-4 px-4 py-10">
+        <div className={`${mt.border} ${mt.shadow} bg-white p-6`}>
+          <p className="text-xs font-black uppercase tracking-wide text-[#004AAD]">Admin separate preview</p>
+          <h2 className="mt-2 text-2xl font-black text-neutral-900">Step grading complete</h2>
+          <p className="mt-2 text-sm font-bold text-neutral-700">
+            Step {singleStepResult.stepIndex} ({singleStepResult.taskType})
+          </p>
+          <p className="mt-3 text-4xl font-black text-[#004AAD]">{singleStepResult.score}/160</p>
+          <p className="mt-2 text-xs font-bold text-neutral-600">
+            This preview mode runs one step only so you can QA UI + grading quickly.
+          </p>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => router.push("/mock-test/start?adminPreview=1&previewSeparate=1")}
+              className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black shadow-[3px_3px_0_0_#000]"
+            >
+              Back to separate preview setup
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-4 px-4 py-4 sm:py-6">
       <div className="sticky top-3 z-20 space-y-3">
@@ -350,6 +405,13 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
               <QuestionRouter
                 question={question}
                 submitting={submittingStep}
+          onSpeakPhotoReady={() => {
+            if (skipTimerMode) return;
+            if (current?.task_type !== "speak_about_photo") return;
+            if (speakPhotoTimerStarted) return;
+            setSpeakPhotoTimerStarted(true);
+            timer.resumeTimer();
+          }}
                 onDictationAudioFinished={() => {
                   if (skipTimerMode) return;
                   if (current?.task_type !== "dictation") return;

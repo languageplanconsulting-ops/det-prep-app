@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { ConversationSessionGate } from "@/components/conversation/ConversationSessionGate";
 import { CONVERSATION_DIFFICULTIES, parseConversationRoundParam } from "@/lib/conversation-constants";
 import type { ConversationDifficulty } from "@/types/conversation";
@@ -22,7 +23,19 @@ export default async function InteractiveConversationSetPage({
   const difficulty = dRaw.toLowerCase();
   const setNumber = Number.parseInt(sRaw, 10);
 
-  if (round === null || !isDifficulty(difficulty) || !Number.isFinite(setNumber)) {
+  if (round === null || !Number.isFinite(setNumber)) {
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-8">
+        <p className="font-bold text-red-700">Invalid URL.</p>
+      </main>
+    );
+  }
+
+  if (difficulty === "hard") {
+    redirect(`/practice/listening/interactive/${round}`);
+  }
+
+  if (!isDifficulty(difficulty)) {
     return (
       <main className="mx-auto max-w-4xl px-4 py-8">
         <p className="font-bold text-red-700">Invalid URL.</p>

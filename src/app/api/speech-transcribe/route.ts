@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { transcribeEnglishAudioWithGemini } from "@/lib/gemini-transcribe";
+import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { resolveTranscriptionGeminiModel } from "@/lib/gemini-model-resolve";
+import { transcribeEnglishAudioWithGemini } from "@/lib/gemini-transcribe";
+import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 
 export const maxDuration = 120;
 
@@ -59,12 +61,32 @@ export async function POST(req: Request) {
 
   try {
     const model = await resolveTranscriptionGeminiModel();
-    const transcript = await transcribeEnglishAudioWithGemini({
+    const userId = await getOptionalAuthUserId();
+    const { transcript, usage } = await transcribeEnglishAudioWithGemini({
       apiKey: key,
       model,
       audioBase64: audioBase64.trim(),
       mimeType: mimeType.trim(),
     });
+    if (usage) {
+      scheduleApiUsageLog({
+        userId,
+        operation: "speech_transcribe",
+        provider: "gemini",
+        model: usage.model,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+      });
+    } else {
+      scheduleApiUsageLog({
+        userId,
+        operation: "speech_transcribe",
+        provider: "gemini",
+        model,
+        charsIn: Math.floor(audioBase64.trim().length / 4),
+        meta: { note: "no_usage_metadata" },
+      });
+    }
     return NextResponse.json({ transcript });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Transcription failed";

@@ -1,6 +1,9 @@
 import { normalizeVocabSetsIncoming, parseVocabSetsJson } from "@/lib/vocab-admin";
 import { VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
-import { defaultVocabFullBank, emptyVocabFullBank } from "@/lib/vocab-default-data";
+import {
+  emptyVocabFullBank,
+  isBuiltInPlaceholderVocabSet,
+} from "@/lib/vocab-default-data";
 import type {
   VocabFullBank,
   VocabPassageUnit,
@@ -154,13 +157,13 @@ function migrateLegacyArrayToBank(arr: VocabSet[]): VocabFullBank {
 }
 
 function parseStoredBank(raw: string | null): VocabFullBank {
-  const base = defaultVocabFullBank();
+  const base = emptyVocabFullBank();
   if (!raw) return base;
   try {
     const parsed = JSON.parse(raw) as unknown;
     if (Array.isArray(parsed)) {
       if (parsed.length === 0) {
-        return defaultVocabFullBank();
+        return emptyVocabFullBank();
       }
       return migrateLegacyArrayToBank(parsed as VocabSet[]);
     }
@@ -170,13 +173,15 @@ function parseStoredBank(raw: string | null): VocabFullBank {
       const block = o[String(r)];
       if (!Array.isArray(block)) continue;
       const byNum = new Map<number, VocabSet>();
-      for (const row of base[r]) byNum.set(row.setNumber, row);
-      for (const item of block) {
-        if (!item || typeof item !== "object") continue;
-        const s = item as VocabSet;
-        if (typeof s.setNumber === "number" && Array.isArray(s.passages)) {
-          const roundNum = typeof s.round === "number" && isRound(s.round) ? s.round : r;
-          byNum.set(s.setNumber, { ...s, round: roundNum, passages: s.passages });
+      if (block.length > 0) {
+        for (const row of base[r]) byNum.set(row.setNumber, row);
+        for (const item of block) {
+          if (!item || typeof item !== "object") continue;
+          const s = item as VocabSet;
+          if (typeof s.setNumber === "number" && Array.isArray(s.passages)) {
+            const roundNum = typeof s.round === "number" && isRound(s.round) ? s.round : r;
+            byNum.set(s.setNumber, { ...s, round: roundNum, passages: s.passages });
+          }
         }
       }
       base[r] = [...byNum.values()].sort((a, b) => a.setNumber - b.setNumber);
@@ -188,7 +193,7 @@ function parseStoredBank(raw: string | null): VocabFullBank {
 }
 
 export function loadVocabBank(): VocabFullBank {
-  if (typeof window === "undefined") return defaultVocabFullBank();
+  if (typeof window === "undefined") return emptyVocabFullBank();
   return parseStoredBank(localStorage.getItem(VOCAB_SETS_KEY));
 }
 
@@ -199,7 +204,11 @@ export function loadVocabVisibleBank(): VocabFullBank {
   const out = emptyVocabFullBank();
   for (const r of VOCAB_ROUND_NUMBERS) {
     const allowed = new Set(occ[r]);
-    out[r] = bank[r].filter((s) => allowed.has(s.setNumber)).sort((a, b) => a.setNumber - b.setNumber);
+    out[r] = bank[r]
+      .filter(
+        (s) => allowed.has(s.setNumber) && !isBuiltInPlaceholderVocabSet(s),
+      )
+      .sort((a, b) => a.setNumber - b.setNumber);
   }
   return out;
 }
@@ -284,8 +293,12 @@ export function mergeVocabSetsFromAdmin(incoming: VocabSet[], round: VocabRoundN
       map.set(s.setNumber, { ...s, round });
       continue;
     }
+    // Import for a level should replace that whole level in the slot
+    // (prevents "10 existing + 10 uploaded = 20" accumulation).
+    const replacedLevels = new Set(s.passages.map((p) => p.contentLevel));
     const mergedPassages = new Map<string, VocabSet["passages"][number]>();
     for (const p of prev.passages) {
+      if (replacedLevels.has(p.contentLevel)) continue;
       mergedPassages.set(`${p.contentLevel}:${p.passageNumber}`, p);
     }
     for (const p of s.passages) {
@@ -328,6 +341,40 @@ export function removeVocabPassagesFromAdmin(
     bank[round][ix] = { ...s, passages: nextPassages };
   }
   persistVocabBank(bank);
+}
+
+/** Remove every passage at one difficulty for a slot (other difficulties stay). */
+export function removeAllVocabPassagesForLevel(
+  round: VocabRoundNum,
+  setNumber: number,
+  level: VocabSessionLevel,
+): void {
+  const s = loadVocabBank()[round].find((x) => x.setNumber === setNumber);
+  if (!s) return;
+  const metas = s.passages
+    .filter((p) => p.contentLevel === level)
+    .map((p) => ({ contentLevel: p.contentLevel, passageNumber: p.passageNumber }));
+  removeVocabPassagesFromAdmin(setNumber, metas, round);
+}
+
+/** Remove the whole set (all difficulties); drops admin visibility for that slot. */
+export function removeVocabSetFromRound(round: VocabRoundNum, setNumber: number): void {
+  const bank = loadVocabBank();
+  const ix = bank[round].findIndex((x) => x.setNumber === setNumber);
+  if (ix < 0) return;
+  bank[round].splice(ix, 1);
+  unregisterVocabAdminSlots(round, [setNumber]);
+  persistVocabBank(bank);
+}
+
+/**
+ * Empty vocabulary for all rounds and clear which slots are “published”.
+ * Browser only — use Admin → “Sync to server now” afterward to overwrite the Supabase snapshot.
+ */
+export function clearEntireVocabBankAndOccupancy(): void {
+  if (typeof window === "undefined") return;
+  persistVocabBank(emptyVocabFullBank());
+  saveVocabAdminOccupancy(emptyVocabOccupancy());
 }
 
 export function getVocabSetByNumber(setNumber: number, round: VocabRoundNum): VocabSet | undefined {

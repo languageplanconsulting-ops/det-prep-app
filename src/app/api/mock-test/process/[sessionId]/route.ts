@@ -70,6 +70,7 @@ export async function POST(
           const graded = await gradeDetResponse(
             text,
             `Phase ${p} open response. Question type: ${String(item.questionType ?? "open")}.`,
+            { userId: user.id },
           );
           item.aiScore = graded.score;
         } catch {
@@ -85,7 +86,7 @@ export async function POST(
 
     const subscores = calculateAllSubscores(scoringInput);
     const overall = calculateOverallScore(subscores);
-    const insights = await generateInsightSummary(subscores);
+    const insights = await generateInsightSummary(subscores, { userId: user.id });
 
     const adaptiveLog = session.phase_responses;
 

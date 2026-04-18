@@ -119,7 +119,7 @@ export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryEx
   };
 
   if (phase === "loading") {
-    return <GradingProgressLoader eyebrow="Grading your summary" />;
+    return <GradingProgressLoader eyebrow="Grading your summary" placement="inline" />;
   }
 
   if (phase === "report" && report) {

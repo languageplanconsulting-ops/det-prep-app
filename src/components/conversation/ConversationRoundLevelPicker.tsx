@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
-  CONVERSATION_DIFFICULTIES,
   CONVERSATION_DIFFICULTY_LABEL,
-  CONVERSATION_MAX_SCORE,
+  CONVERSATION_FULL_SCORE,
   CONVERSATION_TOTAL_STEPS,
 } from "@/lib/conversation-constants";
 import { filterConversationExamsForPractice } from "@/lib/conversation-practice-filter";
@@ -16,7 +15,7 @@ import {
   loadConversationBank,
 } from "@/lib/conversation-storage";
 import { buildDefaultConversationBank } from "@/lib/conversation-default-data";
-import type { ConversationDifficulty, ConversationExam } from "@/types/conversation";
+import type { ConversationExam } from "@/types/conversation";
 
 function isComplete(
   prog: ReturnType<typeof getConversationProgress>,
@@ -26,6 +25,14 @@ function isComplete(
   if (Math.round(prog.bestScore) >= maxScore) return true;
   const ok = prog.lastItemOk;
   return !!ok && ok.length === CONVERSATION_TOTAL_STEPS && ok.every(Boolean);
+}
+
+function needsRedeem(
+  prog: ReturnType<typeof getConversationProgress>,
+  complete: boolean,
+): boolean {
+  if (!prog || complete) return false;
+  return prog.lastItemOk?.some((x) => !x) ?? false;
 }
 
 function audioCoverage(exam: {
@@ -54,81 +61,6 @@ function formatShortDate(iso: string | null): string {
   } catch {
     return "—";
   }
-}
-
-function ConversationRoundTutorExplainer({ round }: { round: number }) {
-  const [open, setOpen] = useState(false);
-  const easy = CONVERSATION_MAX_SCORE.easy;
-  const medium = CONVERSATION_MAX_SCORE.medium;
-  const hard = CONVERSATION_MAX_SCORE.hard;
-
-  return (
-    <div className="mt-4">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full rounded-sm border-2 border-black bg-ep-yellow/40 px-4 py-3 text-left shadow-[3px_3px_0_0_#000] transition hover:bg-ep-yellow/60"
-      >
-        <span className="block text-sm font-black text-neutral-900">
-          How rounds &amp; levels work (tutor) — tap to {open ? "hide" : "show"}
-        </span>
-        <span className="mt-0.5 block text-xs font-bold text-neutral-700">
-          อธิบายรอบและระดับ (ติวเตอร์) — แตะเพื่อ{open ? "ซ่อน" : "ดู"}
-        </span>
-      </button>
-
-      {open ? (
-        <div className="mt-3 space-y-5 rounded-sm border-2 border-black bg-white p-4 text-sm shadow-[3px_3px_0_0_#000]">
-          <div>
-            <p className="text-xs font-black uppercase tracking-wide text-ep-blue">
-              English
-            </p>
-            <p className="mt-2 font-black text-neutral-900">What is &quot;Round {round}&quot;?</p>
-            <p className="mt-2 leading-relaxed text-neutral-800">
-              We call it a <strong>round</strong> because each round contains <strong>many exams</strong> (several
-              sets). That structure is for learners who want to <strong>practice a lot</strong> in one place
-              before moving on. <strong>Round {round}</strong> is available now;{" "}
-              <strong>Rounds 2–5</strong> will be loaded soon.
-            </p>
-            <p className="mt-3 font-black text-neutral-900">Difficulty levels &amp; max scores</p>
-            <ul className="mt-2 list-inside list-disc space-y-1 font-semibold text-neutral-800">
-              <li>
-                Easy · max <strong>{easy}</strong> pts
-              </li>
-              <li>
-                Medium · max <strong>{medium}</strong> pts
-              </li>
-              <li>
-                Hard · max <strong>{hard}</strong> pts
-              </li>
-            </ul>
-          </div>
-
-          <div className="border-t-2 border-dashed border-neutral-200 pt-4">
-            <p className="text-xs font-black uppercase tracking-wide text-ep-blue">ไทย</p>
-            <p className="mt-2 font-black text-neutral-900">รอบ {round} คืออะไร?</p>
-            <p className="mt-2 leading-relaxed text-neutral-800">
-              เรียกว่า <strong>รอบ</strong> เพราะในแต่ละรอบมี<strong>ข้อสอบหลายชุด</strong> (หลายเซ็ต) ให้ฝึก
-              เหมาะกับคนที่อยาก<strong>ซ้อมเยอะๆ</strong>ก่อนไปต่อ <strong>รอบ {round}</strong> ใช้งานได้แล้วตอนนี้;{" "}
-              <strong>รอบ 2–5</strong> กำลังจะเปิดให้โหลดเร็วๆ นี้
-            </p>
-            <p className="mt-3 font-black text-neutral-900">ระดับความยากและคะแนนเต็ม</p>
-            <ul className="mt-2 list-inside list-disc space-y-1 font-semibold text-neutral-800">
-              <li>
-                ง่าย (Easy) · เต็ม <strong>{easy}</strong> คะแนน
-              </li>
-              <li>
-                ปานกลาง (Medium) · เต็ม <strong>{medium}</strong> คะแนน
-              </li>
-              <li>
-                ยาก (Hard) · เต็ม <strong>{hard}</strong> คะแนน
-              </li>
-            </ul>
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
 }
 
 export function ConversationRoundLevelPicker({ round }: { round: number }) {
@@ -167,14 +99,14 @@ export function ConversationRoundLevelPicker({ round }: { round: number }) {
 
       <header className="ep-panel-luxury ep-brutal rounded-sm border-4 border-black bg-white p-6 shadow-[4px_4px_0_0_#000]">
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.25em] text-ep-blue">
-          Round {round}
+          Round {round} · Question bank
         </p>
-        <h1 className="mt-2 text-2xl font-black tracking-tight">Choose your set</h1>
+        <h1 className="mt-2 text-2xl font-black tracking-tight">Sets in this round</h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-600">
-          Summary by level: Easy ({CONVERSATION_MAX_SCORE.easy}), Medium ({CONVERSATION_MAX_SCORE.medium}), Hard (
-          {CONVERSATION_MAX_SCORE.hard}). Click a topic thumbnail below to start.
+          One list for the whole bank. Full score on every set: <strong>{CONVERSATION_FULL_SCORE}</strong> pts. The{" "}
+          <strong>Tag</strong> column is a legacy content label only. Tap a row to start; use <strong>Redeem</strong>{" "}
+          after mistakes.
         </p>
-        <ConversationRoundTutorExplainer round={round} />
 
         <div className="mt-4 grid gap-4 border-t-2 border-dashed border-neutral-300 pt-4 sm:grid-cols-2">
           <div>
@@ -185,7 +117,7 @@ export function ConversationRoundLevelPicker({ round }: { round: number }) {
               {roundStats.avgPercent != null ? `${roundStats.avgPercent}%` : "—"}
             </p>
             <p className="ep-stat mt-0.5 text-xs text-neutral-500">
-              Mean of your best % on each set you&apos;ve tried (all levels in this round).
+              Mean of your best % on each set you&apos;ve tried in this round.
             </p>
           </div>
           <div>
@@ -202,72 +134,129 @@ export function ConversationRoundLevelPicker({ round }: { round: number }) {
         </div>
       </header>
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        {CONVERSATION_DIFFICULTIES.map((d) => (
-          <DifficultyColumn
-            key={d}
-            round={round}
-            difficulty={d}
-            exams={filterConversationExamsForPractice(bank[round]?.[d])}
-          />
-        ))}
+      <section className="ep-panel-luxury ep-brutal overflow-hidden rounded-sm border-4 border-black bg-white shadow-[4px_4px_0_0_#000]">
+        <div className="border-b-4 border-black bg-ep-yellow/30 px-4 py-3">
+          <p className="text-xs font-black uppercase tracking-wide text-neutral-900">Question bank</p>
+          <p className="ep-stat mt-0.5 text-[10px] font-bold text-neutral-600">
+            Sorted by bank slot (Easy first), then set number. Full score {CONVERSATION_FULL_SCORE} pts each.
+          </p>
+        </div>
+        <QuestionBankRows
+          round={round}
+          easyExams={filterConversationExamsForPractice(bank[round]?.easy)}
+          mediumExams={filterConversationExamsForPractice(bank[round]?.medium)}
+        />
       </section>
     </div>
   );
 }
 
-function DifficultyColumn({
+function QuestionBankRows({
   round,
-  difficulty,
-  exams,
+  easyExams,
+  mediumExams,
 }: {
   round: number;
-  difficulty: ConversationDifficulty;
-  exams: ConversationExam[];
+  easyExams: ConversationExam[];
+  mediumExams: ConversationExam[];
 }) {
-  const levelMax = CONVERSATION_MAX_SCORE[difficulty];
-  const sorted = [...exams].sort((a, b) => a.setNumber - b.setNumber);
-  return (
-    <div className="ep-panel-luxury ep-brutal rounded-sm border-4 border-black bg-white p-3 shadow-[4px_4px_0_0_#000]">
-      <p className="text-base font-black uppercase">{CONVERSATION_DIFFICULTY_LABEL[difficulty]}</p>
-      <p className="ep-stat text-xs font-bold text-neutral-600">
-        Default max {levelMax} pts · {sorted.length} set(s)
-      </p>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        {sorted.length === 0 ? (
-          <p className="col-span-2 text-[10px] font-bold text-neutral-500">No sets uploaded for this level.</p>
-        ) : (
-          sorted.map((exam) => {
-            const setNumber = exam.setNumber;
-            const examMax = conversationMaxForExam(exam);
-            const prog = getConversationProgress(round, difficulty, setNumber);
-            const complete = isComplete(prog, examMax);
-            const redeem = !!prog && !complete && (prog.lastItemOk?.some((x) => !x) ?? false);
-            const href = redeem
-              ? `/practice/listening/interactive/${round}/${difficulty}/${setNumber}?redeem=1`
-              : `/practice/listening/interactive/${round}/${difficulty}/${setNumber}`;
-            const cov = audioCoverage(exam);
-            return (
-              <Link
-                key={exam.id}
-                href={href}
-                className="ep-btn-luxury ep-interactive rounded-sm border-2 border-black bg-neutral-50 px-2 py-2 text-left shadow-[2px_2px_0_0_#000] hover:bg-ep-yellow/25"
-              >
-                <p className="text-xs font-black">Set {setNumber}</p>
-                <p className="line-clamp-2 text-[10px] font-bold text-neutral-600">{exam.title}</p>
-                <p className="ep-stat mt-1 text-[10px] font-bold text-neutral-500">
-                  Audio {cov.covered}/{cov.total}
-                </p>
-                <p className="ep-stat mt-1 text-[10px] font-bold text-ep-blue">
-                  {prog ? `${Math.round(prog.bestScore)}/${examMax}` : `0/${examMax}`}
-                </p>
-                {complete ? <p className="text-[10px] font-black text-emerald-700">Completed</p> : null}
-                {redeem ? <p className="text-[10px] font-black text-amber-700">Redeem</p> : null}
-              </Link>
-            );
-          })
-        )}
+  type Row = { exam: ConversationExam; difficulty: "easy" | "medium" };
+  const rows: Row[] = [
+    ...[...easyExams].sort((a, b) => a.setNumber - b.setNumber).map((exam) => ({ exam, difficulty: "easy" as const })),
+    ...[...mediumExams]
+      .sort((a, b) => a.setNumber - b.setNumber)
+      .map((exam) => ({ exam, difficulty: "medium" as const })),
+  ].sort((a, b) => {
+    if (a.difficulty !== b.difficulty) return a.difficulty === "easy" ? -1 : 1;
+    return a.exam.setNumber - b.exam.setNumber;
+  });
+
+  if (rows.length === 0) {
+    return (
+      <div className="px-4 py-10 text-center">
+        <p className="text-sm font-bold text-neutral-700">No sets in this round yet.</p>
+        <p className="ep-stat mt-2 text-xs text-neutral-500">
+          Content appears here after an admin upload for round {round}.
+        </p>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="hidden grid-cols-[5.5rem_minmax(0,1fr)_auto_5.5rem] gap-2 border-b-2 border-black bg-neutral-100 px-4 py-2 ep-stat text-[10px] font-black uppercase tracking-widest text-neutral-800 sm:grid">
+        <span>Tag</span>
+        <span>Set &amp; title</span>
+        <span className="text-right">Status</span>
+        <span className="text-right">Best</span>
+      </div>
+      <ul className="divide-y-4 divide-black">
+        {rows.map(({ exam, difficulty }) => {
+          const setNumber = exam.setNumber;
+          const examMax = conversationMaxForExam(exam);
+          const prog = getConversationProgress(round, difficulty, setNumber);
+          const complete = isComplete(prog, examMax);
+          const redeem = needsRedeem(prog, complete);
+          const href = redeem
+            ? `/practice/listening/interactive/${round}/${difficulty}/${setNumber}?redeem=1`
+            : `/practice/listening/interactive/${round}/${difficulty}/${setNumber}`;
+          const cov = audioCoverage(exam);
+          const scoreCell =
+            prog != null ? (
+              <span className="ep-stat font-bold text-ep-blue">
+                {Math.round(prog.bestScore)}/{examMax}
+              </span>
+            ) : (
+              <span className="ep-stat text-neutral-400">0/{examMax}</span>
+            );
+
+          return (
+            <li key={`${difficulty}-${exam.id}`} className="border-b-4 border-black last:border-b-0">
+              <Link
+                href={href}
+                className="ep-btn-luxury ep-interactive grid grid-cols-1 gap-3 px-4 py-4 text-sm hover:bg-ep-yellow/15 sm:grid-cols-[5.5rem_minmax(0,1fr)_auto_5.5rem] sm:items-center sm:gap-2"
+              >
+                <div className="flex items-center gap-2 sm:block sm:min-w-0">
+                  <span className="inline-flex w-fit rounded-sm border-2 border-black bg-ep-blue/10 px-2 py-0.5 ep-stat text-[10px] font-black uppercase text-ep-blue">
+                    {CONVERSATION_DIFFICULTY_LABEL[difficulty]}
+                  </span>
+                  <span className="text-xs font-bold text-neutral-500 sm:hidden">· Set {setNumber}</span>
+                </div>
+                <div className="min-w-0 sm:pl-0">
+                  <span className="hidden font-black text-neutral-900 sm:inline">Set {setNumber}</span>
+                  <span className="mt-0.5 line-clamp-2 block text-[11px] font-bold text-neutral-700 sm:mt-1">
+                    {exam.title}
+                  </span>
+                  <span className="ep-stat mt-1 block text-[10px] font-bold text-neutral-500">
+                    Audio lines {cov.covered}/{cov.total}
+                  </span>
+                </div>
+                <div className="flex flex-row items-center justify-between gap-2 sm:flex-col sm:items-end sm:justify-center sm:text-right">
+                  <div className="flex flex-wrap items-center gap-1 sm:justify-end">
+                    {redeem ? (
+                      <span className="border-2 border-black bg-ep-yellow px-1.5 py-0.5 text-[9px] font-black uppercase">
+                        Redeem
+                      </span>
+                    ) : null}
+                    {complete ? (
+                      <span
+                        className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-emerald-700 bg-emerald-100 text-sm font-black text-emerald-800"
+                        title="Completed"
+                      >
+                        ✓
+                      </span>
+                    ) : null}
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-wide text-neutral-700">
+                    {complete ? "Done" : prog ? "In progress" : "Start"}
+                  </span>
+                </div>
+                <div className="text-left text-base sm:text-right">{scoreCell}</div>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 }

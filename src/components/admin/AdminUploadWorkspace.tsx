@@ -47,7 +47,6 @@ type UploadKind =
 type UploadCounts = Record<UploadKind, number> & {
   conversationEasy: number;
   conversationMedium: number;
-  conversationHard: number;
 };
 
 function getCounts(): UploadCounts {
@@ -66,7 +65,6 @@ function getCounts(): UploadCounts {
     conversation: conv.length,
     conversationEasy: conv.filter((e) => e.difficulty === "easy").length,
     conversationMedium: conv.filter((e) => e.difficulty === "medium").length,
-    conversationHard: conv.filter((e) => e.difficulty === "hard").length,
     realword: countRealWordSetsInBank(),
     dialogueSummary: countDialogueSummarySetsInBank(),
     interactiveSpeaking: loadInteractiveSpeakingScenarios().length,
@@ -103,7 +101,6 @@ export function AdminUploadWorkspace() {
     conversation: 0,
     conversationEasy: 0,
     conversationMedium: 0,
-    conversationHard: 0,
     realword: 0,
     dialogueSummary: 0,
     interactiveSpeaking: 0,
@@ -229,8 +226,7 @@ export function AdminUploadWorkspace() {
         </p>
         {active === "conversation" ? (
           <p className="mt-2 rounded-[4px] border-2 border-black bg-neutral-50 px-2 py-2 ep-stat text-[10px] font-bold text-neutral-700">
-            Interactive conversation · by level: E {counts.conversationEasy} · M {counts.conversationMedium} · H{" "}
-            {counts.conversationHard}
+            Interactive conversation · by level: E {counts.conversationEasy} · M {counts.conversationMedium}
           </p>
         ) : null}
       </aside>

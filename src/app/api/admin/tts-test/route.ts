@@ -195,10 +195,11 @@ export async function POST(req: Request) {
             "GEMINI_API_KEY is not set (or empty) in the server environment.",
         });
       }
-      const out = await synthesizeEnglishSpeechWithGemini({
+      const raw = await synthesizeEnglishSpeechWithGemini({
         apiKey: geminiKey,
         text,
       });
+      const { usage: _usage, ...out } = raw;
       const audioBytes = Buffer.from(out.audioBase64, "base64").length;
       return NextResponse.json({
         ok: true as const,

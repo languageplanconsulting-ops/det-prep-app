@@ -37,11 +37,23 @@ function normalizeText(v: unknown): string {
   return String(v ?? "").trim().toLowerCase();
 }
 
-function to0to100From160(score160: number): number {
-  return Math.max(0, Math.min(100, score160 / 1.6));
+function normalize160(v: number): number {
+  if (!Number.isFinite(v)) return 0;
+  return Math.max(0, Math.min(160, v));
 }
 
-function fitbHeuristicScore(answer: unknown, correct: unknown, content?: Record<string, unknown> | null): number {
+function tokenizeDictationForScoring(v: unknown): string[] {
+  const s = String(v ?? "")
+    .toLowerCase()
+    // Full stop should NOT be counted in scoring.
+    .replace(/[.]/g, " ");
+  // Count words and punctuation tokens (comma, question mark, etc.)
+  // except full stop which is removed above.
+  const tokens = s.match(/[a-z0-9]+(?:'[a-z0-9]+)*|[,!?;:()"[\]{}\-]/g);
+  return tokens ?? [];
+}
+
+function fitbHeuristicScore160(answer: unknown, correct: unknown, content?: Record<string, unknown> | null): number {
   const answerObj = (answer && typeof answer === "object" ? answer : null) as
     | { answer?: unknown; answers?: unknown[] }
     | null;
@@ -72,13 +84,13 @@ function fitbHeuristicScore(answer: unknown, correct: unknown, content?: Record<
       const g = gradeFitbBlank(mw, typed);
       return g === "exact" ? 1 : g === "close" ? 0.5 : 0;
     });
-    const pct = (scores.reduce<number>((a, b) => a + b, 0) / missingWords.length) * 100;
-    return Math.max(0, Math.min(100, pct));
+    const ratio = scores.reduce<number>((a, b) => a + b, 0) / missingWords.length;
+    return normalize160(ratio * 160);
   }
 
   const actual = normalizeText((answer as { answer?: unknown })?.answer ?? answer);
   const expected = normalizeText((correct as { answer?: unknown })?.answer ?? correct);
-  if (actual && expected && actual === expected) return 100;
+  if (actual && expected && actual === expected) return 160;
 
   if (typedList.length > 0 && Array.isArray((correct as { answers?: unknown[] })?.answers)) {
     const expectedList = ((correct as { answers?: unknown[] }).answers ?? []).map((x) =>
@@ -87,47 +99,61 @@ function fitbHeuristicScore(answer: unknown, correct: unknown, content?: Record<
     const matched = typedList.reduce((acc, t, i) => {
       return acc + (normalizeFitbCompare(t) === (expectedList[i] ?? "") ? 1 : 0);
     }, 0);
-    return expectedList.length > 0 ? (matched / expectedList.length) * 100 : 0;
+    return expectedList.length > 0 ? normalize160((matched / expectedList.length) * 160) : 0;
   }
   return 0;
 }
 
-function fallbackHeuristicScore(taskType: string, answer: unknown, correct: unknown, content?: Record<string, unknown> | null): number {
+function fallbackHeuristicScore160(taskType: string, answer: unknown, correct: unknown, content?: Record<string, unknown> | null): number {
   if (isAdminSkippedAnswer(answer)) return 0;
 
   if (taskType === "fill_in_blanks" || taskType === "dictation") {
     if (taskType === "fill_in_blanks") {
-      return fitbHeuristicScore(answer, correct, content);
+      return fitbHeuristicScore160(answer, correct, content);
     }
-    const actual = normalizeText((answer as { answer?: unknown })?.answer ?? answer);
-    const expected = normalizeText((correct as { answer?: unknown })?.answer ?? correct);
-    return actual && expected && actual === expected ? 100 : 0;
+    const actualTokens = tokenizeDictationForScoring((answer as { answer?: unknown })?.answer ?? answer);
+    const expectedRaw =
+      (correct as { answer?: unknown })?.answer ??
+      (content as { reference_sentence?: unknown } | null)?.reference_sentence ??
+      correct;
+    const expectedTokens = tokenizeDictationForScoring(expectedRaw);
+    if (expectedTokens.length === 0) return 0;
+    const matched = expectedTokens.reduce((acc, token, idx) => {
+      return acc + (actualTokens[idx] === token ? 1 : 0);
+    }, 0);
+    return normalize160((matched / expectedTokens.length) * 160);
   }
   if (taskType === "vocabulary_reading") {
     const score = Number((answer as { averageScore0To100?: unknown })?.averageScore0To100);
-    return Number.isFinite(score) ? Math.max(0, Math.min(100, score)) : 0;
+    return Number.isFinite(score) ? normalize160((score / 100) * 160) : 0;
   }
   if (taskType === "real_english_word") {
+    const correctRealWords = Number(
+      (answer as { correctCount?: unknown; correctRealWords?: unknown; correct_real_words?: unknown })?.correctCount ??
+      (answer as { correctRealWords?: unknown })?.correctRealWords ??
+      (answer as { correct_real_words?: unknown })?.correct_real_words,
+    );
+    if (Number.isFinite(correctRealWords)) {
+      return normalize160(correctRealWords * 5);
+    }
     const score160 = Number((answer as { score160?: unknown })?.score160);
     if (Number.isFinite(score160)) {
-      return Math.max(0, Math.min(100, (score160 / 160) * 100));
+      return normalize160(score160);
     }
   }
   if (taskType === "interactive_conversation_mcq") {
     const score = Number((answer as { averageScore0To100?: unknown })?.averageScore0To100);
-    return Number.isFinite(score) ? Math.max(0, Math.min(100, score)) : 0;
+    return Number.isFinite(score) ? normalize160((score / 100) * 160) : 0;
   }
   if (taskType === "interactive_speaking") {
-    const turns = Array.isArray((answer as { user_turn_answers?: unknown[] })?.user_turn_answers)
-      ? ((answer as { user_turn_answers?: string[] }).user_turn_answers ?? [])
-      : [];
+    const turns = extractInteractiveSpeakingTranscripts(answer);
     if (turns.length > 0) {
       const chars = turns.join(" ").trim().length;
-      return chars >= 180 ? 85 : chars >= 80 ? 70 : chars >= 20 ? 55 : 35;
+      return chars >= 180 ? 136 : chars >= 80 ? 112 : chars >= 20 ? 88 : 56;
     }
   }
   const text = normalizeText((answer as { text?: unknown })?.text ?? answer);
-  return text.length >= 20 ? 80 : text.length >= 5 ? 60 : 0;
+  return text.length >= 20 ? 128 : text.length >= 5 ? 96 : 0;
 }
 
 async function scoreAnswerWithNormalCriteria({
@@ -158,7 +184,7 @@ async function scoreAnswerWithNormalCriteria({
     taskType === "real_english_word" ||
     taskType === "interactive_conversation_mcq"
   ) {
-    return fallbackHeuristicScore(taskType, answer, correct, content);
+    return fallbackHeuristicScore160(taskType, answer, correct, content);
   }
 
   try {
@@ -205,12 +231,19 @@ async function scoreAnswerWithNormalCriteria({
           prepMinutes: 0,
         }),
       );
-      return to0to100From160(report.score160);
+      return normalize160(report.score160);
     }
 
     if (taskType === "write_about_photo" || taskType === "speak_about_photo") {
       const transcript = String((answer as { text?: unknown })?.text ?? answer ?? "");
       const imageUrl = String(content.image_url ?? "");
+      const allPhotoCategories = ["people", "place", "landscape", "animal", "nature"];
+      const keywordSet = new Set<string>(
+        Array.isArray(content.keywords)
+          ? content.keywords.map((x) => String(x).trim().toLowerCase()).filter(Boolean)
+          : [],
+      );
+      for (const c of allPhotoCategories) keywordSet.add(c);
       const { report } = await runWithFallback((model) =>
         generatePhotoSpeakReportWithGemini({
           apiKey: keys.geminiApiKey,
@@ -224,15 +257,13 @@ async function scoreAnswerWithNormalCriteria({
           promptEn: String(content.prompt_en ?? content.instruction ?? "Respond based on the photo."),
           promptTh: String(content.prompt_th ?? content.instruction_th ?? "ตอบจากภาพ"),
           imageUrl: imageUrl || "https://example.com/mock-photo.jpg",
-          taskKeywords: Array.isArray(content.keywords)
-            ? content.keywords.map((x) => String(x))
-            : [],
+          taskKeywords: [...keywordSet],
           prepMinutes: 0,
           transcript,
           originHub: taskType === "write_about_photo" ? "write-about-photo" : "speak-about-photo",
         }),
       );
-      return to0to100From160(report.score160);
+      return normalize160(report.score160);
     }
 
     if (taskType === "read_then_speak") {
@@ -254,7 +285,7 @@ async function scoreAnswerWithNormalCriteria({
           transcript,
         }),
       );
-      return to0to100From160(report.score160);
+      return normalize160(report.score160);
     }
 
     if (taskType === "conversation_summary") {
@@ -295,14 +326,15 @@ async function scoreAnswerWithNormalCriteria({
           wordCount: summary.trim().split(/\s+/).filter(Boolean).length,
         }),
       );
-      return to0to100From160(report.score160);
+      return normalize160(report.score160);
     }
 
     if (taskType === "interactive_speaking") {
       const userTurnsRaw = (answer as { user_turn_answers?: unknown[] })?.user_turn_answers;
       const contentTurns = Array.isArray(content.turns) ? content.turns : [];
-      if (Array.isArray(userTurnsRaw) && userTurnsRaw.length >= INTERACTIVE_SPEAKING_TURN_COUNT) {
-        const turns = userTurnsRaw
+      const transcripts = extractInteractiveSpeakingTranscripts(answer);
+      if (transcripts.length >= INTERACTIVE_SPEAKING_TURN_COUNT) {
+        const turns = transcripts
           .slice(0, INTERACTIVE_SPEAKING_TURN_COUNT)
           .map((a, idx) => {
             const t = (contentTurns[idx] ?? {}) as Record<string, unknown>;
@@ -327,7 +359,13 @@ async function scoreAnswerWithNormalCriteria({
             turns,
           }),
         );
-        return to0to100From160(report.score160);
+        const score160 = normalize160(report.score160);
+        if (score160 <= 0) {
+          // Guardrail: if model returns an unusable 0 despite non-empty turns,
+          // fall back to deterministic heuristic from transcript length.
+          return fallbackHeuristicScore160(taskType, answer, correct, content);
+        }
+        return score160;
       }
 
       const transcript = String((answer as { text?: unknown })?.text ?? answer ?? "");
@@ -348,13 +386,36 @@ async function scoreAnswerWithNormalCriteria({
           transcript,
         }),
       );
-      return to0to100From160(report.score160);
+      const score160 = normalize160(report.score160);
+      if (score160 <= 0 && (transcripts.length > 0 || transcript.trim().length > 0)) {
+        return fallbackHeuristicScore160(taskType, answer, correct, content);
+      }
+      return score160;
     }
   } catch (error) {
     console.error("[mock-fixed-submit-step] AI grading failed; fallback heuristic", error);
   }
 
-  return fallbackHeuristicScore(taskType, answer, correct, content);
+  return fallbackHeuristicScore160(taskType, answer, correct, content);
+}
+
+function extractInteractiveSpeakingTranscripts(answer: unknown): string[] {
+  const fromUserTurns = Array.isArray((answer as { user_turn_answers?: unknown[] })?.user_turn_answers)
+    ? ((answer as { user_turn_answers?: unknown[] }).user_turn_answers ?? [])
+        .map((v) => String(v ?? "").trim())
+        .filter(Boolean)
+    : [];
+  if (fromUserTurns.length > 0) return fromUserTurns;
+
+  const fromTurns = Array.isArray((answer as { turns?: unknown[] })?.turns)
+    ? ((answer as { turns?: unknown[] }).turns ?? [])
+        .map((row) => {
+          const o = row as Record<string, unknown>;
+          return String(o.transcript ?? o.answerTranscript ?? "").trim();
+        })
+        .filter(Boolean)
+    : [];
+  return fromTurns;
 }
 
 type ScoredRow = { step_index: number; task_type: string; score: number };
@@ -365,17 +426,13 @@ function avgScore(rows: ScoredRow[], pick: (row: ScoredRow) => boolean): number 
   return items.reduce((a, b) => a + b, 0) / items.length;
 }
 
-function to160(raw0to100: number): number {
-  return Math.max(0, Math.min(160, Math.round(raw0to100 * 1.6)));
-}
-
-function weighted0to100(parts: Array<{ score: number; weight: number }>): number {
+function weighted160(parts: Array<{ score: number; weight: number }>): number {
   return parts.reduce((sum, p) => sum + (p.score * p.weight) / 100, 0);
 }
 
 function scoreBuckets(rows: ScoredRow[]) {
   const conversationScore = avgScore(rows, (r) => r.step_index === 13);
-  const speakingRaw = weighted0to100([
+  const speakingRaw = weighted160([
     { score: conversationScore, weight: 5 },
     // interactive speaking 40% (step 19 in fixed flow)
     { score: avgScore(rows, (r) => r.step_index === 19), weight: 40 },
@@ -383,7 +440,7 @@ function scoreBuckets(rows: ScoredRow[]) {
     { score: avgScore(rows, (r) => r.task_type === "read_then_speak"), weight: 40 },
   ]);
 
-  const listeningRaw = weighted0to100([
+  const listeningRaw = weighted160([
     { score: conversationScore, weight: 40 },
     { score: avgScore(rows, (r) => r.task_type === "dictation"), weight: 30 },
     // interactive speaking 20% (step 19 in fixed flow)
@@ -397,13 +454,13 @@ function scoreBuckets(rows: ScoredRow[]) {
     },
   ]);
 
-  const readingRaw = weighted0to100([
+  const readingRaw = weighted160([
     { score: avgScore(rows, (r) => r.task_type === "real_english_word"), weight: 20 },
     { score: avgScore(rows, (r) => r.task_type === "vocabulary_reading"), weight: 55 },
     { score: avgScore(rows, (r) => r.task_type === "fill_in_blanks"), weight: 25 },
   ]);
 
-  const writingRaw = weighted0to100([
+  const writingRaw = weighted160([
     { score: avgScore(rows, (r) => r.task_type === "write_about_photo"), weight: 20 },
     { score: avgScore(rows, (r) => r.task_type === "read_and_write"), weight: 50 },
     { score: avgScore(rows, (r) => r.task_type === "dictation"), weight: 20 },
@@ -419,11 +476,11 @@ function scoreBuckets(rows: ScoredRow[]) {
   const totalRaw = (speakingRaw + listeningRaw + readingRaw + writingRaw) / 4;
 
   return {
-    total: to160(totalRaw),
-    listening: to160(listeningRaw),
-    speaking: to160(speakingRaw),
-    reading: to160(readingRaw),
-    writing: to160(writingRaw),
+    total: normalize160(Math.round(totalRaw)),
+    listening: normalize160(Math.round(listeningRaw)),
+    speaking: normalize160(Math.round(speakingRaw)),
+    reading: normalize160(Math.round(readingRaw)),
+    writing: normalize160(Math.round(writingRaw)),
   };
 }
 
@@ -482,6 +539,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (prev.some((r: any) => r.step_index === body.stepIndex)) {
     return NextResponse.json({ error: "Step already submitted" }, { status: 400 });
   }
+  const sessionTargets = (session.targets ?? {}) as Record<string, unknown>;
+  const singleStepPreview = sessionTargets.singleStepPreview === true;
+  const singleStepIndex = Number(sessionTargets.singleStepIndex ?? 0);
   const score = await scoreAnswerWithNormalCriteria({
     req,
     taskType: step.task_type,
@@ -490,12 +550,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     step,
   });
   const next = [...prev, { step_index: body.stepIndex, task_type: step.task_type, answer: body.answer, score }];
-  const isComplete = next.length >= 20;
+  const isComplete = singleStepPreview
+    ? body.stepIndex === singleStepIndex && next.length >= 1
+    : next.length >= 20;
   const patch: Record<string, unknown> = {
     responses: next,
-    current_step: Math.min(20, body.stepIndex + 1),
+    current_step: singleStepPreview
+      ? body.stepIndex
+      : Math.min(20, body.stepIndex + 1),
   };
-  if (isComplete) {
+  if (isComplete && !singleStepPreview) {
     patch.status = "completed";
     patch.completed_at = new Date().toISOString();
   }
@@ -551,5 +615,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
   }
 
-  return NextResponse.json({ ok: true, complete: isComplete });
+  return NextResponse.json({
+    ok: true,
+    complete: isComplete,
+    singleStepPreview,
+    stepScore: score,
+    stepIndex: body.stepIndex,
+    taskType: step.task_type,
+  });
 }

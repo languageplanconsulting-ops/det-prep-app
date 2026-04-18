@@ -1,4 +1,5 @@
 import { findTextSpan } from "@/lib/find-text-span";
+import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
@@ -213,6 +214,7 @@ function asArr(v: unknown): unknown[] {
 export async function generateSpeakingReportWithGemini(params: {
   apiKey: string;
   anthropicApiKey?: string;
+  openAiApiKey?: string;
   model?: string;
   attemptId: string;
   topicId: string;
@@ -224,7 +226,7 @@ export async function generateSpeakingReportWithGemini(params: {
   prepMinutes: number;
   transcript: string;
   speakingRound?: SpeakingRoundNum;
-}): Promise<SpeakingAttemptReport> {
+}): Promise<{ report: SpeakingAttemptReport; usage: GradingLlmUsage | null }> {
   const {
     apiKey,
     attemptId,
@@ -242,9 +244,13 @@ export async function generateSpeakingReportWithGemini(params: {
   const modelName =
     params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const text = await generateGradingJsonCompletion({
+  const { text, usage } = await generateGradingJsonCompletion({
     model: modelName,
-    keys: { geminiApiKey: apiKey, anthropicApiKey: params.anthropicApiKey },
+    keys: {
+      geminiApiKey: apiKey,
+      anthropicApiKey: params.anthropicApiKey,
+      openAiApiKey: params.openAiApiKey,
+    },
     systemInstruction: buildSystemInstruction(),
     userPayload: buildUserPayload(
       topicTitleEn,
@@ -390,7 +396,7 @@ export async function generateSpeakingReportWithGemini(params: {
       };
     });
 
-  return {
+  const report: SpeakingAttemptReport = {
     gradingSource: "gemini",
     attemptId,
     topicId,
@@ -426,4 +432,5 @@ export async function generateSpeakingReportWithGemini(params: {
             },
           ],
   };
+  return { report, usage };
 }

@@ -7,6 +7,7 @@ import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
 import { SpeakingFullReportNotebookButton } from "@/components/speaking/SpeakingFullReportNotebookButton";
 import { SpeakingVocabularyUpgradePanel } from "@/components/speaking/SpeakingVocabularyUpgradePanel";
+import { GrammarFixesPanel, type GrammarFixItem } from "@/components/reports/GrammarFixesPanel";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
@@ -130,6 +131,17 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
       {SPEAKING_RUBRIC_WEIGHTS.taskRelevancy * 100}%
     </>
   );
+  const grammarFixes: GrammarFixItem[] = report.grammar.breakdown
+    .map((b) => ({
+      id: b.id,
+      wrong: b.excerpt?.trim() ?? "",
+      betterEn: b.suggestionEn?.trim() || "",
+      betterTh: b.suggestionTh?.trim() || "",
+      noteEn: b.en,
+      noteTh: b.th,
+    }))
+    .filter((x) => x.wrong && (x.betterEn || x.betterTh))
+    .slice(0, 5);
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -285,6 +297,13 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
           ))}
         </ul>
       </BrutalPanel>
+      <GrammarFixesPanel
+        items={grammarFixes}
+        attemptId={report.attemptId}
+        entrySource="speaking-read-and-speak"
+        titleEn="Grammar fixes (speaking)"
+        titleTh="จุดแก้ไวยากรณ์ (การพูด)"
+      />
           </div>
         </div>
       </section>

@@ -1,9 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { readGeminiUsageFromResponse } from "@/lib/gemini-usage-metadata";
 import {
   INTERACTIVE_SPEAKING_NEXT_QUESTION_GEMINI_MODEL,
   INTERACTIVE_SPEAKING_TURN_COUNT,
 } from "@/lib/interactive-speaking-constants";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
+import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 
 const SYSTEM = `You generate the next interview question for an English speaking exam (Thai learners, DET-style).
 
@@ -41,7 +43,7 @@ export async function generateInteractiveSpeakingNextQuestion(params: {
   history: NextQuestionHistoryItem[];
   /** Next turn number (2…TURN_COUNT). */
   nextTurnNumber: number;
-}): Promise<{ questionEn: string; questionTh: string }> {
+}): Promise<{ questionEn: string; questionTh: string; usage: GradingLlmUsage | null }> {
   const {
     apiKey,
     scenarioTitleEn,
@@ -84,6 +86,7 @@ export async function generateInteractiveSpeakingNextQuestion(params: {
     `Produce the interviewer question for turn ${nextTurnNumber} of ${INTERACTIVE_SPEAKING_TURN_COUNT}.\n\nContext:\n${payload}`,
   );
   const text = result.response.text();
+  const usage = readGeminiUsageFromResponse(result.response, modelName);
   const raw = parseGeminiJsonObjectResponse(text);
   const questionEn = String(raw.questionEn ?? "").trim();
   const questionTh = String(raw.questionTh ?? "").trim();
@@ -93,5 +96,6 @@ export async function generateInteractiveSpeakingNextQuestion(params: {
   return {
     questionEn,
     questionTh: questionTh || questionEn,
+    usage,
   };
 }

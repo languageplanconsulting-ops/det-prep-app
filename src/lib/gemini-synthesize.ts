@@ -1,5 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+import { readGeminiUsageFromResponse } from "@/lib/gemini-usage-metadata";
+import type { GradingLlmUsage } from "@/types/grading-llm-usage";
+
 function extractAudioFromResponse(resp: unknown): { audioBase64: string; mimeType: string } | null {
   const r = resp as Record<string, unknown>;
   const candidates =
@@ -33,7 +36,7 @@ export async function synthesizeEnglishSpeechWithGemini(params: {
   apiKey: string;
   text: string;
   model?: string;
-}): Promise<{ audioBase64: string; mimeType: string }> {
+}): Promise<{ audioBase64: string; mimeType: string; usage: GradingLlmUsage | null }> {
   const modelName = params.model ?? process.env.GEMINI_TTS_MODEL ?? "gemini-2.5-flash-preview-tts";
   const genAI = new GoogleGenerativeAI(params.apiKey);
   const model = genAI.getGenerativeModel({
@@ -54,6 +57,7 @@ export async function synthesizeEnglishSpeechWithGemini(params: {
 
   const prompt = `Read this sentence exactly as written, in clear natural English. Do not add or omit words:\n\n${params.text.trim()}`;
   const result = await model.generateContent(prompt);
+  const usage = readGeminiUsageFromResponse(result.response, modelName);
   const audio = extractAudioFromResponse(result.response);
   if (!audio) {
     const fallbackText = result.response.text?.().trim?.() ?? "";
@@ -63,6 +67,6 @@ export async function synthesizeEnglishSpeechWithGemini(params: {
         : "Gemini did not return audio for this sentence (check TTS model/key).",
     );
   }
-  return audio;
+  return { ...audio, usage };
 }
 

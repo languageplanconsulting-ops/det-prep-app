@@ -1,4 +1,5 @@
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
+import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import { DIALOGUE_SUMMARY_RUBRIC_WEIGHTS } from "@/lib/dialogue-summary-constants";
@@ -173,19 +174,24 @@ function buildUserPayload(exam: DialogueSummaryExam, summary: string): string {
 export async function generateDialogueSummaryReportWithGemini(params: {
   apiKey: string;
   anthropicApiKey?: string;
+  openAiApiKey?: string;
   model?: string;
   attemptId: string;
   exam: DialogueSummaryExam;
   summary: string;
   submittedAt: string;
   wordCount: number;
-}): Promise<DialogueSummaryAttemptReport> {
+}): Promise<{ report: DialogueSummaryAttemptReport; usage: GradingLlmUsage | null }> {
   const { apiKey, attemptId, exam, summary, submittedAt, wordCount } = params;
   const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const text = await generateGradingJsonCompletion({
+  const { text, usage } = await generateGradingJsonCompletion({
     model: modelName,
-    keys: { geminiApiKey: apiKey, anthropicApiKey: params.anthropicApiKey },
+    keys: {
+      geminiApiKey: apiKey,
+      anthropicApiKey: params.anthropicApiKey,
+      openAiApiKey: params.openAiApiKey,
+    },
     systemInstruction: buildSystemInstruction(),
     userPayload: buildUserPayload(exam, summary),
     temperature: 0.35,
@@ -324,7 +330,7 @@ export async function generateDialogueSummaryReportWithGemini(params: {
     });
   }
 
-  return {
+  const report: DialogueSummaryAttemptReport = {
     gradingSource: "gemini",
     attemptId,
     examId: exam.id,
@@ -344,4 +350,5 @@ export async function generateDialogueSummaryReportWithGemini(params: {
     improvementPoints,
     highlights,
   };
+  return { report, usage };
 }

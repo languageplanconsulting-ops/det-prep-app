@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateInteractiveSpeakingNextQuestion } from "@/lib/gemini-interactive-speaking-next";
+import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 import {
   INTERACTIVE_SPEAKING_NEXT_QUESTION_GEMINI_MODEL,
   INTERACTIVE_SPEAKING_TURN_COUNT,
@@ -75,6 +77,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    const userId = await getOptionalAuthUserId();
     const out = await generateInteractiveSpeakingNextQuestion({
       apiKey: key,
       model: INTERACTIVE_SPEAKING_NEXT_QUESTION_GEMINI_MODEL,
@@ -85,7 +88,19 @@ export async function POST(req: Request) {
       history,
       nextTurnNumber,
     });
-    return NextResponse.json(out);
+    const { usage, ...payload } = out;
+    if (usage) {
+      scheduleApiUsageLog({
+        userId,
+        operation: "interactive_speaking_next_question",
+        provider: "gemini",
+        model: usage.model,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        meta: { nextTurnNumber },
+      });
+    }
+    return NextResponse.json(payload);
   } catch (e) {
     const message = e instanceof Error ? e.message : "Gemini request failed";
     console.error("[interactive-speaking-next]", e);

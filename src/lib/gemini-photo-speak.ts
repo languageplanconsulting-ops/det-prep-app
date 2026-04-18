@@ -1,4 +1,5 @@
 import { findTextSpan } from "@/lib/find-text-span";
+import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
@@ -196,6 +197,7 @@ function asArr(v: unknown): unknown[] {
 export async function generatePhotoSpeakReportWithGemini(params: {
   apiKey: string;
   anthropicApiKey?: string;
+  openAiApiKey?: string;
   model?: string;
   attemptId: string;
   itemId: string;
@@ -208,7 +210,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
   prepMinutes: number;
   transcript: string;
   originHub?: "speak-about-photo" | "write-about-photo";
-}): Promise<PhotoSpeakAttemptReport> {
+}): Promise<{ report: PhotoSpeakAttemptReport; usage: GradingLlmUsage | null }> {
   const {
     apiKey,
     attemptId,
@@ -227,9 +229,13 @@ export async function generatePhotoSpeakReportWithGemini(params: {
   const modelName =
     params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const text = await generateGradingJsonCompletion({
+  const { text, usage } = await generateGradingJsonCompletion({
     model: modelName,
-    keys: { geminiApiKey: apiKey, anthropicApiKey: params.anthropicApiKey },
+    keys: {
+      geminiApiKey: apiKey,
+      anthropicApiKey: params.anthropicApiKey,
+      openAiApiKey: params.openAiApiKey,
+    },
     systemInstruction: buildSystemInstruction(),
     userPayload: buildUserPayload(
       titleEn,
@@ -377,7 +383,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       };
     });
 
-  return {
+  const report: PhotoSpeakAttemptReport = {
     kind: "photo-speak",
     imageUrl,
     taskKeywords,
@@ -416,4 +422,5 @@ export async function generatePhotoSpeakReportWithGemini(params: {
             },
           ],
   };
+  return { report, usage };
 }

@@ -11,6 +11,8 @@ type StartBody = {
   setId?: string;
   adminPreviewMode?: boolean;
   skipTimerMode?: boolean;
+  previewSeparateMode?: boolean;
+  previewStepIndex?: number;
   targets?: {
     total?: number;
     listening?: number;
@@ -19,6 +21,12 @@ type StartBody = {
     writing?: number;
   };
 };
+
+function normalizePreviewStep(raw: unknown): number {
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return 1;
+  return Math.max(1, Math.min(FIXED_MOCK_STEP_COUNT, Math.round(n)));
+}
 
 function monthStartIso(): string {
   const d = new Date();
@@ -74,6 +82,8 @@ export async function POST(req: Request) {
 
     const adminPreviewMode = body.adminPreviewMode === true;
     const skipTimerMode = body.skipTimerMode === true;
+    const previewSeparateMode = body.previewSeparateMode === true;
+    const previewStepIndex = normalizePreviewStep(body.previewStepIndex ?? 1);
 
     const { data, error } = await supabase
       .from("mock_fixed_sessions")
@@ -81,12 +91,14 @@ export async function POST(req: Request) {
         user_id: surrogateUserId,
         set_id: body.setId,
         status: "in_progress",
-        current_step: 1,
+        current_step: previewSeparateMode ? previewStepIndex : 1,
         targets: {
           ...(body.targets ?? {}),
           monthlyUsed: 0,
           adminPreviewMode,
           skipTimerMode,
+          singleStepPreview: previewSeparateMode,
+          singleStepIndex: previewSeparateMode ? previewStepIndex : null,
         },
         responses: [],
         started_at: new Date().toISOString(),
@@ -125,6 +137,8 @@ export async function POST(req: Request) {
   const isAdmin = me?.role === "admin";
   const adminPreviewMode = isAdmin && body.adminPreviewMode === true;
   const skipTimerMode = isAdmin && body.skipTimerMode === true;
+  const previewSeparateMode = isAdmin && body.previewSeparateMode === true;
+  const previewStepIndex = normalizePreviewStep(body.previewStepIndex ?? 1);
 
   if (!isAdmin && !isMockTestAvailableNow()) {
     return NextResponse.json({ error: "Mock test is not available yet" }, { status: 403 });
@@ -154,12 +168,14 @@ export async function POST(req: Request) {
       user_id: user.id,
       set_id: body.setId,
       status: "in_progress",
-      current_step: 1,
+      current_step: previewSeparateMode ? previewStepIndex : 1,
       targets: {
         ...(body.targets ?? {}),
         monthlyUsed: count ?? 0,
         adminPreviewMode,
         skipTimerMode,
+        singleStepPreview: previewSeparateMode,
+        singleStepIndex: previewSeparateMode ? previewStepIndex : null,
       },
       responses: [],
       started_at: new Date().toISOString(),

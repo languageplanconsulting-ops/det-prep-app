@@ -1,74 +1,93 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 
-import { buildMockBankCountMatrix } from "@/lib/mock-test/admin-bank-counts";
-import { buildMockUploadTemplateJson } from "@/lib/mock-test/admin-upload-templates";
 import {
-  MOCK_DET_TIERS,
-  type MockBankTierKey,
-} from "@/lib/mock-test/mock-difficulty-tiers";
+  buildFixedTemplateCsv,
+  buildFixedTemplateJson,
+  parseFixedMockUploadCsv,
+  parseFixedMockUploadJson,
+} from "@/lib/mock-test/fixed-upload";
+import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
 import { mt } from "@/lib/mock-test/mock-test-styles";
-import {
-  MOCK_PHASES_FIXED_MEDIUM_POOL,
-  MOCK_TEST_PHASE_COUNT,
-  PHASE_QUESTION_COUNTS,
-  PHASE_QUESTION_TYPE,
-} from "@/lib/mock-test/constants";
-import { parseUploadJson } from "@/lib/mock-test/validate-upload";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 export function MockTestAdminBankWorkspace() {
-  const [matrix, setMatrix] = useState(() =>
-    buildMockBankCountMatrix(null),
-  );
-  const [draftByPhase, setDraftByPhase] = useState<Record<number, string>>(
-    {},
-  );
-  const [tierByPhase, setTierByPhase] = useState<
-    Record<number, MockBankTierKey>
-  >({});
-  const [busyPhase, setBusyPhase] = useState<number | null>(null);
+  const [sets, setSets] = useState<Array<{ id: string; name: string; itemCount: number }>>([]);
+  const [setName, setSetName] = useState("");
+  const [format, setFormat] = useState<"json" | "csv">("json");
+  const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
 
-  const loadCounts = useCallback(async () => {
+  const csvInstructions = `CSV column guide (exact format)
+Header:
+step_index,task_type,time_limit_sec,rest_after_step_sec,is_ai_graded,content_json,correct_answer_json
+
+Column rules:
+- step_index: integer 1..20, one row per step
+- task_type: must match fixed sequence for that step
+- time_limit_sec: integer seconds (e.g. 120, 60, 480)
+- rest_after_step_sec: integer seconds (usually 0, rest steps 45)
+- is_ai_graded: true or false
+- content_json: valid JSON object (quoted in CSV)
+- correct_answer_json: valid JSON object for objective tasks, blank/null for open tasks
+
+Task-specific content_json:
+- fill_in_blanks (steps 1/4/6/11): normal DET format
+  sentence + options[] OR sentence_before + sentence_after + options[]
+- vocabulary_reading (step 8): passage.p1/p2/p3 + at least 6 vocabularyQuestions[] + missingParagraph
+- interactive_speaking (step 13) + conversation_summary (step 14):
+  turns[] with question_en and reference_answer_en in each turn`;
+
+  const loadSets = useCallback(async () => {
     const supabase = getBrowserSupabase();
     if (!supabase) return;
     const { data, error } = await supabase
-      .from("mock_questions")
-      .select("phase, difficulty");
+      .from("mock_fixed_sets")
+      .select("id,name,mock_fixed_set_items(count)");
     if (error) {
       setBanner(error.message);
       return;
     }
-    setMatrix(buildMockBankCountMatrix(data as { phase: number; difficulty: string }[]));
+    const mapped = ((data ?? []) as Array<{ id: string; name: string; mock_fixed_set_items: Array<{ count: number }> }>)
+      .map((row) => ({
+        id: row.id,
+        name: row.name,
+        itemCount: row.mock_fixed_set_items?.[0]?.count ?? 0,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    setSets(mapped);
   }, []);
 
   useEffect(() => {
-    void loadCounts();
-  }, [loadCounts]);
+    void loadSets();
+  }, [loadSets]);
 
-  const tierFor = (phase: number): MockBankTierKey =>
-    MOCK_PHASES_FIXED_MEDIUM_POOL.has(phase)
-      ? "medium"
-      : (tierByPhase[phase] ?? "medium");
-
-  const setTier = (phase: number, tier: MockBankTierKey) => {
-    setTierByPhase((prev) => ({ ...prev, [phase]: tier }));
-  };
-
-  const copyTemplate = async (phase: number) => {
-    const json = buildMockUploadTemplateJson(phase, tierFor(phase));
-    setDraftByPhase((prev) => ({ ...prev, [phase]: json }));
+  const copyTemplate = async () => {
+    const text = format === "json" ? buildFixedTemplateJson() : buildFixedTemplateCsv();
+    setDraft(text);
     try {
-      await navigator.clipboard.writeText(json);
-      setBanner(`Template for phase ${phase} copied to clipboard.`);
+      await navigator.clipboard.writeText(text);
+      setBanner("Template copied to clipboard.");
     } catch {
-      setBanner(`Template loaded in the phase ${phase} box — copy failed (browser blocked).`);
+      setBanner("Template loaded in the input box (clipboard blocked by browser).");
     }
   };
 
-  const uploadPhase = async (phase: number) => {
+  const downloadTemplate = () => {
+    const text = format === "json" ? buildFixedTemplateJson() : buildFixedTemplateCsv();
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = format === "json" ? "fixed-mock-template.json" : "fixed-mock-template.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const uploadFixedSet = async () => {
     setBanner(null);
     const supabase = getBrowserSupabase();
     if (!supabase) {
@@ -77,48 +96,43 @@ export function MockTestAdminBankWorkspace() {
       );
       return;
     }
-    const raw = draftByPhase[phase] ?? "";
-    const parsed = parseUploadJson(raw);
-    if (parsed.parseError) {
-      setBanner(parsed.parseError);
+    if (!setName.trim()) {
+      setBanner("Please enter set name.");
       return;
     }
-    const tier = tierFor(phase);
-    const valid = parsed.questions.filter((q) => q.errors.length === 0);
-    const forPhase = valid.filter((q) => q.phase === phase);
-    const wrong = valid.filter((q) => q.phase !== phase);
-
-    if (forPhase.length === 0) {
-      setBanner(
-        `Phase ${phase}: no valid rows with phase === ${phase}. ` +
-          (wrong.length ? `(${wrong.length} row(s) skipped — wrong phase.) ` : "") +
-          `Fix errors: ${parsed.questions.map((q) => q.errors.join("; ")).filter(Boolean).slice(0, 3).join(" | ") || "—"}`,
-      );
+    const parsed =
+      format === "json" ? parseFixedMockUploadJson(draft) : parseFixedMockUploadCsv(draft);
+    if (parsed.error) {
+      setBanner(parsed.error);
       return;
     }
-
-    setBusyPhase(phase);
-    const rows = forPhase.map((q) => ({
-      phase: q.phase,
-      question_type: q.question_type,
-      skill: q.skill,
-      difficulty: tier,
-      content: q.content,
-      correct_answer: q.correct_answer,
-      is_ai_graded: q.is_ai_graded,
-      is_active: true,
+    setBusy(true);
+    const { data: setRow, error: setError } = await supabase
+      .from("mock_fixed_sets")
+      .upsert([{ name: setName.trim(), is_active: true }], { onConflict: "name" })
+      .select("id")
+      .single();
+    if (setError || !setRow) {
+      setBusy(false);
+      setBanner(setError?.message ?? "Could not create set");
+      return;
+    }
+    await supabase.from("mock_fixed_set_items").delete().eq("set_id", setRow.id);
+    const rows = parsed.rows.map((r) => ({
+      set_id: setRow.id,
+      step_index: r.step_index,
+      task_type: r.task_type,
+      time_limit_sec: r.time_limit_sec,
+      rest_after_step_sec: r.rest_after_step_sec ?? 0,
+      content: r.content,
+      correct_answer: r.correct_answer,
+      is_ai_graded: r.is_ai_graded ?? false,
     }));
-
-    const { error } = await supabase.from("mock_questions").insert(rows);
-    setBusyPhase(null);
-    if (error) {
-      setBanner(error.message);
-      return;
-    }
-    setBanner(
-      `Uploaded ${rows.length} row(s) for phase ${phase} at DET ${MOCK_DET_TIERS.find((t) => t.key === tier)?.detPoints ?? tier} pool.`,
-    );
-    await loadCounts();
+    const { error } = await supabase.from("mock_fixed_set_items").insert(rows);
+    setBusy(false);
+    if (error) return setBanner(error.message);
+    setBanner(`Uploaded ${rows.length}/${FIXED_MOCK_STEP_COUNT} steps to set "${setName.trim()}".`);
+    await loadSets();
   };
 
   return (
@@ -128,190 +142,175 @@ export function MockTestAdminBankWorkspace() {
           className="text-2xl font-black text-[#004AAD]"
           style={{ fontFamily: "var(--font-inter), system-ui" }}
         >
-          Mock question bank — upload by phase
+          Fixed mock bank — 20-step set uploader
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-neutral-600">
-          Each phase has its own JSON box.{" "}
-          <strong>Phases 1–3:</strong> choose a DET pool tier (85 / 125 / 150) — it maps to{" "}
-          <code className="font-mono text-xs">easy</code>,{" "}
-          <code className="font-mono text-xs">medium</code>,{" "}
-          <code className="font-mono text-xs">hard</code> on insert.{" "}
-          <strong>Phases 4–10:</strong> no tier control — the mock test (v1) always uses the{" "}
-          <code className="font-mono text-xs">medium</code> pool for those sections (vocab+reading composite,
-          writing, speaking, photos, interactive speaking, conversation summary). Copied templates include{" "}
-          <code className="font-mono text-xs">_notes</code> (ignored on upload).
+          Upload one complete fixed set at a time with exactly 20 ordered steps. Existing steps for the same
+          set name are replaced on upload. JSON supports both exact step rows and grouped-by-task rows
+          (system auto-distributes by the fixed sequence).
         </p>
       </header>
 
       <section className={`${mt.border} ${mt.shadow} bg-white p-4`}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-black text-[#004AAD]">Bank inventory</p>
+            <p className="text-sm font-black text-[#004AAD]">Available fixed sets</p>
             <p className="text-xs text-neutral-600">
-              Row counts by phase and pool tier · Total questions:{" "}
-              <span className="font-mono font-bold">{matrix.grandTotal}</span>
+              Learners will only see active admin-uploaded set names.
             </p>
           </div>
           <button
             type="button"
-            onClick={() => void loadCounts()}
+            onClick={() => void loadSets()}
             className={`${mt.border} bg-neutral-100 px-3 py-2 text-xs font-bold shadow-[2px_2px_0_0_#000]`}
           >
-            Refresh counts
+            Refresh
           </button>
         </div>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[520px] border-collapse text-left">
-            <thead>
-              <tr className="border-b-4 border-black bg-[#FFCC00]/40">
-                <th className="p-2 text-xs font-black uppercase">Phase / type</th>
-                <th className="p-2 text-center text-xs font-black">85 (easy)</th>
-                <th className="p-2 text-center text-xs font-black">125 (med)</th>
-                <th className="p-2 text-center text-xs font-black">150 (hard)</th>
-                <th className="p-2 text-center text-xs font-black">Σ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: MOCK_TEST_PHASE_COUNT }, (_, i) => i + 1).map(
-                (p) => {
-                  const c = matrix.byPhase[p];
-                  if (!c) return null;
-                  return (
-                    <tr key={p} className="border-b border-neutral-200">
-                      <td className="p-2 font-mono text-xs">
-                        {p}. {PHASE_QUESTION_TYPE[p]?.replace(/_/g, " ")}
-                      </td>
-                      <td className="p-2 text-center font-mono text-sm">{c.easy}</td>
-                      <td className="p-2 text-center font-mono text-sm">{c.medium}</td>
-                      <td className="p-2 text-center font-mono text-sm">{c.hard}</td>
-                      <td className="p-2 text-center font-mono font-bold">{c.total}</td>
-                    </tr>
-                  );
-                },
-              )}
-            </tbody>
-          </table>
-        </div>
+        <ul className="mt-3 space-y-2">
+          {sets.map((s) => (
+            <li key={s.id} className="rounded-[4px] border-2 border-black bg-neutral-50 px-3 py-2 text-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span className="font-black text-[#004AAD]">{s.name}</span>
+                  <span className="ml-2 text-xs text-neutral-600">{s.itemCount}/20 steps</span>
+                </div>
+                <Link
+                  href={`/mock-test/start?setId=${encodeURIComponent(s.id)}&adminPreview=1&skipTimer=1`}
+                  className="rounded-[4px] border-2 border-black bg-[#FFCC00] px-2.5 py-1 text-[11px] font-black shadow-[2px_2px_0_0_#000]"
+                >
+                  Test mock (skip timer)
+                </Link>
+              </div>
+            </li>
+          ))}
+          {sets.length === 0 ? <li className="text-sm text-neutral-600">No fixed sets uploaded yet.</li> : null}
+        </ul>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        {Array.from({ length: MOCK_TEST_PHASE_COUNT }, (_, i) => i + 1).map(
-          (phase) => {
-            const qt = PHASE_QUESTION_TYPE[phase];
-            const n = PHASE_QUESTION_COUNTS[phase] ?? 1;
-            const tier = tierFor(phase);
-            const parsed = parseUploadJson(draftByPhase[phase] ?? "");
-            const valid = parsed.questions.filter((q) => q.errors.length === 0);
-            const forPhase = valid.filter((q) => q.phase === phase);
-
-            return (
-              <section
-                key={phase}
-                className={`${mt.border} ${mt.shadow} flex flex-col bg-neutral-50 p-4`}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2 border-b-2 border-neutral-200 pb-3">
-                  <div>
-                    <p className="text-xs font-black uppercase text-[#004AAD]">
-                      Phase {phase}
-                    </p>
-                    <p className="font-mono text-sm font-bold text-neutral-900">
-                      {qt?.replace(/_/g, " ")} · learner steps n={n}
-                    </p>
-                  </div>
-                  {MOCK_PHASES_FIXED_MEDIUM_POOL.has(phase) ? (
-                    <span className="rounded-[4px] border-2 border-dashed border-neutral-400 px-2 py-1 text-[11px] font-bold text-neutral-600">
-                      Pool: 125 → medium (fixed)
-                    </span>
-                  ) : (
-                    <div className="flex flex-wrap gap-1">
-                      {MOCK_DET_TIERS.map((t) => (
-                        <button
-                          key={t.key}
-                          type="button"
-                          onClick={() => setTier(phase, t.key)}
-                          className={`rounded-[4px] border-2 border-black px-2 py-1 text-xs font-black ${
-                            tier === t.key
-                              ? "bg-[#004AAD] text-[#FFCC00]"
-                              : "bg-white text-neutral-800"
-                          }`}
-                          title={t.description}
-                        >
-                          {t.detPoints}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <p className="mt-2 text-[11px] text-neutral-600">
-                  {MOCK_PHASES_FIXED_MEDIUM_POOL.has(phase) ? (
-                    <>
-                      Uploads use the standard pool{" "}
-                      <strong>125 / medium</strong> only (matches v1 session + vocab/reading unified band in v2).
-                    </>
-                  ) : (
-                    <>
-                      Pool for this upload:{" "}
-                      <strong>
-                        {MOCK_DET_TIERS.find((x) => x.key === tier)?.detPoints} → {tier}
-                      </strong>
-                    </>
-                  )}
-                </p>
-
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => void copyTemplate(phase)}
-                    className={`${mt.border} bg-white px-3 py-2 text-xs font-bold shadow-[2px_2px_0_0_#000]`}
-                  >
-                    Copy template JSON
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setDraftByPhase((prev) => ({ ...prev, [phase]: "" }))
-                    }
-                    className="rounded-[4px] border-2 border-dashed border-neutral-400 px-3 py-2 text-xs font-bold text-neutral-600"
-                  >
-                    Clear box
-                  </button>
-                </div>
-
-                <textarea
-                  value={draftByPhase[phase] ?? ""}
-                  onChange={(e) =>
-                    setDraftByPhase((prev) => ({
-                      ...prev,
-                      [phase]: e.target.value,
-                    }))
-                  }
-                  rows={12}
-                  className={`mt-3 w-full flex-1 ${mt.border} bg-white p-3 font-mono text-[11px] leading-relaxed`}
-                  placeholder={`{ "_notes": ["optional docs — ignored on upload"], "questions": [ { "phase": ${phase}, "question_type": "${qt}", ... } ] }`}
-                  spellCheck={false}
-                />
-
-                <p className="mt-2 text-[11px] text-neutral-600">
-                  Parsed: {parsed.questions.length} · Valid: {valid.length} · Ready for phase {phase}:{" "}
-                  <span className="font-bold text-[#004AAD]">{forPhase.length}</span>
-                </p>
-
-                <button
-                  type="button"
-                  disabled={forPhase.length === 0 || busyPhase !== null}
-                  onClick={() => void uploadPhase(phase)}
-                  className={`mt-3 w-full ${mt.border} bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50`}
-                >
-                  {busyPhase === phase
-                    ? "Uploading…"
-                    : `Upload ${forPhase.length} row(s) for phase ${phase}`}
-                </button>
-              </section>
-            );
-          },
-        )}
-      </div>
+      <section className={`${mt.border} ${mt.shadow} space-y-4 bg-neutral-50 p-4`}>
+        <div className="rounded-[4px] border-2 border-black bg-white p-3 text-xs text-neutral-700">
+          <p className="font-black uppercase tracking-wide text-[#004AAD]">CSV column guide (exact format)</p>
+          <p className="mt-2">
+            Header must be exactly:
+            <code className="ml-1 font-mono">
+              step_index,task_type,time_limit_sec,rest_after_step_sec,is_ai_graded,content_json,correct_answer_json
+            </code>
+          </p>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(csvInstructions);
+                setBanner("CSV instructions copied.");
+              } catch {
+                setBanner("Could not copy CSV instructions (clipboard blocked).");
+              }
+            }}
+            className={`${mt.border} mt-2 bg-white px-3 py-1.5 text-[11px] font-bold shadow-[2px_2px_0_0_#000]`}
+          >
+            Copy CSV instructions
+          </button>
+          <div className="mt-2 space-y-1">
+            <p>
+              <strong>step_index</strong>: integer 1..20 (exactly one row for each step).
+            </p>
+            <p>
+              <strong>task_type</strong>: must match the fixed sequence for that step (do not change order).
+            </p>
+            <p>
+              <strong>time_limit_sec</strong>: integer seconds (for example 120, 60, 480).
+            </p>
+            <p>
+              <strong>rest_after_step_sec</strong>: integer seconds (usually 0; rest steps use 45).
+            </p>
+            <p>
+              <strong>is_ai_graded</strong>: <code className="font-mono">true</code> or{" "}
+              <code className="font-mono">false</code>.
+            </p>
+            <p>
+              <strong>content_json</strong>: valid JSON object (must be quoted in CSV). This contains the question content.
+            </p>
+            <p>
+              <strong>correct_answer_json</strong>: valid JSON object for objective questions (or blank/null for open-ended).
+            </p>
+          </div>
+          <div className="mt-3 space-y-1">
+            <p className="font-bold text-neutral-900">Task-specific content_json requirements</p>
+            <p>
+              <strong>fill_in_blanks (steps 1/4/6/11)</strong>: use normal DET fill format (
+              <code className="font-mono">passage + missingWords[]</code>) exactly like normal fill-in-blank uploads.
+            </p>
+            <p>
+              <strong>vocabulary_reading (step 8)</strong>: requires{" "}
+              <code className="font-mono">passage.p1/p2/p3</code>, at least 6{" "}
+              <code className="font-mono">vocabularyQuestions[]</code>, and{" "}
+              <code className="font-mono">missingParagraph</code>.
+            </p>
+            <p>
+              <strong>interactive_speaking (step 13)</strong> and{" "}
+              <strong>conversation_summary (step 14)</strong>: provide{" "}
+              <code className="font-mono">turns[]</code> with{" "}
+              <code className="font-mono">question_en</code> and{" "}
+              <code className="font-mono">reference_answer_en</code> in each turn.
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input
+            value={setName}
+            onChange={(e) => setSetName(e.target.value)}
+            className={`${mt.border} bg-white px-3 py-2 text-sm`}
+            placeholder="Fixed set name (e.g. April 2026 Form A)"
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setFormat("json")}
+              className={`rounded-[4px] border-2 border-black px-3 py-2 text-xs font-black ${format === "json" ? "bg-[#004AAD] text-[#FFCC00]" : "bg-white"}`}
+            >
+              JSON
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormat("csv")}
+              className={`rounded-[4px] border-2 border-black px-3 py-2 text-xs font-black ${format === "csv" ? "bg-[#004AAD] text-[#FFCC00]" : "bg-white"}`}
+            >
+              CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => void copyTemplate()}
+              className={`${mt.border} bg-white px-3 py-2 text-xs font-bold shadow-[2px_2px_0_0_#000]`}
+            >
+              Load template
+            </button>
+            <button
+              type="button"
+              onClick={downloadTemplate}
+              className={`${mt.border} bg-white px-3 py-2 text-xs font-bold shadow-[2px_2px_0_0_#000]`}
+            >
+              Download {format.toUpperCase()} template
+            </button>
+          </div>
+        </div>
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={16}
+          className={`w-full ${mt.border} bg-white p-3 font-mono text-[11px] leading-relaxed`}
+          spellCheck={false}
+          placeholder={format === "json" ? '{"items":[...]}' : "step_index,task_type,time_limit_sec,..."}
+        />
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void uploadFixedSet()}
+          className={`w-full ${mt.border} bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50`}
+        >
+          {busy ? "Uploading..." : "Upload fixed 20-step set"}
+        </button>
+      </section>
 
       {banner ? (
         <p className="rounded-[4px] border-4 border-black bg-amber-50 px-4 py-3 text-sm font-bold text-amber-950">

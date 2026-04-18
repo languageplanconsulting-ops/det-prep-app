@@ -131,8 +131,8 @@ export function ReadThenSpeakMock({
       ) : null}
 
       <div className="space-y-1">
-        {promptTh ? <p className="text-sm font-bold text-neutral-900">{promptTh}</p> : null}
-        {promptEn ? <p className="text-xs text-neutral-600">{promptEn}</p> : null}
+        {promptTh ? <p className="text-lg font-black text-neutral-900">{promptTh}</p> : null}
+        {promptEn ? <p className="text-base font-bold text-neutral-700">{promptEn}</p> : null}
       </div>
 
       {speechError ? (

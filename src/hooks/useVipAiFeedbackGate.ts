@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import {
+  emitVipApiCreditNotice,
+  getVipWeeklyAiFeedbackRemaining,
   getVipWeeklyAiFeedbackUses,
   recordVipAiFeedbackUse,
   thConfirmBeforeAiSubmit,
@@ -15,6 +17,7 @@ import {
 /**
  * VIP-only weekly AI submit quota. Non-VIP: no client gate (unchanged).
  * Call `confirmBeforeAiSubmit()` on each Submit click; after successful API, `recordSuccessfulAiSubmit()`.
+ * Interactive speaking uses its own flow: session-start confirm + `addVipAiFeedbackUses` per API call.
  */
 export function useVipAiFeedbackGate() {
   const { effectiveTier, loading: tierLoading } = useEffectiveTier();
@@ -79,6 +82,7 @@ export function useVipAiFeedbackGate() {
 
     const u = getVipWeeklyAiFeedbackUses(userId);
     const rem = VIP_AI_FEEDBACK_WEEKLY_LIMIT - u;
+    emitVipApiCreditNotice(Math.max(0, rem));
     if (rem <= 0) {
       window.alert(thExhaustedQuotaMessage());
       return false;
@@ -89,6 +93,7 @@ export function useVipAiFeedbackGate() {
   const recordSuccessfulAiSubmit = useCallback(() => {
     if (isVip && userId) {
       recordVipAiFeedbackUse(userId);
+      emitVipApiCreditNotice(getVipWeeklyAiFeedbackRemaining(userId));
       refresh();
     }
   }, [isVip, userId, refresh]);

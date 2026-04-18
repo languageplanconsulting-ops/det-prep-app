@@ -1,11 +1,18 @@
+import { INTERACTIVE_SPEAKING_FOLLOWUP_COUNT } from "@/lib/interactive-speaking-constants";
+
 /**
  * Client-side weekly quota for VIP AI feedback (Write about photo, Read then write/speak,
- * Speak about photo, Dialogue summary). Resets each local-calendar Monday; does not roll over.
+ * Speak about photo, Dialogue summary, Interactive speaking). Resets each local-calendar Monday; does not roll over.
  */
 
 export const VIP_AI_FEEDBACK_WEEKLY_LIMIT = 15;
 
+/** One full interactive speaking session: follow-up question APIs + final report. */
+export const VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION =
+  INTERACTIVE_SPEAKING_FOLLOWUP_COUNT + 1;
+
 const STORAGE_KEY = "ep-vip-ai-feedback-weekly-v1";
+export const VIP_API_CREDIT_NOTICE_EVENT = "ep-vip-api-credit-notice";
 
 /** Monday date of current week in the user's local timezone (YYYY-MM-DD). */
 export function getLocalWeekStartMondayString(d = new Date()): string {
@@ -72,13 +79,69 @@ export function getVipWeeklyAiFeedbackUses(userId: string): number {
 }
 
 export function recordVipAiFeedbackUse(userId: string): void {
+  addVipAiFeedbackUses(userId, 1);
+}
+
+/** Increment weekly count by `delta` (e.g. several API calls in one interactive speaking session). */
+export function addVipAiFeedbackUses(userId: string, delta: number): void {
+  if (delta <= 0) return;
   const map = pruneUsageMap(loadMap());
   const key = compositeKey(userId);
-  map[key] = (map[key] ?? 0) + 1;
+  map[key] = (map[key] ?? 0) + delta;
   saveMap(map);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("ep-vip-ai-quota-changed"));
   }
+}
+
+export function getVipWeeklyAiFeedbackRemaining(userId: string): number {
+  return Math.max(0, VIP_AI_FEEDBACK_WEEKLY_LIMIT - getVipWeeklyAiFeedbackUses(userId));
+}
+
+function formatDateShortTh(d: Date): string {
+  try {
+    return new Intl.DateTimeFormat("th-TH", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    }).format(d);
+  } catch {
+    return d.toLocaleDateString();
+  }
+}
+
+function formatDateShortEn(d: Date): string {
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    }).format(d);
+  } catch {
+    return d.toLocaleDateString();
+  }
+}
+
+export function getNextLocalMondayLabels(now = new Date()): { th: string; en: string } {
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dow = d.getDay(); // 0 Sun … 6 Sat
+  const daysUntilNextMonday = ((8 - dow) % 7) || 7;
+  d.setDate(d.getDate() + daysUntilNextMonday);
+  return { th: formatDateShortTh(d), en: formatDateShortEn(d) };
+}
+
+export function emitVipApiCreditNotice(remaining: number, limit = VIP_AI_FEEDBACK_WEEKLY_LIMIT): void {
+  if (typeof window === "undefined") return;
+  const resetOn = getNextLocalMondayLabels();
+  window.dispatchEvent(
+    new CustomEvent(VIP_API_CREDIT_NOTICE_EVENT, {
+      detail: {
+        remaining,
+        limit,
+        resetOn,
+      },
+    }),
+  );
 }
 
 export function thExhaustedQuotaMessage(): string {
@@ -97,4 +160,13 @@ export const TH_QUOTA_NO_ROLLOVER =
   "โควต้าไม่สะสม: ถ้าไม่ใช้ครบในสัปดาห์นี้ สิทธิ์ที่เหลือจะไม่ย้ายไปสัปดาห์ถัดไป และจะรีเซ็ตใหม่ทุกวันจันทร์ตามเวลาเครื่องของคุณ";
 
 export const TH_QUOTA_COVERED_PARTS_TH =
-  "นับรวม: เขียนเกี่ยวกับรูป · อ่านแล้วเขียน · อ่านแล้วพูด · พูดเกี่ยวกับรูป · สรุปบทสนทนา (Dialogue summary)";
+  "นับรวม: เขียนเกี่ยวกับรูป · อ่านแล้วเขียน · อ่านแล้วพูด · พูดเกี่ยวกับรูป · สรุปบทสนทนา · พูดโต้ตอบ (นับทุกครั้งที่เรียก AI: คำถามต่อเนื่อง + รายงาน)";
+
+export function thInteractiveSpeakingInsufficientCredits(need: number, have: number): string {
+  return `สมาชิก VIP: พูดโต้ตอบใช้สิทธิ์ AI สูงสุด ${need} ครั้งต่อรอบ (คำถามต่อเนื่อง + รายงาน) แต่สัปดาห์นี้เหลืออีก ${have} ครั้ง—รอรีเซ็ตวันจันทร์หรือใช้สิทธิ์ให้ว่างก่อน`;
+}
+
+/** Shown once when starting interactive speaking (VIP). */
+export function thInteractiveSpeakingStartConfirm(cost: number, remainingBefore: number): string {
+  return `AI (VIP): แบบฝึกพูดโต้ตอบใช้สิทธิ์สูงสุด ${cost} ครั้งต่อรอบ (สร้างคำถามต่อเนื่อง + รายงานคะแนน)\n\nสัปดาห์นี้เหลือ ${remainingBefore}/${VIP_AI_FEEDBACK_WEEKLY_LIMIT} ครั้งก่อนเริ่มรอบนี้\n\nเริ่มรอบนี้เลยไหม?`;
+}

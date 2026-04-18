@@ -141,6 +141,7 @@ export async function POST(
         body.stage,
         qRow as unknown as PoolQuestionRow,
         r.answer,
+        user.id,
       );
       newRows.push(scored);
     }

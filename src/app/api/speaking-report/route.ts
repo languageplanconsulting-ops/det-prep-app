@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateSpeakingReportWithGemini } from "@/lib/gemini-speaking";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
+import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 import { isSpeakingRound } from "@/lib/speaking-constants";
 
 export const maxDuration = 120;
@@ -64,7 +66,8 @@ export async function POST(req: Request) {
   try {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
-    const report = await generateSpeakingReportWithGemini({
+    const userId = await getOptionalAuthUserId();
+    const { report, usage } = await generateSpeakingReportWithGemini({
       apiKey: keys.geminiApiKey,
       anthropicApiKey: keys.anthropicApiKey,
       model,
@@ -79,6 +82,17 @@ export async function POST(req: Request) {
       transcript,
       speakingRound,
     });
+    if (usage) {
+      scheduleApiUsageLog({
+        userId,
+        operation: "speaking_report",
+        provider: usage.provider,
+        model: usage.model,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        meta: { attemptId, topicId, questionId },
+      });
+    }
     return NextResponse.json(report);
   } catch (e) {
     const message = e instanceof Error ? e.message : "Gemini request failed";

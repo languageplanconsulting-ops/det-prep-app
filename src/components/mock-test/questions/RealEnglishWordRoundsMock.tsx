@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 type Props = {
   content: Record<string, unknown>;
+  submitting?: boolean;
   onSubmit: (payload: { score160: number; detail: Record<string, unknown> }) => void;
 };
 
@@ -16,7 +17,7 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-export function RealEnglishWordRoundsMock({ content, onSubmit }: Props) {
+export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = false }: Props) {
   const realWords = useMemo(
     () =>
       (Array.isArray(content.real_words) ? content.real_words : [])
@@ -63,10 +64,12 @@ export function RealEnglishWordRoundsMock({ content, onSubmit }: Props) {
 
   const submitRound = () => {
     let plus = 0;
+    let minus = 0;
     selected.forEach((w) => {
       if (round.realSet.has(w)) plus += 5;
+      else minus += 2;
     });
-    const nextScore = score + plus;
+    const nextScore = Math.max(0, Math.min(160, score + plus - minus));
     if (roundIdx >= 3) {
       onSubmit({
         score160: nextScore,
@@ -74,6 +77,7 @@ export function RealEnglishWordRoundsMock({ content, onSubmit }: Props) {
           rounds: 4,
           per_round_sec: 60,
           score_per_correct: 5,
+          score_penalty_per_fake_pick: -2,
           max_score: 160,
         },
       });
@@ -88,7 +92,7 @@ export function RealEnglishWordRoundsMock({ content, onSubmit }: Props) {
     <div className="space-y-4">
       <p className="text-sm font-black text-[#004AAD]">Real English Word — Round {roundIdx + 1}/4</p>
       <p className="text-xs text-neutral-600">
-        Choose real words only. Each correct real word = 5 points. No negative marks.
+        Choose real words only. Each correct real word = +5 points. Each selected fake word = -2 points.
       </p>
       <div className="grid gap-2 sm:grid-cols-2">
         {round.words.map((w) => {
@@ -97,6 +101,7 @@ export function RealEnglishWordRoundsMock({ content, onSubmit }: Props) {
             <button
               key={w}
               type="button"
+              disabled={submitting}
               onClick={() =>
                 setSelected((prev) => {
                   const next = new Set(prev);
@@ -114,10 +119,11 @@ export function RealEnglishWordRoundsMock({ content, onSubmit }: Props) {
       </div>
       <button
         type="button"
+        disabled={submitting}
         onClick={submitRound}
-        className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
+        className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
       >
-        {roundIdx >= 3 ? "Submit real-word score" : "Next round"}
+        {submitting ? "Submitting..." : roundIdx >= 3 ? "Submit real-word score" : "Next round"}
       </button>
     </div>
   );

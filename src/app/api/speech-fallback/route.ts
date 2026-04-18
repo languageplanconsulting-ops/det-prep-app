@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import {
   DEEPGRAM_TTS_MAX_CHARS,
   synthesizeEnglishSpeechWithDeepgram,
@@ -6,6 +7,7 @@ import {
 import { synthesizeEnglishSpeechWithElevenLabs } from "@/lib/elevenlabs-synthesize";
 import { synthesizeEnglishSpeechWithGemini } from "@/lib/gemini-synthesize";
 import { INWORLD_MAX_CHARS, synthesizeEnglishSpeechWithInworld } from "@/lib/inworld-synthesize";
+import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 import { SPEECH_SYNTHESIS_MAX_CHARS } from "@/lib/speech-api-limits";
 
 export const maxDuration = 120;
@@ -52,6 +54,7 @@ export async function POST(req: Request) {
   }
 
   const trimmed = text.trim();
+  const userId = await getOptionalAuthUserId();
 
   const runGemini = async () => {
     if (!geminiKey) {
@@ -63,10 +66,30 @@ export async function POST(req: Request) {
         { status: 503 },
       );
     }
-    const out = await synthesizeEnglishSpeechWithGemini({
+    const raw = await synthesizeEnglishSpeechWithGemini({
       apiKey: geminiKey,
       text: trimmed,
     });
+    const { usage, ...out } = raw;
+    if (usage) {
+      scheduleApiUsageLog({
+        userId,
+        operation: "speech_tts_fallback",
+        provider: "gemini",
+        model: usage.model,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        charsIn: trimmed.length,
+      });
+    } else {
+      scheduleApiUsageLog({
+        userId,
+        operation: "speech_tts_fallback",
+        provider: "gemini",
+        model: process.env.GEMINI_TTS_MODEL ?? "gemini-2.5-flash-preview-tts",
+        charsIn: trimmed.length,
+      });
+    }
     return NextResponse.json(out);
   };
 
@@ -85,6 +108,12 @@ export async function POST(req: Request) {
         apiKey: deepgramKey,
         text: trimmed,
       });
+      scheduleApiUsageLog({
+        userId,
+        operation: "speech_tts_fallback",
+        provider: "deepgram",
+        charsIn: trimmed.length,
+      });
       return NextResponse.json(out);
     }
 
@@ -98,6 +127,12 @@ export async function POST(req: Request) {
       const out = await synthesizeEnglishSpeechWithElevenLabs({
         apiKey: elevenKey,
         text: trimmed,
+      });
+      scheduleApiUsageLog({
+        userId,
+        operation: "speech_tts_fallback",
+        provider: "elevenlabs",
+        charsIn: trimmed.length,
       });
       return NextResponse.json(out);
     }
@@ -123,6 +158,12 @@ export async function POST(req: Request) {
         text: trimmed,
         apiKey: inworldKey,
       });
+      scheduleApiUsageLog({
+        userId,
+        operation: "speech_tts_fallback",
+        provider: "inworld",
+        charsIn: trimmed.length,
+      });
       return NextResponse.json(out);
     }
 
@@ -131,6 +172,12 @@ export async function POST(req: Request) {
         const out = await synthesizeEnglishSpeechWithDeepgram({
           text: trimmed,
           apiKey: deepgramKey,
+        });
+        scheduleApiUsageLog({
+          userId,
+          operation: "speech_tts_fallback",
+          provider: "deepgram",
+          charsIn: trimmed.length,
         });
         return NextResponse.json(out);
       } catch {
@@ -143,6 +190,12 @@ export async function POST(req: Request) {
         const out = await synthesizeEnglishSpeechWithInworld({
           text: trimmed,
           apiKey: inworldKey,
+        });
+        scheduleApiUsageLog({
+          userId,
+          operation: "speech_tts_fallback",
+          provider: "inworld",
+          charsIn: trimmed.length,
         });
         return NextResponse.json(out);
       } catch {

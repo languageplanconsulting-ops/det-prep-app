@@ -2,11 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import {
-  CONVERSATION_DIFFICULTY_LABEL,
-  CONVERSATION_SCENARIO_Q_COUNT,
-  CONVERSATION_TOTAL_STEPS,
-} from "@/lib/conversation-constants";
+import { CONVERSATION_SCENARIO_Q_COUNT, CONVERSATION_TOTAL_STEPS } from "@/lib/conversation-constants";
 import { conversationExplanationThai } from "@/lib/conversation-report-helpers";
 import { conversationScore, countConversationCorrect } from "@/lib/conversation-scoring";
 import { conversationMaxForExam } from "@/lib/conversation-storage";
@@ -17,24 +13,26 @@ import {
   normalizeCategoryIds,
 } from "@/lib/notebook-storage";
 import { playBlinkBeep } from "@/lib/play-blink-beep";
-import type { ConversationDifficulty, ConversationExam, ConversationMainQuestion } from "@/types/conversation";
+import type { ConversationExam, ConversationMainQuestion } from "@/types/conversation";
 
 export function ConversationReportPanel({
   exam,
-  difficulty,
   scenarioPicks,
   mainPicks,
   itemOk,
   onRedeemNow,
-  hubHref,
+  backHref,
+  restartHref,
 }: {
   exam: ConversationExam;
-  difficulty: ConversationDifficulty;
   scenarioPicks: (number | null)[];
   mainPicks: (number | null)[];
   itemOk: boolean[];
   onRedeemNow: () => void;
-  hubHref: string;
+  /** Round page listing all Easy + Medium sets */
+  backHref: string;
+  /** Same set URL without redeem — full restart from the beginning */
+  restartHref: string;
 }) {
   const maxScore = conversationMaxForExam(exam);
   const correct = countConversationCorrect(itemOk);
@@ -103,10 +101,6 @@ export function ConversationReportPanel({
                 <>
                   {points}
                   <span className="text-2xl font-bold text-neutral-400">/{maxScore}</span>
-                  <span className="ep-stat ml-2 text-xl font-black text-ep-blue">
-                    {" "}
-                    ({CONVERSATION_DIFFICULTY_LABEL[difficulty]})
-                  </span>
                 </>
               ) : (
                 <span className="text-lg font-bold text-neutral-500">—</span>
@@ -115,14 +109,14 @@ export function ConversationReportPanel({
             <p className="ep-stat mt-2 text-sm text-neutral-600">
               {itemOk.length === CONVERSATION_TOTAL_STEPS ? (
                 <>
-                  {correct}/{CONVERSATION_TOTAL_STEPS} correct ({pctCorrect}%) · Level cap {maxScore} pts
+                  {correct}/{CONVERSATION_TOTAL_STEPS} correct ({pctCorrect}%) · Full score {maxScore} pts
                 </>
               ) : (
                 <>Incomplete attempt — finish all questions to earn a score.</>
               )}
             </p>
             <p className="ep-stat mt-1 text-xs text-neutral-500">
-              Score = (correct ÷ {CONVERSATION_TOTAL_STEPS}) × {maxScore} for this level.
+              Score = (correct ÷ {CONVERSATION_TOTAL_STEPS}) × {maxScore}.
             </p>
           </div>
           {!mastered ? (
@@ -299,11 +293,18 @@ export function ConversationReportPanel({
             </button>
           ) : null}
           <Link
-            href={hubHref}
+            href={restartHref}
+            onClick={() => playBlinkBeep()}
+            className="ep-btn-luxury ep-link-luxury inline-flex flex-1 items-center justify-center border-4 border-black bg-white py-4 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000]"
+          >
+            Start this set again
+          </Link>
+          <Link
+            href={backHref}
             onClick={() => playBlinkBeep()}
             className="ep-btn-luxury ep-link-luxury inline-flex flex-1 items-center justify-center border-4 border-black bg-ep-blue py-4 text-center text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
           >
-            Return to hub
+            Back to all sets
           </Link>
         </div>
       </div>

@@ -11,6 +11,7 @@ import { ProductionReportLandingHero } from "@/components/production/ProductionR
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
 import { SpeakingVocabularyUpgradePanel } from "@/components/speaking/SpeakingVocabularyUpgradePanel";
+import { GrammarFixesPanel, type GrammarFixItem } from "@/components/reports/GrammarFixesPanel";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
 import { GRADING_BADGE_OFFLINE, GRADING_BADGE_PRIMARY } from "@/lib/report-branding";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
@@ -130,6 +131,17 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
   const router = useRouter();
   const nav = photoReportNav(report);
   const submission = (report.punctuatedTranscript ?? report.transcript).trim();
+  const grammarFixes: GrammarFixItem[] = report.grammar.breakdown
+    .map((b) => ({
+      id: b.id,
+      wrong: b.excerpt?.trim() ?? "",
+      betterEn: b.suggestionEn?.trim() || "",
+      betterTh: b.suggestionTh?.trim() || "",
+      noteEn: b.en,
+      noteTh: b.th,
+    }))
+    .filter((x) => x.wrong && (x.betterEn || x.betterTh))
+    .slice(0, 5);
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -315,6 +327,13 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
           ))}
         </ul>
       </BrutalPanel>
+      <GrammarFixesPanel
+        items={grammarFixes}
+        attemptId={report.attemptId}
+        entrySource={nav.notebookSource}
+        titleEn={nav.isWrite ? "Grammar fixes (photo write)" : "Grammar fixes (photo speak)"}
+        titleTh={nav.isWrite ? "จุดแก้ไวยากรณ์ (เขียนเกี่ยวกับภาพ)" : "จุดแก้ไวยากรณ์ (พูดจากภาพ)"}
+      />
         </div>
       </section>
 

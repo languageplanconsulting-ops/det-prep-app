@@ -6,9 +6,12 @@ import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { normalizeVocabSetsIncoming, parseVocabSetsJson } from "@/lib/vocab-admin";
 import { VOCAB_MAX_PASSAGES_PER_SET, VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
 import {
+  clearEntireVocabBankAndOccupancy,
   countVocabSetsInBank,
   loadVocabBank,
   mergeVocabSetsFromAdmin,
+  removeAllVocabPassagesForLevel,
+  removeVocabSetFromRound,
 } from "@/lib/vocab-storage";
 import type { VocabPassageUnit, VocabRoundNum, VocabSet, VocabSessionLevel } from "@/types/vocab";
 
@@ -109,23 +112,8 @@ export function AdminVocabSetsPaste() {
     if (!Array.isArray(parsed) || parsed.length === 0) {
       throw new Error("JSON must be a non-empty array");
     }
-    const existing = loadVocabBank()[selectedRound].find((s) => s.setNumber === selectedSet);
-    const usedPassageNumbers = new Set(
-      (existing?.passages ?? [])
-        .filter((p) => p.contentLevel === selectedDifficulty)
-        .map((p) => p.passageNumber),
-    );
     const allocatePassageNumbers = (count: number): number[] => {
-      const allocated: number[] = [];
-      let cursor = 1;
-      while (allocated.length < count) {
-        if (!usedPassageNumbers.has(cursor)) {
-          allocated.push(cursor);
-          usedPassageNumbers.add(cursor);
-        }
-        cursor += 1;
-      }
-      return allocated;
+      return Array.from({ length: count }, (_, i) => i + 1);
     };
     const legacyRows = parsed as LegacyVocabExamRow[];
     const getLegacyPassage = (r: LegacyVocabExamRow): string | null => {
@@ -277,6 +265,21 @@ export function AdminVocabSetsPaste() {
   const difficultyPassages =
     previewSet?.passages.filter((p) => p.contentLevel === selectedDifficulty) ?? [];
 
+  const removeWholeSlot = (setNumber: number) => {
+    const set = loadVocabBank()[selectedRound].find((s) => s.setNumber === setNumber);
+    const total = set?.passages.length ?? 0;
+    if (
+      !window.confirm(
+        `Remove the ENTIRE slot Round ${selectedRound} · ${setNumber} (all difficulties, ${total} passage(s))?`,
+      )
+    ) {
+      return;
+    }
+    removeVocabSetFromRound(selectedRound, setNumber);
+    setMessage(`Removed entire R${selectedRound} slot ${setNumber}.`);
+    setError(null);
+  };
+
   return (
     <BrutalPanel title="Vocabulary in context — JSON upload">
       <p className="mb-2 text-sm text-neutral-600">
@@ -370,6 +373,66 @@ export function AdminVocabSetsPaste() {
       >
         Import vocabulary questions
       </button>
+
+      <div className="mt-6 rounded-[4px] border-4 border-red-700 bg-red-50 p-4">
+        <p className="text-xs font-black uppercase tracking-wide text-red-900">Remove / reset (local browser)</p>
+        <p className="mt-1 text-xs text-red-900/90">
+          Bulk uploads (e.g. many easy/medium/hard passages) live in this browser&apos;s{" "}
+          <code className="rounded bg-white/80 px-1">localStorage</code>. Shared copies also live in Supabase{" "}
+          <code className="rounded bg-white/80 px-1">content_bank_snapshots</code> — after clearing here, use{" "}
+          <strong>Sync to server now</strong> below so learners don&apos;t pull the old snapshot back.
+        </p>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <button
+            type="button"
+            onClick={() => {
+              const n = difficultyPassages.length;
+              if (
+                !window.confirm(
+                  `Remove all ${selectedDifficulty} passages in Round ${selectedRound} slot ${selectedSet}? (${n} passage(s))`,
+                )
+              ) {
+                return;
+              }
+              removeAllVocabPassagesForLevel(selectedRound, selectedSet, selectedDifficulty);
+              setMessage(`Removed all ${selectedDifficulty} passages for R${selectedRound} slot ${selectedSet}.`);
+              setError(null);
+            }}
+            className="rounded-[2px] border-2 border-black bg-white px-3 py-2 text-xs font-black uppercase text-red-900 shadow-[2px_2px_0_0_#000]"
+          >
+            Remove this difficulty only
+          </button>
+          <button
+            type="button"
+            onClick={() => removeWholeSlot(selectedSet)}
+            className="rounded-[2px] border-2 border-black bg-white px-3 py-2 text-xs font-black uppercase text-red-900 shadow-[2px_2px_0_0_#000]"
+          >
+            Remove whole slot
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (
+                !window.confirm(
+                  "Clear ALL vocabulary rounds, all slots, and admin visibility from this browser? This cannot be undone.",
+                )
+              ) {
+                return;
+              }
+              if (window.prompt('Type DELETE to confirm total vocabulary reset.') !== "DELETE") {
+                return;
+              }
+              clearEntireVocabBankAndOccupancy();
+              setMessage("Cleared entire vocabulary bank and admin slot list in this browser.");
+              setError(null);
+            }}
+            className="rounded-[2px] border-2 border-black bg-red-700 px-3 py-2 text-xs font-black uppercase text-white shadow-[2px_2px_0_0_#000]"
+          >
+            Clear everything
+          </button>
+        </div>
+      </div>
+
       <div className="mt-4 rounded-[4px] border-2 border-black bg-neutral-50 p-3">
         <p className="text-xs font-black uppercase tracking-wide text-neutral-700">
           Preview (admin)
@@ -466,6 +529,7 @@ export function AdminVocabSetsPaste() {
                 <th className="border border-black bg-white px-2 py-1">Easy</th>
                 <th className="border border-black bg-white px-2 py-1">Medium</th>
                 <th className="border border-black bg-white px-2 py-1">Hard</th>
+                <th className="border border-black bg-white px-2 py-1">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -477,6 +541,19 @@ export function AdminVocabSetsPaste() {
                   <td className="border border-black bg-white px-2 py-1 text-center">{row.easy}</td>
                   <td className="border border-black bg-white px-2 py-1 text-center">{row.medium}</td>
                   <td className="border border-black bg-white px-2 py-1 text-center">{row.hard}</td>
+                  <td className="border border-black bg-white px-2 py-1 text-center">
+                    {row.easy > 0 || row.medium > 0 || row.hard > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => removeWholeSlot(row.setNumber)}
+                        className="rounded-[2px] border border-black bg-red-600 px-2 py-1 text-[10px] font-black uppercase text-white"
+                      >
+                        Delete slot
+                      </button>
+                    ) : (
+                      <span className="text-neutral-400">—</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

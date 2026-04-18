@@ -77,9 +77,11 @@ export function VocabularyReadingMockExam({
 
   const step = aggregateMode ? internalStep : completedSteps;
   const block = blocks[step];
-  const p2 = exam.passage.p2;
+  const p2Correct = String(exam.missingParagraph?.correctAnswer ?? exam.passage.p2 ?? "");
   const missingSelectionStep = aggregateMode ? 6 : 5;
-  const vocabAnswers = (exam.vocabularyQuestions ?? []).slice(0, 6).map((q) => q.correctAnswer);
+  const vocabAnswers = aggregateMode
+    ? Array.from({ length: 6 }).map((_, idx) => internalAnswers[idx] ?? `[BLANK ${idx + 1}]`)
+    : (exam.vocabularyQuestions ?? []).slice(0, 6).map((q) => q.correctAnswer);
   const shouldFillVocabBlanks =
     aggregateMode && (step > missingSelectionStep || (step === missingSelectionStep && missingReveal));
   const p1Display = shouldFillVocabBlanks ? fillVocabBlanks(exam.passage.p1, vocabAnswers) : exam.passage.p1;
@@ -173,10 +175,11 @@ export function VocabularyReadingMockExam({
             Tip: highlighted words are clickable for meanings.
           </p>
         ) : null}
-        <div className="mt-4 space-y-4 text-sm leading-relaxed text-neutral-800">
+        <div className="mt-4 grid gap-5 lg:grid-cols-[1.35fr_1fr]">
+          <div className="space-y-4 text-sm leading-relaxed text-neutral-800">
           <p className="whitespace-pre-wrap">
-            {aggregateMode && !shouldFillVocabBlanks ? (
-              renderMockVocabBlanksAsBoxes(exam.passage.p1)
+            {aggregateMode ? (
+              renderMockVocabBlanksAsBoxes(exam.passage.p1, internalAnswers)
             ) : (
               <HighlightedReadingText
                 text={p1Display}
@@ -198,7 +201,7 @@ export function VocabularyReadingMockExam({
           ) : (
             <p className="whitespace-pre-wrap border-l-4 border-ep-blue pl-3">
               <HighlightedReadingText
-                text={p2}
+                text={p2Correct}
                 vocab={vocab}
                 activeWord={activeWord}
                 setNumber={0}
@@ -208,8 +211,8 @@ export function VocabularyReadingMockExam({
             </p>
           )}
           <p className="whitespace-pre-wrap">
-            {aggregateMode && !shouldFillVocabBlanks ? (
-              renderMockVocabBlanksAsBoxes(exam.passage.p3)
+            {aggregateMode ? (
+              renderMockVocabBlanksAsBoxes(exam.passage.p3, internalAnswers)
             ) : (
               <HighlightedReadingText
                 text={p3Display}
@@ -221,48 +224,46 @@ export function VocabularyReadingMockExam({
               />
             )}
           </p>
-        </div>
-      </section>
-
-      <section className="ep-brutal-reading rounded-sm bg-neutral-50 p-5">
-        <p className="ep-stat text-xs font-bold uppercase text-neutral-500">
-          {labels[step]}
-        </p>
-        <p className="mt-2 text-base font-bold text-neutral-900">{block.question}</p>
-        <ul className="mt-4 space-y-2">
-          {shuffled.shuffled.map((opt) => (
-            <li key={opt.slice(0, 48) + opt.length}>
+          </div>
+          <div className="ep-brutal-reading rounded-sm bg-neutral-50 p-4">
+            <p className="ep-stat text-xs font-bold uppercase text-neutral-500">{labels[step]}</p>
+            <p className="mt-2 text-base font-bold text-neutral-900">{block.question}</p>
+            <ul className="mt-4 space-y-2">
+              {shuffled.shuffled.map((opt) => (
+                <li key={opt.slice(0, 48) + opt.length}>
+                  <button
+                    type="button"
+                    onClick={() => onOptionClick(opt)}
+                    disabled={submitting}
+                    className={`w-full border-4 border-black px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition hover:bg-ep-yellow/30 ${
+                      step === (aggregateMode ? 6 : 5) && missingReveal && missingPick === opt
+                        ? "bg-ep-yellow/50"
+                        : "bg-white"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {step === (aggregateMode ? 6 : 5) && missingReveal && missingPick ? (
               <button
                 type="button"
-                onClick={() => onOptionClick(opt)}
+                onClick={() => submitChoice(missingPick)}
                 disabled={submitting}
-                className={`w-full border-4 border-black px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition hover:bg-ep-yellow/30 ${
-                  step === (aggregateMode ? 6 : 5) && missingReveal && missingPick === opt
-                    ? "bg-ep-yellow/50"
-                    : "bg-white"
-                }`}
+                className="mt-5 w-full border-4 border-black bg-ep-blue px-4 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] disabled:opacity-50"
               >
-                {opt}
+                {submitting ? "Submitting..." : "Submit answer / ส่งคำตอบ"}
               </button>
-            </li>
-          ))}
-        </ul>
-        {step === (aggregateMode ? 6 : 5) && missingReveal && missingPick ? (
-          <button
-            type="button"
-            onClick={() => submitChoice(missingPick)}
-            disabled={submitting}
-            className="mt-5 w-full border-4 border-black bg-ep-blue px-4 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] disabled:opacity-50"
-          >
-            {submitting ? "ส่งคำตอบ... / Sending" : "Submit answer / ส่งคำตอบ"}
-          </button>
-        ) : null}
+            ) : null}
+          </div>
+        </div>
       </section>
     </div>
   );
 }
 
-function renderMockVocabBlanksAsBoxes(text: string) {
+function renderMockVocabBlanksAsBoxes(text: string, answers: string[] = []) {
   const re = /\[BLANK\s*(\d+)\]/gi;
   const out: any[] = [];
   let last = 0;
@@ -275,12 +276,14 @@ function renderMockVocabBlanksAsBoxes(text: string) {
     }
 
     const blankNum = match[1] ?? "";
+    const idxNum = Number(blankNum) - 1;
+    const picked = idxNum >= 0 ? String(answers[idxNum] ?? "").trim() : "";
     out.push(
       <span
         key={`b-${idx}-${blankNum}`}
         className="mx-0.5 inline-flex items-center justify-center rounded-[8px] border-4 border-black bg-[#dbffd8] px-2 py-1 font-black tracking-widest text-[#0f7a16] shadow-[3px_3px_0_0_#000]"
       >
-        ____{blankNum}
+        {picked || `____${blankNum}`}
       </span>,
     );
     last = idx + match[0]!.length;

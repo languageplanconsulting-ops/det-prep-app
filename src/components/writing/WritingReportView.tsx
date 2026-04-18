@@ -9,6 +9,7 @@ import { AnnotatedEssay } from "@/components/writing/AnnotatedEssay";
 import { FullReportNotebookButton } from "@/components/writing/FullReportNotebookButton";
 import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { GrammarFixesPanel, type GrammarFixItem } from "@/components/reports/GrammarFixesPanel";
 import {
   buildWritingReportNotebookFullBodies,
   buildWritingReportNotebookPreview,
@@ -225,6 +226,17 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
       {SPEAKING_RUBRIC_WEIGHTS.taskRelevancy * 100}%
     </>
   );
+  const grammarFixes: GrammarFixItem[] = fullReport.grammar.breakdown
+    .map((b) => ({
+      id: b.id,
+      wrong: b.excerpt?.trim() ?? "",
+      betterEn: b.suggestionEn?.trim() || "",
+      betterTh: b.suggestionTh?.trim() || "",
+      noteEn: b.en,
+      noteTh: b.th,
+    }))
+    .filter((x) => x.wrong && (x.betterEn || x.betterTh))
+    .slice(0, 5);
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -487,6 +499,13 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           ))}
         </ul>
       </BrutalPanel>
+      <GrammarFixesPanel
+        items={grammarFixes}
+        attemptId={fullReport.attemptId}
+        entrySource="writing-read-and-write"
+        titleEn="Grammar fixes (read & write)"
+        titleTh="จุดแก้ไวยากรณ์ (อ่านแล้วเขียน)"
+      />
           </div>
         </div>
       </section>

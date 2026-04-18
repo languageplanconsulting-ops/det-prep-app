@@ -22,7 +22,7 @@ const BUCKETS = [
 ] as const;
 
 type BucketKey = (typeof BUCKETS)[number]["task"];
-type PhotoTopic = "people" | "place" | "landscape";
+type PhotoTopic = "all" | "people" | "place" | "landscape" | "animal" | "nature";
 type PhotoEntry = { imageUrl: string; photoType: PhotoTopic };
 
 function prettyTaskName(task: string): string {
@@ -43,15 +43,16 @@ export function MockFixedBuilderWorkspace() {
   const [fakeWordSource, setFakeWordSource] = useState("");
   const [readWriteTopicSource, setReadWriteTopicSource] = useState("");
   const [interactiveSpeakingTopicSource, setInteractiveSpeakingTopicSource] = useState("");
+  const [photoBulkSource, setPhotoBulkSource] = useState("");
   const [writePhotoEntries, setWritePhotoEntries] = useState<PhotoEntry[]>([
-    { imageUrl: "", photoType: "people" },
-    { imageUrl: "", photoType: "place" },
-    { imageUrl: "", photoType: "landscape" },
+    { imageUrl: "", photoType: "all" },
+    { imageUrl: "", photoType: "all" },
+    { imageUrl: "", photoType: "all" },
   ]);
   const [speakPhotoEntries, setSpeakPhotoEntries] = useState<PhotoEntry[]>([
-    { imageUrl: "", photoType: "people" },
-    { imageUrl: "", photoType: "place" },
-    { imageUrl: "", photoType: "landscape" },
+    { imageUrl: "", photoType: "all" },
+    { imageUrl: "", photoType: "all" },
+    { imageUrl: "", photoType: "all" },
   ]);
   const [bucketJson, setBucketJson] = useState<Record<BucketKey, string>>(() => {
     const init = {} as Record<BucketKey, string>;
@@ -374,6 +375,7 @@ export function MockFixedBuilderWorkspace() {
       content: {
         image_url: row.imageUrl,
         photo_type: row.photoType,
+        keywords: ["people", "place", "landscape", "animal", "nature"],
         instruction:
           task === "write_about_photo"
             ? "Write a response based on the photo."
@@ -387,6 +389,34 @@ export function MockFixedBuilderWorkspace() {
     }));
     setBucket(task, jsonFormat(generated));
     setBanner(`Generated ${task} JSON from link + topic boxes.`);
+  };
+
+  const applyPhotoBulkSource = () => {
+    const lines = photoBulkSource
+      .split(/\r?\n/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+    if (lines.length < 5) {
+      setBanner("Photo bulk paste needs 5 lines: first 2 for write, next 3 for speak.");
+      return;
+    }
+    const parsed = lines.slice(0, 5).map((line) => {
+      const [urlRaw, typeRaw] = line.split("|").map((x) => x.trim());
+      const url = String(urlRaw ?? "");
+      const t = String(typeRaw ?? "all").toLowerCase();
+      const valid: PhotoTopic =
+        t === "all" || t === "people" || t === "place" || t === "landscape" || t === "animal" || t === "nature"
+          ? (t as PhotoTopic)
+          : "all";
+      return { imageUrl: url, photoType: valid };
+    });
+    if (parsed.some((x) => !x.imageUrl)) {
+      setBanner("Every photo bulk line must include image URL. Format: image_url|category");
+      return;
+    }
+    setWritePhotoEntries(parsed.slice(0, 2));
+    setSpeakPhotoEntries(parsed.slice(2, 5));
+    setBanner("Applied photo bulk rows to write_about_photo (2) and speak_about_photo (3).");
   };
 
   const generateDictationFromSource = async () => {
@@ -489,6 +519,27 @@ export function MockFixedBuilderWorkspace() {
             onChange={(e) => setDictationSource(e.target.value)}
           />
         </div>
+        <div className={`${mt.border} bg-white p-3`}>
+          <p className="text-xs font-black text-[#004AAD]">Photo bulk paste (5 items in one go)</p>
+          <p className="mt-1 text-[11px] text-neutral-600">
+            Paste 5 lines in order: first 2 = write_about_photo, next 3 = speak_about_photo. Format per line:
+            image_url|category (category optional). If omitted, all categories are used.
+          </p>
+          <textarea
+            className={`${mt.border} mt-2 w-full bg-neutral-50 p-2 text-xs`}
+            rows={5}
+            placeholder={`https://.../img1.jpg\nhttps://.../img2.jpg\nhttps://.../img3.jpg\nhttps://.../img4.jpg\nhttps://.../img5.jpg`}
+            value={photoBulkSource}
+            onChange={(e) => setPhotoBulkSource(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={applyPhotoBulkSource}
+            className={`mt-2 ${mt.border} bg-white px-3 py-2 text-xs font-bold shadow-[2px_2px_0_0_#000]`}
+          >
+            Apply 5 photos to write+speak
+          </button>
+        </div>
         <div className="grid gap-4 lg:grid-cols-2">
           <section className={`${mt.border} bg-white p-3`}>
             <p className="text-xs font-black text-[#004AAD]">Write about photo (2 items)</p>
@@ -509,9 +560,12 @@ export function MockFixedBuilderWorkspace() {
                       updatePhotoEntry("write_about_photo", i, { photoType: e.target.value as PhotoTopic })
                     }
                   >
+                    <option value="all">all categories</option>
                     <option value="people">people</option>
                     <option value="place">place</option>
                     <option value="landscape">landscape</option>
+                    <option value="animal">animal</option>
+                    <option value="nature">nature</option>
                   </select>
                 </div>
               ))}
@@ -543,9 +597,12 @@ export function MockFixedBuilderWorkspace() {
                       updatePhotoEntry("speak_about_photo", i, { photoType: e.target.value as PhotoTopic })
                     }
                   >
+                    <option value="all">all categories</option>
                     <option value="people">people</option>
                     <option value="place">place</option>
                     <option value="landscape">landscape</option>
+                    <option value="animal">animal</option>
+                    <option value="nature">nature</option>
                   </select>
                 </div>
               ))}
@@ -636,6 +693,12 @@ export function MockFixedBuilderWorkspace() {
                         className="rounded border border-black bg-amber-100 px-2 py-1 text-[10px] font-bold"
                       >
                         Preview + skip timer
+                      </Link>
+                      <Link
+                        href={`/mock-test/start?setId=${encodeURIComponent(s.id)}&adminPreview=1&previewSeparate=1&skipTimer=1`}
+                        className="rounded border border-black bg-emerald-100 px-2 py-1 text-[10px] font-bold"
+                      >
+                        Preview separate
                       </Link>
                     </div>
                   </td>

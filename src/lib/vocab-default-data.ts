@@ -73,6 +73,41 @@ export const DEFAULT_VOCAB_SETS: VocabSet[] = [
   },
 ];
 
+/** Fingerprint passage quiz content (order of passages normalized). */
+function vocabSetContentFingerprint(set: VocabSet): string {
+  const levelRank: Record<VocabPassageUnit["contentLevel"], number> = {
+    easy: 0,
+    medium: 1,
+    hard: 2,
+  };
+  const sorted = [...set.passages].sort((a, b) => {
+    const d = levelRank[a.contentLevel] - levelRank[b.contentLevel];
+    return d !== 0 ? d : a.passageNumber - b.passageNumber;
+  });
+  return sorted
+    .map((p) => {
+      const blankKey = p.blanks
+        .map((b) => `${b.correctAnswer}\n${(b.options ?? []).slice().sort().join(",")}`)
+        .join("\n");
+      return `${p.passageText.trim()}\n${blankKey}`;
+    })
+    .join("\n---\n");
+}
+
+const BUILTIN_PLACEHOLDER_FINGERPRINT = DEFAULT_VOCAB_SETS[0]
+  ? vocabSetContentFingerprint(DEFAULT_VOCAB_SETS[0])
+  : "";
+
+/**
+ * True when this set is the same vocabulary-in-context content as the app’s built-in
+ * placeholder (e.g. admin pasted the default bank for every slot). Those are hidden
+ * from the learner bank so only real uploaded content appears.
+ */
+export function isBuiltInPlaceholderVocabSet(candidate: VocabSet): boolean {
+  if (!BUILTIN_PLACEHOLDER_FINGERPRINT) return false;
+  return vocabSetContentFingerprint(candidate) === BUILTIN_PLACEHOLDER_FINGERPRINT;
+}
+
 export function emptyVocabFullBank(): VocabFullBank {
   const b = {} as VocabFullBank;
   for (const r of VOCAB_ROUND_NUMBERS) {

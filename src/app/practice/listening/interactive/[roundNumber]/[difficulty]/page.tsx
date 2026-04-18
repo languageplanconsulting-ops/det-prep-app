@@ -1,30 +1,19 @@
-import { notFound } from "next/navigation";
-import { ConversationSetList } from "@/components/conversation/ConversationSetList";
-import {
-  CONVERSATION_DIFFICULTIES,
-  parseConversationRoundParam,
-} from "@/lib/conversation-constants";
-import type { ConversationDifficulty } from "@/types/conversation";
+import { notFound, redirect } from "next/navigation";
+import { parseConversationRoundParam } from "@/lib/conversation-constants";
 
-function isDifficulty(s: string): s is ConversationDifficulty {
-  return (CONVERSATION_DIFFICULTIES as readonly string[]).includes(s);
-}
-
+/**
+ * Legacy path: `/interactive/{round}/{difficulty}` used to list sets per band.
+ * All sets for a round live on the round question bank only.
+ */
 export default async function InteractiveConversationDifficultyPage({
   params,
 }: {
   params: Promise<{ roundNumber: string; difficulty: string }>;
 }) {
-  const { roundNumber: rRaw, difficulty: dRaw } = await params;
+  const { roundNumber: rRaw } = await params;
   const round = parseConversationRoundParam(rRaw);
-  const difficulty = dRaw.toLowerCase();
-  if (round === null || !isDifficulty(difficulty)) {
+  if (round === null) {
     notFound();
   }
-
-  return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
-      <ConversationSetList round={round} difficulty={difficulty} />
-    </main>
-  );
+  redirect(`/practice/listening/interactive/${round}`);
 }

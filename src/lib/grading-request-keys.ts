@@ -1,8 +1,9 @@
-import { isAnthropicGradingModel } from "@/lib/grading-llm-generate";
+import { isAnthropicGradingModel, isOpenAiGradingModel } from "@/lib/grading-llm-generate";
 
 export type ResolvedGradingKeys = {
   geminiApiKey: string;
   anthropicApiKey?: string;
+  openAiApiKey?: string;
 };
 
 /**
@@ -13,6 +14,8 @@ export function resolveGradingKeysFromRequest(req: Request, model: string): Reso
     process.env.GEMINI_API_KEY?.trim() || req.headers.get("x-gemini-api-key")?.trim() || "";
   const anthropic =
     process.env.ANTHROPIC_API_KEY?.trim() || req.headers.get("x-anthropic-api-key")?.trim() || "";
+  const openai =
+    process.env.OPENAI_API_KEY?.trim() || req.headers.get("x-openai-api-key")?.trim() || "";
 
   if (isAnthropicGradingModel(model)) {
     if (!anthropic) {
@@ -20,12 +23,20 @@ export function resolveGradingKeysFromRequest(req: Request, model: string): Reso
         "No Anthropic key. Set ANTHROPIC_API_KEY for Claude grading (or x-anthropic-api-key on the request).",
       );
     }
-    return { geminiApiKey: "", anthropicApiKey: anthropic };
+    return { geminiApiKey: "", anthropicApiKey: anthropic, openAiApiKey: openai || undefined };
+  }
+  if (isOpenAiGradingModel(model)) {
+    if (!openai) {
+      throw new Error(
+        "No OpenAI key. Set OPENAI_API_KEY for ChatGPT grading (or x-openai-api-key on the request).",
+      );
+    }
+    return { geminiApiKey: "", anthropicApiKey: anthropic || undefined, openAiApiKey: openai };
   }
   if (!gemini) {
     throw new Error(
       "No Gemini key. Set GEMINI_API_KEY (or x-gemini-api-key) for Gemini grading models.",
     );
   }
-  return { geminiApiKey: gemini, anthropicApiKey: anthropic || undefined };
+  return { geminiApiKey: gemini, anthropicApiKey: anthropic || undefined, openAiApiKey: openai || undefined };
 }

@@ -7,13 +7,14 @@ import type { ConversationSummaryTurn } from "@/lib/mock-test/conversation-summa
 
 type Props = {
   content: Record<string, unknown>;
+  submitting?: boolean;
   onSubmit: (payload: {
     text: string;
     user_turn_answers: string[];
   }) => void;
 };
 
-export function ConversationSummaryMock({ content, onSubmit }: Props) {
+export function ConversationSummaryMock({ content, onSubmit, submitting = false }: Props) {
   const turns = (Array.isArray(content.turns)
     ? content.turns
     : []) as ConversationSummaryTurn[];
@@ -73,6 +74,7 @@ export function ConversationSummaryMock({ content, onSubmit }: Props) {
           <textarea
             value={reply}
             onChange={(e) => setReply(e.target.value)}
+            disabled={submitting}
             rows={5}
             className="mt-2 w-full rounded-[4px] border-4 border-black bg-white p-3 text-sm"
             placeholder="Type your spoken reply (English)…"
@@ -81,10 +83,10 @@ export function ConversationSummaryMock({ content, onSubmit }: Props) {
         <button
           type="button"
           onClick={submitTurn}
-          disabled={reply.trim().length < 2}
+          disabled={submitting || reply.trim().length < 2}
           className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
         >
-          {turnIdx + 1 >= total ? "Finish conversation / จบบทสนทนา" : "Next turn / ข้อถัดไป"}
+          {submitting ? "Submitting..." : turnIdx + 1 >= total ? "Finish conversation / จบบทสนทนา" : "Next turn / ข้อถัดไป"}
         </button>
       </div>
     );
@@ -156,6 +158,7 @@ export function ConversationSummaryMock({ content, onSubmit }: Props) {
         <textarea
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
+          disabled={submitting}
           rows={8}
           className="mt-2 w-full rounded-[4px] border-4 border-black bg-white p-3 text-sm"
           placeholder="Summarize the main points and outcome of the conversation…"
@@ -170,10 +173,10 @@ export function ConversationSummaryMock({ content, onSubmit }: Props) {
             user_turn_answers: userAnswers,
           })
         }
-        disabled={summary.trim().split(/\s+/).filter(Boolean).length < 5}
+        disabled={submitting || summary.trim().split(/\s+/).filter(Boolean).length < 5}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
       >
-        Submit summary / ส่งคำสรุป
+        {submitting ? "Submitting..." : "Submit summary / ส่งคำสรุป"}
       </button>
     </div>
   );

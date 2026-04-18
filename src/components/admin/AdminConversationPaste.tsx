@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import {
+  CONVERSATION_DIFFICULTIES,
+  CONVERSATION_FULL_SCORE,
   CONVERSATION_MAIN_Q_COUNT,
   CONVERSATION_ROUND_COUNT,
   CONVERSATION_SCENARIO_Q_COUNT,
@@ -39,8 +41,6 @@ import { dbService } from "@/lib/dbService";
 import { playBlinkBeep } from "@/lib/play-blink-beep";
 import type { ConversationDifficulty, ConversationExam } from "@/types/conversation";
 
-const DIFFICULTIES: ConversationDifficulty[] = ["easy", "medium", "hard"];
-
 function ConversationAggTable({
   title,
   matrix,
@@ -56,13 +56,13 @@ function ConversationAggTable({
       <p className="text-xs font-black uppercase tracking-wide text-neutral-800">{title}</p>
       {subtitle ? <p className="mt-1 text-[11px] text-neutral-600">{subtitle}</p> : null}
       <div className="mt-2 overflow-x-auto">
-        <table className="w-full min-w-[280px] border-collapse text-left text-[11px]">
+        <table className="w-full min-w-[320px] border-collapse text-left text-[11px]">
           <thead>
             <tr className="bg-neutral-100">
               <th className="border border-black px-2 py-1.5 font-black">Round</th>
-              {DIFFICULTIES.map((d) => (
-                <th key={d} className="border border-black px-2 py-1.5 font-black capitalize">
-                  {d}
+              {CONVERSATION_DIFFICULTIES.map((d) => (
+                <th key={d} className="border border-black px-2 py-1.5 font-black">
+                  {d === "easy" ? "Easy (bank slot)" : "Medium (bank slot)"}
                 </th>
               ))}
             </tr>
@@ -71,7 +71,7 @@ function ConversationAggTable({
             {rounds.map((r) => (
               <tr key={r}>
                 <td className="border border-black px-2 py-1.5 font-bold">R{r}</td>
-                {DIFFICULTIES.map((d) => {
+                {CONVERSATION_DIFFICULTIES.map((d) => {
                   const cell = matrix[r]?.[d] ?? { exams: 0, mcqItems: 0 };
                   const label =
                     cell.exams === 0
@@ -90,8 +90,58 @@ function ConversationAggTable({
       </div>
       <p className="mt-2 text-[10px] text-neutral-500">
         Q = scored steps per set (scenario + main MCQs). A complete exam has {CONVERSATION_TOTAL_STEPS} questions (
-        {CONVERSATION_SCENARIO_Q_COUNT} scenario + {CONVERSATION_MAIN_Q_COUNT} main).
+        {CONVERSATION_SCENARIO_Q_COUNT} scenario + {CONVERSATION_MAIN_Q_COUNT} main).         Learners open one list per round at{" "}
+        <code className="rounded bg-neutral-100 px-0.5">/practice/listening/interactive/[round]</code> — Easy/Medium
+        columns are storage slots only; every set is scored out of <strong>{CONVERSATION_FULL_SCORE}</strong> pts.
       </p>
+    </div>
+  );
+}
+
+/** Matches learner hub: one row per round question bank with total set count. */
+function ConversationRoundBankSummary({
+  matrix,
+}: {
+  matrix: ReturnType<typeof emptyConversationAggMatrix>;
+}) {
+  const rounds = Array.from({ length: CONVERSATION_ROUND_COUNT }, (_, i) => i + 1);
+  return (
+    <div className="rounded-[4px] border-2 border-ep-blue/40 bg-ep-blue/5 p-3">
+      <p className="text-xs font-black uppercase tracking-wide text-ep-blue">Learner question banks (this browser)</p>
+      <p className="mt-1 text-[10px] text-neutral-600">
+        Each round is a single bank URL — no extra &quot;difficulty&quot; step before the set list.
+      </p>
+      <div className="mt-2 overflow-x-auto">
+        <table className="w-full min-w-[520px] border-collapse text-left text-[11px]">
+          <thead>
+            <tr className="bg-white">
+              <th className="border border-black px-2 py-1.5 font-black">Round</th>
+              <th className="border border-black px-2 py-1.5 font-black">Total sets</th>
+              <th className="border border-black px-2 py-1.5 font-black">Easy-tagged</th>
+              <th className="border border-black px-2 py-1.5 font-black">Medium-tagged</th>
+              <th className="border border-black px-2 py-1.5 font-black">Learner path</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rounds.map((r) => {
+              const ez = matrix[r]?.easy.exams ?? 0;
+              const md = matrix[r]?.medium.exams ?? 0;
+              const tot = ez + md;
+              return (
+                <tr key={r} className="bg-white">
+                  <td className="border border-black px-2 py-1.5 font-bold">R{r}</td>
+                  <td className="border border-black px-2 py-1.5 font-bold text-neutral-900">{tot}</td>
+                  <td className="border border-black px-2 py-1.5 ep-stat text-neutral-800">{ez}</td>
+                  <td className="border border-black px-2 py-1.5 ep-stat text-neutral-800">{md}</td>
+                  <td className="border border-black px-2 py-1.5 ep-stat text-neutral-700">
+                    <code className="text-[10px]">/practice/listening/interactive/{r}</code>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -105,7 +155,7 @@ export function AdminConversationPaste() {
     useState<ConversationDifficulty>("easy");
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [totalExams, setTotalExams] = useState(0);
-  const [byDifficulty, setByDifficulty] = useState({ easy: 0, medium: 0, hard: 0 });
+  const [byDifficulty, setByDifficulty] = useState({ easy: 0, medium: 0 });
   const [conversationImportBatches, setConversationImportBatches] = useState(0);
   const [previewExam, setPreviewExam] = useState<ConversationExam | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -132,7 +182,7 @@ export function AdminConversationPaste() {
   const exams = getAllConversationExams();
   const bankAggMatrix = useMemo(
     () => summarizeStoredExamsIntoAggMatrix(exams),
-    [totalExams, byDifficulty.easy, byDifficulty.medium, byDifficulty.hard, conversationImportBatches],
+    [totalExams, byDifficulty.easy, byDifficulty.medium, conversationImportBatches],
   );
 
   const pastePreview = useMemo(() => {
@@ -167,7 +217,6 @@ export function AdminConversationPaste() {
     totalExams,
     byDifficulty.easy,
     byDifficulty.medium,
-    byDifficulty.hard,
   ]);
 
   useEffect(() => {
@@ -177,7 +226,6 @@ export function AdminConversationPaste() {
       setByDifficulty({
         easy: all.filter((e) => e.difficulty === "easy").length,
         medium: all.filter((e) => e.difficulty === "medium").length,
-        hard: all.filter((e) => e.difficulty === "hard").length,
       });
       setConversationImportBatches(
         loadAdminUploadLog().filter((e) => e.examKind === "conversation").length,
@@ -201,7 +249,8 @@ export function AdminConversationPaste() {
     };
   }, [message, selectedRound, selectedSet, selectedDifficulty]);
 
-  const distinctManageSets = [...new Set(exams.map((e) => e.setNumber))].sort((a, b) => a - b);
+  const examsForManageSetPicker = manageRound > 0 ? exams.filter((e) => (e.round ?? 1) === manageRound) : exams;
+  const distinctManageSets = [...new Set(examsForManageSetPicker.map((e) => e.setNumber))].sort((a, b) => a - b);
   const lineRows = exams.flatMap((exam) => {
     const scenarioLine = {
       id: `${exam.id}::scenario`,
@@ -509,7 +558,7 @@ export function AdminConversationPaste() {
   };
 
   return (
-    <BrutalPanel title="Interactive conversation — JSON upload">
+    <BrutalPanel title="Interactive conversation — JSON (5 round banks)">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -540,26 +589,32 @@ export function AdminConversationPaste() {
       {tab === "upload" ? (
         <>
       <p className="mb-2 text-sm text-neutral-600">
-        Choose round, <strong>default</strong> difficulty, and the first set number. Paste or upload a JSON array.
-        If each object includes <code className="ep-stat text-xs">&quot;difficulty&quot;</code>, that value wins — the
-        dropdown is ignored for that row. Use <code className="ep-stat text-xs">&quot;medium&quot;</code> in JSON for
-        Medium, or remove <code className="ep-stat text-xs">difficulty</code> from objects to follow the dropdown.
+        Learners open <strong>Rounds 1–{CONVERSATION_ROUND_COUNT}</strong> as separate{" "}
+        <strong>question banks</strong> (one URL per round, no extra level picker). Put each exam in the right bank with{" "}
+        <code className="ep-stat text-xs">&quot;round&quot;: 1</code>…<code className="ep-stat text-xs">{CONVERSATION_ROUND_COUNT}</code> in
+        JSON, or use the <strong>Round</strong> selector below for rows that omit <code className="ep-stat text-xs">round</code>.
+        <code className="ep-stat text-xs">&quot;difficulty&quot;</code> chooses the <strong>bank slot</strong> (easy vs
+        medium array). It does <strong>not</strong> change points — full score is always{" "}
+        <strong>{CONVERSATION_FULL_SCORE}</strong> per set. Per-row <code className="ep-stat text-xs">difficulty</code>{" "}
+        overrides the default slot dropdown; former <code className="ep-stat text-xs">&quot;hard&quot;</code> imports as
+        Medium.
       </p>
       <p className="ep-stat mb-3 text-xs text-neutral-500">
-        Exams in browser: <strong>{totalExams}</strong> (easy {byDifficulty.easy} · medium {byDifficulty.medium} · hard{" "}
-        {byDifficulty.hard}) · Import batches logged: <strong>{conversationImportBatches}</strong> · Preview slot: round{" "}
-        {selectedRound} / {selectedDifficulty} / set {selectedSet}
+        Exams in browser: <strong>{totalExams}</strong> (easy-tagged {byDifficulty.easy} · medium-tagged{" "}
+        {byDifficulty.medium}) · Import batches: <strong>{conversationImportBatches}</strong> · Slot preview (defaults
+        for rows without round/set/difficulty): round {selectedRound} · tag {selectedDifficulty} · set {selectedSet}
       </p>
-      <div className="mb-4">
+      <div className="mb-4 space-y-3">
+        <ConversationRoundBankSummary matrix={bankAggMatrix} />
         <ConversationAggTable
-          title="Uploaded bank — sets & questions by round / difficulty"
-          subtitle="Each cell: number of conversation sets and total scored MCQ steps in this browser."
+          title="Uploaded bank — detail by round and tag"
+          subtitle="Same data as above: set counts and total scored MCQ steps per cell."
           matrix={bankAggMatrix}
         />
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <label className="text-xs font-bold uppercase tracking-wide text-neutral-700">
-          Round
+          Round (question bank)
           <select
             value={selectedRound}
             onChange={(e) => setSelectedRound(Number(e.target.value))}
@@ -567,7 +622,7 @@ export function AdminConversationPaste() {
           >
             {Array.from({ length: CONVERSATION_ROUND_COUNT }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
-                Round {n}
+                {`Round ${n} → /practice/listening/interactive/${n}`}
               </option>
             ))}
           </select>
@@ -586,15 +641,15 @@ export function AdminConversationPaste() {
           />
         </label>
         <label className="text-xs font-bold uppercase tracking-wide text-neutral-700">
-          Default difficulty (if JSON omits it)
+          Default bank slot (if JSON omits difficulty)
           <select
             value={selectedDifficulty}
             onChange={(e) => setSelectedDifficulty(e.target.value as ConversationDifficulty)}
             className="mt-1 w-full border-2 border-black bg-white px-2 py-2 text-sm font-bold"
           >
-            {DIFFICULTIES.map((d) => (
+            {CONVERSATION_DIFFICULTIES.map((d) => (
               <option key={d} value={d}>
-                {d}
+                {d} · full score {CONVERSATION_FULL_SCORE} pts
               </option>
             ))}
           </select>
@@ -620,7 +675,7 @@ export function AdminConversationPaste() {
         {CONVERSATION_MAIN_Q_COUNT} <code className="ep-stat text-xs">mainQuestions</code> (each with{" "}
         <code className="ep-stat text-xs">transcript</code>). <code className="ep-stat text-xs">id</code> is optional
         (auto). Per-row <code className="ep-stat text-xs">difficulty</code> / <code className="ep-stat text-xs">round</code>{" "}
-        in JSON override the selectors when present.
+        in JSON override the upload selectors when present (round <strong>1–{CONVERSATION_ROUND_COUNT}</strong>).
       </p>
       <div className="mb-3 rounded-[4px] border-2 border-dashed border-neutral-500 bg-neutral-100/90 p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -654,7 +709,7 @@ export function AdminConversationPaste() {
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={10}
-        placeholder='[ { "id": "conv_easy_01", "title": "…", "difficulty": "easy", "scenario": "…", "highlightedWords": [ … ], "scenarioQuestions": [ … ], "mainQuestions": [ { "transcript": "…", … } ] } ]'
+        placeholder='[ { "title": "…", "round": 1, "difficulty": "easy", "setNumber": 1, "scenario": "…", "highlightedWords": [ … ], "scenarioQuestions": [ … ], "mainQuestions": [ { "transcript": "…", … } ] } ]'
         className="w-full border-2 border-black bg-neutral-50 p-3 ep-stat text-xs"
         spellCheck={false}
       />
@@ -670,15 +725,15 @@ export function AdminConversationPaste() {
       {pastePreview.kind === "ok" ? (
         <div className="mt-3">
           <ConversationAggTable
-            title={`This paste — ${pastePreview.rowCount} exam row(s) (target slots after defaults)`}
-            subtitle="Per-cell counts follow round/difficulty from JSON (or your selectors) and next free set numbers. Q counts use arrays in JSON when present; otherwise 8 per row."
+            title={`This paste — ${pastePreview.rowCount} exam row(s) after slot defaults`}
+            subtitle={`Cells use each row's round + tag from JSON, or your Round / default tag / start set # above. Q counts use arrays when present; otherwise ${CONVERSATION_TOTAL_STEPS} per row.`}
             matrix={pastePreview.matrix}
           />
           {(() => {
             const m = pastePreview.matrix[selectedRound];
             if (!m) return null;
             const parts: string[] = [];
-            for (const d of DIFFICULTIES) {
+            for (const d of CONVERSATION_DIFFICULTIES) {
               const n = m[d].exams;
               if (n > 0) parts.push(`${d} ×${n}`);
             }
@@ -687,18 +742,17 @@ export function AdminConversationPaste() {
             return (
               <>
                 <p className="mt-2 text-sm font-bold text-neutral-900">
-                  Import destination (Round {selectedRound}):{" "}
-                  {parts.length > 0 ? parts.join(" · ") : "—"}
+                  Paste lands in bank <strong>Round {selectedRound}</strong> (learners:{" "}
+                  <code className="ep-stat text-xs">/practice/listening/interactive/{selectedRound}</code>
+                  ) — {parts.length > 0 ? parts.join(" · ") : "no sets in this paste"}
                 </p>
                 {mismatch ? (
                   <p className="mt-2 rounded-[4px] border-2 border-amber-600 bg-amber-50 p-3 text-sm font-bold text-amber-950">
-                    Your dropdown is set to <strong>{selectedDifficulty}</strong>, but this paste does not add any
-                    sets under {selectedDifficulty}. Your JSON probably has{" "}
-                    <code className="ep-stat text-xs">&quot;difficulty&quot;: &quot;easy&quot;</code> on each row —
-                    learners will see new content under <strong>Easy</strong>, not Medium/Hard. To use Medium: change
-                    every row to{" "}
-                    <code className="ep-stat text-xs">&quot;difficulty&quot;: &quot;medium&quot;</code>, or remove the
-                    difficulty field so the dropdown above applies.
+                    Default tag is <strong>{selectedDifficulty}</strong>, but this paste adds no{" "}
+                    <strong>{selectedDifficulty}</strong>-tagged sets. Your JSON likely uses the other tag (e.g.{" "}
+                    <code className="ep-stat text-xs">&quot;difficulty&quot;: &quot;easy&quot;</code> on every row).
+                    Change rows to <code className="ep-stat text-xs">&quot;difficulty&quot;: &quot;medium&quot;</code>{" "}
+                    or clear <code className="ep-stat text-xs">difficulty</code> so the default tag dropdown applies.
                   </p>
                 ) : null}
               </>
@@ -721,7 +775,7 @@ export function AdminConversationPaste() {
         </p>
         {!previewExam ? (
           <p className="mt-2 text-sm text-neutral-600">
-            No exam yet for round {selectedRound}, {selectedDifficulty}, set {selectedSet}.
+            No exam yet at round {selectedRound}, tag {selectedDifficulty}, set {selectedSet} (slot preview only).
           </p>
         ) : (
           <div className="mt-2 space-y-2 rounded-[4px] border border-black bg-white px-3 py-2 text-sm">
@@ -738,7 +792,8 @@ export function AdminConversationPaste() {
         <div className="space-y-3">
           <p className="text-sm text-neutral-600">
             Deepgram, Inworld, and Gemini use a small parallel pool with retries. ElevenLabs runs one request at a time.
-            Learners hear saved clips first; missing lines use API then browser voice.
+            Learners hear saved clips first; missing lines use API then browser voice. Use <strong>Round</strong> and{" "}
+            <strong>Set</strong> below to scope lines across the five round banks.
           </p>
           <label className="block text-xs font-bold uppercase tracking-wide text-neutral-700">
             TTS provider
@@ -772,7 +827,7 @@ export function AdminConversationPaste() {
               onClick={() => void runGenerate("current-round")}
               className="border-2 border-black bg-white px-3 py-2 text-xs font-black uppercase disabled:opacity-50"
             >
-              Generate audio for current set / round only
+              Generate audio (filters: round / set below)
             </button>
             <button
               type="button"

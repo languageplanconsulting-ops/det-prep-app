@@ -29,7 +29,8 @@ export function mapConversationDifficulty(raw: string): ConversationDifficulty |
   const s = raw.trim().toLowerCase();
   if (s === "easy" || s === "foundational") return "easy";
   if (s === "medium" || s === "intermediate") return "medium";
-  if (s === "hard" || s === "advanced") return "hard";
+  /** Former "hard" uploads are stored as Medium so scoring stays on the two supported tiers. */
+  if (s === "hard" || s === "advanced") return "medium";
   return null;
 }
 
@@ -141,7 +142,7 @@ export function parseConversationBankJson(text: string): ConversationExam[] {
   }
 
   const out: ConversationExam[] = [];
-  const counters: Record<ConversationDifficulty, number> = { easy: 0, medium: 0, hard: 0 };
+  const counters: Record<"easy" | "medium", number> = { easy: 0, medium: 0 };
 
   parsed.forEach((raw, idx) => {
     if (!isRecord(raw)) throw new Error(`Row ${idx + 1}: must be an object`);
@@ -185,8 +186,9 @@ export function parseConversationBankJson(text: string): ConversationExam[] {
       setNumber = parseSetNumberFromId(idStr);
     }
     if (setNumber == null) {
-      counters[difficulty] += 1;
-      setNumber = counters[difficulty];
+      const tier: "easy" | "medium" = difficulty === "easy" ? "easy" : "medium";
+      counters[tier] += 1;
+      setNumber = counters[tier];
     }
     if (!Number.isInteger(setNumber) || setNumber < 1) {
       throw new Error(`Row ${idx + 1}: set number must be a positive integer`);

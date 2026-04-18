@@ -13,6 +13,7 @@ import { DialogueSummaryAnnotatedResponse } from "@/components/dialogue-summary/
 import { DIALOGUE_SUMMARY_RUBRIC_WEIGHTS } from "@/lib/dialogue-summary-constants";
 import { GRADING_BADGE_OFFLINE, GRADING_BADGE_PRIMARY } from "@/lib/report-branding";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
+import { GrammarFixesPanel, type GrammarFixItem } from "@/components/reports/GrammarFixesPanel";
 import type { DialogueSummaryAttemptReport, DialogueSummaryCriterionReport } from "@/types/dialogue-summary";
 import type { SuggestedNotebookPremade } from "@/components/writing/AddToNotebookButton";
 
@@ -82,6 +83,17 @@ export function DialogueSummaryReportView({
   const router = useRouter();
 
   const scorePct = Math.min(100, Math.round((report.score160 / 160) * 100));
+  const grammarFixes: GrammarFixItem[] = report.highlights
+    .map((h, idx) => ({
+      id: `g-${idx}`,
+      wrong: h.type === "grammar" && !h.isPositive ? report.summary.slice(h.start, h.end).trim() : "",
+      betterEn: h.type === "grammar" && !h.isPositive ? h.fixEn?.trim() || "" : "",
+      betterTh: h.type === "grammar" && !h.isPositive ? h.fixTh?.trim() || "" : "",
+      noteEn: h.noteEn,
+      noteTh: h.noteTh,
+    }))
+    .filter((x) => x.wrong && (x.betterEn || x.betterTh))
+    .slice(0, 5);
 
   return (
     <div className="relative mx-auto max-w-4xl space-y-8 pb-8">
@@ -232,6 +244,13 @@ export function DialogueSummaryReportView({
           ))}
         </ul>
       </BrutalPanel>
+      <GrammarFixesPanel
+        items={grammarFixes}
+        attemptId={report.attemptId}
+        entrySource="dialogue-summary"
+        titleEn="Grammar fixes (dialogue summary)"
+        titleTh="จุดแก้ไวยากรณ์ (สรุปบทสนทนา)"
+      />
 
       <BrutalPanel eyebrow="Your writing" title="Annotated feedback">
         <DialogueSummaryAnnotatedResponse summary={report.summary} highlights={report.highlights} />

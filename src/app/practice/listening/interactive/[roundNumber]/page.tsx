@@ -14,7 +14,7 @@ export default async function InteractiveConversationRoundPage({
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <main className="mx-auto max-w-6xl px-4 py-8">
       <ConversationRoundLevelPicker round={round} />
     </main>
   );

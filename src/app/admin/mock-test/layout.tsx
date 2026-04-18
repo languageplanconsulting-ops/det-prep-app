@@ -1,9 +1,11 @@
 import Link from "next/link";
 
 const links = [
+  { href: "/admin/mock-test/builder", label: "Builder" },
   { href: "/admin/mock-test/upload", label: "Upload" },
   { href: "/admin/mock-test/questions", label: "Question bank" },
   { href: "/admin/mock-test/stats", label: "Statistics" },
+  { href: "/admin/api-usage", label: "API costs (฿)" },
 ] as const;
 
 export default function AdminMockTestLayout({

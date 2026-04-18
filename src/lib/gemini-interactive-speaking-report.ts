@@ -1,5 +1,6 @@
 import { INTERACTIVE_SPEAKING_TURN_COUNT } from "@/lib/interactive-speaking-constants";
 import { findTextSpan } from "@/lib/find-text-span";
+import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
@@ -107,6 +108,7 @@ function asArr(v: unknown): unknown[] {
 export async function generateInteractiveSpeakingReportWithGemini(params: {
   apiKey: string;
   anthropicApiKey?: string;
+  openAiApiKey?: string;
   model?: string;
   attemptId: string;
   scenarioId: string;
@@ -114,7 +116,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
   scenarioTitleTh: string;
   prepMinutes: number;
   turns: TurnInput[];
-}): Promise<InteractiveSpeakingAttemptReport> {
+}): Promise<{ report: InteractiveSpeakingAttemptReport; usage: GradingLlmUsage | null }> {
   const { apiKey, attemptId, scenarioId, scenarioTitleEn, scenarioTitleTh, prepMinutes, turns } =
     params;
 
@@ -179,9 +181,13 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
     2,
   );
 
-  const text = await generateGradingJsonCompletion({
+  const { text, usage } = await generateGradingJsonCompletion({
     model: modelName,
-    keys: { geminiApiKey: apiKey, anthropicApiKey: params.anthropicApiKey },
+    keys: {
+      geminiApiKey: apiKey,
+      anthropicApiKey: params.anthropicApiKey,
+      openAiApiKey: params.openAiApiKey,
+    },
     systemInstruction: buildSystemInstruction(),
     userPayload,
     temperature: 0.35,
@@ -387,7 +393,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
   const combinedPunctuated = turnRecords.map((r) => r.punctuatedTranscript ?? r.transcript).join("\n\n");
   const wc = combinedPunctuated.split(/\s+/).filter(Boolean).length;
 
-  return {
+  const report: InteractiveSpeakingAttemptReport = {
     kind: "interactive-speaking",
     scenarioId,
     scenarioTitleEn,
@@ -416,4 +422,5 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
     keyLearningQuotes: keyLearningOut,
     ...(vocabularyUpgradeSuggestions.length > 0 ? { vocabularyUpgradeSuggestions } : {}),
   };
+  return { report, usage };
 }

@@ -1,8 +1,10 @@
 import { parseConversationBankJson } from "@/lib/conversation-admin";
 import {
   CONVERSATION_DIFFICULTIES,
+  CONVERSATION_FULL_SCORE,
   CONVERSATION_MAX_SCORE,
   CONVERSATION_ROUND_COUNT,
+  CONVERSATION_TOTAL_STEPS,
 } from "@/lib/conversation-constants";
 import { conversationScore, countConversationCorrect } from "@/lib/conversation-scoring";
 import { buildDefaultConversationBank } from "@/lib/conversation-default-data";
@@ -201,9 +203,93 @@ function parseStoredBank(raw: string | null): ConversationBankByRound {
   }
 }
 
+/**
+ * Moves every exam out of `hard` into `medium` (new set numbers when needed), clears `hard`,
+ * and rewires learner progress keys. Persists when anything changed.
+ */
+function migrateConversationHardTierAway(bank: ConversationBankByRound): boolean {
+  const renames: { from: string; to: string }[] = [];
+  let bankChanged = false;
+
+  for (let r = 1; r <= CONVERSATION_ROUND_COUNT; r++) {
+    const rb = bank[r];
+    if (!rb || rb.hard.length === 0) continue;
+    const usedMedium = new Set(rb.medium.map((e) => e.setNumber));
+    let maxMedium = rb.medium.reduce((m, e) => Math.max(m, e.setNumber), 0);
+
+    const sortedHard = [...rb.hard].sort((a, b) => a.setNumber - b.setNumber);
+    for (const exam of sortedHard) {
+      const oldSet = exam.setNumber;
+      let newSet = oldSet;
+      if (usedMedium.has(newSet)) {
+        newSet = maxMedium + 1;
+        while (usedMedium.has(newSet)) newSet += 1;
+      }
+      usedMedium.add(newSet);
+      maxMedium = Math.max(maxMedium, newSet);
+
+      rb.medium.push({
+        ...exam,
+        difficulty: "medium",
+        setNumber: newSet,
+      });
+      renames.push({ from: progressKey(r, "hard", oldSet), to: progressKey(r, "medium", newSet) });
+    }
+    rb.hard = [];
+    rb.medium.sort((a, b) => a.setNumber - b.setNumber);
+    bankChanged = true;
+  }
+
+  if (!bankChanged) return false;
+
+  const m = loadConversationProgressMap();
+  let progChanged = false;
+  for (const { from, to } of renames) {
+    const old = m[from];
+    if (!old) continue;
+    delete m[from];
+    progChanged = true;
+    const existing = m[to];
+    if (!existing) {
+      m[to] = old;
+      continue;
+    }
+    const newer = existing.updatedAt >= old.updatedAt ? existing : old;
+    const older = existing.updatedAt >= old.updatedAt ? old : existing;
+    m[to] = {
+      bestScore: Math.max(existing.bestScore, old.bestScore),
+      maxScore: newer.maxScore,
+      lastItemOk:
+        newer.lastItemOk && newer.lastItemOk.length === CONVERSATION_TOTAL_STEPS
+          ? [...newer.lastItemOk]
+          : older.lastItemOk && older.lastItemOk.length === CONVERSATION_TOTAL_STEPS
+            ? [...older.lastItemOk]
+            : newer.lastItemOk
+              ? [...newer.lastItemOk]
+              : [...(older.lastItemOk ?? [])],
+      updatedAt: newer.updatedAt,
+    };
+  }
+  for (const k of Object.keys(m)) {
+    if (/^\d+:hard:\d+$/.test(k)) {
+      delete m[k];
+      progChanged = true;
+    }
+  }
+  if (progChanged) {
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(m));
+    emitConversationUpdate();
+  }
+  return true;
+}
+
 function loadBankFromLocalStorage(): ConversationBankByRound {
   if (typeof window === "undefined") return cloneBank(buildDefaultConversationBank());
-  return parseStoredBank(localStorage.getItem(BANK_KEY) ?? localStorage.getItem(LEGACY_BANK_KEY));
+  const bank = parseStoredBank(localStorage.getItem(BANK_KEY) ?? localStorage.getItem(LEGACY_BANK_KEY));
+  if (migrateConversationHardTierAway(bank)) {
+    persistConversationBank(bank);
+  }
+  return bank;
 }
 
 export function loadConversationBank(): ConversationBankByRound {
@@ -382,12 +468,11 @@ export function removeConversationExamsFromAdmin(
   persistConversationBank(bank);
 }
 
-export function conversationMaxForDifficulty(d: ConversationDifficulty): number {
-  return CONVERSATION_MAX_SCORE[d];
+export function conversationMaxForDifficulty(_d: ConversationDifficulty): number {
+  return CONVERSATION_FULL_SCORE;
 }
 
-export function conversationMaxForExam(exam: { difficulty: ConversationDifficulty; maxScore?: number }): number {
-  const m = exam.maxScore;
-  if (typeof m === "number" && Number.isFinite(m) && m > 0) return m;
-  return CONVERSATION_MAX_SCORE[exam.difficulty];
+/** Full score is always CONVERSATION_FULL_SCORE; legacy `exam.maxScore` / difficulty tiers are ignored. */
+export function conversationMaxForExam(_exam: { difficulty: ConversationDifficulty; maxScore?: number }): number {
+  return CONVERSATION_FULL_SCORE;
 }

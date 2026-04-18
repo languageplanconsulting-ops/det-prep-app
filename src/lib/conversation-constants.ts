@@ -1,15 +1,18 @@
 import type { ConversationDifficulty } from "@/types/conversation";
 
-/** Dashboard: show only Round 1, then difficulty, then sets. */
-export const CONVERSATION_ROUND_COUNT = 1;
+/** Dashboard: Rounds 1…N each open straight to that round’s question bank (no difficulty hub). */
+export const CONVERSATION_ROUND_COUNT = 5;
 
 /** Built-in default bank seeds this many sets per difficulty; admins may add unlimited additional sets. */
 export const CONVERSATION_SET_COUNT = 5;
 
+/** Every interactive conversation set uses the same full score (no tier-based caps). */
+export const CONVERSATION_FULL_SCORE = 160;
+
 export const CONVERSATION_MAX_SCORE: Record<ConversationDifficulty, number> = {
-  easy: 85,
-  medium: 125,
-  hard: 160,
+  easy: CONVERSATION_FULL_SCORE,
+  medium: CONVERSATION_FULL_SCORE,
+  hard: CONVERSATION_FULL_SCORE,
 };
 
 export const CONVERSATION_DIFFICULTY_LABEL: Record<ConversationDifficulty, string> = {
@@ -18,7 +21,8 @@ export const CONVERSATION_DIFFICULTY_LABEL: Record<ConversationDifficulty, strin
   hard: "Hard",
 };
 
-export const CONVERSATION_DIFFICULTIES: ConversationDifficulty[] = ["easy", "medium", "hard"];
+/** Learner practice + routing: Easy and Medium only (Hard tier removed; legacy hard sets migrate to Medium). */
+export const CONVERSATION_DIFFICULTIES = ["easy", "medium"] as ConversationDifficulty[];
 
 export const CONVERSATION_SCENARIO_Q_COUNT = 3;
 export const CONVERSATION_MAIN_Q_COUNT = 5;

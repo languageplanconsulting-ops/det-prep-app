@@ -1,4 +1,5 @@
 import { findTextSpan } from "@/lib/find-text-span";
+import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import type {
@@ -280,13 +281,15 @@ export async function generateWritingReportWithGemini(params: {
   apiKey: string;
   /** Required when `model` is a Claude id. */
   anthropicApiKey?: string;
+  /** Required when `model` is an OpenAI id. */
+  openAiApiKey?: string;
   model?: string;
   attemptId: string;
   topic: WritingTopic;
   essay: string;
   followUpAnswers?: string[];
   prepMinutes: number;
-}): Promise<WritingAttemptReport> {
+}): Promise<{ report: WritingAttemptReport; usage: GradingLlmUsage | null }> {
   const { apiKey, attemptId, topic, essay, prepMinutes } = params;
   const followUps = topic.followUps ?? [];
   const followUpRaw =
@@ -296,11 +299,12 @@ export async function generateWritingReportWithGemini(params: {
   const modelName =
     params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const text = await generateGradingJsonCompletion({
+  const { text, usage } = await generateGradingJsonCompletion({
     model: modelName,
     keys: {
       geminiApiKey: apiKey,
       anthropicApiKey: params.anthropicApiKey,
+      openAiApiKey: params.openAiApiKey,
     },
     systemInstruction: buildSystemInstruction(),
     userPayload: buildUserPayload(topic, essay, followUpRaw, prepMinutes),
@@ -477,7 +481,7 @@ export async function generateWritingReportWithGemini(params: {
   const hasSectionHighlights =
     mainHighlights.length > 0 || followUpHighlights.some((a) => a.length > 0);
 
-  return {
+  const report: WritingAttemptReport = {
     gradingSource: "gemini" as const,
     attemptId,
     topicId: topic.id,
@@ -518,4 +522,5 @@ export async function generateWritingReportWithGemini(params: {
     ...(boost ? { taskPersonalExperienceBoostApplied: true } : {}),
     ...(vocabularyUpgrades.length > 0 ? { vocabularyUpgradeSuggestions: vocabularyUpgrades } : {}),
   };
+  return { report, usage };
 }

@@ -42,7 +42,8 @@ export function ConversationSessionClient({
   setNumber: number;
   startWithRedeem?: boolean;
 }) {
-  const hubHref = `/practice/listening/interactive/${round}/${difficulty}`;
+  const roundSetsHref = `/practice/listening/interactive/${round}`;
+  const restartHref = `/practice/listening/interactive/${round}/${difficulty}/${setNumber}`;
   const maxScore = conversationMaxForExam(exam);
 
   const [phase, setPhase] = useState<"session" | "report">("session");
@@ -333,20 +334,20 @@ export function ConversationSessionClient({
     return (
       <div className="ep-luxury-option-in space-y-6">
         <Link
-          href={hubHref}
+          href={roundSetsHref}
           onClick={() => playBlinkBeep()}
           className="ep-link-luxury inline-block text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-4 hover:underline"
         >
-          ← Hub
+          ← All sets
         </Link>
         <ConversationReportPanel
           exam={exam}
-          difficulty={difficulty}
           scenarioPicks={scenarioPicks}
           mainPicks={mainPicks}
           itemOk={itemOkSnapshot}
           onRedeemNow={startRedeem}
-          hubHref={hubHref}
+          backHref={roundSetsHref}
+          restartHref={restartHref}
         />
       </div>
     );
@@ -356,11 +357,11 @@ export function ConversationSessionClient({
     <div className="flex min-h-[min(100vh,960px)] flex-col">
       <div className="flex flex-wrap items-start justify-between gap-3 pb-4">
         <Link
-          href={hubHref}
+          href={roundSetsHref}
           onClick={() => playBlinkBeep()}
           className="ep-link-luxury text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-4 hover:underline"
         >
-          ← Exam bank
+          ← All sets
         </Link>
         <p className="max-w-[16rem] text-right text-xs font-bold text-neutral-600">{exam.title}</p>
       </div>

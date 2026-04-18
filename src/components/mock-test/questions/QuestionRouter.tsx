@@ -23,6 +23,7 @@ type Props = {
   phaseProgress?: number;
   submitting?: boolean;
   onDictationAudioFinished?: () => void;
+  onSpeakPhotoReady?: () => void;
   onSubmit: (answer: unknown) => void;
 };
 
@@ -31,6 +32,7 @@ export function QuestionRouter({
   phaseProgress = 0,
   submitting = false,
   onDictationAudioFinished,
+  onSpeakPhotoReady,
   onSubmit,
 }: Props) {
   const c = question.content as Record<string, unknown>;
@@ -57,6 +59,7 @@ export function QuestionRouter({
       return (
         <RealEnglishWordRoundsMock
           content={c}
+          submitting={submitting}
           onSubmit={(payload) => onSubmit(payload)}
         />
       );
@@ -104,7 +107,12 @@ export function QuestionRouter({
       );
     case "speak_about_photo":
       return (
-        <SpeakAboutPhotoMock content={c} submitting={submitting} onSubmit={(payload) => onSubmit(payload)} />
+        <SpeakAboutPhotoMock
+          content={c}
+          submitting={submitting}
+          onImageReady={onSpeakPhotoReady}
+          onSubmit={(payload) => onSubmit(payload)}
+        />
       );
     case "interactive_speaking":
       return (
@@ -137,6 +145,7 @@ export function QuestionRouter({
         return (
           <ConversationSummaryFromInteractiveMock
             content={c}
+            submitting={submitting}
             onSubmit={(payload) => onSubmit(payload)}
           />
         );
@@ -145,6 +154,7 @@ export function QuestionRouter({
         return (
           <ConversationSummaryMock
             content={c}
+            submitting={submitting}
             onSubmit={(payload) => onSubmit(payload)}
           />
         );

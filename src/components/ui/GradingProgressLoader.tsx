@@ -14,11 +14,13 @@ function easeProgress(elapsedSec: number): number {
 type GradingProgressLoaderProps = {
   eyebrow?: string;
   variant?: "default" | "premium";
+  placement?: "fixed" | "inline";
 };
 
 export function GradingProgressLoader({
   eyebrow,
   variant = "default",
+  placement = "fixed",
 }: GradingProgressLoaderProps) {
   const [msgIndex, setMsgIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -43,13 +45,18 @@ export function GradingProgressLoader({
     return () => window.clearInterval(id);
   }, []);
 
+  const containerClass =
+    placement === "fixed"
+      ? premium
+        ? "fixed inset-0 z-[80] flex items-center justify-center bg-neutral-900/45 p-4 backdrop-blur-[2px]"
+        : "fixed inset-0 z-[80] flex items-center justify-center bg-neutral-900/35 p-4"
+      : premium
+        ? "mx-auto flex min-h-[70vh] w-full items-center justify-center p-4"
+        : "mx-auto flex min-h-[70vh] w-full items-center justify-center p-4";
+
   return (
     <div
-      className={
-        premium
-          ? "fixed inset-0 z-[80] flex items-center justify-center bg-neutral-900/45 p-4 backdrop-blur-[2px]"
-          : "fixed inset-0 z-[80] flex items-center justify-center bg-neutral-900/35 p-4"
-      }
+      className={containerClass}
       role="status"
       aria-live="polite"
       aria-busy="true"

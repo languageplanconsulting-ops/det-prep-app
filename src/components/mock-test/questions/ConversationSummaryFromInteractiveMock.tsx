@@ -7,9 +7,11 @@ import type { ConversationSummaryTurn } from "@/lib/mock-test/conversation-summa
 
 export function ConversationSummaryFromInteractiveMock({
   content,
+  submitting = false,
   onSubmit,
 }: {
   content: Record<string, unknown>;
+  submitting?: boolean;
   onSubmit: (payload: { text: string }) => void;
 }) {
   const turns = useMemo(
@@ -72,6 +74,7 @@ export function ConversationSummaryFromInteractiveMock({
       <textarea
         value={summary}
         onChange={(e) => setSummary(e.target.value)}
+        disabled={submitting}
         rows={8}
         className="w-full rounded-[4px] border-4 border-black bg-white p-3 text-sm"
         placeholder="Write your conversation summary..."
@@ -79,10 +82,10 @@ export function ConversationSummaryFromInteractiveMock({
       <button
         type="button"
         onClick={() => onSubmit({ text: summary.trim() })}
-        disabled={summary.trim().split(/\s+/).filter(Boolean).length < 5}
+        disabled={submitting || summary.trim().split(/\s+/).filter(Boolean).length < 5}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
       >
-        Submit summary
+        {submitting ? "Submitting..." : "Submit summary"}
       </button>
     </div>
   );

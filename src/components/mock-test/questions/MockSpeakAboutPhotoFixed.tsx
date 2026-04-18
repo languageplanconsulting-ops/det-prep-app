@@ -14,10 +14,12 @@ function countWords(text: string): number {
 export function SpeakAboutPhotoMock({
   content,
   submitting = false,
+  onImageReady,
   onSubmit,
 }: {
   content: Record<string, unknown>;
   submitting?: boolean;
+  onImageReady?: () => void;
   onSubmit: (answer: { text: string }) => void;
 }) {
   // Support multiple possible field names from different admin upload formats
@@ -39,6 +41,7 @@ export function SpeakAboutPhotoMock({
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const recRef = useRef<SpeechRecognitionInstance | null>(null);
   const listeningRef = useRef(false);
@@ -135,13 +138,40 @@ export function SpeakAboutPhotoMock({
   const wc = useMemo(() => countWords(transcript), [transcript]);
   const canSubmit = wc >= 15;
 
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [imageUrl]);
+
+  useEffect(() => {
+    if (!imageUrl) onImageReady?.();
+  }, [imageUrl, onImageReady]);
+
   return (
     <div className="space-y-4">
       {photoType ? <p className="text-xs font-black uppercase tracking-wide text-[#004AAD]">{photoType}</p> : null}
 
       {imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt="" className="max-h-64 w-full rounded-[4px] border-4 border-black object-cover" />
+        <div className="relative">
+          {!imageLoaded ? (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[4px] border-4 border-black bg-white/90">
+              <div className="flex items-center gap-2 text-sm font-black text-[#004AAD]">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#004AAD] border-t-transparent" />
+                Loading photo...
+              </div>
+            </div>
+          ) : null}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageUrl}
+            alt=""
+            onLoad={() => {
+              setImageLoaded(true);
+              onImageReady?.();
+            }}
+            onError={() => setImageLoaded(false)}
+            className="max-h-64 w-full rounded-[4px] border-4 border-black object-cover"
+          />
+        </div>
       ) : (
         <div className="rounded-[4px] border-4 border-dashed border-black bg-neutral-50 p-6 text-center text-sm font-bold text-neutral-600">
           Photo not provided / ไม่มีรูป

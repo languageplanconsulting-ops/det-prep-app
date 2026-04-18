@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   CONVERSATION_DIFFICULTY_LABEL,
-  CONVERSATION_MAX_SCORE,
+  CONVERSATION_FULL_SCORE,
   CONVERSATION_TOTAL_STEPS,
 } from "@/lib/conversation-constants";
 import { filterConversationExamsForPractice } from "@/lib/conversation-practice-filter";
@@ -83,7 +83,7 @@ export function ConversationSetList({
   const rows = filterConversationExamsForPractice(bank[round]?.[difficulty]).sort(
     (a, b) => a.setNumber - b.setNumber,
   );
-  const levelMax = CONVERSATION_MAX_SCORE[difficulty];
+  const levelMax = CONVERSATION_FULL_SCORE;
   const hubHref = "/practice/listening/interactive";
   const roundHref = `/practice/listening/interactive/${round}`;
 
@@ -110,8 +110,7 @@ export function ConversationSetList({
         </p>
         <h1 className="mt-2 text-2xl font-black tracking-tight">Sets</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Max scores follow each set (default {levelMax} pts for this level). Open with{" "}
-          <strong>REDEEM</strong> when you still have mistakes to fix.
+          Full score {levelMax} pts per set. Open with <strong>REDEEM</strong> when you still have mistakes to fix.
         </p>
       </header>
 

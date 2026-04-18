@@ -21,7 +21,7 @@ import {
 // ─── constants ────────────────────────────────────────────────────────────────
 export const MOCK_IS_TURN_COUNT = 4;
 const PREP_SECONDS = 8;
-const MAX_SPEAK_SECONDS = 45;
+const MAX_SPEAK_SECONDS = 35;
 
 // ─── TTS helper ───────────────────────────────────────────────────────────────
 async function playTtsQuestion(text: string): Promise<void> {
@@ -414,12 +414,7 @@ export function MockInteractiveSpeakingSession({
   // ── submit current turn transcript, advance ──
   const runSubmit = useCallback(async () => {
     const trimmed = transcriptRef.current.trim();
-    const wc = trimmed.split(/\s+/).filter(Boolean).length;
-    if (wc < 3) {
-      setError("Please speak or type at least a few words before continuing.");
-      setPhase("review");
-      return;
-    }
+    // Auto-advance behavior: even very short/empty answers move to next turn when time ends.
     setError(null);
 
     const cur = currentQRef.current;

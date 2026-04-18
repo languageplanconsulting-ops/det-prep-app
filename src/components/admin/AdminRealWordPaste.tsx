@@ -11,7 +11,9 @@ import {
 import { REALWORD_ROUND_NUMBERS, REALWORD_SET_COUNT } from "@/lib/realword-constants";
 import {
   countRealWordSetsInBank,
+  loadRealWordAdminOccupancy,
   loadRealWordBank,
+  loadRealWordVisibleBank,
   mergeRealWordBankFromAdmin,
 } from "@/lib/realword-storage";
 import type { RealWordDifficulty, RealWordRoundNum } from "@/types/realword";
@@ -81,6 +83,7 @@ export function AdminRealWordPaste() {
   useEffect(() => {
     setTotalBoards(countRealWordSetsInBank());
     const bank = loadRealWordBank();
+    const visible = loadRealWordVisibleBank();
     const r = selectedRound as RealWordRoundNum;
     const row = bank[r][selectedDifficulty].find((x) => x.setNumber === selectedSet);
     setPreviewWords(row?.words ?? []);
@@ -88,9 +91,9 @@ export function AdminRealWordPaste() {
     setGroupCounts(
       REALWORD_ROUND_NUMBERS.map((round) => ({
         round,
-        easy: bank[round].easy.length,
-        medium: bank[round].medium.length,
-        hard: bank[round].hard.length,
+        easy: visible[round].easy.length,
+        medium: visible[round].medium.length,
+        hard: visible[round].hard.length,
       })),
     );
   }, [message, selectedDifficulty, selectedSet, selectedRound]);
@@ -108,9 +111,9 @@ export function AdminRealWordPaste() {
     }[];
     targetSet: number;
   } => {
-    const bank = loadRealWordBank();
     const r = selectedRound as RealWordRoundNum;
-    const occupied = new Set(bank[r][selectedDifficulty].map((row) => row.setNumber));
+    const occupancy = loadRealWordAdminOccupancy();
+    const occupied = new Set(occupancy[r][selectedDifficulty]);
     let targetSet: number | null = null;
     for (let n = selectedSet; n <= REALWORD_SET_COUNT; n++) {
       if (!occupied.has(n)) {
@@ -158,9 +161,9 @@ export function AdminRealWordPaste() {
       }
 
       if (isRealWordGroupedTopicFormat(parsed)) {
-        const bank = loadRealWordBank();
         const rr = selectedRound as RealWordRoundNum;
-        const occupied = new Set(bank[rr][selectedDifficulty].map((row) => row.setNumber));
+        const occupancy = loadRealWordAdminOccupancy();
+        const occupied = new Set(occupancy[rr][selectedDifficulty]);
         const { rows: normalizedRows, assignedSetNumbers } = expandGroupedRealWordTopicsToMergeRows(
           parsed,
           selectedRound,
@@ -193,8 +196,8 @@ export function AdminRealWordPaste() {
       } else if (isFlatRowsWithSetIdPerWord(parsed)) {
         const rr = selectedRound as RealWordRoundNum;
         const rows = parsed as RealWordAdminInputRow[];
-        const bank = loadRealWordBank();
-        const occupied = new Set(bank[rr][selectedDifficulty].map((s) => s.setNumber));
+        const occupancy = loadRealWordAdminOccupancy();
+        const occupied = new Set(occupancy[rr][selectedDifficulty]);
         const ids: string[] = [];
         const byOldId = new Map<string, RealWordAdminInputRow[]>();
         for (const row of rows) {

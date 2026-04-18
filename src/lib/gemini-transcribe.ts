@@ -1,5 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+import { readGeminiUsageFromResponse } from "@/lib/gemini-usage-metadata";
+import type { GradingLlmUsage } from "@/types/grading-llm-usage";
+
 const TRANSCRIBE_PROMPT = `Verbatim transcription for a speaking test.
 
 Rules:
@@ -13,7 +16,7 @@ export async function transcribeEnglishAudioWithGemini(params: {
   audioBase64: string;
   mimeType: string;
   model?: string;
-}): Promise<string> {
+}): Promise<{ transcript: string; usage: GradingLlmUsage | null }> {
   const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
   const genAI = new GoogleGenerativeAI(params.apiKey);
   const model = genAI.getGenerativeModel({
@@ -37,5 +40,6 @@ export async function transcribeEnglishAudioWithGemini(params: {
   ]);
 
   const text = result.response.text();
-  return text.trim();
+  const usage = readGeminiUsageFromResponse(result.response, modelName);
+  return { transcript: text.trim(), usage };
 }

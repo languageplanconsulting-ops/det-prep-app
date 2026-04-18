@@ -43,6 +43,8 @@ export function MockTestStartClient() {
   const [startError, setStartError] = useState<string | null>(null);
   const [adminPreviewMode, setAdminPreviewMode] = useState(false);
   const [skipTimerMode, setSkipTimerMode] = useState(false);
+  const [previewSeparateMode, setPreviewSeparateMode] = useState(false);
+  const [previewStepIndex, setPreviewStepIndex] = useState(13);
 
   const adminCanPreview = isAdmin || previewEligible;
   const trackUsage = launchLive || adminCanPreview;
@@ -62,6 +64,11 @@ export function MockTestStartClient() {
       setSelectedSetId(selectedFromQuery);
       setAdminPreviewMode(searchParams.get("adminPreview") === "1");
       setSkipTimerMode(searchParams.get("skipTimer") === "1");
+      const separate = searchParams.get("previewSeparate") === "1";
+      setPreviewSeparateMode(separate);
+      const stepRaw = Number(searchParams.get("previewStep") ?? "13");
+      const normalizedStep = Number.isFinite(stepRaw) ? Math.max(1, Math.min(20, Math.round(stepRaw))) : 13;
+      setPreviewStepIndex(normalizedStep);
 
       const supabase = getBrowserSupabase();
       if (!supabase) {
@@ -125,6 +132,8 @@ export function MockTestStartClient() {
           },
           adminPreviewMode: adminCanPreview && adminPreviewMode,
           skipTimerMode: adminCanPreview && skipTimerMode,
+          previewSeparateMode: adminCanPreview && previewSeparateMode,
+          previewStepIndex: adminCanPreview && previewSeparateMode ? previewStepIndex : undefined,
         }),
       });
       window.clearTimeout(timeout);
@@ -341,6 +350,33 @@ export function MockTestStartClient() {
                   />
                   Skip timer mode (no countdown/rest in session)
                 </label>
+                <label className="flex items-center gap-2 text-sm font-bold">
+                  <input
+                    type="checkbox"
+                    checked={previewSeparateMode}
+                    onChange={(e) => setPreviewSeparateMode(e.target.checked)}
+                  />
+                  Preview separate step only
+                </label>
+                {previewSeparateMode ? (
+                  <div className="rounded-[4px] border-2 border-dashed border-black bg-neutral-50 px-3 py-2">
+                    <p className="text-xs font-bold text-neutral-700">Choose step (1-20)</p>
+                    <select
+                      value={previewStepIndex}
+                      onChange={(e) => setPreviewStepIndex(Number(e.target.value) || 13)}
+                      className={`${mt.border} mt-1 w-full bg-white px-2 py-1 text-sm`}
+                    >
+                      {Array.from({ length: 20 }).map((_, i) => {
+                        const step = i + 1;
+                        return (
+                          <option key={step} value={step}>
+                            Step {step}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                ) : null}
               </div>
             ) : null}
             <p className="mt-2 text-xs font-bold text-[#004AAD]">
