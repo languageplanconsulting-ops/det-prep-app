@@ -1,7 +1,8 @@
 import type { FixedSequenceTemplateStep } from "@/lib/mock-test/fixed-types";
 
 export const FIXED_MOCK_STEP_COUNT = 20;
-export const FIXED_MOCK_ESTIMATED_DURATION_LABEL = "1h to 1h 15m";
+/** Wall-clock range for the full 20-step fixed mock (steps + short rests). */
+export const FIXED_MOCK_ESTIMATED_DURATION_LABEL = "1h – 1h10";
 export const FIXED_MOCK_VIP_MONTHLY_LIMIT = 10;
 
 const REST_STEPS = new Set([5, 8, 12, 17]);

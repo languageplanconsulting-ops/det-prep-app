@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { MOCK_TEST_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
 import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
+import { countBillableMockFixedSessions, mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
 import { isMockTestAvailableNow } from "@/lib/mock-test/mock-test-availability";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
@@ -26,13 +27,6 @@ function normalizePreviewStep(raw: unknown): number {
   const n = Number(raw);
   if (!Number.isFinite(n)) return 1;
   return Math.max(1, Math.min(FIXED_MOCK_STEP_COUNT, Math.round(n)));
-}
-
-function monthStartIso(): string {
-  const d = new Date();
-  d.setDate(1);
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString();
 }
 
 function normalizeTier(raw: unknown): Tier {
@@ -144,18 +138,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Mock test is not available yet" }, { status: 403 });
   }
 
-  const { count } = await supabase
-    .from("mock_fixed_results")
-    .select("*", { head: true, count: "exact" })
+  const monthStart = mockFixedMonthStartIso();
+  const { data: sessionRows } = await supabase
+    .from("mock_fixed_sessions")
+    .select("targets")
     .eq("user_id", user.id)
-    .gte("created_at", monthStartIso());
+    .gte("started_at", monthStart);
+  const billableUsed = countBillableMockFixedSessions(sessionRows);
 
   const tier = normalizeTier(me?.tier);
   const monthlyLimit = MOCK_TEST_MONTHLY_LIMIT[tier];
   if (!isAdmin && (!Number.isFinite(monthlyLimit) || monthlyLimit <= 0)) {
     return NextResponse.json({ error: "Your plan does not include mock tests" }, { status: 403 });
   }
-  if (!isAdmin && Number.isFinite(monthlyLimit) && (count ?? 0) >= monthlyLimit) {
+  if (!isAdmin && Number.isFinite(monthlyLimit) && billableUsed >= monthlyLimit) {
     return NextResponse.json(
       { error: `Monthly mock test limit reached for ${tier} plan` },
       { status: 403 },
@@ -169,9 +165,9 @@ export async function POST(req: Request) {
       set_id: body.setId,
       status: "in_progress",
       current_step: previewSeparateMode ? previewStepIndex : 1,
-      targets: {
-        ...(body.targets ?? {}),
-        monthlyUsed: count ?? 0,
+        targets: {
+          ...(body.targets ?? {}),
+          monthlyUsed: billableUsed,
         adminPreviewMode,
         skipTimerMode,
         singleStepPreview: previewSeparateMode,
