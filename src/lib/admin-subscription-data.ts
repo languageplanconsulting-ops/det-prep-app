@@ -5,7 +5,7 @@ import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
 export const TIER_MONTHLY_THB: Record<string, number> = {
   free: 0,
-  basic: 299,
+  basic: 399,
   premium: 699,
   vip: 999,
 };

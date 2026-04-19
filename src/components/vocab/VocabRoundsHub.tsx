@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
+import { VocabExamIntroModal } from "@/components/vocab/VocabExamIntroModal";
 import { VocabularyBuilderAvailabilityBanner } from "@/components/vocab/VocabularyBuilderAvailabilityBanner";
 import { getVocabRoundStats, loadVocabVisibleBank } from "@/lib/vocab-storage";
 import type { VocabRoundNum } from "@/types/vocab";
@@ -34,6 +35,7 @@ export function VocabRoundsHub() {
 
   return (
     <div className="space-y-8">
+      <VocabExamIntroModal />
       <header className="ep-brutal-reading rounded-sm bg-white p-6">
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">
           Vocabulary in context

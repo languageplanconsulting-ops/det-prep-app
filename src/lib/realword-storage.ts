@@ -80,6 +80,27 @@ function isRound(n: number): n is RealWordRoundNum {
 
 export type RealWordAdminOccupancy = Record<RealWordRoundNum, Record<RealWordDifficulty, number[]>>;
 
+/** Round 1 shipped defaults use ids like `RW_E_01` (not admin uploads like `RW_R1_EASY_S01_TOPIC_…`). */
+const REALWORD_BUILTIN_ROUND1_SET_ID = /^RW_[EMH]_\d{2}$/;
+
+/** True for seeded placeholder boards learners should not see until replaced by an admin upload. */
+export function isRealWordBuiltInRound1Placeholder(set: RealWordSet): boolean {
+  const r = set.round ?? 1;
+  if (r !== 1) return false;
+  return REALWORD_BUILTIN_ROUND1_SET_ID.test(set.setId.trim());
+}
+
+/**
+ * Sets shown in the learner hub: real admin content only.
+ * Rounds 2–5 default empty — anything in the bank counts. Round 1 hides built-in placeholders.
+ */
+export function isRealWordLearnerVisibleSet(round: RealWordRoundNum, set: RealWordSet): boolean {
+  if (round >= 2) {
+    return Array.isArray(set.words) && set.words.length > 0;
+  }
+  return !isRealWordBuiltInRound1Placeholder(set);
+}
+
 function emptyRealWordOccupancy(): RealWordAdminOccupancy {
   const occ = {} as RealWordAdminOccupancy;
   for (const r of REALWORD_ROUND_NUMBERS) {
@@ -120,16 +141,6 @@ export function loadRealWordAdminOccupancy(): RealWordAdminOccupancy {
 function saveRealWordAdminOccupancy(next: RealWordAdminOccupancy): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(REALWORD_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
-}
-
-function registerRealWordAdminSlots(
-  round: RealWordRoundNum,
-  difficulty: RealWordDifficulty,
-  setNumbers: number[],
-): void {
-  const occ = loadRealWordAdminOccupancy();
-  occ[round][difficulty] = [...new Set([...occ[round][difficulty], ...setNumbers])].sort((a, b) => a - b);
-  saveRealWordAdminOccupancy(occ);
 }
 
 function isV1BankShape(o: unknown): o is Record<RealWordDifficulty, RealWordSet[]> {
@@ -225,9 +236,25 @@ export function loadRealWordBank(): RealWordFullBank {
   return parseStoredBank(localStorage.getItem(REALWORD_BANK_KEY));
 }
 
+/** Recompute `ep-realword-admin-uploaded-v1` from the bank so admin slot pickers match learner visibility. */
+export function rebuildRealWordAdminOccupancyFromBank(bank: RealWordFullBank): void {
+  const occ = emptyRealWordOccupancy();
+  for (const r of REALWORD_ROUND_NUMBERS) {
+    for (const d of REALWORD_DIFFICULTIES) {
+      const nums: number[] = [];
+      for (const s of bank[r][d]) {
+        if (isRealWordLearnerVisibleSet(r, s)) nums.push(s.setNumber);
+      }
+      occ[r][d] = [...new Set(nums)].sort((a, b) => a - b);
+    }
+  }
+  saveRealWordAdminOccupancy(occ);
+}
+
 export function persistRealWordBank(bank: RealWordFullBank): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(REALWORD_BANK_KEY, JSON.stringify(bank));
+  rebuildRealWordAdminOccupancyFromBank(bank);
   emitRealWordUpdate();
 }
 
@@ -240,16 +267,14 @@ export function getRealWordSet(
   return bank[round][difficulty].find((s) => s.setNumber === setNumber) ?? null;
 }
 
-/** Learner-facing bank: only admin-uploaded slots are visible. */
+/** Learner-facing bank: hide Round 1 built-in placeholders; other rounds show any non-empty uploaded set. */
 export function loadRealWordVisibleBank(): RealWordFullBank {
   const bank = loadRealWordBank();
-  const occ = loadRealWordAdminOccupancy();
   const out = defaultRealWordFullBank();
   for (const r of REALWORD_ROUND_NUMBERS) {
     for (const d of REALWORD_DIFFICULTIES) {
-      const allowed = new Set(occ[r][d]);
       out[r][d] = bank[r][d]
-        .filter((s) => allowed.has(s.setNumber))
+        .filter((s) => isRealWordLearnerVisibleSet(r, s))
         .sort((a, b) => a.setNumber - b.setNumber);
     }
   }
@@ -315,12 +340,6 @@ export function mergeRealWordBankFromAdmin(
     bank[round][d] = [...map.values()].sort((a, b) => a.setNumber - b.setNumber);
   }
   persistRealWordBank(bank);
-  for (const d of REALWORD_DIFFICULTIES) {
-    const uploadedSetNumbers = normalized[d].map((s) => s.setNumber);
-    if (uploadedSetNumbers.length > 0) {
-      registerRealWordAdminSlots(round, d, uploadedSetNumbers);
-    }
-  }
   return { count: sets.length, sets };
 }
 

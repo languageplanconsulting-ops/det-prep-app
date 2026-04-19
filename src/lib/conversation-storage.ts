@@ -468,6 +468,58 @@ export function removeConversationExamsFromAdmin(
   persistConversationBank(bank);
 }
 
+const BANK_DIFFICULTY_SLOTS: ConversationDifficulty[] = ["easy", "medium", "hard"];
+
+/**
+ * Removes exams by id from the round bank, clears learner progress for those slots,
+ * and persists. Caller should delete IndexedDB audio via `deleteConversationAudioKeysForExamId`.
+ */
+export function removeConversationExamsByIds(ids: string[]): number {
+  const idSet = new Set(ids.map((x) => x.trim()).filter(Boolean));
+  if (idSet.size === 0) return 0;
+  const bank = loadConversationBank();
+  let removed = 0;
+  const progressToDelete: string[] = [];
+
+  for (let r = 1; r <= CONVERSATION_ROUND_COUNT; r++) {
+    for (const d of BANK_DIFFICULTY_SLOTS) {
+      const arr = bank[r]?.[d];
+      if (!arr?.length) continue;
+      const next: ConversationExam[] = [];
+      for (const e of arr) {
+        if (idSet.has(e.id)) {
+          progressToDelete.push(progressKey(r, d, e.setNumber));
+          removed += 1;
+        } else {
+          next.push(e);
+        }
+      }
+      if (next.length !== arr.length) {
+        bank[r]![d] = next;
+      }
+    }
+  }
+
+  if (removed === 0) return 0;
+
+  persistConversationBank(bank);
+
+  const m = loadConversationProgressMap();
+  let progChanged = false;
+  for (const k of progressToDelete) {
+    if (m[k]) {
+      delete m[k];
+      progChanged = true;
+    }
+  }
+  if (progChanged) {
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(m));
+    emitConversationUpdate();
+  }
+
+  return removed;
+}
+
 export function conversationMaxForDifficulty(_d: ConversationDifficulty): number {
   return CONVERSATION_FULL_SCORE;
 }

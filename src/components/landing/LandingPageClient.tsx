@@ -470,7 +470,7 @@ export function LandingPageClient({
               {
                 name: "FREE / ฟรี",
                 price: "฿0",
-                feats: ["2 AI feedbacks", "1 daily task set", "All 4 skills"],
+                feats: ["1 starter test for each exam lane", "1 personalized feedback credit", "0 mock tests"],
                 cta: "Start free / เริ่มฟรี",
                 href: "/login",
                 featured: false,
@@ -479,7 +479,7 @@ export function LandingPageClient({
               {
                 name: "BASIC / เบสิก",
                 price: "฿399",
-                feats: ["10 AI feedbacks", "3 daily sets", "1 mock test"],
+                feats: ["12 AI feedbacks", "Read/Vocab 15 · Literacy 20 · Convo 10", "2 mock tests"],
                 cta: "Choose / เลือก",
                 href: "/login",
                 featured: false,
@@ -488,7 +488,7 @@ export function LandingPageClient({
               {
                 name: "PREMIUM / พรีเมียม",
                 price: "฿699",
-                feats: ["28 AI feedbacks / month", "5 daily sets", "4 mock tests"],
+                feats: ["30 AI feedbacks / month", "Read/Vocab 30 · Literacy 50 · Convo 20", "4 mock tests"],
                 cta: "Choose / เลือก",
                 href: "/login",
                 featured: true,
@@ -497,7 +497,7 @@ export function LandingPageClient({
               {
                 name: "VIP / วีไอพี",
                 price: "฿999",
-                feats: ["60 AI feedbacks / month", "8 daily sets", "8 mock tests"],
+                feats: ["60 AI feedbacks / month", "Unlimited practice lanes", "6 mock tests"],
                 cta: "Choose / เลือก",
                 href: "/login",
                 featured: false,

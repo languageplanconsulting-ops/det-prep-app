@@ -26,6 +26,7 @@ import {
   summarizeStoredExamsIntoAggMatrix,
   type ConversationUploadInputRow,
 } from "@/lib/conversation-upload-defaults";
+import { AdminConversationBankManager } from "@/components/admin/AdminConversationBankManager";
 import { wipeInteractiveConversationClientData } from "@/lib/conversation-client-wipe";
 import {
   conversationAudioKey,
@@ -147,7 +148,7 @@ function ConversationRoundBankSummary({
 }
 
 export function AdminConversationPaste() {
-  const [tab, setTab] = useState<"upload" | "manage-audio">("upload");
+  const [tab, setTab] = useState<"upload" | "manage-audio" | "manage-tests">("upload");
   const [text, setText] = useState("");
   const [selectedRound, setSelectedRound] = useState<number>(1);
   const [selectedSet, setSelectedSet] = useState<number>(1);
@@ -580,6 +581,15 @@ export function AdminConversationPaste() {
         </button>
         <button
           type="button"
+          onClick={() => setTab("manage-tests")}
+          className={`border-2 border-black px-3 py-1 text-xs font-black uppercase ${
+            tab === "manage-tests" ? "bg-ep-blue text-white" : "bg-white"
+          }`}
+        >
+          Manage tests
+        </button>
+        <button
+          type="button"
           onClick={() => void wipeAllConversationData()}
           className="ml-auto border-2 border-red-700 bg-white px-3 py-1 text-xs font-black uppercase text-red-800 hover:bg-red-50"
         >
@@ -788,7 +798,7 @@ export function AdminConversationPaste() {
         )}
       </div>
         </>
-      ) : (
+      ) : tab === "manage-audio" ? (
         <div className="space-y-3">
           <p className="text-sm text-neutral-600">
             Deepgram, Inworld, and Gemini use a small parallel pool with retries. ElevenLabs runs one request at a time.
@@ -937,6 +947,8 @@ export function AdminConversationPaste() {
             </table>
           </div>
         </div>
+      ) : (
+        <AdminConversationBankManager />
       )}
       {message ? <p className="mt-2 text-sm font-bold text-green-800">{message}</p> : null}
       {error ? (

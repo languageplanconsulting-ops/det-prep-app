@@ -116,3 +116,26 @@ export async function deleteConversationAudioByKey(keyRaw: string): Promise<void
     });
   });
 }
+
+/** Deletes all IndexedDB clips whose keys start with `examId::` (scenario + MCQ lines). */
+export async function deleteConversationAudioKeysForExamId(examId: string): Promise<void> {
+  const id = examId.trim();
+  if (!id) return;
+  const prefix = `${id}::`;
+  await withStore("readwrite", async (store) => {
+    const keys = await new Promise<IDBValidKey[]>((resolve, reject) => {
+      const req = store.getAllKeys();
+      req.onsuccess = () => resolve(req.result as IDBValidKey[]);
+      req.onerror = () => reject(req.error ?? new Error("Failed to list conversation audio keys"));
+    });
+    for (const k of keys) {
+      if (String(k).startsWith(prefix)) {
+        await new Promise<void>((resolve, reject) => {
+          const del = store.delete(k);
+          del.onsuccess = () => resolve();
+          del.onerror = () => reject(del.error ?? new Error("Failed to delete conversation audio key"));
+        });
+      }
+    }
+  });
+}

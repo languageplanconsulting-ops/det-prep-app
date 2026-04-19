@@ -4,6 +4,7 @@ import {
   getDictationBankJsonForContentSync,
   reconcileDictationBankAfterContentPull,
 } from "@/lib/dictation-storage";
+import { loadRealWordBank, rebuildRealWordAdminOccupancyFromBank } from "@/lib/realword-storage";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 export const CONTENT_BANK_KEYS = [
@@ -42,11 +43,20 @@ export function readLocalContentBankSnapshot(): ContentBankSnapshot {
 export function applyLocalContentBankSnapshot(snapshot: ContentBankSnapshot): number {
   if (typeof window === "undefined") return 0;
   let written = 0;
+  let wroteRealWordBank = false;
   for (const [k, v] of Object.entries(snapshot)) {
     if (!CONTENT_BANK_KEYS.includes(k as (typeof CONTENT_BANK_KEYS)[number])) continue;
     if (typeof v !== "string" || !v.length) continue;
     localStorage.setItem(k, v);
     written += 1;
+    if (k === "ep-realword-bank-v1") wroteRealWordBank = true;
+  }
+  if (wroteRealWordBank) {
+    try {
+      rebuildRealWordAdminOccupancyFromBank(loadRealWordBank());
+    } catch {
+      /* ignore */
+    }
   }
   if (written > 0) {
     window.dispatchEvent(new Event("ep-write-about-photo-rounds"));

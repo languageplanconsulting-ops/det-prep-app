@@ -17,7 +17,7 @@ export interface PlanDisplay {
 export const MOCK_USER_PLAN: PlanDisplay = {
   tier: "free",
   label: "Free",
-  aiFeedbackPerMonth: 2,
+  aiFeedbackPerMonth: 1,
   dailySets: 1,
   expires: "Never",
 };
@@ -36,7 +36,7 @@ export function planDisplayFromTier(tier: Tier): PlanDisplay {
     tier,
     label: TIER_DISPLAY[tier].nameEn,
     aiFeedbackPerMonth: ai,
-    dailySets: maxSets,
+    dailySets: Number.isFinite(maxSets) ? maxSets : "unlimited",
     expires: tier === "free" ? "Never" : "Active subscription",
   };
 }

@@ -75,22 +75,22 @@ export const SET_LIMITS: Record<Tier, Record<ContentSkill, number>> = {
     conversation: 0,
   },
   basic: {
-    comprehension: 4,
-    literacy: 4,
-    vocabulary: 4,
-    conversation: 4,
+    comprehension: 15,
+    literacy: 20,
+    vocabulary: 15,
+    conversation: 10,
   },
   premium: {
-    comprehension: 6,
-    literacy: 6,
-    vocabulary: 6,
-    conversation: 6,
+    comprehension: 30,
+    literacy: 50,
+    vocabulary: 30,
+    conversation: 20,
   },
   vip: {
-    comprehension: 8,
-    literacy: 8,
-    vocabulary: 8,
-    conversation: 8,
+    comprehension: Number.POSITIVE_INFINITY,
+    literacy: Number.POSITIVE_INFINITY,
+    vocabulary: Number.POSITIVE_INFINITY,
+    conversation: Number.POSITIVE_INFINITY,
   },
 };
 
@@ -105,8 +105,8 @@ export const TIER_DIFFICULTY_ACCESS: Record<Tier, Difficulty[]> = {
 /** Shared AI credits per month (except free = lifetime pool of 1). */
 export const AI_MONTHLY_LIMIT: Record<Tier, number> = {
   free: 1,
-  basic: 10,
-  premium: 28,
+  basic: 12,
+  premium: 30,
   vip: 60,
 };
 
@@ -122,8 +122,8 @@ export const AI_TYPES: readonly AIProductType[] = [
 export const MOCK_TEST_MONTHLY_LIMIT: Record<Tier, number> = {
   free: 0,
   basic: 2,
-  premium: 5,
-  vip: 10,
+  premium: 4,
+  vip: 6,
 };
 
 /** Streak freeze grants per month (VIP = unlimited → use Infinity). */
@@ -284,7 +284,7 @@ export function getUpgradeMessage(tier: Tier, blockedFeature: FeatureKey): strin
 
     mock_test:
       tier === "free"
-        ? "Mock Test ใช้ได้ตั้งแต่ Basic (1 ครั้ง/เดือน) — อัปเกรดเพื่อฝึกสอบจำลอง"
+        ? "Mock Test ใช้ได้ตั้งแต่ Basic (2 ครั้ง/เดือน) — อัปเกรดเพื่อฝึกสอบจำลอง"
         : "อัปเกรดเป็น Premium หรือ VIP เพื่อเพิ่มจำนวน Mock Test ต่อเดือน",
 
     notebook_export:
@@ -319,8 +319,10 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     priceThb: 0,
     color: "#737373",
     highlightsEn: [
-      "1 set/month (easy) — Comprehension, Literacy, Vocabulary",
-      "1 lifetime AI credit (shared across all AI tasks)",
+      "1 starter test for each non-mock exam lane",
+      "1 personalized feedback credit (choose 1 AI task to try once)",
+      "Read & Write / Read & Speak / Interactive Speaking / Write or Speak About Photo: choose any one",
+      "0 Mock Tests",
       "Streaks & XP",
       "Score-only analytics",
     ],
@@ -329,12 +331,12 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     tier: "basic",
     nameEn: "Basic",
     nameTh: "เบสิก",
-    priceThb: 299,
+    priceThb: 399,
     color: "#0ea5e9",
     highlightsEn: [
-      "4 sets/month (easy + medium) — Comprehension, Literacy, Vocabulary, Conversation",
-      "10 AI credits/month (all 5 AI types)",
-      "1 Mock Test / month",
+      "Read + Vocab 15, Literacy 20, Conversation 10 / month",
+      "12 AI credits/month (all 5 AI types)",
+      "2 Mock Tests / month",
       "Basic charts",
       "3 streak freezes / month",
     ],
@@ -343,12 +345,12 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     tier: "premium",
     nameEn: "Premium",
     nameTh: "พรีเมียม",
-    priceThb: 599,
+    priceThb: 699,
     color: "#8b5cf6",
     highlightsEn: [
-      "6 sets/month (all difficulties) — all four skills",
-      "28 AI credits/month",
-      "5 Mock Tests / month",
+      "Read + Vocab 30, Literacy 50, Conversation 20 / month",
+      "30 AI credits/month",
+      "4 Mock Tests / month",
       "Full analytics charts",
       "3 streak freezes / month",
     ],
@@ -360,9 +362,9 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     priceThb: 999,
     color: "#eab308",
     highlightsEn: [
-      "8 sets/month (all difficulties)",
+      "Unlimited practice sets across all four skills",
       "60 AI credits/month",
-      "Unlimited Mock Tests",
+      "6 Mock Tests / month",
       "Full analytics + PDF export",
       "Notebook PDF export",
       "Unlimited streak freezes",

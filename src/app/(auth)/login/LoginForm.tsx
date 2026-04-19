@@ -62,6 +62,9 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
       credentials: "same-origin",
     });
     setBusy(false);
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem("ep-show-login-welcome", "1");
+    }
     const next = redirectTo.startsWith("/") ? redirectTo : "/practice";
     router.push(next);
     router.refresh();

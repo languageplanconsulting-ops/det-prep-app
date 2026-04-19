@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { LoginWelcomeModal } from "@/components/auth/LoginWelcomeModal";
 import { PreviewBanner } from "@/components/admin/PreviewBanner";
 import { ContentBankHydrator } from "@/components/content/ContentBankHydrator";
 import { MainNav } from "@/components/layout/MainNav";
@@ -41,6 +42,7 @@ export default function RootLayout({
           <ContentBankHydrator />
           <PreviewBanner />
           <MainNav />
+          <LoginWelcomeModal />
           <VipApiCreditNotebookNotice />
           <PageTransition>{children}</PageTransition>
         </EffectiveTierProvider>
