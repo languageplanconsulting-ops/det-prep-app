@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 type IntroModalShellProps = {
   open: boolean;
@@ -27,6 +28,22 @@ export function IntroModalShell({
 }: IntroModalShellProps) {
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (open) {
@@ -40,29 +57,29 @@ export function IntroModalShell({
     return () => window.clearTimeout(timer);
   }, [open]);
 
-  if (!mounted) return null;
+  if (!mounted || !portalReady) return null;
 
-  return (
+  return createPortal(
     <div
-      className={`fixed inset-0 z-[100] overflow-y-auto overscroll-contain p-4 md:p-6 ${
+      className={`fixed inset-0 z-[100] overflow-hidden bg-black/35 p-4 backdrop-blur-[1.5px] md:p-6 ${
         visible ? "opacity-100" : "opacity-0"
       } transition-opacity duration-200 ease-out`}
-      style={{
-        fontFamily: "var(--font-inter), ui-sans-serif, system-ui, 'Anuphan', sans-serif",
-        backgroundImage: "radial-gradient(#111 1px, transparent 1px)",
-        backgroundSize: "20px 20px",
-        backgroundColor,
-      }}
+      style={{ fontFamily: "var(--font-inter), ui-sans-serif, system-ui, 'Anuphan', sans-serif" }}
       role="dialog"
       aria-modal="true"
       aria-labelledby={labelledBy}
       onClick={onDismiss}
     >
-      <div className="flex min-h-full items-center justify-center py-2 md:py-4">
+      <div className="grid h-full place-items-center">
         <div
-          className={`flex max-h-[min(88vh,760px)] w-full ${maxWidthClassName} flex-col overflow-hidden border-4 border-[#111] bg-white shadow-[8px_8px_0_0_#111] transition duration-200 ease-out ${
+          className={`flex h-[min(86vh,720px)] w-full ${maxWidthClassName} flex-col overflow-hidden border-4 border-[#111] bg-white shadow-[8px_8px_0_0_#111] transition duration-200 ease-out ${
             visible ? "translate-y-0 scale-100" : "translate-y-4 scale-[0.97]"
           }`}
+          style={{
+            backgroundImage: "radial-gradient(#111 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+            backgroundColor,
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start justify-between border-b-4 border-black px-6 pb-4 pt-6 md:px-8 md:pt-8">
@@ -83,6 +100,7 @@ export function IntroModalShell({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -2,6 +2,7 @@
 
 import { useCallback, useLayoutEffect, useState } from "react";
 import { IntroModalShell } from "@/components/practice/IntroModalShell";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
 const STORAGE_KEY = "ep-vocab-master-intro-dismissed-v1";
 
@@ -11,23 +12,34 @@ const STORAGE_KEY = "ep-vocab-master-intro-dismissed-v1";
  */
 export function VocabExamIntroModal() {
   const [open, setOpen] = useState(true);
+  const { isAdmin, previewEligible, loading } = useEffectiveTier();
+  const forceShowEveryVisit = isAdmin || previewEligible;
 
   useLayoutEffect(() => {
+    if (loading) return;
+    if (forceShowEveryVisit) {
+      setOpen(true);
+      return;
+    }
     try {
       if (localStorage.getItem(STORAGE_KEY) === "1") setOpen(false);
     } catch {
       /* keep open */
     }
-  }, []);
+  }, [forceShowEveryVisit, loading]);
 
   const dismiss = useCallback(() => {
+    if (forceShowEveryVisit) {
+      setOpen(false);
+      return;
+    }
     try {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {
       /* ignore */
     }
     setOpen(false);
-  }, []);
+  }, [forceShowEveryVisit]);
 
   if (!open) return null;
 
