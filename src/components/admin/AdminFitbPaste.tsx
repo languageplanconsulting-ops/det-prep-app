@@ -16,6 +16,7 @@ import {
   loadFitbAdminOccupancy,
   mergeFitbBankFromAdmin,
   registerFitbAdminSlots,
+  revertFitbAdminSlotsToDefaults,
 } from "@/lib/fitb-storage";
 import type { FitbDifficulty, FitbRoundNum } from "@/types/fitb";
 
@@ -28,6 +29,60 @@ type FitbAdminInputRow = {
 };
 
 const DIFFICULTY_OPTIONS: FitbDifficulty[] = ["easy", "medium", "hard"];
+
+type FitbInventoryRow = {
+  key: string;
+  round: FitbRoundNum;
+  difficulty: FitbDifficulty;
+  setNumber: number;
+  setId: string;
+  cefrLevel: string;
+  blankCount: number;
+  passagePreview: string;
+  /** Slot was registered via this admin panel (import). */
+  adminSlot: boolean;
+};
+
+function buildFitbInventory(args: {
+  filterRound: FitbRoundNum | "all";
+  filterDifficulty: FitbDifficulty | "all";
+  adminSlotsOnly: boolean;
+}): FitbInventoryRow[] {
+  const bank = loadFitbBank();
+  const occ = loadFitbAdminOccupancy();
+  const rows: FitbInventoryRow[] = [];
+  for (const r of FITB_ROUND_NUMBERS) {
+    if (args.filterRound !== "all" && r !== args.filterRound) continue;
+    for (const d of DIFFICULTY_OPTIONS) {
+      if (args.filterDifficulty !== "all" && d !== args.filterDifficulty) continue;
+      const occupied = new Set(occ[r][d]);
+      for (const set of bank[r][d]) {
+        const adminSlot = occupied.has(set.setNumber);
+        if (args.adminSlotsOnly && !adminSlot) continue;
+        const passagePreview =
+          set.passage.length > 140 ? `${set.passage.slice(0, 140)}…` : set.passage;
+        rows.push({
+          key: `${r}:${d}:${set.setNumber}`,
+          round: r,
+          difficulty: d,
+          setNumber: set.setNumber,
+          setId: set.setId,
+          cefrLevel: set.cefrLevel,
+          blankCount: set.missingWords.length,
+          passagePreview,
+          adminSlot,
+        });
+      }
+    }
+  }
+  rows.sort((a, b) => {
+    if (a.round !== b.round) return a.round - b.round;
+    const di = DIFFICULTY_OPTIONS.indexOf(a.difficulty) - DIFFICULTY_OPTIONS.indexOf(b.difficulty);
+    if (di !== 0) return di;
+    return a.setNumber - b.setNumber;
+  });
+  return rows;
+}
 
 /** Two-row bulk example; `difficulty` and `set_id` are overwritten on import from the round/level UI. */
 const FITB_BULK_TEMPLATE = JSON.stringify(
@@ -98,6 +153,23 @@ export function AdminFitbPaste() {
   const [error, setError] = useState<string | null>(null);
   const [clearNotice, setClearNotice] = useState<string | null>(null);
   const [templateCopied, setTemplateCopied] = useState(false);
+  const [inventoryVersion, setInventoryVersion] = useState(0);
+  const [invFilterRound, setInvFilterRound] = useState<FitbRoundNum | "all">("all");
+  const [invFilterDifficulty, setInvFilterDifficulty] = useState<FitbDifficulty | "all">("all");
+  const [invAdminSlotsOnly, setInvAdminSlotsOnly] = useState(true);
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    const bump = () => setInventoryVersion((v) => v + 1);
+    window.addEventListener("ep-fitb-storage", bump);
+    return () => window.removeEventListener("ep-fitb-storage", bump);
+  }, []);
+
+  const inventoryRows = buildFitbInventory({
+    filterRound: invFilterRound,
+    filterDifficulty: invFilterDifficulty,
+    adminSlotsOnly: invAdminSlotsOnly,
+  });
 
   useEffect(() => {
     const bank = loadFitbBank();
@@ -137,7 +209,63 @@ export function AdminFitbPaste() {
         },
       })),
     );
-  }, [message, selectedDifficulty, selectedSet, selectedRound]);
+  }, [message, selectedDifficulty, selectedSet, selectedRound, inventoryVersion]);
+
+  const toggleKey = (key: string) => {
+    setSelectedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const selectAllVisible = () => {
+    setSelectedKeys(new Set(inventoryRows.map((r) => r.key)));
+  };
+
+  const clearSelection = () => setSelectedKeys(new Set());
+
+  const deleteSelectedSets = () => {
+    if (selectedKeys.size === 0) return;
+    const ok = window.confirm(
+      `Remove ${selectedKeys.size} FITB set slot(s)? Each slot goes back to the app’s built-in default (if any) and is removed from the “admin uploaded” map.`,
+    );
+    if (!ok) return;
+    setError(null);
+    setClearNotice(null);
+    type Group = { round: FitbRoundNum; difficulty: FitbDifficulty; nums: Set<number> };
+    const groups = new Map<string, Group>();
+    for (const key of selectedKeys) {
+      const parts = key.split(":");
+      if (parts.length !== 3) continue;
+      const round = Number(parts[0]) as FitbRoundNum;
+      const difficulty = parts[1] as FitbDifficulty;
+      const setNumber = Number(parts[2]);
+      if (!FITB_ROUND_NUMBERS.includes(round as FitbRoundNum) || !DIFFICULTY_OPTIONS.includes(difficulty)) continue;
+      if (!Number.isInteger(setNumber)) continue;
+      const gk = `${round}:${difficulty}`;
+      let g = groups.get(gk);
+      if (!g) {
+        g = { round, difficulty, nums: new Set() };
+        groups.set(gk, g);
+      }
+      g.nums.add(setNumber);
+    }
+    let reverted = 0;
+    for (const g of groups.values()) {
+      const nums = [...g.nums];
+      if (nums.length === 0) continue;
+      revertFitbAdminSlotsToDefaults(g.round, g.difficulty, nums);
+      reverted += nums.length;
+    }
+    setSelectedKeys(new Set());
+    setMessage(
+      reverted > 0
+        ? `Removed ${reverted} slot(s). If learners use the shared server bank, click “Sync to server now” on the admin page.`
+        : "Nothing was removed.",
+    );
+  };
 
   const applySelectionDefaults = (
     rows: FitbAdminInputRow[],
@@ -262,6 +390,153 @@ export function AdminFitbPaste() {
         Choose <strong>round (1–5)</strong> and <strong>level</strong>, then paste a JSON <strong>array</strong>.
         Import fills the first empty sets for that round and level (incoming set numbers are ignored).
       </p>
+
+      <section className="mb-4 rounded-[4px] border-2 border-black bg-white p-3 shadow-[3px_3px_0_0_#000]">
+        <p className="text-xs font-black uppercase tracking-wide text-neutral-800">Browse &amp; delete sets</p>
+        <p className="mt-1 text-xs text-neutral-600">
+          <strong>Admin slot</strong> = this browser recorded an import into that round/level/set number. Deleting
+          restores the built-in default passage for that slot (when the app ships one) and frees the slot for new
+          imports.
+        </p>
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <label className="text-xs font-bold uppercase text-neutral-700">
+            Round
+            <select
+              value={invFilterRound === "all" ? "all" : String(invFilterRound)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setInvFilterRound(v === "all" ? "all" : (Number(v) as FitbRoundNum));
+              }}
+              className="mt-1 block min-w-[8rem] border-2 border-black bg-neutral-50 px-2 py-1.5 text-sm font-bold"
+            >
+              <option value="all">All rounds</option>
+              {FITB_ROUND_NUMBERS.map((r) => (
+                <option key={r} value={r}>
+                  Round {r}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-bold uppercase text-neutral-700">
+            Level
+            <select
+              value={invFilterDifficulty}
+              onChange={(e) =>
+                setInvFilterDifficulty(
+                  e.target.value === "all" ? "all" : (e.target.value as FitbDifficulty),
+                )
+              }
+              className="mt-1 block min-w-[8rem] border-2 border-black bg-neutral-50 px-2 py-1.5 text-sm font-bold"
+            >
+              <option value="all">All levels</option>
+              {DIFFICULTY_OPTIONS.map((d) => (
+                <option key={d} value={d}>
+                  {FITB_DIFFICULTY_LABEL[d]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-neutral-800">
+            <input
+              type="checkbox"
+              checked={invAdminSlotsOnly}
+              onChange={(e) => setInvAdminSlotsOnly(e.target.checked)}
+            />
+            Admin slots only
+          </label>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={selectAllVisible}
+            disabled={inventoryRows.length === 0}
+            className="border-2 border-black bg-neutral-100 px-3 py-2 text-xs font-black uppercase shadow-[2px_2px_0_0_#000] disabled:opacity-40"
+          >
+            Select visible
+          </button>
+          <button
+            type="button"
+            onClick={clearSelection}
+            disabled={selectedKeys.size === 0}
+            className="border-2 border-black bg-white px-3 py-2 text-xs font-black uppercase shadow-[2px_2px_0_0_#000] disabled:opacity-40"
+          >
+            Clear selection
+          </button>
+          <button
+            type="button"
+            onClick={deleteSelectedSets}
+            disabled={selectedKeys.size === 0}
+            className="border-2 border-black bg-red-600 px-3 py-2 text-xs font-black uppercase text-white shadow-[2px_2px_0_0_#000] disabled:opacity-40"
+          >
+            Delete selected ({selectedKeys.size})
+          </button>
+        </div>
+        <div className="mt-3 max-h-[min(28rem,55vh)] overflow-auto rounded-[2px] border border-black">
+          <table className="w-full min-w-[640px] border-collapse text-left text-xs">
+            <thead className="sticky top-0 z-[1] bg-ep-yellow/90">
+              <tr className="border-b-2 border-black uppercase">
+                <th className="w-10 border-r border-black px-1 py-2 text-center"> </th>
+                <th className="border-r border-black px-2 py-2">R</th>
+                <th className="border-r border-black px-2 py-2">Lvl</th>
+                <th className="border-r border-black px-2 py-2">#</th>
+                <th className="border-r border-black px-2 py-2">Admin</th>
+                <th className="border-r border-black px-2 py-2">setId</th>
+                <th className="border-r border-black px-2 py-2">CEFR</th>
+                <th className="border-r border-black px-2 py-2">Blanks</th>
+                <th className="px-2 py-2">Passage preview</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inventoryRows.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-3 py-6 text-center text-neutral-600">
+                    No sets match these filters. Turn off “Admin slots only” to list every set in the bank, or import
+                    content first.
+                  </td>
+                </tr>
+              ) : (
+                inventoryRows.map((row) => (
+                  <tr
+                    key={row.key}
+                    className={`border-b border-neutral-300 ${selectedKeys.has(row.key) ? "bg-ep-blue/10" : "bg-white"}`}
+                  >
+                    <td className="border-r border-neutral-200 px-1 py-1.5 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedKeys.has(row.key)}
+                        onChange={() => toggleKey(row.key)}
+                        aria-label={`Select FITB R${row.round} ${row.difficulty} set ${row.setNumber}`}
+                      />
+                    </td>
+                    <td className="border-r border-neutral-200 px-2 py-1.5 font-bold">{row.round}</td>
+                    <td className="border-r border-neutral-200 px-2 py-1.5 ep-stat font-semibold">
+                      {FITB_DIFFICULTY_LABEL[row.difficulty]}
+                    </td>
+                    <td className="border-r border-neutral-200 px-2 py-1.5 font-mono">{row.setNumber}</td>
+                    <td className="border-r border-neutral-200 px-2 py-1.5 font-bold">
+                      {row.adminSlot ? (
+                        <span className="text-ep-blue">Yes</span>
+                      ) : (
+                        <span className="text-neutral-400">—</span>
+                      )}
+                    </td>
+                    <td className="max-w-[10rem] border-r border-neutral-200 truncate px-2 py-1.5 ep-stat" title={row.setId}>
+                      {row.setId}
+                    </td>
+                    <td className="border-r border-neutral-200 px-2 py-1.5">{row.cefrLevel}</td>
+                    <td className="border-r border-neutral-200 px-2 py-1.5 text-center">{row.blankCount}</td>
+                    <td className="px-2 py-1.5 text-neutral-700">{row.passagePreview}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-2 ep-stat text-[10px] text-neutral-500">
+          Showing {inventoryRows.length} row(s). Total sets in bank: {totalSets}.
+        </p>
+      </section>
+
       <button
         type="button"
         onClick={clearAllFitb}

@@ -2,6 +2,7 @@
 
 import { Caveat } from "next/font/google";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { NotebookProductionReportFullView } from "@/components/notebook/NotebookProductionReportFullView";
 import { NotebookSpeakingHighlightCard } from "@/components/notebook/NotebookSpeakingHighlightCard";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 
@@ -25,6 +26,7 @@ import {
   renameCustomCategory,
   updateNotebookEntry,
 } from "@/lib/notebook-storage";
+import { tryParseNotebookProductionReport } from "@/lib/notebook-production-report-parse";
 import type { NotebookCustomCategory, NotebookEntry } from "@/types/writing";
 
 type SortMode = "recent" | "alpha";
@@ -600,57 +602,71 @@ export function NotebookList() {
                         {showFull ? "Show less" : "See in full"}
                       </button>
                       {showFull ? (
-                        <div className="mt-3 max-h-[min(72vh,38rem)] space-y-4 overflow-y-auto rounded-xl border-2 border-black/80 bg-[linear-gradient(180deg,#ffffff_0%,#fff8e8_100%)] p-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                          <div className="sticky top-0 z-[1] -mx-1 rounded-lg border-2 border-black bg-ep-blue px-3 py-2 text-white shadow-[2px_2px_0_0_#000]">
-                            <p className="ep-stat text-[10px] font-black uppercase tracking-widest text-ep-yellow">
-                              English Plan
-                            </p>
-                            <p className="text-sm font-black">Production Feedback Report</p>
-                          </div>
-                          {e.fullBodyEn?.trim() ? (
-                            <div className="rounded-lg border-2 border-black/20 bg-white p-3 shadow-sm">
-                              <p className="ep-stat inline-flex rounded-full border-2 border-black/20 bg-ep-blue/10 px-2 py-0.5 text-[10px] font-black uppercase text-ep-blue">
-                                Full feedback (EN)
-                              </p>
-                              <div className="mt-3 space-y-3">
-                                {splitReportSections(e.fullBodyEn).map((section, idx) => (
-                                  <section
-                                    key={`en-${idx}-${section.heading}`}
-                                    className="rounded-md border border-black/10 bg-neutral-50 p-3"
-                                  >
-                                    <p className="ep-stat text-[10px] font-black uppercase tracking-wide text-ep-blue">
-                                      {section.heading}
+                        <div className="mt-3 max-h-[min(72vh,38rem)] space-y-4 overflow-y-auto rounded-xl border-2 border-black/80 bg-[#f8f7f4] p-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                          {(() => {
+                            const parsed = tryParseNotebookProductionReport({
+                              fullBodyEn: e.fullBodyEn ?? "",
+                              fullBodyTh: e.fullBodyTh ?? "",
+                              source: e.source,
+                            });
+                            if (parsed) {
+                              return <NotebookProductionReportFullView data={parsed} />;
+                            }
+                            return (
+                              <>
+                                <div className="sticky top-0 z-[1] -mx-1 rounded-lg border-2 border-black bg-ep-blue px-3 py-2 text-white shadow-[2px_2px_0_0_#000]">
+                                  <p className="ep-stat text-[10px] font-black uppercase tracking-widest text-ep-yellow">
+                                    English Plan
+                                  </p>
+                                  <p className="text-sm font-black">Production Feedback Report</p>
+                                </div>
+                                {e.fullBodyEn?.trim() ? (
+                                  <div className="rounded-lg border-2 border-black/20 bg-white p-3 shadow-sm">
+                                    <p className="ep-stat inline-flex rounded-full border-2 border-black/20 bg-ep-blue/10 px-2 py-0.5 text-[10px] font-black uppercase text-ep-blue">
+                                      Full feedback (EN)
                                     </p>
-                                    <div className="mt-2 space-y-1">
-                                      {renderFeedbackRichText(section.body.join("\n"))}
+                                    <div className="mt-3 space-y-3">
+                                      {splitReportSections(e.fullBodyEn).map((section, idx) => (
+                                        <section
+                                          key={`en-${idx}-${section.heading}`}
+                                          className="rounded-md border border-black/10 bg-neutral-50 p-3"
+                                        >
+                                          <p className="ep-stat text-[10px] font-black uppercase tracking-wide text-ep-blue">
+                                            {section.heading}
+                                          </p>
+                                          <div className="mt-2 space-y-1">
+                                            {renderFeedbackRichText(section.body.join("\n"))}
+                                          </div>
+                                        </section>
+                                      ))}
                                     </div>
-                                  </section>
-                                ))}
-                              </div>
-                            </div>
-                          ) : null}
-                          {e.fullBodyTh?.trim() ? (
-                            <div className="rounded-lg border-2 border-black/20 bg-white p-3 shadow-sm">
-                              <p className="ep-stat inline-flex rounded-full border-2 border-black/20 bg-amber-100/70 px-2 py-0.5 text-[10px] font-black uppercase text-amber-800">
-                                Full feedback (TH)
-                              </p>
-                              <div className="mt-3 space-y-3">
-                                {splitReportSections(e.fullBodyTh).map((section, idx) => (
-                                  <section
-                                    key={`th-${idx}-${section.heading}`}
-                                    className="rounded-md border border-black/10 bg-neutral-50 p-3"
-                                  >
-                                    <p className="ep-stat text-[10px] font-black uppercase tracking-wide text-amber-800">
-                                      {section.heading}
+                                  </div>
+                                ) : null}
+                                {e.fullBodyTh?.trim() ? (
+                                  <div className="rounded-lg border-2 border-black/20 bg-white p-3 shadow-sm">
+                                    <p className="ep-stat inline-flex rounded-full border-2 border-black/20 bg-amber-100/70 px-2 py-0.5 text-[10px] font-black uppercase text-amber-800">
+                                      Full feedback (TH)
                                     </p>
-                                    <div className="mt-2 space-y-1">
-                                      {renderFeedbackRichText(section.body.join("\n"))}
+                                    <div className="mt-3 space-y-3">
+                                      {splitReportSections(e.fullBodyTh).map((section, idx) => (
+                                        <section
+                                          key={`th-${idx}-${section.heading}`}
+                                          className="rounded-md border border-black/10 bg-neutral-50 p-3"
+                                        >
+                                          <p className="ep-stat text-[10px] font-black uppercase tracking-wide text-amber-800">
+                                            {section.heading}
+                                          </p>
+                                          <div className="mt-2 space-y-1">
+                                            {renderFeedbackRichText(section.body.join("\n"))}
+                                          </div>
+                                        </section>
+                                      ))}
                                     </div>
-                                  </section>
-                                ))}
-                              </div>
-                            </div>
-                          ) : null}
+                                  </div>
+                                ) : null}
+                              </>
+                            );
+                          })()}
                         </div>
                       ) : null}
                     </div>

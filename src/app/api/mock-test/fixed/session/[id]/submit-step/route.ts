@@ -8,6 +8,7 @@ import { generateSpeakingReportWithGemini } from "@/lib/gemini-speaking";
 import { generateWritingReportWithGemini } from "@/lib/gemini-writing";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { INTERACTIVE_SPEAKING_TURN_COUNT } from "@/lib/interactive-speaking-constants";
+import { scoreBuckets } from "@/lib/mock-test/fixed-mock-score-buckets";
 import { gradeFitbBlank, normalizeFitbCompare } from "@/lib/fitb-scoring";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
@@ -416,72 +417,6 @@ function extractInteractiveSpeakingTranscripts(answer: unknown): string[] {
         .filter(Boolean)
     : [];
   return fromTurns;
-}
-
-type ScoredRow = { step_index: number; task_type: string; score: number };
-
-function avgScore(rows: ScoredRow[], pick: (row: ScoredRow) => boolean): number {
-  const items = rows.filter(pick).map((r) => r.score);
-  if (!items.length) return 0;
-  return items.reduce((a, b) => a + b, 0) / items.length;
-}
-
-function weighted160(parts: Array<{ score: number; weight: number }>): number {
-  return parts.reduce((sum, p) => sum + (p.score * p.weight) / 100, 0);
-}
-
-function scoreBuckets(rows: ScoredRow[]) {
-  const conversationScore = avgScore(rows, (r) => r.step_index === 13);
-  const speakingRaw = weighted160([
-    { score: conversationScore, weight: 5 },
-    // interactive speaking 40% (step 19 in fixed flow)
-    { score: avgScore(rows, (r) => r.step_index === 19), weight: 40 },
-    { score: avgScore(rows, (r) => r.task_type === "speak_about_photo"), weight: 15 },
-    { score: avgScore(rows, (r) => r.task_type === "read_then_speak"), weight: 40 },
-  ]);
-
-  const listeningRaw = weighted160([
-    { score: conversationScore, weight: 40 },
-    { score: avgScore(rows, (r) => r.task_type === "dictation"), weight: 30 },
-    // interactive speaking 20% (step 19 in fixed flow)
-    { score: avgScore(rows, (r) => r.step_index === 19), weight: 20 },
-    {
-      score: avgScore(
-        rows,
-        (r) => r.task_type === "conversation_summary" || r.task_type === "summarize_conversation",
-      ),
-      weight: 10,
-    },
-  ]);
-
-  const readingRaw = weighted160([
-    { score: avgScore(rows, (r) => r.task_type === "real_english_word"), weight: 20 },
-    { score: avgScore(rows, (r) => r.task_type === "vocabulary_reading"), weight: 55 },
-    { score: avgScore(rows, (r) => r.task_type === "fill_in_blanks"), weight: 25 },
-  ]);
-
-  const writingRaw = weighted160([
-    { score: avgScore(rows, (r) => r.task_type === "write_about_photo"), weight: 20 },
-    { score: avgScore(rows, (r) => r.task_type === "read_and_write"), weight: 50 },
-    { score: avgScore(rows, (r) => r.task_type === "dictation"), weight: 20 },
-    {
-      score: avgScore(
-        rows,
-        (r) => r.task_type === "conversation_summary" || r.task_type === "summarize_conversation",
-      ),
-      weight: 10,
-    },
-  ]);
-
-  const totalRaw = (speakingRaw + listeningRaw + readingRaw + writingRaw) / 4;
-
-  return {
-    total: normalize160(Math.round(totalRaw)),
-    listening: normalize160(Math.round(listeningRaw)),
-    speaking: normalize160(Math.round(speakingRaw)),
-    reading: normalize160(Math.round(readingRaw)),
-    writing: normalize160(Math.round(writingRaw)),
-  };
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {

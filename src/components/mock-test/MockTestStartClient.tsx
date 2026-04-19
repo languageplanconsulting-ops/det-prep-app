@@ -35,6 +35,7 @@ type MockAttemptRow = {
   session_id: string;
   set_id: string;
   created_at: string;
+  dashboard_saved_at?: string | null;
   actual_total: number;
   actual_listening: number;
   actual_speaking: number;
@@ -46,6 +47,15 @@ type MockAttemptRow = {
   target_reading: number | null;
   target_writing: number | null;
 };
+
+function sortMockAttempts(list: MockAttemptRow[]) {
+  return [...list].sort((a, b) => {
+    const pa = a.dashboard_saved_at != null && a.dashboard_saved_at !== "" ? 1 : 0;
+    const pb = b.dashboard_saved_at != null && b.dashboard_saved_at !== "" ? 1 : 0;
+    if (pa !== pb) return pb - pa;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+}
 
 export function MockTestStartClient() {
   const router = useRouter();
@@ -71,6 +81,7 @@ export function MockTestStartClient() {
   const [skipTimerMode, setSkipTimerMode] = useState(false);
   const [previewSeparateMode, setPreviewSeparateMode] = useState(false);
   const [previewStepIndex, setPreviewStepIndex] = useState(13);
+  const [unpinSessionId, setUnpinSessionId] = useState<string | null>(null);
 
   const adminCanPreview = isAdmin || previewEligible;
   const trackUsage = launchLive || adminCanPreview;
@@ -128,12 +139,13 @@ export function MockTestStartClient() {
       const { data: attRows } = await supabase
         .from("mock_fixed_results")
         .select(
-          "id, session_id, set_id, created_at, actual_total, actual_listening, actual_speaking, actual_reading, actual_writing, target_total, target_listening, target_speaking, target_reading, target_writing",
+          "id, session_id, set_id, created_at, dashboard_saved_at, actual_total, actual_listening, actual_speaking, actual_reading, actual_writing, target_total, target_listening, target_speaking, target_reading, target_writing",
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(40);
-      setAttempts((attRows as MockAttemptRow[] | null) ?? []);
+      const raw = (attRows as MockAttemptRow[] | null) ?? [];
+      setAttempts(sortMockAttempts(raw));
     })();
   }, [searchParams, trackUsage]);
 
@@ -148,6 +160,26 @@ export function MockTestStartClient() {
   const canStart = !!selectedSetId && (adminCanPreview || (hasUser === true && launchLive && tierOk));
 
   const limitLabel = unlimited ? "Unlimited" : String(limit);
+
+  const unpinFromDashboard = (sessionId: string) => {
+    void (async () => {
+      setUnpinSessionId(sessionId);
+      try {
+        const res = await fetch(`/api/mock-test/fixed/results/${sessionId}/dashboard`, {
+          method: "PATCH",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ saved: false }),
+        });
+        if (!res.ok) return;
+        setAttempts((prev) =>
+          sortMockAttempts(prev.map((r) => (r.session_id === sessionId ? { ...r, dashboard_saved_at: null } : r))),
+        );
+      } finally {
+        setUnpinSessionId(null);
+      }
+    })();
+  };
 
   const start = async () => {
     if (!canStart || !selectedSetId) return;
@@ -340,11 +372,16 @@ export function MockTestStartClient() {
             <p className="mt-1 text-[11px] font-semibold text-white/90">
               Total + skill subscores (estimated) · คะแนนรวมและทักษะย่อย (ประมาณ)
             </p>
+            <p className="mt-2 text-[10px] font-semibold text-white/85">
+              Open any report and use &quot;Save report to mock test dashboard&quot; to pin it here. ·
+              เปิดรายงานแล้วกดบันทึกเพื่อปักหมุดไว้ด้านบนตาราง
+            </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] border-collapse text-left text-xs">
+            <table className="w-full min-w-[800px] border-collapse text-left text-xs">
               <thead>
                 <tr className="border-b-2 border-black bg-ep-yellow/30">
+                  <th className="border-r-2 border-black px-3 py-2 font-black uppercase">Saved / บันทึก</th>
                   <th className="border-r-2 border-black px-3 py-2 font-black uppercase">Date / วันที่</th>
                   <th className="border-r-2 border-black px-3 py-2 font-black uppercase">Set / ชุด</th>
                   <th className="border-r-2 border-black px-3 py-2 font-black uppercase">Total</th>
@@ -367,6 +404,9 @@ export function MockTestStartClient() {
                       : "—";
                   return (
                     <tr key={row.id} className="border-b-2 border-black odd:bg-white even:bg-neutral-50">
+                      <td className="border-r-2 border-black px-3 py-2 text-center font-black text-neutral-800">
+                        {row.dashboard_saved_at != null && row.dashboard_saved_at !== "" ? "★" : "—"}
+                      </td>
                       <td className="border-r-2 border-black px-3 py-2 font-semibold text-neutral-800">{date}</td>
                       <td className="border-r-2 border-black px-3 py-2 font-bold text-neutral-900">{name}</td>
                       <td className="border-r-2 border-black px-3 py-2 font-mono font-black text-[#004AAD]">
@@ -377,12 +417,24 @@ export function MockTestStartClient() {
                       <td className="border-r-2 border-black px-3 py-2 font-mono">{fmtScore(row.actual_speaking)}</td>
                       <td className="border-r-2 border-black px-3 py-2 font-mono">{fmtScore(row.actual_writing)}</td>
                       <td className="px-3 py-2">
-                        <Link
-                          href={`/mock-test/fixed/results/${row.session_id}`}
-                          className="font-black uppercase text-[#004AAD] underline underline-offset-2"
-                        >
-                          Open / เปิด
-                        </Link>
+                        <div className="flex flex-col gap-1">
+                          <Link
+                            href={`/mock-test/fixed/results/${row.session_id}`}
+                            className="font-black uppercase text-[#004AAD] underline underline-offset-2"
+                          >
+                            Open / เปิด
+                          </Link>
+                          {row.dashboard_saved_at != null && row.dashboard_saved_at !== "" ? (
+                            <button
+                              type="button"
+                              disabled={unpinSessionId === row.session_id}
+                              onClick={() => unpinFromDashboard(row.session_id)}
+                              className="text-left text-[10px] font-bold uppercase text-neutral-500 underline decoration-dotted underline-offset-2 hover:text-red-700 disabled:opacity-40"
+                            >
+                              {unpinSessionId === row.session_id ? "…" : "Unpin / ยกเลิกปักหมุด"}
+                            </button>
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                   );

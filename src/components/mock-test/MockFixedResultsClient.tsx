@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { mt } from "@/lib/mock-test/mock-test-styles";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
+import type { FixedMockScoredRow } from "@/lib/mock-test/fixed-mock-score-buckets";
+
+import { MockFixedReportBrandedView } from "./MockFixedReportBrandedView";
 
 type FixedResult = {
   target_total: number;
@@ -19,8 +21,11 @@ type FixedResult = {
   actual_reading: number;
   actual_writing: number;
   deltas: Record<string, number>;
+  created_at?: string;
+  /** When set, this report is pinned on `/mock-test/start`. */
+  dashboard_saved_at?: string | null;
   report_payload?: {
-    responses?: Array<{ step_index: number; task_type: string; score: number }>;
+    responses?: FixedMockScoredRow[];
   };
 };
 
@@ -29,14 +34,12 @@ function avg(list: number[]): number {
   return list.reduce((a, b) => a + b, 0) / list.length;
 }
 
-function fmtDelta(value: number): string {
-  const rounded = Math.round(value);
-  return `${rounded >= 0 ? "+" : ""}${rounded}`;
-}
-
 export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const [row, setRow] = useState<FixedResult | null>(null);
+  const [dashboardSavedAt, setDashboardSavedAt] = useState<string | null>(null);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -46,22 +49,18 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
       });
       if (!res.ok) return;
       const json = (await res.json()) as { result?: FixedResult };
-      setRow((json.result ?? null) as FixedResult | null);
+      const next = (json.result ?? null) as FixedResult | null;
+      setRow(next);
+      setDashboardSavedAt(next?.dashboard_saved_at ?? null);
     })();
   }, [sessionId]);
 
   if (!row) return <div className="p-8 text-center font-bold">Loading result...</div>;
 
   const desiredScore = Math.round(Number(row.target_total ?? 0));
-  const scoreFromSkills = Math.round(
-    (Number(row.actual_listening ?? 0) +
-      Number(row.actual_writing ?? 0) +
-      Number(row.actual_speaking ?? 0) +
-      Number(row.actual_reading ?? 0)) /
-      4,
-  );
+  const totalScore = Math.round(Number(row.actual_total ?? 0));
 
-  const responses = row.report_payload?.responses ?? [];
+  const responses = (row.report_payload?.responses ?? []) as FixedMockScoredRow[];
   const byTask = new Map<string, number[]>();
   for (const r of responses) {
     const prev = byTask.get(r.task_type) ?? [];
@@ -87,7 +86,14 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   }
   if (
     sortedLow.some((x) =>
-      ["write_about_photo", "speak_about_photo", "read_and_write", "read_then_speak", "interactive_speaking", "conversation_summary"].includes(x.task),
+      [
+        "write_about_photo",
+        "speak_about_photo",
+        "read_and_write",
+        "read_then_speak",
+        "interactive_speaking",
+        "conversation_summary",
+      ].includes(x.task),
     )
   ) {
     recommendations.push("Focus on overall production score (speaking + writing).");
@@ -96,116 +102,79 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
     recommendations.push("Keep balancing all skills and review your lowest two task types first.");
   }
 
-  const items = [
-    { key: "total", label: "Total", actual: row.actual_total, target: row.target_total },
-    { key: "listening", label: "Listening", actual: row.actual_listening, target: row.target_listening },
-    { key: "speaking", label: "Speaking", actual: row.actual_speaking, target: row.target_speaking },
-    { key: "reading", label: "Reading", actual: row.actual_reading, target: row.target_reading },
-    { key: "writing", label: "Writing", actual: row.actual_writing, target: row.target_writing },
-  ];
-  const metTargetCount = items.filter((x) => Number(x.actual ?? 0) >= Number(x.target ?? 0)).length;
+  const listening = Math.round(Number(row.actual_listening ?? 0));
+  const speaking = Math.round(Number(row.actual_speaking ?? 0));
+  const reading = Math.round(Number(row.actual_reading ?? 0));
+  const writing = Math.round(Number(row.actual_writing ?? 0));
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 px-4 py-10">
-      <section className={`${mt.border} ${mt.shadow} ${mt.gridBg} rounded-[4px] bg-[#004AAD] p-6 text-[#FFCC00] sm:p-8`}>
-        <p className="text-sm font-bold uppercase tracking-[0.2em]">Fixed 20-step mock report</p>
-        <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <p className="text-lg font-bold">Your desired score = {desiredScore}/160</p>
-            <p className="mt-1 text-4xl font-black sm:text-5xl">
-              Your score = {scoreFromSkills}/160
-            </p>
-            <p className="mt-2 max-w-xl text-sm font-bold text-[#FFCC00]/90">
-              Computed as round((Listening + Writing + Speaking + Reading) / 4)
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-[4px] border-2 border-black bg-white px-3 py-3 text-black">
-              <div className="text-[11px] font-black uppercase tracking-wide text-neutral-500">Target met</div>
-              <div className="text-2xl font-black">{desiredScore > 0 && scoreFromSkills >= desiredScore ? "Yes" : "Not yet"}</div>
-            </div>
-            <div className="rounded-[4px] border-2 border-black bg-white px-3 py-3 text-black">
-              <div className="text-[11px] font-black uppercase tracking-wide text-neutral-500">Skills on target</div>
-              <div className="text-2xl font-black">{metTargetCount}/5</div>
-            </div>
-            <div className="rounded-[4px] border-2 border-black bg-white px-3 py-3 text-black">
-              <div className="text-[11px] font-black uppercase tracking-wide text-neutral-500">Best area</div>
-              <div className="text-sm font-black">{sortedHigh[0]?.task.replaceAll("_", " ") ?? "N/A"}</div>
-            </div>
-            <div className="rounded-[4px] border-2 border-black bg-white px-3 py-3 text-black">
-              <div className="text-[11px] font-black uppercase tracking-wide text-neutral-500">Main focus</div>
-              <div className="text-sm font-black">{sortedLow[0]?.task.replaceAll("_", " ") ?? "N/A"}</div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section className={`${mt.border} ${mt.shadow} bg-white p-6`}>
-        <h2 className="text-lg font-black text-[#004AAD]">Target vs Actual</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {items.map((x) => {
-            const delta = (x.actual ?? 0) - (x.target ?? 0);
-            return (
-              <div key={x.key} className="rounded-[4px] border-2 border-black px-3 py-3">
-                <div className="flex items-start justify-between gap-3">
-                  <span className="font-bold">{x.label}</span>
-                  <span
-                    className={`rounded-full border-2 border-black px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${
-                      delta >= 0 ? "bg-emerald-200" : "bg-red-100"
-                    }`}
-                  >
-                    {fmtDelta(delta)}
-                  </span>
-                </div>
-                <div className="mt-3 flex items-end justify-between">
-                  <span className="font-mono text-2xl font-black">{Math.round(x.actual)}</span>
-                  <span className="text-xs font-bold text-neutral-500">
-                    Target {Math.round(Number(x.target ?? 0))} /160
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-      <section className={`${mt.border} ${mt.shadow} bg-white p-6`}>
-        <h2 className="text-lg font-black text-[#004AAD]">Score breakdown</h2>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-[4px] border-2 border-black bg-emerald-50 p-3">
-            <p className="text-sm font-black text-emerald-800">Strength (Top 3)</p>
-            <ul className="mt-2 space-y-1 text-sm">
-              {sortedHigh.map((x) => (
-                <li key={x.task} className="flex items-center justify-between">
-                  <span>{x.task.replaceAll("_", " ")}</span>
-                  <span className="font-mono font-bold">{x.average}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-[4px] border-2 border-black bg-red-50 p-3">
-            <p className="text-sm font-black text-red-800">Weakness (Lowest 3)</p>
-            <ul className="mt-2 space-y-1 text-sm">
-              {sortedLow.map((x) => (
-                <li key={x.task} className="flex items-center justify-between">
-                  <span>{x.task.replaceAll("_", " ")}</span>
-                  <span className="font-mono font-bold">{x.average}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-      <section className={`${mt.border} ${mt.shadow} bg-white p-6`}>
-        <h2 className="text-lg font-black text-[#004AAD]">Recommendation</h2>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-neutral-800">
-          {recommendations.map((r, i) => (
-            <li key={i}>{r}</li>
-          ))}
-        </ul>
-      </section>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Link href="/mock-test/start" className={`${mt.border} bg-white px-4 py-3 text-center text-sm font-bold shadow-[4px_4px_0_0_#000]`}>
-          Start another fixed mock
-        </Link>
+    <>
+      <MockFixedReportBrandedView
+        sessionId={sessionId}
+        total={totalScore}
+        listening={listening}
+        speaking={speaking}
+        reading={reading}
+        writing={writing}
+        targets={{
+          total: Math.round(Number(row.target_total ?? 0)),
+          listening: Math.round(Number(row.target_listening ?? 0)),
+          speaking: Math.round(Number(row.target_speaking ?? 0)),
+          reading: Math.round(Number(row.target_reading ?? 0)),
+          writing: Math.round(Number(row.target_writing ?? 0)),
+        }}
+        responses={responses}
+        completedAt={row.created_at ?? null}
+        recommendations={recommendations}
+      />
+      <div className="mx-auto max-w-[720px] space-y-2 px-4 pb-12">
+        <button
+          type="button"
+          disabled={dashboardLoading}
+          onClick={() => {
+            void (async () => {
+              setDashboardError(null);
+              setDashboardLoading(true);
+              const wantSave = !dashboardSavedAt;
+              try {
+                const res = await fetch(`/api/mock-test/fixed/results/${sessionId}/dashboard`, {
+                  method: "PATCH",
+                  credentials: "same-origin",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ saved: wantSave }),
+                });
+                const json = (await res.json().catch(() => ({}))) as {
+                  error?: string;
+                  dashboard_saved_at?: string | null;
+                };
+                if (!res.ok) {
+                  setDashboardError(json.error ?? "Could not update dashboard.");
+                  return;
+                }
+                setDashboardSavedAt(json.dashboard_saved_at ?? null);
+              } finally {
+                setDashboardLoading(false);
+              }
+            })();
+          }}
+          className="w-full border-[3px] border-black bg-white px-4 py-3 text-center text-[0.7rem] font-extrabold uppercase tracking-wide text-neutral-900 shadow-[2px_2px_0_0_#111827] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_#111827] disabled:opacity-50"
+        >
+          {dashboardLoading
+            ? "Updating…"
+            : dashboardSavedAt
+              ? "Saved on mock test dashboard — tap to remove"
+              : "Save report to mock test dashboard"}
+        </button>
+        {dashboardError ? (
+          <p className="text-center text-xs font-bold text-red-700">{dashboardError}</p>
+        ) : null}
+        <p className="text-center text-[11px] font-semibold text-neutral-600">
+          Pinned reports appear at the top of your list on{" "}
+          <Link href="/mock-test/start" className="font-bold text-[#004aad] underline underline-offset-2">
+            Mock test
+          </Link>
+          .
+        </p>
         <button
           type="button"
           onClick={() => {
@@ -220,30 +189,31 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
                 user_id: user.id,
                 type: "production",
                 content: [
-                  `Desired score: ${desiredScore}/160`,
-                  `Your score: ${scoreFromSkills}/160`,
+                  "DET fixed mock (20 steps) — full report snapshot",
+                  `Total: ${totalScore}/160 (target ${desiredScore}/160)`,
+                  `Listening ${listening}/160 · Speaking ${speaking}/160 · Reading ${reading}/160 · Writing ${writing}/160`,
                   "",
-                  "Strength (Top 3):",
-                  ...sortedHigh.map((x) => `- ${x.task}: ${x.average}`),
+                  "Strength (top 3 task averages):",
+                  ...sortedHigh.map((x) => `- ${x.task.replaceAll("_", " ")}: ${x.average}`),
                   "",
-                  "Weakness (Lowest 3):",
-                  ...sortedLow.map((x) => `- ${x.task}: ${x.average}`),
+                  "Weakest (lowest 3):",
+                  ...sortedLow.map((x) => `- ${x.task.replaceAll("_", " ")}: ${x.average}`),
                   "",
-                  "Recommendations:",
+                  "Coach tips:",
                   ...recommendations.map((x) => `- ${x}`),
                 ].join("\n"),
                 source_exercise_type: "mock_test",
                 source_skill: "production",
-                score_at_save: scoreFromSkills,
+                score_at_save: totalScore,
               });
               router.push("/notebook");
             })();
           }}
-          className={`${mt.border} bg-[#FFCC00] px-4 py-3 text-sm font-black text-black shadow-[4px_4px_0_0_#000]`}
+          className="w-full border-[3px] border-black bg-[#ffcc00] px-4 py-3 text-center text-[0.7rem] font-extrabold uppercase tracking-wide text-black shadow-[2px_2px_0_0_#111827] transition hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_#111827]"
         >
           Save report to notebook
         </button>
       </div>
-    </main>
+    </>
   );
 }
