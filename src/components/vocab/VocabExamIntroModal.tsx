@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useLayoutEffect, useState } from "react";
+import { IntroModalShell } from "@/components/practice/IntroModalShell";
 
 const STORAGE_KEY = "ep-vocab-master-intro-dismissed-v1";
 
@@ -31,33 +32,39 @@ export function VocabExamIntroModal() {
   if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{
-        fontFamily: "var(--font-inter), ui-sans-serif, system-ui",
-        backgroundImage: "radial-gradient(#111 1px, transparent 1px)",
-        backgroundSize: "20px 20px",
-        backgroundColor: "#e5e7eb",
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="vocab-intro-title"
-    >
-      <div className="max-h-[min(92vh,900px)] w-full max-w-2xl overflow-y-auto border-4 border-[#111] bg-white p-6 shadow-[8px_8px_0_0_#111] md:p-8">
-        <div className="flex items-start justify-between border-b-4 border-black pb-4">
-          <div>
-            <h1
-              id="vocab-intro-title"
-              className="text-2xl font-black uppercase italic leading-none tracking-tighter sm:text-3xl"
-            >
-              Master Vocab <br />
-              <span className="text-[#0055FF]">เก่งศัพท์ ไม่ต้องท่อง</span>
-            </h1>
-          </div>
-          <div className="border-2 border-black bg-[#FFD600] px-1 py-0.5 font-mono text-[10px] font-bold">GUIDE 01</div>
+    <IntroModalShell
+      open={open}
+      onDismiss={dismiss}
+      labelledBy="vocab-intro-title"
+      title={
+        <>
+          Master Vocab <br />
+          <span className="text-[#0055FF]">เก่งศัพท์ ไม่ต้องท่อง</span>
+        </>
+      }
+      badge={<div className="border-2 border-black bg-[#FFD600] px-1 py-0.5 font-mono text-[10px] font-bold">GUIDE 01</div>}
+      backgroundColor="#e5e7eb"
+      footer={
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={dismiss}
+            className="flex-1 border-[3px] border-black bg-[#0055FF] py-4 text-lg font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+          >
+            Get Started / เริ่มเลย
+          </button>
+          <button
+            type="button"
+            onClick={dismiss}
+            className="flex w-16 items-center justify-center border-[3px] border-black bg-white font-black shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            aria-label="Dismiss guide"
+          >
+            ?
+          </button>
         </div>
-
-        <div className="mt-6 space-y-6">
+      }
+    >
+      <div className="space-y-6">
           <div className="flex gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-black text-white">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,26 +133,7 @@ export function VocabExamIntroModal() {
             <span>➔</span>
             <span className="bg-[#FFD600] px-1 text-black">3. ADD TO NOTEBOOK</span>
           </div>
-        </div>
-
-        <div className="mt-8 flex gap-4">
-          <button
-            type="button"
-            onClick={dismiss}
-            className="flex-1 border-[3px] border-black bg-[#0055FF] py-4 text-lg font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
-          >
-            Get Started / เริ่มเลย
-          </button>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="flex w-16 items-center justify-center border-[3px] border-black bg-white font-black shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
-            aria-label="Dismiss guide"
-          >
-            ?
-          </button>
-        </div>
       </div>
-    </div>
+    </IntroModalShell>
   );
 }

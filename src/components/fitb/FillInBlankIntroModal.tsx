@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { IntroModalShell } from "@/components/practice/IntroModalShell";
 
 /**
  * GUIDE 03 — shown from Practice hub before entering Fill in the blank.
@@ -32,35 +33,43 @@ export function FillInBlankIntroModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{
-        fontFamily: "var(--font-inter), ui-sans-serif, system-ui, 'Anuphan', sans-serif",
-        backgroundImage: "radial-gradient(#111 1px, transparent 1px)",
-        backgroundSize: "20px 20px",
-        backgroundColor: "#f3f4f6",
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="fitb-intro-title"
-    >
-      <div className="max-h-[min(92vh,900px)] w-full max-w-2xl overflow-y-auto border-4 border-[#111] bg-white p-6 shadow-[8px_8px_0_0_#111] md:p-8">
-        <div className="flex items-start justify-between border-b-4 border-black pb-4">
-          <div>
-            <h1
-              id="fitb-intro-title"
-              className="text-2xl font-black uppercase italic leading-none tracking-tighter sm:text-3xl"
-            >
-              เติมคำในช่องว่าง <br />
-              <span className="font-mono text-xl font-bold not-italic normal-case text-violet-600">Fill in the Blank</span>
-            </h1>
-          </div>
-          <div className="border-2 border-black bg-violet-600 px-1 py-0.5 font-mono text-[10px] font-bold text-white">
-            GUIDE 03
-          </div>
+    <IntroModalShell
+      open={open}
+      onDismiss={dismiss}
+      labelledBy="fitb-intro-title"
+      title={
+        <>
+          เติมคำในช่องว่าง <br />
+          <span className="font-mono text-xl font-bold not-italic normal-case text-violet-600">
+            Fill in the Blank
+          </span>
+        </>
+      }
+      badge={
+        <div className="border-2 border-black bg-violet-600 px-1 py-0.5 font-mono text-[10px] font-bold text-white">
+          GUIDE 03
         </div>
-
-        <div className="mt-6 space-y-6">
+      }
+      footer={
+        <>
+          <button
+            type="button"
+            onClick={enter}
+            className="w-full border-[3px] border-black bg-violet-600 py-4 text-lg font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+          >
+            เริ่มแบบฝึกหัด / Enter Exercise
+          </button>
+          <button
+            type="button"
+            onClick={dismiss}
+            className="mt-3 w-full border-2 border-transparent py-2 text-center text-xs font-bold text-neutral-500 underline"
+          >
+            Close
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-6">
           <div className="flex items-center gap-4 border-2 border-black bg-purple-50 p-4">
             <div className="text-3xl font-black" aria-hidden>
               🎯
@@ -139,25 +148,7 @@ export function FillInBlankIntroModal({
               &quot;Like a jigsaw puzzle: Match both the shape (Grammar) and the pattern (Vocab).&quot;
             </p>
           </div>
-        </div>
-
-        <div className="mt-8">
-          <button
-            type="button"
-            onClick={enter}
-            className="w-full border-[3px] border-black bg-violet-600 py-4 text-lg font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
-          >
-            เริ่มแบบฝึกหัด / Enter Exercise
-          </button>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="mt-3 w-full border-2 border-transparent py-2 text-center text-xs font-bold text-neutral-500 underline"
-          >
-            Close
-          </button>
-        </div>
       </div>
-    </div>
+    </IntroModalShell>
   );
 }

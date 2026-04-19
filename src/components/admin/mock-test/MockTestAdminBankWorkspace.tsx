@@ -11,11 +11,11 @@ import {
 } from "@/lib/mock-test/fixed-upload";
 import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
 import { mt } from "@/lib/mock-test/mock-test-styles";
-import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 export function MockTestAdminBankWorkspace() {
   const [sets, setSets] = useState<Array<{ id: string; name: string; itemCount: number }>>([]);
   const [setName, setSetName] = useState("");
+  const [userTitle, setUserTitle] = useState("");
   const [format, setFormat] = useState<"json" | "csv">("json");
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
@@ -42,20 +42,20 @@ Task-specific content_json:
   turns[] with question_en and reference_answer_en in each turn`;
 
   const loadSets = useCallback(async () => {
-    const supabase = getBrowserSupabase();
-    if (!supabase) return;
-    const { data, error } = await supabase
-      .from("mock_fixed_sets")
-      .select("id,name,mock_fixed_set_items(count)");
-    if (error) {
-      setBanner(error.message);
+    const res = await fetch("/api/mock-test/fixed/sets", { credentials: "same-origin" });
+    const json = (await res.json().catch(() => ({}))) as {
+      sets?: Array<{ id: string; name: string; stepCount: number }>;
+      error?: string;
+    };
+    if (!res.ok) {
+      setBanner(json.error ?? "Could not load fixed sets.");
       return;
     }
-    const mapped = ((data ?? []) as Array<{ id: string; name: string; mock_fixed_set_items: Array<{ count: number }> }>)
+    const mapped = (json.sets ?? [])
       .map((row) => ({
         id: row.id,
         name: row.name,
-        itemCount: row.mock_fixed_set_items?.[0]?.count ?? 0,
+        itemCount: row.stepCount ?? 0,
       }))
       .sort((a, b) => a.name.localeCompare(b.name));
     setSets(mapped);
@@ -89,15 +89,12 @@ Task-specific content_json:
 
   const uploadFixedSet = async () => {
     setBanner(null);
-    const supabase = getBrowserSupabase();
-    if (!supabase) {
-      setBanner(
-        "Supabase not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
-      );
+    if (!setName.trim()) {
+      setBanner("Please enter internal set name.");
       return;
     }
-    if (!setName.trim()) {
-      setBanner("Please enter set name.");
+    if (!userTitle.trim()) {
+      setBanner("Please enter learner-facing title.");
       return;
     }
     const parsed =
@@ -106,32 +103,39 @@ Task-specific content_json:
       setBanner(parsed.error);
       return;
     }
+    const groupedItems = parsed.rows.reduce<Record<string, unknown[]>>((acc, row) => {
+      const current = acc[row.task_type] ?? [];
+      current.push({
+        content: row.content,
+        correct_answer: row.correct_answer,
+        time_limit_sec: row.time_limit_sec,
+        rest_after_step_sec: row.rest_after_step_sec ?? 0,
+        is_ai_graded: row.is_ai_graded ?? false,
+      });
+      acc[row.task_type] = current;
+      return acc;
+    }, {});
     setBusy(true);
-    const { data: setRow, error: setError } = await supabase
-      .from("mock_fixed_sets")
-      .upsert([{ name: setName.trim(), is_active: true }], { onConflict: "name" })
-      .select("id")
-      .single();
-    if (setError || !setRow) {
-      setBusy(false);
-      setBanner(setError?.message ?? "Could not create set");
-      return;
-    }
-    await supabase.from("mock_fixed_set_items").delete().eq("set_id", setRow.id);
-    const rows = parsed.rows.map((r) => ({
-      set_id: setRow.id,
-      step_index: r.step_index,
-      task_type: r.task_type,
-      time_limit_sec: r.time_limit_sec,
-      rest_after_step_sec: r.rest_after_step_sec ?? 0,
-      content: r.content,
-      correct_answer: r.correct_answer,
-      is_ai_graded: r.is_ai_graded ?? false,
-    }));
-    const { error } = await supabase.from("mock_fixed_set_items").insert(rows);
+    const res = await fetch("/api/admin/mock-test/fixed-builder/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({
+        internal_name: setName.trim(),
+        user_title: userTitle.trim(),
+        grouped_items: groupedItems,
+      }),
+    });
+    const json = (await res.json().catch(() => ({}))) as {
+      ok?: boolean;
+      error?: string;
+      savedRows?: number;
+    };
     setBusy(false);
-    if (error) return setBanner(error.message);
-    setBanner(`Uploaded ${rows.length}/${FIXED_MOCK_STEP_COUNT} steps to set "${setName.trim()}".`);
+    if (!res.ok || !json.ok) return setBanner(json.error ?? "Upload failed.");
+    setBanner(
+      `Uploaded ${json.savedRows ?? parsed.rows.length}/${FIXED_MOCK_STEP_COUNT} steps to set "${userTitle.trim()}".`,
+    );
     await loadSets();
   };
 
@@ -261,7 +265,13 @@ Task-specific content_json:
             value={setName}
             onChange={(e) => setSetName(e.target.value)}
             className={`${mt.border} bg-white px-3 py-2 text-sm`}
-            placeholder="Fixed set name (e.g. April 2026 Form A)"
+            placeholder="Internal set name (e.g. april-2026-form-a)"
+          />
+          <input
+            value={userTitle}
+            onChange={(e) => setUserTitle(e.target.value)}
+            className={`${mt.border} bg-white px-3 py-2 text-sm`}
+            placeholder="Learner title (e.g. April 2026 Form A)"
           />
           <div className="flex gap-2">
             <button

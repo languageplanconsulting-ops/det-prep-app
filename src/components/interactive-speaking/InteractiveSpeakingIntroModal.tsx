@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 
+import { IntroModalShell } from "@/components/practice/IntroModalShell";
 import { getNextLocalMondayLabels } from "@/lib/vip-ai-feedback-quota";
 
 export function InteractiveSpeakingIntroModal({
@@ -43,41 +44,48 @@ export function InteractiveSpeakingIntroModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{
-        fontFamily: "var(--font-inter), ui-sans-serif, system-ui, 'Anuphan', sans-serif",
-        backgroundImage: "radial-gradient(#111 1px, transparent 1px)",
-        backgroundSize: "20px 20px",
-        backgroundColor: "#f3f4f6",
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="interactive-speaking-intro-title"
-      onClick={dismiss}
-    >
-      <div
-        className="max-h-[min(92vh,900px)] w-full max-w-2xl overflow-y-auto border-4 border-[#111] bg-white p-6 shadow-[8px_8px_0_0_#111] md:p-8"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-6 flex items-start justify-between border-b-4 border-black pb-4">
-          <div>
-            <h1
-              id="interactive-speaking-intro-title"
-              className="text-2xl font-black uppercase italic leading-none tracking-tighter sm:text-3xl"
-            >
-              พูดโต้ตอบอัจฉริยะ <br />
-              <span className="font-mono text-xl font-bold not-italic normal-case text-rose-500">
-                Interactive Speaking
-              </span>
-            </h1>
-          </div>
-          <div className="border-2 border-black bg-rose-500 px-1 py-0.5 font-mono text-[10px] font-bold text-white">
-            GUIDE 06
-          </div>
+    <IntroModalShell
+      open={open}
+      onDismiss={dismiss}
+      labelledBy="interactive-speaking-intro-title"
+      title={
+        <>
+          พูดโต้ตอบอัจฉริยะ <br />
+          <span className="font-mono text-xl font-bold not-italic normal-case text-rose-500">
+            Interactive Speaking
+          </span>
+        </>
+      }
+      badge={
+        <div className="border-2 border-black bg-rose-500 px-1 py-0.5 font-mono text-[10px] font-bold text-white">
+          GUIDE 06
         </div>
-
-        <div className="space-y-6">
+      }
+      footer={
+        <>
+          <button
+            type="button"
+            onClick={enter}
+            disabled={!canStart}
+            className={`w-full border-[3px] border-black py-4 text-lg font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_#111] transition ${
+              canStart
+                ? "bg-rose-500 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                : "cursor-not-allowed bg-neutral-400 opacity-70 shadow-none"
+            }`}
+          >
+            เริ่มการสนทนา / Start Speaking
+          </button>
+          <button
+            type="button"
+            onClick={dismiss}
+            className="mt-3 w-full border-2 border-transparent py-2 text-center text-xs font-bold text-neutral-500 underline"
+          >
+            Close
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-6">
           <div className="space-y-4">
             <p className="text-center font-mono text-[11px] font-black uppercase tracking-widest text-gray-500">
               กระบวนการฝึกฝน / How it works
@@ -152,30 +160,7 @@ export function InteractiveSpeakingIntroModal({
               Add the report &amp; recommended vocab to your notebook to improve your next score.
             </p>
           </div>
-        </div>
-
-        <div className="mt-8">
-          <button
-            type="button"
-            onClick={enter}
-            disabled={!canStart}
-            className={`w-full border-[3px] border-black py-4 text-lg font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_#111] transition ${
-              canStart
-                ? "bg-rose-500 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
-                : "cursor-not-allowed bg-neutral-400 opacity-70 shadow-none"
-            }`}
-          >
-            เริ่มการสนทนา / Start Speaking
-          </button>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="mt-3 w-full border-2 border-transparent py-2 text-center text-xs font-bold text-neutral-500 underline"
-          >
-            Close
-          </button>
-        </div>
       </div>
-    </div>
+    </IntroModalShell>
   );
 }

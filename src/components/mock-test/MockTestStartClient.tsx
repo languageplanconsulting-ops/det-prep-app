@@ -578,7 +578,10 @@ export function MockTestStartClient() {
                       <button
                         key={row.id}
                         type="button"
-                        onClick={() => setSelectedSetId(row.id)}
+                        onClick={() => {
+                          setSelectedSetId(row.id);
+                          setShowPreflight(true);
+                        }}
                         className={`flex w-full items-center justify-between border-2 border-black p-2 text-left hover:bg-blue-50 ${
                           selectedSetId === row.id ? "bg-blue-50" : "bg-white"
                         }`}

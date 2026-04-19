@@ -2,19 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
 import { VocabExamIntroModal } from "@/components/vocab/VocabExamIntroModal";
 import { VocabularyBuilderAvailabilityBanner } from "@/components/vocab/VocabularyBuilderAvailabilityBanner";
+import { VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
 import { getVocabRoundStats, loadVocabVisibleBank } from "@/lib/vocab-storage";
 import type { VocabRoundNum } from "@/types/vocab";
 
 function formatShortDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "No attempts yet";
   try {
     const d = new Date(iso);
     return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   } catch {
-    return "—";
+    return "No attempts yet";
   }
 }
 
@@ -34,30 +34,93 @@ export function VocabRoundsHub() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div
+      className="space-y-10"
+      style={{
+        fontFamily: "var(--font-inter), ui-sans-serif, system-ui, 'Anuphan', sans-serif",
+      }}
+    >
       <VocabExamIntroModal />
-      <header className="ep-brutal-reading rounded-sm bg-white p-6">
-        <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">
-          Vocabulary in context
-        </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">English Plan — vocabulary exam bank</h1>
-        <p className="mt-2 max-w-2xl text-sm text-neutral-600">
-          Five rounds. Each round has eight sets. Inside a set, pick Easy / Medium / Hard, then a test. Averages
-          use your best score per test as a percent of that test&apos;s max; the date is your most recent attempt
-          in that round.
-        </p>
+
+      <Link
+        href="/practice"
+        className="font-mono text-xs font-black text-[#004aad] hover:underline"
+      >
+        ← BACK TO PRACTICE HUB / กลับหน้าหลัก
+      </Link>
+
+      <header
+        className="relative overflow-hidden border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#111] md:p-8"
+        style={{
+          backgroundImage: "radial-gradient(#111 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+          backgroundColor: "#f3f4f6",
+        }}
+      >
+        <div className="absolute right-0 top-0 border-b-4 border-l-4 border-black bg-[#004aad] px-4 py-1 font-mono text-[10px] text-white">
+          COMPREHENSION · VOCABULARY IN CONTEXT
+        </div>
+
+        <h1 className="text-4xl font-black uppercase italic leading-none tracking-tighter md:text-5xl">
+          คลังข้อสอบคำศัพท์ <br />
+          <span className="text-2xl not-italic text-[#004aad] md:text-3xl">Vocabulary Exam Bank</span>
+        </h1>
+
+        <div className="mt-6 grid gap-6 border-t-4 border-black pt-6 md:grid-cols-2 md:items-center">
+          <div className="space-y-3">
+            <p className="text-sm font-black uppercase text-gray-400">
+              วิธีเก่งศัพท์แบบไม่ต้องท่อง (Strategy):
+            </p>
+            <ul className="space-y-2 text-sm font-bold">
+              <li className="flex items-center gap-3">
+                <span className="flex h-6 w-6 items-center justify-center bg-black text-[10px] text-white">1</span>
+                <span>เลือกความยาก (Easy / Medium / Hard) ในแต่ละชุด</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="flex h-6 w-6 items-center justify-center bg-black text-[10px] text-white">2</span>
+                <span>ทำแบบทดสอบเพื่อดูการใช้คำศัพท์ในบริบทจริง</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="flex h-6 w-6 items-center justify-center bg-black text-[10px] text-white">3</span>
+                <span>
+                  คำไหนที่ผิด? <span className="text-[#004aad] underline">กด &quot;Add to Notebook&quot;</span> เพื่อไว้ทบทวน
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div className="border-2 border-dashed border-black bg-gray-50 p-4">
+            <p className="mb-2 text-[11px] font-bold italic leading-tight text-gray-500">
+              &quot;Five rounds of vocabulary sets. Each set is designed to test your situational word choice. Scores impact both Literacy and Comprehension sub-scores.&quot;
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <span className="border-2 border-black bg-[#ffcc00] px-2 py-0.5 font-mono text-[10px] font-extrabold uppercase">
+                Boosts Score
+              </span>
+              <span className="border-2 border-black bg-white px-2 py-0.5 font-mono text-[10px] font-extrabold uppercase">
+                8 Sets / Round
+              </span>
+            </div>
+          </div>
+        </div>
       </header>
 
       <VocabularyBuilderAvailabilityBanner />
 
-      <section className="space-y-4">
-        <h2 className="text-lg font-black uppercase tracking-wide">Rounds</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {VOCAB_ROUND_NUMBERS.map((round) => (
-            <RoundCard key={`${round}-${v}`} round={round} />
-          ))}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        {VOCAB_ROUND_NUMBERS.map((round) => (
+          <RoundCard key={`${round}-${v}`} round={round} />
+        ))}
+      </div>
+
+      <footer className="relative border-4 border-black bg-black p-5 text-white shadow-[8px_8px_0_0_#111]">
+        <div className="absolute -top-3 left-4 border-2 border-black bg-[#ffcc00] px-2 py-0.5 text-[10px] font-black text-black">
+          VOCAB HACK
         </div>
-      </section>
+        <p className="mt-1 text-xs font-bold italic leading-tight">
+          แทนการท่องจำทีละคำ ให้ฝึกทำโจทย์บ่อยๆ เพื่อให้สมองจำภาพรวมของบริบท และอย่าลืมบันทึกคำที่ตอบผิดลง{" "}
+          <span className="text-[#ffcc00]">Personal Notebook</span> เพื่อกลับมาทวนได้แม่นยำขึ้น!
+        </p>
+      </footer>
     </div>
   );
 }
@@ -66,28 +129,51 @@ function RoundCard({ round }: { round: VocabRoundNum }) {
   const bank = loadVocabVisibleBank();
   const totalSets = bank[round].length;
   const stats = getVocabRoundStats(round);
+  const href = `/practice/comprehension/vocabulary/round/${round}`;
+  const hasAttempts = stats.avgPercent != null;
+  const avgLabel = hasAttempts ? `${stats.avgPercent}%` : "—";
+  const statusLabel = "Ready";
+  const cardClassName = round === 1 || hasAttempts ? "bg-[#ffcc00]" : "bg-white";
 
   return (
     <Link
-      href={`/practice/comprehension/vocabulary/round/${round}`}
-      className="ep-interactive ep-brutal-reading flex flex-col rounded-sm bg-ep-yellow px-4 py-6 text-left shadow-[4px_4px_0_0_#000] hover:bg-ep-yellow/90"
+      href={href}
+      className={`flex h-full flex-col border-4 border-black p-5 shadow-[8px_8px_0_0_#111] transition duration-200 ease-out hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0_0_#111] ${cardClassName}`}
     >
-      <span className="text-2xl font-black">Round {round}</span>
-      <span className="ep-stat mt-2 text-sm font-bold text-neutral-800">
-        {totalSets > 0 ? `${totalSets} set(s) uploaded` : "COMING SOON"}
-      </span>
-      <span className="ep-stat mt-3 block text-xs font-bold uppercase tracking-wide text-neutral-700">
-        Avg score
-      </span>
-      <span className="text-lg font-black text-ep-blue">
-        {stats.avgPercent != null ? `${stats.avgPercent}%` : "—"}
-      </span>
-      <span className="ep-stat mt-2 block text-xs font-bold uppercase tracking-wide text-neutral-700">
-        Latest attempt
-      </span>
-      <span className="ep-stat text-sm font-semibold text-neutral-800">
-        {formatShortDate(stats.latestAttemptDate)}
-      </span>
+      <div className="mb-4 flex items-start justify-between">
+        <span className="border-2 border-black bg-white px-2 py-0.5 font-mono text-[10px] font-extrabold uppercase text-black">
+          {statusLabel}
+        </span>
+        <span className="font-mono text-[10px] font-black opacity-40">ROUND 0{round}</span>
+      </div>
+
+      <h3 className={`mb-1 text-3xl font-black uppercase italic ${round >= 3 && !hasAttempts ? "text-gray-300" : ""}`}>
+        Round {round}
+      </h3>
+      <p className={`mb-4 text-[11px] font-black leading-tight ${round >= 3 && !hasAttempts ? "opacity-60" : ""}`}>
+        {totalSets} ชุดในคลังข้อสอบ <br />
+        <span className="text-[#004aad]">({totalSets} SET{totalSets === 1 ? "" : "S"} UPLOADED)</span>
+      </p>
+
+      <div className="mt-auto space-y-3">
+        <div className={`border-2 border-black p-2 ${hasAttempts ? "bg-white" : "bg-gray-50 opacity-40"}`}>
+          <p className="font-mono text-[9px] font-black uppercase opacity-50">Avg Score / คะแนนเฉลี่ย</p>
+          <p className={`text-3xl font-black ${hasAttempts ? "text-[#004aad]" : "text-black"}`}>{avgLabel}</p>
+        </div>
+        <div className={`text-[10px] font-bold leading-none ${hasAttempts ? "" : "opacity-30 italic"}`}>
+          {hasAttempts ? (
+            <>
+              <p className="opacity-50">LATEST ATTEMPT / ฝึกล่าสุด</p>
+              <p>{formatShortDate(stats.latestAttemptDate)}</p>
+            </>
+          ) : (
+            <>
+              <p>No attempts yet</p>
+              <p>ยังไม่มีประวัติการสอบ</p>
+            </>
+          )}
+        </div>
+      </div>
     </Link>
   );
 }
