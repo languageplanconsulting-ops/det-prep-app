@@ -5,7 +5,15 @@ import { useMemo, useState } from "react";
 type Props = {
   content: Record<string, unknown>;
   submitting?: boolean;
-  onSubmit: (payload: { score160: number; detail: Record<string, unknown> }) => void;
+  onSubmit: (payload: {
+    score160: number;
+    detail: Record<string, unknown>;
+    round_selections?: Array<{
+      selected: string[];
+      realWords: string[];
+      fakeWords: string[];
+    }>;
+  }) => void;
 };
 
 function shuffle<T>(arr: T[]): T[] {
