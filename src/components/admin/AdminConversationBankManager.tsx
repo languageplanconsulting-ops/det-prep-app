@@ -24,6 +24,8 @@ function sortExamsForTable(list: ConversationExam[]): ConversationExam[] {
 export function AdminConversationBankManager() {
   const [query, setQuery] = useState("");
   const [roundFilter, setRoundFilter] = useState<number>(0);
+  const [difficultyFilter, setDifficultyFilter] = useState<"all" | "easy" | "medium" | "hard">("all");
+  const [setFilter, setSetFilter] = useState<number>(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [tick, setTick] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -46,11 +48,27 @@ export function AdminConversationBankManager() {
     const q = query.trim().toLowerCase();
     return allExams.filter((e) => {
       if (roundFilter > 0 && (e.round ?? 1) !== roundFilter) return false;
+      if (difficultyFilter !== "all" && e.difficulty !== difficultyFilter) return false;
+      if (setFilter > 0 && e.setNumber !== setFilter) return false;
       if (!q) return true;
       const hay = `${e.title} ${e.id} ${e.scenario} ${e.difficulty} ${e.setNumber} ${e.round ?? 1}`.toLowerCase();
       return hay.includes(q);
     });
-  }, [allExams, query, roundFilter]);
+  }, [allExams, difficultyFilter, query, roundFilter, setFilter]);
+
+  const distinctSetNumbers = useMemo(
+    () => [...new Set(allExams.map((e) => e.setNumber))].sort((a, b) => a - b),
+    [allExams],
+  );
+
+  const countsByDifficulty = useMemo(
+    () => ({
+      easy: allExams.filter((e) => e.difficulty === "easy").length,
+      medium: allExams.filter((e) => e.difficulty === "medium").length,
+      hard: allExams.filter((e) => e.difficulty === "hard").length,
+    }),
+    [allExams],
+  );
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -97,12 +115,60 @@ export function AdminConversationBankManager() {
     })();
   };
 
+  const removeSingle = (id: string, title: string) => {
+    if (
+      !window.confirm(
+        `Remove this uploaded interactive conversation set?\n\n${title}\n\nThis will delete the set, its learner progress, and generated TTS clips from this browser.`,
+      )
+    ) {
+      return;
+    }
+    void (async () => {
+      setBusy(true);
+      setNotice(null);
+      try {
+        removeConversationExamsByIds([id]);
+        await deleteConversationAudioKeysForExamId(id);
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+        setNotice(`Removed "${title}".`);
+        playBlinkBeep();
+        refresh();
+      } catch (e) {
+        setNotice(e instanceof Error ? e.message : "Remove failed.");
+      } finally {
+        setBusy(false);
+      }
+    })();
+  };
+
   return (
     <div className="space-y-3">
       <p className="text-sm text-neutral-700">
-        All uploaded sets in this browser are listed below. Select rows and remove them to delete those tests from the
-        question bank (learners will no longer see them).
+        Uploaded interactive-conversation sets in this browser are listed below. Filter the table, inspect what is
+        already in the bank, then remove selected uploads when needed.
       </p>
+      <div className="grid gap-2 sm:grid-cols-4">
+        <div className="rounded-[4px] border-2 border-black bg-white px-3 py-2">
+          <p className="text-[10px] font-black uppercase text-neutral-500">Total uploaded</p>
+          <p className="text-lg font-black text-neutral-900">{allExams.length}</p>
+        </div>
+        <div className="rounded-[4px] border-2 border-black bg-white px-3 py-2">
+          <p className="text-[10px] font-black uppercase text-neutral-500">Easy-tagged</p>
+          <p className="text-lg font-black text-ep-blue">{countsByDifficulty.easy}</p>
+        </div>
+        <div className="rounded-[4px] border-2 border-black bg-white px-3 py-2">
+          <p className="text-[10px] font-black uppercase text-neutral-500">Medium-tagged</p>
+          <p className="text-lg font-black text-ep-blue">{countsByDifficulty.medium}</p>
+        </div>
+        <div className="rounded-[4px] border-2 border-black bg-white px-3 py-2">
+          <p className="text-[10px] font-black uppercase text-neutral-500">Selected</p>
+          <p className="text-lg font-black text-red-800">{selected.size}</p>
+        </div>
+      </div>
       {notice ? (
         <p className="rounded border-2 border-emerald-700 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-900">
           {notice}
@@ -130,6 +196,34 @@ export function AdminConversationBankManager() {
             {Array.from({ length: CONVERSATION_ROUND_COUNT }, (_, i) => i + 1).map((r) => (
               <option key={r} value={r}>
                 Round {r}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-xs font-bold uppercase text-neutral-700">
+          Tag
+          <select
+            value={difficultyFilter}
+            onChange={(e) => setDifficultyFilter(e.target.value as "all" | "easy" | "medium" | "hard")}
+            className="mt-1 block border-2 border-black bg-white px-2 py-1.5 text-sm font-bold"
+          >
+            <option value="all">All tags</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </label>
+        <label className="text-xs font-bold uppercase text-neutral-700">
+          Set
+          <select
+            value={setFilter}
+            onChange={(e) => setSetFilter(Number(e.target.value))}
+            className="mt-1 block border-2 border-black bg-white px-2 py-1.5 text-sm font-bold"
+          >
+            <option value={0}>All sets</option>
+            {distinctSetNumbers.map((setNumber) => (
+              <option key={setNumber} value={setNumber}>
+                Set {setNumber}
               </option>
             ))}
           </select>
@@ -169,12 +263,13 @@ export function AdminConversationBankManager() {
               <th className="border border-black px-2 py-1.5 font-black">Title</th>
               <th className="border border-black px-2 py-1.5 font-black">Id</th>
               <th className="border border-black px-2 py-1.5 font-black">Scenario (preview)</th>
+              <th className="border border-black px-2 py-1.5 font-black">Action</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="border border-black px-3 py-6 text-center font-semibold text-neutral-500">
+                <td colSpan={8} className="border border-black px-3 py-6 text-center font-semibold text-neutral-500">
                   No tests match this filter.
                 </td>
               </tr>
@@ -197,6 +292,16 @@ export function AdminConversationBankManager() {
                     <td className="border border-black px-2 py-1.5 font-semibold text-neutral-900">{e.title}</td>
                     <td className="border border-black px-2 py-1.5 font-mono text-[10px] text-neutral-600">{e.id}</td>
                     <td className="border border-black px-2 py-1.5 text-neutral-700">{prev || "—"}</td>
+                    <td className="border border-black px-2 py-1.5">
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => removeSingle(e.id, e.title)}
+                        className="border border-red-700 bg-red-50 px-2 py-1 text-[10px] font-black uppercase text-red-900 disabled:opacity-40"
+                      >
+                        Remove
+                      </button>
+                    </td>
                   </tr>
                 );
               })
