@@ -27,6 +27,12 @@ export function AdminShellBar() {
         Study activity
       </Link>
       <Link
+        href="/admin/executive"
+        className="rounded-[4px] border-2 border-black bg-[#FFCC00] px-3 py-1 text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-ep-yellow/70"
+      >
+        Executive dashboard
+      </Link>
+      <Link
         href="/practice"
         className="text-xs font-semibold text-neutral-700 underline decoration-2 underline-offset-2 hover:text-neutral-900"
       >
