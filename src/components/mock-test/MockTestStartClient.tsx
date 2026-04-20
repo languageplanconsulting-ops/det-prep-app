@@ -84,6 +84,13 @@ function csvEscape(value: string): string {
   return `"${normalized}"`;
 }
 
+const MOCK_START_LOADING_STEPS = [
+  "Locking your mock credit…",
+  "Preparing the 20-step sequence…",
+  "Loading timers and skill targets…",
+  "Opening your exam workspace…",
+] as const;
+
 function downloadAttemptsCsv(attempts: MockAttemptRow[], setNameById: Record<string, string>) {
   const header = [
     "date",
@@ -203,6 +210,7 @@ export function MockTestStartClient() {
   const [previewSeparateMode, setPreviewSeparateMode] = useState(false);
   const [previewStepIndex, setPreviewStepIndex] = useState(13);
   const [unpinSessionId, setUnpinSessionId] = useState<string | null>(null);
+  const [startVisualTick, setStartVisualTick] = useState(0);
 
   const adminCanPreview = isAdmin || previewEligible;
   const trackUsage = launchLive || adminCanPreview;
@@ -304,6 +312,18 @@ export function MockTestStartClient() {
   const sortedAttempts = attempts.slice(0, 50);
   const pinnedAttemptCount = attempts.filter((row) => row.dashboard_saved_at).length;
   const marketing = tierMarketing(effectiveTier);
+  const selectedSetName = setNameById[selectedSetId] ?? "—";
+
+  useEffect(() => {
+    if (!starting) {
+      setStartVisualTick(0);
+      return;
+    }
+    const id = window.setInterval(() => {
+      setStartVisualTick((prev) => prev + 1);
+    }, 850);
+    return () => window.clearInterval(id);
+  }, [starting]);
 
   const start = async () => {
     if (!canStart || !selectedSetId) return;
@@ -663,94 +683,246 @@ export function MockTestStartClient() {
       </div>
 
       {showPreflight ? (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 px-4 py-6">
-          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto border-4 border-black bg-[#fffdf2] p-6 shadow-[8px_8px_0_0_#111]">
-            <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#0055FF]">Preflight · ก่อนเริ่มสอบ</p>
-            <h2 className="mt-2 text-2xl font-black">Start this mock set</h2>
-            <p className="mt-3 text-sm font-bold text-neutral-800">
-              Starting now uses 1 mock credit immediately. Quitting early does not refund it.
-            </p>
-            <p className="mt-2 text-sm font-semibold text-neutral-700">
-              ชุดที่เลือก: <span className="font-black">{setNameById[selectedSetId] ?? "—"}</span>
-            </p>
-            <p className="mt-2 text-sm font-semibold text-neutral-700">
-              แพ็กเกจของคุณ: <span className="font-black uppercase">{effectiveTier}</span> · สิทธิ์ต่อเดือน:{" "}
-              <span className="font-black">{limit}</span>
-            </p>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              {(["total", "listening", "speaking", "reading", "writing"] as const).map((k) => (
-                <label key={k} className="col-span-2 sm:col-span-1">
-                  <span className="font-mono text-[10px] font-black uppercase text-neutral-600">{k}</span>
-                  <input
-                    value={targets[k]}
-                    onChange={(e) => setTargets((prev) => ({ ...prev, [k]: e.target.value }))}
-                    placeholder={k === "total" ? "Target total" : `Target ${k}`}
-                    className="mt-1 w-full border-4 border-black bg-white px-3 py-2 text-sm font-bold"
-                  />
-                </label>
-              ))}
-            </div>
+        <div
+          className="fixed inset-0 z-[80] overflow-y-auto px-4 py-6 md:px-8"
+          style={{
+            backgroundImage: "radial-gradient(#111 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+            backgroundColor: "#f3f4f6",
+          }}
+        >
+          <div className="mx-auto flex min-h-full max-w-5xl items-center justify-center">
+            {starting ? (
+              <div className="w-full max-w-2xl border-4 border-black bg-white p-8 shadow-[10px_10px_0_0_#111] md:p-10">
+                <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#004aad]">
+                  Launch Sequence // กำลังเปิดข้อสอบ
+                </p>
+                <h2 className="mt-3 text-4xl font-black uppercase italic leading-none tracking-tighter md:text-5xl">
+                  Starting Mock <br />
+                  <span className="not-italic text-[#004aad]">Please wait</span>
+                </h2>
+                <div className="mt-8 border-4 border-black bg-[#ffcc00] p-4 shadow-[4px_4px_0_0_#111]">
+                  <p className="text-sm font-black uppercase">Preparing your exam workspace</p>
+                  <p className="mt-2 text-[11px] font-bold text-black/80">
+                    Do not refresh this page. We are creating your session, locking your credit, and loading the first step.
+                  </p>
+                </div>
+                <div className="mt-8 border-4 border-black bg-white p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] font-black uppercase text-neutral-500">Progress</span>
+                    <span className="font-mono text-[10px] font-black uppercase text-[#004aad]">
+                      {Math.min(MOCK_START_LOADING_STEPS.length, startVisualTick + 1)}/{MOCK_START_LOADING_STEPS.length}
+                    </span>
+                  </div>
+                  <div className="mt-3 h-4 border-[3px] border-black bg-neutral-100">
+                    <div
+                      className="h-full bg-[#004aad] transition-[width] duration-500"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          ((startVisualTick % MOCK_START_LOADING_STEPS.length) + 1) /
+                            MOCK_START_LOADING_STEPS.length *
+                            100,
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="mt-4 text-sm font-black text-neutral-900">
+                    {
+                      MOCK_START_LOADING_STEPS[
+                        Math.min(startVisualTick, MOCK_START_LOADING_STEPS.length - 1)
+                      ]
+                    }
+                  </p>
+                  <div className="mt-5 flex gap-2">
+                    {MOCK_START_LOADING_STEPS.map((label, idx) => {
+                      const active = idx <= Math.min(startVisualTick, MOCK_START_LOADING_STEPS.length - 1);
+                      return (
+                        <div key={label} className="flex-1">
+                          <div
+                            className={`h-3 border-2 border-black ${
+                              active ? "bg-[#ffcc00]" : "bg-white"
+                            }`}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full max-w-2xl border-4 border-black bg-white p-6 shadow-[10px_10px_0_0_#111] md:p-10">
+                <div className="mb-8 flex items-end justify-between border-b-4 border-black pb-6">
+                  <div>
+                    <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#004aad]">
+                      Preflight Check // ก่อนเริ่มสอบ
+                    </p>
+                    <h2 className="mt-2 text-4xl font-black uppercase italic leading-none tracking-tighter md:text-5xl">
+                      ยืนยันการเริ่มสอบ <br />
+                      <span className="not-italic text-[#004aad]">Start Mock Set</span>
+                    </h2>
+                  </div>
+                  <div className="min-w-[100px] border-[3px] border-black bg-[#ffcc00] p-2 text-center">
+                    <p className="font-mono text-[9px] font-black uppercase">Tier Status</p>
+                    <p className="text-xl font-black uppercase italic">{effectiveTier}</p>
+                  </div>
+                </div>
 
-            {adminCanPreview ? (
-              <div className="mt-4 space-y-2 border-2 border-black bg-white p-3">
-                <label className="flex items-center gap-2 text-sm font-bold">
-                  <input type="checkbox" checked={adminPreviewMode} onChange={(e) => setAdminPreviewMode(e.target.checked)} />
-                  Admin test mode (bypass 10-minute wait)
-                </label>
-                <label className="flex items-center gap-2 text-sm font-bold">
-                  <input type="checkbox" checked={skipTimerMode} onChange={(e) => setSkipTimerMode(e.target.checked)} />
-                  Skip timer mode
-                </label>
-                <label className="flex items-center gap-2 text-sm font-bold">
-                  <input
-                    type="checkbox"
-                    checked={previewSeparateMode}
-                    onChange={(e) => setPreviewSeparateMode(e.target.checked)}
-                  />
-                  Preview separate step only
-                </label>
-                {previewSeparateMode ? (
-                  <div className="border-2 border-dashed border-black bg-neutral-50 px-3 py-2">
-                    <p className="text-xs font-bold text-neutral-700">Step 1–20</p>
-                    <select
-                      value={previewStepIndex}
-                      onChange={(e) => setPreviewStepIndex(Number(e.target.value) || 13)}
-                      className="mt-1 w-full border-4 border-black bg-white px-2 py-1 text-sm"
-                    >
-                      {Array.from({ length: 20 }).map((_, i) => {
-                        const step = i + 1;
-                        return (
-                          <option key={step} value={step}>
-                            Step {step}
-                          </option>
-                        );
-                      })}
-                    </select>
+                <div className="mb-8 flex items-start gap-4 border-[3px] border-black bg-[#ffcc00] p-4 shadow-[4px_4px_0_0_#111]">
+                  <span className="text-3xl">⚠️</span>
+                  <div>
+                    <p className="text-sm font-black uppercase leading-tight">คำเตือนเรื่องสิทธิ์การสอบ (Credit Notice)</p>
+                    <p className="mt-1 text-[11px] font-bold text-black/80">
+                      การกดเริ่มจะใช้ <span className="underline">1 Mock Credit</span> ทันที หากกดออกกลางคันระบบจะไม่คืนสิทธิ์และไม่มีการคืนเงิน กรุณาเผื่อเวลาอย่างน้อย {FIXED_MOCK_ESTIMATED_DURATION_LABEL}
+                    </p>
+                    <p className="mt-1 font-mono text-[9px] font-bold uppercase text-black/40">
+                      Starting now uses 1 credit. Quitting early = No refund.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="border-2 border-black bg-gray-50 p-3">
+                    <p className="font-mono text-[9px] font-black uppercase opacity-40">Selected Set / ชุดที่เลือก</p>
+                    <p className="mt-1 text-lg font-black uppercase italic text-[#004aad]">{selectedSetName}</p>
+                  </div>
+                  <div className="border-2 border-black bg-gray-50 p-3">
+                    <p className="font-mono text-[9px] font-black uppercase opacity-40">Credits Left / สิทธิ์คงเหลือ</p>
+                    <p className="mt-1 text-lg font-black">
+                      {remainingCount} <span className="text-[10px] opacity-40">Sessions</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mb-10 space-y-4">
+                  <h3 className="flex items-center gap-2 border-b-2 border-black pb-1 text-sm font-black uppercase">
+                    🎯 ตั้งเป้าหมายของคุณ (Set Your Targets)
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-1">
+                      <label className="font-mono text-[10px] font-black uppercase opacity-50">Total Target</label>
+                      <input
+                        value={targets.total}
+                        onChange={(e) => setTargets((prev) => ({ ...prev, total: e.target.value }))}
+                        placeholder="Target total (e.g. 125)"
+                        className="w-full border-[3px] border-black px-3 py-[10px] font-extrabold outline-none focus:bg-[#fff9e6] focus:shadow-[4px_4px_0_0_#004aad]"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {([
+                        ["listening", "Listening"],
+                        ["speaking", "Speaking"],
+                      ] as const).map(([key, label]) => (
+                        <div key={key} className="space-y-1">
+                          <label className="font-mono text-[10px] font-black uppercase opacity-50">{label}</label>
+                          <input
+                            value={targets[key]}
+                            onChange={(e) => setTargets((prev) => ({ ...prev, [key]: e.target.value }))}
+                            placeholder="Target"
+                            className="w-full border-[3px] border-black px-3 py-[10px] font-extrabold outline-none focus:bg-[#fff9e6] focus:shadow-[4px_4px_0_0_#004aad]"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 md:col-span-2">
+                      {([
+                        ["reading", "Reading"],
+                        ["writing", "Writing"],
+                      ] as const).map(([key, label]) => (
+                        <div key={key} className="space-y-1">
+                          <label className="font-mono text-[10px] font-black uppercase opacity-50">{label}</label>
+                          <input
+                            value={targets[key]}
+                            onChange={(e) => setTargets((prev) => ({ ...prev, [key]: e.target.value }))}
+                            placeholder="Target"
+                            className="w-full border-[3px] border-black px-3 py-[10px] font-extrabold outline-none focus:bg-[#fff9e6] focus:shadow-[4px_4px_0_0_#004aad]"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {adminCanPreview ? (
+                  <div className="relative mb-10 border-[3px] border-black bg-black p-5 text-[#FFD600]">
+                    <span className="absolute -top-3 left-4 bg-red-600 px-2 py-0.5 text-[9px] font-black uppercase text-white shadow-sm">
+                      Admin Control Room
+                    </span>
+                    <div className="space-y-3 pt-2">
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={adminPreviewMode}
+                          onChange={(e) => setAdminPreviewMode(e.target.checked)}
+                          className="h-5 w-5 accent-[#FFD600]"
+                        />
+                        <span className="text-[11px] font-bold">Admin test mode (Bypass 10-minute wait)</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={skipTimerMode}
+                          onChange={(e) => setSkipTimerMode(e.target.checked)}
+                          className="h-5 w-5 accent-[#FFD600]"
+                        />
+                        <span className="text-[11px] font-bold">Skip timer mode</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={previewSeparateMode}
+                          onChange={(e) => setPreviewSeparateMode(e.target.checked)}
+                          className="h-5 w-5 accent-[#FFD600]"
+                        />
+                        <span className="text-[11px] font-bold">Preview separate step only</span>
+                      </label>
+                      {previewSeparateMode ? (
+                        <div className="border-2 border-dashed border-[#FFD600] bg-black/40 px-3 py-2">
+                          <p className="text-[10px] font-black uppercase">Preview step</p>
+                          <select
+                            value={previewStepIndex}
+                            onChange={(e) => setPreviewStepIndex(Number(e.target.value) || 13)}
+                            className="mt-2 w-full border-[3px] border-[#FFD600] bg-black px-2 py-2 text-sm font-bold text-[#FFD600]"
+                          >
+                            {Array.from({ length: 20 }).map((_, i) => {
+                              const step = i + 1;
+                              return (
+                                <option key={step} value={step}>
+                                  Step {step}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 ) : null}
+
+                <div className="flex flex-col gap-4 md:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => void start()}
+                    className="flex-grow border-[3px] border-black bg-[#004aad] py-4 text-xl font-black uppercase tracking-widest text-white shadow-[6px_6px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[8px_8px_0_0_#111]"
+                  >
+                    Confirm & Start
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPreflight(false)}
+                    className="border-[3px] border-black bg-white px-10 py-4 font-black uppercase text-gray-500 shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111]"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                {startError ? (
+                  <p className="mt-4 border-2 border-red-700 bg-red-50 px-3 py-2 text-xs font-bold text-red-800">
+                    {startError}
+                  </p>
+                ) : null}
               </div>
-            ) : null}
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => void start()}
-                className="border-[3px] border-black bg-[#0055FF] px-5 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111]"
-              >
-                Confirm & Start
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowPreflight(false)}
-                className="border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#111]"
-              >
-                Cancel
-              </button>
-            </div>
-
-            {startError ? (
-              <p className="mt-4 border-2 border-red-700 bg-red-50 px-3 py-2 text-xs font-bold text-red-800">{startError}</p>
-            ) : null}
+            )}
           </div>
         </div>
       ) : null}

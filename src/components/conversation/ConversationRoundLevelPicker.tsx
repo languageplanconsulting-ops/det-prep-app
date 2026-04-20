@@ -2,11 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  CONVERSATION_DIFFICULTY_LABEL,
-  CONVERSATION_FULL_SCORE,
-  CONVERSATION_TOTAL_STEPS,
-} from "@/lib/conversation-constants";
+import { CONVERSATION_DIFFICULTY_LABEL, CONVERSATION_FULL_SCORE, CONVERSATION_TOTAL_STEPS } from "@/lib/conversation-constants";
 import { filterConversationExamsForPractice } from "@/lib/conversation-practice-filter";
 import {
   conversationMaxForExam,
@@ -33,24 +29,6 @@ function needsRedeem(
 ): boolean {
   if (!prog || complete) return false;
   return prog.lastItemOk?.some((x) => !x) ?? false;
-}
-
-function audioCoverage(exam: {
-  scenarioAudioBase64?: string;
-  scenarioAudioInIndexedDb?: boolean;
-  scenarioQuestions: { audioBase64?: string; audioInIndexedDb?: boolean }[];
-  mainQuestions: { audioBase64?: string; audioInIndexedDb?: boolean }[];
-}): { covered: number; total: number } {
-  const total = 1 + exam.scenarioQuestions.length + exam.mainQuestions.length;
-  let covered =
-    Boolean(exam.scenarioAudioBase64?.trim()) || Boolean(exam.scenarioAudioInIndexedDb) ? 1 : 0;
-  covered += exam.scenarioQuestions.filter(
-    (q) => Boolean(q.audioBase64?.trim()) || Boolean(q.audioInIndexedDb),
-  ).length;
-  covered += exam.mainQuestions.filter(
-    (q) => Boolean(q.audioBase64?.trim()) || Boolean(q.audioInIndexedDb),
-  ).length;
-  return { covered, total };
 }
 
 function formatShortDate(iso: string | null): string {
@@ -138,7 +116,7 @@ export function ConversationRoundLevelPicker({ round }: { round: number }) {
         <div className="border-b-4 border-black bg-ep-yellow/30 px-4 py-3">
           <p className="text-xs font-black uppercase tracking-wide text-neutral-900">Question bank</p>
           <p className="ep-stat mt-0.5 text-[10px] font-bold text-neutral-600">
-            Sorted by bank slot (Easy first), then set number. Full score {CONVERSATION_FULL_SCORE} pts each.
+            Sorted by bank slot (Easy first), then topic title. Full score {CONVERSATION_FULL_SCORE} pts each.
           </p>
         </div>
         <QuestionBankRows
@@ -200,7 +178,6 @@ function QuestionBankRows({
           const href = redeem
             ? `/practice/listening/interactive/${round}/${difficulty}/${setNumber}?redeem=1`
             : `/practice/listening/interactive/${round}/${difficulty}/${setNumber}`;
-          const cov = audioCoverage(exam);
           const scoreCell =
             prog != null ? (
               <span className="ep-stat font-bold text-ep-blue">
@@ -220,15 +197,10 @@ function QuestionBankRows({
                   <span className="inline-flex w-fit rounded-sm border-2 border-black bg-ep-blue/10 px-2 py-0.5 ep-stat text-[10px] font-black uppercase text-ep-blue">
                     {CONVERSATION_DIFFICULTY_LABEL[difficulty]}
                   </span>
-                  <span className="text-xs font-bold text-neutral-500 sm:hidden">· Set {setNumber}</span>
                 </div>
                 <div className="min-w-0 sm:pl-0">
-                  <span className="hidden font-black text-neutral-900 sm:inline">Set {setNumber}</span>
-                  <span className="mt-0.5 line-clamp-2 block text-[11px] font-bold text-neutral-700 sm:mt-1">
+                  <span className="line-clamp-2 block text-sm font-black text-neutral-900">
                     {exam.title}
-                  </span>
-                  <span className="ep-stat mt-1 block text-[10px] font-bold text-neutral-500">
-                    Audio lines {cov.covered}/{cov.total}
                   </span>
                 </div>
                 <div className="flex flex-row items-center justify-between gap-2 sm:flex-col sm:items-end sm:justify-center sm:text-right">
