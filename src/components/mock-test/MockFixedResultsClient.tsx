@@ -9,6 +9,13 @@ import type { FixedMockScoredRow } from "@/lib/mock-test/fixed-mock-score-bucket
 
 import { MockFixedReportBrandedView } from "./MockFixedReportBrandedView";
 
+type FixedStepItem = {
+  step_index: number;
+  task_type: string;
+  content?: Record<string, unknown> | null;
+  correct_answer?: Record<string, unknown> | null;
+};
+
 type FixedResult = {
   target_total: number;
   target_listening: number;
@@ -37,6 +44,7 @@ function avg(list: number[]): number {
 export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const [row, setRow] = useState<FixedResult | null>(null);
+  const [stepItems, setStepItems] = useState<FixedStepItem[]>([]);
   const [dashboardSavedAt, setDashboardSavedAt] = useState<string | null>(null);
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
@@ -48,9 +56,10 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
         cache: "no-store",
       });
       if (!res.ok) return;
-      const json = (await res.json()) as { result?: FixedResult };
+      const json = (await res.json()) as { result?: FixedResult; stepItems?: FixedStepItem[] };
       const next = (json.result ?? null) as FixedResult | null;
       setRow(next);
+      setStepItems(json.stepItems ?? []);
       setDashboardSavedAt(next?.dashboard_saved_at ?? null);
     })();
   }, [sessionId]);
@@ -124,6 +133,7 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
           writing: Math.round(Number(row.target_writing ?? 0)),
         }}
         responses={responses}
+        stepItems={stepItems}
         completedAt={row.created_at ?? null}
         recommendations={recommendations}
       />

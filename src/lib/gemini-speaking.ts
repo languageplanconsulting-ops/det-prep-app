@@ -65,14 +65,36 @@ function criterion(
   };
 }
 
-function buildSystemInstruction(): string {
+function buildSystemInstruction(options?: {
+  punctuateBeforeScoring?: boolean;
+  spokenFillerLenient?: boolean;
+}): string {
+  const punctuateBeforeScoring = options?.punctuateBeforeScoring === true;
+  const spokenFillerLenient = options?.spokenFillerLenient === true;
+  const workflow = punctuateBeforeScoring
+    ? `WORKFLOW (mandatory):
+1) First produce punctuatedTranscript by adding light punctuation, capitalization, sentence boundaries, and spacing cleanup to the learner's spoken transcript.
+2) Do NOT change meaning, do NOT rewrite ideas, and keep spoken wording intact as much as possible.
+3) Score ONLY using punctuatedTranscript (all excerpts and quotes must be exact substrings of punctuatedTranscript).`
+    : `WORKFLOW (mandatory):
+1) Keep the transcript RAW. Do NOT add punctuation, capitalization, or sentence-boundary corrections.
+2) Return punctuatedTranscript exactly equal to the raw transcript input (same wording/content).
+3) Score ONLY using the raw transcript text (all excerpts and quotes must be exact substrings of the raw transcript).`;
+  const fillerRule = spokenFillerLenient
+    ? `
+
+Spoken-transcript leniency:
+- This is spoken language, so natural fillers such as "um", "uh", "you know", "well", and "like" may appear.
+- Do NOT penalize occasional filler words by themselves.
+- Only penalize fillers when they are clearly excessive, repetitive, or disruptive to coherence.`
+    : "";
+
+  const scoreText = punctuateBeforeScoring ? "punctuatedTranscript" : "raw transcript";
+
   return `You are an expert English examiner for Thai learners (spoken DET-style production task).
 The learner read a prompt and spoke. You receive a raw ASR transcript (may lack punctuation).
 
-WORKFLOW (mandatory):
-1) Keep the transcript RAW. Do NOT add punctuation, capitalization, or sentence-boundary corrections.
-2) Return punctuatedTranscript exactly equal to the raw transcript input (same wording/content).
-3) Score ONLY using the raw transcript text (all excerpts and quotes must be exact substrings of the raw transcript).
+${workflow}${fillerRule}
 
 Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
 Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
@@ -82,11 +104,11 @@ For EACH criterion summary (grammarSummaryEn/Th, etc.), include TWO parts:
 (B) A line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" followed by a concrete action tied to THIS learner's wording (not generic advice).
 
 Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, taskBreakdown):
-- excerpt: exact short quote from the raw transcript (use quotation marks in JSON string only).
+- excerpt: exact short quote from the ${scoreText} (use quotation marks in JSON string only).
 - issueEn / issueTh: what is wrong (bilingual).
 - suggestionEn / suggestionTh: a concrete correction or better wording (bilingual)—for vocabulary, name 1–3 better words or collocations when possible.
 
-Improvement points: up to 10. Each MUST quote an exact phrase from the raw transcript (e.g. "In your phrase '…', …") and give a specific fix—not generic tips.
+Improvement points: up to 10. Each MUST quote an exact phrase from the ${scoreText} (e.g. "In your phrase '…', …") and give a specific fix—not generic tips.
 
 Apply band targets when choosing percentages (same as before):
 
@@ -103,10 +125,10 @@ IMPORTANT — task score boost:
 - Set taskPersonalExperienceBoost to true if the learner uses (a) authentic personal experience OR (b) hypothetical personal experience (e.g. "If I were…", "I would…", "Imagine I…", "In my experience…"). The grading system adds +10 to the task percentage (cap 100) when this is true—mention that bonus briefly in taskSummaryEn/Th.
 
 Vocabulary upgrade suggestions (separate from criterion breakdown):
-- vocabularyUpgradeSuggestions: up to 10 items. Each: originalWord (exact word/phrase as used in raw transcript), upgradedWord (B2/C1 alternative), meaningTh (Thai gloss), exampleEn, exampleTh (short example sentence using upgradedWord).
+- vocabularyUpgradeSuggestions: up to 10 items. Each: originalWord (exact word/phrase as used in ${scoreText}), upgradedWord (B2/C1 alternative), meaningTh (Thai gloss), exampleEn, exampleTh (short example sentence using upgradedWord).
 
 Transcript highlights (for interactive hover on punctuated text):
-- transcriptHighlights: up to 18 items. Each: exactQuote (verbatim substring of raw transcript), isPositive (true=strength, false=weakness), noteEn, noteTh (short tooltip, one line each). Cover grammar, vocabulary, coherence, and task where useful. No overlapping quotes if possible.
+- transcriptHighlights: up to 18 items. Each: exactQuote (verbatim substring of ${scoreText}), isPositive (true=strength, false=weakness), noteEn, noteTh (short tooltip, one line each). Cover grammar, vocabulary, coherence, and task where useful. No overlapping quotes if possible.
 
 Return ONLY valid JSON (no markdown). Use issueEn/issueTh (not "en"/"th") for breakdown issue lines.${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
@@ -118,7 +140,10 @@ function buildUserPayload(
   questionTh: string,
   prepMinutes: number,
   transcript: string,
+  options?: { punctuateBeforeScoring?: boolean },
 ): string {
+  const punctuateBeforeScoring = options?.punctuateBeforeScoring === true;
+  const scoreText = punctuateBeforeScoring ? "punctuatedTranscript" : "raw transcript";
   return JSON.stringify(
     {
       task: "analyze_spoken_response",
@@ -129,7 +154,9 @@ function buildUserPayload(
       prepMinutes,
       transcript,
       requiredJsonShape: {
-        punctuatedTranscript: "string — MUST be exactly the same as the raw transcript input (no punctuation rewrite)",
+        punctuatedTranscript: punctuateBeforeScoring
+          ? "string — lightly punctuated version of the spoken transcript; keep the same wording and meaning"
+          : "string — MUST be exactly the same as the raw transcript input (no punctuation rewrite)",
         grammarScorePercent: "number 0-100",
         vocabularyScorePercent: "number 0-100",
         coherenceScorePercent: "number 0-100",
@@ -144,7 +171,7 @@ function buildUserPayload(
         taskSummaryTh: "string",
         grammarBreakdown: [
           {
-            excerpt: "string exact from raw transcript",
+            excerpt: `string exact from ${scoreText}`,
             issueEn: "string",
             issueTh: "string",
             suggestionEn: "string",
@@ -194,7 +221,7 @@ function buildUserPayload(
         ],
         transcriptHighlights: [
           {
-            exactQuote: "string verbatim from raw transcript",
+            exactQuote: `string verbatim from ${scoreText}`,
             isPositive: "boolean",
             noteEn: "string",
             noteTh: "string",
@@ -226,6 +253,8 @@ export async function generateSpeakingReportWithGemini(params: {
   prepMinutes: number;
   transcript: string;
   speakingRound?: SpeakingRoundNum;
+  punctuateBeforeScoring?: boolean;
+  spokenFillerLenient?: boolean;
 }): Promise<{ report: SpeakingAttemptReport; usage: GradingLlmUsage | null }> {
   const {
     apiKey,
@@ -239,6 +268,8 @@ export async function generateSpeakingReportWithGemini(params: {
     prepMinutes,
     transcript,
     speakingRound = 1,
+    punctuateBeforeScoring = false,
+    spokenFillerLenient = false,
   } = params;
 
   const modelName =
@@ -251,7 +282,10 @@ export async function generateSpeakingReportWithGemini(params: {
       anthropicApiKey: params.anthropicApiKey,
       openAiApiKey: params.openAiApiKey,
     },
-    systemInstruction: buildSystemInstruction(),
+    systemInstruction: buildSystemInstruction({
+      punctuateBeforeScoring,
+      spokenFillerLenient,
+    }),
     userPayload: buildUserPayload(
       topicTitleEn,
       topicTitleTh,
@@ -259,6 +293,7 @@ export async function generateSpeakingReportWithGemini(params: {
       questionPromptTh,
       prepMinutes,
       transcript,
+      { punctuateBeforeScoring },
     ),
     temperature: 0.35,
   });

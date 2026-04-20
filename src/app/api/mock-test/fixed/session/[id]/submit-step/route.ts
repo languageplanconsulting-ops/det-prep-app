@@ -284,6 +284,8 @@ async function scoreAnswerWithNormalCriteria({
           questionPromptTh: String(content.prompt_th ?? content.instruction_th ?? "ตอบตามโจทย์"),
           prepMinutes: 0,
           transcript,
+          punctuateBeforeScoring: true,
+          spokenFillerLenient: true,
         }),
       );
       return normalize160(report.score160);

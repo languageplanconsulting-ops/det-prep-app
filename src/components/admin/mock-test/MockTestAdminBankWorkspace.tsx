@@ -164,7 +164,7 @@ Task-specific content_json:
             </p>
           </div>
           <button
-            type="button"
+type="button"
             onClick={() => void loadSets()}
             className={`${mt.border} bg-neutral-100 px-3 py-2 text-xs font-bold shadow-[2px_2px_0_0_#000]`}
           >
@@ -179,12 +179,49 @@ Task-specific content_json:
                   <span className="font-black text-[#004AAD]">{s.name}</span>
                   <span className="ml-2 text-xs text-neutral-600">{s.itemCount}/20 steps</span>
                 </div>
-                <Link
-                  href={`/mock-test/start?setId=${encodeURIComponent(s.id)}&adminPreview=1&skipTimer=1`}
-                  className="rounded-[4px] border-2 border-black bg-[#FFCC00] px-2.5 py-1 text-[11px] font-black shadow-[2px_2px_0_0_#000]"
-                >
-                  Test mock (skip timer)
-                </Link>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setBanner(null);
+                      setBusy(true);
+                      const res = await fetch(
+                        `/api/admin/mock-test/fixed-builder/set?setId=${encodeURIComponent(s.id)}`,
+                        { credentials: "same-origin" },
+                      );
+                      const json = (await res.json().catch(() => ({}))) as {
+                        ok?: boolean;
+                        error?: string;
+                        set?: {
+                          internal_name?: string;
+                          user_title?: string;
+                          grouped_items?: Record<string, unknown>;
+                        };
+                      };
+                      setBusy(false);
+                      if (!res.ok || !json.ok || !json.set) {
+                        setBanner(json.error ?? "Could not load set JSON.");
+                        return;
+                      }
+                      setFormat("json");
+                      setSetName(String(json.set.internal_name ?? ""));
+                      setUserTitle(String(json.set.user_title ?? ""));
+                      setDraft(JSON.stringify({ grouped_items: json.set.grouped_items ?? {} }, null, 2));
+                      setBanner(`Loaded "${json.set.user_title ?? s.name}" into the JSON editor. Edit and upload to replace it.`);
+                      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+                    }}
+                    disabled={busy}
+                    className="rounded-[4px] border-2 border-black bg-white px-2.5 py-1 text-[11px] font-black shadow-[2px_2px_0_0_#000] disabled:opacity-50"
+                  >
+                    Edit JSON
+                  </button>
+                  <Link
+                    href={`/mock-test/start?setId=${encodeURIComponent(s.id)}&adminPreview=1&skipTimer=1`}
+                    className="rounded-[4px] border-2 border-black bg-[#FFCC00] px-2.5 py-1 text-[11px] font-black shadow-[2px_2px_0_0_#000]"
+                  >
+                    Test mock (skip timer)
+                  </Link>
+                </div>
               </div>
             </li>
           ))}

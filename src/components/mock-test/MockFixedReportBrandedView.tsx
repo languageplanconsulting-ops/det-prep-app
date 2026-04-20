@@ -10,6 +10,9 @@ import {
   type FixedMockSkillId,
 } from "@/lib/mock-test/fixed-mock-score-buckets";
 import { formatMockAnswerSnippet } from "@/lib/mock-test/mock-fixed-answer-snippet";
+import { buildSpeakingAttemptReport } from "@/lib/speaking-report";
+import { buildWritingAttemptReport } from "@/lib/writing-report";
+import type { WritingTopic } from "@/types/writing";
 
 const RING_R = 45;
 const RING_C = 2 * Math.PI * RING_R;
@@ -77,6 +80,285 @@ function scoreTone(score: number): "high" | "mid" | "low" {
 
 const SKILL_ORDER: FixedMockSkillId[] = ["speaking", "listening", "reading", "writing"];
 
+type FixedStepItem = {
+  step_index: number;
+  task_type: string;
+  content?: Record<string, unknown> | null;
+  correct_answer?: Record<string, unknown> | null;
+};
+
+function answerText(answer: unknown): string {
+  return formatMockAnswerSnippet(answer, 2000);
+}
+
+function pickStringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.map((x) => String(x ?? "").trim()).filter(Boolean) : [];
+}
+
+function reviewBulletsFirstFive(lines: string[]): string[] {
+  return lines.map((x) => x.trim()).filter(Boolean).slice(0, 5);
+}
+
+function extractInteractiveSpeakingTranscript(answer: unknown): string {
+  if (!answer || typeof answer !== "object") return "";
+  const o = answer as Record<string, unknown>;
+  const direct = pickStringList(o.user_turn_answers).join(" ");
+  if (direct) return direct.trim();
+  if (Array.isArray(o.turns)) {
+    return (o.turns as unknown[])
+      .map((row) => {
+        if (!row || typeof row !== "object") return "";
+        const r = row as Record<string, unknown>;
+        return String(r.transcript ?? r.answerTranscript ?? "").trim();
+      })
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+  }
+  return String(o.text ?? "").trim();
+}
+
+function buildProductionBullets(taskType: string, answer: unknown, content?: Record<string, unknown> | null): string[] {
+  const text =
+    taskType === "interactive_speaking"
+      ? extractInteractiveSpeakingTranscript(answer)
+      : String((answer as { text?: unknown })?.text ?? answerText(answer)).trim();
+  if (!text) return [];
+
+  if (taskType === "read_and_write" || taskType === "write_about_photo" || taskType === "conversation_summary") {
+    const topic: WritingTopic = {
+      id: `mock-review-${taskType}`,
+      titleEn: String(content?.title_en ?? content?.titleEn ?? taskLabel(taskType)),
+      titleTh: String(content?.title_th ?? content?.titleTh ?? taskLabel(taskType)),
+      promptEn: String(content?.prompt ?? content?.prompt_en ?? content?.instruction ?? "Respond to the task."),
+      promptTh: String(content?.prompt_th ?? content?.instruction_th ?? "ตอบตามโจทย์"),
+    };
+    const report = buildWritingAttemptReport(`review-${taskType}`, topic, text, 0);
+    const ordered = [
+      ...report.improvementPoints.filter((p) => p.category === "grammar").map((p) => p.en),
+      ...report.improvementPoints.filter((p) => p.category === "vocabulary").map((p) => p.en),
+      ...report.improvementPoints
+        .filter((p) => p.category !== "grammar" && p.category !== "vocabulary")
+        .map((p) => p.en),
+    ];
+    return reviewBulletsFirstFive(ordered);
+  }
+
+  const report = buildSpeakingAttemptReport(
+    `review-${taskType}`,
+    `review-${taskType}`,
+    String(content?.title_en ?? content?.titleEn ?? taskLabel(taskType)),
+    String(content?.title_th ?? content?.titleTh ?? taskLabel(taskType)),
+    `review-${taskType}-q`,
+    String(content?.prompt_en ?? content?.prompt ?? content?.instruction ?? "Respond to the prompt."),
+    String(content?.prompt_th ?? content?.instruction_th ?? "ตอบตามโจทย์"),
+    0,
+    text,
+    {
+      variant: taskType === "speak_about_photo" ? "photo-speak" : taskType === "read_then_speak" ? "read-speak" : undefined,
+    },
+  );
+  const ordered = [
+    ...report.improvementPoints.filter((p) => p.category === "grammar").map((p) => p.en),
+    ...report.improvementPoints.filter((p) => p.category === "vocabulary").map((p) => p.en),
+    ...report.improvementPoints
+      .filter((p) => p.category !== "grammar" && p.category !== "vocabulary")
+      .map((p) => p.en),
+  ];
+  return reviewBulletsFirstFive(ordered);
+}
+
+function panelToneClass(kind: "good" | "warn" | "bad" | "neutral"): string {
+  if (kind === "good") return "border-emerald-300 bg-emerald-50";
+  if (kind === "warn") return "border-amber-300 bg-amber-50";
+  if (kind === "bad") return "border-red-300 bg-red-50";
+  return "border-neutral-200 bg-white";
+}
+
+function renderStepReview(row: FixedMockScoredRow, item?: FixedStepItem) {
+  const answer = row.answer;
+  const content = (item?.content ?? {}) as Record<string, unknown>;
+  const correct = (item?.correct_answer ?? {}) as Record<string, unknown>;
+
+  if (row.task_type === "fill_in_blanks") {
+    const expected = Array.isArray(content.missingWords)
+      ? (content.missingWords as Array<Record<string, unknown>>).map((m) => String(m.correctWord ?? "").trim())
+      : pickStringList(correct.answers);
+    const typed = Array.isArray((answer as { answers?: unknown[] })?.answers)
+      ? pickStringList((answer as { answers?: unknown[] }).answers)
+      : [String((answer as { answer?: unknown })?.answer ?? answer ?? "").trim()].filter(Boolean);
+    return (
+      <div className="mt-3 grid gap-2">
+        {expected.map((exp, idx) => {
+          const got = typed[idx] ?? "";
+          const ok = got.trim().toLowerCase() === exp.trim().toLowerCase();
+          return (
+            <div key={idx} className={`rounded border-2 p-3 ${panelToneClass(ok ? "good" : "bad")}`}>
+              <p className="font-mono text-[0.55rem] font-bold uppercase text-neutral-500">Blank {idx + 1}</p>
+              <div className="mt-1 grid gap-2 sm:grid-cols-2">
+                <div>
+                  <p className="text-[11px] font-black uppercase text-neutral-500">Your answer</p>
+                  <p className={`text-sm font-bold ${ok ? "text-emerald-700" : "text-red-700"}`}>{got || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-black uppercase text-neutral-500">Correct answer</p>
+                  <p className="text-sm font-bold text-emerald-700">{exp || "—"}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (row.task_type === "dictation") {
+    const learner = String((answer as { answer?: unknown })?.answer ?? answer ?? "").trim();
+    const script = String(content.reference_sentence ?? correct.answer ?? "").trim();
+    return (
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <div className={`rounded border-2 p-3 ${panelToneClass("warn")}`}>
+          <p className="font-mono text-[0.55rem] font-bold uppercase text-neutral-500">Your typed answer</p>
+          <p className="mt-1 whitespace-pre-wrap text-sm font-semibold text-neutral-900">{learner || "—"}</p>
+        </div>
+        <div className={`rounded border-2 p-3 ${panelToneClass("good")}`}>
+          <p className="font-mono text-[0.55rem] font-bold uppercase text-neutral-500">Reference script</p>
+          <p className="mt-1 whitespace-pre-wrap text-sm font-semibold text-emerald-800">{script || "—"}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (row.task_type === "vocabulary_reading") {
+    const chosen = pickStringList((answer as { selected_answers?: unknown[] })?.selected_answers);
+    const expected = pickStringList((answer as { correct_answers?: unknown[] })?.correct_answers);
+    const prompts = pickStringList((answer as { question_prompts?: unknown[] })?.question_prompts);
+    const labels = pickStringList((answer as { question_labels?: unknown[] })?.question_labels);
+    const mismatches = expected
+      .map((exp, idx) => ({ idx, exp, got: chosen[idx] ?? "", prompt: prompts[idx] ?? "", label: labels[idx] ?? `Q${idx + 1}` }))
+      .filter((row) => row.got && row.got !== row.exp);
+    if (!mismatches.length) {
+      return <div className={`mt-3 rounded border-2 p-3 ${panelToneClass("good")} text-sm font-bold text-emerald-800`}>No wrong sub-questions saved on this attempt.</div>;
+    }
+    return (
+      <div className="mt-3 space-y-2">
+        {mismatches.map((m) => (
+          <div key={m.idx} className={`rounded border-2 p-3 ${panelToneClass("bad")}`}>
+            <p className="font-mono text-[0.55rem] font-bold uppercase text-neutral-500">{m.label}</p>
+            <p className="mt-1 text-sm font-semibold text-neutral-900">{m.prompt}</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <div>
+                <p className="text-[11px] font-black uppercase text-neutral-500">Your answer</p>
+                <p className="text-sm font-bold text-red-700">{m.got}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase text-neutral-500">Correct answer</p>
+                <p className="text-sm font-bold text-emerald-700">{m.exp}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (row.task_type === "interactive_conversation_mcq") {
+    const chosen = pickStringList((answer as { user_turn_answers?: unknown[] })?.user_turn_answers);
+    const turns = Array.isArray((answer as { turns?: unknown[] })?.turns) ? ((answer as { turns?: unknown[] }).turns ?? []) : [];
+    const mismatches = turns
+      .map((turn, idx) => {
+        const t = (turn ?? {}) as Record<string, unknown>;
+        return {
+          idx,
+          prompt: String(t.question_en ?? `Question ${idx + 1}`),
+          got: chosen[idx] ?? "",
+          exp: String(t.reference_answer_en ?? ""),
+        };
+      })
+      .filter((row) => row.got && row.exp && row.got !== row.exp);
+    if (!mismatches.length) {
+      return <div className={`mt-3 rounded border-2 p-3 ${panelToneClass("good")} text-sm font-bold text-emerald-800`}>You got all saved interaction choices correct.</div>;
+    }
+    return (
+      <div className="mt-3 space-y-2">
+        {mismatches.map((m) => (
+          <div key={m.idx} className={`rounded border-2 p-3 ${panelToneClass("bad")}`}>
+            <p className="font-mono text-[0.55rem] font-bold uppercase text-neutral-500">Turn {m.idx + 1}</p>
+            <p className="mt-1 text-sm font-semibold text-neutral-900">{m.prompt}</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <div>
+                <p className="text-[11px] font-black uppercase text-neutral-500">Your answer</p>
+                <p className="text-sm font-bold text-red-700">{m.got}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase text-neutral-500">Correct answer</p>
+                <p className="text-sm font-bold text-emerald-700">{m.exp}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (row.task_type === "real_english_word") {
+    const rounds = Array.isArray((answer as { round_selections?: unknown[] })?.round_selections)
+      ? ((answer as { round_selections?: unknown[] }).round_selections ?? [])
+      : [];
+    const missedReal = new Set<string>();
+    const pickedFake = new Set<string>();
+    for (const raw of rounds) {
+      const r = (raw ?? {}) as Record<string, unknown>;
+      const selected = new Set(pickStringList(r.selected));
+      for (const word of pickStringList(r.realWords)) {
+        if (!selected.has(word)) missedReal.add(word);
+      }
+      for (const word of pickStringList(r.fakeWords)) {
+        if (selected.has(word)) pickedFake.add(word);
+      }
+    }
+    return (
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <div className={`rounded border-2 p-3 ${panelToneClass(missedReal.size ? "warn" : "good")}`}>
+          <p className="font-mono text-[0.55rem] font-bold uppercase text-neutral-500">Real words missed</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {[...missedReal].length ? [...missedReal].map((w) => <span key={w} className="rounded border border-emerald-300 bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-800">{w}</span>) : <span className="text-sm font-bold text-emerald-800">None missed.</span>}
+          </div>
+        </div>
+        <div className={`rounded border-2 p-3 ${panelToneClass(pickedFake.size ? "bad" : "good")}`}>
+          <p className="font-mono text-[0.55rem] font-bold uppercase text-neutral-500">Fake words picked</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {[...pickedFake].length ? [...pickedFake].map((w) => <span key={w} className="rounded border border-red-300 bg-red-50 px-2 py-1 text-xs font-bold text-red-800">{w}</span>) : <span className="text-sm font-bold text-emerald-800">No fake words selected.</span>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const bullets = buildProductionBullets(row.task_type, answer, content);
+  const learnerText =
+    row.task_type === "interactive_speaking" ? extractInteractiveSpeakingTranscript(answer) : answerText(answer);
+  return (
+    <div className="mt-3 space-y-3">
+      <div className={`rounded border-2 p-3 ${panelToneClass("neutral")}`}>
+        <p className="font-mono text-[0.55rem] font-bold uppercase text-neutral-500">Your response</p>
+        <p className="mt-1 whitespace-pre-wrap text-sm font-semibold text-neutral-900">{learnerText || "—"}</p>
+      </div>
+      <div className={`rounded border-2 p-3 ${panelToneClass("warn")}`}>
+        <p className="font-mono text-[0.55rem] font-bold uppercase text-neutral-500">How to raise this score</p>
+        <ul className="mt-2 space-y-2">
+          {bullets.length ? bullets.map((b, idx) => (
+            <li key={idx} className="flex gap-2 text-sm font-semibold text-neutral-800">
+              <span className="mt-[2px] inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-black bg-[#ffcc00] text-[10px] font-black">{idx + 1}</span>
+              <span>{b}</span>
+            </li>
+          )) : <li className="text-sm font-semibold text-neutral-700">No extra guidance saved for this attempt yet.</li>}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export function MockFixedReportBrandedView({
   sessionId,
   total,
@@ -86,6 +368,7 @@ export function MockFixedReportBrandedView({
   writing,
   targets,
   responses,
+  stepItems,
   completedAt,
   recommendations,
 }: {
@@ -97,6 +380,7 @@ export function MockFixedReportBrandedView({
   writing: number;
   targets: { total: number; listening: number; speaking: number; reading: number; writing: number };
   responses: FixedMockScoredRow[];
+  stepItems: FixedStepItem[];
   completedAt: string | null;
   recommendations: string[];
 }) {
@@ -141,6 +425,11 @@ export function MockFixedReportBrandedView({
     for (const r of responses) m.set(r.step_index, r);
     return m;
   }, [responses]);
+  const itemsByStep = useMemo(() => {
+    const m = new Map<number, FixedStepItem>();
+    for (const r of stepItems) m.set(r.step_index, r);
+    return m;
+  }, [stepItems]);
 
   const completedLabel = completedAt
     ? new Date(completedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
@@ -432,8 +721,8 @@ export function MockFixedReportBrandedView({
                       <p className={`font-mono text-[0.42rem] font-bold uppercase ${st === "correct" ? "text-emerald-700" : "text-orange-700"}`}>
                         {st === "correct" ? "✓ Strong step" : st === "partial" ? "◆ Mixed" : "✗ Review"}
                       </p>
-                      <p className="mt-1 font-semibold text-neutral-800">Saved response (preview)</p>
-                      <p className="mt-2 whitespace-pre-wrap break-words">{formatMockAnswerSnippet(row.answer)}</p>
+                      <p className="mt-1 font-semibold text-neutral-800">Step review</p>
+                      {renderStepReview(row, itemsByStep.get(tpl.stepIndex))}
                     </div>
                   ) : null}
                 </div>

@@ -52,6 +52,7 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
   const [roundIdx, setRoundIdx] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [score, setScore] = useState(0);
+  const [roundSelections, setRoundSelections] = useState<Array<{ selected: string[]; realWords: string[]; fakeWords: string[] }>>([]);
 
   const round = rounds[roundIdx];
   if (!rounds.length || !round) {
@@ -70,6 +71,11 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
       else minus += 2;
     });
     const nextScore = Math.max(0, Math.min(160, score + plus - minus));
+    const roundSelection = {
+      selected: [...selected],
+      realWords: [...round.realSet],
+      fakeWords: round.words.filter((w) => !round.realSet.has(w)),
+    };
     if (roundIdx >= 3) {
       onSubmit({
         score160: nextScore,
@@ -80,10 +86,12 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
           score_penalty_per_fake_pick: -2,
           max_score: 160,
         },
+        round_selections: [...roundSelections, roundSelection],
       });
       return;
     }
     setScore(nextScore);
+    setRoundSelections((prev) => [...prev, roundSelection]);
     setRoundIdx((x) => x + 1);
     setSelected(new Set());
   };

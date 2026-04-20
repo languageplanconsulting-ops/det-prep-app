@@ -17,7 +17,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ session
       .maybeSingle();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json({ result: data });
+    const { data: items, error: itemsErr } = await supabase
+      .from("mock_fixed_set_items")
+      .select("step_index,task_type,content,correct_answer")
+      .eq("set_id", data.set_id)
+      .order("step_index", { ascending: true });
+    if (itemsErr) return NextResponse.json({ error: itemsErr.message }, { status: 500 });
+    return NextResponse.json({ result: data, stepItems: items ?? [] });
   }
 
   const supabase = await createRouteHandlerSupabase();
@@ -34,6 +40,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ session
     .maybeSingle();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!data) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json({ result: data });
+  const { data: items, error: itemsErr } = await supabase
+    .from("mock_fixed_set_items")
+    .select("step_index,task_type,content,correct_answer")
+    .eq("set_id", data.set_id)
+    .order("step_index", { ascending: true });
+  if (itemsErr) return NextResponse.json({ error: itemsErr.message }, { status: 500 });
+  return NextResponse.json({ result: data, stepItems: items ?? [] });
 }
-

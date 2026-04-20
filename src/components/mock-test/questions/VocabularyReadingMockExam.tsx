@@ -67,6 +67,7 @@ export function VocabularyReadingMockExam({
     : getVocabularyReadingBlocks(exam);
   const vocab = exam.highlightedVocab ?? [];
   const labels = aggregateMode ? COMBINED_LABELS : LABELS;
+  const correctVocabAnswers = (exam.vocabularyQuestions ?? []).slice(0, 6).map((q) => q.correctAnswer);
 
   const [activeWord, setActiveWord] = useState<string | null>(null);
   /** Step 5: chosen option before Submit (practice reading reveals gap first). */
@@ -82,6 +83,8 @@ export function VocabularyReadingMockExam({
   const vocabAnswers = aggregateMode
     ? Array.from({ length: 6 }).map((_, idx) => internalAnswers[idx] ?? `[BLANK ${idx + 1}]`)
     : (exam.vocabularyQuestions ?? []).slice(0, 6).map((q) => q.correctAnswer);
+  const vocabAnswersForDisplay =
+    aggregateMode && step >= missingSelectionStep ? correctVocabAnswers : vocabAnswers;
   const shouldFillVocabBlanks =
     aggregateMode && (step > missingSelectionStep || (step === missingSelectionStep && missingReveal));
   const p1Display = shouldFillVocabBlanks ? fillVocabBlanks(exam.passage.p1, vocabAnswers) : exam.passage.p1;
@@ -125,6 +128,10 @@ export function VocabularyReadingMockExam({
           vocabCount: 6,
           readingCount: Math.max(0, blocks.length - 6),
         },
+        selected_answers: nextAnswers,
+        correct_answers: blocks.map((b) => b.correctAnswer),
+        question_labels: labels.slice(0, blocks.length),
+        question_prompts: blocks.map((b) => b.question),
       });
       return;
     }
@@ -179,7 +186,7 @@ export function VocabularyReadingMockExam({
           <div className="space-y-4 text-sm leading-relaxed text-neutral-800">
           <p className="whitespace-pre-wrap">
             {aggregateMode ? (
-              renderMockVocabBlanksAsBoxes(exam.passage.p1, internalAnswers)
+              renderMockVocabBlanksAsBoxes(exam.passage.p1, vocabAnswersForDisplay, step >= missingSelectionStep)
             ) : (
               <HighlightedReadingText
                 text={p1Display}
@@ -212,7 +219,7 @@ export function VocabularyReadingMockExam({
           )}
           <p className="whitespace-pre-wrap">
             {aggregateMode ? (
-              renderMockVocabBlanksAsBoxes(exam.passage.p3, internalAnswers)
+              renderMockVocabBlanksAsBoxes(exam.passage.p3, vocabAnswersForDisplay, step >= missingSelectionStep)
             ) : (
               <HighlightedReadingText
                 text={p3Display}
@@ -263,7 +270,7 @@ export function VocabularyReadingMockExam({
   );
 }
 
-function renderMockVocabBlanksAsBoxes(text: string, answers: string[] = []) {
+function renderMockVocabBlanksAsBoxes(text: string, answers: string[] = [], lockedCorrect = false) {
   const re = /\[BLANK\s*(\d+)\]/gi;
   const out: any[] = [];
   let last = 0;
@@ -281,7 +288,9 @@ function renderMockVocabBlanksAsBoxes(text: string, answers: string[] = []) {
     out.push(
       <span
         key={`b-${idx}-${blankNum}`}
-        className="mx-0.5 inline-flex items-center justify-center rounded-[8px] border-4 border-black bg-[#dbffd8] px-2 py-1 font-black tracking-widest text-[#0f7a16] shadow-[3px_3px_0_0_#000]"
+        className={`mx-0.5 inline-flex items-center justify-center rounded-[8px] border-4 border-black px-2 py-1 font-black tracking-widest shadow-[3px_3px_0_0_#000] ${
+          lockedCorrect ? "bg-[#dcfce7] text-[#166534]" : "bg-[#dbffd8] text-[#0f7a16]"
+        }`}
       >
         {picked || `____${blankNum}`}
       </span>,
