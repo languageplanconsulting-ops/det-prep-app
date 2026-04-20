@@ -130,6 +130,54 @@ function parseMainQ(raw: unknown, i: number): ConversationMainQuestion {
   };
 }
 
+type ExpandedConversationRow = {
+  label: string;
+  row: Record<string, unknown>;
+};
+
+function expandConversationRows(
+  rows: unknown[],
+  inherited: Record<string, unknown> = {},
+  prefix = "Row",
+): ExpandedConversationRow[] {
+  const out: ExpandedConversationRow[] = [];
+
+  rows.forEach((raw, idx) => {
+    const label = `${prefix} ${idx + 1}`;
+    if (!isRecord(raw)) throw new Error(`${label}: must be an object`);
+
+    const groupedKey = Array.isArray(raw.sets)
+      ? "sets"
+      : Array.isArray(raw.scenarios)
+        ? "scenarios"
+        : null;
+
+    if (groupedKey) {
+      const groupedRows = raw[groupedKey];
+      if (!Array.isArray(groupedRows) || groupedRows.length === 0) {
+        throw new Error(`${label}: ${groupedKey} must be a non-empty array`);
+      }
+      const base: Record<string, unknown> = { ...inherited };
+      for (const [key, value] of Object.entries(raw)) {
+        if (key === "sets" || key === "scenarios") continue;
+        base[key] = value;
+      }
+      out.push(...expandConversationRows(groupedRows, base, `${label}.${groupedKey}`));
+      return;
+    }
+
+    out.push({
+      label,
+      row: {
+        ...inherited,
+        ...raw,
+      },
+    });
+  });
+
+  return out;
+}
+
 export function parseConversationBankJson(text: string): ConversationExam[] {
   let parsed: unknown;
   try {
@@ -141,43 +189,43 @@ export function parseConversationBankJson(text: string): ConversationExam[] {
     throw new Error("JSON must be a non-empty array");
   }
 
+  const expandedRows = expandConversationRows(parsed);
   const out: ConversationExam[] = [];
   const counters: Record<"easy" | "medium", number> = { easy: 0, medium: 0 };
 
-  parsed.forEach((raw, idx) => {
-    if (!isRecord(raw)) throw new Error(`Row ${idx + 1}: must be an object`);
-    const idRaw = raw.id;
-    const title = raw.title;
-    const difficultyRaw = raw.difficulty;
-    const scenario = raw.scenario;
-    const hw = raw.highlightedWords;
-    const sq = raw.scenarioQuestions;
-    const mq = raw.mainQuestions;
+  expandedRows.forEach(({ label, row }) => {
+    const idRaw = row.id;
+    const title = row.title;
+    const difficultyRaw = row.difficulty;
+    const scenario = row.scenario;
+    const hw = row.highlightedWords;
+    const sq = row.scenarioQuestions;
+    const mq = row.mainQuestions;
 
-    if (typeof title !== "string" || !title.trim()) throw new Error(`Row ${idx + 1}: title required`);
-    if (typeof difficultyRaw !== "string") throw new Error(`Row ${idx + 1}: difficulty required`);
+    if (typeof title !== "string" || !title.trim()) throw new Error(`${label}: title required`);
+    if (typeof difficultyRaw !== "string") throw new Error(`${label}: difficulty required`);
     const difficulty = mapConversationDifficulty(difficultyRaw);
-    if (!difficulty) throw new Error(`Row ${idx + 1}: unknown difficulty`);
-    if (typeof scenario !== "string" || !scenario.trim()) throw new Error(`Row ${idx + 1}: scenario required`);
+    if (!difficulty) throw new Error(`${label}: unknown difficulty`);
+    if (typeof scenario !== "string" || !scenario.trim()) throw new Error(`${label}: scenario required`);
     if (!Array.isArray(hw) || hw.length === 0) {
-      throw new Error(`Row ${idx + 1}: highlightedWords must be a non-empty array`);
+      throw new Error(`${label}: highlightedWords must be a non-empty array`);
     }
     if (!Array.isArray(sq) || sq.length !== CONVERSATION_SCENARIO_Q_COUNT) {
-      throw new Error(`Row ${idx + 1}: need exactly ${CONVERSATION_SCENARIO_Q_COUNT} scenarioQuestions`);
+      throw new Error(`${label}: need exactly ${CONVERSATION_SCENARIO_Q_COUNT} scenarioQuestions`);
     }
     if (!Array.isArray(mq) || mq.length !== CONVERSATION_MAIN_Q_COUNT) {
-      throw new Error(`Row ${idx + 1}: need exactly ${CONVERSATION_MAIN_Q_COUNT} mainQuestions`);
+      throw new Error(`${label}: need exactly ${CONVERSATION_MAIN_Q_COUNT} mainQuestions`);
     }
 
     let setNumber: number | null = null;
-    if (raw.setNumber !== undefined) {
+    if (row.setNumber !== undefined) {
       try {
-        const sn = parseIntegerField(raw.setNumber, `Row ${idx + 1}: setNumber`);
-        if (sn < 1) throw new Error(`Row ${idx + 1}: setNumber must be >= 1`);
+        const sn = parseIntegerField(row.setNumber, `${label}: setNumber`);
+        if (sn < 1) throw new Error(`${label}: setNumber must be >= 1`);
         setNumber = sn;
       } catch (e) {
         if (e instanceof Error && e.message.includes("setNumber")) throw e;
-        throw new Error(`Row ${idx + 1}: setNumber must be a positive integer`);
+        throw new Error(`${label}: setNumber must be a positive integer`);
       }
     }
 
@@ -191,22 +239,22 @@ export function parseConversationBankJson(text: string): ConversationExam[] {
       setNumber = counters[tier];
     }
     if (!Number.isInteger(setNumber) || setNumber < 1) {
-      throw new Error(`Row ${idx + 1}: set number must be a positive integer`);
+      throw new Error(`${label}: set number must be a positive integer`);
     }
 
     const id = idStr || `conv_${difficulty}_${String(setNumber).padStart(2, "0")}`;
 
     let round = 1;
-    if (raw.round !== undefined) {
+    if (row.round !== undefined) {
       try {
-        const rn = parseIntegerField(raw.round, `Row ${idx + 1}: round`);
+        const rn = parseIntegerField(row.round, `${label}: round`);
         round = rn;
       } catch {
-        throw new Error(`Row ${idx + 1}: round must be an integer 1–${CONVERSATION_ROUND_COUNT}`);
+        throw new Error(`${label}: round must be an integer 1–${CONVERSATION_ROUND_COUNT}`);
       }
     }
     if (round < 1 || round > CONVERSATION_ROUND_COUNT) {
-      throw new Error(`Row ${idx + 1}: round must be 1–${CONVERSATION_ROUND_COUNT}`);
+      throw new Error(`${label}: round must be 1–${CONVERSATION_ROUND_COUNT}`);
     }
 
     out.push({
@@ -214,7 +262,7 @@ export function parseConversationBankJson(text: string): ConversationExam[] {
       title: title.trim(),
       difficulty,
       round,
-      maxScore: typeof raw.maxScore === "number" ? raw.maxScore : undefined,
+      maxScore: typeof row.maxScore === "number" ? row.maxScore : undefined,
       scenario: scenario.trim(),
       highlightedWords: hw.map((h, i) => parseHighlighted(h, i)),
       scenarioQuestions: sq.map((q, i) => parseScenarioQ(q, i)),
@@ -225,4 +273,3 @@ export function parseConversationBankJson(text: string): ConversationExam[] {
 
   return out;
 }
-

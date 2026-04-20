@@ -1,6 +1,8 @@
 /**
  * Minimal valid one-exam JSON for interactive conversation bulk import (copy for admins).
  * Each exam needs 3 scenarioQuestions and 5 mainQuestions after import validation.
+ * Grouped upload is also allowed:
+ * `[ { "round": 1, "difficulty": "easy", "sets": [ { ...set 1 }, { ...set 2 } ] } ]`
  */
 export const CONVERSATION_BULK_JSON_TEMPLATE = `[
   {

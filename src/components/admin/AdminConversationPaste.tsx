@@ -685,7 +685,10 @@ export function AdminConversationPaste() {
         {CONVERSATION_MAIN_Q_COUNT} <code className="ep-stat text-xs">mainQuestions</code> (each with{" "}
         <code className="ep-stat text-xs">transcript</code>). <code className="ep-stat text-xs">id</code> is optional
         (auto). Per-row <code className="ep-stat text-xs">difficulty</code> / <code className="ep-stat text-xs">round</code>{" "}
-        in JSON override the upload selectors when present (round <strong>1–{CONVERSATION_ROUND_COUNT}</strong>).
+        in JSON override the upload selectors when present (round <strong>1–{CONVERSATION_ROUND_COUNT}</strong>). You
+        can also paste a grouped parent row with a <code className="ep-stat text-xs">sets</code> or{" "}
+        <code className="ep-stat text-xs">scenarios</code> array and the importer will auto-split each child into its
+        own uploaded set.
       </p>
       <div className="mb-3 rounded-[4px] border-2 border-dashed border-neutral-500 bg-neutral-100/90 p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
