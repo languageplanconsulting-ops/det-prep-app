@@ -438,7 +438,7 @@ export async function fetchUserSubscriptionDetail(userId: string) {
     supabase
       .from("study_sessions")
       .select(
-        "id, skill, exercise_type, difficulty, score, duration_seconds, started_at, ended_at, completed",
+        "id, skill, exercise_type, difficulty, score, duration_seconds, started_at, ended_at, completed, submission_payload, report_payload",
       )
       .eq("user_id", userId),
     supabase

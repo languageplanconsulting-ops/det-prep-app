@@ -9,6 +9,7 @@ import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
+import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import { savePhotoSpeakReport } from "@/lib/photo-speak-storage";
 import { recordSpeakAboutPhotoProgress } from "@/lib/speak-about-photo-progress";
 import {
@@ -216,6 +217,26 @@ export function PhotoAssessmentSession({
       setLoadingPercent(100);
       vipGate.recordSuccessfulAiSubmit();
       const report = data as PhotoSpeakAttemptReport;
+      try {
+        await finalizeLatestStudySession({
+          exerciseType: mode === "speak" ? "speak_about_photo" : "write_about_photo",
+          setId: item.id,
+          score: report.score160,
+          completed: true,
+          submissionPayload: {
+            kind: mode === "speak" ? "speak_about_photo" : "write_about_photo",
+            itemId: item.id,
+            titleEn: item.titleEn,
+            titleTh: item.titleTh,
+            promptEn: item.promptEn,
+            promptTh: item.promptTh,
+            transcript,
+          },
+          reportPayload: report,
+        });
+      } catch (e) {
+        console.warn("[PhotoAssessmentSession] finalize study session failed", e);
+      }
       stashReportForNavigation(report.attemptId, report);
       savePhotoSpeakReport(report);
       if (mode === "speak") {

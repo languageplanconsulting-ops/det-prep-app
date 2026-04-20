@@ -154,21 +154,41 @@ export async function PUT(req: Request) {
 
     const body = (await req.json()) as {
       sessionId?: unknown;
+      exerciseType?: unknown;
+      setId?: unknown;
       score?: unknown;
       completed?: unknown;
       duration_seconds?: unknown;
+      submission_payload?: unknown;
+      report_payload?: unknown;
     };
 
-    if (typeof body.sessionId !== "string" || !body.sessionId) {
-      return NextResponse.json({ error: "sessionId required" }, { status: 400 });
-    }
-
-    const { data: row, error: fetchErr } = await supabase
+    let rowQuery = supabase
       .from("study_sessions")
       .select("id, started_at, ended_at, duration_seconds")
-      .eq("id", body.sessionId)
-      .eq("user_id", user.id)
-      .maybeSingle();
+      .eq("user_id", user.id);
+
+    if (typeof body.sessionId === "string" && body.sessionId) {
+      rowQuery = rowQuery.eq("id", body.sessionId);
+    } else {
+      const exerciseType =
+        typeof body.exerciseType === "string" ? body.exerciseType.trim() : "";
+      if (!exerciseType) {
+        return NextResponse.json(
+          { error: "sessionId or exerciseType required" },
+          { status: 400 },
+        );
+      }
+      rowQuery = rowQuery.eq("exercise_type", exerciseType).is("ended_at", null);
+      if (body.setId != null) {
+        const setId =
+          typeof body.setId === "string" ? body.setId : String(body.setId);
+        rowQuery = rowQuery.eq("set_id", setId);
+      }
+      rowQuery = rowQuery.order("created_at", { ascending: false }).limit(1);
+    }
+
+    const { data: row, error: fetchErr } = await rowQuery.maybeSingle();
 
     if (fetchErr || !row) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
@@ -196,15 +216,31 @@ export async function PUT(req: Request) {
       if (Number.isFinite(n)) score = Math.round(n);
     }
 
+    const updatePayload: {
+      ended_at: string;
+      duration_seconds: number;
+      completed: boolean;
+      score: number | null;
+      submission_payload?: unknown;
+      report_payload?: unknown;
+    } = {
+      ended_at: endedAt,
+      duration_seconds: duration,
+      completed,
+      score,
+    };
+
+    if (body.submission_payload !== undefined) {
+      updatePayload.submission_payload = body.submission_payload;
+    }
+    if (body.report_payload !== undefined) {
+      updatePayload.report_payload = body.report_payload;
+    }
+
     const { error } = await supabase
       .from("study_sessions")
-      .update({
-        ended_at: endedAt,
-        duration_seconds: duration,
-        completed,
-        score,
-      })
-      .eq("id", body.sessionId)
+      .update(updatePayload)
+      .eq("id", row.id)
       .eq("user_id", user.id);
 
     if (error) {

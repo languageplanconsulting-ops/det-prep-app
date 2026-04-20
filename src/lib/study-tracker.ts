@@ -37,6 +37,33 @@ async function endSessionRemote(
   }
 }
 
+export async function finalizeLatestStudySession(params: {
+  exerciseType: string;
+  setId?: string | null;
+  score?: number | null;
+  completed?: boolean;
+  submissionPayload?: unknown;
+  reportPayload?: unknown;
+}): Promise<void> {
+  const res = await fetch(SESSION_API, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({
+      exerciseType: params.exerciseType,
+      setId: params.setId ?? null,
+      score: params.score ?? null,
+      completed: params.completed ?? true,
+      submission_payload: params.submissionPayload,
+      report_payload: params.reportPayload,
+    }),
+  });
+  if (!res.ok) {
+    const err = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(err.error ?? `Failed to finalize session (${res.status})`);
+  }
+}
+
 /**
  * On app load, ends any persisted session as incomplete (abandoned).
  */

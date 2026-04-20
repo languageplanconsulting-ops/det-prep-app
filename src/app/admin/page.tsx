@@ -58,6 +58,13 @@ export default function AdminPage() {
           >
             API costs (฿ per user) →
           </Link>
+          <Link
+            href="/admin/study-activity"
+            className="inline-flex items-center rounded-[4px] border-4 border-black bg-rose-100 px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            Study activity dashboard →
+          </Link>
           <a
             href="#admin-tts-debug"
             className="inline-flex items-center rounded-[4px] border-4 border-black bg-lime-200 px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"

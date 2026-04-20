@@ -11,6 +11,7 @@ import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
+import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import {
   getSpeechRecognitionCtor,
   handleSpeechRecognitionError,
@@ -190,6 +191,27 @@ export function ReadSpeakSession({
   };
 
   const goToReport = async (report: SpeakingAttemptReport) => {
+    try {
+      await finalizeLatestStudySession({
+        exerciseType: "read_then_speak",
+        setId: `r${round}-${topicId}`,
+        score: report.score160,
+        completed: true,
+        submissionPayload: {
+          kind: "read_then_speak",
+          topicId: topic.id,
+          questionId: selectedQuestion?.id ?? null,
+          titleEn: topic.titleEn,
+          titleTh: topic.titleTh,
+          promptEn: selectedQuestion?.promptEn ?? "",
+          promptTh: selectedQuestion?.promptTh ?? "",
+          transcript,
+        },
+        reportPayload: report,
+      });
+    } catch (e) {
+      console.warn("[ReadSpeakSession] finalize study session failed", e);
+    }
     stashReportForNavigation(report.attemptId, report);
     saveSpeakingReport(report);
     await router.push(`/practice/production/read-and-speak/report/${report.attemptId}`);

@@ -18,6 +18,7 @@ import {
   VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION,
 } from "@/lib/vip-ai-feedback-quota";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
+import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import {
   INTERACTIVE_SPEAKING_FOLLOWUP_COUNT,
@@ -642,6 +643,24 @@ export function InteractiveSpeakingSession({
         if (vipGate.isVip && vipGate.userId) {
           addVipAiFeedbackUses(vipGate.userId, 1);
           emitVipApiCreditNotice(getVipWeeklyAiFeedbackRemaining(vipGate.userId));
+        }
+        try {
+          await finalizeLatestStudySession({
+            exerciseType: "interactive_speaking",
+            setId: scenario.id,
+            score: report.score160,
+            completed: true,
+            submissionPayload: {
+              kind: "interactive_speaking",
+              scenarioId: scenario.id,
+              titleEn: scenario.titleEn,
+              titleTh: scenario.titleTh,
+              turns: nextCompleted,
+            },
+            reportPayload: report,
+          });
+        } catch (e) {
+          console.warn("[InteractiveSpeakingSession] finalize study session failed", e);
         }
         stashReportForNavigation(report.attemptId, report);
         saveInteractiveSpeakingReport(report);

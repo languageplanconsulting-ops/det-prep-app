@@ -10,6 +10,7 @@ import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
+import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import {
   getReadWriteTopicProgress,
   getTopicById,
@@ -87,6 +88,25 @@ export function ReadWriteSession({ topicId }: { topicId: string }) {
   };
 
   const goToReport = async (report: WritingAttemptReport) => {
+    try {
+      await finalizeLatestStudySession({
+        exerciseType: "read_then_write",
+        setId: topicId,
+        score: report.score160,
+        completed: true,
+        submissionPayload: {
+          kind: "read_then_write",
+          topicId: report.topicId,
+          titleEn: topic.titleEn,
+          titleTh: topic.titleTh,
+          essay,
+          followUpAnswers,
+        },
+        reportPayload: report,
+      });
+    } catch (e) {
+      console.warn("[ReadWriteSession] finalize study session failed", e);
+    }
     stashReportForNavigation(report.attemptId, report);
     saveWritingReport(report);
     recordReadWriteTopicProgress(report.topicId, report.score160, report.attemptId);

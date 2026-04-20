@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { Fragment } from "react";
 import { useCallback, useEffect, useState } from "react";
 import {
   Bar,
@@ -15,6 +16,10 @@ import {
 
 import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
 import { useAdminToast } from "@/components/admin/AdminToast";
+import {
+  extractReportCard,
+  extractSubmissionCard,
+} from "@/lib/admin-study-activity-format";
 import { formatBahtFromSatang } from "@/lib/money-format";
 
 function isoToDatetimeLocalValue(iso: string | null | undefined): string {
@@ -58,6 +63,7 @@ export function SubscriptionDetailClient() {
     kind: "tier" | "revoke" | "extend" | "stripe" | "vip" | null;
     reason: string;
   }>({ kind: null, reason: "" });
+  const [expandedStudySessionId, setExpandedStudySessionId] = useState<string | null>(null);
   const [tierSel, setTierSel] = useState("free");
   const [expiryLocal, setExpiryLocal] = useState("");
 
@@ -626,8 +632,8 @@ export function SubscriptionDetailClient() {
           <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
             <h2 className="text-lg font-black">Practice sessions &amp; scores / แบบฝึกและคะแนน</h2>
             <p className="mt-1 text-xs text-neutral-600">
-              Per-attempt scores when the app recorded them (dictation, FITB, etc.). Blank score means not
-              stored for that session. / คะแนนรายครั้งตามที่ระบบบันทึก
+              Per-attempt scores plus saved submission/report snapshots when the app recorded them. Older
+              sessions may still be missing detail. / คะแนนรายครั้งพร้อม submission และ report snapshot
             </p>
             {studySessionScores.length === 0 ? (
               <p className="mt-3 text-sm text-neutral-500">No study sessions yet. / ยังไม่มีเซสชัน</p>
@@ -643,36 +649,105 @@ export function SubscriptionDetailClient() {
                       <th className="border-b-2 border-black p-2">Score</th>
                       <th className="border-b-2 border-black p-2">Duration</th>
                       <th className="border-b-2 border-black p-2">Done</th>
+                      <th className="border-b-2 border-black p-2">Details</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {studySessionScores.map((row) => (
-                      <tr key={String(row.id)}>
-                        <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
-                          {row.started_at
-                            ? new Date(row.started_at as string).toLocaleString()
-                            : "—"}
-                        </td>
-                        <td className="border-b border-neutral-200 p-2">{String(row.skill ?? "—")}</td>
-                        <td className="border-b border-neutral-200 p-2 font-mono text-[10px]">
-                          {String(row.exercise_type ?? "—")}
-                        </td>
-                        <td className="border-b border-neutral-200 p-2">
-                          {String(row.difficulty ?? "—")}
-                        </td>
-                        <td className="border-b border-neutral-200 p-2 font-semibold">
-                          {row.score != null ? String(row.score) : "—"}
-                        </td>
-                        <td className="border-b border-neutral-200 p-2 ep-stat">
-                          {row.duration_seconds != null && Number(row.duration_seconds) > 0
-                            ? `${Math.round(Number(row.duration_seconds) / 60)} min`
-                            : "—"}
-                        </td>
-                        <td className="border-b border-neutral-200 p-2">
-                          {row.completed ? "✓" : "—"}
-                        </td>
-                      </tr>
-                    ))}
+                    {studySessionScores.map((row) => {
+                      const sessionId = String(row.id);
+                      const isOpen = expandedStudySessionId === sessionId;
+                      const submissionCard = extractSubmissionCard(row);
+                      const reportCard = extractReportCard(row);
+                      const hasDetails = Boolean(submissionCard || reportCard);
+                      return (
+                        <Fragment key={sessionId}>
+                          <tr key={sessionId}>
+                            <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
+                              {row.started_at
+                                ? new Date(row.started_at as string).toLocaleString()
+                                : "—"}
+                            </td>
+                            <td className="border-b border-neutral-200 p-2">{String(row.skill ?? "—")}</td>
+                            <td className="border-b border-neutral-200 p-2 font-mono text-[10px]">
+                              {String(row.exercise_type ?? "—")}
+                            </td>
+                            <td className="border-b border-neutral-200 p-2">
+                              {String(row.difficulty ?? "—")}
+                            </td>
+                            <td className="border-b border-neutral-200 p-2 font-semibold">
+                              {row.score != null ? String(row.score) : "—"}
+                            </td>
+                            <td className="border-b border-neutral-200 p-2 ep-stat">
+                              {row.duration_seconds != null && Number(row.duration_seconds) > 0
+                                ? `${Math.round(Number(row.duration_seconds) / 60)} min`
+                                : "—"}
+                            </td>
+                            <td className="border-b border-neutral-200 p-2">
+                              {row.completed ? "✓" : "—"}
+                            </td>
+                            <td className="border-b border-neutral-200 p-2">
+                              {hasDetails ? (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedStudySessionId((prev) =>
+                                      prev === sessionId ? null : sessionId,
+                                    )
+                                  }
+                                  className="rounded-sm border-2 border-black bg-[#ffcc00] px-2 py-1 text-[10px] font-black uppercase shadow-[2px_2px_0_0_#000]"
+                                >
+                                  {isOpen ? "Hide" : "View"}
+                                </button>
+                              ) : (
+                                <span className="text-neutral-400">—</span>
+                              )}
+                            </td>
+                          </tr>
+                          {isOpen ? (
+                            <tr>
+                              <td colSpan={8} className="border-b border-neutral-200 bg-neutral-50 p-3">
+                                <div className="grid gap-3 lg:grid-cols-2">
+                                  <div className="rounded-sm border-2 border-black bg-white p-3">
+                                    <p className="text-[11px] font-black uppercase tracking-wide text-[#004AAD]">
+                                      {submissionCard?.title ?? "Learner submission"}
+                                    </p>
+                                    {submissionCard?.meta?.length ? (
+                                      <p className="mt-1 text-[10px] font-bold text-neutral-500">
+                                        {submissionCard.meta.filter(Boolean).join(" · ")}
+                                      </p>
+                                    ) : null}
+                                    <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-neutral-800">
+                                      {submissionCard?.body ?? "No saved submission snapshot for this session."}
+                                    </p>
+                                  </div>
+                                  <div className="rounded-sm border-2 border-black bg-white p-3">
+                                    <p className="text-[11px] font-black uppercase tracking-wide text-[#004AAD]">
+                                      Saved report snapshot
+                                    </p>
+                                    <p className="mt-2 text-sm font-black text-neutral-900">
+                                      Score: <span className="text-[#004AAD]">{reportCard?.score ?? "—"}</span>
+                                    </p>
+                                    <p className="mt-2 text-xs leading-relaxed text-neutral-800">
+                                      {reportCard?.summary || "No compact report summary was saved for this session."}
+                                    </p>
+                                    {reportCard?.bullets?.length ? (
+                                      <ul className="mt-3 space-y-1 text-xs text-neutral-800">
+                                        {reportCard.bullets.map((bullet, index) => (
+                                          <li key={`${sessionId}-bullet-${index}`} className="flex gap-2">
+                                            <span className="font-black text-[#004AAD]">{index + 1}.</span>
+                                            <span>{bullet}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : null}
+                        </Fragment>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

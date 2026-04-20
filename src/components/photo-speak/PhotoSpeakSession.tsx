@@ -10,6 +10,7 @@ import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
+import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import {
   getSpeechRecognitionCtor,
   handleSpeechRecognitionError,
@@ -188,6 +189,26 @@ export function PhotoSpeakSession({ itemId }: { itemId: string }) {
   };
 
   const goToReport = async (report: PhotoSpeakAttemptReport) => {
+    try {
+      await finalizeLatestStudySession({
+        exerciseType: "speak_about_photo",
+        setId: itemId,
+        score: report.score160,
+        completed: true,
+        submissionPayload: {
+          kind: "speak_about_photo",
+          itemId: item.id,
+          titleEn: item.titleEn,
+          titleTh: item.titleTh,
+          promptEn: item.promptEn,
+          promptTh: item.promptTh,
+          transcript,
+        },
+        reportPayload: report,
+      });
+    } catch (e) {
+      console.warn("[PhotoSpeakSession] finalize study session failed", e);
+    }
     stashReportForNavigation(report.attemptId, report);
     savePhotoSpeakReport(report);
     recordSpeakAboutPhotoProgress(report.topicId, report.score160, report.attemptId);
