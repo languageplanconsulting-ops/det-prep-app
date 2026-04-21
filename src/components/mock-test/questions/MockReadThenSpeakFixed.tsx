@@ -21,6 +21,10 @@ export function ReadThenSpeakMock({
   onSubmit: (answer: { text: string }) => void;
 }) {
   const passage = String(content.passage ?? "");
+  const topic = String(content.topic ?? content.topic_en ?? content.cue_card ?? "").trim();
+  const guidingQuestions = Array.isArray(content.guiding_questions)
+    ? (content.guiding_questions as unknown[]).map((item) => String(item ?? "").trim()).filter(Boolean)
+    : [];
 
   const promptEn = String(content.prompt_en ?? content.instruction ?? "");
   const promptTh = String(content.prompt_th ?? content.instruction_th ?? "");
@@ -129,6 +133,21 @@ export function ReadThenSpeakMock({
           {passage}
         </div>
       ) : null}
+      {!passage && topic ? (
+        <div className="rounded-[4px] border-4 border-black bg-[#fff9e6] p-4">
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-[#004AAD]">
+            Speaking cue card / หัวข้อพูด
+          </p>
+          <p className="mt-2 text-lg font-black text-neutral-900">{topic}</p>
+          {guidingQuestions.length > 0 ? (
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm font-bold text-neutral-700">
+              {guidingQuestions.map((question, index) => (
+                <li key={`${question}-${index}`}>{question}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="space-y-1">
         {promptTh ? <p className="text-lg font-black text-neutral-900">{promptTh}</p> : null}
@@ -210,4 +229,3 @@ export function ReadThenSpeakMock({
     </div>
   );
 }
-

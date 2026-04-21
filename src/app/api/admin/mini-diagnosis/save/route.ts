@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
+import { synthesizeEnglishSpeechWithDeepgram } from "@/lib/deepgram-synthesize";
+import { synthesizeEnglishSpeechWithGemini } from "@/lib/gemini-synthesize";
+import { synthesizeEnglishSpeechWithInworld } from "@/lib/inworld-synthesize";
 import { parseMiniDiagnosisUploadJson } from "@/lib/mini-diagnosis/upload";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
@@ -22,6 +25,81 @@ type SaveBody = {
   grouped_items?: Record<string, unknown>;
 };
 
+async function synthesizeToDataUrl(text: string): Promise<string> {
+  const cleaned = text.trim();
+  if (!cleaned) return "";
+  try {
+    const deepgramKey = process.env.DEEPGRAM_API_KEY?.trim() || "";
+    if (deepgramKey && cleaned.length <= 2000) {
+      const out = await synthesizeEnglishSpeechWithDeepgram({ apiKey: deepgramKey, text: cleaned });
+      return `data:${out.mimeType};base64,${out.audioBase64}`;
+    }
+  } catch {
+    /* try next provider */
+  }
+  try {
+    const inworldKey = process.env.INWORLD_API_KEY?.trim() || "";
+    if (inworldKey && cleaned.length <= 2000) {
+      const out = await synthesizeEnglishSpeechWithInworld({ apiKey: inworldKey, text: cleaned });
+      return `data:${out.mimeType};base64,${out.audioBase64}`;
+    }
+  } catch {
+    /* try next provider */
+  }
+  try {
+    const geminiKey = process.env.GEMINI_API_KEY?.trim() || "";
+    if (!geminiKey) return "";
+    const out = await synthesizeEnglishSpeechWithGemini({ apiKey: geminiKey, text: cleaned });
+    return `data:${out.mimeType};base64,${out.audioBase64}`;
+  } catch {
+    return "";
+  }
+}
+
+async function enrichMiniDiagnosisAudio(
+  rows: Array<{
+    step_index: number;
+    task_type: string;
+    content: Record<string, unknown>;
+  }>,
+) {
+  const cache = new Map<string, string>();
+  const resolveAudio = async (text: string): Promise<string> => {
+    const key = text.trim();
+    if (!key) return "";
+    if (cache.has(key)) return cache.get(key) ?? "";
+    const url = await synthesizeToDataUrl(key);
+    cache.set(key, url);
+    return url;
+  };
+
+  for (const row of rows) {
+    const content = row.content ?? {};
+    if (row.task_type === "dictation") {
+      const existing = String(content.audio_url ?? "").trim();
+      const sentence = String(content.reference_sentence ?? "").trim();
+      if (!existing && sentence) {
+        const audio = await resolveAudio(sentence);
+        if (audio) content.audio_url = audio;
+      }
+    }
+
+    if (row.task_type === "interactive_listening") {
+      const existing = String(content.audio_url ?? "").trim();
+      const script = String(
+        content.audio_script ?? content.script ?? content.transcript ?? content.narration ?? "",
+      ).trim();
+      if (!existing && script) {
+        const audio = await resolveAudio(script);
+        if (audio) content.audio_url = audio;
+      }
+      if (content.max_plays == null) content.max_plays = 3;
+    }
+
+    row.content = content;
+  }
+}
+
 export async function POST(req: Request) {
   const auth = await ensureAdmin();
   if ("error" in auth) return auth.error;
@@ -36,6 +114,13 @@ export async function POST(req: Request) {
 
   const parsed = parseMiniDiagnosisUploadJson(JSON.stringify({ grouped_items: body.grouped_items ?? {} }));
   if (parsed.error) return NextResponse.json({ error: parsed.error }, { status: 400 });
+  await enrichMiniDiagnosisAudio(
+    parsed.rows.map((row) => ({
+      step_index: row.step_index,
+      task_type: row.task_type,
+      content: row.content,
+    })),
+  );
 
   const { data: setRow, error: setErr } = await supabase
     .from("mini_diagnosis_sets")

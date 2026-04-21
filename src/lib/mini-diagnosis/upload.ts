@@ -270,3 +270,122 @@ export function buildMiniDiagnosisTemplateJson(): string {
   };
   return JSON.stringify({ grouped_items: grouped }, null, 2);
 }
+
+const MINI_DIAGNOSIS_TASK_TEMPLATES: Record<MiniDiagnosisTaskType, unknown> = {
+  dictation: {
+    content: {
+      reference_sentence: "Students should review their notes before the final exam.",
+    },
+  },
+  real_english_word: {
+    content: {
+      real_words: ["market", "travel", "language"],
+      fake_words: ["blonter", "sproke", "drimble"],
+      rounds: 1,
+      words_per_round: 40,
+      round_duration_sec: 60,
+      score_per_correct: 5,
+    },
+  },
+  vocabulary_reading: {
+    content: {
+      mock_combined_mode: true,
+      titleEn: "Campus Climate Study",
+      passage: {
+        p1: "Students at the university joined a project about [BLANK 1] and energy use on campus.",
+        p2: "Researchers found that simple changes could lower costs and improve daily comfort.",
+        p3: "The report encouraged students to take more responsibility for environmental action.",
+      },
+      highlightedVocab: [],
+      vocabularyQuestions: [
+        {
+          question: "Which word is closest in meaning to project?",
+          options: ["plan", "accident", "holiday", "debate"],
+          correctAnswer: "plan",
+        },
+      ],
+      missingParagraph: {
+        question: "Which paragraph fits the missing gap?",
+        options: ["Option A", "Option B", "Option C", "Option D"],
+        correctAnswer: "Option A",
+      },
+      informationLocation: {
+        question: "Where should a sentence about lower bills go?",
+        options: ["Paragraph 1", "Paragraph 2", "Paragraph 3", "Nowhere"],
+        correctAnswer: "Paragraph 2",
+      },
+      bestTitle: {
+        question: "What is the best title?",
+        options: ["Title A", "Title B", "Title C", "Title D"],
+        correctAnswer: "Title A",
+      },
+      mainIdea: {
+        question: "What is the main idea?",
+        options: ["Idea A", "Idea B", "Idea C", "Idea D"],
+        correctAnswer: "Idea A",
+      },
+    },
+  },
+  fill_in_blanks: {
+    content: {
+      passage: "The professor asked the students to [BLANK 1] their essays before the final [BLANK 2].",
+      missingWords: [
+        {
+          correctWord: "revise",
+          clue: "To improve by checking and changing errors.",
+          explanationThai: "แก้ไขปรับปรุง",
+          prefix_length: 2,
+        },
+        {
+          correctWord: "submission",
+          clue: "The act of formally sending work to be checked.",
+          explanationThai: "การส่งงาน",
+          prefix_length: 3,
+        },
+      ],
+    },
+    correct_answer: {
+      answers: ["revise", "submission"],
+    },
+  },
+  interactive_listening: {
+    content: {
+      instruction: "Listen to the audio. You may play it up to 3 times, then answer the 5 questions.",
+      instruction_th: "ฟังเสียงนี้ได้สูงสุด 3 ครั้ง แล้วตอบคำถาม 5 ข้อ",
+      script: "Hello, I am visiting the office to ask about internship opportunities and the application process.",
+      questions: [
+        {
+          question: "Why did the student visit the office?",
+          options: ["Choice 1", "Choice 2", "Choice 3", "Choice 4"],
+          correctAnswer: "Choice 1",
+        },
+      ],
+    },
+  },
+  write_about_photo: {
+    content: {
+      image_url: "https://example.com/mini-write-photo.jpg",
+      instruction: "Write one short paragraph describing what is happening in this image.",
+      instruction_th: "เขียนหนึ่งย่อหน้าสั้นๆ อธิบายสิ่งที่เกิดขึ้นในภาพนี้",
+    },
+  },
+  read_then_speak: {
+    content: {
+      titleEn: "Mini read then speak",
+      titleTh: "มินิอ่านแล้วพูด",
+      topic: "Talk about your favorite book. When did you read it? Who gave it to you? Why do you like it?",
+      prompt_en: "Read the cue card, then respond naturally in English.",
+      prompt_th: "อ่านหัวข้อแล้วพูดตอบอย่างเป็นธรรมชาติเป็นภาษาอังกฤษ",
+      guiding_questions: [
+        "When did you read it?",
+        "Who gave it to you?",
+        "Why do you like it?",
+        "What is the story?",
+      ],
+    },
+  },
+};
+
+export function buildMiniDiagnosisTaskTemplateJson(taskType: MiniDiagnosisTaskType): string {
+  return JSON.stringify(MINI_DIAGNOSIS_TASK_TEMPLATES[taskType], null, 2);
+}
