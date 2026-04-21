@@ -83,7 +83,12 @@ Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
 
 Task relevancy: how well they engaged with each question and stayed on topic across the scenario.
 
-vocabularyUpgradeSuggestions: up to 10 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.
+Priority for feedback:
+- Prioritize grammar corrections first, then vocabulary upgrades.
+- grammarBreakdown should contain up to 8 concrete spoken-language fixes where possible.
+- Each grammar suggestion should sound natural in conversation, not like formal essay English.
+
+vocabularyUpgradeSuggestions: up to 8 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.
 
 keyLearningQuotes: up to 10 objects. This replaces generic tips — each item MUST:
 - turnIndex: 1..${n} (which turn the quote comes from)
@@ -202,7 +207,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
 
   const mapBreak = (arr: unknown) =>
     asArr(arr)
-      .slice(0, 5)
+      .slice(0, 8)
       .map((b) => {
         const o = b as Record<string, unknown>;
         const issueEn = String(o?.issueEn ?? o?.en ?? "");
@@ -249,7 +254,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
   );
 
   const vocabularyUpgradeSuggestions: SpeakingVocabularyUpgrade[] = asArr(raw.vocabularyUpgradeSuggestions)
-    .slice(0, 10)
+    .slice(0, 8)
     .map((item, i) => {
       const o = item as Record<string, unknown>;
       return {

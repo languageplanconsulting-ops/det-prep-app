@@ -76,11 +76,16 @@ For EACH criterion summary, include (A) brief assessment and (B) a line starting
 
 Breakdowns: excerpt (exact quote), issueEn/issueTh, suggestionEn/suggestionTh with concrete corrections. For vocabulary, suggest better words or collocations when possible.
 
+Priority for feedback:
+- Prioritize grammar corrections first, then vocabulary upgrades.
+- grammarBreakdown should contain up to 8 concrete fixes where possible.
+- Keep grammar suggestions natural and score-focused, not overly formal.
+
 Task relevancy: weight whether the learner addresses the photo prompt AND keyword tags.
 
 Task score boost: output taskScorePercent as BASE (0–100). Set taskPersonalExperienceBoost true for authentic personal OR hypothetical personal experience ("If I were…", "I would…", etc.). Server adds +10 to task (cap 100)—note in taskSummary.
 
-vocabularyUpgradeSuggestions: up to 10 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.
+vocabularyUpgradeSuggestions: up to 8 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.
 
 transcriptHighlights: up to 18 — exactQuote from punctuatedTranscript, isPositive, noteEn, noteTh.
 
@@ -263,7 +268,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
 
   const mapBreak = (arr: unknown) =>
     asArr(arr)
-      .slice(0, 5)
+      .slice(0, 8)
       .map((b) => {
         const o = b as Record<string, unknown>;
         const issueEn = String(o?.issueEn ?? o?.en ?? "");
@@ -332,7 +337,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
   const wc = punctuatedRaw.split(/\s+/).filter(Boolean).length;
 
   const vocabularyUpgradeSuggestions: SpeakingVocabularyUpgrade[] = asArr(raw.vocabularyUpgradeSuggestions)
-    .slice(0, 10)
+    .slice(0, 8)
     .map((item, i) => {
       const o = item as Record<string, unknown>;
       return {
@@ -363,7 +368,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
   }
 
   const improvementPoints: ImprovementPoint[] = asArr(raw.improvementPoints)
-    .slice(0, 10)
+    .slice(0, 8)
     .map((p, i) => {
       const o = p as Record<string, unknown>;
       const cat = o?.category;

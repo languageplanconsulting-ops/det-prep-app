@@ -59,6 +59,13 @@ function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
+function formatCountdown(seconds: number): string {
+  const safe = Math.max(0, seconds);
+  const mins = Math.floor(safe / 60);
+  const secs = safe % 60;
+  return `${mins}:${String(secs).padStart(2, "0")}`;
+}
+
 /** Short click when the answer window opens (prep → record). */
 function playAnswerCueSound(): void {
   if (typeof window === "undefined") return;
@@ -743,6 +750,28 @@ export function InteractiveSpeakingSession({
     return "Add more if you need to, then continue.";
   }, [phase]);
 
+  const visibleTimer = useMemo(() => {
+    if (phase === "prep") {
+      return {
+        labelTh: "เวลาคิดก่อนตอบ",
+        labelEn: "Prep time",
+        secondsLeft: prepLeft,
+        maxSeconds: INTERACTIVE_SPEAKING_PREP_SECONDS,
+        tone: "prep" as const,
+      };
+    }
+    if (phase === "record") {
+      return {
+        labelTh: "เวลาพูดตอบ",
+        labelEn: "Speaking time",
+        secondsLeft: recLeft,
+        maxSeconds: INTERACTIVE_SPEAKING_MAX_SPEAK_SECONDS,
+        tone: "record" as const,
+      };
+    }
+    return null;
+  }, [phase, prepLeft, recLeft]);
+
   return (
     <StudySessionBoundary
       skill="production"
@@ -878,6 +907,51 @@ export function InteractiveSpeakingSession({
                     ) : null}
                   </div>
                 </div>
+
+                {visibleTimer ? (
+                  <div
+                    className={`mt-5 rounded-sm border-2 border-black p-4 shadow-[4px_4px_0_0_#000] ${
+                      visibleTimer.tone === "record" ? "bg-rose-100" : "bg-ep-yellow/40"
+                    }`}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="ep-stat text-[10px] font-black uppercase tracking-[0.2em] text-neutral-600">
+                          {visibleTimer.labelTh} / {visibleTimer.labelEn}
+                        </p>
+                        <p className="mt-1 text-4xl font-black tabular-nums text-neutral-900">
+                          {formatCountdown(visibleTimer.secondsLeft)}
+                        </p>
+                        <p className="mt-1 text-xs font-semibold text-neutral-600">
+                          {visibleTimer.tone === "record"
+                            ? "ตอบให้ชัดก่อนหมดเวลา 35 วินาที"
+                            : "คุณมีเวลาคิดก่อนเริ่มตอบ"}
+                        </p>
+                      </div>
+                      <div className="sm:w-56">
+                        <div className="h-4 border-2 border-black bg-white">
+                          <div
+                            className={`h-full transition-all ${
+                              visibleTimer.tone === "record" ? "bg-rose-500" : "bg-ep-blue"
+                            }`}
+                            style={{
+                              width: `${Math.max(
+                                0,
+                                Math.min(
+                                  100,
+                                  (visibleTimer.secondsLeft / visibleTimer.maxSeconds) * 100,
+                                ),
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                        <p className="mt-2 text-right font-mono text-[10px] font-black uppercase text-neutral-500">
+                          {visibleTimer.secondsLeft}s left
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
 
                 {phase === "record" ? (
                   <div className="mt-6 border-t-2 border-dashed border-neutral-200 pt-4">

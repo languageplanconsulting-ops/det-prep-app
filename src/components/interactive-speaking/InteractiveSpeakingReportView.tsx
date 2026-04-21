@@ -197,6 +197,8 @@ export function InteractiveSpeakingReportView({
               upgrades={report.vocabularyUpgradeSuggestions ?? []}
               attemptId={report.attemptId}
               entrySource={entrySource}
+              uiLocale="th"
+              maxItems={8}
             />
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -305,6 +307,7 @@ export function InteractiveSpeakingReportView({
               entrySource="interactive-speaking"
               titleEn="Grammar fixes (interactive speaking)"
               titleTh="จุดแก้ไวยากรณ์ (การพูดโต้ตอบ)"
+              maxItems={8}
             />
           </div>
         </div>

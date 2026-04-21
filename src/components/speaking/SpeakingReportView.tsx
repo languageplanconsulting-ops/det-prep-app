@@ -141,7 +141,7 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
       noteTh: b.th,
     }))
     .filter((x) => x.wrong && (x.betterEn || x.betterTh))
-    .slice(0, 5);
+    .slice(0, 8);
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -228,6 +228,7 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
         attemptId={report.attemptId}
         entrySource="speaking-read-and-speak"
         uiLocale={uiLocale}
+        maxItems={8}
       />
 
       <div className="grid gap-5 md:grid-cols-2">
@@ -303,6 +304,7 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
         entrySource="speaking-read-and-speak"
         titleEn="Grammar fixes (speaking)"
         titleTh="จุดแก้ไวยากรณ์ (การพูด)"
+        maxItems={8}
       />
           </div>
         </div>

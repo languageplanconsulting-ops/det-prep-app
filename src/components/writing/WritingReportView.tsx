@@ -236,7 +236,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
       noteTh: b.th,
     }))
     .filter((x) => x.wrong && (x.betterEn || x.betterTh))
-    .slice(0, 5);
+    .slice(0, 8);
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -395,6 +395,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           attemptId={fullReport.attemptId}
           entrySource="writing-read-and-write"
           uiLocale={uiLocale}
+          maxItems={8}
         />
       ) : null}
 
@@ -505,6 +506,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
         entrySource="writing-read-and-write"
         titleEn="Grammar fixes (read & write)"
         titleTh="จุดแก้ไวยากรณ์ (อ่านแล้วเขียน)"
+        maxItems={8}
       />
           </div>
         </div>

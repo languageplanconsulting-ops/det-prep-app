@@ -108,6 +108,11 @@ Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, task
 - issueEn / issueTh: what is wrong (bilingual).
 - suggestionEn / suggestionTh: a concrete correction or better wording (bilingual)—for vocabulary, name 1–3 better words or collocations when possible.
 
+Priority for feedback:
+- Prioritize grammar corrections first, then vocabulary upgrades.
+- grammarBreakdown should contain up to 8 concrete fixes where possible.
+- Keep grammar suggestions natural and useful for spoken/written exam performance, not abstract textbook comments.
+
 Improvement points: up to 10. Each MUST quote an exact phrase from the ${scoreText} (e.g. "In your phrase '…', …") and give a specific fix—not generic tips.
 
 Apply band targets when choosing percentages (same as before):
@@ -125,7 +130,7 @@ IMPORTANT — task score boost:
 - Set taskPersonalExperienceBoost to true if the learner uses (a) authentic personal experience OR (b) hypothetical personal experience (e.g. "If I were…", "I would…", "Imagine I…", "In my experience…"). The grading system adds +10 to the task percentage (cap 100) when this is true—mention that bonus briefly in taskSummaryEn/Th.
 
 Vocabulary upgrade suggestions (separate from criterion breakdown):
-- vocabularyUpgradeSuggestions: up to 10 items. Each: originalWord (exact word/phrase as used in ${scoreText}), upgradedWord (B2/C1 alternative), meaningTh (Thai gloss), exampleEn, exampleTh (short example sentence using upgradedWord).
+- vocabularyUpgradeSuggestions: up to 8 items. Each: originalWord (exact word/phrase as used in ${scoreText}), upgradedWord (B2/C1 alternative), meaningTh (Thai gloss), exampleEn, exampleTh (short example sentence using upgradedWord).
 
 Transcript highlights (for interactive hover on punctuated text):
 - transcriptHighlights: up to 18 items. Each: exactQuote (verbatim substring of ${scoreText}), isPositive (true=strength, false=weakness), noteEn, noteTh (short tooltip, one line each). Cover grammar, vocabulary, coherence, and task where useful. No overlapping quotes if possible.
@@ -311,7 +316,7 @@ export async function generateSpeakingReportWithGemini(params: {
 
   const mapBreak = (arr: unknown) =>
     asArr(arr)
-      .slice(0, 5)
+      .slice(0, 8)
       .map((b) => {
         const o = b as Record<string, unknown>;
         const issueEn = String(o?.issueEn ?? o?.en ?? "");
@@ -380,7 +385,7 @@ export async function generateSpeakingReportWithGemini(params: {
   const wc = punctuatedRaw.split(/\s+/).filter(Boolean).length;
 
   const vocabularyUpgradeSuggestions: SpeakingVocabularyUpgrade[] = asArr(raw.vocabularyUpgradeSuggestions)
-    .slice(0, 10)
+    .slice(0, 8)
     .map((item, i) => {
       const o = item as Record<string, unknown>;
       return {

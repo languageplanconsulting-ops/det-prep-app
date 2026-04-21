@@ -97,12 +97,17 @@ Task relevancy: weight whether the learner addresses the main prompt and any fol
 
 Task score boost: output taskScorePercent as BASE (0–100). Set taskPersonalExperienceBoost true for authentic personal OR hypothetical personal experience ("If I were…", "I would…", etc.). The grading system adds +10 to the task percentage (cap 100) when this is true—mention that bonus briefly in taskSummaryEn/Th.
 
-vocabularyUpgradeSuggestions: up to 10 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.
+Priority for feedback:
+- Prioritize grammar corrections first, then vocabulary upgrades.
+- grammarBreakdown should contain up to 8 concrete fixes where possible.
+- Keep suggestions practical for scoring higher, not generic textbook advice.
+
+vocabularyUpgradeSuggestions: up to 8 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.
 
 Submission highlights (for hover UI):
 - submissionHighlights: up to 20 items. Each: target = "main" OR "followUp0" / "followUp1" / "followUp2", exactQuote = verbatim from that section's punctuated text, isPositive, noteEn, noteTh.
 
-Improvement points: each MUST quote an exact phrase from the learner's punctuated text and give a specific fix. Up to 10; category grammar|vocabulary|coherence|task|general.
+Improvement points: each MUST quote an exact phrase from the learner's punctuated text and give a specific fix. Up to 8; category grammar|vocabulary|coherence|task|general.
 
 studySentences (max 7), studyVocabulary (max 10): bilingual revision tied to this submission.
 
@@ -204,7 +209,7 @@ function mapBreak(arr: unknown): {
   suggestionTh?: string;
 }[] {
   return asArr(arr)
-    .slice(0, 5)
+    .slice(0, 8)
     .map((b) => {
       const o = b as Record<string, unknown>;
       const issueEn = String(o?.issueEn ?? o?.en ?? "");
@@ -244,7 +249,7 @@ function mapGeminiStudyVocabulary(
   idPrefix: string,
 ): StudyVocabularySuggestion[] {
   return asArr(raw)
-    .slice(0, 10)
+    .slice(0, 8)
     .map((s, i) => {
       const o = s as Record<string, unknown>;
       return {
@@ -326,7 +331,7 @@ export async function generateWritingReportWithGemini(params: {
       : to160(g, v, c, tScore);
 
   const vocabularyUpgrades: WritingVocabularyUpgrade[] = asArr(raw.vocabularyUpgradeSuggestions)
-    .slice(0, 10)
+    .slice(0, 8)
     .map((item, i) => {
       const o = item as Record<string, unknown>;
       return {
@@ -385,7 +390,7 @@ export async function generateWritingReportWithGemini(params: {
   );
 
   const improvementPoints: ImprovementPoint[] = asArr(raw.improvementPoints)
-    .slice(0, 10)
+    .slice(0, 8)
     .map((p, i) => {
       const o = p as Record<string, unknown>;
       const cat = o?.category;

@@ -141,7 +141,7 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
       noteTh: b.th,
     }))
     .filter((x) => x.wrong && (x.betterEn || x.betterTh))
-    .slice(0, 5);
+    .slice(0, 8);
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -258,6 +258,8 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
         upgrades={report.vocabularyUpgradeSuggestions ?? []}
         attemptId={report.attemptId}
         entrySource={nav.notebookSource}
+        uiLocale="th"
+        maxItems={8}
       />
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -333,6 +335,7 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
         entrySource={nav.notebookSource}
         titleEn={nav.isWrite ? "Grammar fixes (photo write)" : "Grammar fixes (photo speak)"}
         titleTh={nav.isWrite ? "จุดแก้ไวยากรณ์ (เขียนเกี่ยวกับภาพ)" : "จุดแก้ไวยากรณ์ (พูดจากภาพ)"}
+        maxItems={8}
       />
         </div>
       </section>

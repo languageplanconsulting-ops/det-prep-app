@@ -11,11 +11,13 @@ export function SpeakingVocabularyUpgradePanel({
   attemptId,
   entrySource,
   uiLocale = "en",
+  maxItems = 10,
 }: {
   upgrades: SpeakingVocabularyUpgrade[];
   attemptId: string;
   entrySource: NotebookEntry["source"];
   uiLocale?: "en" | "th";
+  maxItems?: number;
 }) {
   if (upgrades.length === 0) return null;
 
@@ -26,13 +28,13 @@ export function SpeakingVocabularyUpgradePanel({
       variant="elevated"
       eyebrow={
         th
-          ? "สูงสุด 10 คำ · ทางเลือกระดับ B2/C1"
-          : "Up to 10 items · B2/C1 alternatives"
+          ? `สูงสุด ${Math.min(maxItems, upgrades.length)} คำ · ทางเลือกระดับ B2/C1`
+          : `Up to ${Math.min(maxItems, upgrades.length)} items · B2/C1 alternatives`
       }
       title={th ? "แนะนำคำศัพท์" : "Vocabulary suggestions"}
     >
       <ul className="space-y-4">
-        {upgrades.map((u) => (
+        {upgrades.slice(0, maxItems).map((u) => (
           <li
             key={u.id}
             className="rounded-sm border-2 border-black bg-[#fafafa] p-4 text-sm shadow-[2px_2px_0_0_#000]"

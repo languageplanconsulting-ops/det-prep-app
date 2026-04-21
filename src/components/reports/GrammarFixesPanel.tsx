@@ -20,22 +20,28 @@ export function GrammarFixesPanel({
   entrySource,
   titleEn,
   titleTh,
+  maxItems = 5,
 }: {
   items: GrammarFixItem[];
   attemptId: string;
   entrySource: NotebookEntry["source"];
   titleEn: string;
   titleTh: string;
+  maxItems?: number;
 }) {
   if (items.length === 0) return null;
 
   return (
-    <BrutalPanel variant="elevated" eyebrow={`Up to ${Math.min(5, items.length)}`} title="Grammar fixes">
+    <BrutalPanel
+      variant="elevated"
+      eyebrow={`Up to ${Math.min(maxItems, items.length)}`}
+      title="Grammar fixes"
+    >
       <p className="mb-4 text-xs text-neutral-600">
         จุดที่ควรแก้ไวยากรณ์เพื่อเพิ่มคะแนน: ข้อความเดิมเป็นสีแดง และประโยคที่แนะนำเป็นสีเขียว
       </p>
       <ul className="space-y-3">
-        {items.slice(0, 5).map((item) => (
+        {items.slice(0, maxItems).map((item) => (
           <li
             key={item.id}
             className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]"
