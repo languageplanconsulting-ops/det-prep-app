@@ -50,6 +50,32 @@ type TopCostUser = {
   events: number;
 };
 
+type CohortRetentionPoint = {
+  cohort: string;
+  signups: number;
+  retained7d: number;
+  retained7dPct: number;
+  retained30d: number;
+  retained30dPct: number;
+};
+
+type FunnelStep = {
+  label: string;
+  value: number;
+  note: string;
+};
+
+type RiskUser = {
+  userId: string;
+  email: string;
+  fullName: string | null;
+  tier: string;
+  expiryAt: string | null;
+  lastActiveAt: string | null;
+  studySessions30d: number;
+  aiCostThb30d: number;
+};
+
 type ExecResponse = {
   snapshot: Snapshot;
   tierCounts: Record<string, number>;
@@ -58,6 +84,13 @@ type ExecResponse = {
     subscriberGrowth: Record<string, unknown>[];
     churnVsNew: Record<string, unknown>[];
     conversionsByMonth: Record<string, unknown>[];
+    cohortRetention: CohortRetentionPoint[];
+  };
+  funnel: FunnelStep[];
+  atRisk: {
+    nearExpiry: RiskUser[];
+    heavyFree: RiskUser[];
+    inactivePaid: RiskUser[];
   };
   topCostUsers: TopCostUser[];
 };
@@ -117,7 +150,7 @@ export function AdminExecutiveDashboardClient() {
     );
   }
 
-  const { snapshot, tierCounts, charts, topCostUsers } = data;
+  const { snapshot, tierCounts, charts, topCostUsers, funnel, atRisk } = data;
   const tierDistribution = [
     { name: "Free", value: tierCounts.free ?? 0, fill: TIER_COLORS.free },
     { name: "Basic", value: tierCounts.basic ?? 0, fill: TIER_COLORS.basic },
@@ -311,6 +344,57 @@ export function AdminExecutiveDashboardClient() {
             </LineChart>
           </ResponsiveContainer>
         </ChartPanel>
+
+        <ChartPanel title="Cohort retention (7d / 30d)">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={charts.cohortRetention}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="cohort" />
+              <YAxis domain={[0, 100]} />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="retained7dPct"
+                stroke="#004AAD"
+                strokeWidth={2}
+                name="7d retention %"
+              />
+              <Line
+                type="monotone"
+                dataKey="retained30dPct"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                name="30d retention %"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartPanel>
+
+        <div className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+          <h2 className="text-sm font-black text-neutral-900">Free → paid upgrade funnel</h2>
+          <div className="mt-4 space-y-3">
+            {funnel.map((step, index) => {
+              const prev = index > 0 ? funnel[index - 1]?.value ?? 0 : 0;
+              const ratio = index === 0 || prev <= 0 ? 100 : Math.max(8, Math.round((step.value / prev) * 100));
+              return (
+                <div key={step.label}>
+                  <div className="flex items-center justify-between gap-4 text-xs font-bold uppercase">
+                    <span>{step.label}</span>
+                    <span>{step.value}</span>
+                  </div>
+                  <div className="mt-1 h-4 border-2 border-black bg-neutral-100">
+                    <div
+                      className="h-full bg-[#004AAD]"
+                      style={{ width: `${Math.min(100, ratio)}%` }}
+                    />
+                  </div>
+                  <p className="mt-1 text-[11px] text-neutral-500">{step.note}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
@@ -373,6 +457,30 @@ export function AdminExecutiveDashboardClient() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-3">
+        <RiskPanel
+          title="Near expiry"
+          subtitle="Active paid users expiring within 7 days"
+          rows={atRisk.nearExpiry}
+          accent="amber"
+          mode="expiry"
+        />
+        <RiskPanel
+          title="Heavy free users"
+          subtitle="Strong upgrade candidates using a lot without paying"
+          rows={atRisk.heavyFree}
+          accent="blue"
+          mode="usage"
+        />
+        <RiskPanel
+          title="Inactive paid users"
+          subtitle="Paying users with no study activity for more than 7 days"
+          rows={atRisk.inactivePaid}
+          accent="red"
+          mode="inactive"
+        />
       </section>
     </main>
   );
@@ -437,6 +545,83 @@ function ChartPanel({
     <div className="h-80 rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
       <h2 className="text-sm font-black text-neutral-900">{title}</h2>
       <div className="mt-3 h-[calc(100%-2rem)]">{children}</div>
+    </div>
+  );
+}
+
+function RiskPanel({
+  title,
+  subtitle,
+  rows,
+  accent,
+  mode,
+}: {
+  title: string;
+  subtitle: string;
+  rows: RiskUser[];
+  accent: "amber" | "blue" | "red";
+  mode: "expiry" | "usage" | "inactive";
+}) {
+  const accentClass =
+    accent === "amber"
+      ? "text-amber-700"
+      : accent === "red"
+        ? "text-red-600"
+        : "text-[#004AAD]";
+
+  return (
+    <div className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+      <h2 className={`text-lg font-black ${accentClass}`}>{title}</h2>
+      <p className="mt-1 text-xs text-neutral-500">{subtitle}</p>
+      <div className="mt-4 space-y-3">
+        {rows.length === 0 ? (
+          <p className="text-sm text-neutral-500">No users in this bucket right now.</p>
+        ) : (
+          rows.map((user) => (
+            <div key={user.userId} className="rounded-[4px] border-2 border-black bg-neutral-50 p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-black text-neutral-900">{user.fullName || "—"}</p>
+                  <p className="text-xs text-neutral-500">{user.email}</p>
+                </div>
+                <Link
+                  href={`/admin/subscriptions/${user.userId}`}
+                  className="text-xs font-black uppercase text-[#004AAD] underline underline-offset-2"
+                >
+                  Open
+                </Link>
+              </div>
+              <div className="mt-2 grid gap-2 text-[11px] text-neutral-700">
+                <p>
+                  <span className="font-black">Tier:</span> {user.tier}
+                </p>
+                {mode === "expiry" ? (
+                  <p>
+                    <span className="font-black">Expiry:</span>{" "}
+                    {user.expiryAt ? new Date(user.expiryAt).toLocaleDateString() : "—"}
+                  </p>
+                ) : null}
+                {mode === "inactive" ? (
+                  <p>
+                    <span className="font-black">Last active:</span>{" "}
+                    {user.lastActiveAt ? new Date(user.lastActiveAt).toLocaleDateString() : "Never"}
+                  </p>
+                ) : null}
+                {mode === "usage" ? (
+                  <>
+                    <p>
+                      <span className="font-black">Sessions (30d):</span> {user.studySessions30d}
+                    </p>
+                    <p>
+                      <span className="font-black">AI cost (30d):</span> ฿{user.aiCostThb30d.toFixed(2)}
+                    </p>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
