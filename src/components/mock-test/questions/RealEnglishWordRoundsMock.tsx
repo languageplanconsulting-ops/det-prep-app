@@ -43,7 +43,10 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
 
   const configuredRounds = Math.max(1, Number(content.rounds ?? 4) || 4);
   const wordsPerRound = Math.max(8, Number(content.words_per_round ?? 20) || 20);
-  const realPerRound = Math.max(4, Math.round(wordsPerRound * 0.4));
+  const realPerRound = Math.max(
+    1,
+    Number(content.real_words_per_round ?? content.real_word_count ?? Math.round(wordsPerRound * 0.4)) || Math.round(wordsPerRound * 0.4),
+  );
   const fakePerRound = Math.max(4, wordsPerRound - realPerRound);
   const scorePerCorrect = Math.max(1, Number(content.score_per_correct ?? 5) || 5);
   const fakePenalty = Math.max(0, Number(content.score_penalty_per_fake_pick ?? 2) || 2);

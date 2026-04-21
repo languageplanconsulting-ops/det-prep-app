@@ -154,6 +154,31 @@ function ChoiceQuestionEditor({
   );
 }
 
+function normalizeChoiceQuestionArray(raw: unknown, count: number): ChoiceQuestion[] {
+  const list = Array.isArray(raw) ? raw : [];
+  return ensureQuestionCount(
+    list
+      .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+      .map((item) => ({
+        question: String(item.question ?? ""),
+        options: ensureQuestionCount(
+          [
+            {
+              question: "",
+              options: Array.isArray(item.options)
+                ? (item.options as unknown[]).map((option) => String(option ?? "")).slice(0, 4)
+                : ["", "", "", ""],
+              correctAnswer: String(item.correctAnswer ?? ""),
+            },
+          ],
+          1,
+        )[0].options,
+        correctAnswer: String(item.correctAnswer ?? ""),
+      })),
+    count,
+  );
+}
+
 export function MiniDiagnosisAdminWorkspace() {
   const [sets, setSets] = useState<SetRow[]>([]);
   const [setName, setSetName] = useState("");
@@ -165,6 +190,7 @@ export function MiniDiagnosisAdminWorkspace() {
   const [dictationTwo, setDictationTwo] = useState("");
   const [realWords, setRealWords] = useState("");
   const [fakeWords, setFakeWords] = useState("");
+  const [vocabJsonDraft, setVocabJsonDraft] = useState(DEFAULT_VOCAB_TEMPLATE);
   const [vocabTitle, setVocabTitle] = useState(String(DEFAULT_VOCAB_CONTENT.titleEn ?? ""));
   const [vocabPassage1, setVocabPassage1] = useState(String((DEFAULT_VOCAB_CONTENT.passage as { p1?: unknown } | undefined)?.p1 ?? ""));
   const [vocabPassage2, setVocabPassage2] = useState(String((DEFAULT_VOCAB_CONTENT.passage as { p2?: unknown } | undefined)?.p2 ?? ""));
@@ -222,6 +248,7 @@ export function MiniDiagnosisAdminWorkspace() {
   const [fitbOneJson, setFitbOneJson] = useState(DEFAULT_FITB_TEMPLATE);
   const [fitbTwoJson, setFitbTwoJson] = useState(DEFAULT_FITB_TEMPLATE);
   const [listeningScript, setListeningScript] = useState("");
+  const [listeningJsonDraft, setListeningJsonDraft] = useState(DEFAULT_LISTENING_TEMPLATE);
   const [listeningQuestions, setListeningQuestions] = useState<ChoiceQuestion[]>(
     ensureQuestionCount(
       ((DEFAULT_LISTENING_CONTENT.questions as unknown[]) ?? [])
@@ -324,6 +351,45 @@ export function MiniDiagnosisAdminWorkspace() {
     [],
   );
 
+  const importVocabularyJson = useCallback(() => {
+    const content = extractTemplateContent(vocabJsonDraft);
+    setVocabTitle(String(content.titleEn ?? ""));
+    setVocabPassage1(String((content.passage as { p1?: unknown } | undefined)?.p1 ?? ""));
+    setVocabPassage2(String((content.passage as { p2?: unknown } | undefined)?.p2 ?? ""));
+    setVocabPassage3(String((content.passage as { p3?: unknown } | undefined)?.p3 ?? ""));
+    setVocabQuestions(normalizeChoiceQuestionArray(content.vocabularyQuestions, 6));
+    setVocabMissingParagraph({
+      question: String((content.missingParagraph as { question?: unknown } | undefined)?.question ?? ""),
+      options: normalizeChoiceQuestionArray([content.missingParagraph], 1)[0].options,
+      correctAnswer: String((content.missingParagraph as { correctAnswer?: unknown } | undefined)?.correctAnswer ?? ""),
+    });
+    setVocabInformationLocation({
+      question: String((content.informationLocation as { question?: unknown } | undefined)?.question ?? ""),
+      options: normalizeChoiceQuestionArray([content.informationLocation], 1)[0].options,
+      correctAnswer: String((content.informationLocation as { correctAnswer?: unknown } | undefined)?.correctAnswer ?? ""),
+    });
+    setVocabBestTitle({
+      question: String((content.bestTitle as { question?: unknown } | undefined)?.question ?? ""),
+      options: normalizeChoiceQuestionArray([content.bestTitle], 1)[0].options,
+      correctAnswer: String((content.bestTitle as { correctAnswer?: unknown } | undefined)?.correctAnswer ?? ""),
+    });
+    setVocabMainIdea({
+      question: String((content.mainIdea as { question?: unknown } | undefined)?.question ?? ""),
+      options: normalizeChoiceQuestionArray([content.mainIdea], 1)[0].options,
+      correctAnswer: String((content.mainIdea as { correctAnswer?: unknown } | undefined)?.correctAnswer ?? ""),
+    });
+    setBanner("Vocabulary Reading JSON imported into the form.");
+  }, [vocabJsonDraft]);
+
+  const importListeningJson = useCallback(() => {
+    const content = extractTemplateContent(listeningJsonDraft);
+    setListeningScript(
+      String(content.audio_script ?? content.script ?? content.transcript ?? content.narration ?? ""),
+    );
+    setListeningQuestions(normalizeChoiceQuestionArray(content.questions, 5));
+    setBanner("Listening Mini Test JSON imported into the form.");
+  }, [listeningJsonDraft]);
+
   const groupedItems = useMemo(() => {
     const realWordList = parseWordLines(realWords);
     const fakeWordList = parseWordLines(fakeWords);
@@ -355,8 +421,11 @@ export function MiniDiagnosisAdminWorkspace() {
             fake_words: fakeWordList,
             rounds: 1,
             words_per_round: 40,
+            real_words_per_round: 20,
             round_duration_sec: 60,
-            score_per_correct: 5,
+            score_per_correct: 8,
+            score_penalty_per_fake_pick: 3,
+            max_score: 160,
           },
         },
       ],
@@ -460,8 +529,10 @@ export function MiniDiagnosisAdminWorkspace() {
     if (!dictationOne.trim() || !dictationTwo.trim()) {
       return setBanner("Please fill in both dictation sentences.");
     }
-    if (parseWordLines(realWords).length + parseWordLines(fakeWords).length !== 40) {
-      return setBanner("Real Word needs exactly 40 total words across real + fake boxes.");
+    const realWordCount = parseWordLines(realWords).length;
+    const fakeWordCount = parseWordLines(fakeWords).length;
+    if (realWordCount !== 20 || fakeWordCount !== 20) {
+      return setBanner("Real Word needs exactly 20 real words and 20 fake words.");
     }
     if (!vocabTitle.trim() || !vocabPassage1.trim() || !vocabPassage2.trim() || !vocabPassage3.trim()) {
       return setBanner("Please complete Vocabulary Reading title and all 3 passage paragraphs.");
@@ -597,7 +668,7 @@ export function MiniDiagnosisAdminWorkspace() {
         <Box>
           <SectionHeader
             title="Real English Word"
-            hint="Paste real words in one box and fake words in the other. Total must equal 40."
+            hint="Paste exactly 20 real words and 20 fake words. Scoring is +8 for each real word and -3 for each fake word selected."
             onCopyTemplate={() => void copyTemplate("real_english_word")}
           />
           <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -627,7 +698,7 @@ export function MiniDiagnosisAdminWorkspace() {
             </label>
           </div>
           <p className="mt-3 text-xs font-bold text-neutral-600">
-            Total words now: {parseWordLines(realWords).length + parseWordLines(fakeWords).length}/40
+            Real words: {parseWordLines(realWords).length}/20 · Fake words: {parseWordLines(fakeWords).length}/20
           </p>
         </Box>
 
@@ -637,6 +708,37 @@ export function MiniDiagnosisAdminWorkspace() {
             hint="Build the full reading block here without touching JSON."
           />
           <div className="mt-4 space-y-4">
+            <div className="rounded-[4px] border-4 border-dashed border-black bg-neutral-50 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-500">
+                  Optional JSON import
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void copyTemplate("vocabulary_reading")}
+                    className="rounded-[4px] border-4 border-black bg-white px-3 py-2 text-xs font-black shadow-[4px_4px_0_0_#000]"
+                  >
+                    Copy JSON template
+                  </button>
+                  <button
+                    type="button"
+                    onClick={importVocabularyJson}
+                    className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-3 py-2 text-xs font-black shadow-[4px_4px_0_0_#000]"
+                  >
+                    Import JSON into form
+                  </button>
+                </div>
+              </div>
+              <textarea
+                value={vocabJsonDraft}
+                onChange={(e) => setVocabJsonDraft(e.target.value)}
+                rows={12}
+                className="mt-3 w-full rounded-[4px] border-4 border-black p-3 text-xs font-bold"
+                style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+                placeholder="Paste vocabulary_reading JSON here if you want to import it into the form"
+              />
+            </div>
             <input
               value={vocabTitle}
               onChange={(e) => setVocabTitle(e.target.value)}
@@ -767,6 +869,37 @@ export function MiniDiagnosisAdminWorkspace() {
             hint="Paste the listening script for Deepgram TTS, then fill the 5 multiple-choice questions."
           />
           <div className="mt-4 space-y-4">
+            <div className="rounded-[4px] border-4 border-dashed border-black bg-neutral-50 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-neutral-500">
+                  Optional JSON import
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void copyTemplate("interactive_listening")}
+                    className="rounded-[4px] border-4 border-black bg-white px-3 py-2 text-xs font-black shadow-[4px_4px_0_0_#000]"
+                  >
+                    Copy JSON template
+                  </button>
+                  <button
+                    type="button"
+                    onClick={importListeningJson}
+                    className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-3 py-2 text-xs font-black shadow-[4px_4px_0_0_#000]"
+                  >
+                    Import JSON into form
+                  </button>
+                </div>
+              </div>
+              <textarea
+                value={listeningJsonDraft}
+                onChange={(e) => setListeningJsonDraft(e.target.value)}
+                rows={10}
+                className="mt-3 w-full rounded-[4px] border-4 border-black p-3 text-xs font-bold"
+                style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+                placeholder="Paste interactive_listening JSON here if you want to import it into the form"
+              />
+            </div>
             <textarea
               value={listeningScript}
               onChange={(e) => setListeningScript(e.target.value)}
