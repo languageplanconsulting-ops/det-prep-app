@@ -3,6 +3,8 @@
 import { useEffect, useMemo } from "react";
 
 import { IntroModalShell } from "@/components/practice/IntroModalShell";
+import { PaywallUpsellCard } from "@/components/upsell/PaywallUpsellCard";
+import { buildPaywallSpec } from "@/lib/paywall-upsell";
 import { getNextLocalMondayLabels } from "@/lib/vip-ai-feedback-quota";
 
 export function InteractiveSpeakingIntroModal({
@@ -146,9 +148,9 @@ export function InteractiveSpeakingIntroModal({
               </div>
             </div>
             {showCredits && !canStart ? (
-              <p className="mt-3 text-xs font-black text-rose-600">
-                สิทธิ์คงเหลือไม่พอสำหรับ 1 รอบเต็ม กรุณารอรีเซ็ตวันจันทร์ก่อนเริ่ม
-              </p>
+              <div className="mt-4">
+                <PaywallUpsellCard spec={buildPaywallSpec("vip", "ai_limit")} compact />
+              </div>
             ) : null}
           </div>
 

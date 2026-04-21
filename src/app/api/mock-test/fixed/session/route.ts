@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { consumeAddonCreditsForUser, getAddonBalancesForUser } from "@/lib/addon-credits";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { MOCK_TEST_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
 import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
@@ -148,14 +149,30 @@ export async function POST(req: Request) {
 
   const tier = normalizeTier(me?.tier);
   const monthlyLimit = MOCK_TEST_MONTHLY_LIMIT[tier];
+  const addonBalances = !isAdmin ? await getAddonBalancesForUser(user.id) : { mockRemaining: 0, feedbackRemaining: 0, rows: [] };
   if (!isAdmin && (!Number.isFinite(monthlyLimit) || monthlyLimit <= 0)) {
-    return NextResponse.json({ error: "Your plan does not include mock tests" }, { status: 403 });
+    if (addonBalances.mockRemaining <= 0) {
+      return NextResponse.json({ error: "Your plan does not include mock tests" }, { status: 403 });
+    }
   }
   if (!isAdmin && Number.isFinite(monthlyLimit) && billableUsed >= monthlyLimit) {
-    return NextResponse.json(
-      { error: `Monthly mock test limit reached for ${tier} plan` },
-      { status: 403 },
-    );
+    if (addonBalances.mockRemaining <= 0) {
+      return NextResponse.json(
+        { error: `Monthly mock test limit reached for ${tier} plan` },
+        { status: 403 },
+      );
+    }
+  }
+
+  const shouldConsumeAddon =
+    !isAdmin &&
+    ((Number.isFinite(monthlyLimit) && billableUsed >= monthlyLimit) ||
+      (!Number.isFinite(monthlyLimit) || monthlyLimit <= 0));
+  if (shouldConsumeAddon) {
+    const consumed = await consumeAddonCreditsForUser(user.id, "mock", 1);
+    if (!consumed.ok) {
+      return NextResponse.json({ error: "No extra mock add-on credit available" }, { status: 403 });
+    }
   }
 
   const { data, error } = await supabase
@@ -168,6 +185,7 @@ export async function POST(req: Request) {
         targets: {
           ...(body.targets ?? {}),
           monthlyUsed: billableUsed,
+          addonMockUsed: shouldConsumeAddon,
         adminPreviewMode,
         skipTimerMode,
         singleStepPreview: previewSeparateMode,

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { chargeAiCreditForUser, getAiCreditStateForUser } from "@/lib/addon-credits";
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateWritingReportWithGemini } from "@/lib/gemini-writing";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
@@ -69,6 +70,12 @@ export async function POST(req: Request) {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
     const userId = await getOptionalAuthUserId();
+    if (userId) {
+      const credit = await getAiCreditStateForUser(userId);
+      if (!credit.allowed) {
+        return NextResponse.json({ error: credit.reason ?? "AI feedback quota reached" }, { status: 402 });
+      }
+    }
     const { report, usage } = await generateWritingReportWithGemini({
       apiKey: keys.geminiApiKey,
       anthropicApiKey: keys.anthropicApiKey,
@@ -89,6 +96,12 @@ export async function POST(req: Request) {
         outputTokens: usage.outputTokens,
         meta: { attemptId },
       });
+    }
+    if (userId) {
+      const charged = await chargeAiCreditForUser(userId);
+      if (!charged.ok) {
+        return NextResponse.json({ error: "Could not apply AI credit after grading" }, { status: 500 });
+      }
     }
     return NextResponse.json(report);
   } catch (e) {

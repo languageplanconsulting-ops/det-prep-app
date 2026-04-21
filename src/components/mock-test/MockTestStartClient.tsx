@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { PaywallUpsellCard } from "@/components/upsell/PaywallUpsellCard";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { MOCK_TEST_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
 import { FIXED_MOCK_ESTIMATED_DURATION_LABEL } from "@/lib/mock-test/fixed-sequence";
@@ -13,6 +14,7 @@ import {
   MOCK_TEST_LAUNCH_MESSAGE_EN,
   MOCK_TEST_LAUNCH_MESSAGE_TH,
 } from "@/lib/mock-test/mock-test-availability";
+import { buildPaywallSpec } from "@/lib/paywall-upsell";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 type MockAttemptRow = {
@@ -192,6 +194,7 @@ export function MockTestStartClient() {
   const { effectiveTier, loading: tierLoading, isPreviewMode, isAdmin, previewEligible } = useEffectiveTier();
   const [hasUser, setHasUser] = useState<boolean | null>(null);
   const [used, setUsed] = useState(0);
+  const [mockAddonRemaining, setMockAddonRemaining] = useState(0);
   const [attempts, setAttempts] = useState<MockAttemptRow[]>([]);
   const [selectedSetId, setSelectedSetId] = useState("");
   const [sets, setSets] = useState<MockSetRow[]>([]);
@@ -255,13 +258,23 @@ export function MockTestStartClient() {
       }
 
       setHasUser(true);
-      const monthStart = mockFixedMonthStartIso();
-      const { data: sessionRows } = await supabase
-        .from("mock_fixed_sessions")
-        .select("targets")
-        .eq("user_id", user.id)
-        .gte("started_at", monthStart);
-      setUsed(countBillableMockFixedSessions(sessionRows));
+      const summaryRes = await fetch("/api/account/quota-summary", { credentials: "same-origin" });
+      if (summaryRes.ok) {
+        const summary = (await summaryRes.json()) as {
+          mock?: { used?: number; addonRemaining?: number };
+        };
+        setUsed(Math.max(0, Number(summary.mock?.used ?? 0)));
+        setMockAddonRemaining(Math.max(0, Number(summary.mock?.addonRemaining ?? 0)));
+      } else {
+        const monthStart = mockFixedMonthStartIso();
+        const { data: sessionRows } = await supabase
+          .from("mock_fixed_sessions")
+          .select("targets")
+          .eq("user_id", user.id)
+          .gte("started_at", monthStart);
+        setUsed(countBillableMockFixedSessions(sessionRows));
+        setMockAddonRemaining(0);
+      }
 
       const { data: attRows } = await supabase
         .from("mock_fixed_results")
@@ -283,7 +296,7 @@ export function MockTestStartClient() {
 
   const baseLimit = MOCK_TEST_MONTHLY_LIMIT[effectiveTier];
   const limit = isPreviewMode && baseLimit === 0 ? 1 : baseLimit;
-  const remainingCount = Math.max(0, limit - used);
+  const remainingCount = Math.max(0, limit - used) + mockAddonRemaining;
   const tierOk = used < limit;
   const canStart = !!selectedSetId && (adminCanPreview || (hasUser === true && launchLive && tierOk));
   const bestAttempt = useMemo(
@@ -313,6 +326,14 @@ export function MockTestStartClient() {
   const pinnedAttemptCount = attempts.filter((row) => row.dashboard_saved_at).length;
   const marketing = tierMarketing(effectiveTier);
   const selectedSetName = setNameById[selectedSetId] ?? "—";
+  const mockBlockedSpec = useMemo(() => {
+    if (hasUser === false && !adminCanPreview) return null;
+    if (!tierOk || effectiveTier === "free") return buildPaywallSpec(effectiveTier, "mock_limit");
+    if (!adminCanPreview && remainingCount <= 1) {
+      return buildPaywallSpec(effectiveTier, "mock_near_limit", { mockRemaining: remainingCount });
+    }
+    return null;
+  }, [adminCanPreview, effectiveTier, hasUser, remainingCount, tierOk]);
 
   useEffect(() => {
     if (!starting) {
@@ -659,6 +680,8 @@ export function MockTestStartClient() {
               The more monthly mocks you unlock, the more often you can benchmark, review weak skills, and prove score gains.
             </p>
           </div>
+
+          {mockBlockedSpec ? <PaywallUpsellCard spec={mockBlockedSpec} compact /> : null}
 
           {adminCanPreview ? (
             <div className="border-4 border-black bg-black p-3 font-mono text-[9px] leading-tight text-[#FFD600] shadow-[8px_8px_0_0_#111]">

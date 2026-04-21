@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import type { Tier } from "@/lib/access-control";
 import { getStripe, tierFromStripePriceId } from "@/lib/stripe";
+import { currentTierForUser } from "@/lib/addon-credits";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
 export const runtime = "nodejs";
@@ -100,6 +101,55 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+        if (session.mode === "payment") {
+          const userId = session.metadata?.userId;
+          const addonSku = session.metadata?.addonSku;
+          const paymentIntentId =
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : session.payment_intent?.id ?? null;
+
+          if (!userId || !addonSku || session.payment_status !== "paid") {
+            break;
+          }
+
+          const supabase = createServiceRoleSupabase();
+          const { data: purchase } = await supabase
+            .from("addon_credit_purchases")
+            .select("id, amount, currency, status")
+            .eq("stripe_checkout_session_id", session.id)
+            .maybeSingle();
+
+          if (purchase?.id && purchase.status !== "paid") {
+            const { error: upErr } = await supabase
+              .from("addon_credit_purchases")
+              .update({
+                status: "paid",
+                stripe_payment_intent_id: paymentIntentId,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", purchase.id);
+            if (upErr) console.error("[stripe] addon purchase update failed", upErr.message);
+          }
+
+          const tier = await currentTierForUser(userId);
+          const { error: payErr } = await supabase.from("payment_history").insert({
+            user_id: userId,
+            stripe_payment_intent_id: paymentIntentId,
+            amount: Number(session.amount_total ?? purchase?.amount ?? 0),
+            currency: String(session.currency ?? purchase?.currency ?? "thb"),
+            status: "succeeded",
+            tier,
+            payment_method: "card",
+            description: `Add-on purchase: ${addonSku}`,
+            receipt_url: null,
+          });
+          if (payErr && payErr.code !== "23505") {
+            console.error("[stripe] add-on payment_history insert", payErr.message);
+          }
+          break;
+        }
+
         if (session.mode !== "subscription") break;
 
         const userId = session.metadata?.userId;
