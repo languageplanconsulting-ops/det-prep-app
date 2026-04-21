@@ -41,21 +41,33 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
     [content.fake_words],
   );
 
+  const configuredRounds = Math.max(1, Number(content.rounds ?? 4) || 4);
+  const wordsPerRound = Math.max(8, Number(content.words_per_round ?? 20) || 20);
+  const realPerRound = Math.max(4, Math.round(wordsPerRound * 0.4));
+  const fakePerRound = Math.max(4, wordsPerRound - realPerRound);
+  const scorePerCorrect = Math.max(1, Number(content.score_per_correct ?? 5) || 5);
+  const fakePenalty = Math.max(0, Number(content.score_penalty_per_fake_pick ?? 2) || 2);
+  const maxScore = Math.max(20, Number(content.max_score ?? 160) || 160);
+
   const rounds = useMemo(() => {
-    const real = shuffle(realWords).slice(0, 32);
-    const fake = shuffle(fakeWords).slice(0, 48);
-    if (real.length < 32 || fake.length < 48) return [] as Array<{ words: string[]; realSet: Set<string> }>;
+    const realNeeded = configuredRounds * realPerRound;
+    const fakeNeeded = configuredRounds * fakePerRound;
+    const real = shuffle(realWords).slice(0, realNeeded);
+    const fake = shuffle(fakeWords).slice(0, fakeNeeded);
+    if (real.length < realNeeded || fake.length < fakeNeeded) {
+      return [] as Array<{ words: string[]; realSet: Set<string> }>;
+    }
     const out: Array<{ words: string[]; realSet: Set<string> }> = [];
-    for (let r = 0; r < 4; r++) {
-      const realPart = real.slice(r * 8, r * 8 + 8);
-      const fakePart = fake.slice(r * 12, r * 12 + 12);
+    for (let r = 0; r < configuredRounds; r++) {
+      const realPart = real.slice(r * realPerRound, r * realPerRound + realPerRound);
+      const fakePart = fake.slice(r * fakePerRound, r * fakePerRound + fakePerRound);
       out.push({
         words: shuffle([...realPart, ...fakePart]),
         realSet: new Set(realPart),
       });
     }
     return out;
-  }, [fakeWords, realWords]);
+  }, [configuredRounds, fakePerRound, fakeWords, realPerRound, realWords]);
 
   const [roundIdx, setRoundIdx] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -66,7 +78,7 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
   if (!rounds.length || !round) {
     return (
       <p className="text-sm font-bold text-red-700">
-        real_english_word step requires 32 <code>real_words</code> and 48 <code>fake_words</code>.
+        real_english_word step requires enough <code>real_words</code> and <code>fake_words</code> for the configured rounds.
       </p>
     );
   }
@@ -75,24 +87,24 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
     let plus = 0;
     let minus = 0;
     selected.forEach((w) => {
-      if (round.realSet.has(w)) plus += 5;
-      else minus += 2;
+        if (round.realSet.has(w)) plus += scorePerCorrect;
+      else minus += fakePenalty;
     });
-    const nextScore = Math.max(0, Math.min(160, score + plus - minus));
+    const nextScore = Math.max(0, Math.min(maxScore, score + plus - minus));
     const roundSelection = {
       selected: [...selected],
       realWords: [...round.realSet],
       fakeWords: round.words.filter((w) => !round.realSet.has(w)),
     };
-    if (roundIdx >= 3) {
+    if (roundIdx >= configuredRounds - 1) {
       onSubmit({
         score160: nextScore,
         detail: {
-          rounds: 4,
-          per_round_sec: 60,
-          score_per_correct: 5,
-          score_penalty_per_fake_pick: -2,
-          max_score: 160,
+          rounds: configuredRounds,
+          per_round_sec: Number(content.round_duration_sec ?? 60) || 60,
+          score_per_correct: scorePerCorrect,
+          score_penalty_per_fake_pick: -fakePenalty,
+          max_score: maxScore,
         },
         round_selections: [...roundSelections, roundSelection],
       });
@@ -106,9 +118,11 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-black text-[#004AAD]">Real English Word — Round {roundIdx + 1}/4</p>
+      <p className="text-sm font-black text-[#004AAD]">
+        Real English Word — Round {roundIdx + 1}/{configuredRounds}
+      </p>
       <p className="text-xs text-neutral-600">
-        Choose real words only. Each correct real word = +5 points. Each selected fake word = -2 points.
+        Choose real words only. Each correct real word = +{scorePerCorrect} points. Each selected fake word = -{fakePenalty} points.
       </p>
       <div className="grid gap-2 sm:grid-cols-2">
         {round.words.map((w) => {
@@ -139,7 +153,7 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
         onClick={submitRound}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
       >
-        {submitting ? "Submitting..." : roundIdx >= 3 ? "Submit real-word score" : "Next round"}
+        {submitting ? "Submitting..." : roundIdx >= configuredRounds - 1 ? "Submit real-word score" : "Next round"}
       </button>
     </div>
   );

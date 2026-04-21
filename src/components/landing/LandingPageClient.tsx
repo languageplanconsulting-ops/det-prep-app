@@ -211,6 +211,12 @@ export function LandingPageClient({
               </span>
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+              <Link
+                href="/mini-diagnosis/start"
+                className="inline-block border-4 border-black bg-ep-yellow px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
+              >
+                Mini diagnosis / เช็กระดับฟรี
+              </Link>
               <a
                 href="#pricing"
                 className="inline-block border-4 border-black bg-ep-blue px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-white shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
@@ -308,6 +314,60 @@ export function LandingPageClient({
           ))}
         </div>
       </div>
+
+      <section className={cn("px-4 py-16 sm:px-6 sm:py-20", LANDING_PAGE_GRID_BG)}>
+        <div className="mx-auto max-w-[1400px] border-4 border-black bg-white p-6 shadow-[12px_12px_0_0_#000] sm:p-8">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+            <div>
+              <p className="ep-stat mb-4 text-sm font-bold uppercase tracking-widest text-ep-blue">
+                Mini diagnosis / มินิไดแอกโนซิส
+              </p>
+              <h2 className="text-3xl font-black sm:text-5xl">
+                Check your level first / เช็กระดับก่อนตัดสินใจ
+              </h2>
+              <p className="mt-5 max-w-3xl text-base leading-relaxed text-neutral-700 sm:text-lg">
+                Free users can take one fast diagnostic block to see their current level, weakest skill,
+                and 2 real AI feedback tasks before committing to a full plan.
+                <br />
+                <br />
+                <span className="font-semibold text-neutral-900">
+                  ผู้ใช้ฟรีสามารถลองทำมินิไดแอกโนซิส 1 ครั้ง เพื่อดูคะแนนโดยรวม จุดอ่อนหลัก และรับ AI feedback จริง 2 งาน
+                  ก่อนตัดสินใจอัปเกรด
+                </span>
+              </p>
+              <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+                <Link
+                  href="/mini-diagnosis/start"
+                  className="inline-block border-4 border-black bg-ep-blue px-8 py-4 text-center text-base font-black uppercase tracking-wide text-white shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
+                >
+                  Start mini diagnosis
+                </Link>
+                <a
+                  href="#pricing"
+                  className="inline-block border-4 border-black bg-white px-8 py-4 text-center text-base font-black uppercase tracking-wide text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-100 hover:shadow-[4px_4px_0_0_#000]"
+                >
+                  Compare plans / ดูแพลน
+                </a>
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {[
+                "2 dictation",
+                "1 real English word",
+                "1 vocabulary reading",
+                "2 fill in the blank",
+                "1 listening mini test",
+                "1 write about photo",
+                "1 read then speak",
+              ].map((item) => (
+                <div key={item} className="border-4 border-black bg-[#fff9e6] px-4 py-4 text-sm font-black text-neutral-900">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className={cn("px-4 py-20 sm:px-6 sm:py-28", LANDING_PAGE_GRID_BG)}>
         <div className="mx-auto max-w-[1400px]">
@@ -470,7 +530,7 @@ export function LandingPageClient({
               {
                 name: "FREE / ฟรี",
                 price: "฿0",
-                feats: ["1 starter test for each exam lane", "1 personalized feedback credit", "0 mock tests"],
+                feats: ["1 mini diagnosis", "1 starter test for each exam lane", "1 personalized feedback credit", "0 mock tests"],
                 cta: "Start free / เริ่มฟรี",
                 href: "/login",
                 featured: false,

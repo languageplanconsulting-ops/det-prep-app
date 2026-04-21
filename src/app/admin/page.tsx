@@ -52,6 +52,13 @@ export default function AdminPage() {
             Mock test — upload question bank →
           </Link>
           <Link
+            href="/admin/mock-test/mini-diagnosis"
+            className="inline-flex items-center rounded-[4px] border-4 border-black bg-cyan-200 px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            Mini diagnosis uploader →
+          </Link>
+          <Link
             href="/admin/api-usage"
             className="inline-flex items-center rounded-[4px] border-4 border-black bg-cyan-100 px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
             style={{ fontFamily: "var(--font-jetbrains), monospace" }}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 
 import type { MockQuestionRow } from "@/lib/mock-test/types";
 
@@ -228,21 +228,77 @@ function InteractiveListening({
   submitting,
 }: {
   content: Record<string, unknown>;
-  onSubmit: (a: string) => void;
+  onSubmit: (a: unknown) => void;
   submitting: boolean;
 }) {
   const [pick, setPick] = useState<string | null>(null);
-  const opts = (content.options as string[]) ?? [];
+  const [multiAnswers, setMultiAnswers] = useState<string[]>([]);
+  const [activeQuestion, setActiveQuestion] = useState(0);
+  const [playsUsed, setPlaysUsed] = useState(0);
   const url = String(content.audio_url ?? "");
+  const multiQuestions = Array.isArray(content.questions)
+    ? (content.questions as Array<Record<string, unknown>>)
+    : [];
+  const maxPlays = Math.max(1, Number(content.max_plays ?? 3) || 3);
+  const currentMulti = multiQuestions[activeQuestion];
+  const opts =
+    multiQuestions.length > 0
+      ? ((currentMulti?.options as string[]) ?? [])
+      : ((content.options as string[]) ?? []);
+
+  const handleAudioPlay = (e: SyntheticEvent<HTMLAudioElement>) => {
+    const el = e.currentTarget;
+    if (playsUsed >= maxPlays) {
+      el.pause();
+      el.currentTime = 0;
+      return;
+    }
+    setPlaysUsed((prev) => prev + 1);
+  };
+
+  const submitMulti = () => {
+    const nextAnswers = [...multiAnswers];
+    if (pick) nextAnswers[activeQuestion] = pick;
+    if (activeQuestion < multiQuestions.length - 1) {
+      setMultiAnswers(nextAnswers);
+      setActiveQuestion((prev) => prev + 1);
+      setPick(nextAnswers[activeQuestion + 1] ?? null);
+      return;
+    }
+    let correct = 0;
+    multiQuestions.forEach((question, idx) => {
+      if (String(question.correctAnswer ?? "") === String(nextAnswers[idx] ?? "")) correct += 1;
+    });
+    onSubmit({
+      averageScore0To100: multiQuestions.length > 0 ? (correct / multiQuestions.length) * 100 : 0,
+      detail: {
+        total: multiQuestions.length,
+        correct,
+        maxPlays,
+      },
+      selected_answers: nextAnswers,
+      correct_answers: multiQuestions.map((question) => String(question.correctAnswer ?? "")),
+      question_prompts: multiQuestions.map((question) => String(question.question ?? "")),
+    });
+  };
+
   return (
     <div className="space-y-4">
       <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
+      <p className="text-xs text-neutral-600">{String(content.instruction ?? "")}</p>
       {url ? (
-        <audio controls className="w-full" src={url}>
+        <audio controls className="w-full" src={url} onPlay={handleAudioPlay}>
           <track kind="captions" />
         </audio>
       ) : null}
-      <p className="font-bold">{String(content.question ?? "")}</p>
+      <div className="rounded-[4px] border-4 border-black bg-[#fff9e6] px-3 py-2 text-xs font-black uppercase tracking-wide text-neutral-700">
+        Plays used: {playsUsed}/{maxPlays} / จำนวนครั้งที่ฟัง: {playsUsed}/{maxPlays}
+      </div>
+      <p className="font-bold">
+        {multiQuestions.length > 0
+          ? `Q${activeQuestion + 1}. ${String(currentMulti?.question ?? "")}`
+          : String(content.question ?? "")}
+      </p>
       <div className="grid gap-2">
         {opts.map((o) => (
           <button
@@ -261,10 +317,21 @@ function InteractiveListening({
       <button
         type="button"
         disabled={submitting || !pick}
-        onClick={() => pick && onSubmit(pick)}
+        onClick={() => {
+          if (!pick) return;
+          if (multiQuestions.length > 0) {
+            submitMulti();
+            return;
+          }
+          onSubmit(pick);
+        }}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
       >
-        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
+        {submitting
+          ? "ส่งคำตอบ... / Sending"
+          : multiQuestions.length > 0 && activeQuestion < multiQuestions.length - 1
+            ? "Next question / ข้อต่อไป"
+            : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );
