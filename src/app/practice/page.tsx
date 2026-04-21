@@ -126,7 +126,7 @@ export default function PracticeHubPage() {
   const [interactiveSpeakingIntroOpen, setInteractiveSpeakingIntroOpen] = useState(false);
   const [readWriteIntroOpen, setReadWriteIntroOpen] = useState(false);
 
-  const interactiveSpeakingCanStart = vipAiGate.isAdmin
+  const interactiveSpeakingCanStart = vipAiGate.hasBypassAccess
     ? true
     : !vipAiGate.isVip
     ? true
@@ -135,7 +135,7 @@ export default function PracticeHubPage() {
         vipAiGate.remaining >= VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION);
 
   const enterInteractiveSpeaking = () => {
-    if (vipAiGate.isVip && !vipAiGate.isAdmin) {
+    if (vipAiGate.isVip && !vipAiGate.hasBypassAccess) {
       if (vipAiGate.loading) {
         window.alert("กำลังโหลดข้อมูลบัญชีอยู่ครับ โปรดรอสักครู่แล้วลองอีกครั้ง");
         return;
@@ -156,7 +156,7 @@ export default function PracticeHubPage() {
     router.push(INTERACTIVE_SPEAKING_HREF);
   };
 
-  const readWriteCanStart = vipAiGate.isAdmin
+  const readWriteCanStart = vipAiGate.hasBypassAccess
     ? true
     : !vipAiGate.isVip
     ? true
@@ -165,7 +165,7 @@ export default function PracticeHubPage() {
   const enterReadAndWrite = () => {
     if (
       vipAiGate.isVip &&
-      !vipAiGate.isAdmin &&
+      !vipAiGate.hasBypassAccess &&
       !vipAiGate.loading &&
       vipAiGate.userId
     ) {

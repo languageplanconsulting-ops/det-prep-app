@@ -20,8 +20,10 @@ import {
  * Interactive speaking uses its own flow: session-start confirm + `addVipAiFeedbackUses` per API call.
  */
 export function useVipAiFeedbackGate() {
-  const { effectiveTier, isAdmin, loading: tierLoading } = useEffectiveTier();
+  const { effectiveTier, isAdmin, previewEligible, loading: tierLoading } =
+    useEffectiveTier();
   const isVip = effectiveTier === "vip";
+  const hasBypassAccess = isAdmin || previewEligible;
   const [userId, setUserId] = useState<string | null | undefined>(undefined);
   const [tick, setTick] = useState(0);
 
@@ -58,20 +60,23 @@ export function useVipAiFeedbackGate() {
 
   const used = useMemo(() => {
     void tick;
-    if (isAdmin || !isVip || !userId) return 0;
+    if (hasBypassAccess || !isVip || !userId) return 0;
     return getVipWeeklyAiFeedbackUses(userId);
-  }, [isAdmin, isVip, userId, tick]);
+  }, [hasBypassAccess, isVip, userId, tick]);
 
   const remaining = useMemo(
-    () => (isAdmin ? Number.POSITIVE_INFINITY : Math.max(0, VIP_AI_FEEDBACK_WEEKLY_LIMIT - used)),
-    [isAdmin, used],
+    () =>
+      hasBypassAccess
+        ? Number.POSITIVE_INFINITY
+        : Math.max(0, VIP_AI_FEEDBACK_WEEKLY_LIMIT - used),
+    [hasBypassAccess, used],
   );
 
   /**
    * Run before starting the AI request. Returns false if user cancelled or quota exhausted.
    */
   const confirmBeforeAiSubmit = useCallback((): boolean => {
-    if (isAdmin) return true;
+    if (hasBypassAccess) return true;
     if (!isVip) return true;
     if (authLoading) {
       window.alert(
@@ -89,21 +94,22 @@ export function useVipAiFeedbackGate() {
       return false;
     }
     return window.confirm(thConfirmBeforeAiSubmit(rem));
-  }, [isAdmin, isVip, userId, authLoading]);
+  }, [hasBypassAccess, isVip, userId, authLoading]);
 
   const recordSuccessfulAiSubmit = useCallback(() => {
-    if (isAdmin) return;
+    if (hasBypassAccess) return;
     if (isVip && userId) {
       recordVipAiFeedbackUse(userId);
       emitVipApiCreditNotice(getVipWeeklyAiFeedbackRemaining(userId));
       refresh();
     }
-  }, [isAdmin, isVip, userId, refresh]);
+  }, [hasBypassAccess, isVip, userId, refresh]);
 
-  const showQuotaBanner = !isAdmin && isVip && !!userId && !authLoading;
+  const showQuotaBanner = !hasBypassAccess && isVip && !!userId && !authLoading;
 
   return {
     isAdmin,
+    hasBypassAccess,
     isVip,
     loading,
     userId: userId ?? null,
