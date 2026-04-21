@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 
 import { useBillingActions } from "@/hooks/useBillingActions";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
@@ -61,7 +61,7 @@ const PLAN_CARDS: Array<{
 
 const ADD_ON_ORDER: AddOnSku[] = ["mock_1", "mock_2", "feedback_1", "feedback_3", "feedback_5"];
 
-export default function PricingPage() {
+function PricingPageContent() {
   const { startUpgradeCheckout, startAddOnCheckout, user, loading } = useBillingActions();
   const { effectiveTier } = useEffectiveTier();
   const searchParams = useSearchParams();
@@ -320,5 +320,33 @@ export default function PricingPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense
+      fallback={
+        <main
+          className="min-h-screen bg-[#f3f4f6] px-4 py-10"
+          style={{ backgroundImage: "radial-gradient(#111 1px, transparent 1px)", backgroundSize: "20px 20px" }}
+        >
+          <div className="mx-auto max-w-7xl">
+            <section className="border-4 border-black bg-white p-6 shadow-[10px_10px_0_0_#111] md:p-8">
+              <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#004aad]">
+                Pricing / สิทธิ์การใช้งาน
+              </p>
+              <h1 className="mt-3 text-4xl font-black uppercase italic tracking-tighter md:text-5xl">
+                กำลังโหลดแพลน...
+                <br />
+                <span className="not-italic text-[#004aad]">Loading pricing…</span>
+              </h1>
+            </section>
+          </div>
+        </main>
+      }
+    >
+      <PricingPageContent />
+    </Suspense>
   );
 }
