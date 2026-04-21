@@ -20,7 +20,7 @@ import {
  * Interactive speaking uses its own flow: session-start confirm + `addVipAiFeedbackUses` per API call.
  */
 export function useVipAiFeedbackGate() {
-  const { effectiveTier, loading: tierLoading } = useEffectiveTier();
+  const { effectiveTier, isAdmin, loading: tierLoading } = useEffectiveTier();
   const isVip = effectiveTier === "vip";
   const [userId, setUserId] = useState<string | null | undefined>(undefined);
   const [tick, setTick] = useState(0);
@@ -58,19 +58,20 @@ export function useVipAiFeedbackGate() {
 
   const used = useMemo(() => {
     void tick;
-    if (!isVip || !userId) return 0;
+    if (isAdmin || !isVip || !userId) return 0;
     return getVipWeeklyAiFeedbackUses(userId);
-  }, [isVip, userId, tick]);
+  }, [isAdmin, isVip, userId, tick]);
 
   const remaining = useMemo(
-    () => Math.max(0, VIP_AI_FEEDBACK_WEEKLY_LIMIT - used),
-    [used],
+    () => (isAdmin ? Number.POSITIVE_INFINITY : Math.max(0, VIP_AI_FEEDBACK_WEEKLY_LIMIT - used)),
+    [isAdmin, used],
   );
 
   /**
    * Run before starting the AI request. Returns false if user cancelled or quota exhausted.
    */
   const confirmBeforeAiSubmit = useCallback((): boolean => {
+    if (isAdmin) return true;
     if (!isVip) return true;
     if (authLoading) {
       window.alert(
@@ -88,19 +89,21 @@ export function useVipAiFeedbackGate() {
       return false;
     }
     return window.confirm(thConfirmBeforeAiSubmit(rem));
-  }, [isVip, userId, authLoading]);
+  }, [isAdmin, isVip, userId, authLoading]);
 
   const recordSuccessfulAiSubmit = useCallback(() => {
+    if (isAdmin) return;
     if (isVip && userId) {
       recordVipAiFeedbackUse(userId);
       emitVipApiCreditNotice(getVipWeeklyAiFeedbackRemaining(userId));
       refresh();
     }
-  }, [isVip, userId, refresh]);
+  }, [isAdmin, isVip, userId, refresh]);
 
-  const showQuotaBanner = isVip && !!userId && !authLoading;
+  const showQuotaBanner = !isAdmin && isVip && !!userId && !authLoading;
 
   return {
+    isAdmin,
     isVip,
     loading,
     userId: userId ?? null,

@@ -18,6 +18,7 @@ type AddOnRow = {
 
 type ProfileLite = {
   tier: Tier | string | null;
+  role: string | null;
   tier_expires_at: string | null;
   ai_credits_used: number | null;
   lifetime_ai_used: boolean | null;
@@ -117,14 +118,25 @@ export async function getAiCreditStateForUser(userId: string): Promise<{
   const supabase = createServiceRoleSupabase();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tier, ai_credits_used, lifetime_ai_used")
+    .select("tier, role, ai_credits_used, lifetime_ai_used")
     .eq("id", userId)
     .maybeSingle();
 
   const tier = normalizeTier(profile?.tier);
+  const isAdmin = profile?.role === "admin";
   const used = Math.max(0, Number(profile?.ai_credits_used ?? 0));
   const lifetimeUsed = profile?.lifetime_ai_used === true;
   const { feedbackRemaining } = await getAddonBalancesForUser(userId);
+
+  if (isAdmin) {
+    return {
+      allowed: true,
+      reason: null,
+      tier,
+      planRemaining: Number.POSITIVE_INFINITY,
+      addonRemaining: feedbackRemaining,
+    };
+  }
 
   if (tier === "free") {
     if (!lifetimeUsed) {
@@ -182,13 +194,18 @@ export async function chargeAiCreditForUser(userId: string): Promise<{
   const supabase = createServiceRoleSupabase();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tier, ai_credits_used, lifetime_ai_used")
+    .select("tier, role, ai_credits_used, lifetime_ai_used")
     .eq("id", userId)
     .maybeSingle<ProfileLite>();
 
   const tier = normalizeTier(profile?.tier);
+  const isAdmin = profile?.role === "admin";
   const used = Math.max(0, Number(profile?.ai_credits_used ?? 0));
   const lifetimeUsed = profile?.lifetime_ai_used === true;
+
+  if (isAdmin) {
+    return { ok: true, source: "plan" };
+  }
 
   if (tier === "free") {
     if (!lifetimeUsed) {

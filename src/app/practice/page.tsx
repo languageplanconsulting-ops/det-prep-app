@@ -126,14 +126,16 @@ export default function PracticeHubPage() {
   const [interactiveSpeakingIntroOpen, setInteractiveSpeakingIntroOpen] = useState(false);
   const [readWriteIntroOpen, setReadWriteIntroOpen] = useState(false);
 
-  const interactiveSpeakingCanStart = !vipAiGate.isVip
+  const interactiveSpeakingCanStart = vipAiGate.isAdmin
+    ? true
+    : !vipAiGate.isVip
     ? true
     : !vipAiGate.loading &&
       (!vipAiGate.userId ||
         vipAiGate.remaining >= VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION);
 
   const enterInteractiveSpeaking = () => {
-    if (vipAiGate.isVip) {
+    if (vipAiGate.isVip && !vipAiGate.isAdmin) {
       if (vipAiGate.loading) {
         window.alert("กำลังโหลดข้อมูลบัญชีอยู่ครับ โปรดรอสักครู่แล้วลองอีกครั้ง");
         return;
@@ -154,12 +156,19 @@ export default function PracticeHubPage() {
     router.push(INTERACTIVE_SPEAKING_HREF);
   };
 
-  const readWriteCanStart = !vipAiGate.isVip
+  const readWriteCanStart = vipAiGate.isAdmin
+    ? true
+    : !vipAiGate.isVip
     ? true
     : !vipAiGate.loading && (!vipAiGate.userId || vipAiGate.remaining >= 1);
 
   const enterReadAndWrite = () => {
-    if (vipAiGate.isVip && !vipAiGate.loading && vipAiGate.userId) {
+    if (
+      vipAiGate.isVip &&
+      !vipAiGate.isAdmin &&
+      !vipAiGate.loading &&
+      vipAiGate.userId
+    ) {
       const rem = getVipWeeklyAiFeedbackRemaining(vipAiGate.userId);
       emitVipApiCreditNotice(rem);
       if (rem < 1) {

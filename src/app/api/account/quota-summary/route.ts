@@ -21,7 +21,7 @@ export async function GET() {
   const [{ data: profile }, { data: sessions }, addon] = await Promise.all([
     supabase
       .from("profiles")
-      .select("tier, tier_expires_at, ai_credits_used")
+      .select("tier, role, tier_expires_at, ai_credits_used")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -33,15 +33,17 @@ export async function GET() {
   ]);
 
   const tier = normalizeTier(profile?.tier);
+  const isAdmin = profile?.role === "admin";
   const aiUsed = Math.max(0, Number(profile?.ai_credits_used ?? 0));
   const aiLimit = AI_MONTHLY_LIMIT[tier];
-  const aiPlanRemaining = Math.max(0, aiLimit - aiUsed);
+  const aiPlanRemaining = isAdmin ? Number.MAX_SAFE_INTEGER : Math.max(0, aiLimit - aiUsed);
   const mockUsed = countBillableMockFixedSessions((sessions ?? []) as Array<{ targets?: unknown }>);
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[tier];
-  const mockPlanRemaining = Math.max(0, mockLimit - mockUsed);
+  const mockPlanRemaining = isAdmin ? Number.MAX_SAFE_INTEGER : Math.max(0, mockLimit - mockUsed);
 
   return NextResponse.json({
     tier,
+    isAdmin,
     expiresAt: (profile?.tier_expires_at as string | null) ?? null,
     ai: {
       used: aiUsed,
