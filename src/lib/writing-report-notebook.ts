@@ -79,24 +79,22 @@ export function buildWritingReportNotebookPreview(report: WritingAttemptReport):
   excerpt: string;
 } {
   const r = withStudyPackDefaults(report);
-  const firstTip = r.improvementPoints[0];
-  const gSum = r.grammar.summary.en.trim();
-  const previewLine =
-    firstTip?.en?.trim() ||
-    gSum.slice(0, 120) + (gSum.length > 120 ? "…" : "") ||
-    `Writing report · ${r.wordCount} words.`;
+  const grammarEn = r.grammar.summary.en.trim() || "Review sentence control and accuracy.";
+  const vocabularyEn = r.vocabulary.summary.en.trim() || "Review word choice and range.";
+  const grammarTh = r.grammar.summary.th.trim() || "ดูเรื่องไวยากรณ์และการเรียงประโยค";
+  const vocabularyTh = r.vocabulary.summary.th.trim() || "ดูเรื่องคำศัพท์และการเลือกคำ";
 
   const bodyEn = [
     `Score ${r.score160}/160 · ${r.wordCount} words · prep ${r.prepMinutes} min.`,
-    previewLine,
+    `Grammar: ${grammarEn}`,
+    `Vocabulary: ${vocabularyEn}`,
   ].join("\n");
 
-  const thLine =
-    r.improvementPoints[0]?.th?.trim() ||
-    r.grammar.summary.th.trim().slice(0, 160) ||
-    `คะแนน ${r.score160}/160`;
-
-  const bodyTh = [`คะแนน ${r.score160}/160 · ${r.wordCount} คำ`, thLine].join("\n");
+  const bodyTh = [
+    `คะแนน ${r.score160}/160 · ${r.wordCount} คำ`,
+    `Grammar: ${grammarTh}`,
+    `Vocabulary: ${vocabularyTh}`,
+  ].join("\n");
 
   return {
     titleEn: `Read, then write — ${r.topicTitleEn}`,

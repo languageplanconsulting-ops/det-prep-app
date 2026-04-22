@@ -61,25 +61,22 @@ export function buildSpeakingReportNotebookPreview(report: SpeakingAttemptReport
   bodyTh: string;
   excerpt: string;
 } {
-  const firstTip = report.improvementPoints[0];
-  const gSum = report.grammar.summary.en.trim();
-  const previewLine =
-    firstTip?.en?.trim() ||
-    gSum.slice(0, 120) + (gSum.length > 120 ? "…" : "") ||
-    `Speaking report · ${report.wordCount} words.`;
+  const grammarEn = report.grammar.summary.en.trim() || "Review spoken grammar control.";
+  const vocabularyEn = report.vocabulary.summary.en.trim() || "Review speaking vocabulary range.";
+  const grammarTh = report.grammar.summary.th.trim() || "ดูไวยากรณ์ตอนพูดให้ชัดขึ้น";
+  const vocabularyTh = report.vocabulary.summary.th.trim() || "ดูการเลือกคำตอนพูดให้กว้างขึ้น";
 
   const bodyEn = [
     `Score ${report.score160}/160 · ${report.wordCount} words · prep ${report.prepMinutes} min.`,
-    `Question: ${report.questionPromptEn.slice(0, 100)}${report.questionPromptEn.length > 100 ? "…" : ""}`,
-    previewLine,
+    `Grammar: ${grammarEn}`,
+    `Vocabulary: ${vocabularyEn}`,
   ].join("\n");
 
-  const thLine =
-    report.improvementPoints[0]?.th?.trim() ||
-    report.grammar.summary.th.trim().slice(0, 160) ||
-    `คะแนน ${report.score160}/160`;
-
-  const bodyTh = [`คะแนน ${report.score160}/160 · ${report.wordCount} คำ`, thLine].join("\n");
+  const bodyTh = [
+    `คะแนน ${report.score160}/160 · ${report.wordCount} คำ`,
+    `Grammar: ${grammarTh}`,
+    `Vocabulary: ${vocabularyTh}`,
+  ].join("\n");
 
   return {
     titleEn: `Read, then speak — ${report.topicTitleEn}`,
