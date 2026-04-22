@@ -12,6 +12,7 @@ import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
 import { SpeakingVocabularyUpgradePanel } from "@/components/speaking/SpeakingVocabularyUpgradePanel";
 import { GrammarFixesPanel, type GrammarFixItem } from "@/components/reports/GrammarFixesPanel";
+import { resolveGrammarFixDisplay } from "@/lib/grammar-fix-display";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
 import { GRADING_BADGE_OFFLINE, GRADING_BADGE_PRIMARY } from "@/lib/report-branding";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
@@ -132,14 +133,23 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
   const nav = photoReportNav(report);
   const submission = (report.punctuatedTranscript ?? report.transcript).trim();
   const grammarFixes: GrammarFixItem[] = report.grammar.breakdown
-    .map((b) => ({
-      id: b.id,
-      wrong: b.excerpt?.trim() ?? "",
-      betterEn: b.suggestionEn?.trim() || "",
-      betterTh: b.suggestionTh?.trim() || "",
-      noteEn: b.en,
-      noteTh: b.th,
-    }))
+    .map((b) => {
+      const display = resolveGrammarFixDisplay({
+        excerpt: b.excerpt,
+        suggestionEn: b.suggestionEn,
+        suggestionTh: b.suggestionTh,
+        noteEn: b.en,
+        noteTh: b.th,
+      });
+      return {
+        id: b.id,
+        wrong: display.wrong,
+        betterEn: display.betterEn,
+        betterTh: display.betterTh,
+        noteEn: b.en,
+        noteTh: b.th,
+      };
+    })
     .filter((x) => x.wrong && (x.betterEn || x.betterTh))
     .slice(0, 8);
 

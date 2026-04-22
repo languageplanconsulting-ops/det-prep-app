@@ -14,6 +14,7 @@ import {
   buildWritingReportNotebookFullBodies,
   buildWritingReportNotebookPreview,
 } from "@/lib/writing-report-notebook";
+import { resolveGrammarFixDisplay } from "@/lib/grammar-fix-display";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
@@ -227,14 +228,23 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
     </>
   );
   const grammarFixes: GrammarFixItem[] = fullReport.grammar.breakdown
-    .map((b) => ({
-      id: b.id,
-      wrong: b.excerpt?.trim() ?? "",
-      betterEn: b.suggestionEn?.trim() || "",
-      betterTh: b.suggestionTh?.trim() || "",
-      noteEn: b.en,
-      noteTh: b.th,
-    }))
+    .map((b) => {
+      const display = resolveGrammarFixDisplay({
+        excerpt: b.excerpt,
+        suggestionEn: b.suggestionEn,
+        suggestionTh: b.suggestionTh,
+        noteEn: b.en,
+        noteTh: b.th,
+      });
+      return {
+        id: b.id,
+        wrong: display.wrong,
+        betterEn: display.betterEn,
+        betterTh: display.betterTh,
+        noteEn: b.en,
+        noteTh: b.th,
+      };
+    })
     .filter((x) => x.wrong && (x.betterEn || x.betterTh))
     .slice(0, 8);
 
