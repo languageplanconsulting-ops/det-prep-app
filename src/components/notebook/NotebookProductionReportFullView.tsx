@@ -21,6 +21,7 @@ export function NotebookProductionReportFullView({
 }) {
   const [openResponse, setOpenResponse] = useState(true);
   const [openCriterion, setOpenCriterion] = useState<string | null>("Grammar");
+  const [flippedCards, setFlippedCards] = useState<Record<string, boolean>>({});
   const ringRef = useRef<SVGCircleElement | null>(null);
   const detailRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -46,6 +47,10 @@ export function NotebookProductionReportFullView({
     window.setTimeout(() => {
       detailRefs.current[name]?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 80);
+  };
+
+  const toggleCard = (key: string) => {
+    setFlippedCards((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
@@ -232,20 +237,73 @@ export function NotebookProductionReportFullView({
                       <p className="text-[0.78rem] font-semibold text-emerald-700">No issues flagged — great job!</p>
                     </div>
                   ) : (
-                    c.corrections.map((cr, idx) => (
-                      <div key={idx} className="border-t border-neutral-100 px-3.5 py-3 first:border-t-2">
-                        <div className="flex flex-wrap items-start gap-2">
-                          <span className="font-mono text-[0.78rem] font-semibold line-through decoration-red-600/80 bg-red-50 px-2 py-1 text-red-700 ring-1 ring-red-600">
-                            {cr.before}
-                          </span>
-                          <span className="mt-1 text-[0.7rem] text-neutral-400">→</span>
-                          <span className="font-mono text-[0.78rem] font-bold bg-emerald-50 px-2 py-1 text-emerald-700 ring-1 ring-emerald-600">
-                            {cr.after}
-                          </span>
-                        </div>
-                        <p className="mt-2 text-[0.78rem] leading-relaxed text-neutral-500">{cr.explanation}</p>
-                      </div>
-                    ))
+                    <div className="grid gap-3 px-3.5 py-3 sm:grid-cols-2">
+                      {c.corrections.map((cr, idx) => {
+                        const cardKey = `${c.key}-${idx}`;
+                        const flipped = !!flippedCards[cardKey];
+                        return (
+                          <button
+                            key={cardKey}
+                            type="button"
+                            onClick={() => toggleCard(cardKey)}
+                            className="group min-h-[12.5rem] rounded-2xl border-2 border-black bg-[#fffdf8] p-4 text-left shadow-[3px_3px_0_0_#111827] transition hover:-translate-y-[1px] hover:bg-[#fff8df]"
+                          >
+                            {!flipped ? (
+                              <div className="flex h-full flex-col">
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className="font-mono text-[0.55rem] font-black uppercase tracking-[0.12em] text-red-700">
+                                    Front · Weak phrase
+                                  </span>
+                                  <span className="text-[0.62rem] font-bold uppercase text-neutral-400">
+                                    Tap to flip
+                                  </span>
+                                </div>
+                                <div className="mt-4 flex flex-1 items-center justify-center">
+                                  <p className="font-mono text-base font-bold leading-relaxed text-red-700 line-through decoration-red-600/80">
+                                    {cr.before}
+                                  </p>
+                                </div>
+                                <p className="mt-4 text-[0.72rem] font-semibold text-neutral-500">
+                                  Try recalling the better version before you flip.
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="flex h-full flex-col">
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className="font-mono text-[0.55rem] font-black uppercase tracking-[0.12em] text-emerald-700">
+                                    Back · Fix + help
+                                  </span>
+                                  <span className="text-[0.62rem] font-bold uppercase text-neutral-400">
+                                    Tap to close
+                                  </span>
+                                </div>
+                                <div className="mt-3">
+                                  <p className="font-mono text-[0.72rem] font-bold uppercase tracking-[0.08em] text-neutral-500">
+                                    Better version
+                                  </p>
+                                  <p className="mt-1 rounded-xl bg-emerald-50 px-3 py-2 font-mono text-sm font-bold text-emerald-700 ring-1 ring-emerald-600">
+                                    {cr.after}
+                                  </p>
+                                </div>
+                                <div className="mt-3 space-y-2 text-[0.78rem] leading-relaxed text-neutral-700">
+                                  <p>
+                                    <span className="font-black text-neutral-900">Explanation:</span> {cr.explanation}
+                                  </p>
+                                  {c.summaryTh ? (
+                                    <p>
+                                      <span className="font-black text-[#004aad]">Thai help:</span> {c.summaryTh}
+                                    </p>
+                                  ) : null}
+                                  <p>
+                                    <span className="font-black text-neutral-900">Example to reuse:</span> {cr.after}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
               </div>
@@ -260,25 +318,70 @@ export function NotebookProductionReportFullView({
               <p className="font-mono text-[0.55rem] font-extrabold uppercase tracking-[0.1em]">Vocabulary upgrades</p>
               <p className="mt-0.5 text-[0.65rem] text-neutral-500">Level up these words · ยกระดับคำศัพท์</p>
             </div>
-            <div className="flex flex-col gap-2 px-3.5 py-2.5">
-              {data.vocabUpgrades.map((v, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col gap-2 border-2 border-neutral-200 px-3 py-2.5 transition hover:border-[#004aad] hover:bg-[#f0f5fb] sm:flex-row sm:items-center"
-                >
-                  <div className="flex shrink-0 flex-col items-center gap-0.5 font-mono sm:min-w-[7.5rem] sm:flex-row sm:gap-2">
-                    <span className="text-[0.7rem] font-semibold text-neutral-500 line-through">{v.original}</span>
-                    <span className="text-[0.6rem] text-[#004aad]">↓</span>
-                    <span className="text-[0.78rem] font-extrabold text-[#004aad]">{v.upgraded}</span>
-                  </div>
-                  <div className="min-w-0 flex-1 text-[0.75rem] leading-snug text-neutral-600">
-                    {v.meaningTh}
-                    {v.exampleEn ? (
-                      <span className="mt-1 block font-mono text-[0.65rem] text-neutral-500">e.g. {v.exampleEn}</span>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
+            <div className="grid gap-3 px-3.5 py-3 sm:grid-cols-2">
+              {data.vocabUpgrades.map((v, i) => {
+                const cardKey = `vocab-${i}`;
+                const flipped = !!flippedCards[cardKey];
+                return (
+                  <button
+                    key={cardKey}
+                    type="button"
+                    onClick={() => toggleCard(cardKey)}
+                    className="group min-h-[12.5rem] rounded-2xl border-2 border-black bg-[#fffef8] p-4 text-left shadow-[3px_3px_0_0_#111827] transition hover:-translate-y-[1px] hover:bg-[#fff8df]"
+                  >
+                    {!flipped ? (
+                      <div className="flex h-full flex-col">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-mono text-[0.55rem] font-black uppercase tracking-[0.12em] text-[#004aad]">
+                            Front · Basic word
+                          </span>
+                          <span className="text-[0.62rem] font-bold uppercase text-neutral-400">
+                            Tap to flip
+                          </span>
+                        </div>
+                        <div className="mt-4 flex flex-1 items-center justify-center">
+                          <p className="font-mono text-lg font-bold text-neutral-700">{v.original}</p>
+                        </div>
+                        <p className="mt-4 text-[0.72rem] font-semibold text-neutral-500">
+                          Recall a stronger upgrade before flipping.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex h-full flex-col">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-mono text-[0.55rem] font-black uppercase tracking-[0.12em] text-emerald-700">
+                            Back · Upgrade + example
+                          </span>
+                          <span className="text-[0.62rem] font-bold uppercase text-neutral-400">
+                            Tap to close
+                          </span>
+                        </div>
+                        <div className="mt-3">
+                          <p className="font-mono text-[0.72rem] font-bold uppercase tracking-[0.08em] text-neutral-500">
+                            Better word
+                          </p>
+                          <p className="mt-1 rounded-xl bg-emerald-50 px-3 py-2 font-mono text-sm font-bold text-emerald-700 ring-1 ring-emerald-600">
+                            {v.upgraded}
+                          </p>
+                        </div>
+                        <div className="mt-3 space-y-2 text-[0.78rem] leading-relaxed text-neutral-700">
+                          <p>
+                            <span className="font-black text-[#004aad]">Thai help:</span> {v.meaningTh}
+                          </p>
+                          {v.exampleEn ? (
+                            <p>
+                              <span className="font-black text-neutral-900">Example:</span> {v.exampleEn}
+                            </p>
+                          ) : null}
+                          <p>
+                            <span className="font-black text-neutral-900">Swap:</span> {v.original} → {v.upgraded}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : null}

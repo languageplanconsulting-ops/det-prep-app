@@ -232,6 +232,95 @@ function splitReportSections(text: string): Array<{ heading: string; body: strin
   return sections;
 }
 
+function notebookSourceLabel(e: NotebookEntry): string {
+  const m: Record<NotebookEntry["source"], string> = {
+    "writing-read-and-write": "Writing report",
+    "speaking-read-and-speak": "Speaking report",
+    "speak-about-photo": "Photo speaking",
+    "write-about-photo": "Photo writing",
+    "reading-comprehension": "Reading",
+    "vocabulary-comprehension": "Vocabulary",
+    "fill-in-blank": "Fill in the blank",
+    "interactive-conversation": "Conversation",
+    "real-word": "Real word",
+    "dialogue-summary": "Dialogue summary",
+    "interactive-speaking": "Interactive speaking",
+  };
+  return m[e.source] ?? "Notebook";
+}
+
+type NotebookPreviewBlock = {
+  key: string;
+  label: string;
+  en: string;
+  th: string;
+  tone: "grammar" | "vocabulary" | "neutral";
+};
+
+function splitNotebookPreviewLines(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
+
+function stripPreviewLabel(line: string): string {
+  return line.replace(/^(grammar|vocabulary|score|question)\s*:\s*/i, "").trim();
+}
+
+function extractNotebookPreview(entry: NotebookEntry): {
+  scoreLine: string | null;
+  blocks: NotebookPreviewBlock[];
+} {
+  const enLines = splitNotebookPreviewLines(entry.bodyEn);
+  const thLines = splitNotebookPreviewLines(entry.bodyTh);
+
+  const scoreLine =
+    enLines.find((line) => /^score\b/i.test(line)) ??
+    thLines.find((line) => /^คะแนน\b/i.test(line)) ??
+    null;
+
+  const blocks: NotebookPreviewBlock[] = [];
+
+  const pushIfPresent = (
+    key: string,
+    label: string,
+    tone: NotebookPreviewBlock["tone"],
+    enMatcher: RegExp,
+    thMatcher: RegExp,
+  ) => {
+    const en = enLines.find((line) => enMatcher.test(line)) ?? "";
+    const th = thLines.find((line) => thMatcher.test(line)) ?? "";
+    if (!en && !th) return;
+    blocks.push({
+      key,
+      label,
+      en: stripPreviewLabel(en),
+      th: stripPreviewLabel(th),
+      tone,
+    });
+  };
+
+  pushIfPresent("grammar", "Grammar", "grammar", /^grammar\b/i, /^grammar\b/i);
+  pushIfPresent("vocabulary", "Vocabulary", "vocabulary", /^vocabulary\b/i, /^vocabulary\b/i);
+
+  if (blocks.length === 0) {
+    const firstEn = enLines.find((line) => !/^score\b/i.test(line)) ?? "";
+    const firstTh = thLines.find((line) => !/^คะแนน\b/i.test(line)) ?? "";
+    if (firstEn || firstTh) {
+      blocks.push({
+        key: "main",
+        label: "Saved point",
+        en: firstEn,
+        th: firstTh,
+        tone: "neutral",
+      });
+    }
+  }
+
+  return { scoreLine, blocks };
+}
+
 function refreshAll(): {
   entries: NotebookEntry[];
   categories: NotebookCustomCategory[];
@@ -247,6 +336,8 @@ export function NotebookList() {
   const [search, setSearch] = useState("");
   const [newCatName, setNewCatName] = useState("");
   const [fullExpanded, setFullExpanded] = useState<Record<string, boolean>>({});
+  const [noteExpanded, setNoteExpanded] = useState<Record<string, boolean>>({});
+  const [folderExpanded, setFolderExpanded] = useState<Record<string, boolean>>({});
 
   const reload = useCallback(() => {
     const { entries: e, categories: c } = refreshAll();
@@ -490,6 +581,7 @@ export function NotebookList() {
               genericTitle && (e.titleEn.trim() || e.titleTh.trim())
                 ? [e.titleEn.trim(), e.titleTh.trim()].filter(Boolean).join(" · ")
                 : null;
+            const preview = extractNotebookPreview(e);
 
             const hasFullNote =
               !!(e.fullBodyEn?.trim() || e.fullBodyTh?.trim());
@@ -498,9 +590,10 @@ export function NotebookList() {
             return (
               <li key={e.id}>
                 <section className="relative overflow-hidden rounded-2xl border border-amber-200/90 bg-gradient-to-br from-[#fffdf8] via-[#fffaf3] to-[#f7f4eb] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] ring-1 ring-black/[0.04] transition-shadow hover:shadow-[0_12px_36px_rgb(0,0,0,0.08)]">
-                  <p className="text-[11px] leading-relaxed text-neutral-500">
-                    <span className="text-neutral-500">{tagParts.join(" ")}</span>
-                    <span className="text-neutral-300"> · </span>
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-relaxed text-neutral-500">
+                    <span className="rounded-full border border-black/10 bg-white/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-neutral-700">
+                      {notebookSourceLabel(e)}
+                    </span>
                     <time dateTime={e.createdAt} className="text-neutral-400">
                       {new Date(e.createdAt).toLocaleString()}
                     </time>
@@ -539,6 +632,11 @@ export function NotebookList() {
                       }
                       return (
                         <>
+                          {preview.scoreLine ? (
+                            <div className="mt-3 inline-flex rounded-full border border-ep-blue/30 bg-ep-blue/10 px-3 py-1 text-[11px] font-bold text-ep-blue">
+                              {preview.scoreLine}
+                            </div>
+                          ) : null}
                           {hero ? (
                             <p className="mt-3 text-xl font-black leading-snug tracking-tight text-neutral-900">
                               {hero}
@@ -546,7 +644,42 @@ export function NotebookList() {
                           ) : (
                             <p className="mt-3 text-xl font-black leading-snug text-neutral-500">Saved note</p>
                           )}
-                          {showThaiBelow ? (
+                          {preview.blocks.length > 0 ? (
+                            <div className="mt-4 grid gap-3">
+                              {preview.blocks.map((block) => {
+                                const toneClass =
+                                  block.tone === "grammar"
+                                    ? "border-[#004aad]/25 bg-[#eef4ff]"
+                                    : block.tone === "vocabulary"
+                                      ? "border-emerald-700/25 bg-emerald-50"
+                                      : "border-black/10 bg-white/75";
+                                const labelClass =
+                                  block.tone === "grammar"
+                                    ? "text-[#004aad]"
+                                    : block.tone === "vocabulary"
+                                      ? "text-emerald-700"
+                                      : "text-neutral-600";
+                                return (
+                                  <div
+                                    key={block.key}
+                                    className={`rounded-2xl border px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] ${toneClass}`}
+                                  >
+                                    <p className={`ep-stat text-[10px] font-black uppercase tracking-[0.22em] ${labelClass}`}>
+                                      {block.label}
+                                    </p>
+                                    {block.en ? (
+                                      <p className="mt-2 text-sm font-semibold leading-relaxed text-neutral-900">
+                                        {block.en}
+                                      </p>
+                                    ) : null}
+                                    {block.th ? (
+                                      <p className="mt-1 text-sm leading-relaxed text-neutral-600">{block.th}</p>
+                                    ) : null}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : showThaiBelow ? (
                             <p className="mt-3 text-base leading-relaxed text-neutral-700">{bodyTh}</p>
                           ) : null}
                         </>
@@ -585,6 +718,19 @@ export function NotebookList() {
                     <p className="ep-stat mt-3 border-l-2 border-ep-blue/40 pl-3 text-xs italic text-neutral-500">
                       {e.excerpt}
                     </p>
+                  ) : null}
+
+                  {tagParts.length > 0 ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {tagParts.map((tag) => (
+                        <span
+                          key={`${e.id}-${tag}`}
+                          className="rounded-full border border-black/10 bg-white/70 px-2.5 py-1 text-[10px] font-bold text-neutral-500"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   ) : null}
 
                   {hasFullNote ? (
@@ -673,62 +819,98 @@ export function NotebookList() {
                   ) : null}
 
                   <div className="mt-5 border-t border-amber-200/60 pt-4">
-                    <p
-                      className={`${notebookHand.className} mb-2 text-lg font-semibold tracking-wide text-amber-900/70`}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setNoteExpanded((prev) => ({
+                          ...prev,
+                          [e.id]: !prev[e.id],
+                        }))
+                      }
+                      className="flex w-full items-center justify-between gap-3 text-left"
                     >
-                      Your note
-                    </p>
-                    <textarea
-                      defaultValue={e.userNote}
-                      key={e.id + e.userNote}
-                      rows={4}
-                      placeholder="Jot something down…"
-                      className={`${notebookHand.className} w-full min-h-[6.5rem] resize-y rounded-2xl border border-dashed border-amber-400/45 bg-[linear-gradient(transparent_1.74rem,rgba(251,191,36,0.18)_1.75rem)] bg-[length:100%_1.75rem] bg-local px-4 py-3 text-xl leading-[1.75rem] text-neutral-800 placeholder:text-amber-900/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[box-shadow,border-color] focus:border-amber-500/55 focus:shadow-[inset_0_0_0_1px_rgba(245,158,11,0.15)]`}
-                      onBlur={(ev) => {
-                        if (ev.target.value !== e.userNote)
-                          saveUserNote(e.id, ev.target.value);
-                      }}
-                    />
+                      <p
+                        className={`${notebookHand.className} text-lg font-semibold tracking-wide text-amber-900/70`}
+                      >
+                        Your note
+                      </p>
+                      <span className="text-[11px] font-bold uppercase tracking-wide text-amber-800/70">
+                        {noteExpanded[e.id] ? "Hide" : e.userNote.trim() ? "Open note" : "Add note"}
+                      </span>
+                    </button>
+                    {noteExpanded[e.id] ? (
+                      <textarea
+                        defaultValue={e.userNote}
+                        key={e.id + e.userNote}
+                        rows={4}
+                        placeholder="Jot something down…"
+                        className={`${notebookHand.className} mt-2 w-full min-h-[6.5rem] resize-y rounded-2xl border border-dashed border-amber-400/45 bg-[linear-gradient(transparent_1.74rem,rgba(251,191,36,0.18)_1.75rem)] bg-[length:100%_1.75rem] bg-local px-4 py-3 text-xl leading-[1.75rem] text-neutral-800 placeholder:text-amber-900/30 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-[box-shadow,border-color] focus:border-amber-500/55 focus:shadow-[inset_0_0_0_1px_rgba(245,158,11,0.15)]`}
+                        onBlur={(ev) => {
+                          if (ev.target.value !== e.userNote)
+                            saveUserNote(e.id, ev.target.value);
+                        }}
+                      />
+                    ) : e.userNote.trim() ? (
+                      <p className={`${notebookHand.className} mt-2 line-clamp-2 text-base leading-relaxed text-amber-900/70`}>
+                        {e.userNote}
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className="mt-4 border-t border-neutral-200 pt-4">
-                    <p className="ep-stat mb-2 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                      Folders
-                    </p>
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 ep-stat text-[11px] text-neutral-600">
-                      <label className="flex cursor-not-allowed items-center gap-1.5 opacity-60">
-                        <input type="checkbox" checked readOnly disabled className="h-3.5 w-3.5" />
-                        <span className="text-neutral-500">
-                          {NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.all]}
-                        </span>
-                      </label>
-                      {PREMADE_IDS.map((id) => (
-                        <label key={id} className="flex cursor-pointer items-center gap-1.5">
-                          <input
-                            type="checkbox"
-                            checked={e.categoryIds.includes(id)}
-                            onChange={(ev) => toggleCategory(e, id, ev.target.checked)}
-                            disabled={
-                              e.categoryIds.includes(id) &&
-                              !canRemovePremadeCategory(e.categoryIds, id)
-                            }
-                            className="h-3.5 w-3.5"
-                          />
-                          <span>#{premadeHashtagId(id)}</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFolderExpanded((prev) => ({
+                          ...prev,
+                          [e.id]: !prev[e.id],
+                        }))
+                      }
+                      className="flex w-full items-center justify-between gap-3 text-left"
+                    >
+                      <p className="ep-stat text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                        Folders
+                      </p>
+                      <span className="text-[11px] font-bold uppercase tracking-wide text-neutral-400">
+                        {folderExpanded[e.id] ? "Hide" : "Edit"}
+                      </span>
+                    </button>
+                    {folderExpanded[e.id] ? (
+                      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 rounded-2xl border border-black/10 bg-white/60 p-3 ep-stat text-[11px] text-neutral-600">
+                        <label className="flex cursor-not-allowed items-center gap-1.5 opacity-60">
+                          <input type="checkbox" checked readOnly disabled className="h-3.5 w-3.5" />
+                          <span className="text-neutral-500">
+                            {NOTEBOOK_BUILTIN_LABELS[NOTEBOOK_BUILTIN.all]}
+                          </span>
                         </label>
-                      ))}
-                      {categories.map((c) => (
-                        <label key={c.id} className="flex cursor-pointer items-center gap-1.5">
-                          <input
-                            type="checkbox"
-                            checked={e.categoryIds.includes(c.id)}
-                            onChange={(ev) => toggleCategory(e, c.id, ev.target.checked)}
-                            className="h-3.5 w-3.5"
-                          />
-                          <span>#{c.name.replace(/\s+/g, "-").toLowerCase()}</span>
-                        </label>
-                      ))}
-                    </div>
+                        {PREMADE_IDS.map((id) => (
+                          <label key={id} className="flex cursor-pointer items-center gap-1.5">
+                            <input
+                              type="checkbox"
+                              checked={e.categoryIds.includes(id)}
+                              onChange={(ev) => toggleCategory(e, id, ev.target.checked)}
+                              disabled={
+                                e.categoryIds.includes(id) &&
+                                !canRemovePremadeCategory(e.categoryIds, id)
+                              }
+                              className="h-3.5 w-3.5"
+                            />
+                            <span>{NOTEBOOK_BUILTIN_LABELS[id]}</span>
+                          </label>
+                        ))}
+                        {categories.map((c) => (
+                          <label key={c.id} className="flex cursor-pointer items-center gap-1.5">
+                            <input
+                              type="checkbox"
+                              checked={e.categoryIds.includes(c.id)}
+                              onChange={(ev) => toggleCategory(e, c.id, ev.target.checked)}
+                              className="h-3.5 w-3.5"
+                            />
+                            <span>{c.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className="mt-4 flex justify-end">

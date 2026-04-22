@@ -24,6 +24,14 @@ type ProfileLite = {
   lifetime_ai_used: boolean | null;
 };
 
+type InteractiveSpeakingCreditLockRow = {
+  attempt_id: string;
+  user_id: string;
+  scenario_id: string | null;
+  status: "pending" | "charged";
+  charge_source: "plan" | "addon" | null;
+};
+
 export function creditsGrantedForSku(sku: AddOnSku): number {
   if (sku === "mock_1") return 1;
   if (sku === "mock_2") return 2;
@@ -236,6 +244,100 @@ export async function chargeAiCreditForUser(userId: string): Promise<{
 
   const consumed = await consumeAddonCreditsForUser(userId, "feedback", 1);
   return { ok: consumed.ok, source: consumed.ok ? "addon" : null };
+}
+
+export async function getInteractiveSpeakingCreditLockForAttempt(
+  userId: string,
+  attemptId: string,
+): Promise<InteractiveSpeakingCreditLockRow | null> {
+  const supabase = createServiceRoleSupabase();
+  const { data, error } = await supabase
+    .from("interactive_speaking_credit_locks")
+    .select("attempt_id, user_id, scenario_id, status, charge_source")
+    .eq("attempt_id", attemptId)
+    .eq("user_id", userId)
+    .maybeSingle<InteractiveSpeakingCreditLockRow>();
+  if (error) throw new Error(error.message);
+  return data ?? null;
+}
+
+export async function reserveInteractiveSpeakingCreditForAttempt(args: {
+  userId: string;
+  attemptId: string;
+  scenarioId: string;
+}): Promise<{
+  ok: boolean;
+  reason?: string;
+  source: "plan" | "addon" | null;
+  alreadyReserved?: boolean;
+}> {
+  const { userId, attemptId, scenarioId } = args;
+  const existing = await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId);
+  if (existing) {
+    return {
+      ok: true,
+      source: existing.charge_source,
+      alreadyReserved: true,
+    };
+  }
+
+  const credit = await getAiCreditStateForUser(userId);
+  if (!credit.allowed) {
+    return {
+      ok: false,
+      reason: credit.reason ?? "AI feedback quota reached",
+      source: null,
+    };
+  }
+
+  const supabase = createServiceRoleSupabase();
+  const nowIso = new Date().toISOString();
+  const { error: insertError } = await supabase
+    .from("interactive_speaking_credit_locks")
+    .insert({
+      attempt_id: attemptId,
+      user_id: userId,
+      scenario_id: scenarioId,
+      status: "pending",
+      updated_at: nowIso,
+    });
+
+  if (insertError) {
+    const retryExisting = await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId);
+    if (retryExisting) {
+      return {
+        ok: true,
+        source: retryExisting.charge_source,
+        alreadyReserved: true,
+      };
+    }
+    return { ok: false, reason: insertError.message, source: null };
+  }
+
+  const charged = await chargeAiCreditForUser(userId);
+  if (!charged.ok) {
+    await supabase.from("interactive_speaking_credit_locks").delete().eq("attempt_id", attemptId);
+    return {
+      ok: false,
+      reason: "AI feedback quota reached. Upgrade or buy a feedback add-on.",
+      source: null,
+    };
+  }
+
+  const { error: updateError } = await supabase
+    .from("interactive_speaking_credit_locks")
+    .update({
+      status: "charged",
+      charge_source: charged.source,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("attempt_id", attemptId);
+
+  if (updateError) {
+    return { ok: true, source: charged.source };
+  }
+
+  return { ok: true, source: charged.source };
 }
 
 export async function currentTierForUser(userId: string): Promise<Tier> {

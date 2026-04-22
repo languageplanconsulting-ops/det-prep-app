@@ -12,7 +12,6 @@ import {
   addVipAiFeedbackUses,
   emitVipApiCreditNotice,
   getVipWeeklyAiFeedbackRemaining,
-  thExhaustedQuotaMessage,
   thInteractiveSpeakingInsufficientCredits,
   thInteractiveSpeakingStartConfirm,
   VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION,
@@ -64,6 +63,10 @@ function formatCountdown(seconds: number): string {
   const mins = Math.floor(safe / 60);
   const secs = safe % 60;
   return `${mins}:${String(secs).padStart(2, "0")}`;
+}
+
+function interactiveSpeakingStartCreditConfirm(): string {
+  return "Starting this interactive speaking session will use 1 AI credit now.\n\nIf you quit mid-way, there is no refund.\n\nContinue?";
 }
 
 /** Short click when the answer window opens (prep → record). */
@@ -521,6 +524,11 @@ export function InteractiveSpeakingSession({
 
   const startExam = useCallback(async () => {
     setSubmitError(null);
+    if (!vipGate.isVip && vipGate.userId && !vipGate.hasBypassAccess) {
+      if (!window.confirm(interactiveSpeakingStartCreditConfirm())) {
+        return;
+      }
+    }
     if (vipGate.isVip) {
       if (vipGate.loading) {
         window.alert(
@@ -544,14 +552,42 @@ export function InteractiveSpeakingSession({
         return;
       }
     }
-    setTurn(1);
-    setCompleted([]);
-    completedRef.current = [];
-    await beginTurn(1, scenario.starterQuestionEn, scenario.starterQuestionTh);
+    setPhase("loading-q");
+    try {
+      const res = await fetch("/api/interactive-speaking/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          attemptId,
+          scenarioId: scenario.id,
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        alreadyReserved?: boolean;
+      };
+      if (!res.ok) {
+        throw new Error(typeof data.error === "string" ? data.error : "Could not start interactive speaking.");
+      }
+      if (vipGate.isVip && vipGate.userId && !data.alreadyReserved) {
+        addVipAiFeedbackUses(vipGate.userId, 1);
+        emitVipApiCreditNotice(getVipWeeklyAiFeedbackRemaining(vipGate.userId));
+      }
+      setTurn(1);
+      setCompleted([]);
+      completedRef.current = [];
+      await beginTurn(1, scenario.starterQuestionEn, scenario.starterQuestionTh);
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Could not start interactive speaking.");
+      setPhase("intro");
+    }
   }, [
+    attemptId,
     beginTurn,
+    scenario.id,
     scenario.starterQuestionEn,
     scenario.starterQuestionTh,
+    vipGate.hasBypassAccess,
     vipGate.isVip,
     vipGate.loading,
     vipGate.userId,
@@ -605,15 +641,6 @@ export function InteractiveSpeakingSession({
     ];
 
     if (nextCompleted.length >= INTERACTIVE_SPEAKING_TURN_COUNT) {
-      if (vipGate.isVip && vipGate.userId) {
-        const rem = getVipWeeklyAiFeedbackRemaining(vipGate.userId);
-        emitVipApiCreditNotice(rem);
-        if (rem <= 0) {
-          window.alert(thExhaustedQuotaMessage());
-          setPhase("review");
-          return;
-        }
-      }
       setCompleted(nextCompleted);
       completedRef.current = nextCompleted;
       forceStopMedia();
@@ -647,10 +674,6 @@ export function InteractiveSpeakingSession({
           throw new Error(typeof data.error === "string" ? data.error : "Grading failed.");
         }
         const report = data as InteractiveSpeakingAttemptReport;
-        if (vipGate.isVip && vipGate.userId) {
-          addVipAiFeedbackUses(vipGate.userId, 1);
-          emitVipApiCreditNotice(getVipWeeklyAiFeedbackRemaining(vipGate.userId));
-        }
         try {
           await finalizeLatestStudySession({
             exerciseType: "interactive_speaking",
@@ -689,21 +712,7 @@ export function InteractiveSpeakingSession({
     setTurn(nextTurnNum);
     setPhase("loading-q");
     try {
-      if (vipGate.isVip && vipGate.userId) {
-        const rem = getVipWeeklyAiFeedbackRemaining(vipGate.userId);
-        emitVipApiCreditNotice(rem);
-        if (rem <= 0) {
-          window.alert(thExhaustedQuotaMessage());
-          setSubmitError("Weekly AI limit reached. This resets every Monday (local time).");
-          setPhase("review");
-          return;
-        }
-      }
       const q = await fetchNextQuestion(nextTurnNum, nextCompleted);
-      if (vipGate.isVip && vipGate.userId) {
-        addVipAiFeedbackUses(vipGate.userId, 1);
-        emitVipApiCreditNotice(getVipWeeklyAiFeedbackRemaining(vipGate.userId));
-      }
       await beginTurn(nextTurnNum, q.questionEn, q.questionTh);
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Next question failed.");

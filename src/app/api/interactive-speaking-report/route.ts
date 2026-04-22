@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { chargeAiCreditForUser, getAiCreditStateForUser } from "@/lib/addon-credits";
+import {
+  chargeAiCreditForUser,
+  getAiCreditStateForUser,
+  getInteractiveSpeakingCreditLockForAttempt,
+} from "@/lib/addon-credits";
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateInteractiveSpeakingReportWithGemini } from "@/lib/gemini-interactive-speaking-report";
 import { INTERACTIVE_SPEAKING_TURN_COUNT } from "@/lib/interactive-speaking-constants";
@@ -104,9 +108,12 @@ export async function POST(req: Request) {
       });
     }
     if (userId) {
-      const charged = await chargeAiCreditForUser(userId);
-      if (!charged.ok) {
-        return NextResponse.json({ error: "Could not apply AI credit after grading" }, { status: 500 });
+      const lock = await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId);
+      if (!lock) {
+        const charged = await chargeAiCreditForUser(userId);
+        if (!charged.ok) {
+          return NextResponse.json({ error: "Could not apply AI credit after grading" }, { status: 500 });
+        }
       }
     }
     return NextResponse.json(report);

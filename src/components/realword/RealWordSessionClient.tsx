@@ -7,6 +7,15 @@ import { RealWordReport } from "@/components/realword/RealWordReport";
 import { saveRealWordProgress } from "@/lib/realword-storage";
 import type { RealWordDifficulty, RealWordRoundNum, RealWordSet } from "@/types/realword";
 
+function shuffleWordSet(wordSet: RealWordSet): RealWordSet {
+  const words = [...wordSet.words];
+  for (let i = words.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [words[i], words[j]] = [words[j]!, words[i]!];
+  }
+  return { ...wordSet, words };
+}
+
 export function RealWordSessionClient({
   round,
   wordSet,
@@ -22,6 +31,7 @@ export function RealWordSessionClient({
   hubHref: string;
 }) {
   const [phase, setPhase] = useState<"game" | "report">("game");
+  const [sessionWordSet, setSessionWordSet] = useState<RealWordSet>(() => shuffleWordSet(wordSet));
   const [selected, setSelected] = useState<Set<number>>(() => new Set());
 
   const toggle = (i: number) => {
@@ -38,7 +48,7 @@ export function RealWordSessionClient({
       round,
       difficulty,
       setNumber,
-      words: wordSet.words,
+      words: sessionWordSet.words,
       selectedIndices: selected,
     });
     setPhase("report");
@@ -46,6 +56,7 @@ export function RealWordSessionClient({
 
   const redeemNow = () => {
     setSelected(new Set());
+    setSessionWordSet(shuffleWordSet(wordSet));
     setPhase("game");
   };
 
@@ -59,7 +70,7 @@ export function RealWordSessionClient({
           ← Sets
         </Link>
         <RealWordReport
-          wordSet={wordSet}
+          wordSet={sessionWordSet}
           difficulty={difficulty}
           selected={selected}
           hubHref={hubHref}
@@ -78,9 +89,9 @@ export function RealWordSessionClient({
         >
           ← Sets
         </Link>
-        <p className="max-w-xs text-right text-xs font-bold text-neutral-600">{wordSet.setId}</p>
+        <p className="max-w-xs text-right text-xs font-bold text-neutral-600">{sessionWordSet.setId}</p>
       </div>
-      <RealWordGame wordSet={wordSet} selected={selected} onToggle={toggle} onSubmit={submit} />
+      <RealWordGame wordSet={sessionWordSet} selected={selected} onToggle={toggle} onSubmit={submit} />
     </div>
   );
 }
