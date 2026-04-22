@@ -1,5 +1,7 @@
 /** Shared text blocks for “full report → notebook” dumps. */
 
+import { resolveGrammarFixDisplay } from "@/lib/grammar-fix-display";
+
 export type NotebookCriterionSlice = {
   scorePercent: number;
   weight: number;
@@ -29,10 +31,17 @@ export function appendCriterion(
   );
   partsTh.push(`${r.summary.th}\n`);
   for (const b of r.breakdown) {
+    const display = resolveGrammarFixDisplay({
+      excerpt: b.excerpt,
+      suggestionEn: b.suggestionEn,
+      suggestionTh: b.suggestionTh,
+      noteEn: b.en,
+      noteTh: b.th,
+    });
     partsEn.push(`• ${b.en}\n`);
     partsTh.push(`• ${b.th}\n`);
-    if (b.excerpt) {
-      partsEn.push(`  “${b.excerpt}”\n`);
+    if (display.wrong) {
+      partsEn.push(`  “${display.wrong}”\n`);
     }
     if (b.suggestionEn?.trim()) partsEn.push(`  → ${b.suggestionEn}\n`);
     if (b.suggestionTh?.trim()) partsTh.push(`  → ${b.suggestionTh}\n`);

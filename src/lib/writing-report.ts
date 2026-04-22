@@ -7,6 +7,12 @@ import type {
   WritingCriterionReport,
   WritingTopic,
 } from "@/types/writing";
+import {
+  coherenceTransitionPenaltyPercent,
+  detectGrammarPunctuationIssues,
+  detectTransitionMisuseIssues,
+  grammarPunctuationPenaltyPercent,
+} from "@/lib/production-writing-penalties";
 
 export const WRITING_RUBRIC_WEIGHTS = {
   grammar: 0.3,
@@ -443,9 +449,11 @@ export function buildWritingAttemptReport(
   essay: string,
   prepMinutes: number,
 ): WritingAttemptReport {
-  const g = scoreGrammarPercent(essay);
+  const grammarPunctuationIssues = detectGrammarPunctuationIssues(essay);
+  const transitionIssues = detectTransitionMisuseIssues(essay);
+  const g = Math.max(0, scoreGrammarPercent(essay) - grammarPunctuationPenaltyPercent(essay));
   const v = scoreVocabularyPercent(essay);
-  const c = scoreCoherencePercent(essay);
+  const c = Math.max(0, scoreCoherencePercent(essay) - coherenceTransitionPenaltyPercent(essay));
   const tk = scoreTaskPercent(essay, topic);
   const score160 = to160(g, v, c, tk);
   const wc = countWords(essay);
@@ -467,6 +475,17 @@ export function buildWritingAttemptReport(
       en: `Grammar (target complex structures when appropriate). Score: ${g}%.`,
       th: `เรื่องการเขียนให้ถูกต้อง คะแนน: ${g}%`,
     }, [
+      ...grammarPunctuationIssues.map((issue, idx) => ({
+        excerpt: issue.excerpt || ex,
+        en:
+          idx === 0
+            ? `${issue.reasonEn} Grammar score includes a -10% punctuation penalty for each issue (max -25%).`
+            : issue.reasonEn,
+        th:
+          idx === 0
+            ? `${issue.reasonTh} คะแนนไวยากรณ์ถูกหักเรื่องวรรคตอน -10% ต่อครั้ง (สูงสุด -25%).`
+            : issue.reasonTh,
+      })),
       { excerpt: ex, en: "Check opening for one clear main clause.", th: "ประโยคแรกควรบอกใจความหลักชัดๆ" },
       { en: "Keep tense consistent with the prompt.", th: "เรื่องเวลา (อดีต/ปัจจุบัน) ให้ตรงกับโจทย์" },
       { en: "With FANBOYS, both sides should be full clauses.", th: "ถ้าใช้คำเชื่อมพวก for, and, but ทั้งสองข้างควรเป็นประโยคสมบูรณ์" },
@@ -483,6 +502,17 @@ export function buildWritingAttemptReport(
       en: `Coherence (transitions + referencing). Score: ${c}%.`,
       th: `อ่านแล้วต่อเรื่องกัน คะแนน: ${c}%`,
     }, [
+      ...transitionIssues.map((issue, idx) => ({
+        excerpt: issue.excerpt,
+        en:
+          idx === 0
+            ? `${issue.reasonEn} Coherence score includes a -35% transition-use penalty when this happens.`
+            : issue.reasonEn,
+        th:
+          idx === 0
+            ? `${issue.reasonTh} คะแนน coherence ถูกหัก -35% เมื่อใช้คำเชื่อมผิดลักษณะนี้`
+            : issue.reasonTh,
+      })),
       { en: "Use this/that to refer back clearly.", th: "ใช้ this/that ให้รู้ว่าหมายถึงอะไรก่อนหน้า" },
       { en: "One main idea per paragraph.", th: "ย่อหน้าละหนึ่งหัวข้อหลัก" },
       { en: "Signal contrast with However / On the other hand.", th: "เวลาเปรียบเทียบใช้ However หรือ On the other hand" },

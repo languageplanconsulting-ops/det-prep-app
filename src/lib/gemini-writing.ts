@@ -14,6 +14,12 @@ import type {
 } from "@/types/writing";
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import {
+  coherenceTransitionPenaltyPercent,
+  detectGrammarPunctuationIssues,
+  detectTransitionMisuseIssues,
+  grammarPunctuationPenaltyPercent,
+} from "@/lib/production-writing-penalties";
+import {
   WRITING_RUBRIC_WEIGHTS,
   buildLocalStudyPack,
 } from "@/lib/writing-report";
@@ -92,6 +98,11 @@ For EACH criterion summary, include (A) brief assessment and (B) a line starting
 Breakdown items: use issueEn, issueTh. excerpt = exact short quote from the relevant punctuated section. suggestionEn / suggestionTh = concrete fix (bilingual).
 
 Grammar bands: ~30% A1–A2 issues; ~50% B1–B2; ~70% clean; ~90% ≥1 complex structure; 100% ≥3 complex structures.
+
+Hard scoring rules (mandatory):
+- If the learner misuses a transition / linker, subtract 35 points from coherenceScorePercent.
+- For punctuation mistakes in grammar, subtract 10 points each, capped at 25 total.
+- When either penalty applies, mention it clearly in the relevant breakdown.
 
 Task relevancy: weight whether the learner addresses the main prompt and any follow-ups.
 
@@ -317,9 +328,11 @@ export async function generateWritingReportWithGemini(params: {
   });
   const raw = parseGeminiJsonObjectResponse(text);
 
-  const g = clampPercent(raw.grammarScorePercent);
+  const grammarPunctuationIssues = detectGrammarPunctuationIssues(essay);
+  const transitionIssues = detectTransitionMisuseIssues(essay);
+  const g = Math.max(0, clampPercent(raw.grammarScorePercent) - grammarPunctuationPenaltyPercent(essay));
   const v = clampPercent(raw.vocabularyScorePercent);
-  const c = clampPercent(raw.coherenceScorePercent);
+  const c = Math.max(0, clampPercent(raw.coherenceScorePercent) - coherenceTransitionPenaltyPercent(essay));
   let tScore = clampPercent(raw.taskScorePercent);
   const boost = Boolean(raw.taskPersonalExperienceBoost);
   if (boost) {
@@ -345,6 +358,24 @@ export async function generateWritingReportWithGemini(params: {
     })
     .filter((x) => x.originalWord.length > 0 && x.upgradedWord.length > 0);
 
+  const grammarBreakdown = mapBreak(raw.grammarBreakdown);
+  if (grammarPunctuationIssues.length > 0) {
+    grammarBreakdown.unshift({
+      en: `Punctuation errors reduce grammar here (-10% each, max -25%). ${grammarPunctuationIssues[0]?.reasonEn ?? ""}`.trim(),
+      th: `จุดวรรคตอนผิดทำให้คะแนน grammar ลดลง (-10% ต่อครั้ง สูงสุด -25%). ${grammarPunctuationIssues[0]?.reasonTh ?? ""}`.trim(),
+      excerpt: grammarPunctuationIssues[0]?.excerpt,
+    });
+  }
+
+  const coherenceBreakdown = mapBreak(raw.coherenceBreakdown);
+  if (transitionIssues.length > 0) {
+    coherenceBreakdown.unshift({
+      en: `Transition use is hurting coherence here (-35%). ${transitionIssues[0]?.reasonEn ?? ""}`.trim(),
+      th: `การใช้คำเชื่อมจุดนี้ทำให้คะแนน coherence ลดลง (-35%). ${transitionIssues[0]?.reasonTh ?? ""}`.trim(),
+      excerpt: transitionIssues[0]?.excerpt,
+    });
+  }
+
   const grammar = criterion(
     "grammar",
     WRITING_RUBRIC_WEIGHTS.grammar,
@@ -353,7 +384,7 @@ export async function generateWritingReportWithGemini(params: {
       en: String(raw.grammarSummaryEn ?? ""),
       th: String(raw.grammarSummaryTh ?? ""),
     },
-    mapBreak(raw.grammarBreakdown),
+    grammarBreakdown,
   );
 
   const vocabulary = criterion(
@@ -375,7 +406,7 @@ export async function generateWritingReportWithGemini(params: {
       en: String(raw.coherenceSummaryEn ?? ""),
       th: String(raw.coherenceSummaryTh ?? ""),
     },
-    mapBreak(raw.coherenceBreakdown),
+    coherenceBreakdown,
   );
 
   const taskRelevancy = criterion(
