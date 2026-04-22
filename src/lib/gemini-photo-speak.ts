@@ -6,6 +6,12 @@ import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 import type { SpeakingTranscriptHighlight, SpeakingVocabularyUpgrade } from "@/types/speaking";
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
+import {
+  coherenceTransitionPenaltyPercent,
+  detectGrammarPunctuationIssues,
+  detectTransitionMisuseIssues,
+  grammarPunctuationPenaltyPercent,
+} from "@/lib/production-writing-penalties";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
 
 function pointsOn160(percent: number, weight: number): number {
@@ -61,7 +67,17 @@ function criterion(
   };
 }
 
-function buildSystemInstruction(): string {
+function buildSystemInstruction(originHub?: "speak-about-photo" | "write-about-photo"): string {
+  const writingPenaltyRules =
+    originHub === "write-about-photo"
+      ? `
+
+Hard scoring rules for write-about-photo (mandatory):
+- If the learner misuses a transition / linker, subtract 35 points from coherenceScorePercent.
+- For punctuation mistakes in grammar, subtract 10 points each, capped at 25 total.
+- When either penalty applies, mention it clearly in the relevant breakdown.`
+      : "";
+
   return `You are an expert English examiner for Thai learners (DET-style "speak about a photo").
 The learner saw an image (URL provided for context only — you cannot see pixels; rely on prompt + keyword tags + transcript). The raw transcript is from speech recognition and may lack punctuation.
 
@@ -93,7 +109,7 @@ Improvement points: each MUST quote an exact phrase from punctuatedTranscript an
 
 Grammar bands: ~30% A1–A2 issues; ~50% B1–B2; ~70% clean; ~90% ≥1 complex structure; 100% ≥3 complex structures.
 
-Return ONLY valid JSON (no markdown). Use issueEn/issueTh for breakdown issues.${GEMINI_PRODUCTION_THAI_STYLE}`;
+Return ONLY valid JSON (no markdown). Use issueEn/issueTh for breakdown issues.${writingPenaltyRules}${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
 
 function buildUserPayload(
@@ -241,7 +257,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       anthropicApiKey: params.anthropicApiKey,
       openAiApiKey: params.openAiApiKey,
     },
-    systemInstruction: buildSystemInstruction(),
+    systemInstruction: buildSystemInstruction(originHub),
     userPayload: buildUserPayload(
       titleEn,
       titleTh,
@@ -256,9 +272,21 @@ export async function generatePhotoSpeakReportWithGemini(params: {
   });
   const raw = parseGeminiJsonObjectResponse(text);
 
-  const g = clampPercent(raw.grammarScorePercent);
+  const grammarPunctuationIssues =
+    originHub === "write-about-photo" ? detectGrammarPunctuationIssues(transcript) : [];
+  const transitionIssues =
+    originHub === "write-about-photo" ? detectTransitionMisuseIssues(transcript) : [];
+  const g = Math.max(
+    0,
+    clampPercent(raw.grammarScorePercent) -
+      (originHub === "write-about-photo" ? grammarPunctuationPenaltyPercent(transcript) : 0),
+  );
   const v = clampPercent(raw.vocabularyScorePercent);
-  const c = clampPercent(raw.coherenceScorePercent);
+  const c = Math.max(
+    0,
+    clampPercent(raw.coherenceScorePercent) -
+      (originHub === "write-about-photo" ? coherenceTransitionPenaltyPercent(transcript) : 0),
+  );
   let t = clampPercent(raw.taskScorePercent);
   const boost = Boolean(raw.taskPersonalExperienceBoost);
   if (boost) {
@@ -285,6 +313,24 @@ export async function generatePhotoSpeakReportWithGemini(params: {
         };
       });
 
+  const grammarBreakdown = mapBreak(raw.grammarBreakdown);
+  if (originHub === "write-about-photo" && grammarPunctuationIssues.length > 0) {
+    grammarBreakdown.unshift({
+      en: `Punctuation errors reduce grammar here (-10% each, max -25%). ${grammarPunctuationIssues[0]?.reasonEn ?? ""}`.trim(),
+      th: `จุดวรรคตอนผิดทำให้คะแนน grammar ลดลง (-10% ต่อครั้ง สูงสุด -25%). ${grammarPunctuationIssues[0]?.reasonTh ?? ""}`.trim(),
+      excerpt: grammarPunctuationIssues[0]?.excerpt,
+    });
+  }
+
+  const coherenceBreakdown = mapBreak(raw.coherenceBreakdown);
+  if (originHub === "write-about-photo" && transitionIssues.length > 0) {
+    coherenceBreakdown.unshift({
+      en: `Transition use is hurting coherence here (-35%). ${transitionIssues[0]?.reasonEn ?? ""}`.trim(),
+      th: `การใช้คำเชื่อมจุดนี้ทำให้คะแนน coherence ลดลง (-35%). ${transitionIssues[0]?.reasonTh ?? ""}`.trim(),
+      excerpt: transitionIssues[0]?.excerpt,
+    });
+  }
+
   const grammar = criterion(
     "grammar",
     SPEAKING_RUBRIC_WEIGHTS.grammar,
@@ -293,7 +339,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       en: String(raw.grammarSummaryEn ?? ""),
       th: String(raw.grammarSummaryTh ?? ""),
     },
-    mapBreak(raw.grammarBreakdown),
+    grammarBreakdown,
   );
 
   const vocabulary = criterion(
@@ -315,7 +361,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       en: String(raw.coherenceSummaryEn ?? ""),
       th: String(raw.coherenceSummaryTh ?? ""),
     },
-    mapBreak(raw.coherenceBreakdown),
+    coherenceBreakdown,
   );
 
   const taskRelevancy = criterion(
