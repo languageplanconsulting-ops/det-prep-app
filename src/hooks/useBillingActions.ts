@@ -45,8 +45,13 @@ export function useBillingActions() {
 
   const startUpgradeCheckout = useCallback(
     async (tier: Tier) => {
-      if (tier === "free" || !user) {
+      if (tier === "free") {
         window.location.href = "/pricing";
+        return;
+      }
+
+      if (!user) {
+        window.location.href = `/signup?next=${encodeURIComponent(`/pricing?plan=${tier}`)}`;
         return;
       }
 
@@ -72,8 +77,13 @@ export function useBillingActions() {
 
   const startUpgradePromptPay = useCallback(
     async (tier: Tier) => {
-      if (tier === "free" || !user) {
+      if (tier === "free") {
         window.location.href = "/pricing";
+        return;
+      }
+
+      if (!user) {
+        window.location.href = `/signup?next=${encodeURIComponent(`/pricing?plan=${tier}`)}`;
         return;
       }
 

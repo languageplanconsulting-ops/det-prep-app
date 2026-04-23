@@ -19,7 +19,7 @@ function appOrigin(): string {
   return window.location.origin;
 }
 
-export function SignupForm() {
+export function SignupForm({ redirectTo = "/practice" }: { redirectTo?: string }) {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -84,13 +84,14 @@ export function SignupForm() {
         credentials: "same-origin",
       });
       setBusy(false);
-      router.push("/practice");
+      const next = redirectTo.startsWith("/") ? redirectTo : "/practice";
+      router.push(next);
       router.refresh();
       return;
     }
     setBusy(false);
     setInfo(
-      "Check your email to confirm your account, then you can sign in.",
+      "Your account was created. You can sign in right away with your email and password.",
     );
   };
 
@@ -102,6 +103,9 @@ export function SignupForm() {
       >
         Create account / สร้างบัญชี
       </h1>
+      <p className="mb-5 text-center text-sm text-neutral-600">
+        Sign up with your email and password, then start practicing right away.
+      </p>
       <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
         {err ? <p className={authErrorBox}>{err}</p> : null}
         {info ? (

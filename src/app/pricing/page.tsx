@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { useBillingActions } from "@/hooks/useBillingActions";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
@@ -65,6 +65,7 @@ function PricingPageContent() {
   const { startUpgradeCheckout, startUpgradePromptPay, startAddOnCheckout, user, loading } = useBillingActions();
   const { effectiveTier } = useEffectiveTier();
   const searchParams = useSearchParams();
+  const [checkoutError, setCheckoutError] = useState("");
 
   const focus = searchParams.get("focus");
   const focusedSku = searchParams.get("sku");
@@ -86,6 +87,33 @@ function PricingPageContent() {
     if (effectiveTier === "premium") return "vip";
     return null;
   }, [effectiveTier]);
+
+  const beginPlanCheckout = async (tier: PricingTier) => {
+    try {
+      setCheckoutError("");
+      await startUpgradeCheckout(tier);
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "Could not open card checkout.");
+    }
+  };
+
+  const beginPlanPromptPay = async (tier: PricingTier) => {
+    try {
+      setCheckoutError("");
+      await startUpgradePromptPay(tier);
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "Could not open QR payment.");
+    }
+  };
+
+  const beginAddOnCheckout = async (sku: AddOnSku) => {
+    try {
+      setCheckoutError("");
+      await startAddOnCheckout(sku);
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : "Could not open add-on checkout.");
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#f3f4f6] px-4 py-10" style={{ backgroundImage: "radial-gradient(#111 1px, transparent 1px)", backgroundSize: "20px 20px" }}>
@@ -175,6 +203,48 @@ function PricingPageContent() {
           </section>
         ) : null}
 
+        {checkoutError ? (
+          <section className="border-4 border-black bg-[#fee2e2] p-4 shadow-[8px_8px_0_0_#111]">
+            <p className="text-lg font-black text-[#b91c1c]">
+              เปิดหน้าชำระเงินไม่สำเร็จ / Payment page could not open
+            </p>
+            <p className="mt-1 text-sm font-semibold text-neutral-800">{checkoutError}</p>
+          </section>
+        ) : null}
+
+        {!loading && !user ? (
+          <section className="border-4 border-black bg-[linear-gradient(135deg,#fff8dc_0%,#ffffff_42%,#eaf4ff_100%)] p-5 shadow-[8px_8px_0_0_#111]">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="font-mono text-[10px] font-black uppercase tracking-[0.24em] text-[#004aad]">
+                  New buyer setup
+                </p>
+                <h2 className="mt-2 text-2xl font-black text-neutral-900">
+                  Create your account first, then choose card or QR payment
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-neutral-700">
+                  For first-time buyers, we create your learner account before checkout so your plan,
+                  mock-test credits, and AI feedback can be attached correctly right after payment.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 sm:min-w-[18rem]">
+                <Link
+                  href="/signup?next=/pricing"
+                  className="border-[3px] border-black bg-[#004aad] px-5 py-3 text-center text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111]"
+                >
+                  Create account / Sign up
+                </Link>
+                <Link
+                  href="/login?next=/pricing"
+                  className="border-[3px] border-black bg-white px-5 py-3 text-center text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111]"
+                >
+                  Already have an account? Sign in
+                </Link>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         <section className="grid gap-5 lg:grid-cols-4">
           {PLAN_CARDS.map((plan) => {
             const active = effectiveTier === plan.tier;
@@ -233,22 +303,24 @@ function PricingPageContent() {
                     <div className="space-y-2">
                       <button
                         type="button"
-                        disabled={loading || !user}
-                        onClick={() => void startUpgradeCheckout(plan.tier)}
+                        disabled={loading}
+                        onClick={() => void beginPlanCheckout(plan.tier)}
                         className="block w-full border-[3px] border-black bg-[#004aad] px-4 py-3 text-center text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:opacity-50"
                       >
-                        สมัครด้วยบัตร / Card subscription
+                        {user ? "สมัครด้วยบัตร / Card subscription" : "สร้างบัญชีก่อน / Create account first"}
                       </button>
                       <button
                         type="button"
-                        disabled={loading || !user}
-                        onClick={() => void startUpgradePromptPay(plan.tier)}
+                        disabled={loading}
+                        onClick={() => void beginPlanPromptPay(plan.tier)}
                         className="block w-full border-[3px] border-black bg-[#ffcc00] px-4 py-3 text-center text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111] disabled:opacity-50"
                       >
-                        จ่ายด้วย QR PromptPay
+                        {user ? "จ่ายด้วย QR PromptPay" : "ไปสมัครเพื่อจ่าย QR / Sign up for QR checkout"}
                       </button>
                       <p className="text-[11px] font-semibold text-neutral-500">
-                        PromptPay opens Stripe&apos;s hosted invoice page with a QR code. Renewals are invoice-based, not card auto-charge.
+                        {user
+                          ? "PromptPay opens Stripe's hosted invoice page with a QR code. Renewals are invoice-based, not card auto-charge."
+                          : "New buyers will be guided through account creation first, then returned here to finish payment."}
                       </p>
                     </div>
                   ) : (
@@ -345,7 +417,7 @@ function PricingPageContent() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => void startAddOnCheckout(sku)}
+                    onClick={() => void beginAddOnCheckout(sku)}
                     className="mt-5 border-[3px] border-black bg-[#ffcc00] px-4 py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#111]"
                   >
                     ซื้อสิทธิ์นี้ / Pay by card or QR
