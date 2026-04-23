@@ -30,9 +30,22 @@ function normalizeText(v: unknown): string {
   return String(v ?? "").trim().toLowerCase();
 }
 
+function normalizeDictationText(v: unknown): string {
+  return String(v ?? "")
+    .normalize("NFKC")
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+    .toLowerCase()
+    .replace(/'/g, "")
+    .replace(/[^a-z0-9,\s]+/g, " ")
+    .replace(/\s*,\s*/g, ", ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function tokenizeDictation(v: unknown): string[] {
-  const s = String(v ?? "").toLowerCase().replace(/[.]/g, " ");
-  return s.match(/[a-z0-9]+(?:'[a-z0-9]+)*|[,!?;:()"[\]{}\-]/g) ?? [];
+  const s = normalizeDictationText(v);
+  return s.match(/[a-z0-9]+|,/g) ?? [];
 }
 
 function fitbScore(answer: unknown, correct: unknown, content?: Record<string, unknown> | null): number {
@@ -87,11 +100,17 @@ function fitbScore(answer: unknown, correct: unknown, content?: Record<string, u
 
 function heuristicScore(taskType: string, answer: unknown, correct: unknown, content?: Record<string, unknown> | null): number {
   if (taskType === "dictation") {
-    const actualTokens = tokenizeDictation((answer as { answer?: unknown })?.answer ?? answer);
+    const actualRaw = (answer as { answer?: unknown })?.answer ?? answer;
     const expectedRaw =
       (correct as { answer?: unknown })?.answer ??
       (content as { reference_sentence?: unknown } | null)?.reference_sentence ??
       correct;
+    const normalizedActual = normalizeDictationText(actualRaw);
+    const normalizedExpected = normalizeDictationText(expectedRaw);
+    if (normalizedActual && normalizedExpected && normalizedActual === normalizedExpected) {
+      return 160;
+    }
+    const actualTokens = tokenizeDictation(actualRaw);
     const expectedTokens = tokenizeDictation(expectedRaw);
     if (expectedTokens.length === 0) return 0;
     const matched = expectedTokens.reduce((acc, token, idx) => acc + (actualTokens[idx] === token ? 1 : 0), 0);
@@ -100,7 +119,24 @@ function heuristicScore(taskType: string, answer: unknown, correct: unknown, con
   if (taskType === "fill_in_blanks") {
     return fitbScore(answer, correct, content);
   }
-  if (taskType === "vocabulary_reading" || taskType === "interactive_listening") {
+  if (taskType === "interactive_listening") {
+    const selectedAnswers = Array.isArray((answer as { selected_answers?: unknown[] })?.selected_answers)
+      ? ((answer as { selected_answers?: unknown[] }).selected_answers ?? []).map((value) => String(value ?? ""))
+      : [];
+    const correctAnswers = Array.isArray((answer as { correct_answers?: unknown[] })?.correct_answers)
+      ? ((answer as { correct_answers?: unknown[] }).correct_answers ?? []).map((value) => String(value ?? ""))
+      : [];
+    if (selectedAnswers.length > 0 && correctAnswers.length > 0) {
+      const totalQuestions = Math.min(selectedAnswers.length, correctAnswers.length);
+      const correctCount = selectedAnswers.reduce((count, selected, idx) => {
+        return count + (selected === (correctAnswers[idx] ?? "") ? 1 : 0);
+      }, 0);
+      return normalize160((correctCount / totalQuestions) * 160);
+    }
+    const score = Number((answer as { averageScore0To100?: unknown })?.averageScore0To100);
+    return Number.isFinite(score) ? normalize160((score / 100) * 160) : 0;
+  }
+  if (taskType === "vocabulary_reading") {
     const score = Number((answer as { averageScore0To100?: unknown })?.averageScore0To100);
     return Number.isFinite(score) ? normalize160((score / 100) * 160) : 0;
   }

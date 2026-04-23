@@ -19,6 +19,7 @@ export function MiniDiagnosisStartClient() {
   const [startingId, setStartingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [needsAuth, setNeedsAuth] = useState(false);
+  const [confirmSet, setConfirmSet] = useState<SetRow | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -38,6 +39,7 @@ export function MiniDiagnosisStartClient() {
   }, []);
 
   const startSet = async (setId: string) => {
+    setConfirmSet(null);
     setStartingId(setId);
     setError(null);
     const res = await fetch("/api/mini-diagnosis/session", {
@@ -130,7 +132,7 @@ export function MiniDiagnosisStartClient() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => void startSet(set.id)}
+                      onClick={() => setConfirmSet(set)}
                       disabled={startingId === set.id}
                       className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-3 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#111111] disabled:opacity-60"
                     >
@@ -162,6 +164,51 @@ export function MiniDiagnosisStartClient() {
           </div>
         </section>
       </div>
+
+      {confirmSet ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
+          <div className="w-full max-w-xl border-4 border-black bg-white p-6 shadow-[10px_10px_0_0_#111111]">
+            <p className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-[#004AAD]">
+              Before you start
+            </p>
+            <h2 className="mt-3 text-3xl font-black italic uppercase leading-none text-[#111111]">
+              ใช้เวลาประมาณ 15–17 นาที
+              <br />
+              <span className="not-italic text-[#004AAD]">This mini test takes about 15–17 minutes</span>
+            </h2>
+            <p className="mt-4 text-sm font-bold leading-relaxed text-neutral-700">
+              ระบบจะเริ่มจับเวลาและพาคุณทำต่อเนื่องหลายส่วนของข้อสอบ
+              ถ้าพร้อมแล้วค่อยเริ่ม เพื่อให้ได้ผลประเมินที่แม่นขึ้น
+            </p>
+            <p className="mt-3 text-sm font-bold leading-relaxed text-neutral-700">
+              The test runs through multiple timed sections. Please start only when you are ready so your result is accurate.
+            </p>
+            <div className="mt-5 rounded-[4px] border-4 border-black bg-[#fff9e6] p-4">
+              <p className="text-sm font-black text-[#004AAD]">{confirmSet.name}</p>
+              <p className="mt-1 text-sm font-bold text-neutral-700">
+                Are you sure you want to take this test? / คุณแน่ใจไหมว่าต้องการเริ่มทำแบบทดสอบนี้
+              </p>
+            </div>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => void startSet(confirmSet.id)}
+                disabled={startingId === confirmSet.id}
+                className="flex-1 rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-3 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#111111] disabled:opacity-60"
+              >
+                {startingId === confirmSet.id ? "Starting..." : "Yes, start mini test / ใช่ เริ่มเลย"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmSet(null)}
+                className="flex-1 rounded-[4px] border-4 border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#111111]"
+              >
+                Not now / ไว้ก่อน
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
