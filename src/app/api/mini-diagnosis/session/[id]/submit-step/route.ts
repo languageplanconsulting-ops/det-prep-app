@@ -258,7 +258,34 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     ? await sessionQuery.single()
     : await sessionQuery.eq("user_id", userId!).single();
   if (sessionError || !session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
-  if (session.status !== "in_progress") return NextResponse.json({ error: "Session already closed" }, { status: 400 });
+  const prev = Array.isArray(session.responses) ? session.responses : [];
+  const alreadySubmitted = prev.find((row: any) => row.step_index === body.stepIndex);
+  const alreadyComplete = session.status === "completed" || prev.length >= MINI_DIAGNOSIS_STEP_COUNT;
+
+  if (alreadySubmitted && body.stepIndex < session.current_step) {
+    return NextResponse.json({
+      ok: true,
+      complete: alreadyComplete,
+      stepScore: Number(alreadySubmitted.score ?? 0),
+      stepIndex: body.stepIndex,
+      taskType: String(alreadySubmitted.task_type ?? ""),
+      alreadyProcessed: true,
+    });
+  }
+
+  if (session.status !== "in_progress") {
+    if (alreadySubmitted) {
+      return NextResponse.json({
+        ok: true,
+        complete: true,
+        stepScore: Number(alreadySubmitted.score ?? 0),
+        stepIndex: body.stepIndex,
+        taskType: String(alreadySubmitted.task_type ?? ""),
+        alreadyProcessed: true,
+      });
+    }
+    return NextResponse.json({ error: "Session already closed" }, { status: 400 });
+  }
   if (session.current_step !== body.stepIndex) {
     return NextResponse.json({ error: `Invalid step order. Expected step ${session.current_step}` }, { status: 409 });
   }
@@ -275,9 +302,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const step = setItems.find((item: any) => item.step_index === body.stepIndex);
   if (!step) return NextResponse.json({ error: "Step not found in set" }, { status: 400 });
 
-  const prev = Array.isArray(session.responses) ? session.responses : [];
   if (prev.some((row: any) => row.step_index === body.stepIndex)) {
-    return NextResponse.json({ error: "Step already submitted" }, { status: 400 });
+    const submittedRow = prev.find((row: any) => row.step_index === body.stepIndex);
+    return NextResponse.json({
+      ok: true,
+      complete: alreadyComplete,
+      stepScore: Number(submittedRow?.score ?? 0),
+      stepIndex: body.stepIndex,
+      taskType: String(submittedRow?.task_type ?? step.task_type),
+      alreadyProcessed: true,
+    });
   }
 
   const scored = await scoreMiniDiagnosisAnswer({
