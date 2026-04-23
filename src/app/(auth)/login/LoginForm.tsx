@@ -101,6 +101,9 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
       >
         Sign in / เข้าสู่ระบบ
       </h1>
+      <p className="mb-5 text-center text-sm text-neutral-600">
+        Use the same email and password you used at signup. No email confirmation step is needed.
+      </p>
       <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
         {err ? <p className={authErrorBox}>{err}</p> : null}
         <label className="block">

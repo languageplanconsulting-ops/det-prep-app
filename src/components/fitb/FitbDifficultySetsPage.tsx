@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FitbSetGrid } from "@/components/fitb/FitbSetGrid";
+import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import { FITB_DIFFICULTY_LABEL } from "@/lib/fitb-constants";
 import type { FitbDifficulty, FitbRoundNum } from "@/types/fitb";
 
@@ -48,6 +49,8 @@ export function FitbDifficultySetsPage({
         <h1 className="mt-2 text-3xl font-black tracking-tight">Exam bank</h1>
         <p className="mt-2 text-sm text-neutral-600">Pick a set to practice.</p>
       </header>
+
+      <NonApiExamQuotaReminder exam="fitb" />
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">

@@ -344,7 +344,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       level_label: levelLabel,
       strengths,
       weaknesses,
-      report_payload: { responses: next },
+      report_payload: {
+        responses: next,
+        scoreBreakdown: scores.breakdown,
+      },
     });
     if (resultErr) {
       return NextResponse.json({ error: `Result creation failed: ${resultErr.message}` }, { status: 500 });

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DictationSetGrid } from "@/components/dictation/DictationSetGrid";
+import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import { DICTATION_DIFFICULTY_LABEL } from "@/lib/dictation-constants";
 import type { DictationDifficulty, DictationRoundNum } from "@/types/dictation";
 
@@ -48,6 +49,8 @@ export function DictationDifficultySetsPage({
         <h1 className="mt-2 text-3xl font-black tracking-tight">Dictation sets</h1>
         <p className="mt-2 text-sm text-neutral-600">Pick a set to practice.</p>
       </header>
+
+      <NonApiExamQuotaReminder exam="dictation" />
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">

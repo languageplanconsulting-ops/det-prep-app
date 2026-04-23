@@ -27,9 +27,57 @@ type ResultRow = {
   level_label?: string | null;
   strengths?: Array<{ key: string; score: number }>;
   weaknesses?: Array<{ key: string; score: number }>;
-  report_payload?: { responses?: ResponseRow[] };
+  report_payload?: {
+    responses?: ResponseRow[];
+    scoreBreakdown?: {
+      total?: Record<string, number>;
+      listening?: Record<string, number>;
+      speaking?: Record<string, number>;
+      reading?: Record<string, number>;
+      writing?: Record<string, number>;
+      supporting?: Record<string, number>;
+    };
+  };
   created_at?: string;
 };
+
+function breakdownLabel(key: string) {
+  const labels: Record<string, string> = {
+    dictation: "Dictation / ฟังแล้วพิมพ์",
+    interactive_listening: "Listening Mini Test / มินิเทสต์การฟัง",
+    read_then_speak: "Read Then Speak / อ่านแล้วพูด",
+    fill_in_blanks: "Fill in the Blank / เติมคำ",
+    vocabulary_reading: "Vocabulary Reading / คำศัพท์ + การอ่าน",
+    write_about_photo: "Write About Photo / เขียนจากภาพ",
+    reading: "Reading",
+    listening: "Listening",
+    speaking: "Speaking",
+    writing: "Writing",
+  };
+  return labels[key] ?? key.replaceAll("_", " ");
+}
+
+function breakdownPctLabel(skill: string, part: string) {
+  const map: Record<string, Record<string, string>> = {
+    listening: {
+      dictation: "50%",
+      interactive_listening: "50%",
+    },
+    speaking: {
+      read_then_speak: "100%",
+    },
+    reading: {
+      fill_in_blanks: "50%",
+      vocabulary_reading: "50%",
+    },
+    writing: {
+      write_about_photo: "55%",
+      dictation: "30%",
+      fill_in_blanks: "15%",
+    },
+  };
+  return map[skill]?.[part] ?? "";
+}
 
 function taskLabel(taskType: string) {
   const labels: Record<string, string> = {
@@ -206,6 +254,7 @@ export function MiniDiagnosisResultsClient({ sessionId }: { sessionId: string })
   }, [sessionId]);
 
   const responses = useMemo(() => result?.report_payload?.responses ?? [], [result]);
+  const scoreBreakdown = useMemo(() => result?.report_payload?.scoreBreakdown ?? {}, [result]);
   const merged = useMemo(
     () =>
       stepItems.map((item) => ({
@@ -276,6 +325,76 @@ export function MiniDiagnosisResultsClient({ sessionId }: { sessionId: string })
                 <div key={row.key} className="border-4 border-black bg-[#fef2f2] p-4">
                   <p className="font-black capitalize">{row.key}</p>
                   <p className="text-sm font-bold text-neutral-600">Score {Math.round(Number(row.score ?? 0))}/160</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-4 border-black bg-white p-5 shadow-[8px_8px_0_0_#111111]">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-2xl font-black uppercase text-[#004AAD]">Score breakdown / ที่มาของคะแนน</p>
+              <p className="mt-2 text-sm font-bold text-neutral-600">
+                ทุกสกิลคิดเต็ม 160 ตามสูตร mini test ชุดนี้
+              </p>
+            </div>
+            <div className="border-4 border-black bg-[#fff9e6] px-4 py-3 text-sm font-black text-neutral-800">
+              Total = (Reading + Listening + Speaking + Writing) / 4
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {[
+              ["listening", result.actual_listening],
+              ["speaking", result.actual_speaking],
+              ["reading", result.actual_reading],
+              ["writing", result.actual_writing],
+            ].map(([skill, value]) => {
+              const parts = Object.entries((scoreBreakdown?.[skill as keyof typeof scoreBreakdown] as Record<string, number> | undefined) ?? {});
+              return (
+                <div key={skill} className="border-4 border-black bg-neutral-50 p-4">
+                  <div className="flex items-end justify-between gap-3">
+                    <div>
+                      <p className="font-mono text-[10px] font-black uppercase tracking-wide text-neutral-500">
+                        {String(skill)}
+                      </p>
+                      <p className="text-2xl font-black text-[#004AAD]">{breakdownLabel(String(skill))}</p>
+                    </div>
+                    <div className="border-4 border-black bg-white px-3 py-2 text-right">
+                      <p className="font-mono text-[9px] font-black uppercase text-neutral-500">Skill score</p>
+                      <p className="text-2xl font-black">{Math.round(Number(value ?? 0))}/160</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {parts.map(([part, partScore]) => (
+                      <div key={part} className="flex items-center justify-between gap-3 border-2 border-black bg-white px-3 py-3">
+                        <div>
+                          <p className="text-sm font-black text-neutral-900">{breakdownLabel(part)}</p>
+                          <p className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+                            Weight {breakdownPctLabel(String(skill), part) || "Included"}
+                          </p>
+                        </div>
+                        <p className="text-lg font-black text-[#004AAD]">{Math.round(Number(partScore ?? 0))}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 border-4 border-black bg-[#ecfeff] p-4">
+            <p className="font-black uppercase text-[#004AAD]">Raw section scores / คะแนนดิบแต่ละส่วน</p>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {Object.entries((scoreBreakdown.supporting as Record<string, number> | undefined) ?? {}).map(([part, partScore]) => (
+                <div key={part} className="border-2 border-black bg-white px-3 py-3">
+                  <p className="text-sm font-black text-neutral-900">{breakdownLabel(part)}</p>
+                  <p className="mt-1 text-xl font-black text-[#004AAD]">{Math.round(Number(partScore ?? 0))}/160</p>
+                  {part === "real_english_word" ? (
+                    <p className="mt-1 text-xs font-bold text-neutral-500">Shown for practice review, not used in skill formula.</p>
+                  ) : null}
                 </div>
               ))}
             </div>
