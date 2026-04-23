@@ -37,6 +37,6 @@ export function planDisplayFromTier(tier: Tier): PlanDisplay {
     label: TIER_DISPLAY[tier].nameEn,
     aiFeedbackPerMonth: ai,
     dailySets: Number.isFinite(maxSets) ? maxSets : "unlimited",
-    expires: tier === "free" ? "Never" : "Active subscription",
+    expires: tier === "free" ? "Never" : "30-day access",
   };
 }

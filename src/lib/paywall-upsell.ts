@@ -135,11 +135,11 @@ export function buildPaywallSpec(
     case "renewal_7d":
       return {
         titleTh: "สมาชิกของคุณจะหมดอายุในอีก 7 วัน",
-        titleEn: "Your subscription expires in 7 days",
+        titleEn: "Your plan expires in 7 days",
         bodyTh:
-          "ต่ออายุหรืออัปเกรดตอนนี้เพื่อไม่ให้โควต้าฝึกและรายงาน AI สะดุดในช่วงใกล้สอบ",
+          "เลือกแพลนรอบถัดไปตอนนี้เพื่อไม่ให้โควต้าฝึกและรายงาน AI สะดุดในช่วงใกล้สอบ",
         bodyEn:
-          "Renew or upgrade now to avoid interruptions to your practice and AI reports.",
+          "Choose your next plan now to avoid interruptions to your practice and AI reports.",
         actions: renewalActions(tier),
       };
     case "renewal_3d":
@@ -147,19 +147,19 @@ export function buildPaywallSpec(
         titleTh: "ใกล้หมดอายุแล้ว อย่าให้การฝึกสะดุด",
         titleEn: "Your plan is about to expire",
         bodyTh:
-          "เหลือเวลาอีกไม่มากก่อนสิทธิ์จะหมด หากกำลังเตรียมสอบอยู่ แนะนำให้ต่ออายุหรืออัปเกรดทันที",
+          "เหลือเวลาอีกไม่มากก่อนสิทธิ์จะหมด หากกำลังเตรียมสอบอยู่ แนะนำให้เลือกแพลนรอบถัดไปทันที",
         bodyEn:
-          "Your access is about to expire. Renew or upgrade now if you are actively preparing.",
+          "Your access is about to expire. Choose your next plan now if you are actively preparing.",
         actions: renewalActions(tier),
       };
     case "expired":
       return {
         titleTh: "สมาชิกของคุณหมดอายุแล้ว",
-        titleEn: "Your subscription has expired",
+        titleEn: "Your plan has expired",
         bodyTh:
-          "สิทธิ์แบบชำระเงินถูกปิดชั่วคราวแล้ว กลับมาใช้งานต่อหรืออัปเกรดเพื่อปลดล็อกโควต้าอีกครั้ง",
+          "สิทธิ์แบบชำระเงินถูกปิดชั่วคราวแล้ว เลือกแพลนที่ต้องการเพื่อกลับมาใช้งานต่อและปลดล็อกโควต้าอีกครั้ง",
         bodyEn:
-          "Paid features are currently locked. Resume or upgrade to unlock your credits again.",
+          "Paid features are currently locked. Choose a plan to continue and unlock your credits again.",
         actions: renewalActions(tier),
       };
     case "heavy_free":
@@ -406,8 +406,8 @@ function renewalActions(tier: Tier): UpsellAction[] {
   return [
     {
       kind: "upgrade",
-      labelTh: "ต่ออายุแพลนปัจจุบัน",
-      labelEn: "Renew current plan",
+      labelTh: "เลือกแพลนเดิมต่ออีก 30 วัน",
+      labelEn: "Choose this plan again for 30 days",
       targetTier: tier,
       recommended: true,
     },

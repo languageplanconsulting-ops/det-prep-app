@@ -71,6 +71,7 @@ function PricingPageContent() {
   const focusedSku = searchParams.get("sku");
   const checkoutStatus = searchParams.get("checkout");
   const focusedPlan = searchParams.get("plan");
+  const expired = searchParams.get("expired");
 
   useEffect(() => {
     if (focus === "addons") {
@@ -166,7 +167,7 @@ function PricingPageContent() {
                   onClick={() => void startUpgradeCheckout(recommendation)}
                   className="border-[3px] border-black bg-[#004aad] px-6 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:opacity-50"
                 >
-                  จ่ายด้วยบัตร / Card subscription
+                  จ่ายด้วยบัตร / สิทธิ์ 30 วัน
                 </button>
                 <button
                   type="button"
@@ -187,7 +188,9 @@ function PricingPageContent() {
               ชำระเงินสำเร็จแล้ว / Payment successful
             </p>
             <p className="mt-1 text-sm font-semibold text-neutral-800">
-              สิทธิ์ add-on ของคุณถูกเติมแล้ว หากยังไม่เห็นยอดใหม่ ให้รีเฟรชหน้าอีกครั้ง
+              {focus === "addons"
+                ? "สิทธิ์ add-on ของคุณถูกเติมแล้ว หากยังไม่เห็นยอดใหม่ ให้รีเฟรชหน้าอีกครั้ง"
+                : "เราเปิดสิทธิ์แพลน 30 วันให้แล้ว หากยังไม่เห็นยอดใหม่ ให้รีเฟรชหน้าอีกครั้ง"}
             </p>
           </section>
         ) : null}
@@ -199,6 +202,17 @@ function PricingPageContent() {
             </p>
             <p className="mt-1 text-sm font-semibold text-neutral-800">
               คุณสามารถกลับมาเลือกแพลนหรือ add-on ได้ทุกเมื่อ
+            </p>
+          </section>
+        ) : null}
+
+        {expired ? (
+          <section className="border-4 border-black bg-[#fff7ed] p-4 shadow-[8px_8px_0_0_#111]">
+            <p className="text-lg font-black text-[#9a3412]">
+              แพ็กเกจของคุณหมดอายุแล้ว / Your plan has expired
+            </p>
+            <p className="mt-1 text-sm font-semibold text-neutral-800">
+              เลือกแพลนที่ต้องการเพื่อใช้งานต่อ ระบบจะเปิดสิทธิ์แบบ 30 วันต่อครั้ง ไม่มีการตัดอัตโนมัติ
             </p>
           </section>
         ) : null}
@@ -307,7 +321,7 @@ function PricingPageContent() {
                         onClick={() => void beginPlanCheckout(plan.tier)}
                         className="block w-full border-[3px] border-black bg-[#004aad] px-4 py-3 text-center text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:opacity-50"
                       >
-                        {user ? "สมัครด้วยบัตร / Card subscription" : "สร้างบัญชีก่อน / Create account first"}
+                        {user ? "สมัครด้วยบัตร / สิทธิ์ 30 วัน" : "สร้างบัญชีก่อน / Create account first"}
                       </button>
                       <button
                         type="button"
@@ -319,7 +333,7 @@ function PricingPageContent() {
                       </button>
                       <p className="text-[11px] font-semibold text-neutral-500">
                         {user
-                          ? "PromptPay opens Stripe's hosted invoice page with a QR code. Renewals are invoice-based, not card auto-charge."
+                          ? "แต่ละครั้งเป็นการซื้อสิทธิ์ใช้งาน 30 วันแบบ one-time ไม่มีการต่ออายุอัตโนมัติ"
                           : "New buyers will be guided through account creation first, then returned here to finish payment."}
                       </p>
                     </div>

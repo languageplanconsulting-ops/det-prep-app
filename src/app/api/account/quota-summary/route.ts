@@ -3,11 +3,8 @@ import { NextResponse } from "next/server";
 import { AI_MONTHLY_LIMIT, MOCK_TEST_MONTHLY_LIMIT } from "@/lib/access-control";
 import { getAddonBalancesForUser } from "@/lib/addon-credits";
 import { mockFixedMonthStartIso, countBillableMockFixedSessions } from "@/lib/mock-test/mock-fixed-quota";
+import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
-
-function normalizeTier(raw: unknown) {
-  return raw === "basic" || raw === "premium" || raw === "vip" ? raw : "free";
-}
 
 export async function GET() {
   const supabase = await createRouteHandlerSupabase();
@@ -32,7 +29,10 @@ export async function GET() {
     getAddonBalancesForUser(user.id),
   ]);
 
-  const tier = normalizeTier(profile?.tier);
+  const tier = resolveEffectiveTierFromProfile({
+    tier: profile?.tier,
+    tier_expires_at: (profile?.tier_expires_at as string | null | undefined) ?? null,
+  });
   const isAdmin = profile?.role === "admin";
   const aiUsed = Math.max(0, Number(profile?.ai_credits_used ?? 0));
   const aiLimit = AI_MONTHLY_LIMIT[tier];

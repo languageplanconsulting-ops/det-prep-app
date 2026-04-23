@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Tier } from "@/lib/access-control";
+import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { grantCourseVIPByEmail } from "@/lib/vip-access";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
@@ -26,7 +27,7 @@ export async function getUserTier(userId: string): Promise<Tier | null> {
   const supabase = createServiceRoleSupabase();
   const { data, error } = await supabase
     .from("profiles")
-    .select("tier")
+    .select("tier, tier_expires_at, vip_granted_by_course")
     .eq("id", userId)
     .maybeSingle();
 
@@ -34,9 +35,11 @@ export async function getUserTier(userId: string): Promise<Tier | null> {
     console.error("[subscription] getUserTier", error.message);
     return null;
   }
-  const t = data?.tier;
-  if (t === "free" || t === "basic" || t === "premium" || t === "vip") return t;
-  return null;
+  return resolveEffectiveTierFromProfile({
+    tier: data?.tier,
+    tier_expires_at: (data?.tier_expires_at as string | null | undefined) ?? null,
+    vip_granted_by_course: data?.vip_granted_by_course === true,
+  });
 }
 
 /**

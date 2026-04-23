@@ -1,6 +1,7 @@
 import "server-only";
 
 import { AI_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
+import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { ADD_ON_CATALOG, type AddOnSku } from "@/lib/paywall-upsell";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
@@ -20,6 +21,7 @@ type ProfileLite = {
   tier: Tier | string | null;
   role: string | null;
   tier_expires_at: string | null;
+  vip_granted_by_course?: boolean | null;
   ai_credits_used: number | null;
   lifetime_ai_used: boolean | null;
 };
@@ -112,10 +114,6 @@ export async function consumeAddonCreditsForUser(
   return { ok: remainingToConsume <= 0, consumed };
 }
 
-function normalizeTier(raw: unknown): Tier {
-  return raw === "basic" || raw === "premium" || raw === "vip" ? raw : "free";
-}
-
 export async function getAiCreditStateForUser(userId: string): Promise<{
   allowed: boolean;
   reason: string | null;
@@ -126,11 +124,15 @@ export async function getAiCreditStateForUser(userId: string): Promise<{
   const supabase = createServiceRoleSupabase();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tier, role, ai_credits_used, lifetime_ai_used")
+    .select("tier, role, tier_expires_at, vip_granted_by_course, ai_credits_used, lifetime_ai_used")
     .eq("id", userId)
     .maybeSingle();
 
-  const tier = normalizeTier(profile?.tier);
+  const tier = resolveEffectiveTierFromProfile({
+    tier: profile?.tier,
+    tier_expires_at: (profile?.tier_expires_at as string | null | undefined) ?? null,
+    vip_granted_by_course: profile?.vip_granted_by_course === true,
+  });
   const isAdmin = profile?.role === "admin";
   const used = Math.max(0, Number(profile?.ai_credits_used ?? 0));
   const lifetimeUsed = profile?.lifetime_ai_used === true;
@@ -202,11 +204,15 @@ export async function chargeAiCreditForUser(userId: string): Promise<{
   const supabase = createServiceRoleSupabase();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tier, role, ai_credits_used, lifetime_ai_used")
+    .select("tier, role, tier_expires_at, vip_granted_by_course, ai_credits_used, lifetime_ai_used")
     .eq("id", userId)
     .maybeSingle<ProfileLite>();
 
-  const tier = normalizeTier(profile?.tier);
+  const tier = resolveEffectiveTierFromProfile({
+    tier: profile?.tier,
+    tier_expires_at: profile?.tier_expires_at ?? null,
+    vip_granted_by_course: profile?.vip_granted_by_course === true,
+  });
   const isAdmin = profile?.role === "admin";
   const used = Math.max(0, Number(profile?.ai_credits_used ?? 0));
   const lifetimeUsed = profile?.lifetime_ai_used === true;
@@ -342,8 +348,16 @@ export async function reserveInteractiveSpeakingCreditForAttempt(args: {
 
 export async function currentTierForUser(userId: string): Promise<Tier> {
   const supabase = createServiceRoleSupabase();
-  const { data } = await supabase.from("profiles").select("tier").eq("id", userId).maybeSingle();
-  return normalizeTier(data?.tier);
+  const { data } = await supabase
+    .from("profiles")
+    .select("tier, tier_expires_at, vip_granted_by_course")
+    .eq("id", userId)
+    .maybeSingle();
+  return resolveEffectiveTierFromProfile({
+    tier: data?.tier,
+    tier_expires_at: (data?.tier_expires_at as string | null | undefined) ?? null,
+    vip_granted_by_course: data?.vip_granted_by_course === true,
+  });
 }
 
 export async function ensureStripeCustomerIdForUser(userId: string, email: string): Promise<string> {
