@@ -635,7 +635,7 @@ export function LandingPageClient({
                       </button>
                     ) : (
                       <Link
-                        href={`/login?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`}
+                        href={`/signup?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`}
                         className={cn(
                           "block w-full border-4 border-black py-4 text-center text-sm font-black uppercase",
                           p.featured
@@ -643,11 +643,11 @@ export function LandingPageClient({
                             : "bg-neutral-900 text-white hover:bg-ep-yellow hover:text-neutral-900",
                         )}
                       >
-                        Login for QR payment
+                        Create account for QR payment
                       </Link>
                     )}
                     <Link
-                      href={user ? `/pricing?plan=${p.tier}` : `/login?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`}
+                      href={user ? `/pricing?plan=${p.tier}` : `/signup?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`}
                       className={cn(
                         "block w-full border-4 border-black py-3 text-center text-xs font-black uppercase",
                         p.featured
