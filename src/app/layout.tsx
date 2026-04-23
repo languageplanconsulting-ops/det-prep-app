@@ -6,6 +6,7 @@ import { ContentBankHydrator } from "@/components/content/ContentBankHydrator";
 import { MainNav } from "@/components/layout/MainNav";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { BugReportWidget } from "@/components/support/BugReportWidget";
 import { VipApiCreditNotebookNotice } from "@/components/vip/VipApiCreditNotebookNotice";
 import { EffectiveTierProvider } from "@/hooks/useEffectiveTier";
 import "./globals.css";
@@ -44,6 +45,7 @@ export default function RootLayout({
           <MainNav />
           <LoginWelcomeModal />
           <VipApiCreditNotebookNotice />
+          <BugReportWidget />
           <PageTransition>{children}</PageTransition>
         </EffectiveTierProvider>
       </body>

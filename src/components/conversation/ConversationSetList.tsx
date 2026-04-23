@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import {
   CONVERSATION_DIFFICULTY_LABEL,
   CONVERSATION_FULL_SCORE,
@@ -113,6 +114,8 @@ export function ConversationSetList({
           Full score {levelMax} pts per set. Open with <strong>REDEEM</strong> when you still have mistakes to fix.
         </p>
       </header>
+
+      <NonApiExamQuotaReminder exam="conversation" />
 
       <div className="ep-panel-luxury ep-brutal overflow-hidden rounded-sm border-4 border-black bg-white shadow-[4px_4px_0_0_#000]">
         <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2 border-b-4 border-black bg-ep-yellow/30 px-4 py-2 ep-stat text-[10px] font-black uppercase tracking-widest text-neutral-800">

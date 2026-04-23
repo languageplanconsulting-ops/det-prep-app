@@ -11,6 +11,39 @@ export type MiniDiagnosisSkillBuckets = {
   speaking: number;
   reading: number;
   writing: number;
+  breakdown: {
+    total: {
+      listening: number;
+      speaking: number;
+      reading: number;
+      writing: number;
+    };
+    listening: {
+      dictation: number;
+      interactive_listening: number;
+    };
+    speaking: {
+      read_then_speak: number;
+    };
+    reading: {
+      fill_in_blanks: number;
+      vocabulary_reading: number;
+    };
+    writing: {
+      write_about_photo: number;
+      dictation: number;
+      fill_in_blanks: number;
+    };
+    supporting: {
+      dictation: number;
+      fill_in_blanks: number;
+      vocabulary_reading: number;
+      interactive_listening: number;
+      write_about_photo: number;
+      read_then_speak: number;
+      real_english_word: number;
+    };
+  };
 };
 
 function normalize160(v: number): number {
@@ -30,17 +63,58 @@ export function scoreMiniDiagnosisBuckets(rows: MiniDiagnosisScoredRow[]): MiniD
   const miniListening = avg(rows.filter((r) => r.task_type === "interactive_listening").map((r) => r.score));
   const writing = avg(rows.filter((r) => r.task_type === "write_about_photo").map((r) => r.score));
   const speaking = avg(rows.filter((r) => r.task_type === "read_then_speak").map((r) => r.score));
+  const realEnglishWord = avg(rows.filter((r) => r.task_type === "real_english_word").map((r) => r.score));
 
   const reading = (vocab * 0.5) + (fitb * 0.5);
   const listening = (dictation * 0.5) + (miniListening * 0.5);
-  const total = (reading + listening + writing + speaking) / 4;
+  const writingSkill = (writing * 0.55) + (dictation * 0.30) + (fitb * 0.15);
+  const total = (reading + listening + writingSkill + speaking) / 4;
+
+  const normalizedReading = normalize160(reading);
+  const normalizedListening = normalize160(listening);
+  const normalizedSpeaking = normalize160(speaking);
+  const normalizedWriting = normalize160(writingSkill);
+  const normalizedTotal = normalize160(total);
 
   return {
-    total: normalize160(total),
-    listening: normalize160(listening),
-    speaking: normalize160(speaking),
-    reading: normalize160(reading),
-    writing: normalize160(writing),
+    total: normalizedTotal,
+    listening: normalizedListening,
+    speaking: normalizedSpeaking,
+    reading: normalizedReading,
+    writing: normalizedWriting,
+    breakdown: {
+      total: {
+        listening: normalizedListening,
+        speaking: normalizedSpeaking,
+        reading: normalizedReading,
+        writing: normalizedWriting,
+      },
+      listening: {
+        dictation: normalize160(dictation * 0.5),
+        interactive_listening: normalize160(miniListening * 0.5),
+      },
+      speaking: {
+        read_then_speak: normalizedSpeaking,
+      },
+      reading: {
+        fill_in_blanks: normalize160(fitb * 0.5),
+        vocabulary_reading: normalize160(vocab * 0.5),
+      },
+      writing: {
+        write_about_photo: normalize160(writing * 0.55),
+        dictation: normalize160(dictation * 0.30),
+        fill_in_blanks: normalize160(fitb * 0.15),
+      },
+      supporting: {
+        dictation: normalize160(dictation),
+        fill_in_blanks: normalize160(fitb),
+        vocabulary_reading: normalize160(vocab),
+        interactive_listening: normalize160(miniListening),
+        write_about_photo: normalize160(writing),
+        read_then_speak: normalize160(speaking),
+        real_english_word: normalize160(realEnglishWord),
+      },
+    },
   };
 }
 

@@ -13,6 +13,13 @@ function notifyEmailDefault(): string {
   );
 }
 
+function supportEmailDefault(): string {
+  return (
+    process.env.BUG_REPORT_NOTIFY_EMAIL?.trim() ??
+    notifyEmailDefault()
+  );
+}
+
 /** Admin receives a new Fast Track request from the landing page. */
 export async function sendFastTrackRequestToAdmin(params: {
   studentEmail: string;
@@ -131,4 +138,137 @@ export async function sendWelcomeEmail(
   } catch (e) {
     console.error("[notifications] sendWelcomeEmail", e);
   }
+}
+
+export async function sendBugReportToAdmin(params: {
+  reportId: string;
+  reporterEmail: string;
+  reporterLine: string;
+  reporterName: string | null;
+  subject: string;
+  details: string;
+  pageUrl: string | null;
+  submittedAtIso: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const to = supportEmailDefault();
+  const html = `
+    <p><strong>New bug report from ENGLISH PLAN</strong></p>
+    <p>
+      Report ID: <strong>${escapeHtml(params.reportId)}</strong><br/>
+      Reporter email: <a href="mailto:${escapeHtml(params.reporterEmail)}">${escapeHtml(params.reporterEmail)}</a><br/>
+      LINE: ${escapeHtml(params.reporterLine)}<br/>
+      Name: ${escapeHtml(params.reporterName?.trim() || "—")}<br/>
+      Submitted (UTC): ${escapeHtml(params.submittedAtIso)}
+    </p>
+    <p><strong>Subject</strong><br/>${escapeHtml(params.subject)}</p>
+    <p><strong>Details</strong><br/>${escapeHtml(params.details).replace(/\n/g, "<br/>")}</p>
+    <p><strong>Page URL</strong><br/>${escapeHtml(params.pageUrl?.trim() || "—")}</p>
+    <p>Review in Admin → Bug reports.</p>
+    <hr/>
+    <p><strong>รายงานปัญหาใหม่จาก ENGLISH PLAN</strong></p>
+    <p>
+      รหัสรายงาน: <strong>${escapeHtml(params.reportId)}</strong><br/>
+      อีเมลผู้แจ้ง: ${escapeHtml(params.reporterEmail)}<br/>
+      LINE: ${escapeHtml(params.reporterLine)}<br/>
+      ชื่อ: ${escapeHtml(params.reporterName?.trim() || "—")}
+    </p>
+  `;
+  const result = await sendResendEmail({
+    to,
+    subject: `[English Plan] Bug report — ${params.subject}`,
+    html,
+    replyTo: params.reporterEmail,
+  });
+  if (!result.ok) {
+    console.error("[notifications] sendBugReportToAdmin failed:", result.error);
+  }
+  return result;
+}
+
+export async function sendBugReportReceivedToReporter(params: {
+  to: string;
+  reportId: string;
+  subject: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const html = `
+    <p>Hello,</p>
+    <p>We received your bug report for <strong>ENGLISH PLAN</strong>.</p>
+    <p>
+      Report ID: <strong>${escapeHtml(params.reportId)}</strong><br/>
+      Subject: ${escapeHtml(params.subject)}
+    </p>
+    <p>Our team will review it and email you when there is an update or fix.</p>
+    <hr/>
+    <p>สวัสดีค่ะ/ครับ</p>
+    <p>เราได้รับรายงานปัญหาของคุณใน <strong>ENGLISH PLAN</strong> แล้ว</p>
+    <p>
+      รหัสรายงาน: <strong>${escapeHtml(params.reportId)}</strong><br/>
+      หัวข้อ: ${escapeHtml(params.subject)}
+    </p>
+    <p>ทีมงานจะตรวจสอบและส่งอีเมลแจ้งกลับเมื่อมีความคืบหน้าหรือแก้ไขเสร็จแล้ว</p>
+  `;
+  const result = await sendResendEmail({
+    to: params.to,
+    subject: "We received your bug report / ได้รับรายงานปัญหาของคุณแล้ว",
+    html,
+  });
+  if (!result.ok) {
+    console.error("[notifications] sendBugReportReceivedToReporter failed:", result.error);
+  }
+  return result;
+}
+
+export async function sendBugReplyToReporter(params: {
+  to: string;
+  reportId: string;
+  subject: string;
+  replyBody: string;
+  status: "open" | "investigating" | "fixed" | "closed";
+}): Promise<{ ok: boolean; error?: string }> {
+  const statusLabel =
+    params.status === "open"
+      ? "Open"
+      : params.status === "investigating"
+        ? "Investigating"
+        : params.status === "fixed"
+          ? "Fixed"
+          : "Closed";
+
+  const statusTh =
+    params.status === "open"
+      ? "เปิดอยู่"
+      : params.status === "investigating"
+        ? "กำลังตรวจสอบ"
+        : params.status === "fixed"
+          ? "แก้ไขแล้ว"
+          : "ปิดแล้ว";
+
+  const html = `
+    <p>Hello,</p>
+    <p>There is an update on your ENGLISH PLAN bug report.</p>
+    <p>
+      Report ID: <strong>${escapeHtml(params.reportId)}</strong><br/>
+      Subject: ${escapeHtml(params.subject)}<br/>
+      Status: <strong>${escapeHtml(statusLabel)}</strong>
+    </p>
+    <p><strong>Reply from admin</strong><br/>${escapeHtml(params.replyBody).replace(/\n/g, "<br/>")}</p>
+    <hr/>
+    <p>สวัสดีค่ะ/ครับ</p>
+    <p>มีความคืบหน้าเกี่ยวกับรายงานปัญหา ENGLISH PLAN ของคุณ</p>
+    <p>
+      รหัสรายงาน: <strong>${escapeHtml(params.reportId)}</strong><br/>
+      หัวข้อ: ${escapeHtml(params.subject)}<br/>
+      สถานะ: <strong>${escapeHtml(statusTh)}</strong>
+    </p>
+    <p><strong>ข้อความจากแอดมิน</strong><br/>${escapeHtml(params.replyBody).replace(/\n/g, "<br/>")}</p>
+  `;
+  const result = await sendResendEmail({
+    to: params.to,
+    subject: `[English Plan] Bug report update — ${params.subject}`,
+    html,
+  });
+  if (!result.ok) {
+    console.error("[notifications] sendBugReplyToReporter failed:", result.error);
+  }
+  return result;
 }

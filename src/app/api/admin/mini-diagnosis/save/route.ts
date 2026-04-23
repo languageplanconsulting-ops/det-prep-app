@@ -122,10 +122,34 @@ export async function POST(req: Request) {
     })),
   );
 
-  const { data: setRow, error: setErr } = await supabase
+  const { data: existingSet, error: lookupErr } = await supabase
     .from("mini_diagnosis_sets")
-    .upsert(
-      [
+    .select("id")
+    .ilike("internal_name", internalName)
+    .maybeSingle();
+  if (lookupErr) {
+    return NextResponse.json({ error: lookupErr.message }, { status: 500 });
+  }
+
+  let setId: string | null = existingSet?.id ? String(existingSet.id) : null;
+
+  if (setId) {
+    const { error: updateErr } = await supabase
+      .from("mini_diagnosis_sets")
+      .update({
+        name: internalName,
+        internal_name: internalName,
+        user_title: userTitle,
+        is_active: false,
+      })
+      .eq("id", setId);
+    if (updateErr) {
+      return NextResponse.json({ error: updateErr.message }, { status: 500 });
+    }
+  } else {
+    const { data: insertedSet, error: insertSetErr } = await supabase
+      .from("mini_diagnosis_sets")
+      .insert([
         {
           name: internalName,
           internal_name: internalName,
@@ -133,29 +157,32 @@ export async function POST(req: Request) {
           is_active: false,
           created_by: userId,
         },
-      ],
-      { onConflict: "internal_name" },
-    )
-    .select("id")
-    .single();
-  if (setErr || !setRow) {
-    return NextResponse.json({ error: setErr?.message ?? "Failed to create set" }, { status: 500 });
+      ])
+      .select("id")
+      .single();
+    if (insertSetErr || !insertedSet?.id) {
+      return NextResponse.json(
+        { error: insertSetErr?.message ?? "Failed to create set" },
+        { status: 500 },
+      );
+    }
+    setId = String(insertedSet.id);
   }
 
   const { error: deactivateErr } = await supabase
     .from("mini_diagnosis_sets")
     .update({ is_active: false })
-    .eq("id", setRow.id);
+    .eq("id", setId);
   if (deactivateErr) return NextResponse.json({ error: deactivateErr.message }, { status: 500 });
 
   const { error: deleteErr } = await supabase
     .from("mini_diagnosis_set_items")
     .delete()
-    .eq("set_id", setRow.id);
+    .eq("set_id", setId);
   if (deleteErr) return NextResponse.json({ error: deleteErr.message }, { status: 500 });
 
   const rows = parsed.rows.map((row) => ({
-    set_id: setRow.id,
+    set_id: setId,
     step_index: row.step_index,
     task_type: row.task_type,
     time_limit_sec: row.time_limit_sec,
@@ -170,8 +197,8 @@ export async function POST(req: Request) {
   const { error: activateErr } = await supabase
     .from("mini_diagnosis_sets")
     .update({ is_active: true, user_title: userTitle, name: internalName, internal_name: internalName })
-    .eq("id", setRow.id);
+    .eq("id", setId);
   if (activateErr) return NextResponse.json({ error: activateErr.message }, { status: 500 });
 
-  return NextResponse.json({ ok: true, setId: setRow.id, savedRows: rows.length });
+  return NextResponse.json({ ok: true, setId, savedRows: rows.length });
 }

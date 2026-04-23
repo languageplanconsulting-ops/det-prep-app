@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import {
   REALWORD_DIFFICULTY_LABEL,
   REALWORD_MAX_SCORE,
@@ -64,6 +65,8 @@ export function RealWordDifficultySetsPage({
           Open a set to play. High score and redeem status update after you submit a run.
         </p>
       </header>
+
+      <NonApiExamQuotaReminder exam="realword" />
 
       <SetList round={round} difficulty={difficulty} bankVersion={bankVersion} />
     </div>
