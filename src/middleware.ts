@@ -6,6 +6,7 @@ import {
   COOKIE_SB_URL,
   mergePublicSupabaseConfig,
 } from "@/lib/supabase-public-config";
+import { hasActivePaidPlan } from "@/lib/plan-status";
 import { verifySimpleAdminToken, SIMPLE_ADMIN_COOKIE } from "@/lib/simple-admin";
 import { ADMIN_PREVIEW_COOKIE } from "@/lib/admin-preview";
 
@@ -27,17 +28,13 @@ type ProfileGate = {
   role: string | null;
   tier: string | null;
   vip_granted_by_course: boolean | null;
+  tier_expires_at: string | null;
   stripe_subscription_id: string | null;
 };
 
 function isPayingMember(p: ProfileGate | null | undefined): boolean {
   if (!p) return false;
-  if (p.vip_granted_by_course === true) return true;
-  if (typeof p.stripe_subscription_id === "string" && p.stripe_subscription_id.trim().length > 0) {
-    return true;
-  }
-  const t = p.tier;
-  return t === "basic" || t === "premium" || t === "vip";
+  return hasActivePaidPlan(p);
 }
 
 export async function middleware(request: NextRequest) {
@@ -136,7 +133,7 @@ export async function middleware(request: NextRequest) {
   if (needsProfileGate) {
     const { data } = await supabase
       .from("profiles")
-      .select("role, tier, vip_granted_by_course, stripe_subscription_id")
+      .select("role, tier, vip_granted_by_course, tier_expires_at, stripe_subscription_id")
       .eq("id", user!.id)
       .maybeSingle();
     profile = data as ProfileGate | null;
@@ -151,7 +148,7 @@ export async function middleware(request: NextRequest) {
       if (codeOk && previewActive) {
         // Logged-in user using admin code + preview-as-tier
       } else {
-        return NextResponse.redirect(new URL("/", request.url));
+        return NextResponse.redirect(new URL("/pricing?expired=1", request.url));
       }
     }
   }

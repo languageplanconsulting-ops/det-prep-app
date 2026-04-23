@@ -6,6 +6,7 @@ import { MOCK_TEST_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
 import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
 import { countBillableMockFixedSessions, mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
 import { isMockTestAvailableNow } from "@/lib/mock-test/mock-test-availability";
+import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 
@@ -28,10 +29,6 @@ function normalizePreviewStep(raw: unknown): number {
   const n = Number(raw);
   if (!Number.isFinite(n)) return 1;
   return Math.max(1, Math.min(FIXED_MOCK_STEP_COUNT, Math.round(n)));
-}
-
-function normalizeTier(raw: unknown): Tier {
-  return raw === "basic" || raw === "premium" || raw === "vip" ? raw : "free";
 }
 
 export async function POST(req: Request) {
@@ -126,7 +123,7 @@ export async function POST(req: Request) {
 
   const { data: me } = await supabase
     .from("profiles")
-    .select("role,tier")
+    .select("role,tier,tier_expires_at,vip_granted_by_course")
     .eq("id", user.id)
     .maybeSingle();
   const isAdmin = me?.role === "admin";
@@ -147,7 +144,11 @@ export async function POST(req: Request) {
     .gte("started_at", monthStart);
   const billableUsed = countBillableMockFixedSessions(sessionRows);
 
-  const tier = normalizeTier(me?.tier);
+  const tier = resolveEffectiveTierFromProfile({
+    tier: me?.tier,
+    tier_expires_at: (me?.tier_expires_at as string | null | undefined) ?? null,
+    vip_granted_by_course: me?.vip_granted_by_course === true,
+  });
   const monthlyLimit = MOCK_TEST_MONTHLY_LIMIT[tier];
   const addonBalances = !isAdmin ? await getAddonBalancesForUser(user.id) : { mockRemaining: 0, feedbackRemaining: 0, rows: [] };
   if (!isAdmin && (!Number.isFinite(monthlyLimit) || monthlyLimit <= 0)) {

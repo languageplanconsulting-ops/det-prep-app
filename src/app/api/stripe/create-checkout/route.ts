@@ -104,14 +104,18 @@ export async function POST(req: Request) {
 
     const base = siteUrl();
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+      mode: "payment",
+      locale: "auto",
       customer: customerId,
+      payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${base}/practice?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${base}/practice?checkout=cancel`,
-      metadata: { userId, tier: tierRaw },
-      subscription_data: {
-        metadata: { userId, tier: tierRaw },
+      success_url: `${base}/pricing?checkout=success&plan=${encodeURIComponent(tierRaw)}`,
+      cancel_url: `${base}/pricing?checkout=cancel&plan=${encodeURIComponent(tierRaw)}`,
+      metadata: {
+        userId,
+        tier: tierRaw,
+        purchaseKind: "plan",
+        paymentFlow: "card_checkout",
       },
       allow_promotion_codes: true,
     });

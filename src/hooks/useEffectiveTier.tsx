@@ -18,6 +18,7 @@ import {
 } from "@/lib/admin-preview";
 import { isBootstrapAdminEmail } from "@/lib/admin-emails";
 import { claimBootstrapAdminClient } from "@/lib/claim-bootstrap-admin";
+import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 export type EffectiveTierState = {
@@ -37,18 +38,6 @@ export type EffectiveTierState = {
 };
 
 const EffectiveTierContext = createContext<EffectiveTierState | null>(null);
-
-function normalizeTier(raw: string | null | undefined): Tier {
-  if (
-    raw === "free" ||
-    raw === "basic" ||
-    raw === "premium" ||
-    raw === "vip"
-  ) {
-    return raw;
-  }
-  return "free";
-}
 
 export function EffectiveTierProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -95,7 +84,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
     }
     let { data } = await supabase
       .from("profiles")
-      .select("tier, role, vip_granted_by_course, stripe_subscription_id")
+      .select("tier, role, vip_granted_by_course, stripe_subscription_id, stripe_customer_id, tier_expires_at")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -110,16 +99,31 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       });
       const { data: again } = await supabase
         .from("profiles")
-        .select("tier, role, vip_granted_by_course, stripe_subscription_id")
+        .select("tier, role, vip_granted_by_course, stripe_subscription_id, stripe_customer_id, tier_expires_at")
         .eq("id", user.id)
         .maybeSingle();
       data = again;
     }
 
-    setRealTier(normalizeTier(data?.tier));
+    setRealTier(
+      resolveEffectiveTierFromProfile({
+        tier: data?.tier,
+        tier_expires_at: (data?.tier_expires_at as string | null | undefined) ?? null,
+        vip_granted_by_course: data?.vip_granted_by_course === true,
+      }),
+    );
     setIsAdmin(data?.role === "admin");
     setVipGrantedByCourse(data?.vip_granted_by_course === true);
-    setHasStripeSubscription(!!data?.stripe_subscription_id);
+    setHasStripeSubscription(
+      !!data?.stripe_subscription_id ||
+        (!!data?.stripe_customer_id &&
+          resolveEffectiveTierFromProfile({
+            tier: data?.tier,
+            tier_expires_at: (data?.tier_expires_at as string | null | undefined) ?? null,
+            vip_granted_by_course: data?.vip_granted_by_course === true,
+          }) !== "free" &&
+          data?.vip_granted_by_course !== true),
+    );
     setLoading(false);
     void fetchPreviewEligible();
   }, [fetchPreviewEligible]);

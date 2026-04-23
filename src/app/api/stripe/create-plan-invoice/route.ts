@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import type Stripe from "stripe";
 
 import type { PaidTier } from "@/lib/stripe";
 import { getStripe, STRIPE_PLANS } from "@/lib/stripe";
@@ -10,6 +9,10 @@ const PAID: PaidTier[] = ["basic", "premium", "vip"];
 
 function isPaidTier(t: string): t is PaidTier {
   return PAID.includes(t as PaidTier);
+}
+
+function siteUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }
 
 export async function POST(req: Request) {
@@ -97,47 +100,34 @@ export async function POST(req: Request) {
       }
     }
 
-    const subscription = await stripe.subscriptions.create({
+    const base = siteUrl();
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      locale: "auto",
       customer: customerId,
-      items: [{ price: priceId }],
-      collection_method: "send_invoice",
-      days_until_due: 1,
+      payment_method_types: ["promptpay"],
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${base}/pricing?checkout=success&plan=${encodeURIComponent(tierRaw)}`,
+      cancel_url: `${base}/pricing?checkout=cancel&plan=${encodeURIComponent(tierRaw)}`,
       metadata: {
         userId,
         tier: tierRaw,
-        billingFlow: "promptpay_invoice",
+        purchaseKind: "plan",
+        paymentFlow: "promptpay_checkout",
       },
-      payment_settings: {
-        payment_method_types: ["promptpay"],
-      },
-      expand: ["latest_invoice"],
+      allow_promotion_codes: true,
     });
 
-    const latestInvoiceValue = subscription.latest_invoice;
-    let invoice: Stripe.Invoice | null =
-      latestInvoiceValue && typeof latestInvoiceValue !== "string"
-        ? latestInvoiceValue
-        : typeof latestInvoiceValue === "string"
-          ? await stripe.invoices.retrieve(latestInvoiceValue)
-          : null;
-
-    if (invoice?.status === "draft") {
-      invoice = await stripe.invoices.finalizeInvoice(invoice.id);
-    }
-
-    const hostedUrl = invoice?.hosted_invoice_url;
-    if (!hostedUrl) {
-      return NextResponse.json({ error: "Could not generate a hosted invoice URL for PromptPay." }, { status: 500 });
+    if (!session.url) {
+      return NextResponse.json({ error: "Checkout session did not return a URL" }, { status: 500 });
     }
 
     return NextResponse.json({
-      url: hostedUrl,
-      flow: "promptpay_invoice",
-      note:
-        "PromptPay for plans uses Stripe's hosted invoice page. PromptPay must be enabled in your Stripe Dashboard.",
+      url: session.url,
+      flow: "promptpay_checkout",
     });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "PromptPay invoice creation failed";
+    const msg = e instanceof Error ? e.message : "PromptPay checkout creation failed";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

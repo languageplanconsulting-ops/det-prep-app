@@ -45,7 +45,7 @@ export function VIPBadge() {
   const title = isCourse
     ? "VIP access granted via EnglishPlan Course enrollment · สิทธิ์ VIP มอบให้ผ่านการลงทะเบียนคอร์ส EnglishPlan"
     : isPremiumStripe
-      ? "VIP via paid subscription · สมาชิก VIP แบบชำระเงิน"
+      ? "VIP via paid plan · สมาชิก VIP แบบชำระเงิน"
       : "VIP · EnglishPlan";
 
   const palette = isCourse

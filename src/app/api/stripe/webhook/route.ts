@@ -1,25 +1,15 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import type { Tier } from "@/lib/access-control";
-import { getStripe, tierFromStripePriceId } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { currentTierForUser } from "@/lib/addon-credits";
+import { nextMonthlyExpiryIso } from "@/lib/plan-status";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
 export const runtime = "nodejs";
 
 function isTier(s: string | undefined): s is Tier {
   return s === "free" || s === "basic" || s === "premium" || s === "vip";
-}
-
-/** Stripe 2026+ exposes billing period end on subscription items. */
-function subscriptionPeriodEndIso(sub: Stripe.Subscription): string {
-  const end = sub.items?.data?.[0]?.current_period_end;
-  if (typeof end === "number") {
-    return new Date(end * 1000).toISOString();
-  }
-  const fallback = new Date();
-  fallback.setDate(fallback.getDate() + 30);
-  return fallback.toISOString();
 }
 
 function stripUndefined<T extends Record<string, unknown>>(patch: T): Record<string, unknown> {
@@ -75,6 +65,68 @@ async function updateProfileByUserId(
   return { error: insertErr?.message ?? null };
 }
 
+async function fulfillOneTimePlanPurchase(
+  session: Stripe.Checkout.Session,
+): Promise<void> {
+  const userId = session.metadata?.userId;
+  const tierMeta = session.metadata?.tier;
+  const paymentFlow = session.metadata?.paymentFlow ?? "card_checkout";
+  if (!userId || !tierMeta || !isTier(tierMeta) || session.payment_status !== "paid") {
+    return;
+  }
+
+  const customerId =
+    typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  const supabase = createServiceRoleSupabase();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("tier_expires_at")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const nextExpiry = nextMonthlyExpiryIso((profile?.tier_expires_at as string | null) ?? null);
+  const now = new Date().toISOString();
+
+  const { error } = await updateProfileByUserId(userId, {
+    tier: tierMeta,
+    ...(customerId ? { stripe_customer_id: customerId } : {}),
+    stripe_subscription_id: null,
+    tier_expires_at: nextExpiry,
+    ai_credits_used: 0,
+    ai_credits_reset_at: now,
+    vip_granted_by_course: false,
+  });
+  if (error) {
+    console.error("[stripe] one-time plan profile update failed", error);
+  }
+
+  const paymentMethod = paymentFlow === "promptpay_checkout" ? "promptpay" : "card";
+  const description =
+    session.metadata?.purchaseKind === "plan"
+      ? `${tierMeta} monthly access`
+      : `Payment ${session.id}`;
+
+  const { error: payErr } = await supabase.from("payment_history").insert({
+    user_id: userId,
+    stripe_payment_intent_id: paymentIntentId,
+    amount: Number(session.amount_total ?? 0),
+    currency: String(session.currency ?? "thb"),
+    status: "succeeded",
+    tier: tierMeta,
+    payment_method: paymentMethod,
+    description,
+    receipt_url: null,
+  });
+  if (payErr && payErr.code !== "23505") {
+    console.error("[stripe] one-time plan payment_history insert", payErr.message);
+  }
+}
+
 export async function POST(req: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) {
@@ -99,8 +151,13 @@ export async function POST(req: Request) {
 
   try {
     switch (event.type) {
-      case "checkout.session.completed": {
+      case "checkout.session.completed":
+      case "checkout.session.async_payment_succeeded": {
         const session = event.data.object as Stripe.Checkout.Session;
+        if (session.mode === "payment" && session.metadata?.purchaseKind === "plan") {
+          await fulfillOneTimePlanPurchase(session);
+          break;
+        }
         if (session.mode === "payment") {
           const userId = session.metadata?.userId;
           const addonSku = session.metadata?.addonSku;
@@ -149,184 +206,10 @@ export async function POST(req: Request) {
           }
           break;
         }
-
-        if (session.mode !== "subscription") break;
-
-        const userId = session.metadata?.userId;
-        const tierMeta = session.metadata?.tier;
-        if (!userId || !tierMeta || !isTier(tierMeta)) {
-          console.error("[stripe] checkout.session.completed: missing userId or tier in metadata");
-          break;
-        }
-
-        const customerId =
-          typeof session.customer === "string" ? session.customer : session.customer?.id;
-        const subRef = session.subscription;
-        const subId = typeof subRef === "string" ? subRef : subRef?.id;
-
-        if (!customerId || !subId) {
-          console.error("[stripe] checkout.session.completed: missing customer or subscription");
-          break;
-        }
-
-        const subscription = await stripe.subscriptions.retrieve(subId);
-        const periodEnd = subscriptionPeriodEndIso(subscription);
-        const now = new Date().toISOString();
-
-        const { error } = await updateProfileByUserId(userId, {
-          tier: tierMeta,
-          stripe_customer_id: customerId,
-          stripe_subscription_id: subId,
-          tier_expires_at: periodEnd,
-          ai_credits_used: 0,
-          ai_credits_reset_at: now,
-          vip_granted_by_course: false,
-        });
-        if (error) console.error("[stripe] profile update failed", error);
-        break;
-      }
-
-      case "customer.subscription.updated": {
-        const sub = event.data.object as Stripe.Subscription;
-        if (sub.collection_method === "send_invoice" && sub.metadata?.billingFlow === "promptpay_invoice") {
-          break;
-        }
-        const userId = sub.metadata?.userId;
-        const priceId = sub.items.data[0]?.price?.id;
-        const tierFromPrice = priceId ? tierFromStripePriceId(priceId) : null;
-        const tierMeta = sub.metadata?.tier;
-        const tier: Tier | null =
-          tierFromPrice ?? (isTier(tierMeta) ? tierMeta : null);
-
-        const periodEnd = subscriptionPeriodEndIso(sub);
-        const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
-
-        if (userId && tier) {
-          const { error } = await updateProfileByUserId(userId, {
-            tier,
-            stripe_subscription_id: sub.id,
-            ...(customerId ? { stripe_customer_id: customerId } : {}),
-            tier_expires_at: periodEnd,
-          });
-          if (error) console.error("[stripe] subscription.updated profile update failed", error);
-          break;
-        }
-
-        if (sub.id) {
-          const supabase = createServiceRoleSupabase();
-          const { data: row } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("stripe_subscription_id", sub.id)
-            .maybeSingle();
-          if (row?.id && tier) {
-            const { error } = await updateProfileByUserId(row.id as string, {
-              tier,
-              stripe_subscription_id: sub.id,
-              ...(customerId ? { stripe_customer_id: customerId } : {}),
-              tier_expires_at: periodEnd,
-            });
-            if (error) console.error("[stripe] subscription.updated fallback failed", error);
-          }
-        }
-        break;
-      }
-
-      case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-        let userId: string | undefined = sub.metadata?.userId ?? undefined;
-        const supabase = createServiceRoleSupabase();
-
-        if (!userId && sub.id) {
-          const { data: row } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("stripe_subscription_id", sub.id)
-            .maybeSingle();
-          if (row && typeof row.id === "string") userId = row.id;
-        }
-
-        if (!userId) {
-          console.error("[stripe] subscription.deleted: could not resolve userId");
-          break;
-        }
-
-        const { error } = await updateProfileByUserId(userId, {
-          tier: "free",
-          stripe_subscription_id: null,
-          tier_expires_at: null,
-          vip_granted_by_course: false,
-        });
-        if (error) console.error("[stripe] subscription.deleted profile update failed", error);
         break;
       }
 
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object as Stripe.Invoice;
-        const subRef = (
-          invoice as unknown as {
-            subscription?: string | { id?: string } | null;
-          }
-        ).subscription;
-        const subId =
-          typeof subRef === "string"
-            ? subRef
-            : subRef && typeof subRef === "object"
-              ? (subRef as { id?: string }).id
-              : null;
-        const amount = invoice.amount_paid ?? 0;
-        if (!subId || !amount) break;
-
-        const subscription = await stripe.subscriptions.retrieve(subId);
-        const userId = subscription.metadata?.userId;
-        const priceId = subscription.items.data[0]?.price?.id;
-        const tierFromPrice = priceId ? tierFromStripePriceId(priceId) : null;
-        const tierMeta = subscription.metadata?.tier;
-        const resolvedTier: Tier | null =
-          tierFromPrice ?? (isTier(tierMeta) ? tierMeta : null);
-        const customerId =
-          typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id;
-        const paymentMethod =
-          subscription.metadata?.billingFlow === "promptpay_invoice" ? "promptpay" : "card";
-
-        const supabase = createServiceRoleSupabase();
-        const { data: row } = await supabase
-          .from("profiles")
-          .select("id, tier")
-          .eq("stripe_subscription_id", subId)
-          .maybeSingle();
-        const rowUserId = row?.id ? String(row.id) : null;
-        const profileUserId = rowUserId ?? userId ?? null;
-        if (!profileUserId) break;
-
-        if (resolvedTier) {
-          const { error: upErr } = await updateProfileByUserId(profileUserId, {
-            tier: resolvedTier,
-            stripe_subscription_id: subId,
-            ...(customerId ? { stripe_customer_id: customerId } : {}),
-            tier_expires_at: subscriptionPeriodEndIso(subscription),
-          });
-          if (upErr) console.error("[stripe] invoice.payment_succeeded profile update failed", upErr);
-        }
-
-        const { error: payErr } = await supabase.from("payment_history").insert({
-          user_id: profileUserId,
-          stripe_invoice_id: invoice.id,
-          stripe_subscription_id: subId,
-          amount,
-          currency: (invoice.currency as string) ?? "thb",
-          status: "succeeded",
-          tier: resolvedTier ?? (row?.tier as string) ?? "premium",
-          description:
-            invoice.description ??
-            `Invoice ${invoice.number ?? invoice.id}`,
-          receipt_url:
-            (invoice.hosted_invoice_url as string | null) ?? null,
-          payment_method: paymentMethod,
-        });
-        if (payErr && payErr.code !== "23505") {
-          console.error("[stripe] payment_history insert", payErr.message);
-        }
         break;
       }
 
