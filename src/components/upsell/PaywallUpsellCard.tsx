@@ -73,7 +73,7 @@ export function PaywallUpsellCard({
         >
           {busyKey ? "กำลังเปิด…" : primary.labelTh}
           <span className="block text-[10px] font-semibold normal-case tracking-normal text-white/80">
-            {primary.labelEn}
+            {primary.kind === "addon" ? `${primary.labelEn} · card or QR` : primary.labelEn}
           </span>
         </button>
       ) : null}
@@ -90,7 +90,7 @@ export function PaywallUpsellCard({
             >
               <span>{action.labelTh}</span>
               <span className="mt-1 block text-[10px] font-semibold normal-case tracking-normal text-neutral-600">
-                {action.labelEn}
+                {action.kind === "addon" ? `${action.labelEn} · card or QR` : action.labelEn}
               </span>
             </button>
           ))}

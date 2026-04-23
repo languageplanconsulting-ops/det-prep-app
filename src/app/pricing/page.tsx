@@ -62,13 +62,14 @@ const PLAN_CARDS: Array<{
 const ADD_ON_ORDER: AddOnSku[] = ["mock_1", "mock_2", "feedback_1", "feedback_3", "feedback_5"];
 
 function PricingPageContent() {
-  const { startUpgradeCheckout, startAddOnCheckout, user, loading } = useBillingActions();
+  const { startUpgradeCheckout, startUpgradePromptPay, startAddOnCheckout, user, loading } = useBillingActions();
   const { effectiveTier } = useEffectiveTier();
   const searchParams = useSearchParams();
 
   const focus = searchParams.get("focus");
   const focusedSku = searchParams.get("sku");
   const checkoutStatus = searchParams.get("checkout");
+  const focusedPlan = searchParams.get("plan");
 
   useEffect(() => {
     if (focus === "addons") {
@@ -130,14 +131,24 @@ function PricingPageContent() {
                   Upgrading is usually better value than repeated one-off top-ups for active learners.
                 </p>
               </div>
-              <button
-                type="button"
-                disabled={loading}
-                onClick={() => void startUpgradeCheckout(recommendation)}
-                className="border-[3px] border-black bg-[#004aad] px-6 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:opacity-50"
-              >
-                อัปเกรดตอนนี้ / Upgrade now
-              </button>
+              <div className="flex flex-col gap-2 sm:min-w-[18rem]">
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => void startUpgradeCheckout(recommendation)}
+                  className="border-[3px] border-black bg-[#004aad] px-6 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:opacity-50"
+                >
+                  จ่ายด้วยบัตร / Card subscription
+                </button>
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => void startUpgradePromptPay(recommendation)}
+                  className="border-[3px] border-black bg-[#ffcc00] px-6 py-3 text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111] disabled:opacity-50"
+                >
+                  จ่ายด้วย QR PromptPay
+                </button>
+              </div>
             </div>
           </section>
         ) : null}
@@ -172,7 +183,11 @@ function PricingPageContent() {
               <article
                 key={plan.tier}
                 className={`flex h-full flex-col border-4 border-black p-5 shadow-[8px_8px_0_0_#111] ${
-                  plan.recommended ? "bg-[#fffbeb]" : "bg-white"
+                  focusedPlan === plan.tier
+                    ? "bg-[#fff7d6]"
+                    : plan.recommended
+                      ? "bg-[#fffbeb]"
+                      : "bg-white"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -215,14 +230,27 @@ function PricingPageContent() {
                       ดูสิทธิ์ปัจจุบัน / View my plan
                     </Link>
                   ) : paid ? (
-                    <button
-                      type="button"
-                      disabled={loading || !user}
-                      onClick={() => void startUpgradeCheckout(plan.tier)}
-                      className="block w-full border-[3px] border-black bg-[#004aad] px-4 py-3 text-center text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:opacity-50"
-                    >
-                      เลือกแพลนนี้ / Choose this plan
-                    </button>
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        disabled={loading || !user}
+                        onClick={() => void startUpgradeCheckout(plan.tier)}
+                        className="block w-full border-[3px] border-black bg-[#004aad] px-4 py-3 text-center text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:opacity-50"
+                      >
+                        สมัครด้วยบัตร / Card subscription
+                      </button>
+                      <button
+                        type="button"
+                        disabled={loading || !user}
+                        onClick={() => void startUpgradePromptPay(plan.tier)}
+                        className="block w-full border-[3px] border-black bg-[#ffcc00] px-4 py-3 text-center text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111] disabled:opacity-50"
+                      >
+                        จ่ายด้วย QR PromptPay
+                      </button>
+                      <p className="text-[11px] font-semibold text-neutral-500">
+                        PromptPay opens Stripe&apos;s hosted invoice page with a QR code. Renewals are invoice-based, not card auto-charge.
+                      </p>
+                    </div>
                   ) : (
                     <Link
                       href="/practice"
@@ -263,6 +291,31 @@ function PricingPageContent() {
             Great for one-off needs. Frequent top-ups usually mean it is time to upgrade.
           </p>
 
+          <div className="mt-5 rounded-[24px] border-3 border-black bg-[linear-gradient(135deg,#eef7ff_0%,#ffffff_48%,#fff6d6_100%)] p-5 shadow-[6px_6px_0_0_#111]">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="font-mono text-[10px] font-black uppercase tracking-[0.28em] text-[#004aad]">
+                  Payment options
+                </p>
+                <h3 className="mt-2 text-2xl font-black tracking-tight text-neutral-900">
+                  Pay by card or QR PromptPay
+                </h3>
+                <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-neutral-700">
+                  When you open checkout for a mock-test or AI-feedback add-on, Stripe can show both card and QR PromptPay
+                  on the same professional payment page, depending on your setup and customer eligibility.
+                </p>
+              </div>
+              <div className="grid gap-2 rounded-[18px] border-2 border-black bg-white px-4 py-3 text-sm font-black shadow-[4px_4px_0_0_#111]">
+                <span className="rounded-full border-2 border-black bg-[#004aad] px-3 py-1 text-center text-[10px] uppercase tracking-[0.2em] text-white">
+                  Card
+                </span>
+                <span className="rounded-full border-2 border-black bg-[#ffcc00] px-3 py-1 text-center text-[10px] uppercase tracking-[0.2em] text-neutral-900">
+                  QR PromptPay
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             {ADD_ON_ORDER.map((sku) => {
               const addOn = ADD_ON_CATALOG[sku];
@@ -282,13 +335,24 @@ function PricingPageContent() {
                   <p className="mt-4 text-3xl font-black text-[#004aad]">฿{addOn.priceThb}</p>
                   <p className="mt-2 text-sm font-bold text-neutral-800">{addOn.shortTh}</p>
                   <p className="mt-1 text-xs text-neutral-500">{addOn.shortEn}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border-2 border-black bg-white px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-neutral-900">
+                      Instant top-up
+                    </span>
+                    <span className="rounded-full border-2 border-black bg-[#e8f3ff] px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#004aad]">
+                      Card or QR
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => void startAddOnCheckout(sku)}
                     className="mt-5 border-[3px] border-black bg-[#ffcc00] px-4 py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#111]"
                   >
-                    ซื้อสิทธิ์นี้ / Buy this add-on
+                    ซื้อสิทธิ์นี้ / Pay by card or QR
                   </button>
+                  <p className="mt-2 text-[11px] font-semibold leading-5 text-neutral-500">
+                    Stripe Checkout opens in a secure payment window with the available methods for this purchase.
+                  </p>
                 </article>
               );
             })}

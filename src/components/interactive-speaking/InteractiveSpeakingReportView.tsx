@@ -211,6 +211,15 @@ export function InteractiveSpeakingReportView({
               maxItems={8}
             />
 
+            <GrammarFixesPanel
+              items={grammarFixes}
+              attemptId={report.attemptId}
+              entrySource="interactive-speaking"
+              titleEn="Grammar fixes (interactive speaking)"
+              titleTh="จุดแก้ไวยากรณ์ (การพูดโต้ตอบ)"
+              maxItems={8}
+            />
+
             <div className="grid gap-4 md:grid-cols-2">
               <CriterionBlock
                 title="Grammar"
@@ -311,14 +320,6 @@ export function InteractiveSpeakingReportView({
                     ))}
               </ul>
             </BrutalPanel>
-            <GrammarFixesPanel
-              items={grammarFixes}
-              attemptId={report.attemptId}
-              entrySource="interactive-speaking"
-              titleEn="Grammar fixes (interactive speaking)"
-              titleTh="จุดแก้ไวยากรณ์ (การพูดโต้ตอบ)"
-              maxItems={8}
-            />
           </div>
         </div>
       </section>

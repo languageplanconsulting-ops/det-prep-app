@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { useBillingActions } from "@/hooks/useBillingActions";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
 
@@ -46,6 +47,7 @@ export function LandingPageClient({
   const [ftLinkedEmail, setFtLinkedEmail] = useState<string | null>(null);
   const [ftErr, setFtErr] = useState<string | null>(null);
   const [stickyOn, setStickyOn] = useState(false);
+  const { user, loading: billingLoading, startUpgradePromptPay } = useBillingActions();
   const {
     isAdmin,
     previewEligible,
@@ -528,6 +530,7 @@ export function LandingPageClient({
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
+                tier: "free" as const,
                 name: "FREE / ฟรี",
                 price: "฿0",
                 feats: ["1 mini diagnosis", "1 starter test for each exam lane", "1 personalized feedback credit", "0 mock tests"],
@@ -537,6 +540,7 @@ export function LandingPageClient({
                 current: false,
               },
               {
+                tier: "basic" as const,
                 name: "BASIC / เบสิก",
                 price: "฿399",
                 feats: ["12 AI feedbacks", "Read/Vocab 15 · Literacy 20 · Convo 10", "2 mock tests"],
@@ -546,6 +550,7 @@ export function LandingPageClient({
                 current: false,
               },
               {
+                tier: "premium" as const,
                 name: "PREMIUM / พรีเมียม",
                 price: "฿699",
                 feats: ["30 AI feedbacks / month", "Read/Vocab 30 · Literacy 50 · Convo 20", "4 mock tests"],
@@ -555,6 +560,7 @@ export function LandingPageClient({
                 current: false,
               },
               {
+                tier: "vip" as const,
                 name: "VIP / วีไอพี",
                 price: "฿999",
                 feats: ["60 AI feedbacks / month", "Unlimited practice lanes", "6 mock tests"],
@@ -599,17 +605,60 @@ export function LandingPageClient({
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href={p.href}
-                  className={cn(
-                    "mt-8 block w-full border-4 border-black py-4 text-center text-sm font-black uppercase",
-                    p.featured
-                      ? "bg-white text-ep-blue hover:bg-ep-yellow"
-                      : "bg-neutral-900 text-white hover:bg-ep-yellow hover:text-neutral-900",
-                  )}
-                >
-                  {p.cta}
-                </Link>
+                {p.tier === "free" ? (
+                  <Link
+                    href={p.href}
+                    className={cn(
+                      "mt-8 block w-full border-4 border-black py-4 text-center text-sm font-black uppercase",
+                      p.featured
+                        ? "bg-white text-ep-blue hover:bg-ep-yellow"
+                        : "bg-neutral-900 text-white hover:bg-ep-yellow hover:text-neutral-900",
+                    )}
+                  >
+                    {p.cta}
+                  </Link>
+                ) : (
+                  <div className="mt-8 space-y-3">
+                    {user ? (
+                      <button
+                        type="button"
+                        disabled={billingLoading}
+                        onClick={() => void startUpgradePromptPay(p.tier)}
+                        className={cn(
+                          "block w-full border-4 border-black py-4 text-center text-sm font-black uppercase",
+                          p.featured
+                            ? "bg-white text-ep-blue hover:bg-ep-yellow"
+                            : "bg-neutral-900 text-white hover:bg-ep-yellow hover:text-neutral-900",
+                        )}
+                      >
+                        Pay by QR / PromptPay
+                      </button>
+                    ) : (
+                      <Link
+                        href={`/login?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`}
+                        className={cn(
+                          "block w-full border-4 border-black py-4 text-center text-sm font-black uppercase",
+                          p.featured
+                            ? "bg-white text-ep-blue hover:bg-ep-yellow"
+                            : "bg-neutral-900 text-white hover:bg-ep-yellow hover:text-neutral-900",
+                        )}
+                      >
+                        Login for QR payment
+                      </Link>
+                    )}
+                    <Link
+                      href={user ? `/pricing?plan=${p.tier}` : `/login?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`}
+                      className={cn(
+                        "block w-full border-4 border-black py-3 text-center text-xs font-black uppercase",
+                        p.featured
+                          ? "bg-ep-yellow text-neutral-900 hover:bg-white"
+                          : "bg-white text-neutral-900 hover:bg-ep-yellow",
+                      )}
+                    >
+                      View all payment options
+                    </Link>
+                  </div>
+                )}
               </div>
             ))}
           </div>
