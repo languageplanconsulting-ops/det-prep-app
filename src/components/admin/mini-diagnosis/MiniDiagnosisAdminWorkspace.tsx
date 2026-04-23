@@ -7,7 +7,16 @@ import { MINI_DIAGNOSIS_STEP_COUNT } from "@/lib/mini-diagnosis/sequence";
 import { buildMiniDiagnosisTaskTemplateJson } from "@/lib/mini-diagnosis/upload";
 import { mt } from "@/lib/mock-test/mock-test-styles";
 
-type SetRow = { id: string; name: string; itemCount: number };
+type SetRow = { id: string; name: string; itemCount: number; internalName?: string; userTitle?: string };
+type ExistingSetItem = {
+  step_index: number;
+  task_type: string;
+  time_limit_sec: number;
+  rest_after_step_sec: number;
+  content: Record<string, unknown> | null;
+  correct_answer: Record<string, unknown> | null;
+  is_ai_graded: boolean;
+};
 
 type ChoiceQuestion = {
   question: string;
@@ -185,6 +194,7 @@ export function MiniDiagnosisAdminWorkspace() {
   const [userTitle, setUserTitle] = useState("");
   const [busy, setBusy] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
+  const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
 
   const [dictationOne, setDictationOne] = useState("");
   const [dictationTwo, setDictationTwo] = useState("");
@@ -281,6 +291,8 @@ export function MiniDiagnosisAdminWorkspace() {
         id: row.id,
         name: row.name,
         itemCount: row.stepCount ?? 0,
+        internalName: (row as { internal_name?: string }).internal_name,
+        userTitle: (row as { user_title?: string }).user_title,
       })),
     );
   }, []);
@@ -562,6 +574,110 @@ export function MiniDiagnosisAdminWorkspace() {
     await loadSets();
   };
 
+  const loadExistingSet = useCallback(async (setId: string) => {
+    setLoadingSetId(setId);
+    setBanner(null);
+    const res = await fetch(`/api/admin/mini-diagnosis/${setId}`, {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    const json = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      set?: { internal_name?: string; user_title?: string };
+      items?: ExistingSetItem[];
+    };
+    setLoadingSetId(null);
+    if (!res.ok || !json.set || !json.items) {
+      setBanner(json.error ?? "Could not load the mini diagnosis set.");
+      return;
+    }
+
+    const items = json.items;
+    const pick = (taskType: string, nth = 0) => items.filter((item) => item.task_type === taskType)[nth] ?? null;
+    const dict1 = pick("dictation", 0);
+    const dict2 = pick("dictation", 1);
+    const realWord = pick("real_english_word");
+    const vocab = pick("vocabulary_reading");
+    const fitb1 = pick("fill_in_blanks", 0);
+    const fitb2 = pick("fill_in_blanks", 1);
+    const listening = pick("interactive_listening");
+    const photo = pick("write_about_photo");
+    const rts = pick("read_then_speak");
+
+    setSetName(String(json.set.internal_name ?? ""));
+    setUserTitle(String(json.set.user_title ?? ""));
+    setDictationOne(String((dict1?.content as { reference_sentence?: unknown } | null)?.reference_sentence ?? ""));
+    setDictationTwo(String((dict2?.content as { reference_sentence?: unknown } | null)?.reference_sentence ?? ""));
+    setRealWords(
+      Array.isArray((realWord?.content as { real_words?: unknown[] } | null)?.real_words)
+        ? ((realWord?.content as { real_words?: unknown[] }).real_words ?? []).map((v) => String(v ?? "")).join("\n")
+        : "",
+    );
+    setFakeWords(
+      Array.isArray((realWord?.content as { fake_words?: unknown[] } | null)?.fake_words)
+        ? ((realWord?.content as { fake_words?: unknown[] }).fake_words ?? []).map((v) => String(v ?? "")).join("\n")
+        : "",
+    );
+
+    const vocabContent = (vocab?.content ?? {}) as Record<string, unknown>;
+    setVocabTitle(String(vocabContent.titleEn ?? ""));
+    setVocabPassage1(String((vocabContent.passage as { p1?: unknown } | undefined)?.p1 ?? ""));
+    setVocabPassage2(String((vocabContent.passage as { p2?: unknown } | undefined)?.p2 ?? ""));
+    setVocabPassage3(String((vocabContent.passage as { p3?: unknown } | undefined)?.p3 ?? ""));
+    setVocabQuestions(normalizeChoiceQuestionArray(vocabContent.vocabularyQuestions, 6));
+    setVocabMissingParagraph({
+      question: String((vocabContent.missingParagraph as { question?: unknown } | undefined)?.question ?? ""),
+      options: normalizeChoiceQuestionArray([vocabContent.missingParagraph], 1)[0].options,
+      correctAnswer: String((vocabContent.missingParagraph as { correctAnswer?: unknown } | undefined)?.correctAnswer ?? ""),
+    });
+    setVocabInformationLocation({
+      question: String((vocabContent.informationLocation as { question?: unknown } | undefined)?.question ?? ""),
+      options: normalizeChoiceQuestionArray([vocabContent.informationLocation], 1)[0].options,
+      correctAnswer: String((vocabContent.informationLocation as { correctAnswer?: unknown } | undefined)?.correctAnswer ?? ""),
+    });
+    setVocabBestTitle({
+      question: String((vocabContent.bestTitle as { question?: unknown } | undefined)?.question ?? ""),
+      options: normalizeChoiceQuestionArray([vocabContent.bestTitle], 1)[0].options,
+      correctAnswer: String((vocabContent.bestTitle as { correctAnswer?: unknown } | undefined)?.correctAnswer ?? ""),
+    });
+    setVocabMainIdea({
+      question: String((vocabContent.mainIdea as { question?: unknown } | undefined)?.question ?? ""),
+      options: normalizeChoiceQuestionArray([vocabContent.mainIdea], 1)[0].options,
+      correctAnswer: String((vocabContent.mainIdea as { correctAnswer?: unknown } | undefined)?.correctAnswer ?? ""),
+    });
+    setVocabJsonDraft(JSON.stringify({ content: vocabContent }, null, 2));
+
+    setFitbOneJson(
+      JSON.stringify(
+        {
+          content: fitb1?.content ?? {},
+          correct_answer: fitb1?.correct_answer ?? null,
+        },
+        null,
+        2,
+      ),
+    );
+    setFitbTwoJson(
+      JSON.stringify(
+        {
+          content: fitb2?.content ?? {},
+          correct_answer: fitb2?.correct_answer ?? null,
+        },
+        null,
+        2,
+      ),
+    );
+
+    const listeningContent = (listening?.content ?? {}) as Record<string, unknown>;
+    setListeningScript(String(listeningContent.script ?? ""));
+    setListeningQuestions(normalizeChoiceQuestionArray(listeningContent.questions, 5));
+    setListeningJsonDraft(JSON.stringify({ content: listeningContent }, null, 2));
+
+    setPhotoUrl(String((photo?.content as { image_url?: unknown } | null)?.image_url ?? ""));
+    setReadThenSpeakTopic(String((rts?.content as { topic?: unknown } | null)?.topic ?? ""));
+    setBanner("Mini diagnosis set loaded into the builder. Edit anything, then upload again.");
+  }, []);
+
   return (
     <div className="space-y-8">
       <header>
@@ -599,14 +715,27 @@ export function MiniDiagnosisAdminWorkspace() {
               >
                 <div>
                   <p className="text-xl font-black text-[#004AAD]">{set.name}</p>
-                  <p className="text-sm text-neutral-600">{set.itemCount}/{MINI_DIAGNOSIS_STEP_COUNT} steps</p>
+                  <p className="text-sm text-neutral-600">
+                    {set.itemCount}/{MINI_DIAGNOSIS_STEP_COUNT} steps
+                    {set.internalName ? ` · ${set.internalName}` : ""}
+                  </p>
                 </div>
-                <Link
-                  href="/mini-diagnosis/start"
-                  className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-4 py-2 text-sm font-black shadow-[4px_4px_0_0_#000]"
-                >
-                  Test diagnosis
-                </Link>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void loadExistingSet(set.id)}
+                    disabled={loadingSetId === set.id}
+                    className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black shadow-[4px_4px_0_0_#000] disabled:opacity-60"
+                  >
+                    {loadingSetId === set.id ? "Loading..." : "Load into builder"}
+                  </button>
+                  <Link
+                    href="/mini-diagnosis/start"
+                    className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-4 py-2 text-sm font-black shadow-[4px_4px_0_0_#000]"
+                  >
+                    Test diagnosis
+                  </Link>
+                </div>
               </div>
             ))
           )}

@@ -10,6 +10,8 @@ function mapCompleteSets(data: any[] | null | undefined) {
     .map((row: any) => ({
       id: row.id as string,
       name: (row.user_title as string) || (row.name as string),
+      internal_name: row.internal_name as string,
+      user_title: row.user_title as string,
       stepCount: row.mini_diagnosis_set_items?.[0]?.count ?? 0,
     }))
     .filter((row) => row.stepCount === MINI_DIAGNOSIS_STEP_COUNT);
@@ -21,7 +23,7 @@ export async function GET() {
     const supabase = createServiceRoleSupabase();
     const { data, error } = await supabase
       .from("mini_diagnosis_sets")
-      .select("id,name,user_title,mini_diagnosis_set_items(count)")
+      .select("id,name,internal_name,user_title,mini_diagnosis_set_items(count)")
       .eq("is_active", true)
       .order("created_at", { ascending: false });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -36,7 +38,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("mini_diagnosis_sets")
-    .select("id,name,user_title,mini_diagnosis_set_items(count)")
+    .select("id,name,internal_name,user_title,mini_diagnosis_set_items(count)")
     .eq("is_active", true)
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
