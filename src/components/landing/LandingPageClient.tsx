@@ -47,6 +47,7 @@ export function LandingPageClient({
   const [ftLinkedEmail, setFtLinkedEmail] = useState<string | null>(null);
   const [ftErr, setFtErr] = useState<string | null>(null);
   const [stickyOn, setStickyOn] = useState(false);
+  const [paymentErr, setPaymentErr] = useState<string | null>(null);
   const { user, loading: billingLoading, startUpgradePromptPay } = useBillingActions();
   const {
     isAdmin,
@@ -135,6 +136,24 @@ export function LandingPageClient({
       setFtLoading(false);
     }
   }, [ftEmail, ftName]);
+
+  const openLandingPromptPay = useCallback(
+    async (tier: "basic" | "premium" | "vip") => {
+      try {
+        setPaymentErr(null);
+        await startUpgradePromptPay(tier);
+      } catch (error) {
+        setPaymentErr(
+          error instanceof Error
+            ? error.message
+            : "เปิดหน้าชำระเงิน QR ไม่สำเร็จ กรุณาลองอีกครั้ง",
+        );
+        const pricing = document.getElementById("pricing");
+        pricing?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    },
+    [startUpgradePromptPay],
+  );
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-neutral-900">
@@ -527,6 +546,14 @@ export function LandingPageClient({
             </p>
             <h2 className="text-3xl font-black sm:text-5xl">Choose your plan / เลือกแพ็กเกจ</h2>
           </header>
+          {paymentErr ? (
+            <div className="mx-auto mb-8 max-w-3xl border-4 border-black bg-[#fee2e2] p-4 text-left shadow-[8px_8px_0_0_#000]">
+              <p className="text-lg font-black text-[#b91c1c]">
+                เปิดหน้าชำระเงิน QR ไม่สำเร็จ
+              </p>
+              <p className="mt-1 text-sm font-semibold text-neutral-800">{paymentErr}</p>
+            </div>
+          ) : null}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
@@ -735,7 +762,7 @@ export function LandingPageClient({
                       <button
                         type="button"
                         disabled={billingLoading}
-                        onClick={() => void startUpgradePromptPay(p.tier)}
+                        onClick={() => void openLandingPromptPay(p.tier)}
                         className={cn(
                           "block w-full border-4 border-black py-4 text-center text-sm font-black uppercase",
                           p.featured
@@ -743,7 +770,7 @@ export function LandingPageClient({
                             : "bg-neutral-900 text-white hover:bg-ep-yellow hover:text-neutral-900",
                         )}
                       >
-                        Pay by QR / PromptPay
+                        ชำระด้วย QR พร้อมเพย์
                       </button>
                     ) : (
                       <Link
@@ -755,7 +782,7 @@ export function LandingPageClient({
                             : "bg-neutral-900 text-white hover:bg-ep-yellow hover:text-neutral-900",
                         )}
                       >
-                        Create account for QR payment
+                        สมัครก่อนเพื่อจ่าย QR
                       </Link>
                     )}
                     <Link
@@ -767,7 +794,7 @@ export function LandingPageClient({
                           : "bg-white text-neutral-900 hover:bg-ep-yellow",
                       )}
                     >
-                      View all payment options
+                      ดูตัวเลือกการชำระเงินทั้งหมด
                     </Link>
                   </div>
                 )}
