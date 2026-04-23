@@ -47,6 +47,7 @@ export function LandingPageClient({
   const [ftLinkedEmail, setFtLinkedEmail] = useState<string | null>(null);
   const [ftErr, setFtErr] = useState<string | null>(null);
   const [stickyOn, setStickyOn] = useState(false);
+  const [paymentErr, setPaymentErr] = useState<string | null>(null);
   const { user, loading: billingLoading, startUpgradePromptPay } = useBillingActions();
   const {
     isAdmin,
@@ -135,6 +136,24 @@ export function LandingPageClient({
       setFtLoading(false);
     }
   }, [ftEmail, ftName]);
+
+  const openLandingPromptPay = useCallback(
+    async (tier: "basic" | "premium" | "vip") => {
+      try {
+        setPaymentErr(null);
+        await startUpgradePromptPay(tier);
+      } catch (error) {
+        setPaymentErr(
+          error instanceof Error
+            ? error.message
+            : "เปิดหน้าชำระเงิน QR ไม่สำเร็จ กรุณาลองอีกครั้ง",
+        );
+        const pricing = document.getElementById("pricing");
+        pricing?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    },
+    [startUpgradePromptPay],
+  );
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-neutral-900">
@@ -527,13 +546,27 @@ export function LandingPageClient({
             </p>
             <h2 className="text-3xl font-black sm:text-5xl">Choose your plan / เลือกแพ็กเกจ</h2>
           </header>
+          {paymentErr ? (
+            <div className="mx-auto mb-8 max-w-3xl border-4 border-black bg-[#fee2e2] p-4 text-left shadow-[8px_8px_0_0_#000]">
+              <p className="text-lg font-black text-[#b91c1c]">
+                เปิดหน้าชำระเงิน QR ไม่สำเร็จ
+              </p>
+              <p className="mt-1 text-sm font-semibold text-neutral-800">{paymentErr}</p>
+            </div>
+          ) : null}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
                 tier: "free" as const,
                 name: "FREE / ฟรี",
                 price: "฿0",
-                feats: ["1 mini diagnosis", "1 starter test for each exam lane", "1 personalized feedback credit", "0 mock tests"],
+                summaryRows: [
+                  "1 mini diagnosis",
+                  "1 starter test for each exam lane",
+                  "1 personalized feedback credit",
+                  "0 mock tests",
+                ],
+                details: [],
                 cta: "Start free / เริ่มฟรี",
                 href: "/login",
                 featured: false,
@@ -543,7 +576,38 @@ export function LandingPageClient({
                 tier: "basic" as const,
                 name: "BASIC / เบสิก",
                 price: "฿399",
-                feats: ["12 AI feedbacks", "Read/Vocab 15 · Literacy 20 · Convo 10", "2 mock tests"],
+                summaryRows: [
+                  "12 AI feedbacks / month",
+                  "Read/Vocab 15 · Literacy 20 · Convo 10",
+                  "2 mock tests / month",
+                ],
+                details: [
+                  {
+                    title: "AI feedback 12 ครั้ง / เดือน คืออะไร?",
+                    body:
+                      "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 12 ครั้งต่อเดือน เลือกใช้กับข้อไหนก็ได้ตามต้องการ",
+                  },
+                  {
+                    title: "Mock test 2 ครั้ง / เดือน คืออะไร?",
+                    body:
+                      "เป็น full-length test ประมาณ 1 ชั่วโมง เพื่อดูคะแนนแบบ over-estimated score, จุดอ่อนของคุณ และช่วยวางแผนว่าจะเอาเวลาไปฝึกส่วนไหนต่อให้คุ้มขึ้นโดยไม่เสียเวลา",
+                  },
+                  {
+                    title: "Read / Vocab 15 หมายถึงอะไร?",
+                    body:
+                      "ฝึกข้อสอบเต็มชุดของสายอ่านและคำศัพท์ได้รวม 15 ชุดต่อเดือน",
+                  },
+                  {
+                    title: "Literacy 20 หมายถึงอะไร?",
+                    body:
+                      "รวม listen and type, choose the real word และ fill in the blank ได้ 20 ชุดเต็มต่อเดือน",
+                  },
+                  {
+                    title: "Interactive conversation 10 หมายถึงอะไร?",
+                    body:
+                      "ฝึก listening conversation แบบเต็มชุดได้ 10 ครั้งต่อเดือน",
+                  },
+                ],
                 cta: "Choose / เลือก",
                 href: "/login",
                 featured: false,
@@ -553,7 +617,38 @@ export function LandingPageClient({
                 tier: "premium" as const,
                 name: "PREMIUM / พรีเมียม",
                 price: "฿699",
-                feats: ["30 AI feedbacks / month", "Read/Vocab 30 · Literacy 50 · Convo 20", "4 mock tests"],
+                summaryRows: [
+                  "30 AI feedbacks / month",
+                  "Read/Vocab 30 · Literacy 50 · Convo 20",
+                  "4 mock tests / month",
+                ],
+                details: [
+                  {
+                    title: "AI feedback 30 ครั้ง / เดือน คืออะไร?",
+                    body:
+                      "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 30 ครั้งต่อเดือน เลือกใช้กับข้อไหนก็ได้ตามแผนของคุณ",
+                  },
+                  {
+                    title: "Mock test 4 ครั้ง / เดือน คืออะไร?",
+                    body:
+                      "เป็น full-length test ประมาณ 1 ชั่วโมง เพื่อดูคะแนนแบบ over-estimated score, จุดอ่อน และช่วยให้รู้ว่าควรใช้เวลาฝึกตรงไหนต่อแบบฉลาดขึ้น",
+                  },
+                  {
+                    title: "Read / Vocab 30 หมายถึงอะไร?",
+                    body:
+                      "ฝึกข้อสอบเต็มชุดของสายอ่านและคำศัพท์ได้รวม 30 ชุดต่อเดือน",
+                  },
+                  {
+                    title: "Literacy 50 หมายถึงอะไร?",
+                    body:
+                      "รวม listen and type, choose the real word และ fill in the blank ได้ 50 ชุดเต็มต่อเดือน",
+                  },
+                  {
+                    title: "Interactive conversation 20 หมายถึงอะไร?",
+                    body:
+                      "ฝึก listening conversation แบบเต็มชุดได้ 20 ครั้งต่อเดือน",
+                  },
+                ],
                 cta: "Choose / เลือก",
                 href: "/login",
                 featured: true,
@@ -563,7 +658,28 @@ export function LandingPageClient({
                 tier: "vip" as const,
                 name: "VIP / วีไอพี",
                 price: "฿999",
-                feats: ["60 AI feedbacks / month", "Unlimited practice lanes", "6 mock tests"],
+                summaryRows: [
+                  "60 AI feedbacks / month",
+                  "Unlimited practice lanes",
+                  "6 mock tests / month",
+                ],
+                details: [
+                  {
+                    title: "AI feedback 60 ครั้ง / เดือน คืออะไร?",
+                    body:
+                      "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 60 ครั้งต่อเดือน เลือกใช้ได้ตามต้องการ",
+                  },
+                  {
+                    title: "Unlimited practice lanes คืออะไร?",
+                    body:
+                      "เข้าถึงข้อสอบฝึกทุกชุดในทุกหมวด และมีอัปเดตข้อใหม่เพิ่มทุกเดือน เหมาะกับคนที่อยากฝึกต่อเนื่องแบบไม่ติดเพดาน",
+                  },
+                  {
+                    title: "Mock test 6 ครั้ง / เดือน คืออะไร?",
+                    body:
+                      "เป็น full-length test ประมาณ 1 ชั่วโมง เพื่อดูคะแนนแบบ over-estimated score, จุดอ่อน และวางแผนใช้เวลาฝึกต่อให้แม่นขึ้น",
+                  },
+                ],
                 cta: "Choose / เลือก",
                 href: "/login",
                 featured: false,
@@ -593,7 +709,7 @@ export function LandingPageClient({
                   <span className="text-lg font-normal">/mo / เดือน</span>
                 </p>
                 <ul className="mt-8 space-y-3 ep-stat text-sm">
-                  {p.feats.map((f) => (
+                  {p.summaryRows.map((f) => (
                     <li
                       key={f}
                       className={cn(
@@ -605,6 +721,29 @@ export function LandingPageClient({
                     </li>
                   ))}
                 </ul>
+                {p.details.length ? (
+                  <div className="mt-5 space-y-3">
+                    {p.details.map((item) => (
+                      <details
+                        key={item.title}
+                        className={cn(
+                          "group border-2 border-black bg-white/80",
+                          p.featured && "bg-white text-neutral-900",
+                        )}
+                      >
+                        <summary className="cursor-pointer list-none px-4 py-3 text-sm font-black leading-6">
+                          <span>{item.title}</span>
+                          <span className="ml-2 inline-block text-[#004aad] transition group-open:rotate-45">
+                            +
+                          </span>
+                        </summary>
+                        <div className="border-t-2 border-black px-4 py-3 text-sm font-semibold leading-6 text-neutral-700">
+                          {item.body}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                ) : null}
                 {p.tier === "free" ? (
                   <Link
                     href={p.href}
@@ -623,7 +762,7 @@ export function LandingPageClient({
                       <button
                         type="button"
                         disabled={billingLoading}
-                        onClick={() => void startUpgradePromptPay(p.tier)}
+                        onClick={() => void openLandingPromptPay(p.tier)}
                         className={cn(
                           "block w-full border-4 border-black py-4 text-center text-sm font-black uppercase",
                           p.featured
@@ -631,7 +770,7 @@ export function LandingPageClient({
                             : "bg-neutral-900 text-white hover:bg-ep-yellow hover:text-neutral-900",
                         )}
                       >
-                        Pay by QR / PromptPay
+                        ชำระด้วย QR พร้อมเพย์
                       </button>
                     ) : (
                       <Link
@@ -643,7 +782,7 @@ export function LandingPageClient({
                             : "bg-neutral-900 text-white hover:bg-ep-yellow hover:text-neutral-900",
                         )}
                       >
-                        Create account for QR payment
+                        สมัครก่อนเพื่อจ่าย QR
                       </Link>
                     )}
                     <Link
@@ -655,7 +794,7 @@ export function LandingPageClient({
                           : "bg-white text-neutral-900 hover:bg-ep-yellow",
                       )}
                     >
-                      View all payment options
+                      ดูตัวเลือกการชำระเงินทั้งหมด
                     </Link>
                   </div>
                 )}
