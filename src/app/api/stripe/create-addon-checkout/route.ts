@@ -62,8 +62,9 @@ export async function POST(req: Request) {
     const base = siteUrl();
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      locale: "auto",
       customer: customerId,
-      payment_method_types: ["card"],
+      payment_method_types: ["card", "promptpay"],
       allow_promotion_codes: true,
       line_items: [
         {

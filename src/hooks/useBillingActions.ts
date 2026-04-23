@@ -70,6 +70,33 @@ export function useBillingActions() {
     [user],
   );
 
+  const startUpgradePromptPay = useCallback(
+    async (tier: Tier) => {
+      if (tier === "free" || !user) {
+        window.location.href = "/pricing";
+        return;
+      }
+
+      const res = await fetch("/api/stripe/create-plan-invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          tier,
+          userId: user.id,
+          email: user.email,
+        }),
+      });
+
+      const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !json.url) {
+        throw new Error(json.error ?? "Could not start PromptPay invoice");
+      }
+      window.location.href = json.url;
+    },
+    [user],
+  );
+
   const openAddOnCatalog = useCallback((sku?: string) => {
     const next = sku ? `/pricing?focus=addons&sku=${encodeURIComponent(sku)}` : "/pricing?focus=addons";
     window.location.href = next;
@@ -102,6 +129,7 @@ export function useBillingActions() {
     user,
     loading,
     startUpgradeCheckout,
+    startUpgradePromptPay,
     openAddOnCatalog,
     startAddOnCheckout,
   };
