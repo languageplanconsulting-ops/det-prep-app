@@ -88,7 +88,17 @@ export async function pushContentBankSnapshotToSupabase(): Promise<{
     console.warn("[content-bank-sync] Could not merge dictation bank for push", err);
   }
   const { data: auth } = await supabase.auth.getUser();
-  const updatedBy = auth.user?.id ?? null;
+  let updatedBy: string | null = auth.user?.id ?? null;
+  if (updatedBy) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", updatedBy)
+      .maybeSingle();
+    if (!profile?.id) {
+      updatedBy = null;
+    }
+  }
   const now = new Date().toISOString();
   const { data, error } = await supabase
     .from("content_bank_snapshots")
@@ -146,4 +156,3 @@ export async function pullContentBankSnapshotFromSupabase(): Promise<{
   }
   return { ok: true, applied, serverUpdatedAt };
 }
-
