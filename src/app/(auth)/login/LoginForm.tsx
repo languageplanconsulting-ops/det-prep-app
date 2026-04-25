@@ -66,7 +66,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
     }
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       password,
     });
     if (error) {
