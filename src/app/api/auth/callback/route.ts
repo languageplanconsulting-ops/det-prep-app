@@ -9,14 +9,15 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { isBootstrapAdminEmail } from "@/lib/admin-emails";
+import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { sendWelcomeEmail } from "@/lib/notifications";
 import {
   COOKIE_AUTH_NEXT,
   COOKIE_SB_URL,
   decodeCookiePart,
 } from "@/lib/supabase-public-config";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { grantVIPOnSignup, normalizeEmail } from "@/lib/vip-access";
 
 function sanitizeNextPath(raw: string | null | undefined): string {
@@ -63,44 +64,30 @@ export async function GET(request: Request) {
     return res;
   }
 
-  const urlFromCookie = decodeCookiePart(cookieStore.get(COOKIE_SB_URL)?.value);
-  const admin = createServiceRoleSupabase(
-    urlFromCookie ? { supabaseUrl: urlFromCookie } : undefined,
-  );
   const norm = normalizeEmail(user.email);
+  const bootstrapAdmin = isBootstrapAdminEmail(user.email);
 
-  const { error: upsertError } = await admin.from("profiles").upsert(
-    {
-      id: user.id,
+  try {
+    await ensureProfileForAuthUser({
+      userId: user.id,
       email: norm,
-      full_name:
+      fullName:
         (user.user_metadata?.full_name as string | undefined) ?? null,
-      avatar_url:
+      avatarUrl:
         (user.user_metadata?.avatar_url as string | undefined) ?? null,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "id" },
-  );
-
-  if (upsertError) {
-    console.error("[auth/callback] profile upsert", upsertError.message);
-  }
-
-  if (isBootstrapAdminEmail(user.email)) {
-    const { error: adminErr } = await admin
-      .from("profiles")
-      .update({
-        role: "admin",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id);
-    if (adminErr) {
-      console.error("[auth/callback] admin role", adminErr.message);
-    }
+      role: bootstrapAdmin ? "admin" : null,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Profile upsert failed";
+    console.error("[auth/callback] profile upsert", message);
   }
 
   await grantVIPOnSignup(user.id, user.email);
 
+  const urlFromCookie = decodeCookiePart(cookieStore.get(COOKIE_SB_URL)?.value);
+  const admin = createServiceRoleSupabase(
+    urlFromCookie ? { supabaseUrl: urlFromCookie } : undefined,
+  );
   const { data: profile } = await admin
     .from("profiles")
     .select("tier")

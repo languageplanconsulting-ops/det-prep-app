@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -61,10 +62,12 @@ function featureCopy(tier: Tier) {
 }
 
 export function LoginWelcomeModal() {
+  const router = useRouter();
   const pathname = usePathname();
   const { effectiveTier, loading } = useEffectiveTier();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<UserSummary>({ label: "student", planStatus: "ACTIVE" });
+  const [freeFeedbackChoice, setFreeFeedbackChoice] = useState("write_about_photo");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -120,6 +123,152 @@ export function LoginWelcomeModal() {
   const vip = featureCopy("vip");
 
   if (!open || loading) return null;
+
+  if (effectiveTier === "free") {
+    const freeFeedbackOptions = [
+      { id: "write_about_photo", emoji: "✍️", label: "Write about photo" },
+      { id: "speak_about_photo", emoji: "🗣️", label: "Speak about photo" },
+      { id: "read_then_write", emoji: "📖", label: "Read then write" },
+      { id: "interactive_speaking", emoji: "💬", label: "Interactive speaking" },
+    ] as const;
+
+    return (
+      <div
+        className="fixed inset-0 z-[1200] flex items-center justify-center bg-[radial-gradient(#d1d5db_1px,transparent_1px)] bg-[size:24px_24px] bg-[#f3f4f6] p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-welcome-title"
+        onClick={close}
+      >
+        <div
+          className="relative max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-[24px] border-2 border-[#111111] bg-white p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)] md:p-8"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="mb-6 border-b border-gray-200 pb-5 text-center">
+            <div className="mb-3 inline-block rounded-full border border-gray-200 bg-gray-100 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gray-500">
+              Current Plan: Free
+            </div>
+            <h1
+              id="login-welcome-title"
+              className="text-2xl font-bold leading-tight text-[#004aad] md:text-3xl"
+            >
+              สิทธิ์การใช้งานฟรี
+              <br />
+              <span className="text-xl text-black">Your Free Access</span>
+            </h1>
+            <p className="mt-2 text-sm text-gray-600">
+              คุณสามารถทดลองใช้งานฟีเจอร์ต่างๆ ได้ตามสิทธิ์ด้านล่างนี้
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-wider">
+                1. ทักษะพื้นฐาน <span className="font-normal capitalize text-gray-500">(Standard Practice)</span>
+              </h2>
+              <span className="rounded border border-gray-200 bg-gray-100 px-2 py-0.5 font-mono text-[10px] font-bold">
+                1 TIME EACH
+              </span>
+            </div>
+
+            <div className="rounded-sm border border-gray-200 bg-gray-50 p-4">
+              <p className="mb-3 text-xs italic text-gray-500">
+                คุณสามารถทดลองฝึกทักษะต่อไปนี้ได้ <span className="font-bold text-black">อย่างละ 1 ครั้ง</span>:
+              </p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs font-medium">
+                <div className="flex items-center gap-2"><span className="text-[#004aad]">✓</span> Dictation</div>
+                <div className="flex items-center gap-2"><span className="text-[#004aad]">✓</span> Vocabulary Skills</div>
+                <div className="flex items-center gap-2"><span className="text-[#004aad]">✓</span> Fill in the Blank</div>
+                <div className="flex items-center gap-2"><span className="text-[#004aad]">✓</span> Reading Skills</div>
+                <div className="flex items-center gap-2"><span className="text-[#004aad]">✓</span> Interactive Convo</div>
+                <div className="flex items-center gap-2"><span className="text-[#004aad]">✓</span> Real Word</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[#004aad]">
+                2. ระบบ Personalized ฟีดแบ็ก{" "}
+                <span className="font-normal capitalize text-gray-500">(Personalized Feedback)</span>
+              </h2>
+              <span className="rounded border border-black bg-[#ffcc00] px-2 py-0.5 font-mono text-[10px] font-bold">
+                CHOOSE ONLY 1
+              </span>
+            </div>
+
+            <div className="relative rounded-sm border-2 border-[#004aad] bg-white p-4">
+              <p className="mb-3 text-xs leading-relaxed text-gray-600">
+                สัมผัสประสบการณ์การตรวจข้อสอบแบบ Personalized
+                <br />
+                <span className="font-bold text-black">
+                  เลือกทดลองได้เพียง 1 ทักษะเท่านั้น (Choose one to try):
+                </span>
+              </p>
+
+              <div className="space-y-2">
+                {freeFeedbackOptions.map((option) => {
+                  const checked = freeFeedbackChoice === option.id;
+                  return (
+                    <label key={option.id} className="flex cursor-pointer">
+                      <input
+                        type="radio"
+                        name="feedback_choice"
+                        className="sr-only"
+                        checked={checked}
+                        onChange={() => setFreeFeedbackChoice(option.id)}
+                      />
+                      <div
+                        className={`flex w-full items-center justify-between rounded-sm border p-3 transition-colors ${
+                          checked
+                            ? "border-[#004aad] bg-[#eff6ff]"
+                            : "border-gray-200 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span className="text-sm font-medium">
+                          {option.emoji} {option.label}
+                        </span>
+                        <div
+                          className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
+                            checked ? "border-[#004aad] bg-[#004aad]" : "border-gray-300 bg-white"
+                          }`}
+                        >
+                          <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              className="w-full rounded-sm border-2 border-[#111111] bg-[#004aad] py-3 text-sm font-bold text-white transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_#111111] active:translate-x-0 active:translate-y-0 active:shadow-none"
+              onClick={() => {
+                close();
+                router.push("/practice");
+              }}
+            >
+              เริ่มต้นทดลองใช้งาน (Start Free Trial)
+            </button>
+          </div>
+
+          <div className="mt-4 text-center">
+            <Link
+              href="/pricing"
+              className="font-mono text-[10px] text-gray-400 underline hover:text-[#004aad]"
+              onClick={close}
+            >
+              UPGRADE TO PREMIUM FOR MORE ACCESS
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

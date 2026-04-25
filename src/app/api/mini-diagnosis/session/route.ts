@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
+import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { MINI_DIAGNOSIS_FREE_LIFETIME_LIMIT, MINI_DIAGNOSIS_STEP_COUNT } from "@/lib/mini-diagnosis/sequence";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
@@ -56,6 +57,15 @@ export async function POST(req: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  await ensureProfileForAuthUser({
+    userId: user.id,
+    email: user.email ?? "",
+    fullName:
+      (user.user_metadata?.full_name as string | undefined) ?? null,
+    avatarUrl:
+      (user.user_metadata?.avatar_url as string | undefined) ?? null,
+  });
 
   const { data: setRow, error: setError } = await supabase
     .from("mini_diagnosis_sets")

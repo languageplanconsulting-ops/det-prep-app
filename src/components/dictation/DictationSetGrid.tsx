@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import {
   DICTATION_MAX_SCORE,
   DICTATION_SET_COUNT,
@@ -68,9 +68,10 @@ export function DictationSetGrid({
         }
 
         return (
-          <Link
+          <FreeQuotaLockedLink
             key={setNumber}
             href={href}
+            exam="dictation"
             className="ep-interactive ep-brutal relative block rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000] hover:bg-ep-yellow/15"
           >
             {complete ? (
@@ -86,7 +87,7 @@ export function DictationSetGrid({
             <p className="mt-1 text-[10px] text-neutral-500 truncate" title={set.hintText}>
               {set.hintText}
             </p>
-          </Link>
+          </FreeQuotaLockedLink>
         );
       })}
     </div>

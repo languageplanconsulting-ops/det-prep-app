@@ -66,13 +66,13 @@ export type TierDisplay = {
 
 export const TIER_ORDER: Tier[] = ["free", "basic", "premium", "vip"];
 
-/** Max sets per skill per monthly window (non-AI content). Conversation on free = 0 (locked). */
+/** Max sets per skill per monthly window (non-AI content). Free lifetime special-cases are handled by callers. */
 export const SET_LIMITS: Record<Tier, Record<ContentSkill, number>> = {
   free: {
     comprehension: 1,
     literacy: 1,
     vocabulary: 1,
-    conversation: 0,
+    conversation: 1,
   },
   basic: {
     comprehension: 15,
@@ -167,14 +167,6 @@ function minTierForDifficulty(d: Difficulty): Tier {
 // ---------------------------------------------------------------------------
 
 export function canAccessSkill(tier: Tier, skill: ContentSkill): AccessSkillResult {
-  if (skill === "conversation" && tier === "free") {
-    return {
-      allowed: false,
-      reason: "Interactive conversation is not included on the Free plan.",
-      upgradeRequired: "basic",
-    };
-  }
-
   const limit = SET_LIMITS[tier][skill];
   if (limit <= 0) {
     return {

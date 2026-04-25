@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import {
   CONVERSATION_DIFFICULTY_LABEL,
@@ -151,8 +152,9 @@ export function ConversationSetList({
               const cov = audioCoverage(exam);
               return (
                 <li key={exam.id} className="border-b-4 border-black last:border-b-0">
-                  <Link
+                  <FreeQuotaLockedLink
                     href={href}
+                    exam="conversation"
                     className="ep-btn-luxury ep-interactive grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-4 py-4 text-sm hover:bg-ep-yellow/20"
                   >
                     <div className="min-w-0">
@@ -183,7 +185,7 @@ export function ConversationSetList({
                       </span>
                     </div>
                     <span className="pl-2 text-right text-sm">{scoreCell}</span>
-                  </Link>
+                  </FreeQuotaLockedLink>
                 </li>
               );
             })

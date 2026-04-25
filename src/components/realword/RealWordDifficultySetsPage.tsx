@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import {
   REALWORD_DIFFICULTY_LABEL,
@@ -158,8 +159,9 @@ function SetList({
 
             return (
               <li key={setNumber}>
-                <Link
+                <FreeQuotaLockedLink
                   href={href}
+                  exam="realword"
                   className="ep-interactive block h-full rounded-sm border-4 border-black bg-white p-5 text-sm shadow-[4px_4px_0_0_#000] transition-colors hover:bg-ep-yellow/15"
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -209,7 +211,7 @@ function SetList({
                       </p>
                     </div>
                   </div>
-                </Link>
+                </FreeQuotaLockedLink>
               </li>
             );
           })

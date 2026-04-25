@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import type { PaidTier } from "@/lib/stripe";
+import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { getStripe, STRIPE_PLANS } from "@/lib/stripe";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
@@ -72,6 +73,14 @@ export async function POST(req: Request) {
 
   try {
     const admin = createServiceRoleSupabase();
+    await ensureProfileForAuthUser({
+      userId,
+      email: email.trim(),
+      fullName:
+        (user.user_metadata?.full_name as string | undefined) ?? null,
+      avatarUrl:
+        (user.user_metadata?.avatar_url as string | undefined) ?? null,
+    });
     const { data: profile, error: profileError } = await admin
       .from("profiles")
       .select("stripe_customer_id")

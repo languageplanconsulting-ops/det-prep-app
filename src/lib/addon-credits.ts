@@ -6,6 +6,13 @@ import { ADD_ON_CATALOG, type AddOnSku } from "@/lib/paywall-upsell";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
 export type AddOnCreditKind = "mock" | "feedback";
+export type FeedbackSurface =
+  | "write_about_photo"
+  | "speak_about_photo"
+  | "read_then_write"
+  | "interactive_speaking"
+  | "read_then_speak"
+  | "dialogue_summary";
 
 type AddOnRow = {
   id: string;
@@ -33,6 +40,20 @@ type InteractiveSpeakingCreditLockRow = {
   status: "pending" | "charged";
   charge_source: "plan" | "addon" | null;
 };
+
+const FREE_FEEDBACK_ALLOWED_SURFACES = new Set<FeedbackSurface>([
+  "write_about_photo",
+  "speak_about_photo",
+  "read_then_write",
+  "interactive_speaking",
+]);
+
+function freeFeedbackLockedReason(surface: FeedbackSurface): string {
+  if (FREE_FEEDBACK_ALLOWED_SURFACES.has(surface)) {
+    return "You already used your one free personalized feedback. / คุณใช้สิทธิ์ Personalized Feedback ฟรี 1 ครั้งครบแล้ว";
+  }
+  return "Free users can use personalized feedback one time on Write about photo, Speak about photo, Read then write, or Interactive speaking only. / ผู้ใช้ฟรีสามารถใช้ Personalized Feedback ได้ 1 ครั้ง เฉพาะ Write about photo, Speak about photo, Read then write หรือ Interactive speaking เท่านั้น";
+}
 
 export function creditsGrantedForSku(sku: AddOnSku): number {
   if (sku === "mock_1") return 1;
@@ -114,7 +135,10 @@ export async function consumeAddonCreditsForUser(
   return { ok: remainingToConsume <= 0, consumed };
 }
 
-export async function getAiCreditStateForUser(userId: string): Promise<{
+export async function getAiCreditStateForUser(
+  userId: string,
+  surface: FeedbackSurface = "read_then_write",
+): Promise<{
   allowed: boolean;
   reason: string | null;
   tier: Tier;
@@ -149,6 +173,24 @@ export async function getAiCreditStateForUser(userId: string): Promise<{
   }
 
   if (tier === "free") {
+    if (!FREE_FEEDBACK_ALLOWED_SURFACES.has(surface)) {
+      if (feedbackRemaining > 0) {
+        return {
+          allowed: true,
+          reason: null,
+          tier,
+          planRemaining: 0,
+          addonRemaining: feedbackRemaining,
+        };
+      }
+      return {
+        allowed: false,
+        reason: freeFeedbackLockedReason(surface),
+        tier,
+        planRemaining: 0,
+        addonRemaining: 0,
+      };
+    }
     if (!lifetimeUsed) {
       return {
         allowed: true,
@@ -169,7 +211,7 @@ export async function getAiCreditStateForUser(userId: string): Promise<{
     }
     return {
       allowed: false,
-      reason: "AI feedback quota reached. Upgrade or buy a feedback add-on.",
+      reason: freeFeedbackLockedReason(surface),
       tier,
       planRemaining: 0,
       addonRemaining: 0,
@@ -197,7 +239,10 @@ export async function getAiCreditStateForUser(userId: string): Promise<{
   };
 }
 
-export async function chargeAiCreditForUser(userId: string): Promise<{
+export async function chargeAiCreditForUser(
+  userId: string,
+  surface: FeedbackSurface = "read_then_write",
+): Promise<{
   ok: boolean;
   source: "plan" | "addon" | null;
 }> {
@@ -222,6 +267,10 @@ export async function chargeAiCreditForUser(userId: string): Promise<{
   }
 
   if (tier === "free") {
+    if (!FREE_FEEDBACK_ALLOWED_SURFACES.has(surface)) {
+      const consumed = await consumeAddonCreditsForUser(userId, "feedback", 1);
+      return { ok: consumed.ok, source: consumed.ok ? "addon" : null };
+    }
     if (!lifetimeUsed) {
       const { error } = await supabase
         .from("profiles")
@@ -287,7 +336,7 @@ export async function reserveInteractiveSpeakingCreditForAttempt(args: {
     };
   }
 
-  const credit = await getAiCreditStateForUser(userId);
+  const credit = await getAiCreditStateForUser(userId, "interactive_speaking");
   if (!credit.allowed) {
     return {
       ok: false,
@@ -320,7 +369,7 @@ export async function reserveInteractiveSpeakingCreditForAttempt(args: {
     return { ok: false, reason: insertError.message, source: null };
   }
 
-  const charged = await chargeAiCreditForUser(userId);
+  const charged = await chargeAiCreditForUser(userId, "interactive_speaking");
   if (!charged.ok) {
     await supabase.from("interactive_speaking_credit_locks").delete().eq("attempt_id", attemptId);
     return {

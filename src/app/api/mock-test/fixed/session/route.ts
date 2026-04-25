@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { consumeAddonCreditsForUser, getAddonBalancesForUser } from "@/lib/addon-credits";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { MOCK_TEST_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
+import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
 import { countBillableMockFixedSessions, mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
 import { isMockTestAvailableNow } from "@/lib/mock-test/mock-test-availability";
@@ -109,6 +110,15 @@ export async function POST(req: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  await ensureProfileForAuthUser({
+    userId: user.id,
+    email: user.email ?? "",
+    fullName:
+      (user.user_metadata?.full_name as string | undefined) ?? null,
+    avatarUrl:
+      (user.user_metadata?.avatar_url as string | undefined) ?? null,
+  });
 
   const { data: setRow, error: setError } = await supabase
     .from("mock_fixed_sets")

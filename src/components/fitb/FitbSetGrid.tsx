@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { FITB_MAX_SCORE, fitbMaxScore } from "@/lib/fitb-constants";
 import { getFitbProgress, loadFitbVisibleBank } from "@/lib/fitb-storage";
 import type { FitbDifficulty, FitbRoundNum } from "@/types/fitb";
@@ -70,9 +70,10 @@ export function FitbSetGrid({
           : `/practice/literacy/fill-in-blank/round/${round}/${difficulty}/${setNumber}`;
 
         return (
-          <Link
+          <FreeQuotaLockedLink
             key={setNumber}
             href={href}
+            exam="fitb"
             className="ep-interactive ep-brutal relative block rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000] hover:bg-ep-yellow/15"
           >
             {needsRedeem ? (
@@ -94,7 +95,7 @@ export function FitbSetGrid({
             <p className="mt-1 text-[10px] text-neutral-500">
               {n} blank{n === 1 ? "" : "s"} · {set.cefrLevel}
             </p>
-          </Link>
+          </FreeQuotaLockedLink>
         );
       })}
     </div>
