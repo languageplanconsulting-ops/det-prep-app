@@ -99,6 +99,78 @@ export function daysAgo(iso: string | null): string {
   return `${days} days ago`;
 }
 
+async function ensureProfilesForAuthUsers(): Promise<void> {
+  const supabase = createServiceRoleSupabase();
+  const authUsers: Array<{
+    id: string;
+    email: string | null;
+    created_at?: string | null;
+    user_metadata?: { full_name?: unknown } | null;
+  }> = [];
+
+  let page = 1;
+  const perPage = 1000;
+
+  while (true) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage });
+    if (error) {
+      console.error("[admin-subscription-data] listUsers", error.message);
+      return;
+    }
+
+    const users = data?.users ?? [];
+    authUsers.push(
+      ...users.map((user) => ({
+        id: user.id,
+        email: user.email ?? null,
+        created_at: user.created_at ?? null,
+        user_metadata: (user.user_metadata as { full_name?: unknown } | null | undefined) ?? null,
+      })),
+    );
+
+    if (users.length < perPage) break;
+    page += 1;
+  }
+
+  if (authUsers.length === 0) return;
+
+  const ids = authUsers.map((user) => user.id);
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("id")
+    .in("id", ids);
+
+  if (profilesError) {
+    console.error("[admin-subscription-data] select profiles", profilesError.message);
+    return;
+  }
+
+  const existing = new Set((profiles ?? []).map((row) => String(row.id)));
+  const missing = authUsers.filter((user) => !existing.has(user.id) && user.email);
+  if (missing.length === 0) return;
+
+  const nowIso = new Date().toISOString();
+  const rows = missing.map((user) => ({
+    id: user.id,
+    email: String(user.email).trim().toLowerCase(),
+    full_name:
+      typeof user.user_metadata?.full_name === "string"
+        ? user.user_metadata.full_name.trim() || null
+        : null,
+    tier: "free",
+    created_at: user.created_at ?? nowIso,
+    updated_at: nowIso,
+  }));
+
+  const { error: upsertError } = await supabase
+    .from("profiles")
+    .upsert(rows, { onConflict: "id" });
+
+  if (upsertError) {
+    console.error("[admin-subscription-data] upsert missing profiles", upsertError.message);
+  }
+}
+
 function sortProfileRows(
   rows: Record<string, unknown>[],
   sort: string,
@@ -158,6 +230,7 @@ export async function fetchSubscriptionList(params: {
   };
 }> {
   const supabase = createServiceRoleSupabase();
+  await ensureProfilesForAuthUsers();
   const pageSize = Math.min(Math.max(params.limit, 1), 100);
   const page = Math.max(params.page, 1);
 

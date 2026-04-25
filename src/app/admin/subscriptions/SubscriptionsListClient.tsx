@@ -107,6 +107,7 @@ export function SubscriptionsListClient() {
   const [status, setStatus] = useState("all");
   const [payment, setPayment] = useState("all");
   const [sort, setSort] = useState("newest");
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const limit = 25;
 
@@ -167,6 +168,54 @@ export function SubscriptionsListClient() {
     });
   };
 
+  const updateTier = async (row: Row, nextTier: string) => {
+    setSavingId(row.id);
+    try {
+      const res = await fetch(`/api/admin/subscriptions/${row.id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tier: nextTier,
+          reason: "Updated from subscriptions list",
+          tier_expires_at: nextTier === "free" ? null : row.tier_expires_at,
+          vip_granted_by_course: nextTier === "vip" ? row.vip_granted_by_course : false,
+        }),
+      });
+
+      if (!res.ok) {
+        const json = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(json.error ?? "Could not update plan");
+      }
+
+      setRows((prev) =>
+        prev.map((item) =>
+          item.id === row.id
+            ? {
+                ...item,
+                tier: nextTier,
+                vip_granted_by_course: nextTier === "vip" ? item.vip_granted_by_course : false,
+              }
+            : item,
+        ),
+      );
+      push({
+        type: "success",
+        titleEn: `Plan updated to ${nextTier}.`,
+        titleTh: `อัปเดตแพลนเป็น ${nextTier} แล้ว`,
+      });
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Failed to update plan.",
+        titleTh: "อัปเดตแพลนไม่สำเร็จ",
+      });
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   const from = total === 0 ? 0 : (page - 1) * limit + 1;
   const to = Math.min(page * limit, total);
 
@@ -199,13 +248,13 @@ export function SubscriptionsListClient() {
             [
               "Total users / ผู้ใช้ทั้งหมด",
               stats.totalUsers,
-              "All registered accounts",
+              "All registered accounts (free + paid)",
               "neutral",
             ],
             [
               "Active paid / ชำระแล้วใช้งาน",
               stats.activePaid,
-              `Basic: ${stats.tierBreakdown.basic} · Premium: ${stats.tierBreakdown.premium} · VIP: ${stats.tierBreakdown.vip}`,
+              `Free users visible too · Basic: ${stats.tierBreakdown.basic} · Premium: ${stats.tierBreakdown.premium} · VIP: ${stats.tierBreakdown.vip}`,
               "blue",
             ],
             [
@@ -310,6 +359,7 @@ export function SubscriptionsListClient() {
                 "Expiry",
                 "Sessions",
                 "Last active",
+                "Manual plan",
                 "Actions",
               ].map((h) => (
                 <th key={h} className="border-b-4 border-black px-2 py-2 text-xs font-black uppercase">
@@ -321,7 +371,7 @@ export function SubscriptionsListClient() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={11} className="p-6 text-center ep-stat">
+                <td colSpan={12} className="p-6 text-center ep-stat">
                   Loading… / กำลังโหลด
                 </td>
               </tr>
@@ -409,6 +459,23 @@ export function SubscriptionsListClient() {
                             (86400 * 1000),
                         )}d ago`
                       : "—"}
+                  </td>
+                  <td className="border-b-2 border-black px-2 py-2">
+                    <select
+                      value={r.tier}
+                      disabled={savingId === r.id}
+                      onChange={(e) => void updateTier(r, e.target.value)}
+                      className="rounded-[4px] border-2 border-black bg-white px-2 py-1 text-xs font-bold uppercase"
+                    >
+                      {["free", "basic", "premium", "vip"].map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="mt-1 text-[10px] font-bold text-neutral-500">
+                      {savingId === r.id ? "Saving…" : "Change directly here"}
+                    </p>
                   </td>
                   <td className="border-b-2 border-black px-2 py-2">
                     <details className="relative">

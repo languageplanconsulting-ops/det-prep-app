@@ -38,11 +38,43 @@ export async function PATCH(request: Request, ctx: Ctx) {
   }
 
   const supabase = createServiceRoleSupabase();
-  const { data: before } = await supabase
+  let { data: before } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", userId)
     .maybeSingle();
+
+  if (!before) {
+    const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId);
+    if (authError || !authUser.user?.email) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const { error: createError } = await supabase.from("profiles").upsert(
+      {
+        id: userId,
+        email: String(authUser.user.email).trim().toLowerCase(),
+        full_name:
+          typeof authUser.user.user_metadata?.full_name === "string"
+            ? authUser.user.user_metadata.full_name.trim() || null
+            : null,
+        tier: "free",
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" },
+    );
+
+    if (createError) {
+      return NextResponse.json({ error: createError.message }, { status: 500 });
+    }
+
+    const { data: afterCreate } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
+    before = afterCreate;
+  }
 
   if (!before) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -52,11 +84,21 @@ export async function PATCH(request: Request, ctx: Ctx) {
     updated_at: new Date().toISOString(),
   };
 
+  let requestedTier: string | null = null;
   if (typeof body.tier === "string") {
     patch.tier = body.tier;
+    requestedTier = body.tier;
   }
   if (typeof body.tier_expires_at === "string" || body.tier_expires_at === null) {
     patch.tier_expires_at = body.tier_expires_at;
+  } else if (requestedTier) {
+    if (requestedTier === "free") {
+      patch.tier_expires_at = null;
+    } else if (!before.tier_expires_at) {
+      const next = new Date();
+      next.setDate(next.getDate() + 30);
+      patch.tier_expires_at = next.toISOString();
+    }
   }
   if (typeof body.full_name === "string") {
     patch.full_name = body.full_name;
