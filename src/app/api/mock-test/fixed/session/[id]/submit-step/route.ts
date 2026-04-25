@@ -38,19 +38,27 @@ function normalizeText(v: unknown): string {
   return String(v ?? "").trim().toLowerCase();
 }
 
+function normalizeDictationText(v: unknown): string {
+  return String(v ?? "")
+    .normalize("NFKC")
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+    .toLowerCase()
+    .replace(/'/g, "")
+    .replace(/[^a-z0-9,\s]+/g, " ")
+    .replace(/\s*,\s*/g, ", ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function normalize160(v: number): number {
   if (!Number.isFinite(v)) return 0;
   return Math.max(0, Math.min(160, v));
 }
 
 function tokenizeDictationForScoring(v: unknown): string[] {
-  const s = String(v ?? "")
-    .toLowerCase()
-    // Full stop should NOT be counted in scoring.
-    .replace(/[.]/g, " ");
-  // Count words and punctuation tokens (comma, question mark, etc.)
-  // except full stop which is removed above.
-  const tokens = s.match(/[a-z0-9]+(?:'[a-z0-9]+)*|[,!?;:()"[\]{}\-]/g);
+  const s = normalizeDictationText(v);
+  const tokens = s.match(/[a-z0-9]+|,/g);
   return tokens ?? [];
 }
 
@@ -112,11 +120,17 @@ function fallbackHeuristicScore160(taskType: string, answer: unknown, correct: u
     if (taskType === "fill_in_blanks") {
       return fitbHeuristicScore160(answer, correct, content);
     }
-    const actualTokens = tokenizeDictationForScoring((answer as { answer?: unknown })?.answer ?? answer);
+    const actualRaw = (answer as { answer?: unknown })?.answer ?? answer;
     const expectedRaw =
       (correct as { answer?: unknown })?.answer ??
       (content as { reference_sentence?: unknown } | null)?.reference_sentence ??
       correct;
+    const normalizedActual = normalizeDictationText(actualRaw);
+    const normalizedExpected = normalizeDictationText(expectedRaw);
+    if (normalizedActual && normalizedExpected && normalizedActual === normalizedExpected) {
+      return 160;
+    }
+    const actualTokens = tokenizeDictationForScoring(actualRaw);
     const expectedTokens = tokenizeDictationForScoring(expectedRaw);
     if (expectedTokens.length === 0) return 0;
     const matched = expectedTokens.reduce((acc, token, idx) => {

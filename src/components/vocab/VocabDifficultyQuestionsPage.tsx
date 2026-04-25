@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import { VOCAB_SESSION_LABEL, VOCAB_SESSION_MAX } from "@/lib/vocab-constants";
 import { getVocabPassageProgress, loadVocabVisibleBank } from "@/lib/vocab-storage";
@@ -71,9 +72,10 @@ export function VocabDifficultyQuestionsPage({
           rows.map((row, idx) => {
             const prog = getVocabPassageProgress(round, sessionLevel, row.setNumber, row.passageNumber);
             return (
-              <Link
+              <FreeQuotaLockedLink
                 key={`${row.setNumber}-${row.passageNumber}-${idx}`}
                 href={`/practice/comprehension/vocabulary/round/${round}/${row.setNumber}/${sessionLevel}/${row.passageNumber}`}
+                exam="vocabulary"
                 className="ep-interactive ep-brutal-reading block rounded-sm bg-white p-4 hover:bg-ep-yellow/25"
               >
                 <p className="text-lg font-black">Question {idx + 1}</p>
@@ -81,7 +83,7 @@ export function VocabDifficultyQuestionsPage({
                 <p className="ep-stat mt-2 text-xs text-neutral-600">
                   {prog ? `Best: ${prog.bestScore}/${maxScore}` : "Not attempted yet"}
                 </p>
-              </Link>
+              </FreeQuotaLockedLink>
             );
           })
         )}

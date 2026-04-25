@@ -14,6 +14,21 @@ import {
 import { claimBootstrapAdminClient } from "@/lib/claim-bootstrap-admin";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
+function formatLoginError(message: string): string {
+  const raw = message.trim();
+  const lower = raw.toLowerCase();
+  if (lower.includes("email not confirmed")) {
+    return "Email not confirmed / อีเมลนี้ยังไม่ได้ยืนยัน";
+  }
+  if (lower.includes("invalid login credentials")) {
+    return "Invalid email or password / อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+  }
+  if (lower.includes("too many requests")) {
+    return "Too many attempts. Please wait and try again. / ลองหลายครั้งเกินไป กรุณารอสักครู่แล้วลองใหม่";
+  }
+  return raw;
+}
+
 export function LoginForm({ redirectTo }: { redirectTo: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -50,10 +65,25 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
     if (error) {
       setBusy(false);
-      setErr("Invalid email or password / อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+      setErr(formatLoginError(error.message));
+      return;
+    }
+    const registerRes = await fetch("/api/auth/register-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({}),
+    });
+    if (!registerRes.ok) {
+      const j = (await registerRes.json().catch(() => ({}))) as { error?: string };
+      setBusy(false);
+      setErr(j.error ?? "Could not create your profile after login.");
       return;
     }
     await claimBootstrapAdminClient(supabase);

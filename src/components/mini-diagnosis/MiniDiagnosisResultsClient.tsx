@@ -401,6 +401,48 @@ export function MiniDiagnosisResultsClient({ sessionId }: { sessionId: string })
           </div>
         </section>
 
+        <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="border-4 border-black bg-white p-5 shadow-[8px_8px_0_0_#111111]">
+            <p className="text-2xl font-black uppercase text-[#004AAD]">How to read this result / วิธีดูผลนี้</p>
+            <div className="mt-4 space-y-3 text-sm font-bold leading-relaxed text-neutral-700">
+              <p>
+                This is a mini test, so the score accuracy will not be the same as the full mock test.
+                It is designed to give you a quick snapshot of your current strengths and weaknesses.
+              </p>
+              <p>
+                นี่คือแบบทดสอบขนาดสั้น ดังนั้นความแม่นของคะแนนจะไม่เท่ากับ full mock test
+                แต่ผลนี้จะช่วยให้คุณเห็นภาพเร็วๆ ว่าตอนนี้คุณเด่นด้านไหน และควรกลับไปแก้จุดไหนก่อน
+              </p>
+              <p>
+                Use this report to decide where to practice next, especially in the skills and task types where your score dropped most.
+              </p>
+            </div>
+          </div>
+
+          <div className="border-4 border-black bg-[#fff9e6] p-5 shadow-[8px_8px_0_0_#111111]">
+            <p className="text-xl font-black uppercase text-[#004AAD]">Next step / ไปต่อยังไงดี</p>
+            <p className="mt-4 text-sm font-bold leading-relaxed text-neutral-700">
+              If you want more practice, more skill-building, and access to 500+ exam-bank questions plus mock tests each month,
+              you can explore the packages and choose what fits your study plan.
+            </p>
+            <p className="mt-3 text-sm font-bold leading-relaxed text-neutral-700">
+              ถ้าคุณอยากฝึกเพิ่มแบบเป็นระบบ มีคลังข้อสอบมากขึ้น และมี mock test ให้ทำต่อทุกเดือน
+              สามารถดูแพ็กเกจเพิ่มเติมได้ตามแผนการเรียนของคุณ
+            </p>
+            <div className="mt-5 flex flex-col gap-3">
+              <Link
+                href="/pricing"
+                className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-4 text-center text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[6px_6px_0_0_#111111]"
+              >
+                Explore packages / ดูแพ็กเกจ
+              </Link>
+              <p className="text-xs font-bold text-neutral-500">
+                No pressure — this is here when you want more structured practice.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section className="border-4 border-black bg-white p-5 shadow-[8px_8px_0_0_#111111]">
           <p className="text-2xl font-black uppercase text-[#004AAD]">Step review / รีวิวทีละข้อ</p>
           <div className="mt-6 space-y-4">

@@ -75,6 +75,7 @@ export function VocabularyReadingMockExam({
   const [missingReveal, setMissingReveal] = useState(false);
   const [internalStep, setInternalStep] = useState(0);
   const [internalAnswers, setInternalAnswers] = useState<string[]>([]);
+  const [localSubmitting, setLocalSubmitting] = useState(false);
 
   const step = aggregateMode ? internalStep : completedSteps;
   const block = blocks[step];
@@ -97,6 +98,12 @@ export function VocabularyReadingMockExam({
     }
   }, [step, missingSelectionStep]);
 
+  useEffect(() => {
+    if (!submitting) {
+      setLocalSubmitting(false);
+    }
+  }, [submitting]);
+
   const shuffled = useMemo(() => {
     if (!block) return { shuffled: [] as string[], correctIndex: 0 };
     return shuffleMcOptions(block.options, block.correctAnswer);
@@ -114,6 +121,7 @@ export function VocabularyReadingMockExam({
     const nextAnswers = [...internalAnswers, choice];
     const endStep = VOCAB_READING_COMBINED_STEPS - 1;
     if (step >= endStep) {
+      setLocalSubmitting(true);
       let correct = 0;
       nextAnswers.forEach((picked, idx) => {
         if (idx >= blocks.length) return;
@@ -140,12 +148,12 @@ export function VocabularyReadingMockExam({
   };
 
   const submitChoice = (choice: string) => {
-    if (submitting) return;
+    if (submitting || localSubmitting) return;
     commitChoice(choice);
   };
 
   const onOptionClick = (opt: string) => {
-    if (submitting) return;
+    if (submitting || localSubmitting) return;
     const revealStep = aggregateMode ? 6 : 5;
     if (step < revealStep) {
       submitChoice(opt);
@@ -241,7 +249,7 @@ export function VocabularyReadingMockExam({
                   <button
                     type="button"
                     onClick={() => onOptionClick(opt)}
-                    disabled={submitting}
+                    disabled={submitting || localSubmitting}
                     className={`w-full border-4 border-black px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition hover:bg-ep-yellow/30 ${
                       step === (aggregateMode ? 6 : 5) && missingReveal && missingPick === opt
                         ? "bg-ep-yellow/50"
@@ -257,15 +265,31 @@ export function VocabularyReadingMockExam({
               <button
                 type="button"
                 onClick={() => submitChoice(missingPick)}
-                disabled={submitting}
+                disabled={submitting || localSubmitting}
                 className="mt-5 w-full border-4 border-black bg-ep-blue px-4 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] disabled:opacity-50"
               >
-                {submitting ? "Submitting..." : "Submit answer / ส่งคำตอบ"}
+                {submitting || localSubmitting ? "Submitting..." : "Submit answer / ส่งคำตอบ"}
               </button>
             ) : null}
           </div>
         </div>
       </section>
+
+      {localSubmitting ? (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4">
+          <div className="w-full max-w-md border-4 border-black bg-white p-6 text-center shadow-[10px_10px_0_0_#111111]">
+            <p className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-[#004AAD]">
+              Loading
+            </p>
+            <p className="mt-3 text-2xl font-black uppercase text-[#111111]">
+              กำลังประมวลผลคำตอบ
+            </p>
+            <p className="mt-2 text-sm font-bold text-neutral-700">
+              Loading next section...
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -24,6 +24,7 @@ type QuotaResponse = {
   expiresAt?: string | null;
   ai?: {
     used?: number;
+    planRemaining?: number;
     addonRemaining?: number;
     totalRemaining?: number;
   };
@@ -37,6 +38,7 @@ type QuotaResponse = {
 const PRACTICE_STORAGE_EVENTS = [
   "storage",
   "focus",
+  "ep-reading-storage",
   "ep-vocab-storage",
   "ep-dictation-storage",
   "ep-fitb-storage",
@@ -153,6 +155,7 @@ export default function ProfilePage() {
   const [mockUsed, setMockUsed] = useState(0);
   const [aiAddonRemaining, setAiAddonRemaining] = useState(0);
   const [mockAddonRemaining, setMockAddonRemaining] = useState(0);
+  const [aiPlanRemainingOverride, setAiPlanRemainingOverride] = useState<number | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [practiceTick, setPracticeTick] = useState(0);
   const { effectiveTier, realTier, loading } = useEffectiveTier();
@@ -190,6 +193,9 @@ export default function ProfilePage() {
         const json = (await res.json()) as QuotaResponse;
         setExpiresAt(json.expiresAt ?? null);
         setAiUsed(Math.max(0, Number(json.ai?.used ?? 0)));
+        setAiPlanRemainingOverride(
+          json.ai?.planRemaining == null ? null : Math.max(0, Number(json.ai.planRemaining)),
+        );
         setMockUsed(Math.max(0, Number(json.mock?.used ?? 0)));
         setAiAddonRemaining(Math.max(0, Number(json.ai?.addonRemaining ?? 0)));
         setMockAddonRemaining(Math.max(0, Number(json.mock?.addonRemaining ?? 0)));
@@ -217,7 +223,7 @@ export default function ProfilePage() {
 
   const aiLimit = AI_MONTHLY_LIMIT[effectiveTier];
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[effectiveTier];
-  const aiRemaining = Math.max(0, aiLimit - aiUsed) + aiAddonRemaining;
+  const aiRemaining = (aiPlanRemainingOverride ?? Math.max(0, aiLimit - aiUsed)) + aiAddonRemaining;
   const mockRemaining = Math.max(0, mockLimit - mockUsed) + mockAddonRemaining;
   const daysLeft = getDaysLeft(expiresAt);
 
@@ -240,6 +246,7 @@ export default function ProfilePage() {
 
   const examCredits = useMemo(() => {
     const vocabulary = getNonApiReminderSnapshot("vocabulary", effectiveTier);
+    const reading = getNonApiReminderSnapshot("reading", effectiveTier);
     const dictation = getNonApiReminderSnapshot("dictation", effectiveTier);
     const fitb = getNonApiReminderSnapshot("fitb", effectiveTier);
     const realword = getNonApiReminderSnapshot("realword", effectiveTier);
@@ -247,14 +254,24 @@ export default function ProfilePage() {
 
     const cards: ExamCreditCard[] = [
       {
+        id: "reading",
+        label: "Reading",
+        category: "Comprehension",
+        remaining: reading.remaining,
+        limit: reading.limit,
+        used: reading.used,
+        unit: reading.cycleKind === "lifetime" ? "free tries / lifetime" : "questions / month",
+        note: reading.poolMessage,
+      },
+      {
         id: "vocabulary",
         label: "Vocabulary",
         category: "Comprehension",
         remaining: vocabulary.remaining,
         limit: vocabulary.limit,
         used: vocabulary.used,
-        unit: "questions / month",
-        note: "Tracks your Vocabulary practice bank for the current month.",
+        unit: vocabulary.cycleKind === "lifetime" ? "free tries / lifetime" : "questions / month",
+        note: vocabulary.poolMessage,
       },
       {
         id: "dictation",
@@ -263,8 +280,8 @@ export default function ProfilePage() {
         remaining: dictation.remaining,
         limit: dictation.limit,
         used: dictation.used,
-        unit: "shared literacy tests / month",
-        note: "Shares the same Literacy pool with Fill in the Blank and Real Word.",
+        unit: dictation.cycleKind === "lifetime" ? "free tries / lifetime" : "shared literacy tests / month",
+        note: dictation.poolMessage,
       },
       {
         id: "fitb",
@@ -273,8 +290,8 @@ export default function ProfilePage() {
         remaining: fitb.remaining,
         limit: fitb.limit,
         used: fitb.used,
-        unit: "shared literacy tests / month",
-        note: "This shows the shared Literacy allowance, not a separate FITB-only bucket.",
+        unit: fitb.cycleKind === "lifetime" ? "free tries / lifetime" : "shared literacy tests / month",
+        note: fitb.poolMessage,
       },
       {
         id: "realword",
@@ -283,8 +300,8 @@ export default function ProfilePage() {
         remaining: realword.remaining,
         limit: realword.limit,
         used: realword.used,
-        unit: "shared literacy tests / month",
-        note: "Real Word uses the same shared Literacy credit pool as Dictation and FITB.",
+        unit: realword.cycleKind === "lifetime" ? "free tries / lifetime" : "shared literacy tests / month",
+        note: realword.poolMessage,
       },
       {
         id: "conversation",
@@ -293,8 +310,8 @@ export default function ProfilePage() {
         remaining: conversation.remaining,
         limit: conversation.limit,
         used: conversation.used,
-        unit: "sets / month",
-        note: "Tracks your Interactive Conversation practice sets for the current month.",
+        unit: conversation.cycleKind === "lifetime" ? "free tries / lifetime" : "sets / month",
+        note: conversation.poolMessage,
       },
       {
         id: "mock",
@@ -327,6 +344,7 @@ export default function ProfilePage() {
     return cards;
   }, [
     aiAddonRemaining,
+    aiPlanRemainingOverride,
     aiLimit,
     aiRemaining,
     aiUsed,

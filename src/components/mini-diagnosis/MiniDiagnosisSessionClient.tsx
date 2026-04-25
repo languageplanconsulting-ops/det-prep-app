@@ -53,7 +53,6 @@ export function MiniDiagnosisSessionClient({ sessionId }: { sessionId: string })
   const [session, setSession] = useState<SessionPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [resting, setResting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dictationTimerStarted, setDictationTimerStarted] = useState(true);
   const timer = usePhaseTimer();
@@ -99,12 +98,6 @@ export function MiniDiagnosisSessionClient({ sessionId }: { sessionId: string })
     timer.resetTimer(stepIndex, current.time_limit_sec);
   }, [current?.step_index, current?.task_type]);
 
-  useEffect(() => {
-    if (!resting || !timer.isExpired) return;
-    setResting(false);
-    void load();
-  }, [resting, timer.isExpired]);
-
   const question = current
     ? {
         id: `${sessionId}-${current.step_index}`,
@@ -136,12 +129,6 @@ export function MiniDiagnosisSessionClient({ sessionId }: { sessionId: string })
     }
     if (json.complete) {
       router.push(`/mini-diagnosis/results/${sessionId}`);
-      return;
-    }
-    if (current.rest_after_step_sec > 0) {
-      setResting(true);
-      timer.resetTimer(999, current.rest_after_step_sec);
-      setSubmitting(false);
       return;
     }
     await load();
@@ -217,13 +204,6 @@ export function MiniDiagnosisSessionClient({ sessionId }: { sessionId: string })
             onSubmit={submit}
           />
         </section>
-
-        {resting ? (
-          <section className="border-4 border-black bg-black p-5 text-center text-white shadow-[8px_8px_0_0_#111111]">
-            <p className="text-xl font-black text-[#FFCC00]">Reset and breathe / พักสั้นๆ</p>
-            <p className="mt-2 text-sm font-bold">Next task is loading in {timer.formattedTime}</p>
-          </section>
-        ) : null}
       </div>
     </main>
   );

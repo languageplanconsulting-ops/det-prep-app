@@ -11,6 +11,7 @@ import {
 const STORAGE_EVENTS = [
   "storage",
   "focus",
+  "ep-reading-storage",
   "ep-vocab-storage",
   "ep-dictation-storage",
   "ep-fitb-storage",
@@ -65,7 +66,7 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
   }, []);
 
   const snapshot = useMemo(() => {
-    if (loading || effectiveTier !== "basic") return null;
+    if (loading || (effectiveTier !== "basic" && effectiveTier !== "free")) return null;
     return getNonApiReminderSnapshot(exam, effectiveTier);
   }, [effectiveTier, exam, loading, tick]);
 
@@ -76,11 +77,17 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
   const remainingLabel =
     snapshot.remaining === 1 ? "1 test left" : `${snapshot.remaining} tests left`;
   const usageLabel = `${snapshot.used}/${snapshot.limit} used`;
+  const planLabel = effectiveTier === "free" ? "Free plan reminder" : "Basic plan reminder";
+  const windowLabel = snapshot.cycleKind === "lifetime" ? "Lifetime usage" : "Monthly usage";
+  const footerLabel =
+    snapshot.cycleKind === "lifetime"
+      ? "Free access is one-time per supported exam bank."
+      : "Resets with the next monthly cycle.";
 
   return (
     <section
       className={`relative overflow-hidden rounded-[28px] border p-5 shadow-[0_18px_50px_rgba(0,0,0,0.08)] transition-all duration-500 ease-out md:p-6 ${tone.panel}`}
-      aria-label={`${snapshot.examLabel} remaining monthly tests`}
+      aria-label={`${snapshot.examLabel} remaining ${snapshot.cycleKind === "lifetime" ? "lifetime" : "monthly"} tests`}
     >
       <div className="pointer-events-none absolute -right-10 top-[-72px] h-40 w-40 rounded-full bg-white/55 blur-3xl" />
       <div className="pointer-events-none absolute -left-8 bottom-[-60px] h-28 w-28 rounded-full bg-[#ffcc00]/25 blur-2xl" />
@@ -89,10 +96,10 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
         <div className="max-w-2xl">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] ${tone.badge}`}>
-              Basic plan reminder
+              {planLabel}
             </span>
             <span className="rounded-full border border-black/10 bg-white/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-black/65">
-              {snapshot.monthLabel}
+              {snapshot.cycleLabel}
             </span>
           </div>
 
@@ -116,7 +123,7 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
             </div>
             <div className="text-right">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-                This month
+                {snapshot.cycleKind === "lifetime" ? "Free quota" : "This month"}
               </p>
               <p className="mt-1 text-sm font-bold text-black/70">{usageLabel}</p>
             </div>
@@ -124,7 +131,7 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
 
           <div>
             <div className="mb-2 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.18em] text-black/45">
-              <span>Monthly usage</span>
+              <span>{windowLabel}</span>
               <span>{progress}%</span>
             </div>
             <div className="h-3 overflow-hidden rounded-full bg-black/10">
@@ -143,7 +150,7 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
           Soft reminder only: your current access rules stay the same.
         </span>
         <span className="rounded-full bg-white/60 px-3 py-1.5">
-          Resets with the next monthly cycle.
+          {footerLabel}
         </span>
       </div>
     </section>

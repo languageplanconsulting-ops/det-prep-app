@@ -50,8 +50,9 @@ export function SignupForm({ redirectTo = "/practice" }: { redirectTo?: string }
     }
     setBusy(true);
     const origin = appOrigin();
+    const normalizedEmail = email.trim().toLowerCase();
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: normalizedEmail,
       password,
       options: {
         emailRedirectTo: origin
@@ -65,7 +66,19 @@ export function SignupForm({ redirectTo = "/practice" }: { redirectTo?: string }
       setErr(error.message);
       return;
     }
-    if (data.session && data.user) {
+    let hasSession = Boolean(data.session && data.user);
+
+    if (!hasSession && data.user) {
+      const signInFallback = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
+      });
+      if (!signInFallback.error && signInFallback.data.session && signInFallback.data.user) {
+        hasSession = true;
+      }
+    }
+
+    if (hasSession) {
       const res = await fetch("/api/auth/register-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,7 +104,7 @@ export function SignupForm({ redirectTo = "/practice" }: { redirectTo?: string }
     }
     setBusy(false);
     setInfo(
-      "Your account was created. You can sign in right away with your email and password.",
+      "Your account was created, but this workspace did not start your session automatically. Try signing in now. If the next screen says your email is not confirmed, Supabase email confirmation is still turned on.",
     );
   };
 

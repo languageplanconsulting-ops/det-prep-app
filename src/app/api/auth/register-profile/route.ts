@@ -1,12 +1,7 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import {
-  COOKIE_SB_URL,
-  decodeCookiePart,
-} from "@/lib/supabase-public-config";
+import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
-import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import {
   checkVIPEligibility,
   grantVIPOnSignup,
@@ -36,30 +31,24 @@ export async function POST(request: Request) {
     fullName = (user.user_metadata?.full_name as string | undefined) ?? null;
   }
 
-  const cookieStore = await cookies();
-  const urlFromCookie = decodeCookiePart(cookieStore.get(COOKIE_SB_URL)?.value);
-  const admin = createServiceRoleSupabase(
-    urlFromCookie ? { supabaseUrl: urlFromCookie } : undefined,
-  );
   const norm = normalizeEmail(user.email);
   const eligible = await checkVIPEligibility(user.email);
 
-  const { error: upsertError } = await admin.from("profiles").upsert(
-    {
-      id: user.id,
+  try {
+    await ensureProfileForAuthUser({
+      userId: user.id,
       email: norm,
-      full_name: fullName,
+      fullName,
+      avatarUrl:
+        (user.user_metadata?.avatar_url as string | undefined) ?? null,
       tier: eligible ? "vip" : "free",
-      vip_granted_by_course: eligible,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "id" },
-  );
-
-  if (upsertError) {
-    console.error("[register-profile]", upsertError.message);
+      vipGrantedByCourse: eligible,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Profile upsert failed";
+    console.error("[register-profile]", message);
     return NextResponse.json(
-      { error: upsertError.message },
+      { error: message },
       { status: 500 },
     );
   }

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
+import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import { READING_DIFFICULTY_LABEL, READING_DIFFICULTY_MAX } from "@/lib/reading-constants";
 import { getReadingExamProgress, loadReadingVisibleBank } from "@/lib/reading-storage";
 import type { ReadingDifficulty, ReadingRoundNum } from "@/types/reading";
@@ -50,6 +52,8 @@ export function ReadingDifficultySetsPage({
           Choose a question directly. No set selection step.
         </p>
       </header>
+
+      <NonApiExamQuotaReminder exam="reading" />
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -103,9 +107,10 @@ function QuestionGrid({
           const prog = getReadingExamProgress(round, difficulty, item.setNumber, item.examNumber);
           const href = `/practice/comprehension/reading/round/${round}/${difficulty}/${item.setNumber}/${item.examNumber}`;
           return (
-            <Link
+            <FreeQuotaLockedLink
               key={`${item.setNumber}-${item.examNumber}`}
               href={href}
+              exam="reading"
               className="ep-interactive ep-brutal-reading block rounded-sm bg-white p-4 hover:bg-ep-yellow/25"
             >
               <p className="text-lg font-black">Question {idx + 1}</p>
@@ -113,7 +118,7 @@ function QuestionGrid({
               <p className="ep-stat mt-2 text-xs text-neutral-600">
                 {prog ? `Best: ${prog.bestScore}/${maxScore}` : "Not attempted yet"}
               </p>
-            </Link>
+            </FreeQuotaLockedLink>
           );
         })
       )}
