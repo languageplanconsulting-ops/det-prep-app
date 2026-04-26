@@ -2,14 +2,20 @@
 
 import type { NotebookEntry } from "@/types/writing";
 
-export function syncNotebookEntryToServer(entry: NotebookEntry): void {
+export async function syncNotebookEntryToServer(
+  entry: NotebookEntry,
+): Promise<void> {
   if (typeof window === "undefined") return;
-  void fetch("/api/notebook/sync", {
+  const res = await fetch("/api/notebook/sync", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify({ entry }),
-  }).catch(() => {});
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error ?? "Notebook sync failed");
+  }
 }
 
 export function deleteNotebookEntryOnServer(clientEntryId: string): void {
@@ -38,4 +44,20 @@ export async function backfillNotebookEntriesToServer(
       /* ignore */
     }
   }
+}
+
+export async function fetchNotebookEntriesFromServer(): Promise<NotebookEntry[]> {
+  if (typeof window === "undefined") return [];
+  const res = await fetch("/api/notebook/sync", {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error ?? "Could not load notebook");
+  }
+  const body = (await res.json().catch(() => ({}))) as {
+    entries?: NotebookEntry[];
+  };
+  return Array.isArray(body.entries) ? body.entries : [];
 }

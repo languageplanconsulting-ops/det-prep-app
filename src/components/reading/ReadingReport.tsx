@@ -247,11 +247,11 @@ function VocabRow({
 
   if (known) return null;
 
-  const save = () => {
+  const save = async () => {
     if (saved) return;
     playBlinkBeep();
     try {
-      addNotebookEntry({
+      await addNotebookEntry({
         source: "reading-comprehension",
         categoryIds: normalizeCategoryIds([NOTEBOOK_BUILTIN.all, NOTEBOOK_BUILTIN.vocabulary]),
         titleEn: v.word,
@@ -289,7 +289,7 @@ function VocabRow({
         <div className="mt-1 grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={save}
+            onClick={() => void save()}
             className="border-4 border-black bg-ep-blue py-2 text-xs font-black uppercase tracking-wide text-white shadow-[3px_3px_0_0_#000]"
           >
             Add to notebook

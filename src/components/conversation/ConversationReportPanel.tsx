@@ -58,9 +58,9 @@ export function ConversationReportPanel({
     );
   };
 
-  const addWord = (word: string, translation: string) => {
+  const addWord = async (word: string, translation: string) => {
     playBlinkBeep();
-    addNotebookEntry({
+    await addNotebookEntry({
       source: "interactive-conversation",
       categoryIds: normalizeCategoryIds([NOTEBOOK_BUILTIN.all, NOTEBOOK_BUILTIN.vocabulary]),
       titleEn: word,
@@ -260,7 +260,7 @@ export function ConversationReportPanel({
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
-                        onClick={() => addWord(h.word, h.translation)}
+                        onClick={() => void addWord(h.word, h.translation)}
                         className="ep-btn-luxury w-full border-4 border-black bg-ep-blue py-2 text-xs font-black uppercase tracking-wide text-white shadow-[3px_3px_0_0_#000]"
                       >
                         Add to notebook

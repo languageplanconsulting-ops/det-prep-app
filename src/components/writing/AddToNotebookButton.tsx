@@ -136,12 +136,12 @@ export function AddToNotebookButton({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const runSave = (slug: string, extraIds: string[] = []) => {
+  const runSave = async (slug: string, extraIds: string[] = []) => {
     setSaveError(null);
     const ids = normalizeCategoryIds([NOTEBOOK_BUILTIN.all, slug, ...extraIds]);
     const p = getPayload();
     try {
-      addNotebookEntry({
+      await addNotebookEntry({
         source: entrySource,
         categoryIds: ids,
         titleEn: p.titleEn,
@@ -177,7 +177,7 @@ export function AddToNotebookButton({
 
   const confirm = () => {
     const slug = premadeToSlug(premade);
-    runSave(slug, [...extraCustom]);
+    void runSave(slug, [...extraCustom]);
   };
 
   const toggleCustom = (id: string) => {
@@ -196,7 +196,7 @@ export function AddToNotebookButton({
         type="button"
         onClick={() => {
           if (directSaveToProductionFeedback) {
-            runSave(premadeToSlug(suggestedPremade));
+            void runSave(premadeToSlug(suggestedPremade));
             return;
           }
           setOpen(true);
