@@ -188,10 +188,10 @@ function WordNotebookRow({
     return () => window.clearTimeout(id);
   }, [showAddedCelebration]);
 
-  const save = () => {
+  const save = async () => {
     if (saved) return;
     try {
-      addNotebookEntry({
+      await addNotebookEntry({
         source: "vocabulary-comprehension",
         categoryIds: normalizeCategoryIds([NOTEBOOK_BUILTIN.all, NOTEBOOK_BUILTIN.vocabulary]),
         titleEn: entry.word,
@@ -223,7 +223,7 @@ function WordNotebookRow({
       </p>
       <button
         type="button"
-        onClick={save}
+        onClick={() => void save()}
         disabled={saved}
         className={`mt-3 border-4 border-black px-3 py-2 text-xs font-black uppercase shadow-[4px_4px_0_0_#000] transition-transform active:translate-x-px active:translate-y-px ${
           saved ? "bg-green-600 text-white" : "bg-ep-yellow text-black hover:bg-[#ffe033]"

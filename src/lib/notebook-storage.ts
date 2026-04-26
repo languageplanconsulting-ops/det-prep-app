@@ -1,5 +1,6 @@
 import {
   backfillNotebookEntriesToServer,
+  fetchNotebookEntriesFromServer,
   deleteNotebookEntryOnServer,
   syncNotebookEntryToServer,
 } from "@/lib/notebook-server-sync";
@@ -9,6 +10,7 @@ export { backfillNotebookEntriesToServer };
 
 const ENTRIES_KEY = "ep-notebook-entries";
 const CATEGORIES_KEY = "ep-notebook-categories";
+let notebookMemoryCache: NotebookEntry[] | null = null;
 
 /** Built-in category ids (stable). Every entry should include `all` plus ≥1 premade content bucket. */
 export const NOTEBOOK_BUILTIN = {
@@ -178,20 +180,46 @@ export function loadNotebook(): NotebookEntry[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(ENTRIES_KEY);
-    if (!raw) return [];
+    if (!raw) return notebookMemoryCache ?? [];
     const parsed = JSON.parse(raw) as unknown[];
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) return notebookMemoryCache ?? [];
     const migrated = parsed
       .map(migrateEntry)
       .filter((e): e is NotebookEntry => e !== null);
+    notebookMemoryCache = migrated;
     return migrated;
   } catch {
-    return [];
+    return notebookMemoryCache ?? [];
   }
 }
 
 export function saveNotebook(entries: NotebookEntry[]): void {
+  notebookMemoryCache = entries;
   localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+}
+
+function mergeNotebookEntries(
+  localEntries: NotebookEntry[],
+  remoteEntries: NotebookEntry[],
+): NotebookEntry[] {
+  const byId = new Map<string, NotebookEntry>();
+  for (const entry of remoteEntries) byId.set(entry.id, entry);
+  for (const entry of localEntries) {
+    const prev = byId.get(entry.id);
+    if (!prev) {
+      byId.set(entry.id, entry);
+      continue;
+    }
+    const prevAt = Date.parse(prev.createdAt);
+    const nextAt = Date.parse(entry.createdAt);
+    if (!Number.isNaN(nextAt) && (Number.isNaN(prevAt) || nextAt >= prevAt)) {
+      byId.set(entry.id, entry);
+    }
+  }
+  return [...byId.values()].sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 }
 
 export function loadCustomCategories(): NotebookCustomCategory[] {
@@ -239,9 +267,9 @@ export function deleteCustomCategory(id: string): void {
   saveNotebook(entries);
 }
 
-export function addNotebookEntry(
+export async function addNotebookEntry(
   entry: Omit<NotebookEntry, "id" | "createdAt">,
-): NotebookEntry {
+): Promise<NotebookEntry> {
   const src: NotebookEntry["source"] =
     entry.source === "speaking-read-and-speak"
       ? "speaking-read-and-speak"
@@ -274,16 +302,31 @@ export function addNotebookEntry(
     id,
     createdAt: new Date().toISOString(),
   };
-  const list = loadNotebook();
-  list.unshift(full);
+  const list = [full, ...loadNotebook().filter((e) => e.id !== full.id)];
+  let serverOk = false;
+  let localOk = false;
+
+  try {
+    await syncNotebookEntryToServer(full);
+    serverOk = true;
+  } catch {
+    serverOk = false;
+  }
+
   try {
     saveNotebook(list);
+    localOk = true;
   } catch {
+    notebookMemoryCache = list;
+    localOk = false;
+  }
+
+  if (!serverOk && !localOk) {
     throw new Error(
-      "Notebook save failed — this browser may block storage or be full.",
+      "Notebook save failed — server sync and browser storage both failed.",
     );
   }
-  syncNotebookEntryToServer(full);
+
   return full;
 }
 
@@ -311,4 +354,16 @@ export function deleteNotebookEntry(id: string): void {
 /** One-time rewrite after migration (optional compact). */
 export function persistMigratedNotebook(): void {
   saveNotebook(loadNotebook());
+}
+
+export async function hydrateNotebookFromServer(): Promise<NotebookEntry[]> {
+  const local = loadNotebook();
+  const remote = await fetchNotebookEntriesFromServer();
+  const merged = mergeNotebookEntries(local, remote);
+  try {
+    saveNotebook(merged);
+  } catch {
+    notebookMemoryCache = merged;
+  }
+  return merged;
 }

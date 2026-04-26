@@ -145,3 +145,35 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 }
+
+export async function GET() {
+  try {
+    const supabase = await createRouteHandlerSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data, error } = await supabase
+      .from("notebook_sync")
+      .select("payload, updated_at")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false });
+
+    if (error) {
+      console.error("[notebook/sync] GET", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const entries = (data ?? [])
+      .map((row) => row.payload)
+      .filter(isNotebookEntryLike);
+
+    return NextResponse.json({ entries });
+  } catch (e) {
+    console.error("[notebook/sync] GET", e);
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
+}

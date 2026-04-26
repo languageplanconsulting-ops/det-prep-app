@@ -64,11 +64,11 @@ export function FitbReportPanel({
     onRedeemNow();
   };
 
-  const addWordToNotebook = (blankIndex: number) => {
+  const addWordToNotebook = async (blankIndex: number) => {
     const mw = set.missingWords[blankIndex];
     if (!mw) return;
     playBlinkBeep();
-    addNotebookEntry({
+    await addNotebookEntry({
       source: "fill-in-blank",
       categoryIds: normalizeCategoryIds([NOTEBOOK_BUILTIN.all, NOTEBOOK_BUILTIN.vocabulary]),
       titleEn: mw.correctWord,
@@ -146,7 +146,7 @@ export function FitbReportPanel({
                     ) : null}
                     <button
                       type="button"
-                      onClick={() => addWordToNotebook(i)}
+                    onClick={() => void addWordToNotebook(i)}
                       className="shrink-0 border-2 border-black bg-ep-yellow px-2 py-1 text-xs font-bold shadow-[2px_2px_0_0_#000]"
                     >
                       Add to notebook

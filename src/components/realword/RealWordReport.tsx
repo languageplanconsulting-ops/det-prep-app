@@ -70,9 +70,9 @@ export function RealWordReport({
   const pickedFake = wordSet.words.filter((w, i) => !w.is_real && selected.has(i));
   const realWords = wordSet.words.filter((w) => w.is_real);
 
-  const addToNotebook = (word: string, explanationThai: string, synonyms: string) => {
+  const addToNotebook = async (word: string, explanationThai: string, synonyms: string) => {
     playBlinkBeep();
-    addNotebookEntry({
+    await addNotebookEntry({
       source: "real-word",
       categoryIds: normalizeCategoryIds([NOTEBOOK_BUILTIN.all, NOTEBOOK_BUILTIN.vocabulary]),
       titleEn: word,
@@ -263,7 +263,7 @@ export function RealWordReport({
                 ) : (
                   <button
                     type="button"
-                    onClick={() => addToNotebook(w.word, w.explanationThai, w.synonyms)}
+                    onClick={() => void addToNotebook(w.word, w.explanationThai, w.synonyms)}
                     className="mt-3 border-4 border-black bg-ep-blue px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[3px_3px_0_0_#000]"
                   >
                     Add to notebook

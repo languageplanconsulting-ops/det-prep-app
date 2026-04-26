@@ -17,6 +17,7 @@ import {
   canRemovePremadeCategory,
   deleteCustomCategory,
   deleteNotebookEntry,
+  hydrateNotebookFromServer,
   loadCustomCategories,
   loadNotebook,
   normalizeCategoryIds,
@@ -349,6 +350,19 @@ export function NotebookList() {
     persistMigratedNotebook();
     reload();
   }, [reload]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void hydrateNotebookFromServer()
+      .then((serverEntries) => {
+        if (cancelled) return;
+        setEntries(serverEntries);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const key = "ep-notebook-server-backfill-v1";

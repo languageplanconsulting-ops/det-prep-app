@@ -53,11 +53,11 @@ export function FullReportNotebookButton({
   const [toast, setToast] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onClick = () => {
+  const onClick = async () => {
     setError(null);
     const preview = build();
     try {
-      addNotebookEntry({
+      await addNotebookEntry({
         source: entrySource,
         categoryIds: normalizeCategoryIds([NOTEBOOK_BUILTIN.all, NOTEBOOK_BUILTIN.productionFeedback]),
         titleEn: preview.titleEn,
@@ -87,7 +87,7 @@ export function FullReportNotebookButton({
 
   return (
     <>
-      <button ref={btnRef} type="button" onClick={onClick} className={className}>
+      <button ref={btnRef} type="button" onClick={() => void onClick()} className={className}>
         {t.add}
       </button>
       {error ? <p className="mt-2 text-xs font-bold text-red-700">{error}</p> : null}
