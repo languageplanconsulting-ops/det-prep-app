@@ -66,6 +66,12 @@ export function SubscriptionDetailClient() {
   const [expandedStudySessionId, setExpandedStudySessionId] = useState<string | null>(null);
   const [tierSel, setTierSel] = useState("free");
   const [expiryLocal, setExpiryLocal] = useState("");
+  const [aiUsedEdit, setAiUsedEdit] = useState("0");
+  const [lifetimeAiUsedEdit, setLifetimeAiUsedEdit] = useState(false);
+  const [grantCredits, setGrantCredits] = useState("1");
+  const [grantExpiryMode, setGrantExpiryMode] = useState("7d");
+  const [grantCustomExpiry, setGrantCustomExpiry] = useState("");
+  const [aiSaving, setAiSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -100,6 +106,13 @@ export function SubscriptionDetailClient() {
     setExpiryLocal(isoToDatetimeLocalValue(p.tier_expires_at as string | null | undefined));
   }, [data]);
 
+  useEffect(() => {
+    if (!data?.aiQuota) return;
+    const aiQuota = data.aiQuota as Record<string, unknown>;
+    setAiUsedEdit(String(aiQuota.monthlyUsed ?? 0));
+    setLifetimeAiUsedEdit(aiQuota.lifetimeAiUsed === true);
+  }, [data]);
+
   const profile = (data?.profile ?? {}) as Record<string, unknown>;
   const study = (data?.study ?? {}) as Record<string, unknown>;
   const weekly = (study.weeklyMinutes as number[]) ?? [0, 0, 0, 0];
@@ -108,6 +121,8 @@ export function SubscriptionDetailClient() {
   const notebookSync = (data?.notebookSync ?? []) as Record<string, unknown>[];
   const mockTestScores = (data?.mockTestScores ?? []) as Record<string, unknown>[];
   const studySessionScores = (data?.studySessionScores ?? []) as Record<string, unknown>[];
+  const aiQuota = (data?.aiQuota ?? {}) as Record<string, unknown>;
+  const feedbackCredits = (aiQuota.feedbackCredits ?? []) as Record<string, unknown>[];
 
   const saveName = async () => {
     const res = await fetch(`/api/admin/subscriptions/${userId}`, {
@@ -168,6 +183,128 @@ export function SubscriptionDetailClient() {
     setNoteText("");
     setNoteOpen(false);
     void load();
+  };
+
+  const saveAiMonthlyState = async () => {
+    setAiSaving(true);
+    try {
+      const res = await fetch(`/api/admin/subscriptions/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          ai_credits_used: Math.max(0, Math.round(Number(aiUsedEdit || 0))),
+          lifetime_ai_used: lifetimeAiUsedEdit,
+          reason: "Admin updated AI quota state",
+        }),
+      });
+      if (!res.ok) {
+        const json = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(json.error ?? "Could not update AI quota");
+      }
+      push({
+        type: "success",
+        titleEn: "AI quota state updated.",
+        titleTh: "อัปเดตสถานะโควตา AI แล้ว",
+      });
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Could not update AI quota",
+        titleTh: "อัปเดตโควตา AI ไม่สำเร็จ",
+      });
+    } finally {
+      setAiSaving(false);
+    }
+  };
+
+  const grantAiCredits = async () => {
+    setAiSaving(true);
+    try {
+      const body: Record<string, unknown> = {
+        credits: Math.max(0, Math.round(Number(grantCredits || 0))),
+        expiryMode: grantExpiryMode,
+        reason: "Admin manual AI credit grant",
+      };
+      if (grantExpiryMode === "custom" && grantCustomExpiry.trim()) {
+        body.expires_at = new Date(grantCustomExpiry).toISOString();
+      }
+      const res = await fetch(`/api/admin/subscriptions/${userId}/ai-credits`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const json = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(json.error ?? "Could not grant AI credits");
+      }
+      push({
+        type: "success",
+        titleEn: "AI credits granted.",
+        titleTh: "เพิ่มเครดิต AI แล้ว",
+      });
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Could not grant AI credits",
+        titleTh: "เพิ่มเครดิต AI ไม่สำเร็จ",
+      });
+    } finally {
+      setAiSaving(false);
+    }
+  };
+
+  const saveFeedbackCreditRow = async (row: Record<string, unknown>) => {
+    const grantedInput = window.prompt(
+      "Set granted credits / กำหนดเครดิตทั้งหมด",
+      String(row.credits_granted ?? 0),
+    );
+    if (grantedInput == null) return;
+    const usedInput = window.prompt(
+      "Set used credits / กำหนดเครดิตที่ใช้ไป",
+      String(row.credits_used ?? 0),
+    );
+    if (usedInput == null) return;
+    const expiryInput = window.prompt(
+      "Set expiry ISO/date-time, or leave empty for no expiry / ตั้งวันหมดอายุ หรือปล่อยว่าง",
+      typeof row.expires_at === "string" ? row.expires_at : "",
+    );
+    setAiSaving(true);
+    try {
+      const res = await fetch(`/api/admin/subscriptions/${userId}/ai-credits`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          creditId: row.id,
+          credits_granted: Math.max(0, Math.round(Number(grantedInput || 0))),
+          credits_used: Math.max(0, Math.round(Number(usedInput || 0))),
+          expires_at: expiryInput?.trim() ? new Date(expiryInput).toISOString() : null,
+          reason: "Admin edited AI credit row",
+        }),
+      });
+      if (!res.ok) {
+        const json = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(json.error ?? "Could not edit AI credit row");
+      }
+      push({
+        type: "success",
+        titleEn: "AI credit row updated.",
+        titleTh: "อัปเดตแถวเครดิต AI แล้ว",
+      });
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Could not edit AI credit row",
+        titleTh: "แก้ไขเครดิต AI ไม่สำเร็จ",
+      });
+    } finally {
+      setAiSaving(false);
+    }
   };
 
   const runAction = async () => {
@@ -413,6 +550,165 @@ export function SubscriptionDetailClient() {
               >
                 Send email (log) / ส่งอีเมล
               </button>
+            </div>
+          </section>
+
+          <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+            <h2 className="text-lg font-black">AI quota / โควตา AI</h2>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {[
+                ["Effective tier / tier ที่ใช้งานจริง", String(aiQuota.effectiveTier ?? "free")],
+                ["Monthly limit / ลิมิตรายเดือน", String(aiQuota.monthlyLimit ?? 0)],
+                ["Used this month / ใช้เดือนนี้", String(aiQuota.monthlyUsed ?? 0)],
+                ["Plan left / คงเหลือจากแพ็ก", String(aiQuota.monthlyRemaining ?? 0)],
+                ["Extra credits / เครดิตเพิ่ม", String(aiQuota.addonRemaining ?? 0)],
+                ["Total left / คงเหลือรวม", String(aiQuota.totalRemaining ?? 0)],
+              ].map(([k, v]) => (
+                <div
+                  key={String(k)}
+                  className="rounded-[4px] border-2 border-black bg-neutral-50 p-3"
+                >
+                  <p className="text-[10px] font-bold uppercase text-neutral-600">{k}</p>
+                  <p className="ep-stat mt-1 text-lg font-black text-[#004AAD]">{v}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 border-t-2 border-neutral-200 pt-4">
+              <p className="text-sm font-black">Edit monthly state / แก้สถานะรายเดือน</p>
+              <div className="mt-2 flex flex-wrap items-end gap-3">
+                <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                  AI used this month / ใช้ไปเดือนนี้
+                  <input
+                    value={aiUsedEdit}
+                    onChange={(e) => setAiUsedEdit(e.target.value)}
+                    className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                    inputMode="numeric"
+                  />
+                </label>
+                <label className="flex items-center gap-2 text-xs font-bold text-neutral-700">
+                  <input
+                    type="checkbox"
+                    checked={lifetimeAiUsedEdit}
+                    onChange={(e) => setLifetimeAiUsedEdit(e.target.checked)}
+                  />
+                  Free lifetime feedback already used / ใช้สิทธิ์ฟรี 1 ครั้งแล้ว
+                </label>
+                <button
+                  type="button"
+                  onClick={() => void saveAiMonthlyState()}
+                  disabled={aiSaving}
+                  className="rounded-[4px] border-4 border-black bg-[#004AAD] px-3 py-2 text-xs font-black text-white shadow-[4px_4px_0_0_#000]"
+                >
+                  {aiSaving ? "Saving…" : "Save AI state / บันทึก"}
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 border-t-2 border-neutral-200 pt-4">
+              <p className="text-sm font-black">Grant extra AI credits / เพิ่มเครดิต AI ชั่วคราว</p>
+              <div className="mt-2 flex flex-wrap items-end gap-3">
+                <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                  Credits / จำนวนเครดิต
+                  <input
+                    value={grantCredits}
+                    onChange={(e) => setGrantCredits(e.target.value)}
+                    className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                    inputMode="numeric"
+                  />
+                </label>
+                <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                  Expiry / วันหมดอายุ
+                  <select
+                    value={grantExpiryMode}
+                    onChange={(e) => setGrantExpiryMode(e.target.value)}
+                    className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                  >
+                    <option value="7d">7 days / 7 วัน</option>
+                    <option value="month_end">End of month / สิ้นเดือน</option>
+                    <option value="custom">Custom / กำหนดเอง</option>
+                    <option value="none">No expiry / ไม่หมดอายุ</option>
+                  </select>
+                </label>
+                {grantExpiryMode === "custom" ? (
+                  <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                    Custom expiry / วันหมดอายุ
+                    <input
+                      type="datetime-local"
+                      value={grantCustomExpiry}
+                      onChange={(e) => setGrantCustomExpiry(e.target.value)}
+                      className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                    />
+                  </label>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => void grantAiCredits()}
+                  disabled={aiSaving}
+                  className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-3 py-2 text-xs font-black shadow-[4px_4px_0_0_#000]"
+                >
+                  {aiSaving ? "Saving…" : "Grant credits / เพิ่มเครดิต"}
+                </button>
+              </div>
+              <p className="mt-2 text-[10px] text-neutral-500">
+                Use 7 days for weekly support, or end of month for monthly support. / ใช้ 7 วันสำหรับโควตารายสัปดาห์ หรือสิ้นเดือนสำหรับรายเดือน
+              </p>
+            </div>
+
+            <div className="mt-4 border-t-2 border-neutral-200 pt-4">
+              <p className="text-sm font-black">Extra AI credit rows / แถวเครดิต AI เพิ่ม</p>
+              {feedbackCredits.length === 0 ? (
+                <p className="mt-2 text-sm text-neutral-500">No extra AI credit rows yet. / ยังไม่มีเครดิตเพิ่ม</p>
+              ) : (
+                <div className="mt-2 overflow-x-auto rounded-sm border-2 border-neutral-200">
+                  <table className="w-full min-w-[680px] text-left text-xs">
+                    <thead className="bg-neutral-100">
+                      <tr>
+                        <th className="border-b-2 border-black p-2">Created</th>
+                        <th className="border-b-2 border-black p-2">SKU</th>
+                        <th className="border-b-2 border-black p-2">Granted</th>
+                        <th className="border-b-2 border-black p-2">Used</th>
+                        <th className="border-b-2 border-black p-2">Left</th>
+                        <th className="border-b-2 border-black p-2">Expiry</th>
+                        <th className="border-b-2 border-black p-2">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {feedbackCredits.map((row) => (
+                        <tr key={String(row.id)}>
+                          <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
+                            {row.created_at ? new Date(row.created_at as string).toLocaleString() : "—"}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 font-mono text-[10px]">
+                            {String(row.sku ?? "—")}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 ep-stat">
+                            {String(row.credits_granted ?? 0)}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 ep-stat">
+                            {String(row.credits_used ?? 0)}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 font-bold text-[#004AAD]">
+                            {String(row.remaining ?? 0)}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
+                            {row.expires_at ? new Date(row.expires_at as string).toLocaleString() : "No expiry"}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2">
+                            <button
+                              type="button"
+                              onClick={() => void saveFeedbackCreditRow(row)}
+                              className="rounded-[4px] border-2 border-black bg-white px-2 py-1 text-[10px] font-black shadow-[2px_2px_0_0_#000]"
+                            >
+                              Edit / แก้ไข
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </section>
 

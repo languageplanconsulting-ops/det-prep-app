@@ -1,4 +1,4 @@
-import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
+import type { AiRewardBonus, ImprovementPoint, WritingCriterionReport } from "@/types/writing";
 
 export type SpeakingRoundNum = 1 | 2 | 3 | 4 | 5;
 
@@ -75,4 +75,6 @@ export interface SpeakingAttemptReport {
   vocabularyUpgradeSuggestions?: SpeakingVocabularyUpgrade[];
   /** Spans on punctuated transcript for hover comments (Gemini). */
   transcriptHighlights?: SpeakingTranscriptHighlight[];
+  /** Temporary AI credit reward for redeemed improvement runs. */
+  rewardBonus?: AiRewardBonus;
 }

@@ -4,6 +4,7 @@ import { AI_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { ADD_ON_CATALOG, type AddOnSku } from "@/lib/paywall-upsell";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+import type { AiRewardBonus } from "@/types/writing";
 
 export type AddOnCreditKind = "mock" | "feedback";
 export type FeedbackSurface =
@@ -13,6 +14,11 @@ export type FeedbackSurface =
   | "interactive_speaking"
   | "read_then_speak"
   | "dialogue_summary";
+
+const REDEEM_REWARD_REQUIRED_GAIN = 5;
+const REDEEM_REWARD_MAX_ACTIVE_CREDITS = 8;
+const REDEEM_REWARD_SOURCE = "redeem_improvement_bonus";
+const REDEEM_REWARD_SKU = "reward_redeem_bonus";
 
 type AddOnRow = {
   id: string;
@@ -53,6 +59,29 @@ function freeFeedbackLockedReason(surface: FeedbackSurface): string {
     return "You already used your one free personalized feedback. / คุณใช้สิทธิ์ Personalized Feedback ฟรี 1 ครั้งครบแล้ว";
   }
   return "Free users can use personalized feedback one time on Write about photo, Speak about photo, Read then write, or Interactive speaking only. / ผู้ใช้ฟรีสามารถใช้ Personalized Feedback ได้ 1 ครั้ง เฉพาะ Write about photo, Speak about photo, Read then write หรือ Interactive speaking เท่านั้น";
+}
+
+function clampScore160(value: number): number {
+  return Math.max(0, Math.min(160, Math.round(value)));
+}
+
+function buildRedeemRewardBonus(args: {
+  previousScore160: number;
+  currentScore160: number;
+  expiresAt: string;
+}): AiRewardBonus {
+  const previousScore160 = clampScore160(args.previousScore160);
+  const currentScore160 = clampScore160(args.currentScore160);
+  const scoreGain = Math.max(0, currentScore160 - previousScore160);
+  return {
+    creditsGranted: 1,
+    expiresAt: args.expiresAt,
+    scoreGain,
+    previousScore160,
+    currentScore160,
+    messageEn: `Nice improvement. You beat your redeemed score by ${scoreGain} points, so you earned 1 free AI credit to use within 7 days.`,
+    messageTh: `พัฒนาขึ้นดีมาก คุณทำคะแนนเพิ่มจากรอบ Redeem ${scoreGain} คะแนน จึงได้รับ AI credit ฟรี 1 ครั้ง ใช้ได้ภายใน 7 วัน`,
+  };
 }
 
 export function creditsGrantedForSku(sku: AddOnSku): number {
@@ -299,6 +328,101 @@ export async function chargeAiCreditForUser(
 
   const consumed = await consumeAddonCreditsForUser(userId, "feedback", 1);
   return { ok: consumed.ok, source: consumed.ok ? "addon" : null };
+}
+
+export async function maybeGrantRedeemImprovementReward(args: {
+  userId: string;
+  attemptId: string;
+  surface: Exclude<FeedbackSurface, "dialogue_summary">;
+  redeemed: boolean;
+  previousScore160: number | null | undefined;
+  currentScore160: number;
+}): Promise<AiRewardBonus | null> {
+  const previous =
+    typeof args.previousScore160 === "number" && Number.isFinite(args.previousScore160)
+      ? clampScore160(args.previousScore160)
+      : null;
+  const current = clampScore160(args.currentScore160);
+  const gain = previous === null ? null : current - previous;
+
+  if (!args.redeemed || previous === null || gain === null || gain <= REDEEM_REWARD_REQUIRED_GAIN) {
+    return null;
+  }
+
+  const supabase = createServiceRoleSupabase();
+  const { data: existing } = await supabase
+    .from("addon_credit_purchases")
+    .select("expires_at")
+    .eq("user_id", args.userId)
+    .eq("kind", "feedback")
+    .eq("status", "paid")
+    .contains("metadata", {
+      source: REDEEM_REWARD_SOURCE,
+      attemptId: args.attemptId,
+      surface: args.surface,
+    })
+    .maybeSingle<{ expires_at: string | null }>();
+
+  if (existing?.expires_at) {
+    return buildRedeemRewardBonus({
+      previousScore160: previous,
+      currentScore160: current,
+      expiresAt: existing.expires_at,
+    });
+  }
+
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const { data: activeRows } = await supabase
+    .from("addon_credit_purchases")
+    .select("credits_granted, credits_used")
+    .eq("user_id", args.userId)
+    .eq("kind", "feedback")
+    .eq("status", "paid")
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+    .contains("metadata", { source: REDEEM_REWARD_SOURCE });
+
+  const activeRewardRemaining = (activeRows ?? []).reduce((sum, row) => {
+    const granted = Number((row as { credits_granted?: unknown }).credits_granted ?? 0);
+    const used = Number((row as { credits_used?: unknown }).credits_used ?? 0);
+    return sum + Math.max(0, granted - used);
+  }, 0);
+
+  if (activeRewardRemaining >= REDEEM_REWARD_MAX_ACTIVE_CREDITS) {
+    return null;
+  }
+
+  const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { error } = await supabase.from("addon_credit_purchases").insert({
+    user_id: args.userId,
+    kind: "feedback",
+    sku: REDEEM_REWARD_SKU,
+    credits_granted: 1,
+    credits_used: 0,
+    amount: 0,
+    currency: "thb",
+    status: "paid",
+    expires_at: expiresAt,
+    metadata: {
+      source: REDEEM_REWARD_SOURCE,
+      attemptId: args.attemptId,
+      surface: args.surface,
+      previousScore160: previous,
+      currentScore160: current,
+      scoreGain: gain,
+    },
+  });
+
+  if (error) {
+    console.error("[maybeGrantRedeemImprovementReward]", error.message);
+    return null;
+  }
+
+  return buildRedeemRewardBonus({
+    previousScore160: previous,
+    currentScore160: current,
+    expiresAt,
+  });
 }
 
 export async function getInteractiveSpeakingCreditLockForAttempt(

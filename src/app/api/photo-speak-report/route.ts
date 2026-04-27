@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { chargeAiCreditForUser, getAiCreditStateForUser } from "@/lib/addon-credits";
+import {
+  chargeAiCreditForUser,
+  getAiCreditStateForUser,
+  maybeGrantRedeemImprovementReward,
+} from "@/lib/addon-credits";
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generatePhotoSpeakReportWithGemini } from "@/lib/gemini-photo-speak";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
@@ -31,6 +35,8 @@ export async function POST(req: Request) {
   const promptTh = o.promptTh;
   const imageUrl = o.imageUrl;
   const keywords = o.keywords;
+  const redeemed = o.redeemed;
+  const previousScore160 = o.previousScore160;
   const originHubRaw = o.originHub;
   const originHub =
     originHubRaw === "write-about-photo"
@@ -114,6 +120,20 @@ export async function POST(req: Request) {
       const charged = await chargeAiCreditForUser(userId, feedbackSurface);
       if (!charged.ok) {
         return NextResponse.json({ error: "Could not apply AI credit after grading" }, { status: 500 });
+      }
+      const rewardBonus = await maybeGrantRedeemImprovementReward({
+        userId,
+        attemptId,
+        surface: feedbackSurface,
+        redeemed: redeemed === true,
+        previousScore160:
+          typeof previousScore160 === "number" && Number.isFinite(previousScore160)
+            ? previousScore160
+            : null,
+        currentScore160: report.score160,
+      });
+      if (rewardBonus) {
+        report.rewardBonus = rewardBonus;
       }
     }
     return NextResponse.json(report);

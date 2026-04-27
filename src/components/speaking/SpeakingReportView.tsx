@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
+import { AiRewardBonusNotice } from "@/components/production/AiRewardBonusNotice";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
 import { SpeakingFullReportNotebookButton } from "@/components/speaking/SpeakingFullReportNotebookButton";
@@ -180,7 +181,7 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
       >
         <button
           type="button"
-          onClick={() => router.push(roundTopicHref)}
+          onClick={() => router.push(`${roundTopicHref}?redeem=1&questionId=${encodeURIComponent(report.questionId)}`)}
           className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
         >
           ทำอีกครั้ง
@@ -191,6 +192,7 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
       <section className="border-y-4 border-black">
         <div className={`${LANDING_PAGE_GRID_BG} py-8 sm:py-10`}>
           <div className="mx-auto max-w-5xl space-y-8 px-4 sm:px-6">
+      <AiRewardBonusNotice reward={report.rewardBonus} />
       <BrutalPanel variant="elevated" title="คำถามของคุณ">
         <p className="text-sm font-medium text-neutral-900">
           {report.questionPromptTh?.trim() ? report.questionPromptTh : report.questionPromptEn}

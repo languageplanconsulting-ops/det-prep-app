@@ -661,6 +661,8 @@ export function InteractiveSpeakingSession({
             scenarioTitleEn: scenario.titleEn,
             scenarioTitleTh: scenario.titleTh,
             prepMinutes: 0,
+            redeemed: startWithRedeem && Boolean(lastAttempt),
+            previousScore160: startWithRedeem ? lastAttempt?.score160 ?? null : null,
             turns: nextCompleted.map((c, i) => ({
               turnIndex: i + 1,
               questionEn: c.questionEn,

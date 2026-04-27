@@ -21,6 +21,9 @@ type Row = {
   sessionCount: number;
   lastActiveAt: string | null;
   mockTestCount: number;
+  aiPlanRemaining: number;
+  aiAddonRemaining: number;
+  aiTotalRemaining: number;
 };
 
 type Stats = {
@@ -358,6 +361,7 @@ export function SubscriptionsListClient() {
                 "Start",
                 "Expiry",
                 "Sessions",
+                "AI left",
                 "Last active",
                 "Manual plan",
                 "Actions",
@@ -371,7 +375,7 @@ export function SubscriptionsListClient() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={12} className="p-6 text-center ep-stat">
+                <td colSpan={13} className="p-6 text-center ep-stat">
                   Loading… / กำลังโหลด
                 </td>
               </tr>
@@ -443,6 +447,16 @@ export function SubscriptionsListClient() {
                   </td>
                   <td className="border-b-2 border-black px-2 py-2 ep-stat text-xs">
                     {r.sessionCount}
+                  </td>
+                  <td className="border-b-2 border-black px-2 py-2">
+                    <p className="ep-stat text-xs font-black text-[#004AAD]">
+                      {Number.isFinite(r.aiTotalRemaining)
+                        ? r.aiTotalRemaining
+                        : "∞"}
+                    </p>
+                    <p className="ep-stat text-[10px] text-neutral-500">
+                      plan {Number.isFinite(r.aiPlanRemaining) ? r.aiPlanRemaining : "∞"} + addon {r.aiAddonRemaining}
+                    </p>
                   </td>
                   <td
                     className={`border-b-2 border-black px-2 py-2 ep-stat text-xs ${

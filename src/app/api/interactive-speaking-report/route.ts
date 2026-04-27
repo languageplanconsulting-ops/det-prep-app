@@ -3,6 +3,7 @@ import {
   chargeAiCreditForUser,
   getAiCreditStateForUser,
   getInteractiveSpeakingCreditLockForAttempt,
+  maybeGrantRedeemImprovementReward,
 } from "@/lib/addon-credits";
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateInteractiveSpeakingReportWithGemini } from "@/lib/gemini-interactive-speaking-report";
@@ -31,6 +32,8 @@ export async function POST(req: Request) {
   const scenarioTitleTh = o.scenarioTitleTh;
   const prepMinutes = o.prepMinutes;
   const turnsRaw = o.turns;
+  const redeemed = o.redeemed;
+  const previousScore160 = o.previousScore160;
 
   if (typeof attemptId !== "string" || !attemptId) {
     return NextResponse.json({ error: "attemptId required" }, { status: 400 });
@@ -114,6 +117,20 @@ export async function POST(req: Request) {
         if (!charged.ok) {
           return NextResponse.json({ error: "Could not apply AI credit after grading" }, { status: 500 });
         }
+      }
+      const rewardBonus = await maybeGrantRedeemImprovementReward({
+        userId,
+        attemptId,
+        surface: "interactive_speaking",
+        redeemed: redeemed === true,
+        previousScore160:
+          typeof previousScore160 === "number" && Number.isFinite(previousScore160)
+            ? previousScore160
+            : null,
+        currentScore160: report.score160,
+      });
+      if (rewardBonus) {
+        report.rewardBonus = rewardBonus;
       }
     }
     return NextResponse.json(report);

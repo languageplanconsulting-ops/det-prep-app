@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { chargeAiCreditForUser, getAiCreditStateForUser } from "@/lib/addon-credits";
+import {
+  chargeAiCreditForUser,
+  getAiCreditStateForUser,
+  maybeGrantRedeemImprovementReward,
+} from "@/lib/addon-credits";
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateWritingReportWithGemini } from "@/lib/gemini-writing";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
@@ -39,6 +43,8 @@ export async function POST(req: Request) {
   const followUpAnswers = o.followUpAnswers;
   const prepMinutes = o.prepMinutes;
   const topic = o.topic;
+  const redeemed = o.redeemed;
+  const previousScore160 = o.previousScore160;
 
   if (typeof attemptId !== "string" || !attemptId) {
     return NextResponse.json({ error: "attemptId required" }, { status: 400 });
@@ -101,6 +107,20 @@ export async function POST(req: Request) {
       const charged = await chargeAiCreditForUser(userId, "read_then_write");
       if (!charged.ok) {
         return NextResponse.json({ error: "Could not apply AI credit after grading" }, { status: 500 });
+      }
+      const rewardBonus = await maybeGrantRedeemImprovementReward({
+        userId,
+        attemptId,
+        surface: "read_then_write",
+        redeemed: redeemed === true,
+        previousScore160:
+          typeof previousScore160 === "number" && Number.isFinite(previousScore160)
+            ? previousScore160
+            : null,
+        currentScore160: report.score160,
+      });
+      if (rewardBonus) {
+        report.rewardBonus = rewardBonus;
       }
     }
     return NextResponse.json(report);
