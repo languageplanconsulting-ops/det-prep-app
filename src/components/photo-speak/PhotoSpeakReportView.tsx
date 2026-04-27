@@ -8,6 +8,7 @@ import {
   buildPhotoSpeakReportNotebookPreview,
 } from "@/lib/photo-speak-report-notebook";
 import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
+import { AiRewardBonusNotice } from "@/components/production/AiRewardBonusNotice";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
 import { SpeakingVocabularyUpgradePanel } from "@/components/speaking/SpeakingVocabularyUpgradePanel";
@@ -184,7 +185,7 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
       >
         <button
           type="button"
-          onClick={() => router.push(nav.sessionPath(report.topicId))}
+          onClick={() => router.push(`${nav.sessionPath(report.topicId)}?redeem=1`)}
           className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
         >
           Try again
@@ -203,6 +204,7 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
 
       <section className="border-y-4 border-black bg-white">
         <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 sm:py-10">
+      <AiRewardBonusNotice reward={report.rewardBonus} />
       <BrutalPanel variant="elevated" title="Photo">
         <div className="overflow-hidden rounded-sm border-2 border-black">
           {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -103,6 +103,12 @@ export async function PATCH(request: Request, ctx: Ctx) {
   if (typeof body.full_name === "string") {
     patch.full_name = body.full_name;
   }
+  if (typeof body.ai_credits_used === "number" && Number.isFinite(body.ai_credits_used)) {
+    patch.ai_credits_used = Math.max(0, Math.round(body.ai_credits_used));
+  }
+  if (body.lifetime_ai_used === true || body.lifetime_ai_used === false) {
+    patch.lifetime_ai_used = body.lifetime_ai_used;
+  }
   if (body.vip_granted_by_course === true || body.vip_granted_by_course === false) {
     patch.vip_granted_by_course = body.vip_granted_by_course;
   }

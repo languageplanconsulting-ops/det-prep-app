@@ -26,7 +26,13 @@ function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
-export function ReadWriteSession({ topicId }: { topicId: string }) {
+export function ReadWriteSession({
+  topicId,
+  startWithRedeem = false,
+}: {
+  topicId: string;
+  startWithRedeem?: boolean;
+}) {
   const router = useRouter();
   const vipGate = useVipAiFeedbackGate();
   const topic = useMemo(() => getTopicById(topicId), [topicId]);
@@ -136,6 +142,8 @@ export function ReadWriteSession({ topicId }: { topicId: string }) {
           essay,
           followUpAnswers,
           prepMinutes: prepChoice,
+          redeemed: startWithRedeem && Boolean(progress),
+          previousScore160: startWithRedeem ? progress?.latestScore160 ?? null : null,
         }),
       });
       const data = (await res.json()) as { error?: string } & Partial<WritingAttemptReport>;

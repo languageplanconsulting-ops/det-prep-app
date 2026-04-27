@@ -30,9 +30,13 @@ function countWords(text: string): number {
 export function ReadSpeakSession({
   topicId,
   round,
+  startWithRedeem = false,
+  redeemQuestionId = null,
 }: {
   topicId: string;
   round: SpeakingRoundNum;
+  startWithRedeem?: boolean;
+  redeemQuestionId?: string | null;
 }) {
   const router = useRouter();
   const vipGate = useVipAiFeedbackGate();
@@ -220,6 +224,9 @@ export function ReadSpeakSession({
   const submitWithGemini = async () => {
     if (!canSubmit || !topic || !selectedQuestion) return;
     if (!vipGate.confirmBeforeAiSubmit()) return;
+    const previousQuestionScore = getSpeakingQuestionLatestScore(topic.id, selectedQuestion.id);
+    const redeemedForSameQuestion =
+      startWithRedeem && redeemQuestionId === selectedQuestion.id && Boolean(previousQuestionScore);
     const id =
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
@@ -245,6 +252,8 @@ export function ReadSpeakSession({
           prepMinutes: prepChoice,
           transcript,
           speakingRound: round,
+          redeemed: redeemedForSameQuestion,
+          previousScore160: redeemedForSameQuestion ? previousQuestionScore?.score160 ?? null : null,
         }),
       });
       const data = (await res.json()) as { error?: string } & Partial<SpeakingAttemptReport>;

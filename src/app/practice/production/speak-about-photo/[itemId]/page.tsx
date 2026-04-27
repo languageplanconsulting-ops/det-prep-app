@@ -2,9 +2,13 @@ import { PhotoAssessmentSession } from "@/components/photo-speak/PhotoAssessment
 
 export default async function SpeakAboutPhotoSessionPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ itemId: string }>;
+  searchParams: Promise<{ redeem?: string }>;
 }) {
   const { itemId } = await params;
-  return <PhotoAssessmentSession mode="speak" itemId={itemId} />;
+  const sp = await searchParams;
+  const startWithRedeem = sp.redeem === "1" || sp.redeem === "true";
+  return <PhotoAssessmentSession mode="speak" itemId={itemId} startWithRedeem={startWithRedeem} />;
 }

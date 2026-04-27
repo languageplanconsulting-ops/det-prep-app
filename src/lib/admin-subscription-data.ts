@@ -1,6 +1,9 @@
 import "server-only";
 
+import { AI_MONTHLY_LIMIT } from "@/lib/access-control";
+import { getAddonBalancesForUser } from "@/lib/addon-credits";
 import { formatBahtFromSatang as formatSatang } from "@/lib/money-format";
+import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
 export const TIER_MONTHLY_THB: Record<string, number> = {
@@ -87,7 +90,66 @@ export type SubscriptionListItem = {
   sessionCount: number;
   lastActiveAt: string | null;
   mockTestCount: number;
+  aiPlanRemaining: number;
+  aiAddonRemaining: number;
+  aiTotalRemaining: number;
 };
+
+export type AdminAiQuotaSnapshot = {
+  tier: string;
+  effectiveTier: string;
+  monthlyLimit: number;
+  monthlyUsed: number;
+  monthlyRemaining: number;
+  addonRemaining: number;
+  totalRemaining: number;
+  lifetimeAiUsed: boolean;
+  feedbackCredits: Array<{
+    id: string;
+    sku: string;
+    credits_granted: number;
+    credits_used: number;
+    remaining: number;
+    status: string;
+    expires_at: string | null;
+    created_at: string;
+    metadata: Record<string, unknown>;
+  }>;
+};
+
+function buildAdminAiQuotaSnapshot(
+  profile: Record<string, unknown>,
+  addonFeedbackRemaining: number,
+  feedbackCredits: AdminAiQuotaSnapshot["feedbackCredits"] = [],
+): AdminAiQuotaSnapshot {
+  const effectiveTier = resolveEffectiveTierFromProfile({
+    tier: profile.tier,
+    tier_expires_at: (profile.tier_expires_at as string | null | undefined) ?? null,
+    vip_granted_by_course: profile.vip_granted_by_course === true,
+  });
+  const lifetimeAiUsed = profile.lifetime_ai_used === true;
+  const rawUsed = Math.max(0, Number(profile.ai_credits_used ?? 0));
+  const monthlyLimit = AI_MONTHLY_LIMIT[effectiveTier as keyof typeof AI_MONTHLY_LIMIT] ?? 0;
+  const monthlyUsed = effectiveTier === "free" ? (lifetimeAiUsed ? 1 : 0) : rawUsed;
+  const monthlyRemaining =
+    effectiveTier === "free"
+      ? lifetimeAiUsed
+        ? 0
+        : 1
+      : Math.max(0, monthlyLimit - rawUsed);
+
+  return {
+    tier: String(profile.tier ?? "free"),
+    effectiveTier,
+    monthlyLimit,
+    monthlyUsed,
+    monthlyRemaining,
+    addonRemaining: addonFeedbackRemaining,
+    totalRemaining: monthlyRemaining + addonFeedbackRemaining,
+    lifetimeAiUsed,
+    feedbackCredits,
+  };
+}
 
 export function daysAgo(iso: string | null): string {
   if (!iso) return "—";
@@ -309,6 +371,7 @@ export async function fetchSubscriptionList(params: {
   const sessionAgg = await aggregateSessionsForUsers(ids);
   const paymentAgg = await aggregatePaymentsForUsers(ids);
   const mockAgg = await aggregateMockTestsForUsers(ids);
+  const aiAddonAgg = await aggregateFeedbackAddonBalancesForUsers(ids);
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -378,6 +441,14 @@ export async function fetchSubscriptionList(params: {
       sessionCount: sessionAgg.counts.get(id) ?? 0,
       lastActiveAt: sessionAgg.lastActive.get(id) ?? null,
       mockTestCount: mockAgg.get(id) ?? 0,
+      ...(() => {
+        const ai = buildAdminAiQuotaSnapshot(r, aiAddonAgg.get(id) ?? 0);
+        return {
+          aiPlanRemaining: ai.monthlyRemaining,
+          aiAddonRemaining: ai.addonRemaining,
+          aiTotalRemaining: ai.totalRemaining,
+        };
+      })(),
     };
   });
 
@@ -472,6 +543,33 @@ async function aggregateMockTestsForUsers(ids: string[]) {
   return map;
 }
 
+async function aggregateFeedbackAddonBalancesForUsers(ids: string[]) {
+  const map = new Map<string, number>();
+  if (ids.length === 0) return map;
+
+  const supabase = createServiceRoleSupabase();
+  const nowIso = new Date().toISOString();
+  const { data: rows } = await supabase
+    .from("addon_credit_purchases")
+    .select("user_id, credits_granted, credits_used")
+    .in("user_id", ids)
+    .eq("kind", "feedback")
+    .eq("status", "paid")
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
+
+  for (const row of rows ?? []) {
+    const uid = String(row.user_id ?? "");
+    if (!uid) continue;
+    const remaining = Math.max(
+      0,
+      Number(row.credits_granted ?? 0) - Number(row.credits_used ?? 0),
+    );
+    map.set(uid, (map.get(uid) ?? 0) + remaining);
+  }
+
+  return map;
+}
+
 export async function fetchUserSubscriptionDetail(userId: string) {
   const supabase = createServiceRoleSupabase();
   const { data: profile, error } = await supabase
@@ -490,6 +588,7 @@ export async function fetchUserSubscriptionDetail(userId: string) {
     { data: mockResults },
     { data: notebookEntries },
     { data: notebookSync },
+    { data: feedbackCredits },
   ] = await Promise.all([
     supabase
       .from("payment_history")
@@ -534,6 +633,13 @@ export async function fetchUserSubscriptionDetail(userId: string) {
       .eq("user_id", userId)
       .order("updated_at", { ascending: false })
       .limit(400),
+    supabase
+      .from("addon_credit_purchases")
+      .select("id, sku, credits_granted, credits_used, status, expires_at, created_at, metadata")
+      .eq("user_id", userId)
+      .eq("kind", "feedback")
+      .order("created_at", { ascending: false })
+      .limit(50),
   ]);
 
   const adminIds = [
@@ -592,9 +698,32 @@ export async function fetchUserSubscriptionDetail(userId: string) {
 
   const p = profile as Record<string, unknown>;
   const totalPaidSatang = await sumPaymentsForUser(userId);
+  const { feedbackRemaining } = await getAddonBalancesForUser(userId);
+  const aiQuota = buildAdminAiQuotaSnapshot(
+    p,
+    feedbackRemaining,
+    (feedbackCredits ?? []).map((row) => ({
+      id: String(row.id),
+      sku: String(row.sku ?? ""),
+      credits_granted: Number(row.credits_granted ?? 0),
+      credits_used: Number(row.credits_used ?? 0),
+      remaining: Math.max(
+        0,
+        Number(row.credits_granted ?? 0) - Number(row.credits_used ?? 0),
+      ),
+      status: String(row.status ?? "pending"),
+      expires_at: (row.expires_at as string | null) ?? null,
+      created_at: String(row.created_at ?? ""),
+      metadata:
+        row.metadata && typeof row.metadata === "object"
+          ? (row.metadata as Record<string, unknown>)
+          : {},
+    })),
+  );
 
   return {
     profile: p,
+    aiQuota,
     payments: payments ?? [],
     notes: (notes ?? []).map((n) => ({
       ...n,

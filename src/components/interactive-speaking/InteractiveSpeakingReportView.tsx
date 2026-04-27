@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
+import { AiRewardBonusNotice } from "@/components/production/AiRewardBonusNotice";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
 import { SpeakingVocabularyUpgradePanel } from "@/components/speaking/SpeakingVocabularyUpgradePanel";
@@ -146,7 +147,7 @@ export function InteractiveSpeakingReportView({
       >
         <button
           type="button"
-          onClick={() => router.push(`/practice/production/interactive-speaking/${report.scenarioId}`)}
+          onClick={() => router.push(`/practice/production/interactive-speaking/${report.scenarioId}?redeem=1`)}
           className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
         >
           Try again
@@ -157,6 +158,7 @@ export function InteractiveSpeakingReportView({
       <section className="border-y-4 border-black">
         <div className={`${LANDING_PAGE_GRID_BG} py-8 sm:py-10`}>
           <div className="mx-auto max-w-5xl space-y-8 px-4 sm:px-6">
+            <AiRewardBonusNotice reward={report.rewardBonus} />
             <BrutalPanel variant="elevated" title="Conversation recap">
               <p className="mb-4 text-xs text-neutral-600">
                 Hover highlighted spans in your answers: green = strength, amber = focus area.

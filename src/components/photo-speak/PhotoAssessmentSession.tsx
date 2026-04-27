@@ -20,7 +20,11 @@ import {
   findWriteAboutPhotoItem,
   getWriteAboutPhotoRoundNumberForItem,
 } from "@/lib/write-about-photo-data";
-import { recordWriteAboutPhotoProgress } from "@/lib/write-about-photo-storage";
+import {
+  getWriteAboutPhotoProgressForItem,
+  recordWriteAboutPhotoProgress,
+} from "@/lib/write-about-photo-storage";
+import { getSpeakAboutPhotoProgressForItem } from "@/lib/speak-about-photo-progress";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 
 type Mode = "write" | "speak";
@@ -45,13 +49,22 @@ function loadingLabel(percent: number): string {
 export function PhotoAssessmentSession({
   mode,
   itemId,
+  startWithRedeem = false,
 }: {
   mode: Mode;
   itemId: string;
+  startWithRedeem?: boolean;
 }) {
   const router = useRouter();
   const item = useMemo(() => findWriteAboutPhotoItem(itemId), [itemId]);
   const round = item ? getWriteAboutPhotoRoundNumberForItem(item.id) : undefined;
+  const latestProgress = useMemo(
+    () =>
+      mode === "speak"
+        ? getSpeakAboutPhotoProgressForItem(itemId)
+        : getWriteAboutPhotoProgressForItem(itemId),
+    [itemId, mode],
+  );
   const vipGate = useVipAiFeedbackGate();
 
   const [transcript, setTranscript] = useState("");
@@ -206,6 +219,8 @@ export function PhotoAssessmentSession({
           prepMinutes: mode === "speak" ? 1 : 0,
           transcript,
           originHub: mode === "speak" ? "speak-about-photo" : "write-about-photo",
+          redeemed: startWithRedeem && Boolean(latestProgress),
+          previousScore160: startWithRedeem ? latestProgress?.latestScore160 ?? null : null,
         }),
       });
       const data = (await res.json()) as { error?: string } & Partial<PhotoSpeakAttemptReport>;

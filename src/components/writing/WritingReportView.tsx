@@ -8,6 +8,7 @@ import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { AnnotatedEssay } from "@/components/writing/AnnotatedEssay";
 import { FullReportNotebookButton } from "@/components/writing/FullReportNotebookButton";
 import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
+import { AiRewardBonusNotice } from "@/components/production/AiRewardBonusNotice";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { GrammarFixesPanel, type GrammarFixItem } from "@/components/reports/GrammarFixesPanel";
 import {
@@ -276,7 +277,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
         <button
           type="button"
           onClick={() =>
-            router.push(`/practice/production/read-and-write/${fullReport.topicId}`)
+            router.push(`/practice/production/read-and-write/${fullReport.topicId}?redeem=1`)
           }
           className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
         >
@@ -298,6 +299,7 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
       <section className="border-y-4 border-black">
         <div className={`${LANDING_PAGE_GRID_BG} py-8 sm:py-10`}>
           <div className="mx-auto max-w-5xl space-y-8 px-4 sm:px-6">
+      <AiRewardBonusNotice reward={fullReport.rewardBonus} />
       {topic ? (
         <BrutalPanel variant="elevated" title="โจทย์">
           <p className="text-sm font-medium text-neutral-900">

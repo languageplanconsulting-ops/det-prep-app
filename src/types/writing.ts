@@ -104,6 +104,16 @@ export interface WritingVocabularyUpgrade {
   exampleTh: string;
 }
 
+export interface AiRewardBonus {
+  creditsGranted: number;
+  expiresAt: string;
+  scoreGain: number;
+  previousScore160: number;
+  currentScore160: number;
+  messageEn: string;
+  messageTh: string;
+}
+
 export interface WritingAttemptReport {
   gradingSource?: "gemini" | "local";
   attemptId: string;
@@ -151,6 +161,8 @@ export interface WritingAttemptReport {
   studyVocabulary?: StudyVocabularySuggestion[];
   /** When Gemini returns B2/C1 upgrade pairs (aligned with write-about-photo). */
   vocabularyUpgradeSuggestions?: WritingVocabularyUpgrade[];
+  /** Temporary AI credit reward for redeemed improvement runs. */
+  rewardBonus?: AiRewardBonus;
 }
 
 export interface NotebookCustomCategory {
