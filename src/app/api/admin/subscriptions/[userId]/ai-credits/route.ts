@@ -20,6 +20,7 @@ function monthEndIso(now = new Date()): string {
 function plusDaysIso(days: number, now = new Date()): string {
   const next = new Date(now);
   next.setDate(next.getDate() + days);
+  next.setHours(23, 59, 59, 999);
   return next.toISOString();
 }
 
@@ -58,6 +59,7 @@ export async function POST(request: Request, ctx: Ctx) {
   const mode =
     body.expiryMode === "7d" ||
     body.expiryMode === "week_end" ||
+    body.expiryMode === "days" ||
     body.expiryMode === "month_end" ||
     body.expiryMode === "custom" ||
     body.expiryMode === "none"
@@ -67,6 +69,13 @@ export async function POST(request: Request, ctx: Ctx) {
   let expiresAt: string | null = null;
   if (mode === "7d") expiresAt = plusDaysIso(7);
   else if (mode === "week_end") expiresAt = weekEndIso();
+  else if (mode === "days") {
+    const days = Math.max(1, Math.round(Number(body.days ?? 0)));
+    if (!days || !Number.isFinite(days)) {
+      return NextResponse.json({ error: "days is required for days mode" }, { status: 400 });
+    }
+    expiresAt = plusDaysIso(days);
+  }
   else if (mode === "month_end") expiresAt = monthEndIso();
   else if (mode === "custom") {
     if (typeof body.expires_at !== "string" || !body.expires_at.trim()) {

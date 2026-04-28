@@ -30,6 +30,56 @@ function isoToDatetimeLocalValue(iso: string | null | undefined): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+function formatAdminDateTime(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("th-TH");
+}
+
+function endOfCurrentWeekIso(now = new Date()): string {
+  const next = new Date(now);
+  const day = next.getDay();
+  const daysUntilSunday = (7 - day) % 7;
+  next.setDate(next.getDate() + daysUntilSunday);
+  next.setHours(23, 59, 59, 999);
+  return next.toISOString();
+}
+
+function endOfCurrentMonthIso(now = new Date()): string {
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+}
+
+function addExactDaysIso(days: number, now = new Date()): string {
+  const next = new Date(now);
+  next.setDate(next.getDate() + days);
+  next.setHours(23, 59, 59, 999);
+  return next.toISOString();
+}
+
+function getExpiryPreview(args: {
+  mode: string;
+  customExpiry: string;
+  exactDays: string;
+}): string | null {
+  const now = new Date();
+  if (args.mode === "7d") return addExactDaysIso(7, now);
+  if (args.mode === "week_end") return endOfCurrentWeekIso(now);
+  if (args.mode === "month_end") return endOfCurrentMonthIso(now);
+  if (args.mode === "days") {
+    const days = Math.max(1, Math.round(Number(args.exactDays || 0)));
+    if (!Number.isFinite(days) || days <= 0) return null;
+    return addExactDaysIso(days, now);
+  }
+  if (args.mode === "custom") {
+    if (!args.customExpiry.trim()) return null;
+    const parsed = new Date(args.customExpiry);
+    if (!Number.isFinite(parsed.getTime())) return null;
+    return parsed.toISOString();
+  }
+  return null;
+}
+
 function notebookPayloadLine(payload: unknown): {
   source: string;
   title: string;
@@ -71,9 +121,11 @@ export function SubscriptionDetailClient() {
   const [grantCredits, setGrantCredits] = useState("1");
   const [grantExpiryMode, setGrantExpiryMode] = useState("7d");
   const [grantCustomExpiry, setGrantCustomExpiry] = useState("");
+  const [grantExactDays, setGrantExactDays] = useState("7");
   const [grantMockCredits, setGrantMockCredits] = useState("1");
   const [grantMockExpiryMode, setGrantMockExpiryMode] = useState("week_end");
   const [grantMockCustomExpiry, setGrantMockCustomExpiry] = useState("");
+  const [grantMockExactDays, setGrantMockExactDays] = useState("7");
   const [aiSaving, setAiSaving] = useState(false);
 
   const load = useCallback(async () => {
@@ -128,6 +180,16 @@ export function SubscriptionDetailClient() {
   const mockQuota = (data?.mockQuota ?? {}) as Record<string, unknown>;
   const feedbackCredits = (aiQuota.feedbackCredits ?? []) as Record<string, unknown>[];
   const mockCredits = (mockQuota.mockCredits ?? []) as Record<string, unknown>[];
+  const aiExpiryPreview = getExpiryPreview({
+    mode: grantExpiryMode,
+    customExpiry: grantCustomExpiry,
+    exactDays: grantExactDays,
+  });
+  const mockExpiryPreview = getExpiryPreview({
+    mode: grantMockExpiryMode,
+    customExpiry: grantMockCustomExpiry,
+    exactDays: grantMockExactDays,
+  });
 
   const saveName = async () => {
     const res = await fetch(`/api/admin/subscriptions/${userId}`, {
@@ -230,12 +292,16 @@ export function SubscriptionDetailClient() {
       const creditsValue = kind === "feedback" ? grantCredits : grantMockCredits;
       const expiryMode = kind === "feedback" ? grantExpiryMode : grantMockExpiryMode;
       const customExpiry = kind === "feedback" ? grantCustomExpiry : grantMockCustomExpiry;
+      const exactDays = kind === "feedback" ? grantExactDays : grantMockExactDays;
       const body: Record<string, unknown> = {
         kind,
         credits: Math.max(0, Math.round(Number(creditsValue || 0))),
         expiryMode,
         reason: kind === "feedback" ? "Admin manual AI credit grant" : "Admin manual mock credit grant",
       };
+      if (expiryMode === "days") {
+        body.days = Math.max(1, Math.round(Number(exactDays || 0)));
+      }
       if (expiryMode === "custom" && customExpiry.trim()) {
         body.expires_at = new Date(customExpiry).toISOString();
       }
@@ -586,6 +652,13 @@ export function SubscriptionDetailClient() {
                 ["Plan left / คงเหลือจากแพ็ก", String(aiQuota.monthlyRemaining ?? 0)],
                 ["Extra credits / เครดิตเพิ่ม", String(aiQuota.addonRemaining ?? 0)],
                 ["Total left / คงเหลือรวม", String(aiQuota.totalRemaining ?? 0)],
+                ["Weekly AI left / เหลือแบบรายสัปดาห์", String(aiQuota.weeklyExtraRemaining ?? 0)],
+                [
+                  "Weekly renews / ต่ออายุหรือหมดรอบ",
+                  aiQuota.weeklyExtraRenewsAt
+                    ? formatAdminDateTime(String(aiQuota.weeklyExtraRenewsAt))
+                    : "—",
+                ],
               ].map(([k, v]) => (
                 <div
                   key={String(k)}
@@ -649,11 +722,23 @@ export function SubscriptionDetailClient() {
                   >
                     <option value="7d">7 days / 7 วัน</option>
                     <option value="week_end">End of week / สิ้นสัปดาห์</option>
+                    <option value="days">Exact days / ระบุจำนวนวัน</option>
                     <option value="month_end">End of month / สิ้นเดือน</option>
                     <option value="custom">Custom / กำหนดเอง</option>
                     <option value="none">No expiry / ไม่หมดอายุ</option>
                   </select>
                 </label>
+                {grantExpiryMode === "days" ? (
+                  <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                    Days / จำนวนวัน
+                    <input
+                      value={grantExactDays}
+                      onChange={(e) => setGrantExactDays(e.target.value)}
+                      className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                      inputMode="numeric"
+                    />
+                  </label>
+                ) : null}
                 {grantExpiryMode === "custom" ? (
                   <label className="flex flex-col text-[10px] font-bold text-neutral-600">
                     Custom expiry / วันหมดอายุ
@@ -674,6 +759,9 @@ export function SubscriptionDetailClient() {
                   {aiSaving ? "Saving…" : "Grant credits / เพิ่มเครดิต"}
                 </button>
               </div>
+              <p className="mt-2 text-[11px] font-semibold text-neutral-600">
+                Expiry preview / ตัวอย่างวันหมดอายุ: {aiExpiryPreview ? formatAdminDateTime(aiExpiryPreview) : "—"}
+              </p>
               <p className="mt-2 text-[10px] text-neutral-500">
                 Use 7 days for weekly support, or end of month for monthly support. / ใช้ 7 วันสำหรับโควตารายสัปดาห์ หรือสิ้นเดือนสำหรับรายเดือน
               </p>
@@ -777,11 +865,23 @@ export function SubscriptionDetailClient() {
                   >
                     <option value="7d">7 days / 7 วัน</option>
                     <option value="week_end">End of week / สิ้นสัปดาห์</option>
+                    <option value="days">Exact days / ระบุจำนวนวัน</option>
                     <option value="month_end">End of month / สิ้นเดือน</option>
                     <option value="custom">Custom / กำหนดเอง</option>
                     <option value="none">No expiry / ไม่หมดอายุ</option>
                   </select>
                 </label>
+                {grantMockExpiryMode === "days" ? (
+                  <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                    Days / จำนวนวัน
+                    <input
+                      value={grantMockExactDays}
+                      onChange={(e) => setGrantMockExactDays(e.target.value)}
+                      className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                      inputMode="numeric"
+                    />
+                  </label>
+                ) : null}
                 {grantMockExpiryMode === "custom" ? (
                   <label className="flex flex-col text-[10px] font-bold text-neutral-600">
                     Custom expiry / วันหมดอายุ
@@ -802,6 +902,9 @@ export function SubscriptionDetailClient() {
                   {aiSaving ? "Saving…" : "Grant mock / เพิ่มสิทธิ์"}
                 </button>
               </div>
+              <p className="mt-2 text-[11px] font-semibold text-neutral-600">
+                Expiry preview / ตัวอย่างวันหมดอายุ: {mockExpiryPreview ? formatAdminDateTime(mockExpiryPreview) : "—"}
+              </p>
               <p className="mt-2 text-[10px] text-neutral-500">
                 Grant short-term support by week or month, then let it expire automatically. / เพิ่มสิทธิ์แบบรายสัปดาห์หรือรายเดือน แล้วให้หมดอายุอัตโนมัติ
               </p>
