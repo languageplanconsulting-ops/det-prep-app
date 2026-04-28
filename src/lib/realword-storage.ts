@@ -1,4 +1,5 @@
 import { parseRealWordBankJson, realWordSetsToBank } from "@/lib/realword-admin";
+import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import {
   REALWORD_DIFFICULTIES,
   REALWORD_MAX_SCORE,
@@ -316,6 +317,7 @@ export function saveRealWordProgress(args: {
     bestScore,
     maxScore,
     updatedAt: new Date().toISOString(),
+    userId: getCurrentBrowserUserId() ?? undefined,
   };
   m[k] = next;
   localStorage.setItem(REALWORD_PROGRESS_KEY, JSON.stringify(m));

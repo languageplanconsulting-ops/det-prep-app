@@ -46,6 +46,7 @@ export interface VocabProgressRecord {
   lastScore: number;
   lastCorrectCount: number;
   updatedAt: string;
+  userId?: string;
 }
 
 export interface VocabExamResultRow {

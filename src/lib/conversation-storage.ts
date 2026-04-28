@@ -1,4 +1,5 @@
 import { parseConversationBankJson } from "@/lib/conversation-admin";
+import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import {
   CONVERSATION_DIFFICULTIES,
   CONVERSATION_FULL_SCORE,
@@ -393,6 +394,7 @@ export function saveConversationProgress(args: {
     maxScore,
     lastItemOk: [...itemOk],
     updatedAt: new Date().toISOString(),
+    userId: getCurrentBrowserUserId() ?? undefined,
   };
   m[k] = next;
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(m));

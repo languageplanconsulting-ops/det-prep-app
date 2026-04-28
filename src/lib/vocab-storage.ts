@@ -1,4 +1,5 @@
 import { normalizeVocabSetsIncoming, parseVocabSetsJson } from "@/lib/vocab-admin";
+import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import { VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
 import {
   emptyVocabFullBank,
@@ -275,6 +276,7 @@ export function saveVocabAttempt(args: {
     lastScore: attainedScore,
     lastCorrectCount: correctCount,
     updatedAt: new Date().toISOString(),
+    userId: getCurrentBrowserUserId() ?? undefined,
   };
   m[k] = next;
   localStorage.setItem(VOCAB_PROGRESS_KEY, JSON.stringify(m));

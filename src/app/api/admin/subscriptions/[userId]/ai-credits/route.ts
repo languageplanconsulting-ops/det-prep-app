@@ -23,6 +23,15 @@ function plusDaysIso(days: number, now = new Date()): string {
   return next.toISOString();
 }
 
+function weekEndIso(now = new Date()): string {
+  const next = new Date(now);
+  const day = next.getDay();
+  const daysUntilSunday = (7 - day) % 7;
+  next.setDate(next.getDate() + daysUntilSunday);
+  next.setHours(23, 59, 59, 999);
+  return next.toISOString();
+}
+
 export async function POST(request: Request, ctx: Ctx) {
   const auth = await getAdminAccess();
   if (!auth.ok) {
@@ -41,8 +50,14 @@ export async function POST(request: Request, ctx: Ctx) {
     return NextResponse.json({ error: "credits must be greater than 0" }, { status: 400 });
   }
 
+  const kind =
+    body.kind === "feedback" || body.kind === "mock"
+      ? body.kind
+      : "feedback";
+
   const mode =
     body.expiryMode === "7d" ||
+    body.expiryMode === "week_end" ||
     body.expiryMode === "month_end" ||
     body.expiryMode === "custom" ||
     body.expiryMode === "none"
@@ -51,6 +66,7 @@ export async function POST(request: Request, ctx: Ctx) {
 
   let expiresAt: string | null = null;
   if (mode === "7d") expiresAt = plusDaysIso(7);
+  else if (mode === "week_end") expiresAt = weekEndIso();
   else if (mode === "month_end") expiresAt = monthEndIso();
   else if (mode === "custom") {
     if (typeof body.expires_at !== "string" || !body.expires_at.trim()) {
@@ -66,7 +82,7 @@ export async function POST(request: Request, ctx: Ctx) {
   const reason =
     typeof body.reason === "string" && body.reason.trim()
       ? body.reason.trim()
-      : `Manual AI credit grant (${mode})`;
+      : `Manual ${kind} credit grant (${mode})`;
 
   const supabase = createServiceRoleSupabase();
   const { data: before } = await supabase
@@ -80,8 +96,8 @@ export async function POST(request: Request, ctx: Ctx) {
 
   const row = {
     user_id: userId,
-    kind: "feedback",
-    sku: "admin_manual_feedback",
+    kind,
+    sku: kind === "mock" ? "admin_manual_mock" : "admin_manual_feedback",
     credits_granted: credits,
     credits_used: 0,
     amount: 0,
@@ -100,7 +116,7 @@ export async function POST(request: Request, ctx: Ctx) {
   const { data, error } = await supabase
     .from("addon_credit_purchases")
     .insert(row)
-    .select("id, credits_granted, credits_used, status, expires_at")
+    .select("id, kind, credits_granted, credits_used, status, expires_at")
     .single();
 
   if (error) {
@@ -110,7 +126,7 @@ export async function POST(request: Request, ctx: Ctx) {
   await logAdminAction({
     adminId,
     targetUserId: userId,
-    action: "admin_ai_credit_grant",
+    action: kind === "mock" ? "admin_mock_credit_grant" : "admin_ai_credit_grant",
     previousValue: null,
     newValue: row,
     reason,
@@ -132,13 +148,18 @@ export async function PATCH(request: Request, ctx: Ctx) {
     return NextResponse.json({ error: "creditId is required" }, { status: 400 });
   }
 
+  const kind =
+    body.kind === "feedback" || body.kind === "mock"
+      ? body.kind
+      : "feedback";
+
   const supabase = createServiceRoleSupabase();
   const { data: before, error: beforeError } = await supabase
     .from("addon_credit_purchases")
     .select("*")
     .eq("id", body.creditId)
     .eq("user_id", userId)
-    .eq("kind", "feedback")
+    .eq("kind", kind)
     .maybeSingle();
 
   if (beforeError) {
@@ -200,10 +221,15 @@ export async function PATCH(request: Request, ctx: Ctx) {
   await logAdminAction({
     adminId,
     targetUserId: userId,
-    action: "admin_ai_credit_edit",
+    action: kind === "mock" ? "admin_mock_credit_edit" : "admin_ai_credit_edit",
     previousValue: before,
     newValue: patch,
-    reason: typeof body.reason === "string" ? body.reason : "Admin edited AI credit row",
+    reason:
+      typeof body.reason === "string"
+        ? body.reason
+        : kind === "mock"
+          ? "Admin edited mock credit row"
+          : "Admin edited AI credit row",
   });
 
   return NextResponse.json({ ok: true });

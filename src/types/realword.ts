@@ -24,4 +24,5 @@ export interface RealWordProgressRecord {
   bestScore: number;
   maxScore: number;
   updatedAt: string;
+  userId?: string;
 }

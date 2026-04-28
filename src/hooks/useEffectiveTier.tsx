@@ -17,6 +17,7 @@ import {
   subscribePreviewTierChange,
 } from "@/lib/admin-preview";
 import { isBootstrapAdminEmail } from "@/lib/admin-emails";
+import { setCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import { claimBootstrapAdminClient } from "@/lib/claim-bootstrap-admin";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
@@ -62,6 +63,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
   const refreshProfile = useCallback(async () => {
     const supabase = getBrowserSupabase();
     if (!supabase) {
+      setCurrentBrowserUserId(null);
       setRealTier("free");
       setIsAdmin(false);
       setVipGrantedByCourse(false);
@@ -74,6 +76,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
+      setCurrentBrowserUserId(null);
       setRealTier("free");
       setIsAdmin(false);
       setVipGrantedByCourse(false);
@@ -82,6 +85,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       void fetchPreviewEligible();
       return;
     }
+    setCurrentBrowserUserId(user.id);
     let { data } = await supabase
       .from("profiles")
       .select("tier, role, vip_granted_by_course, stripe_subscription_id, stripe_customer_id, tier_expires_at")
