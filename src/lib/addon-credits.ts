@@ -19,6 +19,7 @@ const REDEEM_REWARD_REQUIRED_GAIN = 5;
 const REDEEM_REWARD_MAX_ACTIVE_CREDITS = 8;
 const REDEEM_REWARD_SOURCE = "redeem_improvement_bonus";
 const REDEEM_REWARD_SKU = "reward_redeem_bonus";
+export const VIP_AI_FEEDBACK_WEEKLY_LIMIT = 15;
 
 type AddOnRow = {
   id: string;
@@ -46,6 +47,50 @@ type InteractiveSpeakingCreditLockRow = {
   status: "pending" | "charged";
   charge_source: "plan" | "addon" | null;
 };
+
+export type VipWeeklyAiQuota = {
+  weekStart: string;
+  used: number;
+  baseLimit: number;
+  extraLimit: number;
+  totalLimit: number;
+  remaining: number;
+  renewsAt: string;
+  extraExpiresAt: string | null;
+};
+
+function weekStartMondayIsoDate(now = new Date()): string {
+  const date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dow = date.getDay();
+  const daysSinceMonday = (dow + 6) % 7;
+  date.setDate(date.getDate() - daysSinceMonday);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function nextMondayIso(now = new Date()): string {
+  const date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dow = date.getDay();
+  const daysUntilNextMonday = ((8 - dow) % 7) || 7;
+  date.setDate(date.getDate() + daysUntilNextMonday);
+  date.setHours(0, 0, 0, 0);
+  return date.toISOString();
+}
+
+function countsTowardVipWeeklyExtra(row: {
+  metadata?: Record<string, unknown> | null;
+  expires_at?: string | null;
+}): boolean {
+  const source = typeof row.metadata?.source === "string" ? row.metadata.source : "";
+  const expiryMode =
+    typeof row.metadata?.expiryMode === "string" ? row.metadata.expiryMode : "";
+  if (source === REDEEM_REWARD_SOURCE) return true;
+  if (source !== "admin_manual") return false;
+  if (!row.expires_at) return false;
+  return expiryMode === "7d" || expiryMode === "week_end" || expiryMode === "days";
+}
 
 const FREE_FEEDBACK_ALLOWED_SURFACES = new Set<FeedbackSurface>([
   "write_about_photo",
@@ -129,6 +174,96 @@ export async function getAddonBalancesForUser(userId: string): Promise<{
     if (row.kind === "feedback") feedbackRemaining += remaining;
   }
   return { mockRemaining, feedbackRemaining, rows };
+}
+
+export async function getVipWeeklyAiQuotaForUser(userId: string): Promise<VipWeeklyAiQuota> {
+  const supabase = createServiceRoleSupabase();
+  const weekStart = weekStartMondayIsoDate();
+  const renewsAt = nextMondayIso();
+  const nowIso = new Date().toISOString();
+
+  const [{ data: usage }, { data: credits }] = await Promise.all([
+    supabase
+      .from("vip_weekly_ai_usage")
+      .select("uses")
+      .eq("user_id", userId)
+      .eq("week_start", weekStart)
+      .maybeSingle<{ uses: number }>(),
+    supabase
+      .from("addon_credit_purchases")
+      .select("credits_granted, credits_used, expires_at, metadata")
+      .eq("user_id", userId)
+      .eq("kind", "feedback")
+      .eq("status", "paid")
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`),
+  ]);
+
+  const weeklyRows = (credits ?? []).filter((row) =>
+    countsTowardVipWeeklyExtra(row as { metadata?: Record<string, unknown> | null; expires_at?: string | null }),
+  );
+  const extraLimit = weeklyRows.reduce((sum, row) => {
+    const granted = Number((row as { credits_granted?: unknown }).credits_granted ?? 0);
+    const used = Number((row as { credits_used?: unknown }).credits_used ?? 0);
+    return sum + Math.max(0, granted - used);
+  }, 0);
+  const extraExpiresAt =
+    weeklyRows
+      .map((row) => (row as { expires_at?: string | null }).expires_at ?? null)
+      .filter((value): value is string => Boolean(value))
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
+
+  const used = Math.max(0, Number(usage?.uses ?? 0));
+  const totalLimit = VIP_AI_FEEDBACK_WEEKLY_LIMIT + extraLimit;
+  const remaining = Math.max(0, totalLimit - used);
+
+  return {
+    weekStart,
+    used,
+    baseLimit: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
+    extraLimit,
+    totalLimit,
+    remaining,
+    renewsAt,
+    extraExpiresAt,
+  };
+}
+
+export async function recordVipWeeklyAiUse(userId: string, delta = 1): Promise<void> {
+  if (delta <= 0) return;
+  const supabase = createServiceRoleSupabase();
+  const weekStart = weekStartMondayIsoDate();
+  const nowIso = new Date().toISOString();
+  const { data: existing } = await supabase
+    .from("vip_weekly_ai_usage")
+    .select("uses")
+    .eq("user_id", userId)
+    .eq("week_start", weekStart)
+    .maybeSingle<{ uses: number }>();
+
+  if (!existing) {
+    const { error } = await supabase.from("vip_weekly_ai_usage").insert({
+      user_id: userId,
+      week_start: weekStart,
+      uses: delta,
+      updated_at: nowIso,
+    });
+    if (error) {
+      console.error("[recordVipWeeklyAiUse][insert]", error.message);
+    }
+    return;
+  }
+
+  const { error } = await supabase
+    .from("vip_weekly_ai_usage")
+    .update({
+      uses: Math.max(0, Number(existing.uses ?? 0) + delta),
+      updated_at: nowIso,
+    })
+    .eq("user_id", userId)
+    .eq("week_start", weekStart);
+  if (error) {
+    console.error("[recordVipWeeklyAiUse][update]", error.message);
+  }
 }
 
 export async function consumeAddonCreditsForUser(
@@ -323,10 +458,16 @@ export async function chargeAiCreditForUser(
         updated_at: new Date().toISOString(),
       })
       .eq("id", userId);
+    if (!error && tier === "vip") {
+      await recordVipWeeklyAiUse(userId, 1);
+    }
     return { ok: !error, source: !error ? "plan" : null };
   }
 
   const consumed = await consumeAddonCreditsForUser(userId, "feedback", 1);
+  if (consumed.ok && tier === "vip") {
+    await recordVipWeeklyAiUse(userId, 1);
+  }
   return { ok: consumed.ok, source: consumed.ok ? "addon" : null };
 }
 

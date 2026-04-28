@@ -16,7 +16,6 @@ import { canAccessSkill } from "@/lib/access-control";
 import { mockTestHubProgressLabel } from "@/lib/mock-test/mock-test-availability";
 import {
   emitVipApiCreditNotice,
-  getVipWeeklyAiFeedbackRemaining,
   thInteractiveSpeakingInsufficientCredits,
   VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION,
 } from "@/lib/vip-ai-feedback-quota";
@@ -145,8 +144,8 @@ export default function PracticeHubPage() {
         window.alert("กรุณาเข้าสู่ระบบเพื่อใช้โควต้า VIP");
         return;
       }
-      const rem = getVipWeeklyAiFeedbackRemaining(uid);
-      emitVipApiCreditNotice(rem);
+      const rem = vipAiGate.remaining;
+      emitVipApiCreditNotice(rem, vipAiGate.limit);
       const cost = VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION;
       if (rem < cost) {
         window.alert(thInteractiveSpeakingInsufficientCredits(cost, rem));
@@ -169,8 +168,8 @@ export default function PracticeHubPage() {
       !vipAiGate.loading &&
       vipAiGate.userId
     ) {
-      const rem = getVipWeeklyAiFeedbackRemaining(vipAiGate.userId);
-      emitVipApiCreditNotice(rem);
+      const rem = vipAiGate.remaining;
+      emitVipApiCreditNotice(rem, vipAiGate.limit);
       if (rem < 1) {
         window.alert("AI FEEDBACK: You have no remaining VIP grading credit this week. It resets every Monday.");
         return;
