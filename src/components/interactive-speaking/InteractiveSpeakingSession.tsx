@@ -9,9 +9,7 @@ import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import {
-  addVipAiFeedbackUses,
   emitVipApiCreditNotice,
-  getVipWeeklyAiFeedbackRemaining,
   thInteractiveSpeakingInsufficientCredits,
   thInteractiveSpeakingStartConfirm,
   VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION,
@@ -541,8 +539,8 @@ export function InteractiveSpeakingSession({
         window.alert("กรุณาเข้าสู่ระบบเพื่อใช้โควต้า VIP");
         return;
       }
-      const rem = getVipWeeklyAiFeedbackRemaining(uid);
-      emitVipApiCreditNotice(rem);
+      const rem = vipGate.remaining;
+      emitVipApiCreditNotice(rem, vipGate.limit);
       const cost = VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION;
       if (rem < cost) {
         window.alert(thInteractiveSpeakingInsufficientCredits(cost, rem));
@@ -570,8 +568,7 @@ export function InteractiveSpeakingSession({
         throw new Error(typeof data.error === "string" ? data.error : "Could not start interactive speaking.");
       }
       if (vipGate.isVip && vipGate.userId && !data.alreadyReserved) {
-        addVipAiFeedbackUses(vipGate.userId, 1);
-        emitVipApiCreditNotice(getVipWeeklyAiFeedbackRemaining(vipGate.userId));
+        vipGate.recordSuccessfulAiSubmit(1);
       }
       setTurn(1);
       setCompleted([]);

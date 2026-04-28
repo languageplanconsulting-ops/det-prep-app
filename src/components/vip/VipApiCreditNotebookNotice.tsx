@@ -63,7 +63,7 @@ export function VipApiCreditNotebookNotice() {
             รีเซ็ต {notice.resetOn.th}
           </span>
           <span className="rounded-full border-2 border-black bg-yellow-100 px-2.5 py-1 text-neutral-900">
-            Weekly cap: {VIP_AI_FEEDBACK_WEEKLY_LIMIT}
+            Weekly cap: {notice.limit || VIP_AI_FEEDBACK_WEEKLY_LIMIT}
           </span>
         </div>
       </div>

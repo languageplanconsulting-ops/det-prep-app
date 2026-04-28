@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { AI_MONTHLY_LIMIT, MOCK_TEST_MONTHLY_LIMIT } from "@/lib/access-control";
-import { getAddonBalancesForUser } from "@/lib/addon-credits";
+import { getAddonBalancesForUser, getVipWeeklyAiQuotaForUser } from "@/lib/addon-credits";
 import { mockFixedMonthStartIso, countBillableMockFixedSessions } from "@/lib/mock-test/mock-fixed-quota";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
@@ -57,6 +57,7 @@ export async function GET() {
   const mockUsed = countBillableMockFixedSessions((sessions ?? []) as Array<{ targets?: unknown }>);
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[tier];
   const mockPlanRemaining = isAdmin ? Number.MAX_SAFE_INTEGER : Math.max(0, mockLimit - mockUsed);
+  const vipWeekly = tier === "vip" && !isAdmin ? await getVipWeeklyAiQuotaForUser(user.id) : null;
 
   return NextResponse.json({
     tier,
@@ -69,6 +70,17 @@ export async function GET() {
       addonRemaining: addon.feedbackRemaining,
       totalRemaining: aiPlanRemaining + addon.feedbackRemaining,
     },
+    vipWeekly: vipWeekly
+      ? {
+          used: vipWeekly.used,
+          baseLimit: vipWeekly.baseLimit,
+          extraLimit: vipWeekly.extraLimit,
+          totalLimit: vipWeekly.totalLimit,
+          remaining: vipWeekly.remaining,
+          renewsAt: vipWeekly.renewsAt,
+          extraExpiresAt: vipWeekly.extraExpiresAt,
+        }
+      : null,
     mock: {
       used: mockUsed,
       planLimit: mockLimit,
