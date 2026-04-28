@@ -36,4 +36,5 @@ export interface FitbProgressRecord {
   lastUserAnswers?: string[];
   lastClueUsed?: boolean[];
   updatedAt: string;
+  userId?: string;
 }

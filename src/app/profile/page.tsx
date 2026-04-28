@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { PaywallUpsellCard } from "@/components/upsell/PaywallUpsellCard";
 import { VIPBadge } from "@/components/ui/VIPBadge";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
@@ -13,10 +12,7 @@ import {
   TIER_DISPLAY,
   type Tier,
 } from "@/lib/access-control";
-import {
-  getNonApiReminderSnapshot,
-} from "@/lib/non-api-practice-usage";
-import { buildPaywallSpec, shouldShowHeavyUsageUpgrade } from "@/lib/paywall-upsell";
+import { getNonApiReminderSnapshot } from "@/lib/non-api-practice-usage";
 import { mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
@@ -38,6 +34,7 @@ type QuotaResponse = {
 const PRACTICE_STORAGE_EVENTS = [
   "storage",
   "focus",
+  "ep-current-user-scope",
   "ep-reading-storage",
   "ep-vocab-storage",
   "ep-dictation-storage",
@@ -58,10 +55,10 @@ type ExamCreditCard = {
 };
 
 function formatExpiry(expiresAt: string | null, tier: Tier): string {
-  if (!expiresAt) return tier === "free" ? "Never expires" : "—";
+  if (!expiresAt) return tier === "free" ? "ไม่มีวันหมดอายุ" : "—";
   const date = new Date(expiresAt);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString();
+  return date.toLocaleDateString("th-TH");
 }
 
 function getDaysLeft(expiresAt: string | null): number | null {
@@ -109,27 +106,27 @@ function CreditCard({ card }: { card: ExamCreditCard }) {
           <h2 className="mt-2 text-2xl font-black tracking-tight text-neutral-900">{card.label}</h2>
         </div>
         <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${tone.chip}`}>
-          {card.remaining} left
+          เหลือ {card.remaining}
         </span>
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
         <div className="rounded-2xl border border-black/10 bg-white/75 p-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-500">Remaining</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-500">คงเหลือ</p>
           <p className="mt-1 text-3xl font-black tabular-nums text-neutral-900">
             {card.remaining}
             <span className="ml-1 text-sm text-neutral-400">/ {card.limit}</span>
           </p>
         </div>
         <div className="rounded-2xl border border-black/10 bg-white/75 p-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-500">Used</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-500">ใช้ไปแล้ว</p>
           <p className="mt-1 text-3xl font-black tabular-nums text-neutral-900">{card.used}</p>
         </div>
       </div>
 
       <div className="mt-4">
         <div className="mb-2 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-500">
-          <span>Monthly usage</span>
+          <span>{card.unit.includes("lifetime") ? "การใช้งานสะสม" : "การใช้งานรอบนี้"}</span>
           <span>{pct}%</span>
         </div>
         <div className="h-3 overflow-hidden rounded-full bg-black/10">
@@ -142,7 +139,7 @@ function CreditCard({ card }: { card: ExamCreditCard }) {
 
       <p className="mt-4 text-sm leading-6 text-neutral-600">{card.note}</p>
       <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-400">
-        Unit: {card.unit}
+        หน่วย: {card.unit}
       </p>
     </div>
   );
@@ -158,7 +155,7 @@ export default function ProfilePage() {
   const [aiPlanRemainingOverride, setAiPlanRemainingOverride] = useState<number | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [practiceTick, setPracticeTick] = useState(0);
-  const { effectiveTier, realTier, loading } = useEffectiveTier();
+  const { effectiveTier, loading } = useEffectiveTier();
 
   useEffect(() => {
     const refreshPractice = () => setPracticeTick((value) => value + 1);
@@ -227,23 +224,6 @@ export default function ProfilePage() {
   const mockRemaining = Math.max(0, mockLimit - mockUsed) + mockAddonRemaining;
   const daysLeft = getDaysLeft(expiresAt);
 
-  const recommendationSpec = useMemo(() => {
-    if (daysLeft != null && daysLeft < 0 && realTier !== "free") {
-      return buildPaywallSpec(realTier, "expired");
-    }
-    if (effectiveTier === "free") return buildPaywallSpec("free", "heavy_free");
-    if (daysLeft != null && daysLeft <= 3) return buildPaywallSpec(effectiveTier, "renewal_3d");
-    if (daysLeft != null && daysLeft <= 7) return buildPaywallSpec(effectiveTier, "renewal_7d");
-    if (mockRemaining <= 0) return buildPaywallSpec(effectiveTier, "mock_limit");
-
-    const heavyContext = shouldShowHeavyUsageUpgrade(effectiveTier, {
-      mockRemaining,
-      mockLimit,
-      aiRemaining,
-    });
-    return heavyContext ? buildPaywallSpec(effectiveTier, heavyContext) : null;
-  }, [aiRemaining, daysLeft, effectiveTier, mockLimit, mockRemaining, realTier]);
-
   const examCredits = useMemo(() => {
     const vocabulary = getNonApiReminderSnapshot("vocabulary", effectiveTier);
     const reading = getNonApiReminderSnapshot("reading", effectiveTier);
@@ -255,89 +235,107 @@ export default function ProfilePage() {
     const cards: ExamCreditCard[] = [
       {
         id: "reading",
-        label: "Reading",
-        category: "Comprehension",
+        label: "Reading / การอ่าน",
+        category: "Comprehension / การอ่านจับใจความ",
         remaining: reading.remaining,
         limit: reading.limit,
         used: reading.used,
-        unit: reading.cycleKind === "lifetime" ? "free tries / lifetime" : "questions / month",
-        note: reading.poolMessage,
+        unit: reading.cycleKind === "lifetime" ? "สิทธิ์ฟรี / ตลอดอายุบัญชี" : "ชุดข้อสอบ / เดือน",
+        note:
+          reading.poolMessage === "Free users can try one Reading exam for life. After that, you can still browse the bank, but the sets are locked until you upgrade."
+            ? "ผู้ใช้ฟรีลอง Reading ได้ 1 ชุดตลอดอายุบัญชี หลังจากนั้นยังดูคลังข้อสอบได้ แต่จะถูกล็อกจนกว่าจะอัปเกรด"
+            : "ส่วนนี้นับจากการใช้งาน Reading ของคุณในรอบเดือนปัจจุบัน",
       },
       {
         id: "vocabulary",
-        label: "Vocabulary",
-        category: "Comprehension",
+        label: "Vocabulary / คำศัพท์",
+        category: "Comprehension / การอ่านจับใจความ",
         remaining: vocabulary.remaining,
         limit: vocabulary.limit,
         used: vocabulary.used,
-        unit: vocabulary.cycleKind === "lifetime" ? "free tries / lifetime" : "questions / month",
-        note: vocabulary.poolMessage,
+        unit: vocabulary.cycleKind === "lifetime" ? "สิทธิ์ฟรี / ตลอดอายุบัญชี" : "ชุดข้อสอบ / เดือน",
+        note:
+          vocabulary.poolMessage === "Free users can try one Vocabulary question set for life. After that, the bank stays visible, but the sets are locked until you upgrade."
+            ? "ผู้ใช้ฟรีลอง Vocabulary ได้ 1 ชุดตลอดอายุบัญชี หลังจากนั้นยังดูคลังข้อสอบได้ แต่จะถูกล็อกจนกว่าจะอัปเกรด"
+            : "ส่วนนี้นับจากการใช้งาน Vocabulary ของคุณในรอบเดือนปัจจุบัน",
       },
       {
         id: "dictation",
-        label: "Dictation",
-        category: "Literacy",
+        label: "Dictation / ฟังแล้วพิมพ์",
+        category: "Literacy / ทักษะภาษา",
         remaining: dictation.remaining,
         limit: dictation.limit,
         used: dictation.used,
-        unit: dictation.cycleKind === "lifetime" ? "free tries / lifetime" : "shared literacy tests / month",
-        note: dictation.poolMessage,
+        unit: dictation.cycleKind === "lifetime" ? "สิทธิ์ฟรี / ตลอดอายุบัญชี" : "โควต้า Literacy / เดือน",
+        note:
+          dictation.cycleKind === "lifetime"
+            ? `ผู้ใช้ฟรีลอง ${dictation.examLabel} ได้ 1 ครั้งตลอดอายุบัญชี หลังจากนั้นยังดูคลังข้อสอบได้ แต่ชุดข้อสอบจะถูกล็อก`
+            : "Dictation, Fill in the Blank และ Real Word ใช้โควต้า Literacy ร่วมกัน",
       },
       {
         id: "fitb",
-        label: "Fill in the blank",
-        category: "Literacy",
+        label: "Fill in the Blank / เติมคำ",
+        category: "Literacy / ทักษะภาษา",
         remaining: fitb.remaining,
         limit: fitb.limit,
         used: fitb.used,
-        unit: fitb.cycleKind === "lifetime" ? "free tries / lifetime" : "shared literacy tests / month",
-        note: fitb.poolMessage,
+        unit: fitb.cycleKind === "lifetime" ? "สิทธิ์ฟรี / ตลอดอายุบัญชี" : "โควต้า Literacy / เดือน",
+        note:
+          fitb.cycleKind === "lifetime"
+            ? `ผู้ใช้ฟรีลอง ${fitb.examLabel} ได้ 1 ครั้งตลอดอายุบัญชี หลังจากนั้นยังดูคลังข้อสอบได้ แต่ชุดข้อสอบจะถูกล็อก`
+            : "Dictation, Fill in the Blank และ Real Word ใช้โควต้า Literacy ร่วมกัน",
       },
       {
         id: "realword",
-        label: "Choose the real word",
-        category: "Literacy",
+        label: "Choose the Real Word / เลือกคำจริง",
+        category: "Literacy / ทักษะภาษา",
         remaining: realword.remaining,
         limit: realword.limit,
         used: realword.used,
-        unit: realword.cycleKind === "lifetime" ? "free tries / lifetime" : "shared literacy tests / month",
-        note: realword.poolMessage,
+        unit: realword.cycleKind === "lifetime" ? "สิทธิ์ฟรี / ตลอดอายุบัญชี" : "โควต้า Literacy / เดือน",
+        note:
+          realword.cycleKind === "lifetime"
+            ? `ผู้ใช้ฟรีลอง ${realword.examLabel} ได้ 1 ครั้งตลอดอายุบัญชี หลังจากนั้นยังดูคลังข้อสอบได้ แต่ชุดข้อสอบจะถูกล็อก`
+            : "Dictation, Fill in the Blank และ Real Word ใช้โควต้า Literacy ร่วมกัน",
       },
       {
         id: "conversation",
-        label: "Interactive conversation",
-        category: "Listening",
+        label: "Interactive Conversation / บทสนทนาโต้ตอบ",
+        category: "Listening / การฟัง",
         remaining: conversation.remaining,
         limit: conversation.limit,
         used: conversation.used,
-        unit: conversation.cycleKind === "lifetime" ? "free tries / lifetime" : "sets / month",
-        note: conversation.poolMessage,
+        unit: conversation.cycleKind === "lifetime" ? "สิทธิ์ฟรี / ตลอดอายุบัญชี" : "ชุดข้อสอบ / เดือน",
+        note:
+          conversation.poolMessage === "Free users can try one Interactive Conversation set for life. After that, the bank stays open to browse, but the sets are locked until you upgrade."
+            ? "ผู้ใช้ฟรีลอง Interactive Conversation ได้ 1 ชุดตลอดอายุบัญชี หลังจากนั้นยังดูคลังข้อสอบได้ แต่ชุดข้อสอบจะถูกล็อกจนกว่าจะอัปเกรด"
+            : "ส่วนนี้นับจากการใช้งาน Interactive Conversation ของคุณในรอบเดือนปัจจุบัน",
       },
       {
         id: "mock",
-        label: "Full mock test",
-        category: "Mock exam",
+        label: "Full Mock Test / ข้อสอบเสมือนจริง",
+        category: "Mock Exam / ข้อสอบจำลอง",
         remaining: mockRemaining,
         limit: mockLimit,
         used: mockUsed,
-        unit: "mocks / month",
+        unit: "ครั้ง / เดือน",
         note:
           mockAddonRemaining > 0
-            ? `Includes ${mockAddonRemaining} add-on mock credits on top of your plan.`
-            : "Monthly mock quota from your plan.",
+            ? `รวมสิทธิ์ Mock Test เพิ่มอีก ${mockAddonRemaining} ครั้งจาก add-on ของคุณ`
+            : "จำนวนครั้งที่ใช้ได้ตามแพลนของคุณในรอบเดือนนี้",
       },
       {
         id: "ai",
-        label: "AI scored production tasks",
-        category: "AI credits",
+        label: "AI Feedback / รายงานตรวจโดย AI",
+        category: "AI Credits / เครดิต AI",
         remaining: aiRemaining,
         limit: aiLimit,
         used: aiUsed,
-        unit: "credits / month",
+        unit: "เครดิต / เดือน",
         note:
           aiAddonRemaining > 0
-            ? `Includes ${aiAddonRemaining} AI add-on credits on top of your plan.`
-            : "Shared AI scoring/report credits for supported production tasks.",
+            ? `รวมเครดิต AI เพิ่มอีก ${aiAddonRemaining} เครดิตจาก add-on ของคุณ`
+            : "ใช้ร่วมกันสำหรับข้อสอบพูดและเขียนที่มีรายงานตรวจโดย AI",
       },
     ];
 
@@ -358,19 +356,24 @@ export default function ProfilePage() {
 
   const heroStats = [
     {
-      label: "Current plan",
-      value: loading ? "…" : TIER_DISPLAY[effectiveTier].nameEn,
-      note: TIER_DISPLAY[effectiveTier].nameTh,
+      label: "แพลนปัจจุบัน",
+      value: loading ? "…" : TIER_DISPLAY[effectiveTier].nameTh,
+      note: loading ? "…" : TIER_DISPLAY[effectiveTier].nameEn,
     },
     {
-      label: "Plan expires",
+      label: "วันหมดอายุแพลน",
       value: loadingStats ? "…" : formatExpiry(expiresAt, effectiveTier),
-      note: daysLeft != null && daysLeft > 0 ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left` : "Billing status",
+      note:
+        daysLeft != null && daysLeft > 0
+          ? `เหลืออีก ${daysLeft} วัน`
+          : effectiveTier === "free"
+            ? "ใช้ฟรีได้ต่อเนื่อง"
+            : "สถานะแพ็กเกจ",
     },
     {
-      label: "Credits to check",
+      label: "รายการที่ตรวจสอบได้",
       value: String(examCredits.length),
-      note: "Practice + AI + mock quotas",
+      note: "สิทธิ์ฝึกทำข้อสอบ + AI + Mock Test",
     },
   ];
 
@@ -381,17 +384,17 @@ export default function ProfilePage() {
           <VIPBadge />
         </div>
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.24em] text-[#004AAD]">
-          Check my credit
+          สิทธิ์ของฉัน
         </p>
         <h1
           className="mt-3 text-3xl font-black tracking-tight text-neutral-900 md:text-5xl"
           style={{ fontFamily: "var(--font-jetbrains), monospace" }}
         >
-          Plan and exam credits
+          แพลนและสิทธิ์ใช้งาน
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-700 md:text-base">
-          This page is your credit dashboard. It shows what plan you’re on, when it expires, and how many
-          credits or tests you still have left for each exam type.
+          หน้านี้สรุปให้คุณเห็นว่า ตอนนี้คุณอยู่แพลนอะไร แพลนหมดอายุเมื่อไร และยังเหลือสิทธิ์ฝึกทำข้อสอบหรือเครดิต AI
+          สำหรับแต่ละประเภทอีกเท่าไร
         </p>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -410,31 +413,38 @@ export default function ProfilePage() {
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <section className="space-y-6">
-          <BrutalPanel title="Account" eyebrow="Student profile" variant="elevated">
+          <BrutalPanel title="ข้อมูลบัญชี" eyebrow="สำหรับผู้เรียน" variant="elevated">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-[22px] border border-black/10 bg-neutral-50 p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Email</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">อีเมล</p>
                 <p className="mt-2 text-lg font-black text-neutral-900">{email ?? "—"}</p>
               </div>
               <div className="rounded-[22px] border border-black/10 bg-neutral-50 p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Plan summary</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">สรุปแพลน</p>
                 <p className="mt-2 text-lg font-black text-neutral-900">
-                  {loading ? "Loading…" : `${TIER_DISPLAY[effectiveTier].nameTh} / ${TIER_DISPLAY[effectiveTier].nameEn}`}
+                  {loading ? "กำลังโหลด…" : `${TIER_DISPLAY[effectiveTier].nameTh} / ${TIER_DISPLAY[effectiveTier].nameEn}`}
                 </p>
                 <p className="mt-1 text-sm text-neutral-500">
                   {TIER_DISPLAY[effectiveTier].priceThb === 0
-                    ? "Starter access"
-                    : `${TIER_DISPLAY[effectiveTier].priceThb} THB plan`}
+                    ? "เริ่มต้นใช้งานฟรี"
+                    : `${TIER_DISPLAY[effectiveTier].priceThb} บาท`}
                 </p>
               </div>
             </div>
 
             <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {TIER_DISPLAY[effectiveTier].highlightsEn.slice(0, 4).map((line) => (
-                <div key={line} className="rounded-2xl border border-black/10 bg-white p-3 text-sm font-semibold text-neutral-700">
-                  {line}
-                </div>
-              ))}
+              <div className="rounded-2xl border border-black/10 bg-white p-3 text-sm font-semibold text-neutral-700">
+                แพลนนี้ออกแบบให้คุณเห็นสิทธิ์ที่เหลืออยู่ชัดเจน และวางแผนการฝึกได้ง่ายขึ้น
+              </div>
+              <div className="rounded-2xl border border-black/10 bg-white p-3 text-sm font-semibold text-neutral-700">
+                หากแพลนของคุณหมดอายุ ระบบจะพาไปเลือกแพลนใหม่เพื่อใช้งานต่อ
+              </div>
+              <div className="rounded-2xl border border-black/10 bg-white p-3 text-sm font-semibold text-neutral-700">
+                AI Feedback และ Mock Test จะแสดงรวมสิทธิ์จากแพลนและ add-on ของคุณ
+              </div>
+              <div className="rounded-2xl border border-black/10 bg-white p-3 text-sm font-semibold text-neutral-700">
+                สำหรับผู้ใช้ฟรี สิทธิ์ทดลองบางประเภทเป็นแบบใช้ได้ 1 ครั้งตลอดอายุบัญชี
+              </div>
             </div>
           </BrutalPanel>
 
@@ -442,14 +452,14 @@ export default function ProfilePage() {
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.24em] text-neutral-500">
-                  Credits overview
+                  ภาพรวมสิทธิ์ใช้งาน
                 </p>
                 <h2 className="text-2xl font-black tracking-tight text-neutral-900">
-                  Credits left by exam type
+                  สิทธิ์คงเหลือตามประเภทข้อสอบ
                 </h2>
               </div>
               <p className="text-sm font-semibold text-neutral-500">
-                Updated from your current month usage and plan rules
+                อัปเดตจากการใช้งานล่าสุดและกติกาของแพลนคุณ
               </p>
             </div>
 
@@ -462,20 +472,18 @@ export default function ProfilePage() {
         </section>
 
         <aside className="space-y-6">
-          {recommendationSpec ? <PaywallUpsellCard spec={recommendationSpec} /> : null}
-
-          <BrutalPanel title="How to read this page" eyebrow="Credit rules" variant="elevated">
+          <BrutalPanel title="วิธีดูหน้านี้" eyebrow="กติกาการนับสิทธิ์" variant="elevated">
             <ul className="space-y-3 text-sm leading-6 text-neutral-700">
-              <li>Vocabulary has its own monthly pool.</li>
-              <li>Dictation, Fill in the Blank, and Real Word share the same Literacy pool.</li>
-              <li>Interactive Conversation has its own monthly pool.</li>
-              <li>AI and Mock add-ons are added on top of your plan credits when available.</li>
+              <li>Vocabulary และ Reading แยกกันนับคนละส่วน</li>
+              <li>Dictation, Fill in the Blank และ Real Word ใช้โควต้า Literacy ร่วมกันเมื่อเป็นแพลนรายเดือน</li>
+              <li>Interactive Conversation มีสิทธิ์แยกของตัวเอง</li>
+              <li>ถ้าคุณซื้อ add-on เพิ่ม ระบบจะบวกสิทธิ์เพิ่มให้ต่อจากสิทธิ์ในแพลน</li>
             </ul>
             <Link
               href="/pricing"
               className="mt-5 inline-block rounded-[18px] border-[3px] border-black bg-[#FFCC00] px-5 py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#111]"
             >
-              View plans and add-ons
+              ดูแพลนทั้งหมด
             </Link>
           </BrutalPanel>
         </aside>

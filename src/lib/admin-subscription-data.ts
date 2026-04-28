@@ -1,6 +1,6 @@
 import "server-only";
 
-import { AI_MONTHLY_LIMIT } from "@/lib/access-control";
+import { AI_MONTHLY_LIMIT, MOCK_TEST_MONTHLY_LIMIT } from "@/lib/access-control";
 import { getAddonBalancesForUser } from "@/lib/addon-credits";
 import { formatBahtFromSatang as formatSatang } from "@/lib/money-format";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
@@ -95,6 +95,18 @@ export type SubscriptionListItem = {
   aiTotalRemaining: number;
 };
 
+export type AdminExtraCreditRow = {
+  id: string;
+  sku: string;
+  credits_granted: number;
+  credits_used: number;
+  remaining: number;
+  status: string;
+  expires_at: string | null;
+  created_at: string;
+  metadata: Record<string, unknown>;
+};
+
 export type AdminAiQuotaSnapshot = {
   tier: string;
   effectiveTier: string;
@@ -104,17 +116,16 @@ export type AdminAiQuotaSnapshot = {
   addonRemaining: number;
   totalRemaining: number;
   lifetimeAiUsed: boolean;
-  feedbackCredits: Array<{
-    id: string;
-    sku: string;
-    credits_granted: number;
-    credits_used: number;
-    remaining: number;
-    status: string;
-    expires_at: string | null;
-    created_at: string;
-    metadata: Record<string, unknown>;
-  }>;
+  feedbackCredits: AdminExtraCreditRow[];
+};
+
+export type AdminMockQuotaSnapshot = {
+  monthlyLimit: number;
+  monthlyUsed: number;
+  monthlyRemaining: number;
+  addonRemaining: number;
+  totalRemaining: number;
+  mockCredits: AdminExtraCreditRow[];
 };
 
 function buildAdminAiQuotaSnapshot(
@@ -148,6 +159,23 @@ function buildAdminAiQuotaSnapshot(
     totalRemaining: monthlyRemaining + addonFeedbackRemaining,
     lifetimeAiUsed,
     feedbackCredits,
+  };
+}
+
+function buildAdminMockQuotaSnapshot(args: {
+  monthlyLimit: number;
+  monthlyUsed: number;
+  addonRemaining: number;
+  mockCredits?: AdminExtraCreditRow[];
+}): AdminMockQuotaSnapshot {
+  const monthlyRemaining = Math.max(0, args.monthlyLimit - args.monthlyUsed);
+  return {
+    monthlyLimit: args.monthlyLimit,
+    monthlyUsed: args.monthlyUsed,
+    monthlyRemaining,
+    addonRemaining: args.addonRemaining,
+    totalRemaining: monthlyRemaining + args.addonRemaining,
+    mockCredits: args.mockCredits ?? [],
   };
 }
 
@@ -270,6 +298,20 @@ function sortProfileRows(
     return 0;
   };
   rows.sort(cmp);
+}
+
+function countCurrentMonthRows(rows: Record<string, unknown>[], field: string): number {
+  const now = new Date();
+  return rows.filter((row) => {
+    const raw = row[field];
+    if (typeof raw !== "string") return false;
+    const date = new Date(raw);
+    return (
+      Number.isFinite(date.getTime()) &&
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth()
+    );
+  }).length;
 }
 
 export async function fetchSubscriptionList(params: {
@@ -589,6 +631,7 @@ export async function fetchUserSubscriptionDetail(userId: string) {
     { data: notebookEntries },
     { data: notebookSync },
     { data: feedbackCredits },
+    { data: mockCredits },
   ] = await Promise.all([
     supabase
       .from("payment_history")
@@ -638,6 +681,13 @@ export async function fetchUserSubscriptionDetail(userId: string) {
       .select("id, sku, credits_granted, credits_used, status, expires_at, created_at, metadata")
       .eq("user_id", userId)
       .eq("kind", "feedback")
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase
+      .from("addon_credit_purchases")
+      .select("id, sku, credits_granted, credits_used, status, expires_at, created_at, metadata")
+      .eq("user_id", userId)
+      .eq("kind", "mock")
       .order("created_at", { ascending: false })
       .limit(50),
   ]);
@@ -698,32 +748,45 @@ export async function fetchUserSubscriptionDetail(userId: string) {
 
   const p = profile as Record<string, unknown>;
   const totalPaidSatang = await sumPaymentsForUser(userId);
-  const { feedbackRemaining } = await getAddonBalancesForUser(userId);
+  const { feedbackRemaining, mockRemaining } = await getAddonBalancesForUser(userId);
+  const mapExtraCreditRow = (row: Record<string, unknown>): AdminExtraCreditRow => ({
+    id: String(row.id),
+    sku: String(row.sku ?? ""),
+    credits_granted: Number(row.credits_granted ?? 0),
+    credits_used: Number(row.credits_used ?? 0),
+    remaining: Math.max(
+      0,
+      Number(row.credits_granted ?? 0) - Number(row.credits_used ?? 0),
+    ),
+    status: String(row.status ?? "pending"),
+    expires_at: (row.expires_at as string | null) ?? null,
+    created_at: String(row.created_at ?? ""),
+    metadata:
+      row.metadata && typeof row.metadata === "object"
+        ? (row.metadata as Record<string, unknown>)
+        : {},
+  });
   const aiQuota = buildAdminAiQuotaSnapshot(
     p,
     feedbackRemaining,
-    (feedbackCredits ?? []).map((row) => ({
-      id: String(row.id),
-      sku: String(row.sku ?? ""),
-      credits_granted: Number(row.credits_granted ?? 0),
-      credits_used: Number(row.credits_used ?? 0),
-      remaining: Math.max(
-        0,
-        Number(row.credits_granted ?? 0) - Number(row.credits_used ?? 0),
-      ),
-      status: String(row.status ?? "pending"),
-      expires_at: (row.expires_at as string | null) ?? null,
-      created_at: String(row.created_at ?? ""),
-      metadata:
-        row.metadata && typeof row.metadata === "object"
-          ? (row.metadata as Record<string, unknown>)
-          : {},
-    })),
+    (feedbackCredits ?? []).map((row) => mapExtraCreditRow(row as Record<string, unknown>)),
   );
+  const effectiveTier = resolveEffectiveTierFromProfile({
+    tier: profile.tier,
+    tier_expires_at: (profile.tier_expires_at as string | null | undefined) ?? null,
+    vip_granted_by_course: profile.vip_granted_by_course === true,
+  });
+  const mockQuota = buildAdminMockQuotaSnapshot({
+    monthlyLimit: MOCK_TEST_MONTHLY_LIMIT[effectiveTier] ?? 0,
+    monthlyUsed: countCurrentMonthRows((mockResults ?? []) as Record<string, unknown>[], "created_at"),
+    addonRemaining: mockRemaining,
+    mockCredits: (mockCredits ?? []).map((row) => mapExtraCreditRow(row as Record<string, unknown>)),
+  });
 
   return {
     profile: p,
     aiQuota,
+    mockQuota,
     payments: payments ?? [],
     notes: (notes ?? []).map((n) => ({
       ...n,

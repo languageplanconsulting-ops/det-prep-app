@@ -61,6 +61,7 @@ export interface ReadingProgressRecord {
   lastScore: number;
   lastCorrectCount: number;
   updatedAt: string;
+  userId?: string;
 }
 
 export type ReadingQuestionKey =

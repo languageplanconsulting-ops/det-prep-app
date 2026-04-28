@@ -6,6 +6,7 @@ import {
   READING_DIFFICULTIES,
   READING_ROUND_NUMBERS,
 } from "@/lib/reading-constants";
+import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import { defaultReadingFullBank, emptyReadingFullBank } from "@/lib/reading-default-data";
 import type {
   ReadingDifficulty,
@@ -311,6 +312,7 @@ export function saveReadingAttempt(args: {
     lastScore: attainedScore,
     lastCorrectCount: correctCount,
     updatedAt: new Date().toISOString(),
+    userId: getCurrentBrowserUserId() ?? undefined,
   };
   m[k] = next;
   localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(m));

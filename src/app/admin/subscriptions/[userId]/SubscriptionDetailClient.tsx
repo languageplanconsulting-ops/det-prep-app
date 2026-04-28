@@ -71,6 +71,9 @@ export function SubscriptionDetailClient() {
   const [grantCredits, setGrantCredits] = useState("1");
   const [grantExpiryMode, setGrantExpiryMode] = useState("7d");
   const [grantCustomExpiry, setGrantCustomExpiry] = useState("");
+  const [grantMockCredits, setGrantMockCredits] = useState("1");
+  const [grantMockExpiryMode, setGrantMockExpiryMode] = useState("week_end");
+  const [grantMockCustomExpiry, setGrantMockCustomExpiry] = useState("");
   const [aiSaving, setAiSaving] = useState(false);
 
   const load = useCallback(async () => {
@@ -122,7 +125,9 @@ export function SubscriptionDetailClient() {
   const mockTestScores = (data?.mockTestScores ?? []) as Record<string, unknown>[];
   const studySessionScores = (data?.studySessionScores ?? []) as Record<string, unknown>[];
   const aiQuota = (data?.aiQuota ?? {}) as Record<string, unknown>;
+  const mockQuota = (data?.mockQuota ?? {}) as Record<string, unknown>;
   const feedbackCredits = (aiQuota.feedbackCredits ?? []) as Record<string, unknown>[];
+  const mockCredits = (mockQuota.mockCredits ?? []) as Record<string, unknown>[];
 
   const saveName = async () => {
     const res = await fetch(`/api/admin/subscriptions/${userId}`, {
@@ -219,16 +224,20 @@ export function SubscriptionDetailClient() {
     }
   };
 
-  const grantAiCredits = async () => {
+  const grantExtraCredits = async (kind: "feedback" | "mock") => {
     setAiSaving(true);
     try {
+      const creditsValue = kind === "feedback" ? grantCredits : grantMockCredits;
+      const expiryMode = kind === "feedback" ? grantExpiryMode : grantMockExpiryMode;
+      const customExpiry = kind === "feedback" ? grantCustomExpiry : grantMockCustomExpiry;
       const body: Record<string, unknown> = {
-        credits: Math.max(0, Math.round(Number(grantCredits || 0))),
-        expiryMode: grantExpiryMode,
-        reason: "Admin manual AI credit grant",
+        kind,
+        credits: Math.max(0, Math.round(Number(creditsValue || 0))),
+        expiryMode,
+        reason: kind === "feedback" ? "Admin manual AI credit grant" : "Admin manual mock credit grant",
       };
-      if (grantExpiryMode === "custom" && grantCustomExpiry.trim()) {
-        body.expires_at = new Date(grantCustomExpiry).toISOString();
+      if (expiryMode === "custom" && customExpiry.trim()) {
+        body.expires_at = new Date(customExpiry).toISOString();
       }
       const res = await fetch(`/api/admin/subscriptions/${userId}/ai-credits`, {
         method: "POST",
@@ -242,22 +251,27 @@ export function SubscriptionDetailClient() {
       }
       push({
         type: "success",
-        titleEn: "AI credits granted.",
-        titleTh: "เพิ่มเครดิต AI แล้ว",
+        titleEn: kind === "feedback" ? "AI credits granted." : "Mock credits granted.",
+        titleTh: kind === "feedback" ? "เพิ่มเครดิต AI แล้ว" : "เพิ่มสิทธิ์ Mock แล้ว",
       });
       void load();
     } catch (e) {
       push({
         type: "error",
-        titleEn: e instanceof Error ? e.message : "Could not grant AI credits",
-        titleTh: "เพิ่มเครดิต AI ไม่สำเร็จ",
+        titleEn:
+          e instanceof Error
+            ? e.message
+            : kind === "feedback"
+              ? "Could not grant AI credits"
+              : "Could not grant mock credits",
+        titleTh: kind === "feedback" ? "เพิ่มเครดิต AI ไม่สำเร็จ" : "เพิ่มสิทธิ์ Mock ไม่สำเร็จ",
       });
     } finally {
       setAiSaving(false);
     }
   };
 
-  const saveFeedbackCreditRow = async (row: Record<string, unknown>) => {
+  const saveExtraCreditRow = async (kind: "feedback" | "mock", row: Record<string, unknown>) => {
     const grantedInput = window.prompt(
       "Set granted credits / กำหนดเครดิตทั้งหมด",
       String(row.credits_granted ?? 0),
@@ -279,28 +293,37 @@ export function SubscriptionDetailClient() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
+          kind,
           creditId: row.id,
           credits_granted: Math.max(0, Math.round(Number(grantedInput || 0))),
           credits_used: Math.max(0, Math.round(Number(usedInput || 0))),
           expires_at: expiryInput?.trim() ? new Date(expiryInput).toISOString() : null,
-          reason: "Admin edited AI credit row",
+          reason: kind === "feedback" ? "Admin edited AI credit row" : "Admin edited mock credit row",
         }),
       });
       if (!res.ok) {
         const json = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(json.error ?? "Could not edit AI credit row");
+        throw new Error(
+          json.error ??
+            (kind === "feedback" ? "Could not edit AI credit row" : "Could not edit mock credit row"),
+        );
       }
       push({
         type: "success",
-        titleEn: "AI credit row updated.",
-        titleTh: "อัปเดตแถวเครดิต AI แล้ว",
+        titleEn: kind === "feedback" ? "AI credit row updated." : "Mock credit row updated.",
+        titleTh: kind === "feedback" ? "อัปเดตแถวเครดิต AI แล้ว" : "อัปเดตแถวสิทธิ์ Mock แล้ว",
       });
       void load();
     } catch (e) {
       push({
         type: "error",
-        titleEn: e instanceof Error ? e.message : "Could not edit AI credit row",
-        titleTh: "แก้ไขเครดิต AI ไม่สำเร็จ",
+        titleEn:
+          e instanceof Error
+            ? e.message
+            : kind === "feedback"
+              ? "Could not edit AI credit row"
+              : "Could not edit mock credit row",
+        titleTh: kind === "feedback" ? "แก้ไขเครดิต AI ไม่สำเร็จ" : "แก้ไขสิทธิ์ Mock ไม่สำเร็จ",
       });
     } finally {
       setAiSaving(false);
@@ -625,6 +648,7 @@ export function SubscriptionDetailClient() {
                     className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
                   >
                     <option value="7d">7 days / 7 วัน</option>
+                    <option value="week_end">End of week / สิ้นสัปดาห์</option>
                     <option value="month_end">End of month / สิ้นเดือน</option>
                     <option value="custom">Custom / กำหนดเอง</option>
                     <option value="none">No expiry / ไม่หมดอายุ</option>
@@ -643,7 +667,7 @@ export function SubscriptionDetailClient() {
                 ) : null}
                 <button
                   type="button"
-                  onClick={() => void grantAiCredits()}
+                  onClick={() => void grantExtraCredits("feedback")}
                   disabled={aiSaving}
                   className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-3 py-2 text-xs font-black shadow-[4px_4px_0_0_#000]"
                 >
@@ -697,7 +721,135 @@ export function SubscriptionDetailClient() {
                           <td className="border-b border-neutral-200 p-2">
                             <button
                               type="button"
-                              onClick={() => void saveFeedbackCreditRow(row)}
+                              onClick={() => void saveExtraCreditRow("feedback", row)}
+                              className="rounded-[4px] border-2 border-black bg-white px-2 py-1 text-[10px] font-black shadow-[2px_2px_0_0_#000]"
+                            >
+                              Edit / แก้ไข
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
+            <h2 className="text-lg font-black">Mock quota / โควตา Mock</h2>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {[
+                ["Monthly limit / ลิมิตรายเดือน", String(mockQuota.monthlyLimit ?? 0)],
+                ["Used this month / ใช้เดือนนี้", String(mockQuota.monthlyUsed ?? 0)],
+                ["Plan left / คงเหลือจากแพ็ก", String(mockQuota.monthlyRemaining ?? 0)],
+                ["Extra credits / สิทธิ์เพิ่ม", String(mockQuota.addonRemaining ?? 0)],
+                ["Total left / คงเหลือรวม", String(mockQuota.totalRemaining ?? 0)],
+              ].map(([k, v]) => (
+                <div
+                  key={String(k)}
+                  className="rounded-[4px] border-2 border-black bg-neutral-50 p-3"
+                >
+                  <p className="text-[10px] font-bold uppercase text-neutral-600">{k}</p>
+                  <p className="ep-stat mt-1 text-lg font-black text-[#004AAD]">{v}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 border-t-2 border-neutral-200 pt-4">
+              <p className="text-sm font-black">Grant extra mock credits / เพิ่มสิทธิ์ Mock ชั่วคราว</p>
+              <div className="mt-2 flex flex-wrap items-end gap-3">
+                <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                  Credits / จำนวนสิทธิ์
+                  <input
+                    value={grantMockCredits}
+                    onChange={(e) => setGrantMockCredits(e.target.value)}
+                    className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                    inputMode="numeric"
+                  />
+                </label>
+                <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                  Expiry / วันหมดอายุ
+                  <select
+                    value={grantMockExpiryMode}
+                    onChange={(e) => setGrantMockExpiryMode(e.target.value)}
+                    className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                  >
+                    <option value="7d">7 days / 7 วัน</option>
+                    <option value="week_end">End of week / สิ้นสัปดาห์</option>
+                    <option value="month_end">End of month / สิ้นเดือน</option>
+                    <option value="custom">Custom / กำหนดเอง</option>
+                    <option value="none">No expiry / ไม่หมดอายุ</option>
+                  </select>
+                </label>
+                {grantMockExpiryMode === "custom" ? (
+                  <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                    Custom expiry / วันหมดอายุ
+                    <input
+                      type="datetime-local"
+                      value={grantMockCustomExpiry}
+                      onChange={(e) => setGrantMockCustomExpiry(e.target.value)}
+                      className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                    />
+                  </label>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => void grantExtraCredits("mock")}
+                  disabled={aiSaving}
+                  className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-3 py-2 text-xs font-black shadow-[4px_4px_0_0_#000]"
+                >
+                  {aiSaving ? "Saving…" : "Grant mock / เพิ่มสิทธิ์"}
+                </button>
+              </div>
+              <p className="mt-2 text-[10px] text-neutral-500">
+                Grant short-term support by week or month, then let it expire automatically. / เพิ่มสิทธิ์แบบรายสัปดาห์หรือรายเดือน แล้วให้หมดอายุอัตโนมัติ
+              </p>
+            </div>
+
+            <div className="mt-4 border-t-2 border-neutral-200 pt-4">
+              <p className="text-sm font-black">Extra mock credit rows / แถวสิทธิ์ Mock เพิ่ม</p>
+              {mockCredits.length === 0 ? (
+                <p className="mt-2 text-sm text-neutral-500">No extra mock rows yet. / ยังไม่มีสิทธิ์ Mock เพิ่ม</p>
+              ) : (
+                <div className="mt-2 overflow-x-auto rounded-sm border-2 border-neutral-200">
+                  <table className="w-full min-w-[680px] text-left text-xs">
+                    <thead className="bg-neutral-100">
+                      <tr>
+                        <th className="border-b-2 border-black p-2">Created</th>
+                        <th className="border-b-2 border-black p-2">SKU</th>
+                        <th className="border-b-2 border-black p-2">Granted</th>
+                        <th className="border-b-2 border-black p-2">Used</th>
+                        <th className="border-b-2 border-black p-2">Left</th>
+                        <th className="border-b-2 border-black p-2">Expiry</th>
+                        <th className="border-b-2 border-black p-2">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mockCredits.map((row) => (
+                        <tr key={String(row.id)}>
+                          <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
+                            {row.created_at ? new Date(row.created_at as string).toLocaleString() : "—"}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 font-mono text-[10px]">
+                            {String(row.sku ?? "—")}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 ep-stat">
+                            {String(row.credits_granted ?? 0)}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 ep-stat">
+                            {String(row.credits_used ?? 0)}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 font-bold text-[#004AAD]">
+                            {String(row.remaining ?? 0)}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2 ep-stat whitespace-nowrap">
+                            {row.expires_at ? new Date(row.expires_at as string).toLocaleString() : "No expiry"}
+                          </td>
+                          <td className="border-b border-neutral-200 p-2">
+                            <button
+                              type="button"
+                              onClick={() => void saveExtraCreditRow("mock", row)}
                               className="rounded-[4px] border-2 border-black bg-white px-2 py-1 text-[10px] font-black shadow-[2px_2px_0_0_#000]"
                             >
                               Edit / แก้ไข

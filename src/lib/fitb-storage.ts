@@ -1,4 +1,5 @@
 import { normalizeFitbSetsForBank, parseFitbBankJson } from "@/lib/fitb-admin";
+import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import { FITB_DIFFICULTIES, FITB_ROUND_NUMBERS, FITB_SET_COUNT, fitbMaxScore } from "@/lib/fitb-constants";
 import { calculateFitbDetScore, gradesToExactLocks } from "@/lib/fitb-scoring";
 import { buildDefaultFitbBank } from "@/lib/fitb-default-data";
@@ -323,6 +324,7 @@ export function saveFitbProgress(args: {
     lastUserAnswers: [...userAnswers],
     lastClueUsed: [...clueUsed],
     updatedAt: new Date().toISOString(),
+    userId: getCurrentBrowserUserId() ?? undefined,
   };
   m[k] = next;
   localStorage.setItem(FITB_PROGRESS_KEY, JSON.stringify(m));

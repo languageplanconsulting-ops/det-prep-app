@@ -1,4 +1,5 @@
 import { dictationRowsToPatches, parseDictationBankJson } from "@/lib/dictation-admin";
+import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import {
   clearDictationBankJson,
   loadDictationBankJson,
@@ -477,6 +478,7 @@ export function saveDictationAttempt(args: {
     maxScore,
     lastScore: attainedScore,
     updatedAt: new Date().toISOString(),
+    userId: getCurrentBrowserUserId() ?? undefined,
   };
   m[k] = next;
   localStorage.setItem(DICTATION_PROGRESS_KEY, JSON.stringify(m));

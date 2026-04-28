@@ -52,6 +52,7 @@ export interface ConversationProgressRecord {
   maxScore: number;
   lastItemOk: boolean[];
   updatedAt: string;
+  userId?: string;
 }
 
 /** Bank keyed by round (currently only 1), then difficulty, then list of sets. */

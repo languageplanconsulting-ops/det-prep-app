@@ -24,6 +24,7 @@ export interface DictationProgressRecord {
   maxScore: number;
   lastScore: number;
   updatedAt: string;
+  userId?: string;
 }
 
 export type DictationFullBank = Record<DictationRoundNum, Record<DictationDifficulty, DictationItem[]>>;

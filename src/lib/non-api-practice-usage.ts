@@ -1,4 +1,5 @@
 import { getSetLimit, type ContentSkill, type Tier } from "@/lib/access-control";
+import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import { loadConversationProgressMap } from "@/lib/conversation-storage";
 import { loadDictationProgressMap } from "@/lib/dictation-storage";
 import { loadFitbProgressMap } from "@/lib/fitb-storage";
@@ -36,16 +37,34 @@ function isCurrentMonth(iso: string | null | undefined, now: Date): boolean {
   return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
 }
 
-function countCurrentMonthEntries(records: Record<string, { updatedAt: string }>, now: Date): number {
+function belongsToCurrentUser(record: { userId?: string } | undefined, currentUserId: string | null): boolean {
+  if (!currentUserId) return true;
+  return record?.userId === currentUserId;
+}
+
+function countCurrentMonthEntries(
+  records: Record<string, { updatedAt: string; userId?: string }>,
+  now: Date,
+  currentUserId: string | null,
+): number {
   let count = 0;
   for (const value of Object.values(records)) {
+    if (!belongsToCurrentUser(value, currentUserId)) continue;
     if (isCurrentMonth(value.updatedAt, now)) count += 1;
   }
   return count;
 }
 
-function countLifetimeEntries(records: Record<string, { updatedAt: string }>): number {
-  return Object.keys(records).length;
+function countLifetimeEntries(
+  records: Record<string, { updatedAt: string; userId?: string }>,
+  currentUserId: string | null,
+): number {
+  let count = 0;
+  for (const value of Object.values(records)) {
+    if (!belongsToCurrentUser(value, currentUserId)) continue;
+    count += 1;
+  }
+  return count;
 }
 
 function getMonthLabel(now: Date): string {
@@ -56,14 +75,16 @@ function getMonthLabel(now: Date): string {
 }
 
 function getLiteracyUsage(now: Date): number {
+  const currentUserId = getCurrentBrowserUserId();
   return (
-    countCurrentMonthEntries(loadDictationProgressMap(), now) +
-    countCurrentMonthEntries(loadFitbProgressMap(), now) +
-    countCurrentMonthEntries(loadRealWordProgressMap(), now)
+    countCurrentMonthEntries(loadDictationProgressMap(), now, currentUserId) +
+    countCurrentMonthEntries(loadFitbProgressMap(), now, currentUserId) +
+    countCurrentMonthEntries(loadRealWordProgressMap(), now, currentUserId)
   );
 }
 
 function getExamUsage(exam: NonApiReminderExam, now: Date, cycleKind: "monthly" | "lifetime"): number {
+  const currentUserId = getCurrentBrowserUserId();
   const records =
     exam === "reading"
       ? loadReadingProgressMap()
@@ -78,8 +99,8 @@ function getExamUsage(exam: NonApiReminderExam, now: Date, cycleKind: "monthly" 
               : loadRealWordProgressMap();
 
   return cycleKind === "lifetime"
-    ? countLifetimeEntries(records)
-    : countCurrentMonthEntries(records, now);
+    ? countLifetimeEntries(records, currentUserId)
+    : countCurrentMonthEntries(records, now, currentUserId);
 }
 
 export function getNonApiReminderSnapshot(
