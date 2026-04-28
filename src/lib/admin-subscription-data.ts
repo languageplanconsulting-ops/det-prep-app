@@ -116,6 +116,8 @@ export type AdminAiQuotaSnapshot = {
   addonRemaining: number;
   totalRemaining: number;
   lifetimeAiUsed: boolean;
+  weeklyExtraRemaining: number;
+  weeklyExtraRenewsAt: string | null;
   feedbackCredits: AdminExtraCreditRow[];
 };
 
@@ -148,6 +150,16 @@ function buildAdminAiQuotaSnapshot(
         ? 0
         : 1
       : Math.max(0, monthlyLimit - rawUsed);
+  const weeklyRows = feedbackCredits.filter((row) => {
+    const mode = row.metadata?.expiryMode;
+    return mode === "7d" || mode === "week_end" || mode === "days";
+  });
+  const weeklyExtraRemaining = weeklyRows.reduce((sum, row) => sum + Math.max(0, row.remaining), 0);
+  const weeklyExtraRenewsAt =
+    weeklyRows
+      .map((row) => row.expires_at)
+      .filter((value): value is string => Boolean(value))
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
 
   return {
     tier: String(profile.tier ?? "free"),
@@ -158,6 +170,8 @@ function buildAdminAiQuotaSnapshot(
     addonRemaining: addonFeedbackRemaining,
     totalRemaining: monthlyRemaining + addonFeedbackRemaining,
     lifetimeAiUsed,
+    weeklyExtraRemaining,
+    weeklyExtraRenewsAt,
     feedbackCredits,
   };
 }
