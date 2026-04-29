@@ -64,7 +64,7 @@ function formatCountdown(seconds: number): string {
 }
 
 function interactiveSpeakingStartCreditConfirm(): string {
-  return "Starting this interactive speaking session will use 1 AI credit now.\n\nIf you quit mid-way, there is no refund.\n\nContinue?";
+  return "Starting this interactive speaking session will not use a credit yet.\n\nThe AI credit will only be counted when you finish and submit for feedback.\n\nContinue?";
 }
 
 /** Short click when the answer window opens (prep → record). */
@@ -567,9 +567,6 @@ export function InteractiveSpeakingSession({
       if (!res.ok) {
         throw new Error(typeof data.error === "string" ? data.error : "Could not start interactive speaking.");
       }
-      if (vipGate.isVip && vipGate.userId && !data.alreadyReserved) {
-        vipGate.recordSuccessfulAiSubmit(1);
-      }
       setTurn(1);
       setCompleted([]);
       completedRef.current = [];
@@ -673,6 +670,9 @@ export function InteractiveSpeakingSession({
           throw new Error(typeof data.error === "string" ? data.error : "Grading failed.");
         }
         const report = data as InteractiveSpeakingAttemptReport;
+        if (vipGate.isVip && vipGate.userId) {
+          vipGate.recordSuccessfulAiSubmit(1);
+        }
         try {
           await finalizeLatestStudySession({
             exerciseType: "interactive_speaking",

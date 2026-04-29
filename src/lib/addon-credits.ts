@@ -55,6 +55,7 @@ export type VipWeeklyAiQuota = {
   extraLimit: number;
   totalLimit: number;
   remaining: number;
+  baseRemaining: number;
   renewsAt: string;
   extraExpiresAt: string | null;
 };
@@ -198,14 +199,11 @@ export async function getVipWeeklyAiQuotaForUser(userId: string): Promise<VipWee
       .or(`expires_at.is.null,expires_at.gt.${nowIso}`),
   ]);
 
+  const { feedbackRemaining } = await getAddonBalancesForUser(userId);
   const weeklyRows = (credits ?? []).filter((row) =>
     countsTowardVipWeeklyExtra(row as { metadata?: Record<string, unknown> | null; expires_at?: string | null }),
   );
-  const extraLimit = weeklyRows.reduce((sum, row) => {
-    const granted = Number((row as { credits_granted?: unknown }).credits_granted ?? 0);
-    const used = Number((row as { credits_used?: unknown }).credits_used ?? 0);
-    return sum + Math.max(0, granted - used);
-  }, 0);
+  const extraLimit = Math.max(0, feedbackRemaining);
   const extraExpiresAt =
     weeklyRows
       .map((row) => (row as { expires_at?: string | null }).expires_at ?? null)
@@ -213,8 +211,9 @@ export async function getVipWeeklyAiQuotaForUser(userId: string): Promise<VipWee
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
 
   const used = Math.max(0, Number(usage?.uses ?? 0));
-  const totalLimit = VIP_AI_FEEDBACK_WEEKLY_LIMIT + extraLimit;
-  const remaining = Math.max(0, totalLimit - used);
+  const baseRemaining = Math.max(0, VIP_AI_FEEDBACK_WEEKLY_LIMIT - used);
+  const remaining = baseRemaining + extraLimit;
+  const totalLimit = used + remaining;
 
   return {
     weekStart,
@@ -223,6 +222,7 @@ export async function getVipWeeklyAiQuotaForUser(userId: string): Promise<VipWee
     extraLimit,
     totalLimit,
     remaining,
+    baseRemaining,
     renewsAt,
     extraExpiresAt,
   };
@@ -382,6 +382,26 @@ export async function getAiCreditStateForUser(
     };
   }
 
+  if (tier === "vip") {
+    const weekly = await getVipWeeklyAiQuotaForUser(userId);
+    if (weekly.remaining > 0) {
+      return {
+        allowed: true,
+        reason: null,
+        tier,
+        planRemaining: weekly.baseRemaining,
+        addonRemaining: weekly.extraLimit,
+      };
+    }
+    return {
+      allowed: false,
+      reason: "AI feedback quota reached for this week. It resets next week unless you have extra credits.",
+      tier,
+      planRemaining: 0,
+      addonRemaining: 0,
+    };
+  }
+
   const limit = AI_MONTHLY_LIMIT[tier];
   const planRemaining = Math.max(0, limit - used);
   if (planRemaining > 0 || feedbackRemaining > 0) {
@@ -449,6 +469,19 @@ export async function chargeAiCreditForUser(
     return { ok: consumed.ok, source: consumed.ok ? "addon" : null };
   }
 
+  if (tier === "vip") {
+    const weekly = await getVipWeeklyAiQuotaForUser(userId);
+    if (weekly.baseRemaining > 0) {
+      await recordVipWeeklyAiUse(userId, 1);
+      return { ok: true, source: "plan" };
+    }
+    const consumed = await consumeAddonCreditsForUser(userId, "feedback", 1);
+    if (consumed.ok) {
+      await recordVipWeeklyAiUse(userId, 1);
+    }
+    return { ok: consumed.ok, source: consumed.ok ? "addon" : null };
+  }
+
   const limit = AI_MONTHLY_LIMIT[tier];
   if (used < limit) {
     const { error } = await supabase
@@ -458,16 +491,10 @@ export async function chargeAiCreditForUser(
         updated_at: new Date().toISOString(),
       })
       .eq("id", userId);
-    if (!error && tier === "vip") {
-      await recordVipWeeklyAiUse(userId, 1);
-    }
     return { ok: !error, source: !error ? "plan" : null };
   }
 
   const consumed = await consumeAddonCreditsForUser(userId, "feedback", 1);
-  if (consumed.ok && tier === "vip") {
-    await recordVipWeeklyAiUse(userId, 1);
-  }
   return { ok: consumed.ok, source: consumed.ok ? "addon" : null };
 }
 
@@ -633,31 +660,7 @@ export async function reserveInteractiveSpeakingCreditForAttempt(args: {
     }
     return { ok: false, reason: insertError.message, source: null };
   }
-
-  const charged = await chargeAiCreditForUser(userId, "interactive_speaking");
-  if (!charged.ok) {
-    await supabase.from("interactive_speaking_credit_locks").delete().eq("attempt_id", attemptId);
-    return {
-      ok: false,
-      reason: "AI feedback quota reached. Upgrade or buy a feedback add-on.",
-      source: null,
-    };
-  }
-
-  const { error: updateError } = await supabase
-    .from("interactive_speaking_credit_locks")
-    .update({
-      status: "charged",
-      charge_source: charged.source,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("attempt_id", attemptId);
-
-  if (updateError) {
-    return { ok: true, source: charged.source };
-  }
-
-  return { ok: true, source: charged.source };
+  return { ok: true, source: null };
 }
 
 export async function currentTierForUser(userId: string): Promise<Tier> {

@@ -646,15 +646,13 @@ export function SubscriptionDetailClient() {
             <h2 className="text-lg font-black">AI quota / โควตา AI</h2>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {[
-                ["Effective tier / tier ที่ใช้งานจริง", String(aiQuota.effectiveTier ?? "free")],
-                ["Monthly limit / ลิมิตรายเดือน", String(aiQuota.monthlyLimit ?? 0)],
-                ["Used this month / ใช้เดือนนี้", String(aiQuota.monthlyUsed ?? 0)],
-                ["Plan left / คงเหลือจากแพ็ก", String(aiQuota.monthlyRemaining ?? 0)],
-                ["Extra credits / เครดิตเพิ่ม", String(aiQuota.addonRemaining ?? 0)],
-                ["Total left / คงเหลือรวม", String(aiQuota.totalRemaining ?? 0)],
-                ["Weekly AI left / เหลือแบบรายสัปดาห์", String(aiQuota.weeklyExtraRemaining ?? 0)],
+                ["What learner sees now / ที่ผู้เรียนเห็นตอนนี้", `${String(aiQuota.learnerFacingRemaining ?? 0)} / ${String(aiQuota.learnerFacingLimit ?? 0)}`],
+                ["Used now / ใช้ไปแล้วตอนนี้", String(aiQuota.learnerFacingUsed ?? 0)],
+                ["Extra credits active / เครดิตเพิ่มที่ใช้งานได้", String(aiQuota.addonRemaining ?? 0)],
+                ["Weekly renew / รีเซ็ตรอบนี้", aiQuota.learnerFacingRenewsAt ? formatAdminDateTime(String(aiQuota.learnerFacingRenewsAt)) : "—"],
+                ["Weekly bonus left / โบนัสรายสัปดาห์คงเหลือ", String(aiQuota.weeklyExtraRemaining ?? 0)],
                 [
-                  "Weekly renews / ต่ออายุหรือหมดรอบ",
+                  "Extra weekly expiry / เครดิตเพิ่มหมดอายุ",
                   aiQuota.weeklyExtraRenewsAt
                     ? formatAdminDateTime(String(aiQuota.weeklyExtraRenewsAt))
                     : "—",
@@ -670,6 +668,7 @@ export function SubscriptionDetailClient() {
               ))}
             </div>
 
+            {(aiQuota.effectiveTier ?? "free") !== "vip" ? (
             <div className="mt-4 border-t-2 border-neutral-200 pt-4">
               <p className="text-sm font-black">Edit monthly state / แก้สถานะรายเดือน</p>
               <div className="mt-2 flex flex-wrap items-end gap-3">
@@ -700,6 +699,7 @@ export function SubscriptionDetailClient() {
                 </button>
               </div>
             </div>
+            ) : null}
 
             <div className="mt-4 border-t-2 border-neutral-200 pt-4">
               <p className="text-sm font-black">Grant extra AI credits / เพิ่มเครดิต AI ชั่วคราว</p>

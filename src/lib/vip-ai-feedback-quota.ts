@@ -165,5 +165,5 @@ export function thInteractiveSpeakingInsufficientCredits(need: number, have: num
 
 /** Shown once when starting interactive speaking (VIP). */
 export function thInteractiveSpeakingStartConfirm(cost: number, remainingBefore: number): string {
-  return `AI (VIP): เริ่มแบบฝึกพูดโต้ตอบรอบนี้จะใช้สิทธิ์ ${cost} ครั้งทันที\n\nสัปดาห์นี้เหลือ ${remainingBefore}/${VIP_AI_FEEDBACK_WEEKLY_LIMIT} ครั้งก่อนเริ่มรอบนี้\n\nกดตกลงเพื่อเริ่มและใช้สิทธิ์ 1 ครั้ง`;
+  return `AI (VIP): เริ่มแบบฝึกพูดโต้ตอบได้เลย ระบบยังไม่ตัดสิทธิ์ตอนนี้\n\nสิทธิ์ ${cost} ครั้งจะถูกนับเมื่อคุณทำครบและกดส่งให้ตรวจ\n\nสัปดาห์นี้เหลือ ${remainingBefore}/${VIP_AI_FEEDBACK_WEEKLY_LIMIT} ครั้งก่อนเริ่มรอบนี้`;
 }
