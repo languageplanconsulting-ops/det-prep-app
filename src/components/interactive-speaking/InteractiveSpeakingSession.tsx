@@ -540,7 +540,13 @@ export function InteractiveSpeakingSession({
         return;
       }
       const rem = vipGate.remaining;
-      emitVipApiCreditNotice(rem, vipGate.limit);
+      emitVipApiCreditNotice(rem, vipGate.limit, {
+        used: vipGate.used,
+        weeklyRenewsAt: vipGate.renewsAt,
+        monthlyRenewsAt: vipGate.planExpiresAt,
+        extraRemaining: vipGate.extraLimit,
+        extraExpiresAt: vipGate.extraExpiresAt,
+      });
       const cost = VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION;
       if (rem < cost) {
         window.alert(thInteractiveSpeakingInsufficientCredits(cost, rem));

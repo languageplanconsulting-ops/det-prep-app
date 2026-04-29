@@ -22,6 +22,17 @@ type AiQuotaMessageArgs = {
   cost?: number;
 };
 
+type VipApiCreditNoticeDetail = {
+  remaining: number;
+  limit: number;
+  resetOn: { th: string; en: string };
+  used?: number;
+  weeklyRenewsAt?: string | null;
+  monthlyRenewsAt?: string | null;
+  extraRemaining?: number;
+  extraExpiresAt?: string | null;
+};
+
 /** Monday date of current week in the user's local timezone (YYYY-MM-DD). */
 export function getLocalWeekStartMondayString(d = new Date()): string {
   const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -156,15 +167,24 @@ export function getNextLocalMondayLabels(now = new Date()): { th: string; en: st
   return { th: formatDateShortTh(d), en: formatDateShortEn(d) };
 }
 
-export function emitVipApiCreditNotice(remaining: number, limit = VIP_AI_FEEDBACK_WEEKLY_LIMIT): void {
+export function emitVipApiCreditNotice(
+  remaining: number,
+  limit = VIP_AI_FEEDBACK_WEEKLY_LIMIT,
+  detail?: Omit<VipApiCreditNoticeDetail, "remaining" | "limit" | "resetOn">,
+): void {
   if (typeof window === "undefined") return;
   const resetOn = getNextLocalMondayLabels();
   window.dispatchEvent(
-    new CustomEvent(VIP_API_CREDIT_NOTICE_EVENT, {
+    new CustomEvent<VipApiCreditNoticeDetail>(VIP_API_CREDIT_NOTICE_EVENT, {
       detail: {
         remaining,
         limit,
         resetOn,
+        used: Math.max(0, Number(detail?.used ?? 0)),
+        weeklyRenewsAt: detail?.weeklyRenewsAt ?? null,
+        monthlyRenewsAt: detail?.monthlyRenewsAt ?? null,
+        extraRemaining: Math.max(0, Number(detail?.extraRemaining ?? 0)),
+        extraExpiresAt: detail?.extraExpiresAt ?? null,
       },
     }),
   );
@@ -173,14 +193,22 @@ export function emitVipApiCreditNotice(remaining: number, limit = VIP_AI_FEEDBAC
 export function thExhaustedQuotaMessage(args?: Partial<AiQuotaMessageArgs>): string {
   const weeklyReset = formatDateTimeShort(args?.weeklyRenewsAt ?? null, "en-US");
   const monthlyReset = formatDateTimeShort(args?.monthlyRenewsAt ?? null, "en-US");
+  const weeklyMode = Boolean(args?.weeklyRenewsAt);
+  const monthlyExtra = Math.max(0, Number(args?.extraRemaining ?? 0));
   return [
     "AI credit ของคุณไม่พอสำหรับการส่งตรวจครั้งนี้",
-    `• เหลือรวมตอนนี้: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`,
+    weeklyMode
+      ? `• เหลือรายสัปดาห์ตอนนี้: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`
+      : `• เหลือรวมตอนนี้: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`,
+    weeklyMode ? `• เหลือรายเดือน/เครดิตเพิ่ม: ${monthlyExtra}` : null,
     args?.weeklyRenewsAt ? `• รีเซ็ตรอบสัปดาห์: ${formatDateTimeShort(args.weeklyRenewsAt, "th-TH")}` : null,
     args?.monthlyRenewsAt ? `• รอบแพ็กเกจ/รายเดือนถึง: ${formatDateTimeShort(args.monthlyRenewsAt, "th-TH")}` : null,
     "",
     "You do not have enough AI credit for this submit.",
-    `• Left now: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`,
+    weeklyMode
+      ? `• Weekly left now: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`
+      : `• Left now: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`,
+    weeklyMode ? `• Monthly left now: ${monthlyExtra}` : null,
     args?.weeklyRenewsAt ? `• Weekly renew: ${weeklyReset}` : null,
     args?.monthlyRenewsAt ? `• Monthly/package cycle: ${monthlyReset}` : null,
   ]
@@ -194,15 +222,16 @@ export function thConfirmBeforeAiSubmit(args: AiQuotaMessageArgs): string {
   const limit = Math.max(0, Number(args.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT));
   const used = Math.max(0, Number(args.used ?? 0));
   const extraRemaining = Math.max(0, Number(args.extraRemaining ?? 0));
+  const weeklyMode = Boolean(args.weeklyRenewsAt);
   return [
     `การส่งตรวจครั้งนี้จะใช้ AI credit ${Math.max(1, Number(args.cost ?? 1))} ครั้ง`,
     "",
     "สรุปสิทธิ์ของคุณตอนนี้",
-    `• เหลือรวมตอนนี้: ${remaining}/${limit}`,
+    weeklyMode ? `• เหลือรายสัปดาห์ตอนนี้: ${remaining}/${limit}` : `• เหลือรวมตอนนี้: ${remaining}/${limit}`,
     `• ใช้ไปแล้ว: ${used}`,
     args.weeklyRenewsAt ? `• รีเซ็ตรอบสัปดาห์: ${formatDateTimeShort(args.weeklyRenewsAt, "th-TH")}` : null,
     args.monthlyRenewsAt ? `• รอบแพ็กเกจ/รายเดือนถึง: ${formatDateTimeShort(args.monthlyRenewsAt, "th-TH")}` : null,
-    `• เครดิตเพิ่มที่ใช้งานได้: ${extraRemaining}`,
+    weeklyMode ? `• เหลือรายเดือน/เครดิตเพิ่ม: ${extraRemaining}` : `• เครดิตเพิ่มที่ใช้งานได้: ${extraRemaining}`,
     extraRemaining > 0 && args.extraExpiresAt
       ? `• เครดิตเพิ่มหมดอายุเร็วสุด: ${formatDateTimeShort(args.extraExpiresAt, "th-TH")}`
       : null,
@@ -210,11 +239,11 @@ export function thConfirmBeforeAiSubmit(args: AiQuotaMessageArgs): string {
     `This submit will use ${Math.max(1, Number(args.cost ?? 1))} AI credit.`,
     "",
     "Your credit summary right now",
-    `• Left now: ${remaining}/${limit}`,
+    weeklyMode ? `• Weekly left now: ${remaining}/${limit}` : `• Left now: ${remaining}/${limit}`,
     `• Used so far: ${used}`,
     args.weeklyRenewsAt ? `• Weekly renew: ${formatDateTimeShort(args.weeklyRenewsAt, "en-US")}` : null,
     args.monthlyRenewsAt ? `• Monthly/package cycle: ${formatDateTimeShort(args.monthlyRenewsAt, "en-US")}` : null,
-    `• Active extra credits: ${extraRemaining}`,
+    weeklyMode ? `• Monthly left now: ${extraRemaining}` : `• Active extra credits: ${extraRemaining}`,
     extraRemaining > 0 && args.extraExpiresAt
       ? `• Earliest extra expiry: ${formatDateTimeShort(args.extraExpiresAt, "en-US")}`
       : null,
@@ -244,16 +273,17 @@ export function thInteractiveSpeakingStartConfirm(args: AiQuotaMessageArgs): str
   const limit = Math.max(0, Number(args.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT));
   const used = Math.max(0, Number(args.used ?? 0));
   const extraRemaining = Math.max(0, Number(args.extraRemaining ?? 0));
+  const weeklyMode = Boolean(args.weeklyRenewsAt);
   return [
     "เริ่มแบบฝึกพูดโต้ตอบได้เลย ระบบยังไม่ตัดสิทธิ์ตอนนี้",
     `สิทธิ์ ${Math.max(1, Number(args.cost ?? 1))} ครั้งจะถูกนับเมื่อคุณทำครบและกดส่งให้ตรวจ`,
     "",
     "สรุปสิทธิ์ของคุณตอนนี้",
-    `• เหลือรวมตอนนี้: ${remaining}/${limit}`,
+    weeklyMode ? `• เหลือรายสัปดาห์ตอนนี้: ${remaining}/${limit}` : `• เหลือรวมตอนนี้: ${remaining}/${limit}`,
     `• ใช้ไปแล้ว: ${used}`,
     args.weeklyRenewsAt ? `• รีเซ็ตรอบสัปดาห์: ${formatDateTimeShort(args.weeklyRenewsAt, "th-TH")}` : null,
     args.monthlyRenewsAt ? `• รอบแพ็กเกจ/รายเดือนถึง: ${formatDateTimeShort(args.monthlyRenewsAt, "th-TH")}` : null,
-    `• เครดิตเพิ่มที่ใช้งานได้: ${extraRemaining}`,
+    weeklyMode ? `• เหลือรายเดือน/เครดิตเพิ่ม: ${extraRemaining}` : `• เครดิตเพิ่มที่ใช้งานได้: ${extraRemaining}`,
     extraRemaining > 0 && args.extraExpiresAt
       ? `• เครดิตเพิ่มหมดอายุเร็วสุด: ${formatDateTimeShort(args.extraExpiresAt, "th-TH")}`
       : null,
@@ -262,11 +292,11 @@ export function thInteractiveSpeakingStartConfirm(args: AiQuotaMessageArgs): str
     `The ${Math.max(1, Number(args.cost ?? 1))} AI credit will be counted only when you finish and submit for feedback.`,
     "",
     "Your credit summary right now",
-    `• Left now: ${remaining}/${limit}`,
+    weeklyMode ? `• Weekly left now: ${remaining}/${limit}` : `• Left now: ${remaining}/${limit}`,
     `• Used so far: ${used}`,
     args.weeklyRenewsAt ? `• Weekly renew: ${formatDateTimeShort(args.weeklyRenewsAt, "en-US")}` : null,
     args.monthlyRenewsAt ? `• Monthly/package cycle: ${formatDateTimeShort(args.monthlyRenewsAt, "en-US")}` : null,
-    `• Active extra credits: ${extraRemaining}`,
+    weeklyMode ? `• Monthly left now: ${extraRemaining}` : `• Active extra credits: ${extraRemaining}`,
     extraRemaining > 0 && args.extraExpiresAt
       ? `• Earliest extra expiry: ${formatDateTimeShort(args.extraExpiresAt, "en-US")}`
       : null,

@@ -55,10 +55,10 @@ export async function GET() {
         ? 0
         : 1
       : tier === "vip" && vipWeekly
-        ? vipWeekly.remaining
+        ? vipWeekly.weeklyVisibleRemaining
         : Math.max(0, aiLimit - aiUsed);
   const aiUsedDisplay = tier === "vip" && vipWeekly ? vipWeekly.used : aiUsed;
-  const aiLimitDisplay = tier === "vip" && vipWeekly ? vipWeekly.totalLimit : aiLimit;
+  const aiLimitDisplay = tier === "vip" && vipWeekly ? vipWeekly.weeklyVisibleLimit : aiLimit;
   const mockUsed = countBillableMockFixedSessions((sessions ?? []) as Array<{ targets?: unknown }>);
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[tier];
   const mockPlanRemaining = isAdmin ? Number.MAX_SAFE_INTEGER : Math.max(0, mockLimit - mockUsed);
@@ -72,17 +72,39 @@ export async function GET() {
       planLimit: aiLimitDisplay,
       planRemaining: aiPlanRemaining,
       addonRemaining: tier === "vip" && vipWeekly ? 0 : addon.feedbackRemaining,
-      totalRemaining: aiPlanRemaining + (tier === "vip" && vipWeekly ? 0 : addon.feedbackRemaining),
+      totalRemaining:
+        tier === "vip" && vipWeekly
+          ? vipWeekly.weeklyVisibleRemaining + vipWeekly.monthlyVisibleRemaining
+          : aiPlanRemaining + addon.feedbackRemaining,
+      weeklyUsed: tier === "vip" && vipWeekly ? vipWeekly.used : null,
+      weeklyLimit: tier === "vip" && vipWeekly ? vipWeekly.weeklyVisibleLimit : null,
+      weeklyRemaining: tier === "vip" && vipWeekly ? vipWeekly.weeklyVisibleRemaining : null,
+      weeklyRenewsAt: tier === "vip" && vipWeekly ? vipWeekly.renewsAt : null,
+      monthlyRemaining:
+        tier === "vip" && vipWeekly
+          ? vipWeekly.monthlyVisibleRemaining
+          : aiPlanRemaining + addon.feedbackRemaining,
+      monthlyRenewsAt: tier === "vip" && vipWeekly ? ((profile?.tier_expires_at as string | null) ?? null) : ((profile?.tier_expires_at as string | null) ?? null),
+      extraExpiry: tier === "vip" && vipWeekly ? vipWeekly.monthlyExtraExpiresAt : null,
     },
     vipWeekly: vipWeekly
       ? {
           used: vipWeekly.used,
           baseLimit: vipWeekly.baseLimit,
+          baseRemaining: vipWeekly.baseRemaining,
+          weeklyExtraRemaining: vipWeekly.weeklyExtraRemaining,
+          monthlyExtraRemaining: vipWeekly.monthlyExtraRemaining,
+          weeklyVisibleRemaining: vipWeekly.weeklyVisibleRemaining,
+          weeklyVisibleLimit: vipWeekly.weeklyVisibleLimit,
+          monthlyVisibleRemaining: vipWeekly.monthlyVisibleRemaining,
+          weeklyOverrideActive: vipWeekly.weeklyOverrideActive,
+          monthlyOverrideActive: vipWeekly.monthlyOverrideActive,
           extraLimit: vipWeekly.extraLimit,
           totalLimit: vipWeekly.totalLimit,
           remaining: vipWeekly.remaining,
           renewsAt: vipWeekly.renewsAt,
           extraExpiresAt: vipWeekly.extraExpiresAt,
+          monthlyExtraExpiresAt: vipWeekly.monthlyExtraExpiresAt,
         }
       : null,
     mock: {

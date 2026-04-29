@@ -9,7 +9,17 @@ import {
 
 /** Shown above AI Submit on production / dialogue-summary flows for VIP. */
 export function VipAiFeedbackQuotaBanner() {
-  const { showQuotaBanner, remaining, limit, loading, extraLimit, extraExpiresAt, renewsAt, planExpiresAt } = useVipAiFeedbackGate();
+  const {
+    showQuotaBanner,
+    remaining,
+    limit,
+    loading,
+    extraLimit,
+    extraExpiresAt,
+    renewsAt,
+    planExpiresAt,
+    weeklyUsed,
+  } = useVipAiFeedbackGate();
 
   if (!showQuotaBanner) return null;
 
@@ -20,6 +30,9 @@ export function VipAiFeedbackQuotaBanner() {
     >
       <p className="font-bold text-neutral-900">
         {loading ? "กำลังโหลดโควต้า…" : TH_QUOTA_BANNER_LINE(remaining, limit)}
+      </p>
+      <p className="mt-1 text-xs font-semibold text-neutral-800">
+        ใช้ไปแล้วรอบนี้ {weeklyUsed ?? 0} ครั้ง · Used this week {weeklyUsed ?? 0}
       </p>
       {renewsAt ? (
         <p className="mt-1 text-xs font-semibold text-ep-blue">
@@ -33,7 +46,7 @@ export function VipAiFeedbackQuotaBanner() {
       ) : null}
       {extraLimit > 0 ? (
         <p className="mt-1 text-xs font-semibold text-emerald-700">
-          มีสิทธิ์เพิ่มอีก {extraLimit} ครั้ง
+          เหลือรายเดือน/เครดิตเพิ่มอีก {extraLimit} ครั้ง
           {extraExpiresAt ? ` ใช้ได้ถึง ${new Date(extraExpiresAt).toLocaleString("th-TH")}` : ""}
         </p>
       ) : null}

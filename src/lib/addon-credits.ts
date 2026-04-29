@@ -19,6 +19,9 @@ const REDEEM_REWARD_REQUIRED_GAIN = 5;
 const REDEEM_REWARD_MAX_ACTIVE_CREDITS = 8;
 const REDEEM_REWARD_SOURCE = "redeem_improvement_bonus";
 const REDEEM_REWARD_SKU = "reward_redeem_bonus";
+const ADMIN_OVERRIDE_SOURCE = "admin_manual_override";
+const ADMIN_OVERRIDE_WEEKLY_BUCKET = "weekly";
+const ADMIN_OVERRIDE_MONTHLY_BUCKET = "monthly";
 export const VIP_AI_FEEDBACK_WEEKLY_LIMIT = 15;
 
 type AddOnRow = {
@@ -29,6 +32,7 @@ type AddOnRow = {
   status: string;
   expires_at: string | null;
   created_at: string;
+  metadata?: Record<string, unknown> | null;
 };
 
 type ProfileLite = {
@@ -52,12 +56,20 @@ export type VipWeeklyAiQuota = {
   weekStart: string;
   used: number;
   baseLimit: number;
+  baseRemaining: number;
+  weeklyExtraRemaining: number;
+  monthlyExtraRemaining: number;
+  weeklyVisibleRemaining: number;
+  weeklyVisibleLimit: number;
+  monthlyVisibleRemaining: number;
+  weeklyOverrideActive: boolean;
+  monthlyOverrideActive: boolean;
   extraLimit: number;
   totalLimit: number;
   remaining: number;
-  baseRemaining: number;
   renewsAt: string;
   extraExpiresAt: string | null;
+  monthlyExtraExpiresAt: string | null;
 };
 
 function weekStartMondayIsoDate(now = new Date()): string {
@@ -85,12 +97,24 @@ function countsTowardVipWeeklyExtra(row: {
   expires_at?: string | null;
 }): boolean {
   const source = typeof row.metadata?.source === "string" ? row.metadata.source : "";
+  const bucket = typeof row.metadata?.bucket === "string" ? row.metadata.bucket : "";
   const expiryMode =
     typeof row.metadata?.expiryMode === "string" ? row.metadata.expiryMode : "";
   if (source === REDEEM_REWARD_SOURCE) return true;
+  if (source === ADMIN_OVERRIDE_SOURCE) return bucket === ADMIN_OVERRIDE_WEEKLY_BUCKET;
   if (source !== "admin_manual") return false;
   if (!row.expires_at) return false;
   return expiryMode === "7d" || expiryMode === "week_end" || expiryMode === "days";
+}
+
+function countsTowardVipMonthlyExtra(row: {
+  metadata?: Record<string, unknown> | null;
+  expires_at?: string | null;
+}): boolean {
+  const source = typeof row.metadata?.source === "string" ? row.metadata.source : "";
+  const bucket = typeof row.metadata?.bucket === "string" ? row.metadata.bucket : "";
+  if (source === ADMIN_OVERRIDE_SOURCE) return bucket === ADMIN_OVERRIDE_MONTHLY_BUCKET;
+  return !countsTowardVipWeeklyExtra(row);
 }
 
 const FREE_FEEDBACK_ALLOWED_SURFACES = new Set<FeedbackSurface>([
@@ -158,7 +182,7 @@ export async function getAddonBalancesForUser(userId: string): Promise<{
   const nowIso = new Date().toISOString();
   const { data } = await supabase
     .from("addon_credit_purchases")
-    .select("id, kind, credits_granted, credits_used, status, expires_at, created_at")
+    .select("id, kind, credits_granted, credits_used, status, expires_at, created_at, metadata")
     .eq("user_id", userId)
     .eq("status", "paid")
     .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
@@ -196,35 +220,111 @@ export async function getVipWeeklyAiQuotaForUser(userId: string): Promise<VipWee
       .eq("user_id", userId)
       .eq("kind", "feedback")
       .eq("status", "paid")
-      .or(`expires_at.is.null,expires_at.gt.${nowIso}`),
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+      .order("created_at", { ascending: false }),
   ]);
 
-  const { feedbackRemaining } = await getAddonBalancesForUser(userId);
+  const weeklyOverrideRow =
+    (credits ?? []).find((row) => {
+      const metadata = (row as { metadata?: Record<string, unknown> | null }).metadata ?? null;
+      return (
+        typeof metadata?.source === "string" &&
+        metadata.source === ADMIN_OVERRIDE_SOURCE &&
+        metadata.bucket === ADMIN_OVERRIDE_WEEKLY_BUCKET
+      );
+    }) ?? null;
+  const monthlyOverrideRow =
+    (credits ?? []).find((row) => {
+      const metadata = (row as { metadata?: Record<string, unknown> | null }).metadata ?? null;
+      return (
+        typeof metadata?.source === "string" &&
+        metadata.source === ADMIN_OVERRIDE_SOURCE &&
+        metadata.bucket === ADMIN_OVERRIDE_MONTHLY_BUCKET
+      );
+    }) ?? null;
+
   const weeklyRows = (credits ?? []).filter((row) =>
     countsTowardVipWeeklyExtra(row as { metadata?: Record<string, unknown> | null; expires_at?: string | null }),
   );
-  const extraLimit = Math.max(0, feedbackRemaining);
-  const extraExpiresAt =
+  const monthlyRows = (credits ?? []).filter((row) =>
+    countsTowardVipMonthlyExtra(row as { metadata?: Record<string, unknown> | null; expires_at?: string | null }),
+  );
+  const rawWeeklyExtraRemaining = weeklyRows.reduce((sum, row) => {
+    const granted = Number((row as { credits_granted?: unknown }).credits_granted ?? 0);
+    const usedCredits = Number((row as { credits_used?: unknown }).credits_used ?? 0);
+    return sum + Math.max(0, granted - usedCredits);
+  }, 0);
+  const rawMonthlyExtraRemaining = monthlyRows.reduce((sum, row) => {
+    const granted = Number((row as { credits_granted?: unknown }).credits_granted ?? 0);
+    const usedCredits = Number((row as { credits_used?: unknown }).credits_used ?? 0);
+    return sum + Math.max(0, granted - usedCredits);
+  }, 0);
+  const rawExtraExpiresAt =
     weeklyRows
+      .map((row) => (row as { expires_at?: string | null }).expires_at ?? null)
+      .filter((value): value is string => Boolean(value))
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
+  const rawMonthlyExtraExpiresAt =
+    monthlyRows
       .map((row) => (row as { expires_at?: string | null }).expires_at ?? null)
       .filter((value): value is string => Boolean(value))
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
 
   const used = Math.max(0, Number(usage?.uses ?? 0));
   const baseRemaining = Math.max(0, VIP_AI_FEEDBACK_WEEKLY_LIMIT - used);
-  const remaining = baseRemaining + extraLimit;
+  const weeklyOverrideRemaining = weeklyOverrideRow
+    ? Math.max(
+        0,
+        Number((weeklyOverrideRow as { credits_granted?: unknown }).credits_granted ?? 0) -
+          Number((weeklyOverrideRow as { credits_used?: unknown }).credits_used ?? 0),
+      )
+    : 0;
+  const monthlyOverrideRemaining = monthlyOverrideRow
+    ? Math.max(
+        0,
+        Number((monthlyOverrideRow as { credits_granted?: unknown }).credits_granted ?? 0) -
+          Number((monthlyOverrideRow as { credits_used?: unknown }).credits_used ?? 0),
+      )
+    : 0;
+  const weeklyVisibleRemaining = weeklyOverrideRow
+    ? weeklyOverrideRemaining
+    : baseRemaining + rawWeeklyExtraRemaining;
+  const monthlyVisibleRemaining = monthlyOverrideRow
+    ? monthlyOverrideRemaining
+    : rawMonthlyExtraRemaining;
+  const weeklyVisibleLimit = used + weeklyVisibleRemaining;
+  const remaining = weeklyVisibleRemaining + monthlyVisibleRemaining;
+  const weeklyExtraRemaining = weeklyOverrideRow
+    ? Math.max(0, weeklyVisibleRemaining - baseRemaining)
+    : rawWeeklyExtraRemaining;
+  const monthlyExtraRemaining = monthlyVisibleRemaining;
+  const extraLimit = weeklyExtraRemaining + monthlyExtraRemaining;
+  const extraExpiresAt =
+    (weeklyOverrideRow as { expires_at?: string | null } | null)?.expires_at ??
+    rawExtraExpiresAt;
+  const monthlyExtraExpiresAt =
+    (monthlyOverrideRow as { expires_at?: string | null } | null)?.expires_at ??
+    rawMonthlyExtraExpiresAt;
   const totalLimit = used + remaining;
 
   return {
     weekStart,
     used,
     baseLimit: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
+    baseRemaining,
+    weeklyExtraRemaining,
+    monthlyExtraRemaining,
+    weeklyVisibleRemaining,
+    weeklyVisibleLimit,
+    monthlyVisibleRemaining,
+    weeklyOverrideActive: Boolean(weeklyOverrideRow),
+    monthlyOverrideActive: Boolean(monthlyOverrideRow),
     extraLimit,
     totalLimit,
     remaining,
-    baseRemaining,
     renewsAt,
     extraExpiresAt,
+    monthlyExtraExpiresAt,
   };
 }
 
@@ -270,10 +370,40 @@ export async function consumeAddonCreditsForUser(
   userId: string,
   kind: AddOnCreditKind,
   amount = 1,
+  scope: "all" | "weekly_extra" | "monthly_extra" = "all",
 ): Promise<{ ok: boolean; consumed: number }> {
   const supabase = createServiceRoleSupabase();
   const { rows } = await getAddonBalancesForUser(userId);
-  const eligible = rows.filter((row) => row.kind === kind);
+  const eligibleBase = rows.filter((row) => {
+    if (row.kind !== kind) return false;
+    if (kind !== "feedback" || scope === "all") return true;
+    if (scope === "weekly_extra") {
+      return countsTowardVipWeeklyExtra({
+        metadata: row.metadata ?? null,
+        expires_at: row.expires_at,
+      });
+    }
+    return countsTowardVipMonthlyExtra({
+      metadata: row.metadata ?? null,
+      expires_at: row.expires_at,
+    });
+  });
+  const eligible =
+    kind === "feedback" && scope !== "all"
+      ? (() => {
+          const bucket =
+            scope === "weekly_extra"
+              ? ADMIN_OVERRIDE_WEEKLY_BUCKET
+              : ADMIN_OVERRIDE_MONTHLY_BUCKET;
+          const overrideRows = eligibleBase.filter((row) => {
+            const source = typeof row.metadata?.source === "string" ? row.metadata.source : "";
+            const overrideBucket =
+              typeof row.metadata?.bucket === "string" ? row.metadata.bucket : "";
+            return source === ADMIN_OVERRIDE_SOURCE && overrideBucket === bucket;
+          });
+          return overrideRows.length > 0 ? overrideRows : eligibleBase;
+        })()
+      : eligibleBase;
   let remainingToConsume = amount;
   let consumed = 0;
 
@@ -389,8 +519,8 @@ export async function getAiCreditStateForUser(
         allowed: true,
         reason: null,
         tier,
-        planRemaining: weekly.baseRemaining,
-        addonRemaining: weekly.extraLimit,
+        planRemaining: weekly.weeklyVisibleRemaining,
+        addonRemaining: weekly.monthlyVisibleRemaining,
       };
     }
     return {
@@ -475,7 +605,13 @@ export async function chargeAiCreditForUser(
       await recordVipWeeklyAiUse(userId, 1);
       return { ok: true, source: "plan" };
     }
-    const consumed = await consumeAddonCreditsForUser(userId, "feedback", 1);
+    let consumed = { ok: false, consumed: 0 };
+    if (weekly.weeklyExtraRemaining > 0) {
+      consumed = await consumeAddonCreditsForUser(userId, "feedback", 1, "weekly_extra");
+    }
+    if (!consumed.ok && weekly.monthlyExtraRemaining > 0) {
+      consumed = await consumeAddonCreditsForUser(userId, "feedback", 1, "monthly_extra");
+    }
     if (consumed.ok) {
       await recordVipWeeklyAiUse(userId, 1);
     }

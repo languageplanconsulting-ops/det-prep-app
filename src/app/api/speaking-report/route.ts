@@ -8,6 +8,7 @@ import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateSpeakingReportWithGemini } from "@/lib/gemini-speaking";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
+import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 import { isSpeakingRound } from "@/lib/speaking-constants";
 
@@ -128,7 +129,7 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(report);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Gemini request failed";
+    const message = normalizeGradingErrorMessage(e);
     console.error("[speaking-report]", e);
     return NextResponse.json({ error: message }, { status: 500 });
   }

@@ -118,6 +118,8 @@ export function SubscriptionDetailClient() {
   const [expiryLocal, setExpiryLocal] = useState("");
   const [aiUsedEdit, setAiUsedEdit] = useState("0");
   const [lifetimeAiUsedEdit, setLifetimeAiUsedEdit] = useState(false);
+  const [weeklyLeftNowEdit, setWeeklyLeftNowEdit] = useState("0");
+  const [monthlyLeftNowEdit, setMonthlyLeftNowEdit] = useState("0");
   const [grantCredits, setGrantCredits] = useState("1");
   const [grantExpiryMode, setGrantExpiryMode] = useState("7d");
   const [grantCustomExpiry, setGrantCustomExpiry] = useState("");
@@ -166,6 +168,8 @@ export function SubscriptionDetailClient() {
     const aiQuota = data.aiQuota as Record<string, unknown>;
     setAiUsedEdit(String(aiQuota.monthlyUsed ?? 0));
     setLifetimeAiUsedEdit(aiQuota.lifetimeAiUsed === true);
+    setWeeklyLeftNowEdit(String(aiQuota.learnerFacingRemaining ?? 0));
+    setMonthlyLeftNowEdit(String(aiQuota.learnerMonthlyRemaining ?? 0));
   }, [data]);
 
   const profile = (data?.profile ?? {}) as Record<string, unknown>;
@@ -285,6 +289,41 @@ export function SubscriptionDetailClient() {
         type: "error",
         titleEn: e instanceof Error ? e.message : "Could not update AI quota",
         titleTh: "อัปเดตโควตา AI ไม่สำเร็จ",
+      });
+    } finally {
+      setAiSaving(false);
+    }
+  };
+
+  const saveVisibleVipQuota = async () => {
+    setAiSaving(true);
+    try {
+      const res = await fetch(`/api/admin/subscriptions/${userId}/ai-credits`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          action: "set_visible_quota",
+          weeklyLeftNow: Math.max(0, Math.round(Number(weeklyLeftNowEdit || 0))),
+          monthlyLeftNow: Math.max(0, Math.round(Number(monthlyLeftNowEdit || 0))),
+          reason: "Admin set exact visible VIP AI quota",
+        }),
+      });
+      if (!res.ok) {
+        const json = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(json.error ?? "Could not save visible quota");
+      }
+      push({
+        type: "success",
+        titleEn: "Visible VIP AI quota updated.",
+        titleTh: "อัปเดตโควตา AI ที่ผู้เรียนเห็นแล้ว",
+      });
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Could not save visible quota",
+        titleTh: "บันทึกโควตา AI ที่ผู้เรียนเห็นไม่สำเร็จ",
       });
     } finally {
       setAiSaving(false);
@@ -654,12 +693,13 @@ export function SubscriptionDetailClient() {
                 ["Weekly left now / เหลือรอบสัปดาห์ตอนนี้", `${String(aiQuota.learnerFacingRemaining ?? 0)} / ${String(aiQuota.learnerFacingLimit ?? 0)}`],
                 ["Weekly used now / ใช้ไปแล้วรอบนี้", String(aiQuota.learnerFacingUsed ?? 0)],
                 ["Weekly renew / รีเซ็ตรอบสัปดาห์", aiQuota.learnerFacingRenewsAt ? formatAdminDateTime(String(aiQuota.learnerFacingRenewsAt)) : "—"],
+                ["Monthly left now / เหลือรอบเดือนตอนนี้", String(aiQuota.learnerMonthlyRemaining ?? 0)],
                 ["Monthly/package renew / รอบแพ็กเกจรายเดือน", profile.tier_expires_at ? formatAdminDateTime(String(profile.tier_expires_at)) : "No expiry / ไม่หมดอายุ"],
-                ["Extra credits active / เครดิตเพิ่มที่ใช้งานได้", String(aiQuota.addonRemaining ?? 0)],
+                ["Total visible now / คงเหลือที่เห็นรวม", String(Number(aiQuota.learnerFacingRemaining ?? 0) + Number(aiQuota.learnerMonthlyRemaining ?? 0))],
                 [
-                  "Extra credit expiry / เครดิตเพิ่มหมดอายุเร็วสุด",
-                  learnerExtraExpiry
-                    ? formatAdminDateTime(String(learnerExtraExpiry))
+                  "Monthly extra expiry / เครดิตรายเดือนหมดอายุเร็วสุด",
+                  aiQuota.learnerMonthlyRenewsAt
+                    ? formatAdminDateTime(String(aiQuota.learnerMonthlyRenewsAt))
                     : "—",
                 ],
               ].map(([k, v]) => (
@@ -672,6 +712,43 @@ export function SubscriptionDetailClient() {
                 </div>
               ))}
             </div>
+
+            {(aiQuota.effectiveTier ?? "free") === "vip" ? (
+              <div className="mt-4 border-t-2 border-neutral-200 pt-4">
+                <p className="text-sm font-black">Set exact learner view / ตั้งค่าตามที่ผู้เรียนเห็นจริง</p>
+                <div className="mt-2 flex flex-wrap items-end gap-3">
+                  <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                    Weekly left now / เหลือรอบสัปดาห์ตอนนี้
+                    <input
+                      value={weeklyLeftNowEdit}
+                      onChange={(e) => setWeeklyLeftNowEdit(e.target.value)}
+                      className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                      inputMode="numeric"
+                    />
+                  </label>
+                  <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                    Monthly left now / เหลือรอบเดือนตอนนี้
+                    <input
+                      value={monthlyLeftNowEdit}
+                      onChange={(e) => setMonthlyLeftNowEdit(e.target.value)}
+                      className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                      inputMode="numeric"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => void saveVisibleVipQuota()}
+                    disabled={aiSaving}
+                    className="rounded-[4px] border-4 border-black bg-[#004AAD] px-3 py-2 text-xs font-black text-white shadow-[4px_4px_0_0_#000]"
+                  >
+                    {aiSaving ? "Saving…" : "Save exact view / บันทึกแบบตรงกัน"}
+                  </button>
+                </div>
+                <p className="mt-2 text-[10px] text-neutral-500">
+                  This sets the exact weekly and monthly numbers the learner sees right now. / ช่องนี้กำหนดตัวเลขรายสัปดาห์และรายเดือนที่ผู้เรียนเห็นตรง ๆ ตอนนี้
+                </p>
+              </div>
+            ) : null}
 
             {(aiQuota.effectiveTier ?? "free") !== "vip" ? (
             <div className="mt-4 border-t-2 border-neutral-200 pt-4">

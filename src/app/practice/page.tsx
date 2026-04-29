@@ -145,7 +145,13 @@ export default function PracticeHubPage() {
         return;
       }
       const rem = vipAiGate.remaining;
-      emitVipApiCreditNotice(rem, vipAiGate.limit);
+      emitVipApiCreditNotice(rem, vipAiGate.limit, {
+        used: vipAiGate.used,
+        weeklyRenewsAt: vipAiGate.renewsAt,
+        monthlyRenewsAt: vipAiGate.planExpiresAt,
+        extraRemaining: vipAiGate.extraLimit,
+        extraExpiresAt: vipAiGate.extraExpiresAt,
+      });
       const cost = VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION;
       if (rem < cost) {
         window.alert(thInteractiveSpeakingInsufficientCredits(cost, rem));
@@ -169,7 +175,13 @@ export default function PracticeHubPage() {
       vipAiGate.userId
     ) {
       const rem = vipAiGate.remaining;
-      emitVipApiCreditNotice(rem, vipAiGate.limit);
+      emitVipApiCreditNotice(rem, vipAiGate.limit, {
+        used: vipAiGate.used,
+        weeklyRenewsAt: vipAiGate.renewsAt,
+        monthlyRenewsAt: vipAiGate.planExpiresAt,
+        extraRemaining: vipAiGate.extraLimit,
+        extraExpiresAt: vipAiGate.extraExpiresAt,
+      });
       if (rem < 1) {
         window.alert("AI FEEDBACK: You have no remaining VIP grading credit this week. It resets every Monday.");
         return;
