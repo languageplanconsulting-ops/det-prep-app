@@ -62,10 +62,10 @@ export function VipApiCreditNotebookNotice() {
           VIP API Credits Notebook
         </p>
         <p className="mt-1 text-sm font-extrabold text-neutral-900">
-          เครดิต AI คงเหลือ {notice.remaining}/{notice.limit} ครั้ง
+          เครดิต AI รายสัปดาห์คงเหลือ {notice.remaining}/{notice.limit} ครั้ง
         </p>
         <p className="text-sm font-bold text-neutral-800">
-          Remaining AI credits: {notice.remaining}/{notice.limit}
+          Weekly AI credits left: {notice.remaining}/{notice.limit}
         </p>
         <p className="mt-1 text-xs font-semibold text-neutral-700">
           ใช้ไปแล้ว {notice.used ?? 0} ครั้ง · Used {notice.used ?? 0}
@@ -78,6 +78,9 @@ export function VipApiCreditNotebookNotice() {
           <span className="rounded-full border-2 border-black bg-yellow-100 px-2.5 py-1 text-neutral-900">
             Weekly cap: {notice.limit || VIP_AI_FEEDBACK_WEEKLY_LIMIT}
           </span>
+          <span className="rounded-full border-2 border-black bg-emerald-100 px-2.5 py-1 text-neutral-900">
+            Monthly left: {notice.extraRemaining ?? 0}
+          </span>
         </div>
         <div className="mt-2 space-y-1 text-xs font-medium text-neutral-700">
           {notice.weeklyRenewsAt ? (
@@ -88,7 +91,7 @@ export function VipApiCreditNotebookNotice() {
           ) : null}
           {(notice.extraRemaining ?? 0) > 0 ? (
             <p>
-              Extra credits active / เครดิตเพิ่มที่ใช้งานได้: {notice.extraRemaining}
+              Monthly left now / เหลือรายเดือนตอนนี้: {notice.extraRemaining}
               {notice.extraExpiresAt
                 ? ` · ${new Date(notice.extraExpiresAt).toLocaleString("th-TH")}`
                 : ""}

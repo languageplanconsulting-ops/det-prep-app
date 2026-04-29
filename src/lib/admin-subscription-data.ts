@@ -120,8 +120,13 @@ export type AdminAiQuotaSnapshot = {
   learnerFacingLimit: number;
   learnerFacingRemaining: number;
   learnerFacingRenewsAt: string | null;
+  learnerMonthlyRemaining: number;
+  learnerMonthlyRenewsAt: string | null;
+  weeklyBaseRemaining: number;
   weeklyExtraRemaining: number;
   weeklyExtraRenewsAt: string | null;
+  monthlyExtraRemaining: number;
+  monthlyExtraRenewsAt: string | null;
   feedbackCredits: AdminExtraCreditRow[];
 };
 
@@ -165,6 +170,13 @@ function buildAdminAiQuotaSnapshot(
       .map((row) => row.expires_at)
       .filter((value): value is string => Boolean(value))
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
+  const monthlyRows = feedbackCredits.filter((row) => !weeklyRows.includes(row));
+  const monthlyExtraRemaining = monthlyRows.reduce((sum, row) => sum + Math.max(0, row.remaining), 0);
+  const monthlyExtraRenewsAt =
+    monthlyRows
+      .map((row) => row.expires_at)
+      .filter((value): value is string => Boolean(value))
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
 
   return {
     tier: String(profile.tier ?? "free"),
@@ -176,11 +188,20 @@ function buildAdminAiQuotaSnapshot(
     totalRemaining: monthlyRemaining + addonFeedbackRemaining,
     lifetimeAiUsed,
     learnerFacingUsed: vipWeekly?.used ?? monthlyUsed,
-    learnerFacingLimit: vipWeekly?.totalLimit ?? (monthlyRemaining + addonFeedbackRemaining + monthlyUsed),
-    learnerFacingRemaining: vipWeekly?.remaining ?? (monthlyRemaining + addonFeedbackRemaining),
+    learnerFacingLimit:
+      vipWeekly?.weeklyVisibleLimit ??
+      (monthlyRemaining + addonFeedbackRemaining + monthlyUsed),
+    learnerFacingRemaining:
+      vipWeekly?.weeklyVisibleRemaining ?? (monthlyRemaining + addonFeedbackRemaining),
     learnerFacingRenewsAt: vipWeekly?.renewsAt ?? null,
+    learnerMonthlyRemaining:
+      vipWeekly?.monthlyVisibleRemaining ?? (monthlyRemaining + addonFeedbackRemaining),
+    learnerMonthlyRenewsAt: vipWeekly?.monthlyExtraExpiresAt ?? null,
+    weeklyBaseRemaining: vipWeekly?.baseRemaining ?? monthlyRemaining,
     weeklyExtraRemaining,
     weeklyExtraRenewsAt,
+    monthlyExtraRemaining,
+    monthlyExtraRenewsAt,
     feedbackCredits,
   };
 }
