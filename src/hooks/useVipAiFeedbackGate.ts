@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+import { AI_MONTHLY_LIMIT } from "@/lib/access-control";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import {
   emitVipApiCreditNotice,
@@ -23,6 +24,15 @@ type VipWeeklySummary = {
 };
 
 type QuotaSummaryResponse = {
+  tier?: string;
+  expiresAt?: string | null;
+  ai?: {
+    used?: number;
+    planLimit?: number;
+    planRemaining?: number;
+    addonRemaining?: number;
+    totalRemaining?: number;
+  } | null;
   vipWeekly?: VipWeeklySummary | null;
 };
 
@@ -37,11 +47,22 @@ export function useVipAiFeedbackGate() {
   const hasBypassAccess = isAdmin || previewEligible;
   const [userId, setUserId] = useState<string | null | undefined>(undefined);
   const [weekly, setWeekly] = useState<VipWeeklySummary | null>(null);
+  const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null);
+  const [aiUsed, setAiUsed] = useState(0);
+  const [aiLimit, setAiLimit] = useState(VIP_AI_FEEDBACK_WEEKLY_LIMIT);
+  const [aiRemaining, setAiRemaining] = useState(VIP_AI_FEEDBACK_WEEKLY_LIMIT);
+  const [addonRemaining, setAddonRemaining] = useState(0);
   const [quotaLoading, setQuotaLoading] = useState(false);
+  const fallbackLimit = isVip
+    ? VIP_AI_FEEDBACK_WEEKLY_LIMIT
+    : AI_MONTHLY_LIMIT[(effectiveTier === "free" || effectiveTier === "basic" || effectiveTier === "premium" || effectiveTier === "vip"
+        ? effectiveTier
+        : "free")] ?? 0;
 
   const loadQuota = useCallback(async () => {
-    if (hasBypassAccess || !isVip) {
+    if (hasBypassAccess) {
       setWeekly(null);
+      setPlanExpiresAt(null);
       return;
     }
     setQuotaLoading(true);
@@ -49,8 +70,13 @@ export function useVipAiFeedbackGate() {
       const res = await fetch("/api/account/quota-summary", { credentials: "same-origin" });
       if (!res.ok) throw new Error("Could not load quota");
       const json = (await res.json()) as QuotaSummaryResponse;
+      setPlanExpiresAt(typeof json.expiresAt === "string" ? json.expiresAt : null);
+      setAiUsed(Math.max(0, Number(json.ai?.used ?? 0)));
+      setAiLimit(Math.max(0, Number(json.ai?.used ?? 0)) + Math.max(0, Number(json.ai?.totalRemaining ?? 0)));
+      setAiRemaining(Math.max(0, Number(json.ai?.totalRemaining ?? 0)));
+      setAddonRemaining(Math.max(0, Number(json.ai?.addonRemaining ?? 0)));
       setWeekly(
-        json.vipWeekly
+        isVip && json.vipWeekly
           ? {
               used: Math.max(0, Number(json.vipWeekly.used ?? 0)),
               baseLimit: Math.max(0, Number(json.vipWeekly.baseLimit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT)),
@@ -75,19 +101,28 @@ export function useVipAiFeedbackGate() {
             },
       );
     } catch {
-      setWeekly({
-        used: 0,
-        baseLimit: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
-        extraLimit: 0,
-        totalLimit: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
-        remaining: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
-        renewsAt: null,
-        extraExpiresAt: null,
-      });
+      setPlanExpiresAt(null);
+      setAiUsed(0);
+      setAiLimit(fallbackLimit);
+      setAiRemaining(fallbackLimit);
+      setAddonRemaining(0);
+      setWeekly(
+        isVip
+          ? {
+              used: 0,
+              baseLimit: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
+              extraLimit: 0,
+              totalLimit: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
+              remaining: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
+              renewsAt: null,
+              extraExpiresAt: null,
+            }
+          : null,
+      );
     } finally {
       setQuotaLoading(false);
     }
-  }, [hasBypassAccess, isVip]);
+  }, [fallbackLimit, hasBypassAccess, isVip]);
 
   const refresh = useCallback(() => {
     void loadQuota();
@@ -110,12 +145,12 @@ export function useVipAiFeedbackGate() {
   }, []);
 
   useEffect(() => {
-    if (!userId || hasBypassAccess || !isVip) {
-      if (!isVip || hasBypassAccess) setWeekly(null);
+    if (!userId || hasBypassAccess) {
+      if (hasBypassAccess) setWeekly(null);
       return;
     }
     void loadQuota();
-  }, [userId, hasBypassAccess, isVip, loadQuota]);
+  }, [userId, hasBypassAccess, loadQuota]);
 
   useEffect(() => {
     const bump = () => refresh();
@@ -131,36 +166,59 @@ export function useVipAiFeedbackGate() {
 
   const authLoading = userId === undefined;
   const loading = tierLoading || authLoading || quotaLoading;
-  const used = hasBypassAccess || !isVip ? 0 : Math.max(0, Number(weekly?.used ?? 0));
+  const used = hasBypassAccess
+    ? 0
+    : isVip
+      ? Math.max(0, Number(weekly?.used ?? 0))
+      : Math.max(0, aiUsed);
   const remaining = hasBypassAccess
     ? Number.POSITIVE_INFINITY
     : isVip
-      ? Math.max(0, Number(weekly?.remaining ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))
-      : Number.POSITIVE_INFINITY;
+      ? Math.max(0, Number(weekly?.remaining ?? 0))
+      : Math.max(0, aiRemaining);
   const limit = hasBypassAccess
     ? Number.POSITIVE_INFINITY
     : isVip
       ? Math.max(0, Number(weekly?.totalLimit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))
-      : Number.POSITIVE_INFINITY;
+      : Math.max(0, aiLimit);
 
   const confirmBeforeAiSubmit = useCallback((): boolean => {
     if (hasBypassAccess) return true;
-    if (!isVip) return true;
     if (authLoading || quotaLoading) {
       window.alert("กำลังโหลดข้อมูลบัญชีอยู่ครับ โปรดรอสักครู่แล้วลองกดส่งอีกครั้ง");
       return false;
     }
     if (!userId) return true;
 
-    const rem = Math.max(0, Number(weekly?.remaining ?? 0));
-    const total = Math.max(0, Number(weekly?.totalLimit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT));
-    emitVipApiCreditNotice(rem, total);
+    const rem = Math.max(0, remaining);
+    const total = Math.max(0, limit);
+    if (isVip) {
+      emitVipApiCreditNotice(rem, total);
+    }
     if (rem <= 0) {
-      window.alert(thExhaustedQuotaMessage());
+      window.alert(
+        thExhaustedQuotaMessage({
+          remaining: rem,
+          limit: total,
+          weeklyRenewsAt: weekly?.renewsAt ?? null,
+          monthlyRenewsAt: planExpiresAt,
+        }),
+      );
       return false;
     }
-    return window.confirm(thConfirmBeforeAiSubmit(rem).replaceAll(`/${VIP_AI_FEEDBACK_WEEKLY_LIMIT}`, `/${total}`));
-  }, [authLoading, hasBypassAccess, isVip, quotaLoading, userId, weekly]);
+    return window.confirm(
+      thConfirmBeforeAiSubmit({
+        remaining: rem,
+        limit: total,
+        used,
+        weeklyRenewsAt: weekly?.renewsAt ?? null,
+        monthlyRenewsAt: planExpiresAt,
+        extraRemaining: isVip ? Math.max(0, Number(weekly?.extraLimit ?? 0)) : addonRemaining,
+        extraExpiresAt: weekly?.extraExpiresAt ?? null,
+        cost: 1,
+      }),
+    );
+  }, [addonRemaining, authLoading, hasBypassAccess, limit, planExpiresAt, quotaLoading, remaining, used, userId, weekly, isVip]);
 
   const recordSuccessfulAiSubmit = useCallback(
     (delta = 1) => {
@@ -205,9 +263,10 @@ export function useVipAiFeedbackGate() {
     remaining,
     limit,
     baseLimit: Math.max(0, Number(weekly?.baseLimit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT)),
-    extraLimit: Math.max(0, Number(weekly?.extraLimit ?? 0)),
+    extraLimit: isVip ? Math.max(0, Number(weekly?.extraLimit ?? 0)) : addonRemaining,
     renewsAt: weekly?.renewsAt ?? null,
     extraExpiresAt: weekly?.extraExpiresAt ?? null,
+    planExpiresAt,
     resetOn,
     confirmBeforeAiSubmit,
     recordSuccessfulAiSubmit,

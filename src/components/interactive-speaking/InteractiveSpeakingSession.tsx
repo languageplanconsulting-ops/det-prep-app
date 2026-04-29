@@ -546,7 +546,20 @@ export function InteractiveSpeakingSession({
         window.alert(thInteractiveSpeakingInsufficientCredits(cost, rem));
         return;
       }
-      if (!window.confirm(thInteractiveSpeakingStartConfirm(cost, rem))) {
+      if (
+        !window.confirm(
+          thInteractiveSpeakingStartConfirm({
+            cost,
+            remaining: rem,
+            limit: vipGate.limit,
+            used: vipGate.used,
+            weeklyRenewsAt: vipGate.renewsAt,
+            monthlyRenewsAt: vipGate.planExpiresAt,
+            extraRemaining: vipGate.extraLimit,
+            extraExpiresAt: vipGate.extraExpiresAt,
+          }),
+        )
+      ) {
         return;
       }
     }

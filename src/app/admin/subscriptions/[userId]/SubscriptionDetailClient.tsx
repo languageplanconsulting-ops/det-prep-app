@@ -180,6 +180,11 @@ export function SubscriptionDetailClient() {
   const mockQuota = (data?.mockQuota ?? {}) as Record<string, unknown>;
   const feedbackCredits = (aiQuota.feedbackCredits ?? []) as Record<string, unknown>[];
   const mockCredits = (mockQuota.mockCredits ?? []) as Record<string, unknown>[];
+  const learnerExtraExpiry =
+    feedbackCredits
+      .map((row) => (typeof row.expires_at === "string" ? row.expires_at : null))
+      .filter((value): value is string => Boolean(value))
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
   const aiExpiryPreview = getExpiryPreview({
     mode: grantExpiryMode,
     customExpiry: grantCustomExpiry,
@@ -646,15 +651,15 @@ export function SubscriptionDetailClient() {
             <h2 className="text-lg font-black">AI quota / โควตา AI</h2>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {[
-                ["What learner sees now / ที่ผู้เรียนเห็นตอนนี้", `${String(aiQuota.learnerFacingRemaining ?? 0)} / ${String(aiQuota.learnerFacingLimit ?? 0)}`],
-                ["Used now / ใช้ไปแล้วตอนนี้", String(aiQuota.learnerFacingUsed ?? 0)],
+                ["Weekly left now / เหลือรอบสัปดาห์ตอนนี้", `${String(aiQuota.learnerFacingRemaining ?? 0)} / ${String(aiQuota.learnerFacingLimit ?? 0)}`],
+                ["Weekly used now / ใช้ไปแล้วรอบนี้", String(aiQuota.learnerFacingUsed ?? 0)],
+                ["Weekly renew / รีเซ็ตรอบสัปดาห์", aiQuota.learnerFacingRenewsAt ? formatAdminDateTime(String(aiQuota.learnerFacingRenewsAt)) : "—"],
+                ["Monthly/package renew / รอบแพ็กเกจรายเดือน", profile.tier_expires_at ? formatAdminDateTime(String(profile.tier_expires_at)) : "No expiry / ไม่หมดอายุ"],
                 ["Extra credits active / เครดิตเพิ่มที่ใช้งานได้", String(aiQuota.addonRemaining ?? 0)],
-                ["Weekly renew / รีเซ็ตรอบนี้", aiQuota.learnerFacingRenewsAt ? formatAdminDateTime(String(aiQuota.learnerFacingRenewsAt)) : "—"],
-                ["Weekly bonus left / โบนัสรายสัปดาห์คงเหลือ", String(aiQuota.weeklyExtraRemaining ?? 0)],
                 [
-                  "Extra weekly expiry / เครดิตเพิ่มหมดอายุ",
-                  aiQuota.weeklyExtraRenewsAt
-                    ? formatAdminDateTime(String(aiQuota.weeklyExtraRenewsAt))
+                  "Extra credit expiry / เครดิตเพิ่มหมดอายุเร็วสุด",
+                  learnerExtraExpiry
+                    ? formatAdminDateTime(String(learnerExtraExpiry))
                     : "—",
                 ],
               ].map(([k, v]) => (
