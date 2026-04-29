@@ -22,6 +22,17 @@ type AiQuotaMessageArgs = {
   cost?: number;
 };
 
+type VipApiCreditNoticeDetail = {
+  remaining: number;
+  limit: number;
+  resetOn: { th: string; en: string };
+  used?: number;
+  weeklyRenewsAt?: string | null;
+  monthlyRenewsAt?: string | null;
+  extraRemaining?: number;
+  extraExpiresAt?: string | null;
+};
+
 /** Monday date of current week in the user's local timezone (YYYY-MM-DD). */
 export function getLocalWeekStartMondayString(d = new Date()): string {
   const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -156,15 +167,24 @@ export function getNextLocalMondayLabels(now = new Date()): { th: string; en: st
   return { th: formatDateShortTh(d), en: formatDateShortEn(d) };
 }
 
-export function emitVipApiCreditNotice(remaining: number, limit = VIP_AI_FEEDBACK_WEEKLY_LIMIT): void {
+export function emitVipApiCreditNotice(
+  remaining: number,
+  limit = VIP_AI_FEEDBACK_WEEKLY_LIMIT,
+  detail?: Omit<VipApiCreditNoticeDetail, "remaining" | "limit" | "resetOn">,
+): void {
   if (typeof window === "undefined") return;
   const resetOn = getNextLocalMondayLabels();
   window.dispatchEvent(
-    new CustomEvent(VIP_API_CREDIT_NOTICE_EVENT, {
+    new CustomEvent<VipApiCreditNoticeDetail>(VIP_API_CREDIT_NOTICE_EVENT, {
       detail: {
         remaining,
         limit,
         resetOn,
+        used: Math.max(0, Number(detail?.used ?? 0)),
+        weeklyRenewsAt: detail?.weeklyRenewsAt ?? null,
+        monthlyRenewsAt: detail?.monthlyRenewsAt ?? null,
+        extraRemaining: Math.max(0, Number(detail?.extraRemaining ?? 0)),
+        extraExpiresAt: detail?.extraExpiresAt ?? null,
       },
     }),
   );

@@ -8,6 +8,7 @@ import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generatePhotoSpeakReportWithGemini } from "@/lib/gemini-photo-speak";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
+import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 
 export const maxDuration = 120;
@@ -138,7 +139,7 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(report);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Gemini request failed";
+    const message = normalizeGradingErrorMessage(e);
     console.error("[photo-speak-report]", e);
     return NextResponse.json({ error: message }, { status: 500 });
   }

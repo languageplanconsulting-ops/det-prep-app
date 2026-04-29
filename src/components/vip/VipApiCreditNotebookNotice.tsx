@@ -8,6 +8,11 @@ type NoticeState = {
   remaining: number;
   limit: number;
   resetOn: { th: string; en: string };
+  used?: number;
+  weeklyRenewsAt?: string | null;
+  monthlyRenewsAt?: string | null;
+  extraRemaining?: number;
+  extraExpiresAt?: string | null;
 };
 
 export function VipApiCreditNotebookNotice() {
@@ -23,6 +28,11 @@ export function VipApiCreditNotebookNotice() {
         remaining: Math.max(0, Number(detail.remaining) || 0),
         limit: Number(detail.limit) || VIP_AI_FEEDBACK_WEEKLY_LIMIT,
         resetOn: detail.resetOn ?? { th: "วันจันทร์หน้า", en: "next Monday" },
+        used: Math.max(0, Number(detail.used ?? 0)),
+        weeklyRenewsAt: detail.weeklyRenewsAt ?? null,
+        monthlyRenewsAt: detail.monthlyRenewsAt ?? null,
+        extraRemaining: Math.max(0, Number(detail.extraRemaining ?? 0)),
+        extraExpiresAt: detail.extraExpiresAt ?? null,
       });
       setVisible(true);
       if (hideTimer) window.clearTimeout(hideTimer);
@@ -57,6 +67,9 @@ export function VipApiCreditNotebookNotice() {
         <p className="text-sm font-bold text-neutral-800">
           Remaining AI credits: {notice.remaining}/{notice.limit}
         </p>
+        <p className="mt-1 text-xs font-semibold text-neutral-700">
+          ใช้ไปแล้ว {notice.used ?? 0} ครั้ง · Used {notice.used ?? 0}
+        </p>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold">
           <span className={`rounded-full px-2.5 py-1 ${pillClass}`}>Reset {notice.resetOn.en}</span>
           <span className="rounded-full border-2 border-black bg-white px-2.5 py-1 text-neutral-800">
@@ -65,6 +78,22 @@ export function VipApiCreditNotebookNotice() {
           <span className="rounded-full border-2 border-black bg-yellow-100 px-2.5 py-1 text-neutral-900">
             Weekly cap: {notice.limit || VIP_AI_FEEDBACK_WEEKLY_LIMIT}
           </span>
+        </div>
+        <div className="mt-2 space-y-1 text-xs font-medium text-neutral-700">
+          {notice.weeklyRenewsAt ? (
+            <p>Weekly renew / รีเซ็ตรอบสัปดาห์: {new Date(notice.weeklyRenewsAt).toLocaleString("th-TH")}</p>
+          ) : null}
+          {notice.monthlyRenewsAt ? (
+            <p>Monthly/package renew / รอบแพ็กเกจรายเดือน: {new Date(notice.monthlyRenewsAt).toLocaleString("th-TH")}</p>
+          ) : null}
+          {(notice.extraRemaining ?? 0) > 0 ? (
+            <p>
+              Extra credits active / เครดิตเพิ่มที่ใช้งานได้: {notice.extraRemaining}
+              {notice.extraExpiresAt
+                ? ` · ${new Date(notice.extraExpiresAt).toLocaleString("th-TH")}`
+                : ""}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>

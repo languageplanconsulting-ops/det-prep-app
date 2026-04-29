@@ -9,6 +9,7 @@ import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateInteractiveSpeakingReportWithGemini } from "@/lib/gemini-interactive-speaking-report";
 import { INTERACTIVE_SPEAKING_TURN_COUNT } from "@/lib/interactive-speaking-constants";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
+import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 
@@ -159,7 +160,7 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(report);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Gemini request failed";
+    const message = normalizeGradingErrorMessage(e);
     console.error("[interactive-speaking-report]", e);
     return NextResponse.json({ error: message }, { status: 500 });
   }
