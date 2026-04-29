@@ -112,10 +112,34 @@ export async function POST(req: Request) {
     }
     if (userId) {
       const lock = await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId);
-      if (!lock) {
+      if (!lock || lock.status !== "charged") {
         const charged = await chargeAiCreditForUser(userId, "interactive_speaking");
         if (!charged.ok) {
           return NextResponse.json({ error: "Could not apply AI credit after grading" }, { status: 500 });
+        }
+        const { createServiceRoleSupabase } = await import("@/lib/supabase-admin");
+        const supabase = createServiceRoleSupabase();
+        if (lock) {
+          await supabase
+            .from("interactive_speaking_credit_locks")
+            .update({
+              status: "charged",
+              charge_source: charged.source,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("attempt_id", attemptId)
+            .eq("user_id", userId);
+        } else {
+          await supabase
+            .from("interactive_speaking_credit_locks")
+            .upsert({
+              attempt_id: attemptId,
+              user_id: userId,
+              scenario_id: scenarioId,
+              status: "charged",
+              charge_source: charged.source,
+              updated_at: new Date().toISOString(),
+            });
         }
       }
       const rewardBonus = await maybeGrantRedeemImprovementReward({

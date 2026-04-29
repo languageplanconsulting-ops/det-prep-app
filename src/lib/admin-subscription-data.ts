@@ -1,7 +1,7 @@
 import "server-only";
 
 import { AI_MONTHLY_LIMIT, MOCK_TEST_MONTHLY_LIMIT } from "@/lib/access-control";
-import { getAddonBalancesForUser } from "@/lib/addon-credits";
+import { getAddonBalancesForUser, getVipWeeklyAiQuotaForUser, type VipWeeklyAiQuota } from "@/lib/addon-credits";
 import { formatBahtFromSatang as formatSatang } from "@/lib/money-format";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
@@ -116,6 +116,10 @@ export type AdminAiQuotaSnapshot = {
   addonRemaining: number;
   totalRemaining: number;
   lifetimeAiUsed: boolean;
+  learnerFacingUsed: number;
+  learnerFacingLimit: number;
+  learnerFacingRemaining: number;
+  learnerFacingRenewsAt: string | null;
   weeklyExtraRemaining: number;
   weeklyExtraRenewsAt: string | null;
   feedbackCredits: AdminExtraCreditRow[];
@@ -134,6 +138,7 @@ function buildAdminAiQuotaSnapshot(
   profile: Record<string, unknown>,
   addonFeedbackRemaining: number,
   feedbackCredits: AdminAiQuotaSnapshot["feedbackCredits"] = [],
+  vipWeekly: VipWeeklyAiQuota | null = null,
 ): AdminAiQuotaSnapshot {
   const effectiveTier = resolveEffectiveTierFromProfile({
     tier: profile.tier,
@@ -170,6 +175,10 @@ function buildAdminAiQuotaSnapshot(
     addonRemaining: addonFeedbackRemaining,
     totalRemaining: monthlyRemaining + addonFeedbackRemaining,
     lifetimeAiUsed,
+    learnerFacingUsed: vipWeekly?.used ?? monthlyUsed,
+    learnerFacingLimit: vipWeekly?.totalLimit ?? (monthlyRemaining + addonFeedbackRemaining + monthlyUsed),
+    learnerFacingRemaining: vipWeekly?.remaining ?? (monthlyRemaining + addonFeedbackRemaining),
+    learnerFacingRenewsAt: vipWeekly?.renewsAt ?? null,
     weeklyExtraRemaining,
     weeklyExtraRenewsAt,
     feedbackCredits,
@@ -763,6 +772,12 @@ export async function fetchUserSubscriptionDetail(userId: string) {
   const p = profile as Record<string, unknown>;
   const totalPaidSatang = await sumPaymentsForUser(userId);
   const { feedbackRemaining, mockRemaining } = await getAddonBalancesForUser(userId);
+  const effectiveTier = resolveEffectiveTierFromProfile({
+    tier: profile.tier,
+    tier_expires_at: (profile.tier_expires_at as string | null | undefined) ?? null,
+    vip_granted_by_course: profile.vip_granted_by_course === true,
+  });
+  const vipWeekly = effectiveTier === "vip" ? await getVipWeeklyAiQuotaForUser(userId) : null;
   const mapExtraCreditRow = (row: Record<string, unknown>): AdminExtraCreditRow => ({
     id: String(row.id),
     sku: String(row.sku ?? ""),
@@ -784,12 +799,8 @@ export async function fetchUserSubscriptionDetail(userId: string) {
     p,
     feedbackRemaining,
     (feedbackCredits ?? []).map((row) => mapExtraCreditRow(row as Record<string, unknown>)),
+    vipWeekly,
   );
-  const effectiveTier = resolveEffectiveTierFromProfile({
-    tier: profile.tier,
-    tier_expires_at: (profile.tier_expires_at as string | null | undefined) ?? null,
-    vip_granted_by_course: profile.vip_granted_by_course === true,
-  });
   const mockQuota = buildAdminMockQuotaSnapshot({
     monthlyLimit: MOCK_TEST_MONTHLY_LIMIT[effectiveTier] ?? 0,
     monthlyUsed: countCurrentMonthRows((mockResults ?? []) as Record<string, unknown>[], "created_at"),

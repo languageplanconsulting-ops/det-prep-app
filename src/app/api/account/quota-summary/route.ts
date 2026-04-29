@@ -47,28 +47,32 @@ export async function GET() {
   const aiUsed = Math.max(0, Number(profile?.ai_credits_used ?? 0));
   const lifetimeAiUsed = profile?.lifetime_ai_used === true;
   const aiLimit = AI_MONTHLY_LIMIT[tier];
+  const vipWeekly = tier === "vip" && !isAdmin ? await getVipWeeklyAiQuotaForUser(user.id) : null;
   const aiPlanRemaining = isAdmin
     ? Number.MAX_SAFE_INTEGER
     : tier === "free"
       ? lifetimeAiUsed
         ? 0
         : 1
-      : Math.max(0, aiLimit - aiUsed);
+      : tier === "vip" && vipWeekly
+        ? vipWeekly.remaining
+        : Math.max(0, aiLimit - aiUsed);
+  const aiUsedDisplay = tier === "vip" && vipWeekly ? vipWeekly.used : aiUsed;
+  const aiLimitDisplay = tier === "vip" && vipWeekly ? vipWeekly.totalLimit : aiLimit;
   const mockUsed = countBillableMockFixedSessions((sessions ?? []) as Array<{ targets?: unknown }>);
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[tier];
   const mockPlanRemaining = isAdmin ? Number.MAX_SAFE_INTEGER : Math.max(0, mockLimit - mockUsed);
-  const vipWeekly = tier === "vip" && !isAdmin ? await getVipWeeklyAiQuotaForUser(user.id) : null;
 
   return NextResponse.json({
     tier,
     isAdmin,
     expiresAt: (profile?.tier_expires_at as string | null) ?? null,
     ai: {
-      used: aiUsed,
-      planLimit: aiLimit,
+      used: aiUsedDisplay,
+      planLimit: aiLimitDisplay,
       planRemaining: aiPlanRemaining,
-      addonRemaining: addon.feedbackRemaining,
-      totalRemaining: aiPlanRemaining + addon.feedbackRemaining,
+      addonRemaining: tier === "vip" && vipWeekly ? 0 : addon.feedbackRemaining,
+      totalRemaining: aiPlanRemaining + (tier === "vip" && vipWeekly ? 0 : addon.feedbackRemaining),
     },
     vipWeekly: vipWeekly
       ? {
