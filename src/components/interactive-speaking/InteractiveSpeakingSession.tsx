@@ -368,7 +368,7 @@ export function InteractiveSpeakingSession({
           if (myGen !== recordGenRef.current) return;
           if (event.error === "not-allowed") {
             setSpeechError(
-              "Speech recognition was blocked. Allow the microphone or type your answer below.",
+              "Speech recognition was blocked or limited on this device. Allow the microphone, or type your answer below. iPad Safari can be limited here.",
             );
             setRecLeft(0);
             setListening(false);
@@ -421,7 +421,7 @@ export function InteractiveSpeakingSession({
 
       if (!canUploadTranscribe) {
         setSpeechError(
-          "Speech recognition did not start. Type your answer in the box below.",
+          "Speech recognition did not start. On iPad/Safari, type your answer in the box below and you can still complete the AI flow normally.",
         );
         setRecLeft(0);
         return;
@@ -573,6 +573,7 @@ export function InteractiveSpeakingSession({
     try {
       const res = await fetch("/api/interactive-speaking/start", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           attemptId,
@@ -611,6 +612,7 @@ export function InteractiveSpeakingSession({
       const key = getStoredGeminiKey();
       const res = await fetch("/api/interactive-speaking-next", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
           ...(key ? { "x-gemini-api-key": key } : {}),
@@ -664,6 +666,7 @@ export function InteractiveSpeakingSession({
       try {
         const res = await fetch("/api/interactive-speaking-report", {
           method: "POST",
+          credentials: "same-origin",
           headers: {
             "Content-Type": "application/json",
             ...(key ? { "x-gemini-api-key": key } : {}),

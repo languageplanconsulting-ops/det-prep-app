@@ -100,7 +100,7 @@ export function PhotoAssessmentSession({
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) {
       setSpeechError(
-        "Speech recognition is not available in this browser. Try Chrome or Edge on desktop.",
+        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer and use AI scoring normally.",
       );
       return;
     }
@@ -155,7 +155,7 @@ export function PhotoAssessmentSession({
       rec.start();
       setListening(true);
     } catch {
-      setSpeechError("Could not start the microphone.");
+      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for AI scoring.");
       setListening(false);
     }
   }, [transcript]);
@@ -203,6 +203,7 @@ export function PhotoAssessmentSession({
       const geminiKey = getStoredGeminiKey();
       const res = await fetch("/api/photo-speak-report", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
           ...(geminiKey ? { "x-gemini-api-key": geminiKey } : {}),

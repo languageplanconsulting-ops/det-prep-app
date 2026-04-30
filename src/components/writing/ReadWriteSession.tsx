@@ -132,6 +132,7 @@ export function ReadWriteSession({
       const geminiKey = getStoredGeminiKey();
       const res = await fetch("/api/writing-report", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
           ...(geminiKey ? { "x-gemini-api-key": geminiKey } : {}),

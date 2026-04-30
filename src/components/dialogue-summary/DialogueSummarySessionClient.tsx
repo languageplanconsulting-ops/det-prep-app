@@ -73,6 +73,7 @@ export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryEx
       const geminiKey = getStoredGeminiKey();
       const res = await fetch("/api/dialogue-summary-report", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
           ...(geminiKey ? { "x-gemini-api-key": geminiKey } : {}),
