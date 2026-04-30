@@ -4,6 +4,7 @@ import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { DIALOGUE_SUMMARY_MIN_WORDS } from "@/lib/dialogue-summary-constants";
 import { generateDialogueSummaryReportWithGemini } from "@/lib/gemini-dialogue-summary";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
+import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 import type { DialogueSummaryExam } from "@/types/dialogue-summary";
@@ -97,7 +98,7 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(report);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Gemini request failed";
+    const message = normalizeGradingErrorMessage(e);
     console.error("[dialogue-summary-report]", e);
     return NextResponse.json({ error: message }, { status: 500 });
   }

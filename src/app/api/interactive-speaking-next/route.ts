@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateInteractiveSpeakingNextQuestion } from "@/lib/gemini-interactive-speaking-next";
+import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 import {
   INTERACTIVE_SPEAKING_NEXT_QUESTION_GEMINI_MODEL,
@@ -102,7 +103,7 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(payload);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Gemini request failed";
+    const message = normalizeGradingErrorMessage(e);
     console.error("[interactive-speaking-next]", e);
     return NextResponse.json({ error: message }, { status: 500 });
   }
