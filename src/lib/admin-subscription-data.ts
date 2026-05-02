@@ -110,11 +110,16 @@ export type AdminExtraCreditRow = {
 export type AdminAiQuotaSnapshot = {
   tier: string;
   effectiveTier: string;
+  quotaMode: "default" | "monthly_override";
   monthlyLimit: number;
   monthlyUsed: number;
   monthlyRemaining: number;
   addonRemaining: number;
   totalRemaining: number;
+  monthlyConfiguredLimit: number;
+  monthlyPlanRemaining: number;
+  monthlyAddonRemaining: number;
+  weeklyEnabled: boolean;
   lifetimeAiUsed: boolean;
   learnerFacingUsed: number;
   learnerFacingLimit: number;
@@ -152,14 +157,19 @@ function buildAdminAiQuotaSnapshot(
   });
   const lifetimeAiUsed = profile.lifetime_ai_used === true;
   const rawUsed = Math.max(0, Number(profile.ai_credits_used ?? 0));
+  const quotaMode = profile.ai_quota_mode === "monthly_override" ? "monthly_override" : "default";
   const monthlyLimit = AI_MONTHLY_LIMIT[effectiveTier as keyof typeof AI_MONTHLY_LIMIT] ?? 0;
+  const monthlyConfiguredLimit =
+    effectiveTier === "vip" && quotaMode === "monthly_override"
+      ? Math.max(0, Number(profile.ai_monthly_limit_override ?? AI_MONTHLY_LIMIT.vip ?? 0))
+      : monthlyLimit;
   const monthlyUsed = effectiveTier === "free" ? (lifetimeAiUsed ? 1 : 0) : rawUsed;
   const monthlyRemaining =
     effectiveTier === "free"
       ? lifetimeAiUsed
         ? 0
         : 1
-      : Math.max(0, monthlyLimit - rawUsed);
+      : Math.max(0, monthlyConfiguredLimit - rawUsed);
   const weeklyRows = feedbackCredits.filter((row) => {
     const mode = row.metadata?.expiryMode;
     return mode === "7d" || mode === "week_end" || mode === "days";
@@ -178,14 +188,49 @@ function buildAdminAiQuotaSnapshot(
       .filter((value): value is string => Boolean(value))
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
 
+  if (effectiveTier === "vip" && quotaMode === "monthly_override" && vipWeekly) {
+    return {
+      tier: String(profile.tier ?? "free"),
+      effectiveTier,
+      quotaMode,
+      monthlyLimit,
+      monthlyUsed: vipWeekly.monthlyPlanUsed,
+      monthlyRemaining: vipWeekly.monthlyPlanRemaining,
+      addonRemaining: vipWeekly.monthlyExtraRemaining,
+      totalRemaining: vipWeekly.remaining,
+      monthlyConfiguredLimit: vipWeekly.monthlyPlanLimit,
+      monthlyPlanRemaining: vipWeekly.monthlyPlanRemaining,
+      monthlyAddonRemaining: vipWeekly.monthlyExtraRemaining,
+      weeklyEnabled: false,
+      lifetimeAiUsed,
+      learnerFacingUsed: vipWeekly.monthlyPlanUsed,
+      learnerFacingLimit: vipWeekly.monthlyPlanLimit,
+      learnerFacingRemaining: vipWeekly.monthlyPlanRemaining,
+      learnerFacingRenewsAt: null,
+      learnerMonthlyRemaining: vipWeekly.remaining,
+      learnerMonthlyRenewsAt: vipWeekly.monthlyPlanRenewsAt,
+      weeklyBaseRemaining: 0,
+      weeklyExtraRemaining: 0,
+      weeklyExtraRenewsAt: null,
+      monthlyExtraRemaining: vipWeekly.monthlyExtraRemaining,
+      monthlyExtraRenewsAt: vipWeekly.monthlyExtraExpiresAt,
+      feedbackCredits,
+    };
+  }
+
   return {
     tier: String(profile.tier ?? "free"),
     effectiveTier,
+    quotaMode,
     monthlyLimit,
     monthlyUsed,
     monthlyRemaining,
     addonRemaining: addonFeedbackRemaining,
     totalRemaining: monthlyRemaining + addonFeedbackRemaining,
+    monthlyConfiguredLimit,
+    monthlyPlanRemaining: monthlyRemaining,
+    monthlyAddonRemaining: addonFeedbackRemaining,
+    weeklyEnabled: effectiveTier === "vip",
     lifetimeAiUsed,
     learnerFacingUsed: vipWeekly?.used ?? monthlyUsed,
     learnerFacingLimit:

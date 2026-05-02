@@ -28,7 +28,7 @@ export async function GET() {
   const [{ data: profile }, { data: sessions }, addon] = await Promise.all([
     supabase
       .from("profiles")
-      .select("tier, role, tier_expires_at, ai_credits_used, lifetime_ai_used")
+      .select("tier, role, tier_expires_at, ai_credits_used, lifetime_ai_used, ai_quota_mode, ai_monthly_limit_override")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -48,6 +48,7 @@ export async function GET() {
   const lifetimeAiUsed = profile?.lifetime_ai_used === true;
   const aiLimit = AI_MONTHLY_LIMIT[tier];
   const vipWeekly = tier === "vip" && !isAdmin ? await getVipWeeklyAiQuotaForUser(user.id) : null;
+  const vipMonthlyOnly = vipWeekly?.mode === "monthly_override";
   const aiPlanRemaining = isAdmin
     ? Number.MAX_SAFE_INTEGER
     : tier === "free"
@@ -55,10 +56,38 @@ export async function GET() {
         ? 0
         : 1
       : tier === "vip" && vipWeekly
-        ? vipWeekly.weeklyVisibleRemaining
+        ? vipMonthlyOnly
+          ? vipWeekly.monthlyPlanRemaining
+          : vipWeekly.weeklyVisibleRemaining
         : Math.max(0, aiLimit - aiUsed);
-  const aiUsedDisplay = tier === "vip" && vipWeekly ? vipWeekly.used : aiUsed;
-  const aiLimitDisplay = tier === "vip" && vipWeekly ? vipWeekly.weeklyVisibleLimit : aiLimit;
+  const aiUsedDisplay =
+    tier === "vip" && vipWeekly
+      ? vipMonthlyOnly
+        ? vipWeekly.monthlyPlanUsed
+        : vipWeekly.used
+      : aiUsed;
+  const aiPlanLimitDisplay =
+    tier === "vip" && vipWeekly
+      ? vipMonthlyOnly
+        ? vipWeekly.monthlyPlanLimit
+        : vipWeekly.weeklyVisibleLimit
+      : aiLimit;
+  const aiAddonRemaining =
+    tier === "vip" && vipWeekly
+      ? vipMonthlyOnly
+        ? vipWeekly.monthlyExtraRemaining
+        : vipWeekly.monthlyVisibleRemaining
+      : addon.feedbackRemaining;
+  const aiTotalRemaining =
+    tier === "vip" && vipWeekly
+      ? vipWeekly.remaining
+      : aiPlanRemaining + addon.feedbackRemaining;
+  const aiTotalLimit =
+    tier === "vip" && vipWeekly
+      ? vipMonthlyOnly
+        ? vipWeekly.monthlyPlanLimit + vipWeekly.monthlyExtraRemaining
+        : vipWeekly.weeklyVisibleLimit + vipWeekly.monthlyVisibleRemaining
+      : aiPlanLimitDisplay + addon.feedbackRemaining;
   const mockUsed = countBillableMockFixedSessions((sessions ?? []) as Array<{ targets?: unknown }>);
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[tier];
   const mockPlanRemaining = isAdmin ? Number.MAX_SAFE_INTEGER : Math.max(0, mockLimit - mockUsed);
@@ -68,27 +97,56 @@ export async function GET() {
     isAdmin,
     expiresAt: (profile?.tier_expires_at as string | null) ?? null,
     ai: {
-      used: aiUsedDisplay,
-      planLimit: aiLimitDisplay,
-      planRemaining: aiPlanRemaining,
-      addonRemaining: tier === "vip" && vipWeekly ? 0 : addon.feedbackRemaining,
-      totalRemaining:
+      mode:
         tier === "vip" && vipWeekly
-          ? vipWeekly.weeklyVisibleRemaining + vipWeekly.monthlyVisibleRemaining
-          : aiPlanRemaining + addon.feedbackRemaining,
-      weeklyUsed: tier === "vip" && vipWeekly ? vipWeekly.used : null,
-      weeklyLimit: tier === "vip" && vipWeekly ? vipWeekly.weeklyVisibleLimit : null,
-      weeklyRemaining: tier === "vip" && vipWeekly ? vipWeekly.weeklyVisibleRemaining : null,
-      weeklyRenewsAt: tier === "vip" && vipWeekly ? vipWeekly.renewsAt : null,
+          ? vipMonthlyOnly
+            ? "monthly_override"
+            : "weekly"
+          : "monthly_standard",
+      used: aiUsedDisplay,
+      planLimit: aiPlanLimitDisplay,
+      planRemaining: aiPlanRemaining,
+      addonRemaining: aiAddonRemaining,
+      totalRemaining: aiTotalRemaining,
+      totalLimit: aiTotalLimit,
+      weeklyUsed:
+        tier === "vip" && vipWeekly && !vipMonthlyOnly ? vipWeekly.used : null,
+      weeklyLimit:
+        tier === "vip" && vipWeekly && !vipMonthlyOnly
+          ? vipWeekly.weeklyVisibleLimit
+          : null,
+      weeklyRemaining:
+        tier === "vip" && vipWeekly && !vipMonthlyOnly
+          ? vipWeekly.weeklyVisibleRemaining
+          : null,
+      weeklyRenewsAt:
+        tier === "vip" && vipWeekly && !vipMonthlyOnly ? vipWeekly.renewsAt : null,
+      monthlyUsed:
+        tier === "vip" && vipWeekly && vipMonthlyOnly ? vipWeekly.monthlyPlanUsed : aiUsed,
+      monthlyLimit:
+        tier === "vip" && vipWeekly && vipMonthlyOnly
+          ? vipWeekly.monthlyPlanLimit
+          : aiPlanLimitDisplay,
+      monthlyPlanRemaining:
+        tier === "vip" && vipWeekly && vipMonthlyOnly
+          ? vipWeekly.monthlyPlanRemaining
+          : aiPlanRemaining,
+      monthlyAddonRemaining: aiAddonRemaining,
       monthlyRemaining:
         tier === "vip" && vipWeekly
-          ? vipWeekly.monthlyVisibleRemaining
+          ? vipMonthlyOnly
+            ? vipWeekly.remaining
+            : vipWeekly.monthlyVisibleRemaining
           : aiPlanRemaining + addon.feedbackRemaining,
-      monthlyRenewsAt: tier === "vip" && vipWeekly ? ((profile?.tier_expires_at as string | null) ?? null) : ((profile?.tier_expires_at as string | null) ?? null),
+      monthlyRenewsAt:
+        tier === "vip" && vipWeekly && vipMonthlyOnly
+          ? vipWeekly.monthlyPlanRenewsAt
+          : ((profile?.tier_expires_at as string | null) ?? null),
       extraExpiry: tier === "vip" && vipWeekly ? vipWeekly.monthlyExtraExpiresAt : null,
     },
     vipWeekly: vipWeekly
       ? {
+          mode: vipWeekly.mode,
           used: vipWeekly.used,
           baseLimit: vipWeekly.baseLimit,
           baseRemaining: vipWeekly.baseRemaining,
@@ -105,6 +163,7 @@ export async function GET() {
           renewsAt: vipWeekly.renewsAt,
           extraExpiresAt: vipWeekly.extraExpiresAt,
           monthlyExtraExpiresAt: vipWeekly.monthlyExtraExpiresAt,
+          monthlyPlanUsed: vipWeekly.monthlyPlanUsed,
         }
       : null,
     mock: {
