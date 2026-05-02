@@ -7,6 +7,7 @@ import { VIP_API_CREDIT_NOTICE_EVENT, VIP_AI_FEEDBACK_WEEKLY_LIMIT } from "@/lib
 type NoticeState = {
   remaining: number;
   limit: number;
+  quotaMode?: "weekly" | "monthly_override" | "monthly_standard";
   resetOn: { th: string; en: string };
   used?: number;
   weeklyRenewsAt?: string | null;
@@ -27,6 +28,7 @@ export function VipApiCreditNotebookNotice() {
       setNotice({
         remaining: Math.max(0, Number(detail.remaining) || 0),
         limit: Number(detail.limit) || VIP_AI_FEEDBACK_WEEKLY_LIMIT,
+        quotaMode: detail.quotaMode ?? (detail.weeklyRenewsAt ? "weekly" : "monthly_override"),
         resetOn: detail.resetOn ?? { th: "วันจันทร์หน้า", en: "next Monday" },
         used: Math.max(0, Number(detail.used ?? 0)),
         weeklyRenewsAt: detail.weeklyRenewsAt ?? null,
@@ -54,6 +56,7 @@ export function VipApiCreditNotebookNotice() {
   );
 
   if (!notice || !visible) return null;
+  const weeklyMode = notice.quotaMode === "weekly";
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-20 z-[70] flex justify-center px-4">
@@ -62,36 +65,64 @@ export function VipApiCreditNotebookNotice() {
           VIP API Credits Notebook
         </p>
         <p className="mt-1 text-sm font-extrabold text-neutral-900">
-          เครดิต AI รายสัปดาห์คงเหลือ {notice.remaining}/{notice.limit} ครั้ง
+          {weeklyMode
+            ? `เครดิต AI รายสัปดาห์คงเหลือ ${notice.remaining}/${notice.limit} ครั้ง`
+            : `เครดิต AI รายเดือนคงเหลือ ${notice.remaining}/${notice.limit} ครั้ง`}
         </p>
         <p className="text-sm font-bold text-neutral-800">
-          Weekly AI credits left: {notice.remaining}/{notice.limit}
+          {weeklyMode
+            ? `Weekly AI credits left: ${notice.remaining}/${notice.limit}`
+            : `Monthly AI credits left: ${notice.remaining}/${notice.limit}`}
         </p>
         <p className="mt-1 text-xs font-semibold text-neutral-700">
-          ใช้ไปแล้ว {notice.used ?? 0} ครั้ง · Used {notice.used ?? 0}
+          {weeklyMode
+            ? `ใช้ไปแล้วรอบนี้ ${notice.used ?? 0} ครั้ง · Used this week ${notice.used ?? 0}`
+            : `ใช้ไปแล้วรอบนี้ ${notice.used ?? 0} ครั้ง · Used this cycle ${notice.used ?? 0}`}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-bold">
-          <span className={`rounded-full px-2.5 py-1 ${pillClass}`}>Reset {notice.resetOn.en}</span>
-          <span className="rounded-full border-2 border-black bg-white px-2.5 py-1 text-neutral-800">
-            รีเซ็ต {notice.resetOn.th}
-          </span>
-          <span className="rounded-full border-2 border-black bg-yellow-100 px-2.5 py-1 text-neutral-900">
-            Weekly cap: {notice.limit || VIP_AI_FEEDBACK_WEEKLY_LIMIT}
-          </span>
-          <span className="rounded-full border-2 border-black bg-emerald-100 px-2.5 py-1 text-neutral-900">
-            Monthly left: {notice.extraRemaining ?? 0}
-          </span>
+          {weeklyMode ? (
+            <>
+              <span className={`rounded-full px-2.5 py-1 ${pillClass}`}>Reset {notice.resetOn.en}</span>
+              <span className="rounded-full border-2 border-black bg-white px-2.5 py-1 text-neutral-800">
+                รีเซ็ต {notice.resetOn.th}
+              </span>
+              <span className="rounded-full border-2 border-black bg-yellow-100 px-2.5 py-1 text-neutral-900">
+                Weekly cap: {notice.limit || VIP_AI_FEEDBACK_WEEKLY_LIMIT}
+              </span>
+              <span className="rounded-full border-2 border-black bg-emerald-100 px-2.5 py-1 text-neutral-900">
+                Monthly left: {notice.extraRemaining ?? 0}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className={`rounded-full px-2.5 py-1 ${pillClass}`}>Monthly pool active</span>
+              <span className="rounded-full border-2 border-black bg-white px-2.5 py-1 text-neutral-800">
+                ไม่มีลิมิตรอบสัปดาห์
+              </span>
+              <span className="rounded-full border-2 border-black bg-yellow-100 px-2.5 py-1 text-neutral-900">
+                Monthly cap: {notice.limit || 0}
+              </span>
+              <span className="rounded-full border-2 border-black bg-emerald-100 px-2.5 py-1 text-neutral-900">
+                Extra active: {notice.extraRemaining ?? 0}
+              </span>
+            </>
+          )}
         </div>
         <div className="mt-2 space-y-1 text-xs font-medium text-neutral-700">
-          {notice.weeklyRenewsAt ? (
+          {weeklyMode && notice.weeklyRenewsAt ? (
             <p>Weekly renew / รีเซ็ตรอบสัปดาห์: {new Date(notice.weeklyRenewsAt).toLocaleString("th-TH")}</p>
           ) : null}
           {notice.monthlyRenewsAt ? (
-            <p>Monthly/package renew / รอบแพ็กเกจรายเดือน: {new Date(notice.monthlyRenewsAt).toLocaleString("th-TH")}</p>
+            <p>
+              {weeklyMode ? "Monthly/package renew / รอบแพ็กเกจรายเดือน" : "Monthly renew / รีเซ็ตรอบเดือน"}
+              : {new Date(notice.monthlyRenewsAt).toLocaleString("th-TH")}
+            </p>
           ) : null}
           {(notice.extraRemaining ?? 0) > 0 ? (
             <p>
-              Monthly left now / เหลือรายเดือนตอนนี้: {notice.extraRemaining}
+              {weeklyMode
+                ? `Monthly left now / เหลือรายเดือนตอนนี้: ${notice.extraRemaining}`
+                : `Active extra credits / เครดิตเพิ่มที่ใช้งานได้: ${notice.extraRemaining}`}
               {notice.extraExpiresAt
                 ? ` · ${new Date(notice.extraExpiresAt).toLocaleString("th-TH")}`
                 : ""}

@@ -118,6 +118,8 @@ export function SubscriptionDetailClient() {
   const [expiryLocal, setExpiryLocal] = useState("");
   const [aiUsedEdit, setAiUsedEdit] = useState("0");
   const [lifetimeAiUsedEdit, setLifetimeAiUsedEdit] = useState(false);
+  const [quotaModeEdit, setQuotaModeEdit] = useState<"default" | "monthly_override">("default");
+  const [monthlyLimitEdit, setMonthlyLimitEdit] = useState("60");
   const [weeklyLeftNowEdit, setWeeklyLeftNowEdit] = useState("0");
   const [monthlyLeftNowEdit, setMonthlyLeftNowEdit] = useState("0");
   const [grantCredits, setGrantCredits] = useState("1");
@@ -168,6 +170,10 @@ export function SubscriptionDetailClient() {
     const aiQuota = data.aiQuota as Record<string, unknown>;
     setAiUsedEdit(String(aiQuota.monthlyUsed ?? 0));
     setLifetimeAiUsedEdit(aiQuota.lifetimeAiUsed === true);
+    setQuotaModeEdit(
+      aiQuota.quotaMode === "monthly_override" ? "monthly_override" : "default",
+    );
+    setMonthlyLimitEdit(String(aiQuota.monthlyConfiguredLimit ?? aiQuota.monthlyLimit ?? 60));
     setWeeklyLeftNowEdit(String(aiQuota.learnerFacingRemaining ?? 0));
     setMonthlyLeftNowEdit(String(aiQuota.learnerMonthlyRemaining ?? 0));
   }, [data]);
@@ -199,6 +205,10 @@ export function SubscriptionDetailClient() {
     customExpiry: grantMockCustomExpiry,
     exactDays: grantMockExactDays,
   });
+  const vipMonthlyOnly =
+    (aiQuota.effectiveTier ?? "free") === "vip" && aiQuota.quotaMode === "monthly_override";
+  const vipWeeklyMode =
+    (aiQuota.effectiveTier ?? "free") === "vip" && aiQuota.quotaMode !== "monthly_override";
 
   const saveName = async () => {
     const res = await fetch(`/api/admin/subscriptions/${userId}`, {
@@ -289,6 +299,58 @@ export function SubscriptionDetailClient() {
         type: "error",
         titleEn: e instanceof Error ? e.message : "Could not update AI quota",
         titleTh: "อัปเดตโควตา AI ไม่สำเร็จ",
+      });
+    } finally {
+      setAiSaving(false);
+    }
+  };
+
+  const saveVipQuotaMode = async () => {
+    if ((aiQuota.effectiveTier ?? "free") !== "vip") return;
+    if (quotaModeEdit === "monthly_override") {
+      const nextLimit = Math.max(0, Math.round(Number(monthlyLimitEdit || 0)));
+      if (!Number.isFinite(nextLimit) || nextLimit <= 0) {
+        push({
+          type: "error",
+          titleEn: "Enter a valid monthly AI limit.",
+          titleTh: "กรอกจำนวนเครดิต AI รายเดือนให้ถูกต้อง",
+        });
+        return;
+      }
+    }
+    setAiSaving(true);
+    try {
+      const res = await fetch(`/api/admin/subscriptions/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          ai_quota_mode: quotaModeEdit,
+          ai_monthly_limit_override:
+            quotaModeEdit === "monthly_override"
+              ? Math.max(0, Math.round(Number(monthlyLimitEdit || 0)))
+              : null,
+          reason:
+            quotaModeEdit === "monthly_override"
+              ? "Admin switched VIP AI quota to monthly-only mode"
+              : "Admin restored VIP AI quota to weekly mode",
+        }),
+      });
+      if (!res.ok) {
+        const json = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(json.error ?? "Could not update VIP AI quota mode");
+      }
+      push({
+        type: "success",
+        titleEn: "VIP AI quota mode updated.",
+        titleTh: "อัปเดตโหมดโควตา AI ของ VIP แล้ว",
+      });
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Could not update VIP AI quota mode",
+        titleTh: "อัปเดตโหมดโควตา AI ไม่สำเร็จ",
       });
     } finally {
       setAiSaving(false);
@@ -688,21 +750,92 @@ export function SubscriptionDetailClient() {
 
           <section className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
             <h2 className="text-lg font-black">AI quota / โควตา AI</h2>
+            {(aiQuota.effectiveTier ?? "free") === "vip" ? (
+              <div className="mt-3 rounded-[4px] border-2 border-black bg-neutral-50 p-3">
+                <p className="text-sm font-black">VIP AI mode / โหมด AI สำหรับ VIP</p>
+                <div className="mt-2 flex flex-wrap items-end gap-3">
+                  <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                    Mode / โหมด
+                    <select
+                      value={quotaModeEdit}
+                      onChange={(e) =>
+                        setQuotaModeEdit(
+                          e.target.value === "monthly_override" ? "monthly_override" : "default",
+                        )
+                      }
+                      className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-2 text-xs font-bold"
+                    >
+                      <option value="default">Weekly VIP + monthly extras / รายสัปดาห์ + เครดิตเพิ่ม</option>
+                      <option value="monthly_override">Monthly only, no weekly cap / รายเดือนล้วน ไม่มีลิมิตรอบสัปดาห์</option>
+                    </select>
+                  </label>
+                  {quotaModeEdit === "monthly_override" ? (
+                    <label className="flex flex-col text-[10px] font-bold text-neutral-600">
+                      Monthly AI limit / เครดิต AI รายเดือน
+                      <input
+                        value={monthlyLimitEdit}
+                        onChange={(e) => setMonthlyLimitEdit(e.target.value)}
+                        className="mt-1 rounded-[4px] border-4 border-black bg-white px-2 py-1 ep-stat text-sm"
+                        inputMode="numeric"
+                      />
+                    </label>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => void saveVipQuotaMode()}
+                    disabled={aiSaving}
+                    className="rounded-[4px] border-4 border-black bg-[#004AAD] px-3 py-2 text-xs font-black text-white shadow-[4px_4px_0_0_#000]"
+                  >
+                    {aiSaving ? "Saving…" : "Save AI mode / บันทึกโหมด AI"}
+                  </button>
+                </div>
+                <p className="mt-2 text-[10px] text-neutral-500">
+                  Monthly-only mode removes the weekly cap and makes the learner follow the monthly pool only. /
+                  โหมดรายเดือนล้วนจะยกเลิกลิมิตรอบสัปดาห์ และให้ผู้เรียนใช้ตามเครดิตรายเดือนอย่างเดียว
+                </p>
+              </div>
+            ) : null}
             <div className="mt-3 grid grid-cols-2 gap-2">
-              {[
-                ["Weekly left now / เหลือรอบสัปดาห์ตอนนี้", `${String(aiQuota.learnerFacingRemaining ?? 0)} / ${String(aiQuota.learnerFacingLimit ?? 0)}`],
-                ["Weekly used now / ใช้ไปแล้วรอบนี้", String(aiQuota.learnerFacingUsed ?? 0)],
-                ["Weekly renew / รีเซ็ตรอบสัปดาห์", aiQuota.learnerFacingRenewsAt ? formatAdminDateTime(String(aiQuota.learnerFacingRenewsAt)) : "—"],
-                ["Monthly left now / เหลือรอบเดือนตอนนี้", String(aiQuota.learnerMonthlyRemaining ?? 0)],
-                ["Monthly/package renew / รอบแพ็กเกจรายเดือน", profile.tier_expires_at ? formatAdminDateTime(String(profile.tier_expires_at)) : "No expiry / ไม่หมดอายุ"],
-                ["Total visible now / คงเหลือที่เห็นรวม", String(Number(aiQuota.learnerFacingRemaining ?? 0) + Number(aiQuota.learnerMonthlyRemaining ?? 0))],
-                [
-                  "Monthly extra expiry / เครดิตรายเดือนหมดอายุเร็วสุด",
-                  aiQuota.learnerMonthlyRenewsAt
-                    ? formatAdminDateTime(String(aiQuota.learnerMonthlyRenewsAt))
-                    : "—",
-                ],
-              ].map(([k, v]) => (
+              {(vipMonthlyOnly
+                ? [
+                    ["Weekly limit / ลิมิตรอบสัปดาห์", "None / ไม่มี"],
+                    [
+                      "Monthly left now / เหลือรอบเดือนตอนนี้",
+                      `${String(aiQuota.learnerMonthlyRemaining ?? 0)} / ${String(
+                        Number(aiQuota.monthlyConfiguredLimit ?? 0) +
+                          Number(aiQuota.monthlyAddonRemaining ?? 0),
+                      )}`,
+                    ],
+                    ["Monthly used now / ใช้ไปแล้วรอบนี้", String(aiQuota.monthlyUsed ?? 0)],
+                    [
+                      "Monthly/package renew / รอบแพ็กเกจรายเดือน",
+                      profile.tier_expires_at
+                        ? formatAdminDateTime(String(profile.tier_expires_at))
+                        : "No expiry / ไม่หมดอายุ",
+                    ],
+                    ["Monthly plan left / คงเหลือจากแพ็กรายเดือน", String(aiQuota.monthlyPlanRemaining ?? 0)],
+                    ["Extra credits active / เครดิตเพิ่มที่ใช้งานได้", String(aiQuota.monthlyAddonRemaining ?? 0)],
+                    [
+                      "Extra credit expiry / เครดิตเพิ่มหมดอายุเร็วสุด",
+                      aiQuota.monthlyExtraRenewsAt
+                        ? formatAdminDateTime(String(aiQuota.monthlyExtraRenewsAt))
+                        : "—",
+                    ],
+                  ]
+                : [
+                    ["Weekly left now / เหลือรอบสัปดาห์ตอนนี้", `${String(aiQuota.learnerFacingRemaining ?? 0)} / ${String(aiQuota.learnerFacingLimit ?? 0)}`],
+                    ["Weekly used now / ใช้ไปแล้วรอบนี้", String(aiQuota.learnerFacingUsed ?? 0)],
+                    ["Weekly renew / รีเซ็ตรอบสัปดาห์", aiQuota.learnerFacingRenewsAt ? formatAdminDateTime(String(aiQuota.learnerFacingRenewsAt)) : "—"],
+                    ["Monthly left now / เหลือรอบเดือนตอนนี้", String(aiQuota.learnerMonthlyRemaining ?? 0)],
+                    ["Monthly/package renew / รอบแพ็กเกจรายเดือน", profile.tier_expires_at ? formatAdminDateTime(String(profile.tier_expires_at)) : "No expiry / ไม่หมดอายุ"],
+                    ["Total visible now / คงเหลือที่เห็นรวม", String(Number(aiQuota.learnerFacingRemaining ?? 0) + Number(aiQuota.learnerMonthlyRemaining ?? 0))],
+                    [
+                      "Monthly extra expiry / เครดิตรายเดือนหมดอายุเร็วสุด",
+                      aiQuota.learnerMonthlyRenewsAt
+                        ? formatAdminDateTime(String(aiQuota.learnerMonthlyRenewsAt))
+                        : "—",
+                    ],
+                  ]).map(([k, v]) => (
                 <div
                   key={String(k)}
                   className="rounded-[4px] border-2 border-black bg-neutral-50 p-3"
@@ -713,7 +846,7 @@ export function SubscriptionDetailClient() {
               ))}
             </div>
 
-            {(aiQuota.effectiveTier ?? "free") === "vip" ? (
+            {vipWeeklyMode ? (
               <div className="mt-4 border-t-2 border-neutral-200 pt-4">
                 <p className="text-sm font-black">Set exact learner view / ตั้งค่าตามที่ผู้เรียนเห็นจริง</p>
                 <div className="mt-2 flex flex-wrap items-end gap-3">
@@ -750,12 +883,14 @@ export function SubscriptionDetailClient() {
               </div>
             ) : null}
 
-            {(aiQuota.effectiveTier ?? "free") !== "vip" ? (
+            {(aiQuota.effectiveTier ?? "free") !== "vip" || vipMonthlyOnly ? (
             <div className="mt-4 border-t-2 border-neutral-200 pt-4">
-              <p className="text-sm font-black">Edit monthly state / แก้สถานะรายเดือน</p>
+              <p className="text-sm font-black">
+                {vipMonthlyOnly ? "Edit monthly AI cycle / แก้สถานะรอบ AI รายเดือน" : "Edit monthly state / แก้สถานะรายเดือน"}
+              </p>
               <div className="mt-2 flex flex-wrap items-end gap-3">
                 <label className="flex flex-col text-[10px] font-bold text-neutral-600">
-                  AI used this month / ใช้ไปเดือนนี้
+                  {vipMonthlyOnly ? "AI used this cycle / ใช้ไปแล้วรอบนี้" : "AI used this month / ใช้ไปเดือนนี้"}
                   <input
                     value={aiUsedEdit}
                     onChange={(e) => setAiUsedEdit(e.target.value)}
@@ -763,14 +898,16 @@ export function SubscriptionDetailClient() {
                     inputMode="numeric"
                   />
                 </label>
-                <label className="flex items-center gap-2 text-xs font-bold text-neutral-700">
-                  <input
-                    type="checkbox"
-                    checked={lifetimeAiUsedEdit}
-                    onChange={(e) => setLifetimeAiUsedEdit(e.target.checked)}
-                  />
-                  Free lifetime feedback already used / ใช้สิทธิ์ฟรี 1 ครั้งแล้ว
-                </label>
+                {!vipMonthlyOnly ? (
+                  <label className="flex items-center gap-2 text-xs font-bold text-neutral-700">
+                    <input
+                      type="checkbox"
+                      checked={lifetimeAiUsedEdit}
+                      onChange={(e) => setLifetimeAiUsedEdit(e.target.checked)}
+                    />
+                    Free lifetime feedback already used / ใช้สิทธิ์ฟรี 1 ครั้งแล้ว
+                  </label>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => void saveAiMonthlyState()}

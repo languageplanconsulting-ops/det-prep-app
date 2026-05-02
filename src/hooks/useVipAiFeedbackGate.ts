@@ -14,6 +14,7 @@ import {
 } from "@/lib/vip-ai-feedback-quota";
 
 type VipWeeklySummary = {
+  mode?: "weekly" | "monthly_override";
   used: number;
   baseLimit: number;
   baseRemaining?: number;
@@ -30,21 +31,28 @@ type VipWeeklySummary = {
   renewsAt: string | null;
   extraExpiresAt: string | null;
   monthlyExtraExpiresAt?: string | null;
+  monthlyPlanUsed?: number;
 };
 
 type QuotaSummaryResponse = {
   tier?: string;
   expiresAt?: string | null;
   ai?: {
+    mode?: "weekly" | "monthly_override" | "monthly_standard";
     used?: number;
     planLimit?: number;
     planRemaining?: number;
     addonRemaining?: number;
     totalRemaining?: number;
+    totalLimit?: number;
     weeklyUsed?: number | null;
     weeklyLimit?: number | null;
     weeklyRemaining?: number | null;
     weeklyRenewsAt?: string | null;
+    monthlyUsed?: number | null;
+    monthlyLimit?: number | null;
+    monthlyPlanRemaining?: number | null;
+    monthlyAddonRemaining?: number | null;
     monthlyRemaining?: number | null;
     monthlyRenewsAt?: string | null;
     extraExpiry?: string | null;
@@ -62,6 +70,9 @@ export function useVipAiFeedbackGate() {
   const isVip = effectiveTier === "vip";
   const hasBypassAccess = isAdmin || previewEligible;
   const [userId, setUserId] = useState<string | null | undefined>(undefined);
+  const [quotaMode, setQuotaMode] = useState<"weekly" | "monthly_override" | "monthly_standard">(
+    isVip ? "weekly" : "monthly_standard",
+  );
   const [weekly, setWeekly] = useState<VipWeeklySummary | null>(null);
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null);
   const [aiUsed, setAiUsed] = useState(0);
@@ -74,6 +85,8 @@ export function useVipAiFeedbackGate() {
   const [weeklyRenewsDisplay, setWeeklyRenewsDisplay] = useState<string | null>(null);
   const [monthlyRemainingDisplay, setMonthlyRemainingDisplay] = useState<number | null>(null);
   const [monthlyRenewsDisplay, setMonthlyRenewsDisplay] = useState<string | null>(null);
+  const [monthlyUsedDisplay, setMonthlyUsedDisplay] = useState<number | null>(null);
+  const [monthlyLimitDisplay, setMonthlyLimitDisplay] = useState<number | null>(null);
   const [monthlyExtraExpiry, setMonthlyExtraExpiry] = useState<string | null>(null);
   const [quotaLoading, setQuotaLoading] = useState(false);
   const fallbackLimit = isVip
@@ -93,17 +106,44 @@ export function useVipAiFeedbackGate() {
       const res = await fetch("/api/account/quota-summary", { credentials: "same-origin" });
       if (!res.ok) throw new Error("Could not load quota");
       const json = (await res.json()) as QuotaSummaryResponse;
+      const nextQuotaMode =
+        json.ai?.mode ??
+        (isVip ? "weekly" : "monthly_standard");
+      setQuotaMode(nextQuotaMode);
       setPlanExpiresAt(typeof json.expiresAt === "string" ? json.expiresAt : null);
       setAiUsed(Math.max(0, Number(json.ai?.used ?? 0)));
-      setAiLimit(Math.max(0, Number(json.ai?.used ?? 0)) + Math.max(0, Number(json.ai?.totalRemaining ?? 0)));
+      setAiLimit(
+        Math.max(
+          0,
+          Number(
+            json.ai?.totalLimit ??
+              (Number(json.ai?.used ?? 0) + Number(json.ai?.totalRemaining ?? 0)),
+          ),
+        ),
+      );
       setAiRemaining(Math.max(0, Number(json.ai?.totalRemaining ?? 0)));
-      setAddonRemaining(Math.max(0, Number(json.ai?.addonRemaining ?? 0)));
-      setWeeklyUsedDisplay(json.ai?.weeklyUsed == null ? null : Math.max(0, Number(json.ai.weeklyUsed)));
-      setWeeklyLimitDisplay(json.ai?.weeklyLimit == null ? null : Math.max(0, Number(json.ai.weeklyLimit)));
+      setAddonRemaining(
+        Math.max(
+          0,
+          Number(json.ai?.monthlyAddonRemaining ?? json.ai?.addonRemaining ?? 0),
+        ),
+      );
+      setWeeklyUsedDisplay(
+        json.ai?.weeklyUsed == null ? null : Math.max(0, Number(json.ai.weeklyUsed)),
+      );
+      setWeeklyLimitDisplay(
+        json.ai?.weeklyLimit == null ? null : Math.max(0, Number(json.ai.weeklyLimit)),
+      );
       setWeeklyRemainingDisplay(
         json.ai?.weeklyRemaining == null ? null : Math.max(0, Number(json.ai.weeklyRemaining)),
       );
       setWeeklyRenewsDisplay(typeof json.ai?.weeklyRenewsAt === "string" ? json.ai.weeklyRenewsAt : null);
+      setMonthlyUsedDisplay(
+        json.ai?.monthlyUsed == null ? null : Math.max(0, Number(json.ai.monthlyUsed)),
+      );
+      setMonthlyLimitDisplay(
+        json.ai?.monthlyLimit == null ? null : Math.max(0, Number(json.ai.monthlyLimit)),
+      );
       setMonthlyRemainingDisplay(
         json.ai?.monthlyRemaining == null ? null : Math.max(0, Number(json.ai.monthlyRemaining)),
       );
@@ -112,6 +152,7 @@ export function useVipAiFeedbackGate() {
       setWeekly(
         isVip && json.vipWeekly
           ? {
+              mode: json.vipWeekly.mode,
               used: Math.max(0, Number(json.vipWeekly.used ?? 0)),
               baseLimit: Math.max(0, Number(json.vipWeekly.baseLimit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT)),
               baseRemaining: Math.max(0, Number(json.vipWeekly.baseRemaining ?? 0)),
@@ -132,6 +173,7 @@ export function useVipAiFeedbackGate() {
                   : null,
             }
           : {
+              mode: "weekly",
               used: 0,
               baseLimit: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
               baseRemaining: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
@@ -143,26 +185,46 @@ export function useVipAiFeedbackGate() {
               renewsAt: null,
               extraExpiresAt: null,
               monthlyExtraExpiresAt: null,
-            },
+          },
       );
       if (emitNotice && isVip && json.vipWeekly) {
+        const monthlyOnly = nextQuotaMode === "monthly_override";
         emitVipApiCreditNotice(
-          Math.max(0, Number(json.ai?.weeklyRemaining ?? json.vipWeekly.remaining ?? 0)),
           Math.max(
             0,
             Number(
-              json.ai?.weeklyLimit ??
-                (Number(json.vipWeekly.baseRemaining ?? 0) +
-                  Number(json.vipWeekly.used ?? 0) +
-                  Number(json.vipWeekly.weeklyExtraRemaining ?? 0)),
+              monthlyOnly
+                ? json.ai?.monthlyRemaining ?? json.vipWeekly.remaining ?? 0
+                : json.ai?.weeklyRemaining ?? json.vipWeekly.remaining ?? 0,
+            ),
+          ),
+          Math.max(
+            0,
+            Number(
+              monthlyOnly
+                ? json.ai?.totalLimit ??
+                    (Number(json.ai?.monthlyLimit ?? 0) +
+                      Number(json.ai?.monthlyAddonRemaining ?? 0))
+                : json.ai?.weeklyLimit ??
+                    (Number(json.vipWeekly.baseRemaining ?? 0) +
+                      Number(json.vipWeekly.used ?? 0) +
+                      Number(json.vipWeekly.weeklyExtraRemaining ?? 0)),
             ),
           ),
           {
-            used: Math.max(0, Number(json.ai?.weeklyUsed ?? json.vipWeekly.used ?? 0)),
+            quotaMode: nextQuotaMode,
+            used: Math.max(
+              0,
+              Number(
+                monthlyOnly
+                  ? json.ai?.monthlyUsed ?? json.vipWeekly.monthlyPlanUsed ?? 0
+                  : json.ai?.weeklyUsed ?? json.vipWeekly.used ?? 0,
+              ),
+            ),
             weeklyRenewsAt:
-              typeof json.ai?.weeklyRenewsAt === "string"
+              !monthlyOnly && typeof json.ai?.weeklyRenewsAt === "string"
                 ? json.ai.weeklyRenewsAt
-                : typeof json.vipWeekly.renewsAt === "string"
+                : !monthlyOnly && typeof json.vipWeekly.renewsAt === "string"
                   ? json.vipWeekly.renewsAt
                   : null,
             monthlyRenewsAt:
@@ -173,18 +235,23 @@ export function useVipAiFeedbackGate() {
                   : null,
             extraRemaining: Math.max(
               0,
-              Number(json.ai?.monthlyRemaining ?? json.vipWeekly.monthlyExtraRemaining ?? 0),
+              Number(
+                monthlyOnly
+                  ? json.ai?.monthlyAddonRemaining ?? json.vipWeekly.monthlyExtraRemaining ?? 0
+                  : json.ai?.monthlyRemaining ?? json.vipWeekly.monthlyExtraRemaining ?? 0,
+              ),
             ),
             extraExpiresAt:
               typeof json.ai?.extraExpiry === "string"
                 ? json.ai.extraExpiry
                 : typeof json.vipWeekly.monthlyExtraExpiresAt === "string"
                   ? json.vipWeekly.monthlyExtraExpiresAt
-                : null,
+                  : null,
           },
         );
       }
     } catch {
+      setQuotaMode(isVip ? "weekly" : "monthly_standard");
       setPlanExpiresAt(null);
       setAiUsed(0);
       setAiLimit(fallbackLimit);
@@ -194,12 +261,15 @@ export function useVipAiFeedbackGate() {
       setWeeklyLimitDisplay(null);
       setWeeklyRemainingDisplay(null);
       setWeeklyRenewsDisplay(null);
+      setMonthlyUsedDisplay(null);
+      setMonthlyLimitDisplay(null);
       setMonthlyRemainingDisplay(null);
       setMonthlyRenewsDisplay(null);
       setMonthlyExtraExpiry(null);
       setWeekly(
         isVip
           ? {
+              mode: "weekly",
               used: 0,
               baseLimit: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
               baseRemaining: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
@@ -261,14 +331,19 @@ export function useVipAiFeedbackGate() {
 
   const authLoading = userId === undefined;
   const loading = tierLoading || authLoading || quotaLoading;
+  const vipMonthlyOnly = isVip && quotaMode === "monthly_override";
   const weeklyUsedNow =
-    isVip && weeklyUsedDisplay != null
+    vipMonthlyOnly
+      ? 0
+      : isVip && weeklyUsedDisplay != null
       ? weeklyUsedDisplay
       : isVip
         ? Math.max(0, Number(weekly?.used ?? 0))
         : Math.max(0, aiUsed);
   const weeklyRemainingNow =
-    isVip && weeklyRemainingDisplay != null
+    vipMonthlyOnly
+      ? 0
+      : isVip && weeklyRemainingDisplay != null
       ? weeklyRemainingDisplay
       : isVip
         ? Math.max(
@@ -281,7 +356,9 @@ export function useVipAiFeedbackGate() {
           )
         : Math.max(0, aiRemaining);
   const weeklyLimitNow =
-    isVip && weeklyLimitDisplay != null
+    vipMonthlyOnly
+      ? 0
+      : isVip && weeklyLimitDisplay != null
       ? weeklyLimitDisplay
       : isVip
         ? Math.max(
@@ -299,6 +376,14 @@ export function useVipAiFeedbackGate() {
       : isVip
         ? Math.max(0, Number(weekly?.monthlyVisibleRemaining ?? 0))
         : addonRemaining;
+  const monthlyUsedNow =
+    monthlyUsedDisplay != null ? monthlyUsedDisplay : Math.max(0, aiUsed);
+  const monthlyLimitNow =
+    monthlyLimitDisplay != null
+      ? monthlyLimitDisplay
+      : vipMonthlyOnly
+        ? Math.max(0, aiLimit - addonRemaining)
+        : Math.max(0, aiLimit);
   const monthlyRenewsNow =
     isVip
       ? monthlyRenewsDisplay ?? planExpiresAt
@@ -312,17 +397,23 @@ export function useVipAiFeedbackGate() {
     : Math.max(0, aiRemaining);
   const used = hasBypassAccess
     ? 0
-    : isVip
+    : vipMonthlyOnly
+      ? monthlyUsedNow
+      : isVip
       ? weeklyUsedNow
       : Math.max(0, aiUsed);
   const remaining = hasBypassAccess
     ? Number.POSITIVE_INFINITY
-    : isVip
+    : vipMonthlyOnly
+      ? monthlyRemainingNow
+      : isVip
       ? combinedRemaining
       : Math.max(0, aiRemaining);
   const limit = hasBypassAccess
     ? Number.POSITIVE_INFINITY
-    : isVip
+    : vipMonthlyOnly
+      ? Math.max(0, aiLimit)
+      : isVip
       ? Math.max(0, weeklyLimitNow + monthlyRemainingNow)
       : Math.max(0, aiLimit);
 
@@ -334,26 +425,30 @@ export function useVipAiFeedbackGate() {
     }
     if (!userId) return true;
 
-    const rem = Math.max(0, isVip ? combinedRemaining : remaining);
-    const total = Math.max(0, isVip ? weeklyLimitNow + monthlyRemainingNow : limit);
+    const rem = Math.max(0, vipMonthlyOnly ? monthlyRemainingNow : isVip ? combinedRemaining : remaining);
+    const total = Math.max(
+      0,
+      vipMonthlyOnly ? aiLimit : isVip ? weeklyLimitNow + monthlyRemainingNow : limit,
+    );
     if (isVip) {
-      emitVipApiCreditNotice(weeklyRemainingNow, weeklyLimitNow, {
-        used: weeklyUsedNow,
-        weeklyRenewsAt: weeklyRenewsDisplay ?? weekly?.renewsAt ?? null,
+      emitVipApiCreditNotice(vipMonthlyOnly ? monthlyRemainingNow : weeklyRemainingNow, vipMonthlyOnly ? aiLimit : weeklyLimitNow, {
+        quotaMode,
+        used: vipMonthlyOnly ? monthlyUsedNow : weeklyUsedNow,
+        weeklyRenewsAt: vipMonthlyOnly ? null : weeklyRenewsDisplay ?? weekly?.renewsAt ?? null,
         monthlyRenewsAt: monthlyRenewsNow,
-        extraRemaining: monthlyRemainingNow,
+        extraRemaining: vipMonthlyOnly ? addonRemaining : monthlyRemainingNow,
         extraExpiresAt: monthlyExpiryNow,
       });
     }
     if (rem <= 0) {
       window.alert(
         thExhaustedQuotaMessage({
-          remaining: isVip ? weeklyRemainingNow : rem,
-          limit: isVip ? weeklyLimitNow : total,
-          used: weeklyUsedNow,
-          weeklyRenewsAt: weeklyRenewsDisplay ?? weekly?.renewsAt ?? null,
+          remaining: vipMonthlyOnly ? monthlyRemainingNow : isVip ? weeklyRemainingNow : rem,
+          limit: vipMonthlyOnly ? total : isVip ? weeklyLimitNow : total,
+          used: vipMonthlyOnly ? monthlyUsedNow : weeklyUsedNow,
+          weeklyRenewsAt: vipMonthlyOnly ? null : weeklyRenewsDisplay ?? weekly?.renewsAt ?? null,
           monthlyRenewsAt: monthlyRenewsNow,
-          extraRemaining: monthlyRemainingNow,
+          extraRemaining: vipMonthlyOnly ? addonRemaining : monthlyRemainingNow,
           extraExpiresAt: monthlyExpiryNow,
         }),
       );
@@ -361,12 +456,12 @@ export function useVipAiFeedbackGate() {
     }
     return window.confirm(
       thConfirmBeforeAiSubmit({
-        remaining: isVip ? weeklyRemainingNow : rem,
-        limit: isVip ? weeklyLimitNow : total,
-        used: weeklyUsedNow,
-        weeklyRenewsAt: weeklyRenewsDisplay ?? weekly?.renewsAt ?? null,
+        remaining: vipMonthlyOnly ? monthlyRemainingNow : isVip ? weeklyRemainingNow : rem,
+        limit: vipMonthlyOnly ? total : isVip ? weeklyLimitNow : total,
+        used: vipMonthlyOnly ? monthlyUsedNow : weeklyUsedNow,
+        weeklyRenewsAt: vipMonthlyOnly ? null : weeklyRenewsDisplay ?? weekly?.renewsAt ?? null,
         monthlyRenewsAt: monthlyRenewsNow,
-        extraRemaining: monthlyRemainingNow,
+        extraRemaining: vipMonthlyOnly ? addonRemaining : monthlyRemainingNow,
         extraExpiresAt: monthlyExpiryNow,
         cost: 1,
       }),
@@ -376,7 +471,9 @@ export function useVipAiFeedbackGate() {
     combinedRemaining,
     hasBypassAccess,
     isVip,
+    vipMonthlyOnly,
     limit,
+    monthlyUsedNow,
     monthlyExpiryNow,
     monthlyRemainingNow,
     monthlyRenewsNow,
@@ -414,12 +511,13 @@ export function useVipAiFeedbackGate() {
     used,
     remaining,
     limit,
+    quotaMode,
     baseLimit: Math.max(0, Number(weekly?.baseLimit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT)),
-    extraLimit: isVip ? monthlyRemainingNow : addonRemaining,
-    renewsAt: weeklyRenewsDisplay ?? weekly?.renewsAt ?? null,
+    extraLimit: addonRemaining,
+    renewsAt: vipMonthlyOnly ? null : weeklyRenewsDisplay ?? weekly?.renewsAt ?? null,
     extraExpiresAt: monthlyExpiryNow,
     planExpiresAt: monthlyRenewsNow,
-    weeklyUsed: weeklyUsedNow,
+    weeklyUsed: vipMonthlyOnly ? monthlyUsedNow : weeklyUsedNow,
     weeklyRemaining: weeklyRemainingNow,
     weeklyLimit: weeklyLimitNow,
     monthlyRemaining: monthlyRemainingNow,

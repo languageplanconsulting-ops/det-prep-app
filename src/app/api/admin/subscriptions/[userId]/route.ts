@@ -106,6 +106,14 @@ export async function PATCH(request: Request, ctx: Ctx) {
   if (typeof body.ai_credits_used === "number" && Number.isFinite(body.ai_credits_used)) {
     patch.ai_credits_used = Math.max(0, Math.round(body.ai_credits_used));
   }
+  if (body.ai_quota_mode === "default" || body.ai_quota_mode === "monthly_override") {
+    patch.ai_quota_mode = body.ai_quota_mode;
+  }
+  if (typeof body.ai_monthly_limit_override === "number" && Number.isFinite(body.ai_monthly_limit_override)) {
+    patch.ai_monthly_limit_override = Math.max(0, Math.round(body.ai_monthly_limit_override));
+  } else if (body.ai_monthly_limit_override === null) {
+    patch.ai_monthly_limit_override = null;
+  }
   if (body.lifetime_ai_used === true || body.lifetime_ai_used === false) {
     patch.lifetime_ai_used = body.lifetime_ai_used;
   }

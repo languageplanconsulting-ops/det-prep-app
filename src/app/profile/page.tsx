@@ -20,9 +20,11 @@ type QuotaResponse = {
   expiresAt?: string | null;
   ai?: {
     used?: number;
+    planLimit?: number;
     planRemaining?: number;
     addonRemaining?: number;
     totalRemaining?: number;
+    totalLimit?: number;
   };
   mock?: {
     used?: number;
@@ -153,6 +155,7 @@ export default function ProfilePage() {
   const [aiAddonRemaining, setAiAddonRemaining] = useState(0);
   const [mockAddonRemaining, setMockAddonRemaining] = useState(0);
   const [aiPlanRemainingOverride, setAiPlanRemainingOverride] = useState<number | null>(null);
+  const [aiLimitOverride, setAiLimitOverride] = useState<number | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [practiceTick, setPracticeTick] = useState(0);
   const { effectiveTier, loading } = useEffectiveTier();
@@ -193,6 +196,13 @@ export default function ProfilePage() {
         setAiPlanRemainingOverride(
           json.ai?.planRemaining == null ? null : Math.max(0, Number(json.ai.planRemaining)),
         );
+        setAiLimitOverride(
+          json.ai?.totalLimit == null
+            ? json.ai?.planLimit == null
+              ? null
+              : Math.max(0, Number(json.ai.planLimit))
+            : Math.max(0, Number(json.ai.totalLimit)),
+        );
         setMockUsed(Math.max(0, Number(json.mock?.used ?? 0)));
         setAiAddonRemaining(Math.max(0, Number(json.ai?.addonRemaining ?? 0)));
         setMockAddonRemaining(Math.max(0, Number(json.mock?.addonRemaining ?? 0)));
@@ -213,12 +223,13 @@ export default function ProfilePage() {
         setExpiresAt((profile?.tier_expires_at as string | null) ?? null);
         setAiUsed(Math.max(0, Number(profile?.ai_credits_used ?? 0)));
         setMockUsed((sessions ?? []).length);
+        setAiLimitOverride(null);
       }
       setLoadingStats(false);
     })();
   }, []);
 
-  const aiLimit = AI_MONTHLY_LIMIT[effectiveTier];
+  const aiLimit = aiLimitOverride ?? AI_MONTHLY_LIMIT[effectiveTier];
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[effectiveTier];
   const aiRemaining = (aiPlanRemainingOverride ?? Math.max(0, aiLimit - aiUsed)) + aiAddonRemaining;
   const mockRemaining = Math.max(0, mockLimit - mockUsed) + mockAddonRemaining;

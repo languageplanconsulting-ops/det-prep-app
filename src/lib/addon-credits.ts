@@ -7,6 +7,7 @@ import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import type { AiRewardBonus } from "@/types/writing";
 
 export type AddOnCreditKind = "mock" | "feedback";
+export type AiQuotaMode = "default" | "monthly_override";
 export type FeedbackSurface =
   | "write_about_photo"
   | "speak_about_photo"
@@ -41,6 +42,8 @@ type ProfileLite = {
   tier_expires_at: string | null;
   vip_granted_by_course?: boolean | null;
   ai_credits_used: number | null;
+  ai_quota_mode?: string | null;
+  ai_monthly_limit_override?: number | null;
   lifetime_ai_used: boolean | null;
 };
 
@@ -53,7 +56,8 @@ type InteractiveSpeakingCreditLockRow = {
 };
 
 export type VipWeeklyAiQuota = {
-  weekStart: string;
+  mode: "weekly" | "monthly_override";
+  weekStart: string | null;
   used: number;
   baseLimit: number;
   baseRemaining: number;
@@ -67,10 +71,27 @@ export type VipWeeklyAiQuota = {
   extraLimit: number;
   totalLimit: number;
   remaining: number;
-  renewsAt: string;
+  renewsAt: string | null;
   extraExpiresAt: string | null;
   monthlyExtraExpiresAt: string | null;
+  monthlyPlanLimit: number;
+  monthlyPlanUsed: number;
+  monthlyPlanRemaining: number;
+  monthlyPlanRenewsAt: string | null;
 };
+
+function normalizeAiQuotaMode(value: unknown): AiQuotaMode {
+  return value === "monthly_override" ? "monthly_override" : "default";
+}
+
+function getVipMonthlyOverrideLimit(profile: {
+  ai_monthly_limit_override?: number | null;
+}): number {
+  return Math.max(
+    0,
+    Number(profile.ai_monthly_limit_override ?? AI_MONTHLY_LIMIT.vip ?? 0),
+  );
+}
 
 function weekStartMondayIsoDate(now = new Date()): string {
   const date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -207,7 +228,17 @@ export async function getVipWeeklyAiQuotaForUser(userId: string): Promise<VipWee
   const renewsAt = nextMondayIso();
   const nowIso = new Date().toISOString();
 
-  const [{ data: usage }, { data: credits }] = await Promise.all([
+  const [{ data: profile }, { data: usage }, { data: credits }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("ai_credits_used, ai_quota_mode, ai_monthly_limit_override, tier_expires_at")
+      .eq("id", userId)
+      .maybeSingle<{
+        ai_credits_used: number | null;
+        ai_quota_mode: string | null;
+        ai_monthly_limit_override: number | null;
+        tier_expires_at: string | null;
+      }>(),
     supabase
       .from("vip_weekly_ai_usage")
       .select("uses")
@@ -223,6 +254,55 @@ export async function getVipWeeklyAiQuotaForUser(userId: string): Promise<VipWee
       .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
       .order("created_at", { ascending: false }),
   ]);
+
+  const quotaMode = normalizeAiQuotaMode(profile?.ai_quota_mode);
+  const nonOverrideCredits = (credits ?? []).filter((row) => {
+    const metadata = (row as { metadata?: Record<string, unknown> | null }).metadata ?? null;
+    return metadata?.source !== ADMIN_OVERRIDE_SOURCE;
+  });
+  const monthlyAddonRemaining = nonOverrideCredits.reduce((sum, row) => {
+    const granted = Number((row as { credits_granted?: unknown }).credits_granted ?? 0);
+    const usedCredits = Number((row as { credits_used?: unknown }).credits_used ?? 0);
+    return sum + Math.max(0, granted - usedCredits);
+  }, 0);
+  const monthlyAddonExpiry =
+    nonOverrideCredits
+      .map((row) => (row as { expires_at?: string | null }).expires_at ?? null)
+      .filter((value): value is string => Boolean(value))
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
+
+  if (quotaMode === "monthly_override") {
+    const monthlyPlanUsed = Math.max(0, Number(profile?.ai_credits_used ?? 0));
+    const monthlyPlanLimit = getVipMonthlyOverrideLimit({
+      ai_monthly_limit_override: profile?.ai_monthly_limit_override ?? null,
+    });
+    const monthlyPlanRemaining = Math.max(0, monthlyPlanLimit - monthlyPlanUsed);
+    const remaining = monthlyPlanRemaining + monthlyAddonRemaining;
+    return {
+      mode: "monthly_override",
+      weekStart: null,
+      used: monthlyPlanUsed,
+      baseLimit: 0,
+      baseRemaining: 0,
+      weeklyExtraRemaining: 0,
+      monthlyExtraRemaining: monthlyAddonRemaining,
+      weeklyVisibleRemaining: 0,
+      weeklyVisibleLimit: 0,
+      monthlyVisibleRemaining: remaining,
+      weeklyOverrideActive: false,
+      monthlyOverrideActive: false,
+      extraLimit: monthlyAddonRemaining,
+      totalLimit: monthlyPlanLimit + monthlyAddonRemaining,
+      remaining,
+      renewsAt: null,
+      extraExpiresAt: null,
+      monthlyExtraExpiresAt: monthlyAddonExpiry,
+      monthlyPlanLimit,
+      monthlyPlanUsed,
+      monthlyPlanRemaining,
+      monthlyPlanRenewsAt: (profile?.tier_expires_at as string | null) ?? null,
+    };
+  }
 
   const weeklyOverrideRow =
     (credits ?? []).find((row) => {
@@ -308,6 +388,7 @@ export async function getVipWeeklyAiQuotaForUser(userId: string): Promise<VipWee
   const totalLimit = used + remaining;
 
   return {
+    mode: "weekly",
     weekStart,
     used,
     baseLimit: VIP_AI_FEEDBACK_WEEKLY_LIMIT,
@@ -325,6 +406,17 @@ export async function getVipWeeklyAiQuotaForUser(userId: string): Promise<VipWee
     renewsAt,
     extraExpiresAt,
     monthlyExtraExpiresAt,
+    monthlyPlanLimit: getVipMonthlyOverrideLimit({
+      ai_monthly_limit_override: profile?.ai_monthly_limit_override ?? null,
+    }),
+    monthlyPlanUsed: Math.max(0, Number(profile?.ai_credits_used ?? 0)),
+    monthlyPlanRemaining: Math.max(
+      0,
+      getVipMonthlyOverrideLimit({
+        ai_monthly_limit_override: profile?.ai_monthly_limit_override ?? null,
+      }) - Math.max(0, Number(profile?.ai_credits_used ?? 0)),
+    ),
+    monthlyPlanRenewsAt: (profile?.tier_expires_at as string | null) ?? null,
   };
 }
 
@@ -442,7 +534,7 @@ export async function getAiCreditStateForUser(
   const supabase = createServiceRoleSupabase();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tier, role, tier_expires_at, vip_granted_by_course, ai_credits_used, lifetime_ai_used")
+    .select("tier, role, tier_expires_at, vip_granted_by_course, ai_credits_used, lifetime_ai_used, ai_quota_mode, ai_monthly_limit_override")
     .eq("id", userId)
     .maybeSingle();
 
@@ -519,13 +611,22 @@ export async function getAiCreditStateForUser(
         allowed: true,
         reason: null,
         tier,
-        planRemaining: weekly.weeklyVisibleRemaining,
-        addonRemaining: weekly.monthlyVisibleRemaining,
+        planRemaining:
+          weekly.mode === "monthly_override"
+            ? weekly.monthlyPlanRemaining
+            : weekly.weeklyVisibleRemaining,
+        addonRemaining:
+          weekly.mode === "monthly_override"
+            ? weekly.monthlyExtraRemaining
+            : weekly.monthlyVisibleRemaining,
       };
     }
     return {
       allowed: false,
-      reason: "AI feedback quota reached for this week. It resets next week unless you have extra credits.",
+      reason:
+        weekly.mode === "monthly_override"
+          ? "AI feedback quota reached for this monthly/package cycle."
+          : "AI feedback quota reached for this week. It resets next week unless you have extra credits.",
       tier,
       planRemaining: 0,
       addonRemaining: 0,
@@ -563,7 +664,7 @@ export async function chargeAiCreditForUser(
   const supabase = createServiceRoleSupabase();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("tier, role, tier_expires_at, vip_granted_by_course, ai_credits_used, lifetime_ai_used")
+    .select("tier, role, tier_expires_at, vip_granted_by_course, ai_credits_used, lifetime_ai_used, ai_quota_mode, ai_monthly_limit_override")
     .eq("id", userId)
     .maybeSingle<ProfileLite>();
 
@@ -601,6 +702,20 @@ export async function chargeAiCreditForUser(
 
   if (tier === "vip") {
     const weekly = await getVipWeeklyAiQuotaForUser(userId);
+    if (weekly.mode === "monthly_override") {
+      if (weekly.monthlyPlanRemaining > 0) {
+        const { error } = await supabase
+          .from("profiles")
+          .update({
+            ai_credits_used: used + 1,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", userId);
+        return { ok: !error, source: !error ? "plan" : null };
+      }
+      const consumed = await consumeAddonCreditsForUser(userId, "feedback", 1);
+      return { ok: consumed.ok, source: consumed.ok ? "addon" : null };
+    }
     if (weekly.baseRemaining > 0) {
       await recordVipWeeklyAiUse(userId, 1);
       return { ok: true, source: "plan" };

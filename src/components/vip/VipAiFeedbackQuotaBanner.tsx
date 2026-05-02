@@ -11,6 +11,7 @@ import {
 export function VipAiFeedbackQuotaBanner() {
   const {
     showQuotaBanner,
+    quotaMode,
     remaining,
     limit,
     loading,
@@ -22,6 +23,7 @@ export function VipAiFeedbackQuotaBanner() {
   } = useVipAiFeedbackGate();
 
   if (!showQuotaBanner) return null;
+  const weeklyMode = quotaMode === "weekly";
 
   return (
     <div
@@ -29,28 +31,43 @@ export function VipAiFeedbackQuotaBanner() {
       role="status"
     >
       <p className="font-bold text-neutral-900">
-        {loading ? "กำลังโหลดโควต้า…" : TH_QUOTA_BANNER_LINE(remaining, limit)}
+        {loading
+          ? "กำลังโหลดโควต้า…"
+          : weeklyMode
+            ? TH_QUOTA_BANNER_LINE(remaining, limit)
+            : `รอบนี้คุณมี AI credit แบบรายเดือนเหลือ ${remaining} ครั้ง จาก ${limit} ครั้ง`}
       </p>
       <p className="mt-1 text-xs font-semibold text-neutral-800">
-        ใช้ไปแล้วรอบนี้ {weeklyUsed ?? 0} ครั้ง · Used this week {weeklyUsed ?? 0}
+        {weeklyMode
+          ? `ใช้ไปแล้วรอบนี้ ${weeklyUsed ?? 0} ครั้ง · Used this week ${weeklyUsed ?? 0}`
+          : `ใช้ไปแล้วรอบนี้ ${weeklyUsed ?? 0} ครั้ง · Used this cycle ${weeklyUsed ?? 0}`}
       </p>
-      {renewsAt ? (
+      {weeklyMode && renewsAt ? (
         <p className="mt-1 text-xs font-semibold text-ep-blue">
           รีเซ็ตรอบสัปดาห์: {new Date(renewsAt).toLocaleString("th-TH")}
         </p>
       ) : null}
       {planExpiresAt ? (
         <p className="mt-1 text-xs font-semibold text-neutral-700">
-          รอบแพ็กเกจ/รายเดือนถึง {new Date(planExpiresAt).toLocaleString("th-TH")}
+          {weeklyMode ? "รอบแพ็กเกจ/รายเดือนถึง " : "รีเซ็ตรอบรายเดือน/แพ็กเกจ: "}
+          {new Date(planExpiresAt).toLocaleString("th-TH")}
         </p>
       ) : null}
       {extraLimit > 0 ? (
         <p className="mt-1 text-xs font-semibold text-emerald-700">
-          เหลือรายเดือน/เครดิตเพิ่มอีก {extraLimit} ครั้ง
+          {weeklyMode
+            ? `เหลือรายเดือน/เครดิตเพิ่มอีก ${extraLimit} ครั้ง`
+            : `เครดิตเพิ่มที่ใช้งานได้อีก ${extraLimit} ครั้ง`}
           {extraExpiresAt ? ` ใช้ได้ถึง ${new Date(extraExpiresAt).toLocaleString("th-TH")}` : ""}
         </p>
       ) : null}
-      <p className="mt-1.5 text-xs leading-relaxed text-neutral-700">{TH_QUOTA_NO_ROLLOVER}</p>
+      {weeklyMode ? (
+        <p className="mt-1.5 text-xs leading-relaxed text-neutral-700">{TH_QUOTA_NO_ROLLOVER}</p>
+      ) : (
+        <p className="mt-1.5 text-xs leading-relaxed text-neutral-700">
+          โหมดนี้ไม่มีลิมิตรอบสัปดาห์ ระบบจะนับจากเครดิตรายเดือนที่เหลืออยู่ของคุณเท่านั้น
+        </p>
+      )}
       <p className="mt-1 text-xs font-medium text-ep-blue">{TH_QUOTA_COVERED_PARTS_TH}</p>
     </div>
   );

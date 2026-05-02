@@ -25,6 +25,7 @@ type AiQuotaMessageArgs = {
 type VipApiCreditNoticeDetail = {
   remaining: number;
   limit: number;
+  quotaMode?: "weekly" | "monthly_override" | "monthly_standard";
   resetOn: { th: string; en: string };
   used?: number;
   weeklyRenewsAt?: string | null;
@@ -179,6 +180,7 @@ export function emitVipApiCreditNotice(
       detail: {
         remaining,
         limit,
+        quotaMode: detail?.quotaMode ?? (detail?.weeklyRenewsAt ? "weekly" : "monthly_override"),
         resetOn,
         used: Math.max(0, Number(detail?.used ?? 0)),
         weeklyRenewsAt: detail?.weeklyRenewsAt ?? null,
@@ -264,7 +266,7 @@ export const TH_QUOTA_COVERED_PARTS_TH =
   "นับรวม: เขียนเกี่ยวกับรูป · อ่านแล้วเขียน · อ่านแล้วพูด · พูดเกี่ยวกับรูป · สรุปบทสนทนา · พูดโต้ตอบ (นับ 1 ครั้งต่อ 1 session)";
 
 export function thInteractiveSpeakingInsufficientCredits(need: number, have: number): string {
-  return `สมาชิก VIP: พูดโต้ตอบใช้สิทธิ์ AI ${need} ครั้งต่อรอบ แต่สัปดาห์นี้เหลืออีก ${have} ครั้ง—รอรีเซ็ตวันจันทร์หรือใช้สิทธิ์ให้ว่างก่อน`;
+  return `สมาชิก VIP: พูดโต้ตอบใช้สิทธิ์ AI ${need} ครั้งต่อรอบ แต่ตอนนี้เหลืออีก ${have} ครั้ง—รอรอบถัดไปหรือเติมเครดิตเพิ่มก่อน`;
 }
 
 /** Shown once when starting interactive speaking (VIP). */

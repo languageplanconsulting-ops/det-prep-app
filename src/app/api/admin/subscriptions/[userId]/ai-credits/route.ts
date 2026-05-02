@@ -169,7 +169,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("id, tier, tier_expires_at")
+      .select("id, tier, tier_expires_at, ai_quota_mode")
       .eq("id", userId)
       .maybeSingle();
 
@@ -178,6 +178,12 @@ export async function PATCH(request: Request, ctx: Ctx) {
     }
     if (!profile) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    if (profile.ai_quota_mode === "monthly_override") {
+      return NextResponse.json(
+        { error: "Monthly-only AI clients do not use weekly visible overrides." },
+        { status: 400 },
+      );
     }
 
     const vipWeekly = await getVipWeeklyAiQuotaForUser(userId);
@@ -273,7 +279,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
         row: weeklyOverride as Record<string, unknown> | null,
         bucket: "weekly",
         leftNow: weeklyLeftNow,
-        expiresAt: vipWeekly.renewsAt,
+        expiresAt: vipWeekly.renewsAt ?? weekEndIso(),
       });
       const monthlyResult = await applyOverride({
         row: monthlyOverride as Record<string, unknown> | null,

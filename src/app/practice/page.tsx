@@ -146,6 +146,7 @@ export default function PracticeHubPage() {
       }
       const rem = vipAiGate.remaining;
       emitVipApiCreditNotice(rem, vipAiGate.limit, {
+        quotaMode: vipAiGate.quotaMode,
         used: vipAiGate.used,
         weeklyRenewsAt: vipAiGate.renewsAt,
         monthlyRenewsAt: vipAiGate.planExpiresAt,
@@ -176,6 +177,7 @@ export default function PracticeHubPage() {
     ) {
       const rem = vipAiGate.remaining;
       emitVipApiCreditNotice(rem, vipAiGate.limit, {
+        quotaMode: vipAiGate.quotaMode,
         used: vipAiGate.used,
         weeklyRenewsAt: vipAiGate.renewsAt,
         monthlyRenewsAt: vipAiGate.planExpiresAt,
@@ -183,7 +185,11 @@ export default function PracticeHubPage() {
         extraExpiresAt: vipAiGate.extraExpiresAt,
       });
       if (rem < 1) {
-        window.alert("AI FEEDBACK: You have no remaining VIP grading credit this week. It resets every Monday.");
+        window.alert(
+          vipAiGate.quotaMode === "weekly"
+            ? "AI FEEDBACK: You have no remaining VIP grading credit this week. It resets every Monday."
+            : "AI FEEDBACK: You have no remaining VIP grading credit in this monthly/package cycle right now.",
+        );
         return;
       }
     }

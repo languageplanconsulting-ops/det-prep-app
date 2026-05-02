@@ -541,6 +541,7 @@ export function InteractiveSpeakingSession({
       }
       const rem = vipGate.remaining;
       emitVipApiCreditNotice(rem, vipGate.limit, {
+        quotaMode: vipGate.quotaMode,
         used: vipGate.used,
         weeklyRenewsAt: vipGate.renewsAt,
         monthlyRenewsAt: vipGate.planExpiresAt,
