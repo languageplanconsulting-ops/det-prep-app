@@ -4,6 +4,12 @@ import { getAdminAccess } from "@/lib/admin-auth";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+  Pragma: "no-cache",
+  Expires: "0",
+};
+
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
@@ -15,39 +21,57 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       .select("id,user_id,set_id,status,current_step,responses,targets,started_at,completed_at,cancelled_at")
       .eq("id", id)
       .single();
-    if (sessionErr || !session) return NextResponse.json({ error: sessionErr?.message ?? "Not found" }, { status: 404 });
+    if (sessionErr || !session) {
+      return NextResponse.json(
+        { error: sessionErr?.message ?? "Not found" },
+        { status: 404, headers: NO_STORE_HEADERS },
+      );
+    }
 
     const { data: setRow, error: setErr } = await supabase
       .from("mock_fixed_sets")
       .select("id,name,user_title")
       .eq("id", session.set_id)
       .single();
-    if (setErr || !setRow) return NextResponse.json({ error: setErr?.message ?? "Fixed set not found" }, { status: 404 });
+    if (setErr || !setRow) {
+      return NextResponse.json(
+        { error: setErr?.message ?? "Fixed set not found" },
+        { status: 404, headers: NO_STORE_HEADERS },
+      );
+    }
 
     const { data: items, error: itemsErr } = await supabase
       .from("mock_fixed_set_items")
       .select("step_index,task_type,time_limit_sec,rest_after_step_sec,content,correct_answer,is_ai_graded")
       .eq("set_id", session.set_id)
       .order("step_index", { ascending: true });
-    if (itemsErr || !items) return NextResponse.json({ error: itemsErr?.message ?? "Fixed set items not found" }, { status: 404 });
+    if (itemsErr || !items) {
+      return NextResponse.json(
+        { error: itemsErr?.message ?? "Fixed set items not found" },
+        { status: 404, headers: NO_STORE_HEADERS },
+      );
+    }
     if (items.length !== 20) {
-      return NextResponse.json({ error: "Fixed set is incomplete" }, { status: 409 });
+      return NextResponse.json({ error: "Fixed set is incomplete" }, { status: 409, headers: NO_STORE_HEADERS });
     }
 
-    return NextResponse.json({
-      session: {
-        ...session,
-        mock_fixed_sets: setRow,
-        mock_fixed_set_items: items,
+    return NextResponse.json(
+      {
+        session: {
+          ...session,
+          mock_fixed_sets: setRow,
+          mock_fixed_set_items: items,
+        },
       },
-    });
+      { headers: NO_STORE_HEADERS },
+    );
   }
 
   const supabase = await createRouteHandlerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
 
   const { data: session, error: sessionErr } = await supabase
     .from("mock_fixed_sessions")
@@ -55,32 +79,50 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     .eq("id", id)
     .eq("user_id", user.id)
     .single();
-  if (sessionErr || !session) return NextResponse.json({ error: sessionErr?.message ?? "Not found" }, { status: 404 });
+  if (sessionErr || !session) {
+    return NextResponse.json(
+      { error: sessionErr?.message ?? "Not found" },
+      { status: 404, headers: NO_STORE_HEADERS },
+    );
+  }
 
   const { data: setRow, error: setErr } = await supabase
     .from("mock_fixed_sets")
     .select("id,name,user_title")
     .eq("id", session.set_id)
     .single();
-  if (setErr || !setRow) return NextResponse.json({ error: setErr?.message ?? "Fixed set not found" }, { status: 404 });
+  if (setErr || !setRow) {
+    return NextResponse.json(
+      { error: setErr?.message ?? "Fixed set not found" },
+      { status: 404, headers: NO_STORE_HEADERS },
+    );
+  }
 
   const { data: items, error: itemsErr } = await supabase
     .from("mock_fixed_set_items")
     .select("step_index,task_type,time_limit_sec,rest_after_step_sec,content,correct_answer,is_ai_graded")
     .eq("set_id", session.set_id)
     .order("step_index", { ascending: true });
-  if (itemsErr || !items) return NextResponse.json({ error: itemsErr?.message ?? "Fixed set items not found" }, { status: 404 });
+  if (itemsErr || !items) {
+    return NextResponse.json(
+      { error: itemsErr?.message ?? "Fixed set items not found" },
+      { status: 404, headers: NO_STORE_HEADERS },
+    );
+  }
   if (items.length !== 20) {
-    return NextResponse.json({ error: "Fixed set is incomplete" }, { status: 409 });
+    return NextResponse.json({ error: "Fixed set is incomplete" }, { status: 409, headers: NO_STORE_HEADERS });
   }
 
-  return NextResponse.json({
-    session: {
-      ...session,
-      mock_fixed_sets: setRow,
-      mock_fixed_set_items: items,
+  return NextResponse.json(
+    {
+      session: {
+        ...session,
+        mock_fixed_sets: setRow,
+        mock_fixed_set_items: items,
+      },
     },
-  });
+    { headers: NO_STORE_HEADERS },
+  );
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {

@@ -29,6 +29,7 @@ type SessionPayload = {
 };
 
 const STEP_COUNT = 20;
+const FAST_PASS_DWELL_MS = 2500;
 
 const TASK_LABELS: Record<string, { en: string; th: string; hint: string }> = {
   fill_in_blanks: { en: "Fill in the blanks", th: "เติมคำในช่องว่าง", hint: "Read the full context before deciding each word." },
@@ -74,6 +75,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   const answeredCount = session?.responses?.length ?? 0;
   const adminPreviewMode = session?.targets?.adminPreviewMode === true;
   const skipTimerMode = session?.targets?.skipTimerMode === true;
+  const fastPassPreviewMode = session?.targets?.fastPassPreviewMode === true;
   const stepIndex = session?.current_step ?? 1;
   const current = useMemo(
     () => session?.mock_fixed_set_items?.find((i) => i.step_index === stepIndex) ?? null,
@@ -104,6 +106,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       const ctl = new AbortController();
       const t = window.setTimeout(() => ctl.abort(), 20000);
       const res = await fetch(`/api/mock-test/fixed/session/${sessionId}`, {
+        cache: "no-store",
         credentials: "same-origin",
         signal: ctl.signal,
       });
@@ -156,6 +159,19 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     void load("rest");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resting, timer.isExpired]);
+
+  useEffect(() => {
+    if (!fastPassPreviewMode) return;
+    if (!current) return;
+    if (loading || resting || submittingStep) return;
+
+    const timeout = window.setTimeout(() => {
+      void submit({ skippedByAdmin: true, fastPassPreview: true });
+    }, FAST_PASS_DWELL_MS);
+
+    return () => window.clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fastPassPreviewMode, current?.step_index, loading, resting, submittingStep]);
 
   const mergedContent =
     current?.task_type === "conversation_summary" && prevInteractive?.answer
@@ -367,7 +383,9 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
               </div>
               <div className="rounded-[4px] border-2 border-black bg-white px-3 py-2">
                 <div className="text-[11px] font-black uppercase tracking-wide text-neutral-500">Mode</div>
-                <div className="text-sm font-black text-neutral-900">{skipTimerMode ? "Preview" : "Live timing"}</div>
+                <div className="text-sm font-black text-neutral-900">
+                  {fastPassPreviewMode ? "Fast pass" : skipTimerMode ? "Preview" : "Live timing"}
+                </div>
               </div>
             </div>
           </div>
@@ -377,7 +395,9 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
         </div>
         {skipTimerMode ? (
           <div className="rounded-[4px] border-2 border-dashed border-[#004AAD] bg-[#eaf1ff] px-3 py-2 text-xs font-black text-[#004AAD]">
-            Admin preview mode: timer and rest are skipped, but the question flow and report path still run.
+            {fastPassPreviewMode
+              ? "Fast pass preview: each step is shown briefly, then auto-skipped through the normal grading path."
+              : "Admin preview mode: timer and rest are skipped, but the question flow and report path still run."}
           </div>
         ) : (
           <MockTestTimerBar
@@ -403,15 +423,16 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
             </div>
             <div className="p-4 sm:p-5">
               <QuestionRouter
+                key={question.id}
                 question={question}
                 submitting={submittingStep}
-          onSpeakPhotoReady={() => {
-            if (skipTimerMode) return;
-            if (current?.task_type !== "speak_about_photo") return;
-            if (speakPhotoTimerStarted) return;
-            setSpeakPhotoTimerStarted(true);
-            timer.resumeTimer();
-          }}
+                onSpeakPhotoReady={() => {
+                  if (skipTimerMode) return;
+                  if (current?.task_type !== "speak_about_photo") return;
+                  if (speakPhotoTimerStarted) return;
+                  setSpeakPhotoTimerStarted(true);
+                  timer.resumeTimer();
+                }}
                 onDictationAudioFinished={() => {
                   if (skipTimerMode) return;
                   if (current?.task_type !== "dictation") return;
@@ -446,13 +467,19 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
                 Preview uses the same scoring formula as learners. Any task skipped by admin is counted as zero.
               </p>
             ) : null}
+            {fastPassPreviewMode ? (
+              <p className="mt-3 rounded-[4px] border-2 border-dashed border-amber-500 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900">
+                Auto-advancing every {Math.round(FAST_PASS_DWELL_MS / 1000)}s so you can QA the full question sequence in under a minute.
+              </p>
+            ) : null}
             {adminPreviewMode ? (
               <button
                 type="button"
+                disabled={fastPassPreviewMode}
                 onClick={() => void submit({ skippedByAdmin: true })}
                 className="mt-3 w-full rounded-[4px] border-4 border-black bg-amber-100 px-4 py-2 text-sm font-black text-amber-900 shadow-[3px_3px_0_0_#000]"
               >
-                Admin: skip this task
+                {fastPassPreviewMode ? "Admin: auto-skip active" : "Admin: skip this task"}
               </button>
             ) : null}
             <button
@@ -460,6 +487,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
               onClick={async () => {
                 const res = await fetch(`/api/mock-test/fixed/session/${sessionId}`, {
                   method: "PATCH",
+                  cache: "no-store",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ status: "cancelled", cancelled_at: new Date().toISOString() }),
                 });
