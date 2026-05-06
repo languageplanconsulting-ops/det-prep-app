@@ -99,6 +99,8 @@ async function fulfillOneTimePlanPurchase(
     tier_expires_at: nextExpiry,
     ai_credits_used: 0,
     ai_credits_reset_at: now,
+    ai_quota_mode: "default",
+    ai_monthly_limit_override: null,
     vip_granted_by_course: false,
   });
   if (error) {
