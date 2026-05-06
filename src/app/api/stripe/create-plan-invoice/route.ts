@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import type { PaidTier } from "@/lib/stripe";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
+import { buildThaiCheckoutBranding, buildThaiCheckoutText } from "@/lib/stripe-checkout-branding";
 import { getStripe, STRIPE_PLANS } from "@/lib/stripe";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
@@ -15,6 +16,12 @@ function isPaidTier(t: string): t is PaidTier {
 function siteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }
+
+const PLAN_LABEL_TH: Record<PaidTier, string> = {
+  basic: "แพ็กเกจ Basic 30 วัน",
+  premium: "แพ็กเกจ Premium 30 วัน",
+  vip: "แพ็กเกจ VIP 30 วัน",
+};
 
 export async function POST(req: Request) {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -112,7 +119,9 @@ export async function POST(req: Request) {
     const base = siteUrl();
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      locale: "auto",
+      locale: "th",
+      branding_settings: buildThaiCheckoutBranding(),
+      custom_text: buildThaiCheckoutText(PLAN_LABEL_TH[tierRaw]),
       customer: customerId,
       payment_method_types: ["promptpay"],
       line_items: [{ price: priceId, quantity: 1 }],

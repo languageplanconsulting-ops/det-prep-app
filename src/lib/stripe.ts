@@ -3,7 +3,7 @@ import type { Tier } from "@/lib/access-control";
 
 export type PaidTier = "basic" | "premium" | "vip";
 
-/** Placeholders — replace with real Price IDs from Stripe Dashboard (THB recurring). */
+/** Placeholders — replace with real Price IDs from Stripe Dashboard (THB one-time plan payments). */
 export const STRIPE_PRICE_BASIC = "STRIPE_PRICE_BASIC";
 export const STRIPE_PRICE_PREMIUM = "STRIPE_PRICE_PREMIUM";
 export const STRIPE_PRICE_VIP = "STRIPE_PRICE_VIP";

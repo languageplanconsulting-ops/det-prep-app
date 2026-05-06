@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import type { AddOnSku } from "@/lib/paywall-upsell";
 import { ADD_ON_CATALOG } from "@/lib/paywall-upsell";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { buildThaiCheckoutBranding, buildThaiCheckoutText } from "@/lib/stripe-checkout-branding";
 import { getStripe } from "@/lib/stripe";
 import {
   creditsGrantedForSku,
@@ -62,22 +63,24 @@ export async function POST(req: Request) {
     const base = siteUrl();
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      locale: "auto",
+      locale: "th",
+      branding_settings: buildThaiCheckoutBranding(),
+      custom_text: buildThaiCheckoutText(item.labelTh),
       customer: customerId,
       payment_method_types: ["card", "promptpay"],
       allow_promotion_codes: true,
       line_items: [
         {
           quantity: 1,
-          price_data: {
-            currency: "thb",
-            unit_amount: item.priceThb * 100,
-            product_data: {
-              name: item.labelEn,
-              description: item.labelTh,
+            price_data: {
+              currency: "thb",
+              unit_amount: item.priceThb * 100,
+              product_data: {
+                name: item.labelTh,
+                description: item.labelEn,
+              },
             },
           },
-        },
       ],
       success_url: `${base}/pricing?checkout=success&focus=addons&sku=${encodeURIComponent(sku)}`,
       cancel_url: `${base}/pricing?checkout=cancel&focus=addons&sku=${encodeURIComponent(sku)}`,
