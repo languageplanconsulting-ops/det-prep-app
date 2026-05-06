@@ -226,6 +226,34 @@ function PricingPageContent() {
           </section>
         ) : null}
 
+        <section className="border-4 border-black bg-[linear-gradient(135deg,#e8f1ff_0%,#ffffff_48%,#fff8dc_100%)] p-6 shadow-[8px_8px_0_0_#111]">
+          <p className="font-mono text-[10px] font-black uppercase tracking-[0.24em] text-[#004aad]">
+            Learn before you buy
+          </p>
+          <h2 className="mt-3 text-2xl font-black text-neutral-900">
+            Compare plans with the DET guide hub
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-neutral-700">
+            If you are still deciding, start with the Duolingo English Test guide pages for score
+            targets, mock-test planning, cost, and task-specific prep. They are built to bring search
+            visitors into the exact product area they need next.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3 text-sm font-black uppercase">
+            <Link href="/duolingo-english-test" className="border-[3px] border-black bg-white px-4 py-3 shadow-[4px_4px_0_0_#111]">
+              DET guide hub
+            </Link>
+            <Link href="/duolingo-english-test/mock-test" className="border-[3px] border-black bg-white px-4 py-3 shadow-[4px_4px_0_0_#111]">
+              Mock test guide
+            </Link>
+            <Link href="/duolingo-english-test/score-guide" className="border-[3px] border-black bg-white px-4 py-3 shadow-[4px_4px_0_0_#111]">
+              Score guide
+            </Link>
+            <Link href="/duolingo-english-test/write-about-photo" className="border-[3px] border-black bg-white px-4 py-3 shadow-[4px_4px_0_0_#111]">
+              Write about photo
+            </Link>
+          </div>
+        </section>
+
         {!loading && !user ? (
           <section className="border-4 border-black bg-[linear-gradient(135deg,#fff8dc_0%,#ffffff_42%,#eaf4ff_100%)] p-5 shadow-[8px_8px_0_0_#111]">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

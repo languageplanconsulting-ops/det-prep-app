@@ -175,6 +175,15 @@ export function LandingPageClient({
           </Link>
           <div className="flex w-full shrink-0 flex-wrap items-center justify-stretch gap-2 sm:w-auto sm:justify-end sm:gap-4">
             <a
+              href="/duolingo-english-test"
+              className="ep-stat inline-flex min-h-[44px] flex-1 items-center justify-center border-2 border-black bg-[#e8f1ff] px-3 py-2 text-center text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-[#d6e8ff] sm:flex-initial sm:text-sm"
+            >
+              <span className="leading-tight">
+                DET Guide
+                <span className="hidden sm:inline"> / คู่มือ DET</span>
+              </span>
+            </a>
+            <a
               href="#preview"
               className="ep-stat inline-flex min-h-[44px] flex-1 items-center justify-center border-2 border-black bg-white px-3 py-2 text-center text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-neutral-50 sm:flex-initial sm:text-sm"
             >
@@ -254,6 +263,12 @@ export function LandingPageClient({
                 className="inline-block border-4 border-black bg-ep-blue px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-white shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
               >
                 Get started / เริ่มเลย
+              </a>
+              <a
+                href="/duolingo-english-test"
+                className="inline-block border-4 border-black bg-white px-8 py-5 text-center text-lg font-bold text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-100 hover:shadow-[4px_4px_0_0_#000]"
+              >
+                DET guide / คู่มือ DET
               </a>
               <a
                 href="#features"
