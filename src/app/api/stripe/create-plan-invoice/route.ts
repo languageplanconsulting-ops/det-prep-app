@@ -4,6 +4,7 @@ import type { PaidTier } from "@/lib/stripe";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { buildThaiCheckoutBranding, buildThaiCheckoutText } from "@/lib/stripe-checkout-branding";
 import { getStripe, STRIPE_PLANS } from "@/lib/stripe";
+import { resolveSiteUrl } from "@/lib/site-url";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
@@ -11,10 +12,6 @@ const PAID: PaidTier[] = ["basic", "premium", "vip"];
 
 function isPaidTier(t: string): t is PaidTier {
   return PAID.includes(t as PaidTier);
-}
-
-function siteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }
 
 const PLAN_LABEL_TH: Record<PaidTier, string> = {
@@ -116,7 +113,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const base = siteUrl();
+    const base = resolveSiteUrl(req);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       locale: "th",
