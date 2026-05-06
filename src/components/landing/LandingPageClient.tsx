@@ -922,6 +922,11 @@ export function LandingPageClient({
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
+                <Link href="/about" className="hover:text-ep-yellow">
+                  About English Plan
+                </Link>
+              </li>
+              <li>
                 <a href="#features" className="hover:text-ep-yellow">
                   Features
                 </a>

@@ -10,6 +10,7 @@ import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 const baseLinks = [
   { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
   { href: "/profile", label: "Profile" },
   { href: "/student-overview", label: "Student Overview" },
   { href: "/notebook", label: "Notebook" },
@@ -80,6 +81,12 @@ export function MainNav() {
             Practice
           </Link>
         ) : null}
+        <Link
+          href="/about"
+          className="ep-interactive shrink-0 rounded-sm border-2 border-black bg-white px-3 py-1.5 text-xs font-bold text-neutral-900 sm:text-sm"
+        >
+          About
+        </Link>
         <Link
           href="/?fastTrack=1"
           className="ep-interactive shrink-0 rounded-sm border-2 border-black bg-ep-yellow/90 px-3 py-1.5 text-xs font-black uppercase text-black shadow-[2px_2px_0_0_#000] sm:text-sm"
