@@ -101,6 +101,18 @@ Breakdown items: use issueEn, issueTh. excerpt = exact short quote from the rele
 
 Grammar bands: ~30% A1–A2 issues; ~50% B1–B2; ~70% clean; ~90% ≥1 complex structure; 100% ≥3 complex structures.
 
+Vocabulary bands for Read and Write (mandatory):
+- 100% = more than 10 collocations, vocabulary at B2–C2 level, no mistakes
+- 90% = more than 8 collocations, vocabulary at B2–C2 level, no mistakes
+- 80% = more than 6 collocations, vocabulary at B2–C2 level, no mistakes
+- 70% = more than 6 collocations, vocabulary at B1–C2 level, no more than 5 mistakes / awkward / unnatural uses
+- 60% = more than 6 collocations, vocabulary at B1–C2 level, no more than 7 mistakes / awkward / unnatural uses
+- 50% = vocabulary mostly stays in A1–B1 level, with fewer than 5 mistakes
+- 40% = vocabulary mostly stays in A1–B1 level, with more than 5 mistakes
+- 30% = vocabulary mostly stays in A1–B1 level, with many mistakes and awkward use
+
+When you score vocabulary, explicitly follow this band table. In vocabulary feedback, mention collocations, level band, and awkward/unnatural use where relevant.
+
 Hard scoring rules (mandatory):
 - If the learner misuses a transition / linker, subtract 35 points from coherenceScorePercent.
 - For punctuation mistakes in grammar, subtract 10 points each, capped at 25 total.

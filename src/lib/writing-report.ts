@@ -45,24 +45,153 @@ function scoreGrammarPercent(essay: string): number {
   return Math.min(100, Math.max(25, s));
 }
 
-function scoreVocabularyPercent(essay: string): number {
+type ReadWriteVocabularyAnalysis = {
+  scorePercent: number;
+  collocations: number;
+  levelBand: "A1-B1" | "B1-C2" | "B2-C2";
+  issueCount: number;
+  awkwardCount: number;
+  repeatedBasicCount: number;
+  matchedAdvancedWords: number;
+};
+
+function analyzeReadWriteVocabulary(essay: string): ReadWriteVocabularyAnalysis {
   const lower = essay.toLowerCase();
-  const adv = (
-    lower.match(
-      /\b(significant|nevertheless|furthermore|consequently|perspective|emphasize|crucial|sophisticated|demonstrate|establish)\b/g,
-    ) ?? []
-  ).length;
-  const mid = (
-    lower.match(
-      /\b(important|however|experience|develop|challenge|opportunity|support|reason|result)\b/g,
-    ) ?? []
-  ).length;
-  let s = 58;
-  if (adv >= 2) s = 88;
-  else if (adv === 1) s = 78;
-  if (mid >= 4) s += 8;
-  if (adv === 0 && mid < 2) s = Math.min(s, 62);
-  return Math.min(100, Math.max(28, s));
+  const collocationPatterns = [
+    /\bsense of equality\b/g,
+    /\bfocus on studying\b/g,
+    /\bcompetition about clothes\b/g,
+    /\bexpensive brands\b/g,
+    /\bfashion trends\b/g,
+    /\bpersonal responsibility\b/g,
+    /\bconcrete example\b/g,
+    /\bstrong initial reason\b/g,
+    /\btopic[-\s]specific terms?\b/g,
+    /\bmain idea\b/g,
+    /\banswer the prompt\b/g,
+    /\baddress the prompt\b/g,
+    /\bclear benefit\b/g,
+    /\bclear drawback\b/g,
+    /\bfrom another angle\b/g,
+    /\bplay an important role\b/g,
+    /\bhighly beneficial\b/g,
+    /\bmake (?:the )?classroom feel more equal\b/g,
+    /\blook at .* from another angle\b/g,
+    /\bin most schools\b/g,
+  ] as const;
+
+  const advancedWordPatterns = [
+    /\bsignificant\b/g,
+    /\bnevertheless\b/g,
+    /\bfurthermore\b/g,
+    /\bconsequently\b/g,
+    /\bperspective\b/g,
+    /\bemphas(?:i[sz]e|is(?:e|ing|ed))\b/g,
+    /\bcrucial\b/g,
+    /\bsophisticated\b/g,
+    /\bdemonstrat(?:e|es|ed|ing)\b/g,
+    /\bestablish(?:ed|es|ing)?\b/g,
+    /\bdiscipline\b/g,
+    /\bflexibility\b/g,
+    /\bcultural\b/g,
+    /\bindividuals\b/g,
+    /\bresponsibility\b/g,
+    /\bequality\b/g,
+    /\bopportunity\b/g,
+    /\btrade[-\s]?offs?\b/g,
+    /\bnuanced\b/g,
+    /\bcoherent\b/g,
+    /\bprecise|precision\b/g,
+  ] as const;
+
+  const midWordPatterns = [
+    /\bimportant\b/g,
+    /\bhowever\b/g,
+    /\bexperience\b/g,
+    /\bdevelop\b/g,
+    /\bchallenge\b/g,
+    /\bsupport\b/g,
+    /\breason\b/g,
+    /\bresult\b/g,
+    /\bbenefit\b/g,
+    /\bdrawback\b/g,
+    /\bopinion\b/g,
+    /\bexample\b/g,
+  ] as const;
+
+  const basicRepetitionTokens = [
+    "good",
+    "bad",
+    "nice",
+    "big",
+    "small",
+    "thing",
+    "things",
+    "people",
+    "very",
+    "important",
+    "really",
+  ] as const;
+
+  const awkwardPatterns = [
+    /\bthings? is\b/g,
+    /\bpeoples\b/g,
+    /\bmore easier\b/g,
+    /\bvery unique\b/g,
+    /\bmake .* more better\b/g,
+    /\bon the another hand\b/g,
+    /\bdiscuss about\b/g,
+    /\baccording to me\b/g,
+  ] as const;
+
+  const collocations = collocationPatterns.reduce(
+    (sum, pattern) => sum + (lower.match(pattern)?.length ?? 0),
+    0,
+  );
+  const matchedAdvancedWords = advancedWordPatterns.reduce(
+    (sum, pattern) => sum + (lower.match(pattern)?.length ?? 0),
+    0,
+  );
+  const matchedMidWords = midWordPatterns.reduce(
+    (sum, pattern) => sum + (lower.match(pattern)?.length ?? 0),
+    0,
+  );
+  const awkwardCount = awkwardPatterns.reduce(
+    (sum, pattern) => sum + (lower.match(pattern)?.length ?? 0),
+    0,
+  );
+  const repeatedBasicCount = basicRepetitionTokens.reduce((sum, token) => {
+    const count = lower.match(new RegExp(`\\b${token}\\b`, "g"))?.length ?? 0;
+    return sum + Math.max(0, count - 2);
+  }, 0);
+  const issueCount = awkwardCount + repeatedBasicCount;
+
+  const levelBand: "A1-B1" | "B1-C2" | "B2-C2" =
+    matchedAdvancedWords >= 6
+      ? "B2-C2"
+      : matchedAdvancedWords + matchedMidWords >= 8
+        ? "B1-C2"
+        : "A1-B1";
+
+  let scorePercent = 30;
+  if (levelBand === "B2-C2" && collocations > 10 && issueCount === 0) scorePercent = 100;
+  else if (levelBand === "B2-C2" && collocations > 8 && issueCount === 0) scorePercent = 90;
+  else if (levelBand === "B2-C2" && collocations > 6 && issueCount === 0) scorePercent = 80;
+  else if (levelBand !== "A1-B1" && collocations > 6 && issueCount <= 5) scorePercent = 70;
+  else if (levelBand !== "A1-B1" && collocations > 6 && issueCount <= 7) scorePercent = 60;
+  else if (levelBand === "A1-B1" && issueCount < 5) scorePercent = 50;
+  else if (levelBand === "A1-B1" && issueCount >= 5 && issueCount < 8) scorePercent = 40;
+  else scorePercent = 30;
+
+  return {
+    scorePercent,
+    collocations,
+    levelBand,
+    issueCount,
+    awkwardCount,
+    repeatedBasicCount,
+    matchedAdvancedWords,
+  };
 }
 
 function scoreCoherencePercent(essay: string): number {
@@ -454,13 +583,14 @@ export function buildWritingAttemptReport(
   const grammarPunctuationIssues = detectGrammarPunctuationIssues(essay);
   const grammarStructureIssues = detectGrammarStructureIssues(essay);
   const transitionIssues = detectTransitionMisuseIssues(essay);
+  const vocabAnalysis = analyzeReadWriteVocabulary(essay);
   const g = Math.max(
     0,
     scoreGrammarPercent(essay) -
       grammarPunctuationPenaltyPercent(essay) -
       grammarStructurePenaltyPercent(essay),
   );
-  const v = scoreVocabularyPercent(essay);
+  const v = vocabAnalysis.scorePercent;
   const c = Math.max(0, scoreCoherencePercent(essay) - coherenceTransitionPenaltyPercent(essay));
   const tk = scoreTaskPercent(essay, topic);
   const score160 = to160(g, v, c, tk);
@@ -506,12 +636,28 @@ export function buildWritingAttemptReport(
       { en: "With FANBOYS, both sides should be full clauses.", th: "ถ้าใช้คำเชื่อมพวก for, and, but ทั้งสองข้างควรเป็นประโยคสมบูรณ์" },
     ]),
     vocabulary: criterion("vocabulary", WRITING_RUBRIC_WEIGHTS.vocabulary, v, {
-      en: `Vocabulary precision (B2/C1 when correct). Score: ${v}%.`,
-      th: `เลือกคำให้ตรงและดีขึ้น คะแนน: ${v}%`,
+      en: `Vocabulary band for Read and Write. Score: ${v}%.`,
+      th: `ระดับคำศัพท์สำหรับ Read and Write คะแนน: ${v}%`,
     }, [
-      { en: "Use collocations that match the register.", th: "ใช้คำคู่กันที่เข้ากับโทนเรื่อง" },
-      { en: "Avoid repeating the same adjective.", th: "อย่าใช้คำคุณศัพท์คำเดิมซ้ำๆ" },
-      { en: "Watch for false friends from Thai.", th: "ระวังคำที่หน้าตาเหมือนไทยแต่ความหมายคนละอย่าง" },
+      {
+        excerpt: ex,
+        en: `Band reached: ${v}% because the answer shows ${vocabAnalysis.collocations} collocation(s), ${vocabAnalysis.levelBand} vocabulary, and about ${vocabAnalysis.issueCount} vocabulary issue(s).`,
+        th: `คำตอบนี้อยู่ในช่วง ${v}% เพราะมี collocation ประมาณ ${vocabAnalysis.collocations} จุด ใช้คำระดับ ${vocabAnalysis.levelBand} และมีจุดคำศัพท์/ความไม่เป็นธรรมชาติประมาณ ${vocabAnalysis.issueCount} จุด`,
+      },
+      {
+        en: "Vocabulary at 100/90/80 needs B2–C2 vocabulary, many collocations, and no noticeable mistakes.",
+        th: "ถ้าจะได้ 100/90/80 ต้องใช้คำระดับ B2–C2 มี collocation เยอะ และแทบไม่มีข้อผิดพลาดเรื่องคำศัพท์",
+      },
+      {
+        en:
+          vocabAnalysis.issueCount > 0
+            ? `Current issues include about ${vocabAnalysis.awkwardCount} awkward/unnatural use(s) and ${vocabAnalysis.repeatedBasicCount} repeated basic-word pattern(s).`
+            : "There are no obvious vocabulary mistakes or awkward wording in the local check.",
+        th:
+          vocabAnalysis.issueCount > 0
+            ? `ตอนนี้ระบบ local พบความไม่เป็นธรรมชาติประมาณ ${vocabAnalysis.awkwardCount} จุด และการวนใช้คำพื้นฐานประมาณ ${vocabAnalysis.repeatedBasicCount} จุด`
+            : "จากการเช็กแบบ local ยังไม่พบความผิดหรือความไม่เป็นธรรมชาติเด่นๆ เรื่องคำศัพท์",
+      },
     ]),
     coherence: criterion("coherence", WRITING_RUBRIC_WEIGHTS.coherence, c, {
       en: `Coherence (transitions + referencing). Score: ${c}%.`,
