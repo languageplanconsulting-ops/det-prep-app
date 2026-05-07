@@ -164,8 +164,8 @@ export function buildPaywallSpec(
       };
     case "heavy_free":
       return {
-        titleTh: "คุณกำลังใช้งานแบบผู้เตรียมสอบจริงจัง",
-        titleEn: "You are using the platform like a serious test taker",
+        titleTh: "พร้อมปลดล็อกแพ็กเกจเพิ่มแล้ว",
+        titleEn: "Ready to unlock more access",
         bodyTh:
           "จากรูปแบบการใช้งานของคุณ แนะนำให้อัปเกรดเพื่อปลดล็อก Mock Test และรับเครดิต AI มากพอสำหรับการฝึกต่อเนื่อง",
         bodyEn:

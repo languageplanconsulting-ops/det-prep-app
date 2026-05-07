@@ -16,13 +16,28 @@ export function PaywallUpsellCard({
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const examCompactActions = useMemo(() => {
+    if (!compact) return spec.actions;
+    const upgrade =
+      spec.actions.find((action) => action.kind === "upgrade" && action.targetTier) ?? null;
+    const pricing =
+      spec.actions.find((action) => action.kind === "pricing") ??
+      ({
+        kind: "pricing",
+        labelTh: "ดูแพ็กเกจทั้งหมด",
+        labelEn: "Compare plans",
+      } as const);
+
+    return [upgrade, pricing].filter((action): action is UpsellAction => Boolean(action));
+  }, [compact, spec.actions]);
+
   const primary = useMemo(
-    () => spec.actions.find((action) => action.recommended) ?? spec.actions[0] ?? null,
-    [spec.actions],
+    () => examCompactActions.find((action) => action.recommended) ?? examCompactActions[0] ?? null,
+    [examCompactActions],
   );
   const secondary = useMemo(
-    () => spec.actions.filter((action) => action !== primary),
-    [spec.actions, primary],
+    () => examCompactActions.filter((action) => action !== primary),
+    [examCompactActions, primary],
   );
 
   const trigger = async (action: UpsellAction, index: number) => {
@@ -48,16 +63,20 @@ export function PaywallUpsellCard({
 
   return (
     <div className="rounded-[4px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">
-      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#004AAD]">
-        Upgrade / Add-on
-      </p>
-      <h3 className={`mt-2 font-black leading-tight text-neutral-900 ${compact ? "text-lg" : "text-2xl"}`}>
-        {spec.titleTh}
-      </h3>
-      <p className="mt-1 text-sm font-semibold text-neutral-500">{spec.titleEn}</p>
-      <p className="mt-3 text-sm font-bold leading-relaxed text-neutral-900">{spec.bodyTh}</p>
-      <p className="mt-1 text-xs text-neutral-500">{spec.bodyEn}</p>
-      {spec.noteTh || spec.noteEn ? (
+      {!compact ? (
+        <>
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#004AAD]">
+            Upgrade / Add-on
+          </p>
+          <h3 className={`mt-2 font-black leading-tight text-neutral-900 ${compact ? "text-lg" : "text-2xl"}`}>
+            {spec.titleTh}
+          </h3>
+          <p className="mt-1 text-sm font-semibold text-neutral-500">{spec.titleEn}</p>
+          <p className="mt-3 text-sm font-bold leading-relaxed text-neutral-900">{spec.bodyTh}</p>
+          <p className="mt-1 text-xs text-neutral-500">{spec.bodyEn}</p>
+        </>
+      ) : null}
+      {!compact && (spec.noteTh || spec.noteEn) ? (
         <div className="mt-4 rounded-sm border-2 border-dashed border-black bg-neutral-50 p-3">
           {spec.noteTh ? <p className="text-xs font-bold text-neutral-800">{spec.noteTh}</p> : null}
           {spec.noteEn ? <p className="mt-1 text-[11px] text-neutral-500">{spec.noteEn}</p> : null}
@@ -69,11 +88,11 @@ export function PaywallUpsellCard({
           type="button"
           onClick={() => void trigger(primary, 0)}
           disabled={busyKey !== null}
-          className="mt-4 w-full rounded-[4px] border-[3px] border-black bg-[#004AAD] px-4 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] disabled:opacity-60"
+          className={`${compact ? "mt-0" : "mt-4"} w-full rounded-[4px] border-[3px] border-black bg-[#004AAD] px-4 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] disabled:opacity-60`}
         >
           {busyKey ? "กำลังเปิด…" : primary.labelTh}
           <span className="block text-[10px] font-semibold normal-case tracking-normal text-white/80">
-            {primary.kind === "addon" ? `${primary.labelEn} · card or QR` : primary.labelEn}
+            {primary.labelEn}
           </span>
         </button>
       ) : null}
@@ -90,7 +109,7 @@ export function PaywallUpsellCard({
             >
               <span>{action.labelTh}</span>
               <span className="mt-1 block text-[10px] font-semibold normal-case tracking-normal text-neutral-600">
-                {action.kind === "addon" ? `${action.labelEn} · card or QR` : action.labelEn}
+                {action.labelEn}
               </span>
             </button>
           ))}
