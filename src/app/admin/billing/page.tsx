@@ -109,6 +109,20 @@ function envStatuses(): EnvStatus[] {
       required: true,
       note: "Required for webhook fulfillment and profile/payment updates.",
     },
+    {
+      key: "BUSINESS_NOTIFY_EMAIL",
+      label: "Business alert recipient email",
+      value: process.env.BUSINESS_NOTIFY_EMAIL,
+      required: false,
+      note: "Optional but recommended. Receives instant alerts for new accounts, paid orders, and free mini diagnosis starts.",
+    },
+    {
+      key: "RESEND_API_KEY",
+      label: "Resend API key",
+      value: process.env.RESEND_API_KEY,
+      required: false,
+      note: "Needed to actually send the business alert emails. Without it, events are still logged but email will not send.",
+    },
   ];
 }
 
@@ -196,6 +210,11 @@ export default function AdminBillingSetupPage() {
             <p>
               Add-on mock tests and AI feedback credits are already implemented as one-off top-ups.
               They are fulfilled by the webhook and counted in quota summary automatically.
+            </p>
+            <p>
+              Business alerts can now email you automatically for new accounts, paid purchases,
+              and free mini diagnosis starts. Set <code className="ep-stat">BUSINESS_NOTIFY_EMAIL</code>
+              and <code className="ep-stat">RESEND_API_KEY</code> to turn those on.
             </p>
             <p>
               The billing portal route exists, but it is only truly useful once you migrate plans to

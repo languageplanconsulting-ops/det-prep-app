@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { consumeAddonCreditsForUser, getAddonBalancesForUser } from "@/lib/addon-credits";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { MOCK_TEST_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
+import { recordBusinessEvent } from "@/lib/business-events";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
 import { countBillableMockFixedSessions, mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
@@ -214,5 +215,21 @@ export async function POST(req: Request) {
     .single();
 
   if (error || !data) return NextResponse.json({ error: error?.message ?? "Failed to start session" }, { status: 500 });
+
+  await recordBusinessEvent({
+    userId: user.id,
+    email: user.email ?? null,
+    eventType: "mock_test_started",
+    eventSource: "mock_fixed_session",
+    eventLabel: body.setId,
+    metadata: {
+      setId: body.setId,
+      tier,
+      addonMockUsed: shouldConsumeAddon,
+      monthlyUsed: billableUsed,
+      sessionId: data.id,
+    },
+  });
+
   return NextResponse.json({ sessionId: data.id });
 }

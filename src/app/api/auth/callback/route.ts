@@ -9,6 +9,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { isBootstrapAdminEmail } from "@/lib/admin-emails";
+import { recordBusinessEvent } from "@/lib/business-events";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { sendWelcomeEmail } from "@/lib/notifications";
 import {
@@ -99,6 +100,23 @@ export async function GET(request: Request) {
     (user.user_metadata?.full_name as string | undefined) ?? undefined,
     profile?.tier as string | undefined,
   );
+
+  await recordBusinessEvent({
+    userId: user.id,
+    email: norm,
+    eventType: "account_created",
+    eventSource: "auth_callback",
+    eventLabel: (profile?.tier as string | undefined) ?? "free",
+    dedupeKey: `account_created:${user.id}`,
+    metadata: {
+      provider:
+        (user.app_metadata?.provider as string | undefined) ??
+        (user.identities?.[0]?.provider as string | undefined) ??
+        "unknown",
+      tier: (profile?.tier as string | undefined) ?? "free",
+      nextPath: next,
+    },
+  });
 
   const res = NextResponse.redirect(new URL(next, request.url));
   res.cookies.set(COOKIE_AUTH_NEXT, "", { path: "/", maxAge: 0 });

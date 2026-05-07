@@ -2,6 +2,7 @@ import type Stripe from "stripe";
 
 import type { Tier } from "@/lib/access-control";
 import { currentTierForUser } from "@/lib/addon-credits";
+import { recordBusinessEvent } from "@/lib/business-events";
 import { nextMonthlyExpiryIso } from "@/lib/plan-status";
 import { getStripe } from "@/lib/stripe";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
@@ -167,6 +168,23 @@ export async function fulfillOneTimePlanPurchase(
     console.error("[stripe] one-time plan payment_history insert", payErr.message);
   }
 
+  await recordBusinessEvent({
+    userId,
+    email: session.customer_details?.email ?? session.customer_email ?? null,
+    eventType: "plan_purchased",
+    eventSource: paymentFlow,
+    eventLabel: tierMeta,
+    eventValue: Number(session.amount_total ?? 0),
+    eventCurrency: String(session.currency ?? "thb"),
+    dedupeKey: `plan_purchase:${session.id}`,
+    metadata: {
+      stripeSessionId: session.id,
+      stripePaymentIntentId: paymentIntentId,
+      paymentMethod,
+      nextExpiry,
+    },
+  });
+
   return { ok: !error, userId, tier: tierMeta };
 }
 
@@ -220,6 +238,27 @@ export async function fulfillAddonPurchase(
   if (payErr && payErr.code !== "23505") {
     console.error("[stripe] add-on payment_history insert", payErr.message);
   }
+
+  await recordBusinessEvent({
+    userId,
+    email: session.customer_details?.email ?? session.customer_email ?? null,
+    eventType: "addon_purchased",
+    eventSource: paymentMethod,
+    eventLabel: addonSku,
+    eventValue: Number(session.amount_total ?? purchase?.amount ?? 0),
+    eventCurrency: String(session.currency ?? purchase?.currency ?? "thb"),
+    dedupeKey: `addon_purchase:${session.id}`,
+    metadata: {
+      stripeSessionId: session.id,
+      stripePaymentIntentId: paymentIntentId,
+      paymentMethod,
+      tierAtPurchase: tier,
+      creditsGranted:
+        typeof session.metadata?.creditsGranted === "string"
+          ? Number(session.metadata.creditsGranted)
+          : null,
+    },
+  });
 
   return { ok: true, userId, addonSku };
 }

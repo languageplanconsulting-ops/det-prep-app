@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { recordBusinessEvent } from "@/lib/business-events";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import {
@@ -54,6 +55,22 @@ export async function POST(request: Request) {
   }
 
   await grantVIPOnSignup(user.id, user.email);
+
+  await recordBusinessEvent({
+    userId: user.id,
+    email: norm,
+    eventType: "account_created",
+    eventSource: "register_profile",
+    eventLabel: eligible ? "vip" : "free",
+    dedupeKey: `account_created:${user.id}`,
+    metadata: {
+      provider:
+        (user.app_metadata?.provider as string | undefined) ??
+        (user.identities?.[0]?.provider as string | undefined) ??
+        "email",
+      tier: eligible ? "vip" : "free",
+    },
+  });
 
   return NextResponse.json({ ok: true });
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { recordBusinessEvent } from "@/lib/business-events";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { MINI_DIAGNOSIS_FREE_LIFETIME_LIMIT, MINI_DIAGNOSIS_STEP_COUNT } from "@/lib/mini-diagnosis/sequence";
@@ -110,5 +111,21 @@ export async function POST(req: Request) {
   if (error || !data) {
     return NextResponse.json({ error: error?.message ?? "Failed to start session" }, { status: 500 });
   }
+
+  const currentTier = (me?.tier as string | undefined) ?? "free";
+  await recordBusinessEvent({
+    userId: user.id,
+    email: user.email ?? null,
+    eventType: "mini_diagnosis_started",
+    eventSource: "mini_diagnosis_session",
+    eventLabel: body.setId,
+    metadata: {
+      setId: body.setId,
+      tier: currentTier,
+      isFreeUser: !isAdmin && currentTier === "free",
+      sessionId: data.id,
+    },
+  });
+
   return NextResponse.json({ sessionId: data.id });
 }
