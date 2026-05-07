@@ -99,6 +99,8 @@ async function fulfillOneTimePlanPurchase(
     tier_expires_at: nextExpiry,
     ai_credits_used: 0,
     ai_credits_reset_at: now,
+    ai_quota_mode: "default",
+    ai_monthly_limit_override: null,
     vip_granted_by_course: false,
   });
   if (error) {
@@ -125,6 +127,35 @@ async function fulfillOneTimePlanPurchase(
   if (payErr && payErr.code !== "23505") {
     console.error("[stripe] one-time plan payment_history insert", payErr.message);
   }
+}
+
+async function paymentMethodForCheckoutSession(
+  stripe: Stripe,
+  session: Stripe.Checkout.Session,
+): Promise<"card" | "promptpay"> {
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  if (!paymentIntentId) {
+    return "card";
+  }
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, {
+      expand: ["payment_method"],
+    });
+    const paymentMethod = paymentIntent.payment_method;
+    if (paymentMethod && typeof paymentMethod !== "string") {
+      if (paymentMethod.type === "promptpay") return "promptpay";
+      if (paymentMethod.type === "card") return "card";
+    }
+  } catch (error) {
+    console.error("[stripe] payment method detection failed", error);
+  }
+
+  return "card";
 }
 
 export async function POST(req: Request) {
@@ -171,6 +202,7 @@ export async function POST(req: Request) {
           }
 
           const supabase = createServiceRoleSupabase();
+          const paymentMethod = await paymentMethodForCheckoutSession(stripe, session);
           const { data: purchase } = await supabase
             .from("addon_credit_purchases")
             .select("id, amount, currency, status")
@@ -197,7 +229,7 @@ export async function POST(req: Request) {
             currency: String(session.currency ?? purchase?.currency ?? "thb"),
             status: "succeeded",
             tier,
-            payment_method: "card",
+            payment_method: paymentMethod,
             description: `Add-on purchase: ${addonSku}`,
             receipt_url: null,
           });

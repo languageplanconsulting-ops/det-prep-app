@@ -62,7 +62,7 @@ const PLAN_CARDS: Array<{
 const ADD_ON_ORDER: AddOnSku[] = ["mock_1", "mock_2", "feedback_1", "feedback_3", "feedback_5"];
 
 function PricingPageContent() {
-  const { startUpgradeCheckout, startUpgradePromptPay, startAddOnCheckout, user, loading } = useBillingActions();
+  const { startUpgradeCheckout, startUpgradePromptPay, startAddOnCheckout, user, loading, checkoutBusy } = useBillingActions();
   const { effectiveTier } = useEffectiveTier();
   const searchParams = useSearchParams();
   const [checkoutError, setCheckoutError] = useState("");
@@ -163,19 +163,19 @@ function PricingPageContent() {
               <div className="flex flex-col gap-2 sm:min-w-[18rem]">
                 <button
                   type="button"
-                  disabled={loading}
+                  disabled={loading || checkoutBusy}
                   onClick={() => void startUpgradeCheckout(recommendation)}
-                  className="border-[3px] border-black bg-[#004aad] px-6 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:opacity-50"
+                  className="border-[3px] border-black bg-[#004aad] px-6 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  จ่ายด้วยบัตร / สิทธิ์ 30 วัน
+                  {checkoutBusy ? "Opening checkout..." : "จ่ายด้วยบัตร / สิทธิ์ 30 วัน"}
                 </button>
                 <button
                   type="button"
-                  disabled={loading}
+                  disabled={loading || checkoutBusy}
                   onClick={() => void startUpgradePromptPay(recommendation)}
-                  className="border-[3px] border-black bg-[#ffcc00] px-6 py-3 text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111] disabled:opacity-50"
+                  className="border-[3px] border-black bg-[#ffcc00] px-6 py-3 text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  จ่ายด้วย QR PromptPay
+                  {checkoutBusy ? "Opening checkout..." : "จ่ายด้วย QR PromptPay"}
                 </button>
               </div>
             </div>
@@ -225,6 +225,34 @@ function PricingPageContent() {
             <p className="mt-1 text-sm font-semibold text-neutral-800">{checkoutError}</p>
           </section>
         ) : null}
+
+        <section className="border-4 border-black bg-[linear-gradient(135deg,#e8f1ff_0%,#ffffff_48%,#fff8dc_100%)] p-6 shadow-[8px_8px_0_0_#111]">
+          <p className="font-mono text-[10px] font-black uppercase tracking-[0.24em] text-[#004aad]">
+            Learn before you buy
+          </p>
+          <h2 className="mt-3 text-2xl font-black text-neutral-900">
+            Compare plans with the DET guide hub
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-neutral-700">
+            If you are still deciding, start with the Duolingo English Test guide pages for score
+            targets, mock-test planning, cost, and task-specific prep. They are built to bring search
+            visitors into the exact product area they need next.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3 text-sm font-black uppercase">
+            <Link href="/duolingo-english-test" className="border-[3px] border-black bg-white px-4 py-3 shadow-[4px_4px_0_0_#111]">
+              DET guide hub
+            </Link>
+            <Link href="/duolingo-english-test/mock-test" className="border-[3px] border-black bg-white px-4 py-3 shadow-[4px_4px_0_0_#111]">
+              Mock test guide
+            </Link>
+            <Link href="/duolingo-english-test/score-guide" className="border-[3px] border-black bg-white px-4 py-3 shadow-[4px_4px_0_0_#111]">
+              Score guide
+            </Link>
+            <Link href="/duolingo-english-test/write-about-photo" className="border-[3px] border-black bg-white px-4 py-3 shadow-[4px_4px_0_0_#111]">
+              Write about photo
+            </Link>
+          </div>
+        </section>
 
         {!loading && !user ? (
           <section className="border-4 border-black bg-[linear-gradient(135deg,#fff8dc_0%,#ffffff_42%,#eaf4ff_100%)] p-5 shadow-[8px_8px_0_0_#111]">
@@ -317,19 +345,27 @@ function PricingPageContent() {
                     <div className="space-y-2">
                       <button
                         type="button"
-                        disabled={loading}
+                        disabled={loading || checkoutBusy}
                         onClick={() => void beginPlanCheckout(plan.tier)}
-                        className="block w-full border-[3px] border-black bg-[#004aad] px-4 py-3 text-center text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:opacity-50"
+                        className="block w-full border-[3px] border-black bg-[#004aad] px-4 py-3 text-center text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111] disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {user ? "สมัครด้วยบัตร / สิทธิ์ 30 วัน" : "สร้างบัญชีก่อน / Create account first"}
+                        {checkoutBusy
+                          ? "Opening checkout..."
+                          : user
+                            ? "สมัครด้วยบัตร / สิทธิ์ 30 วัน"
+                            : "สร้างบัญชีก่อน / Create account first"}
                       </button>
                       <button
                         type="button"
-                        disabled={loading}
+                        disabled={loading || checkoutBusy}
                         onClick={() => void beginPlanPromptPay(plan.tier)}
-                        className="block w-full border-[3px] border-black bg-[#ffcc00] px-4 py-3 text-center text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111] disabled:opacity-50"
+                        className="block w-full border-[3px] border-black bg-[#ffcc00] px-4 py-3 text-center text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111] disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {user ? "จ่ายด้วย QR PromptPay" : "ไปสมัครเพื่อจ่าย QR / Sign up for QR checkout"}
+                        {checkoutBusy
+                          ? "Opening checkout..."
+                          : user
+                            ? "จ่ายด้วย QR PromptPay"
+                            : "ไปสมัครเพื่อจ่าย QR / Sign up for QR checkout"}
                       </button>
                       <p className="text-[11px] font-semibold text-neutral-500">
                         {user
@@ -431,10 +467,11 @@ function PricingPageContent() {
                   </div>
                   <button
                     type="button"
+                    disabled={checkoutBusy}
                     onClick={() => void beginAddOnCheckout(sku)}
-                    className="mt-5 border-[3px] border-black bg-[#ffcc00] px-4 py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#111]"
+                    className="mt-5 border-[3px] border-black bg-[#ffcc00] px-4 py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#111] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    ซื้อสิทธิ์นี้ / Pay by card or QR
+                    {checkoutBusy ? "Opening checkout..." : "ซื้อสิทธิ์นี้ / Pay by card or QR"}
                   </button>
                   <p className="mt-2 text-[11px] font-semibold leading-5 text-neutral-500">
                     Stripe Checkout opens in a secure payment window with the available methods for this purchase.

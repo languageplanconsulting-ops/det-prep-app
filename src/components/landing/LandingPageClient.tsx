@@ -175,6 +175,15 @@ export function LandingPageClient({
           </Link>
           <div className="flex w-full shrink-0 flex-wrap items-center justify-stretch gap-2 sm:w-auto sm:justify-end sm:gap-4">
             <a
+              href="/duolingo-english-test"
+              className="ep-stat inline-flex min-h-[44px] flex-1 items-center justify-center border-2 border-black bg-[#e8f1ff] px-3 py-2 text-center text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-[#d6e8ff] sm:flex-initial sm:text-sm"
+            >
+              <span className="leading-tight">
+                DET Guide
+                <span className="hidden sm:inline"> / คู่มือ DET</span>
+              </span>
+            </a>
+            <a
               href="#preview"
               className="ep-stat inline-flex min-h-[44px] flex-1 items-center justify-center border-2 border-black bg-white px-3 py-2 text-center text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-neutral-50 sm:flex-initial sm:text-sm"
             >
@@ -231,6 +240,17 @@ export function LandingPageClient({
                 เตรียมสอบ DET แบบครบวงจร เน้นทั้ง 4 ทักษะ พร้อมฟีดแบ็กจาก AI และระดับที่ปรับให้เหมาะกับคุณ
               </span>
             </p>
+            <div className="mt-6 inline-flex max-w-2xl items-start gap-3 border-4 border-black bg-[#fff7d6] px-5 py-4 shadow-[6px_6px_0_0_#000]">
+              <span className="mt-0.5 text-2xl font-black text-ep-blue">VIP</span>
+              <div className="text-sm font-bold leading-6 text-neutral-900 sm:text-base">
+                Students in the <span className="text-ep-blue">Duolingo Fast Track course</span> receive
+                <span className="bg-ep-yellow px-1.5 py-0.5"> VIP package access for 6 months</span>.
+                <br />
+                <span className="text-neutral-700">
+                  นักเรียนคอร์ส Duolingo Fast Track จะได้รับสิทธิ์แพ็กเกจ VIP นาน 6 เดือน
+                </span>
+              </div>
+            </div>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
               <Link
                 href="/mini-diagnosis/start"
@@ -243,6 +263,12 @@ export function LandingPageClient({
                 className="inline-block border-4 border-black bg-ep-blue px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-white shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
               >
                 Get started / เริ่มเลย
+              </a>
+              <a
+                href="/duolingo-english-test"
+                className="inline-block border-4 border-black bg-white px-8 py-5 text-center text-lg font-bold text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-100 hover:shadow-[4px_4px_0_0_#000]"
+              >
+                DET guide / คู่มือ DET
               </a>
               <a
                 href="#features"
@@ -267,7 +293,7 @@ export function LandingPageClient({
                 onClick={() => setFastTrackOpen(true)}
                 className="inline-block border-4 border-black bg-white px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-50 hover:shadow-[4px_4px_0_0_#000]"
               >
-                Duolingo Fast Track VIP / เปิดสิทธิ์คอร์ส
+                Duolingo Fast Track VIP (6 months) / เปิดสิทธิ์คอร์ส 6 เดือน
               </button>
             </div>
             <div className="mt-8 flex flex-col gap-4 ep-stat sm:flex-row sm:gap-6">
@@ -895,6 +921,11 @@ export function LandingPageClient({
               Product
             </h4>
             <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/about" className="hover:text-ep-yellow">
+                  About English Plan
+                </Link>
+              </li>
               <li>
                 <a href="#features" className="hover:text-ep-yellow">
                   Features

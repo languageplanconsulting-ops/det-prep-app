@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 import type { AddOnSku } from "@/lib/paywall-upsell";
 import { ADD_ON_CATALOG } from "@/lib/paywall-upsell";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { buildThaiCheckoutBranding, buildThaiCheckoutText } from "@/lib/stripe-checkout-branding";
 import { getStripe } from "@/lib/stripe";
+import { resolveSiteUrl } from "@/lib/site-url";
 import {
   creditsGrantedForSku,
   currentTierForUser,
@@ -11,10 +13,6 @@ import {
   ensureStripeCustomerIdForUser,
 } from "@/lib/addon-credits";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-
-function siteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-}
 
 function isAddonSku(value: unknown): value is AddOnSku {
   return value === "mock_1" || value === "mock_2" || value === "feedback_1" || value === "feedback_3" || value === "feedback_5";
@@ -59,25 +57,27 @@ export async function POST(req: Request) {
       .maybeSingle();
     const expiresAt = cycleExpiryIso((profile?.tier_expires_at as string | null) ?? null);
 
-    const base = siteUrl();
+    const base = resolveSiteUrl(req);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      locale: "auto",
+      locale: "th",
+      branding_settings: buildThaiCheckoutBranding(),
+      custom_text: buildThaiCheckoutText(item.labelTh),
       customer: customerId,
       payment_method_types: ["card", "promptpay"],
       allow_promotion_codes: true,
       line_items: [
         {
           quantity: 1,
-          price_data: {
-            currency: "thb",
-            unit_amount: item.priceThb * 100,
-            product_data: {
-              name: item.labelEn,
-              description: item.labelTh,
+            price_data: {
+              currency: "thb",
+              unit_amount: item.priceThb * 100,
+              product_data: {
+                name: item.labelTh,
+                description: item.labelEn,
+              },
             },
           },
-        },
       ],
       success_url: `${base}/pricing?checkout=success&focus=addons&sku=${encodeURIComponent(sku)}`,
       cancel_url: `${base}/pricing?checkout=cancel&focus=addons&sku=${encodeURIComponent(sku)}`,

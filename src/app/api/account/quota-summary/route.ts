@@ -28,7 +28,7 @@ export async function GET() {
   const [{ data: profile }, { data: sessions }, addon] = await Promise.all([
     supabase
       .from("profiles")
-      .select("tier, role, tier_expires_at, ai_credits_used, lifetime_ai_used, ai_quota_mode, ai_monthly_limit_override")
+      .select("tier, role, tier_expires_at, vip_granted_by_course, ai_credits_used, lifetime_ai_used, ai_quota_mode, ai_monthly_limit_override")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -42,6 +42,7 @@ export async function GET() {
   const tier = resolveEffectiveTierFromProfile({
     tier: profile?.tier,
     tier_expires_at: (profile?.tier_expires_at as string | null | undefined) ?? null,
+    vip_granted_by_course: profile?.vip_granted_by_course === true,
   });
   const isAdmin = profile?.role === "admin";
   const aiUsed = Math.max(0, Number(profile?.ai_credits_used ?? 0));

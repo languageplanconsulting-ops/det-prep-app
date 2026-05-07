@@ -210,6 +210,7 @@ export function MockTestStartClient() {
   const [startError, setStartError] = useState<string | null>(null);
   const [adminPreviewMode, setAdminPreviewMode] = useState(false);
   const [skipTimerMode, setSkipTimerMode] = useState(false);
+  const [fastPassPreviewMode, setFastPassPreviewMode] = useState(false);
   const [previewSeparateMode, setPreviewSeparateMode] = useState(false);
   const [previewStepIndex, setPreviewStepIndex] = useState(13);
   const [unpinSessionId, setUnpinSessionId] = useState<string | null>(null);
@@ -346,6 +347,13 @@ export function MockTestStartClient() {
     return () => window.clearInterval(id);
   }, [starting]);
 
+  useEffect(() => {
+    if (!fastPassPreviewMode) return;
+    setAdminPreviewMode(true);
+    setSkipTimerMode(true);
+    setPreviewSeparateMode(false);
+  }, [fastPassPreviewMode]);
+
   const start = async () => {
     if (!canStart || !selectedSetId) return;
     setStarting(true);
@@ -369,8 +377,10 @@ export function MockTestStartClient() {
           },
           adminPreviewMode: adminCanPreview && adminPreviewMode,
           skipTimerMode: adminCanPreview && skipTimerMode,
-          previewSeparateMode: adminCanPreview && previewSeparateMode,
-          previewStepIndex: adminCanPreview && previewSeparateMode ? previewStepIndex : undefined,
+          fastPassPreviewMode: adminCanPreview && fastPassPreviewMode,
+          previewSeparateMode: adminCanPreview && previewSeparateMode && !fastPassPreviewMode,
+          previewStepIndex:
+            adminCanPreview && previewSeparateMode && !fastPassPreviewMode ? previewStepIndex : undefined,
         }),
       });
       window.clearTimeout(timeout);
@@ -893,12 +903,28 @@ export function MockTestStartClient() {
                       <label className="flex cursor-pointer items-center gap-3">
                         <input
                           type="checkbox"
+                          checked={fastPassPreviewMode}
+                          onChange={(e) => setFastPassPreviewMode(e.target.checked)}
+                          className="h-5 w-5 accent-[#FFD600]"
+                        />
+                        <span className="text-[11px] font-bold">Fast pass preview (auto-skip all 20)</span>
+                      </label>
+                      <label className="flex cursor-pointer items-center gap-3">
+                        <input
+                          type="checkbox"
                           checked={previewSeparateMode}
                           onChange={(e) => setPreviewSeparateMode(e.target.checked)}
+                          disabled={fastPassPreviewMode}
                           className="h-5 w-5 accent-[#FFD600]"
                         />
                         <span className="text-[11px] font-bold">Preview separate step only</span>
                       </label>
+                      {fastPassPreviewMode ? (
+                        <div className="border-2 border-dashed border-[#FFD600] bg-black/40 px-3 py-2 text-[10px] font-bold leading-5">
+                          Shows each question briefly, auto-submits `skippedByAdmin`, skips timers/rest,
+                          and still runs the normal backend scoring + result creation path.
+                        </div>
+                      ) : null}
                       {previewSeparateMode ? (
                         <div className="border-2 border-dashed border-[#FFD600] bg-black/40 px-3 py-2">
                           <p className="text-[10px] font-black uppercase">Preview step</p>

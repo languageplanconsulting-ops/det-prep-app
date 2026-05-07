@@ -12,6 +12,7 @@ export function MockTestSessionRouter({ sessionId }: { sessionId: string }) {
   useEffect(() => {
     void (async () => {
       const fixedRes = await fetch(`/api/mock-test/fixed/session/${sessionId}`, {
+        cache: "no-store",
         credentials: "same-origin",
       });
       if (fixedRes.ok) {
@@ -19,6 +20,7 @@ export function MockTestSessionRouter({ sessionId }: { sessionId: string }) {
         return;
       }
       const res = await fetch(`/api/mock-test/session/${sessionId}`, {
+        cache: "no-store",
         credentials: "same-origin",
       });
       const j = (await res.json()) as { session?: { engine_version?: number } };

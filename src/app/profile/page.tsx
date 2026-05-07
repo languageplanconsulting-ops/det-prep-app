@@ -57,7 +57,7 @@ type ExamCreditCard = {
 };
 
 function formatExpiry(expiresAt: string | null, tier: Tier): string {
-  if (!expiresAt) return tier === "free" ? "ไม่มีวันหมดอายุ" : "—";
+  if (!expiresAt) return tier === "free" || tier === "vip" ? "ไม่มีวันหมดอายุ" : "—";
   const date = new Date(expiresAt);
   if (Number.isNaN(date.getTime())) return "—";
   return date.toLocaleDateString("th-TH");

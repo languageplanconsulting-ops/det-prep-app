@@ -9,6 +9,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { BugReportWidget } from "@/components/support/BugReportWidget";
 import { VipApiCreditNotebookNotice } from "@/components/vip/VipApiCreditNotebookNotice";
 import { EffectiveTierProvider } from "@/hooks/useEffectiveTier";
+import { buildDefaultMetadata } from "@/lib/site-metadata";
 import "./globals.css";
 
 const inter = Inter({
@@ -23,10 +24,7 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "ENGLISH PLAN",
-  description: "DET-style English training and practice hub.",
-};
+export const metadata: Metadata = buildDefaultMetadata();
 
 export default function RootLayout({
   children,
@@ -34,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="th">
       <body
         className={`${inter.variable} ${jetbrains.variable} min-h-screen font-sans text-neutral-900 antialiased`}
       >

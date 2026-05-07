@@ -4,6 +4,18 @@ type Issue = {
   reasonTh: string;
 };
 
+const COMMA_SPLICE_RIGHT_START =
+  /^(?:I|he|she|it|they|we|this|that|there|these|those)\b/i;
+
+const INTRODUCTORY_PHRASE_START =
+  /^(?:judging|looking|based|considering|speaking|compared|to me|to be honest|in my opinion|in my view|for example|for instance|as a result|after|before|when|while|if|because|although|since)\b/i;
+
+const LIKELY_SUBJECT_START =
+  /^(?:I|he|she|it|they|we|this|that|there|these|those|the\s+\w+|a\s+\w+|an\s+\w+|[A-Z][a-z]+)\b/;
+
+const LIKELY_FINITE_VERB =
+  /\b(?:am|is|are|was|were|be|been|being|have|has|had|do|does|did|can|could|will|would|shall|should|may|might|must)\b|\b\w+(?:ed|s)\b/i;
+
 function clipExcerpt(text: string, index: number, length: number): string {
   const start = Math.max(0, index - 18);
   const end = Math.min(text.length, index + length + 18);
@@ -24,6 +36,33 @@ function collectMatches(
       excerpt: clipExcerpt(text, match.index, match[0].length),
       reasonEn,
       reasonTh,
+    });
+  }
+  return issues;
+}
+
+function detectCommaSpliceIssues(text: string): Issue[] {
+  const issues: Issue[] = [];
+  for (let i = 0; i < text.length && issues.length < 2; i += 1) {
+    if (text[i] !== ",") continue;
+
+    const leftBoundary = Math.max(text.lastIndexOf(".", i), text.lastIndexOf("!", i), text.lastIndexOf("?", i));
+    const rightBoundaryCandidates = [text.indexOf(".", i), text.indexOf("!", i), text.indexOf("?", i)].filter((x) => x >= 0);
+    const rightBoundary = rightBoundaryCandidates.length > 0 ? Math.min(...rightBoundaryCandidates) : text.length;
+
+    const left = text.slice(leftBoundary + 1, i).trim();
+    const right = text.slice(i + 1, rightBoundary).trim();
+
+    if (left.length < 8 || right.length < 6) continue;
+    if (INTRODUCTORY_PHRASE_START.test(left)) continue;
+    if (!COMMA_SPLICE_RIGHT_START.test(right)) continue;
+    if (!LIKELY_SUBJECT_START.test(left)) continue;
+    if (!LIKELY_FINITE_VERB.test(left)) continue;
+
+    issues.push({
+      excerpt: clipExcerpt(text, i, 1),
+      reasonEn: "This comma likely joins two full clauses incorrectly.",
+      reasonTh: "คอมมานี้น่าจะเชื่อมสองประโยคเต็มแบบผิด",
     });
   }
   return issues;
@@ -66,13 +105,7 @@ export function detectGrammarPunctuationIssues(text: string): Issue[] {
   );
 
   issues.push(
-    ...collectMatches(
-      source,
-      /\b[^.!?]{18,},\s+(?:I|he|she|it|they|we|this|that|there)\b/g,
-      "This comma likely joins two full clauses incorrectly.",
-      "คอมมานี้น่าจะเชื่อมสองประโยคเต็มแบบผิด",
-      2,
-    ),
+    ...detectCommaSpliceIssues(source),
   );
 
   return issues.slice(0, 4);

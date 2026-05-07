@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
+import { resolveSiteUrl } from "@/lib/site-url";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-
-function siteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-}
 
 export async function POST(req: Request) {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -64,7 +61,7 @@ export async function POST(req: Request) {
     const stripe = getStripe();
     const portal = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${siteUrl()}/practice`,
+      return_url: `${resolveSiteUrl(req)}/practice`,
     });
 
     if (!portal.url) {

@@ -15,6 +15,7 @@ type StartBody = {
   setId?: string;
   adminPreviewMode?: boolean;
   skipTimerMode?: boolean;
+  fastPassPreviewMode?: boolean;
   previewSeparateMode?: boolean;
   previewStepIndex?: number;
   targets?: {
@@ -74,8 +75,9 @@ export async function POST(req: Request) {
     }
 
     const adminPreviewMode = body.adminPreviewMode === true;
-    const skipTimerMode = body.skipTimerMode === true;
-    const previewSeparateMode = body.previewSeparateMode === true;
+    const fastPassPreviewMode = body.fastPassPreviewMode === true;
+    const skipTimerMode = body.skipTimerMode === true || fastPassPreviewMode;
+    const previewSeparateMode = body.previewSeparateMode === true && !fastPassPreviewMode;
     const previewStepIndex = normalizePreviewStep(body.previewStepIndex ?? 1);
 
     const { data, error } = await supabase
@@ -90,6 +92,7 @@ export async function POST(req: Request) {
           monthlyUsed: 0,
           adminPreviewMode,
           skipTimerMode,
+          fastPassPreviewMode,
           singleStepPreview: previewSeparateMode,
           singleStepIndex: previewSeparateMode ? previewStepIndex : null,
         },
@@ -138,8 +141,9 @@ export async function POST(req: Request) {
     .maybeSingle();
   const isAdmin = me?.role === "admin";
   const adminPreviewMode = isAdmin && body.adminPreviewMode === true;
-  const skipTimerMode = isAdmin && body.skipTimerMode === true;
-  const previewSeparateMode = isAdmin && body.previewSeparateMode === true;
+  const fastPassPreviewMode = isAdmin && body.fastPassPreviewMode === true;
+  const skipTimerMode = isAdmin && (body.skipTimerMode === true || fastPassPreviewMode);
+  const previewSeparateMode = isAdmin && body.previewSeparateMode === true && !fastPassPreviewMode;
   const previewStepIndex = normalizePreviewStep(body.previewStepIndex ?? 1);
 
   if (!isAdmin && !isMockTestAvailableNow()) {
@@ -197,10 +201,11 @@ export async function POST(req: Request) {
           ...(body.targets ?? {}),
           monthlyUsed: billableUsed,
           addonMockUsed: shouldConsumeAddon,
-        adminPreviewMode,
-        skipTimerMode,
-        singleStepPreview: previewSeparateMode,
-        singleStepIndex: previewSeparateMode ? previewStepIndex : null,
+          adminPreviewMode,
+          skipTimerMode,
+          fastPassPreviewMode,
+          singleStepPreview: previewSeparateMode,
+          singleStepIndex: previewSeparateMode ? previewStepIndex : null,
       },
       responses: [],
       started_at: new Date().toISOString(),

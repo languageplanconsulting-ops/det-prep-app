@@ -14,6 +14,7 @@ type UserLite = {
 export function useBillingActions() {
   const [user, setUser] = useState<UserLite | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,6 +46,7 @@ export function useBillingActions() {
 
   const startUpgradeCheckout = useCallback(
     async (tier: Tier) => {
+      if (checkoutBusy) return;
       if (tier === "free") {
         window.location.href = "/pricing";
         return;
@@ -55,28 +57,36 @@ export function useBillingActions() {
         return;
       }
 
-      const res = await fetch("/api/stripe/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({
-          tier,
-          userId: user.id,
-          email: user.email,
-        }),
-      });
+      setCheckoutBusy(true);
+      try {
+        const res = await fetch("/api/stripe/create-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            tier,
+            userId: user.id,
+            email: user.email,
+          }),
+        });
 
-      const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-      if (!res.ok || !json.url) {
-        throw new Error(json.error ?? "Could not start checkout");
+        const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+        if (!res.ok || !json.url) {
+          setCheckoutBusy(false);
+          throw new Error(json.error ?? "Could not start checkout");
+        }
+        window.location.href = json.url;
+      } catch (error) {
+        setCheckoutBusy(false);
+        throw error;
       }
-      window.location.href = json.url;
     },
-    [user],
+    [checkoutBusy, user],
   );
 
   const startUpgradePromptPay = useCallback(
     async (tier: Tier) => {
+      if (checkoutBusy) return;
       if (tier === "free") {
         window.location.href = "/pricing";
         return;
@@ -87,24 +97,31 @@ export function useBillingActions() {
         return;
       }
 
-      const res = await fetch("/api/stripe/create-plan-invoice", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({
-          tier,
-          userId: user.id,
-          email: user.email,
-        }),
-      });
+      setCheckoutBusy(true);
+      try {
+        const res = await fetch("/api/stripe/create-plan-invoice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            tier,
+            userId: user.id,
+            email: user.email,
+          }),
+        });
 
-      const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-      if (!res.ok || !json.url) {
-        throw new Error(json.error ?? "Could not start PromptPay invoice");
+        const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+        if (!res.ok || !json.url) {
+          setCheckoutBusy(false);
+          throw new Error(json.error ?? "Could not start PromptPay invoice");
+        }
+        window.location.href = json.url;
+      } catch (error) {
+        setCheckoutBusy(false);
+        throw error;
       }
-      window.location.href = json.url;
     },
-    [user],
+    [checkoutBusy, user],
   );
 
   const openAddOnCatalog = useCallback((sku?: string) => {
@@ -114,30 +131,39 @@ export function useBillingActions() {
 
   const startAddOnCheckout = useCallback(
     async (sku: AddOnSku) => {
+      if (checkoutBusy) return;
       if (!user) {
         window.location.href = `/login?next=${encodeURIComponent(`/pricing?focus=addons&sku=${sku}`)}`;
         return;
       }
 
-      const res = await fetch("/api/stripe/create-addon-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ sku }),
-      });
+      setCheckoutBusy(true);
+      try {
+        const res = await fetch("/api/stripe/create-addon-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ sku }),
+        });
 
-      const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
-      if (!res.ok || !json.url) {
-        throw new Error(json.error ?? "Could not start add-on checkout");
+        const json = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+        if (!res.ok || !json.url) {
+          setCheckoutBusy(false);
+          throw new Error(json.error ?? "Could not start add-on checkout");
+        }
+        window.location.href = json.url;
+      } catch (error) {
+        setCheckoutBusy(false);
+        throw error;
       }
-      window.location.href = json.url;
     },
-    [user],
+    [checkoutBusy, user],
   );
 
   return {
     user,
     loading,
+    checkoutBusy,
     startUpgradeCheckout,
     startUpgradePromptPay,
     openAddOnCatalog,
