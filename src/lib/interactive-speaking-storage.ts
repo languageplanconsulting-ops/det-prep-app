@@ -25,7 +25,11 @@ export function loadInteractiveSpeakingScenarios(): InteractiveSpeakingScenario[
 }
 
 export function saveInteractiveSpeakingScenarios(items: InteractiveSpeakingScenario[]): void {
-  localStorage.setItem(INTERACTIVE_SPEAKING_STORAGE_KEY, JSON.stringify(items));
+  try {
+    localStorage.setItem(INTERACTIVE_SPEAKING_STORAGE_KEY, JSON.stringify(items));
+  } catch {
+    /* ignore browser storage failures */
+  }
 }
 
 export function mergeInteractiveSpeakingScenariosFromAdmin(
@@ -57,7 +61,11 @@ export function getInteractiveSpeakingScenarioById(
 }
 
 export function saveInteractiveSpeakingReport(report: InteractiveSpeakingAttemptReport): void {
-  localStorage.setItem(`${INTERACTIVE_SPEAKING_REPORT_PREFIX}${report.attemptId}`, JSON.stringify(report));
+  try {
+    localStorage.setItem(`${INTERACTIVE_SPEAKING_REPORT_PREFIX}${report.attemptId}`, JSON.stringify(report));
+  } catch {
+    /* Safari/private mode: report route can still use the navigation handoff. */
+  }
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("ep-interactive-speaking-report-saved"));
   }

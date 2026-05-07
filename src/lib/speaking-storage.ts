@@ -166,17 +166,21 @@ export function getSpeakingQuestion(
 }
 
 export function saveSpeakingReport(report: SpeakingAttemptReport): void {
-  localStorage.setItem(`${REPORT_PREFIX}${report.attemptId}`, JSON.stringify(report));
-  const summary: SpeakingAttemptSummary = {
-    attemptId: report.attemptId,
-    topicId: report.topicId,
-    topicTitleEn: report.topicTitleEn,
-    score160: report.score160,
-    submittedAt: report.submittedAt,
-    canRedeem: true,
-  };
-  localStorage.setItem(LATEST_KEY, JSON.stringify(summary));
-  setSpeakingQuestionLatestScore(report);
+  try {
+    localStorage.setItem(`${REPORT_PREFIX}${report.attemptId}`, JSON.stringify(report));
+    const summary: SpeakingAttemptSummary = {
+      attemptId: report.attemptId,
+      topicId: report.topicId,
+      topicTitleEn: report.topicTitleEn,
+      score160: report.score160,
+      submittedAt: report.submittedAt,
+      canRedeem: true,
+    };
+    localStorage.setItem(LATEST_KEY, JSON.stringify(summary));
+    setSpeakingQuestionLatestScore(report);
+  } catch {
+    /* Safari/private mode: report route can still open from handoff. */
+  }
   emitSpeakingUpdate();
 }
 

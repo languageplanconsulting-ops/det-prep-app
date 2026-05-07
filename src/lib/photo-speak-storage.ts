@@ -19,7 +19,11 @@ export function loadPhotoSpeakItems(): PhotoSpeakItem[] {
 }
 
 export function savePhotoSpeakItems(items: PhotoSpeakItem[]): void {
-  localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
+  try {
+    localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
+  } catch {
+    /* ignore browser storage failures */
+  }
 }
 
 export function mergePhotoSpeakItemsFromAdmin(incoming: PhotoSpeakItem[]): PhotoSpeakItem[] {
@@ -44,7 +48,11 @@ export function getPhotoSpeakItemById(id: string): PhotoSpeakItem | undefined {
 }
 
 export function savePhotoSpeakReport(report: PhotoSpeakAttemptReport): void {
-  localStorage.setItem(`${REPORT_PREFIX}${report.attemptId}`, JSON.stringify(report));
+  try {
+    localStorage.setItem(`${REPORT_PREFIX}${report.attemptId}`, JSON.stringify(report));
+  } catch {
+    /* Safari/private mode: same-tab handoff still covers immediate report view. */
+  }
 }
 
 export function loadPhotoSpeakReport(attemptId: string): PhotoSpeakAttemptReport | null {

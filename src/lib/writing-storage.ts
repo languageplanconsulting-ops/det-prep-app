@@ -59,7 +59,11 @@ export function loadWritingTopics(): WritingTopic[] {
 }
 
 export function saveWritingTopics(topics: WritingTopic[]): void {
-  localStorage.setItem(TOPICS_KEY, JSON.stringify(topics));
+  try {
+    localStorage.setItem(TOPICS_KEY, JSON.stringify(topics));
+  } catch {
+    /* Safari/private mode: keep bundled/default topics available. */
+  }
   emitWritingTopicsUpdate();
 }
 
@@ -110,16 +114,20 @@ export function getTopicById(id: string): WritingTopic | undefined {
 }
 
 export function saveWritingReport(report: WritingAttemptReport): void {
-  localStorage.setItem(`${REPORT_PREFIX}${report.attemptId}`, JSON.stringify(report));
-  const summary: WritingAttemptSummary = {
-    attemptId: report.attemptId,
-    topicId: report.topicId,
-    topicTitleEn: report.topicTitleEn,
-    score160: report.score160,
-    submittedAt: report.submittedAt,
-    canRedeem: true,
-  };
-  localStorage.setItem(LATEST_KEY, JSON.stringify(summary));
+  try {
+    localStorage.setItem(`${REPORT_PREFIX}${report.attemptId}`, JSON.stringify(report));
+    const summary: WritingAttemptSummary = {
+      attemptId: report.attemptId,
+      topicId: report.topicId,
+      topicTitleEn: report.topicTitleEn,
+      score160: report.score160,
+      submittedAt: report.submittedAt,
+      canRedeem: true,
+    };
+    localStorage.setItem(LATEST_KEY, JSON.stringify(summary));
+  } catch {
+    /* Safari/private mode: report route can still use handoff memory/session. */
+  }
 }
 
 export function loadWritingReport(attemptId: string): WritingAttemptReport | null {
