@@ -99,6 +99,29 @@ export function loadWritingTopics(): WritingTopic[] {
   }
 }
 
+export function subscribeWritingTopics(onStoreChange: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener("ep-writing-topics", onStoreChange);
+  window.addEventListener("focus", onStoreChange);
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener("ep-writing-topics", onStoreChange);
+    window.removeEventListener("focus", onStoreChange);
+  };
+}
+
+export function getWritingTopicsSnapshotToken(): string {
+  if (typeof window === "undefined") {
+    return JSON.stringify(bundledWritingTopics());
+  }
+  try {
+    return localStorage.getItem(TOPICS_KEY) ?? "__bundled__";
+  } catch {
+    return "__bundled__";
+  }
+}
+
 export function saveWritingTopics(topics: WritingTopic[]): void {
   try {
     const normalized = topics
@@ -210,6 +233,15 @@ function loadReadWriteTopicProgressMap(): Record<string, ReadWriteTopicProgress>
       : {};
   } catch {
     return {};
+  }
+}
+
+export function getReadWriteTopicProgressSnapshotToken(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return localStorage.getItem(READ_WRITE_TOPIC_PROGRESS_KEY) ?? "";
+  } catch {
+    return "";
   }
 }
 

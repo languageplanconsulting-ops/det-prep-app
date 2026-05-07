@@ -8,14 +8,18 @@ import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBan
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
+import { pullContentBankSnapshotFromSupabase } from "@/lib/content-bank-sync";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import {
   getReadWriteTopicProgress,
+  getReadWriteTopicProgressSnapshotToken,
   getTopicById,
+  getWritingTopicsSnapshotToken,
   recordReadWriteTopicProgress,
   saveWritingReport,
+  subscribeWritingTopics,
   subscribeReadWriteTopicProgress,
 } from "@/lib/writing-storage";
 import type { WritingAttemptReport } from "@/types/writing";
@@ -35,12 +39,20 @@ export function ReadWriteSession({
 }) {
   const router = useRouter();
   const vipGate = useVipAiFeedbackGate();
-  const topic = useMemo(() => getTopicById(topicId), [topicId]);
-  const progress = useSyncExternalStore(
-    subscribeReadWriteTopicProgress,
-    () => getReadWriteTopicProgress(topicId),
-    () => undefined as ReturnType<typeof getReadWriteTopicProgress>,
+  const topicsSnapshot = useSyncExternalStore(
+    subscribeWritingTopics,
+    getWritingTopicsSnapshotToken,
+    () => "",
   );
+  const topic = useMemo(() => getTopicById(topicId), [topicId, topicsSnapshot]);
+  const progressSnapshot = useSyncExternalStore(
+    subscribeReadWriteTopicProgress,
+    getReadWriteTopicProgressSnapshotToken,
+    () => "",
+  );
+  const progress = useMemo(() => getReadWriteTopicProgress(topicId), [topicId, progressSnapshot]);
+  const [mounted, setMounted] = useState(false);
+  const [hydratingTopic, setHydratingTopic] = useState(true);
   const [prepChoice, setPrepChoice] = useState(3);
   const [phase, setPhase] = useState<"prep-pick" | "prep-run" | "write">("prep-pick");
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -48,6 +60,35 @@ export function ReadWriteSession({
   const [followUpAnswers, setFollowUpAnswers] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrateTopic = async () => {
+      if (!mounted) return;
+      if (topic) {
+        if (!cancelled) setHydratingTopic(false);
+        return;
+      }
+      if (!cancelled) setHydratingTopic(true);
+      try {
+        await pullContentBankSnapshotFromSupabase();
+      } catch (e) {
+        console.warn("[ReadWriteSession] topic hydration failed", e);
+      } finally {
+        if (!cancelled) setHydratingTopic(false);
+      }
+    };
+
+    void hydrateTopic();
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, topicId, topic, topicsSnapshot]);
 
   useEffect(() => {
     if (phase !== "prep-run") return;
@@ -61,10 +102,38 @@ export function ReadWriteSession({
     if (phase === "prep-run" && secondsLeft === 0) setPhase("write");
   }, [phase, secondsLeft]);
 
+  const wc = countWords(essay);
+  const followUps = topic?.followUps ?? [];
+  const canSubmit = Boolean(topic) && wc >= 50;
+
+  const latestScore = progress?.latestScore160 ?? null;
+  const hasAttempt = Boolean(progress);
+  const isPerfect = hasAttempt && (latestScore ?? 0) >= MAX_SCORE;
+  const showRedeemOnSession = hasAttempt && !isPerfect;
+
+  useEffect(() => {
+    setFollowUpAnswers(followUps.map(() => ""));
+  }, [topic?.id, topicsSnapshot]);
+
+  if (!mounted || (!topic && hydratingTopic)) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-12 text-center">
+        <p className="font-bold">Loading topic…</p>
+        <p className="mt-2 text-sm text-neutral-600">
+          Syncing the latest read-and-write content for this account.
+        </p>
+      </div>
+    );
+  }
+
   if (!topic) {
     return (
       <div className="mx-auto max-w-lg px-4 py-12 text-center">
         <p className="font-bold">Topic not found.</p>
+        <p className="mt-2 text-sm text-neutral-600">
+          This topic is missing from the shared content bank. Please ask admin to sync the
+          read-and-write bank again.
+        </p>
         <Link
           href="/practice/production/read-and-write"
           className="mt-4 inline-block text-ep-blue"
@@ -74,19 +143,6 @@ export function ReadWriteSession({
       </div>
     );
   }
-
-  const wc = countWords(essay);
-  const followUps = topic.followUps ?? [];
-  const canSubmit = wc >= 50;
-
-  const latestScore = progress?.latestScore160 ?? null;
-  const hasAttempt = Boolean(progress);
-  const isPerfect = hasAttempt && (latestScore ?? 0) >= MAX_SCORE;
-  const showRedeemOnSession = hasAttempt && !isPerfect;
-
-  useEffect(() => {
-    setFollowUpAnswers(followUps.map(() => ""));
-  }, [topic.id]);
 
   const startPrep = () => {
     setSecondsLeft(prepChoice * 60);
