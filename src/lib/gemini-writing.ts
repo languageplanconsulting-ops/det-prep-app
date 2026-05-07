@@ -15,8 +15,10 @@ import type {
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import {
   coherenceTransitionPenaltyPercent,
+  detectGrammarStructureIssues,
   detectGrammarPunctuationIssues,
   detectTransitionMisuseIssues,
+  grammarStructurePenaltyPercent,
   grammarPunctuationPenaltyPercent,
 } from "@/lib/production-writing-penalties";
 import {
@@ -102,6 +104,8 @@ Grammar bands: ~30% A1–A2 issues; ~50% B1–B2; ~70% clean; ~90% ≥1 complex 
 Hard scoring rules (mandatory):
 - If the learner misuses a transition / linker, subtract 35 points from coherenceScorePercent.
 - For punctuation mistakes in grammar, subtract 10 points each, capped at 25 total.
+- If the learner uses no passive voice anywhere in the answer, subtract 10 points from grammarScorePercent.
+- If the learner uses no complex sentence signal anywhere in the answer (for example: subordinating conjunction, relative clause such as which/who/where, an -ing opener, or a comma-based sentence pattern), subtract 10 points from grammarScorePercent.
 - When either penalty applies, mention it clearly in the relevant breakdown.
 
 Task relevancy: weight whether the learner addresses the main prompt and any follow-ups.
@@ -329,8 +333,14 @@ export async function generateWritingReportWithGemini(params: {
   const raw = parseGeminiJsonObjectResponse(text);
 
   const grammarPunctuationIssues = detectGrammarPunctuationIssues(essay);
+  const grammarStructureIssues = detectGrammarStructureIssues(essay);
   const transitionIssues = detectTransitionMisuseIssues(essay);
-  const g = Math.max(0, clampPercent(raw.grammarScorePercent) - grammarPunctuationPenaltyPercent(essay));
+  const g = Math.max(
+    0,
+    clampPercent(raw.grammarScorePercent) -
+      grammarPunctuationPenaltyPercent(essay) -
+      grammarStructurePenaltyPercent(essay),
+  );
   const v = clampPercent(raw.vocabularyScorePercent);
   const c = Math.max(0, clampPercent(raw.coherenceScorePercent) - coherenceTransitionPenaltyPercent(essay));
   let tScore = clampPercent(raw.taskScorePercent);
@@ -365,6 +375,15 @@ export async function generateWritingReportWithGemini(params: {
       th: `จุดวรรคตอนผิดทำให้คะแนน grammar ลดลง (-10% ต่อครั้ง สูงสุด -25%). ${grammarPunctuationIssues[0]?.reasonTh ?? ""}`.trim(),
       excerpt: grammarPunctuationIssues[0]?.excerpt,
     });
+  }
+  if (grammarStructureIssues.length > 0) {
+    for (const issue of [...grammarStructureIssues].reverse()) {
+      grammarBreakdown.unshift({
+        en: issue.reasonEn,
+        th: issue.reasonTh,
+        excerpt: issue.excerpt,
+      });
+    }
   }
 
   const coherenceBreakdown = mapBreak(raw.coherenceBreakdown);

@@ -16,6 +16,18 @@ const LIKELY_SUBJECT_START =
 const LIKELY_FINITE_VERB =
   /\b(?:am|is|are|was|were|be|been|being|have|has|had|do|does|did|can|could|will|would|shall|should|may|might|must)\b|\b\w+(?:ed|s)\b/i;
 
+const PASSIVE_VOICE_PATTERN =
+  /\b(?:am|is|are|was|were|be|been|being|get|gets|got)\s+(?:not\s+)?(?:\w+ly\s+)?(?:\w+(?:ed|en)|known|seen|shown|made|built|found|given|taken|written|driven|spoken|born|caught|held|left|lost|paid|put|read|said|sold|sent|told|won)\b/i;
+
+const SUBORDINATING_CONJUNCTION_PATTERN =
+  /\b(?:although|though|because|since|while|when|after|before|if|unless|whereas|once|until|even though|so that|as long as|provided that)\b/i;
+
+const RELATIVE_CLAUSE_PATTERN =
+  /(?:,\s*|\b)(?:which|who|whom|whose|that|where|when)\s+[A-Za-z]/i;
+
+const ING_CLAUSE_PATTERN =
+  /(?:^|[.!?]\s+|,\s+)[A-Za-z]+ing\b/i;
+
 function clipExcerpt(text: string, index: number, length: number): string {
   const start = Math.max(0, index - 18);
   const end = Math.min(text.length, index + length + 18);
@@ -39,6 +51,27 @@ function collectMatches(
     });
   }
   return issues;
+}
+
+function firstUsefulExcerpt(text: string): string {
+  const source = String(text ?? "").trim();
+  if (!source) return "";
+  const firstSentence = source.split(/[.!?]/, 1)[0]?.trim() ?? "";
+  const excerpt = firstSentence || source;
+  return excerpt.length > 70 ? `${excerpt.slice(0, 67).trim()}...` : excerpt;
+}
+
+function hasPassiveVoice(text: string): boolean {
+  return PASSIVE_VOICE_PATTERN.test(text);
+}
+
+function hasComplexStructure(text: string): boolean {
+  return (
+    text.includes(",") ||
+    SUBORDINATING_CONJUNCTION_PATTERN.test(text) ||
+    RELATIVE_CLAUSE_PATTERN.test(text) ||
+    ING_CLAUSE_PATTERN.test(text)
+  );
 }
 
 function detectCommaSpliceIssues(text: string): Issue[] {
@@ -113,6 +146,38 @@ export function detectGrammarPunctuationIssues(text: string): Issue[] {
 
 export function grammarPunctuationPenaltyPercent(text: string): number {
   return Math.min(25, detectGrammarPunctuationIssues(text).length * 10);
+}
+
+export function detectGrammarStructureIssues(text: string): Issue[] {
+  const source = String(text ?? "");
+  if (!source.trim()) return [];
+
+  const issues: Issue[] = [];
+  const excerpt = firstUsefulExcerpt(source);
+
+  if (!hasPassiveVoice(source)) {
+    issues.push({
+      excerpt,
+      reasonEn: "No passive voice appears in this answer. Grammar score includes a -10% structure penalty.",
+      reasonTh: "คำตอบนี้ไม่มี passive voice จึงถูกหักคะแนน grammar ด้านโครงสร้าง -10%",
+    });
+  }
+
+  if (!hasComplexStructure(source)) {
+    issues.push({
+      excerpt,
+      reasonEn:
+        "No complex sentence pattern appears here (for example: subordinator, relative clause, -ing opener, or comma-based structure). Grammar score includes a -10% structure penalty.",
+      reasonTh:
+        "คำตอบนี้ยังไม่มีโครงสร้างประโยคซับซ้อน (เช่น คำเชื่อมย่อย relative clause, โครงสร้าง V-ing หรือประโยคที่มี comma) จึงถูกหักคะแนน grammar ด้านโครงสร้าง -10%",
+    });
+  }
+
+  return issues;
+}
+
+export function grammarStructurePenaltyPercent(text: string): number {
+  return detectGrammarStructureIssues(text).length * 10;
 }
 
 export function detectTransitionMisuseIssues(text: string): Issue[] {

@@ -8,8 +8,10 @@ import type { SpeakingTranscriptHighlight, SpeakingVocabularyUpgrade } from "@/t
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import {
   coherenceTransitionPenaltyPercent,
+  detectGrammarStructureIssues,
   detectGrammarPunctuationIssues,
   detectTransitionMisuseIssues,
+  grammarStructurePenaltyPercent,
   grammarPunctuationPenaltyPercent,
 } from "@/lib/production-writing-penalties";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
@@ -75,6 +77,8 @@ function buildSystemInstruction(originHub?: "speak-about-photo" | "write-about-p
 Hard scoring rules for write-about-photo (mandatory):
 - If the learner misuses a transition / linker, subtract 35 points from coherenceScorePercent.
 - For punctuation mistakes in grammar, subtract 10 points each, capped at 25 total.
+- If the learner uses no passive voice anywhere in the answer, subtract 10 points from grammarScorePercent.
+- If the learner uses no complex sentence signal anywhere in the answer (for example: subordinating conjunction, relative clause such as which/who/where, an -ing opener, or a comma-based sentence pattern), subtract 10 points from grammarScorePercent.
 - When either penalty applies, mention it clearly in the relevant breakdown.`
       : "";
 
@@ -274,12 +278,16 @@ export async function generatePhotoSpeakReportWithGemini(params: {
 
   const grammarPunctuationIssues =
     originHub === "write-about-photo" ? detectGrammarPunctuationIssues(transcript) : [];
+  const grammarStructureIssues =
+    originHub === "write-about-photo" ? detectGrammarStructureIssues(transcript) : [];
   const transitionIssues =
     originHub === "write-about-photo" ? detectTransitionMisuseIssues(transcript) : [];
   const g = Math.max(
     0,
     clampPercent(raw.grammarScorePercent) -
-      (originHub === "write-about-photo" ? grammarPunctuationPenaltyPercent(transcript) : 0),
+      (originHub === "write-about-photo"
+        ? grammarPunctuationPenaltyPercent(transcript) + grammarStructurePenaltyPercent(transcript)
+        : 0),
   );
   const v = clampPercent(raw.vocabularyScorePercent);
   const c = Math.max(
@@ -320,6 +328,15 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       th: `จุดวรรคตอนผิดทำให้คะแนน grammar ลดลง (-10% ต่อครั้ง สูงสุด -25%). ${grammarPunctuationIssues[0]?.reasonTh ?? ""}`.trim(),
       excerpt: grammarPunctuationIssues[0]?.excerpt,
     });
+  }
+  if (originHub === "write-about-photo" && grammarStructureIssues.length > 0) {
+    for (const issue of [...grammarStructureIssues].reverse()) {
+      grammarBreakdown.unshift({
+        en: issue.reasonEn,
+        th: issue.reasonTh,
+        excerpt: issue.excerpt,
+      });
+    }
   }
 
   const coherenceBreakdown = mapBreak(raw.coherenceBreakdown);

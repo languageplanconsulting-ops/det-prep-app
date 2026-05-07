@@ -9,8 +9,10 @@ import type {
 } from "@/types/writing";
 import {
   coherenceTransitionPenaltyPercent,
+  detectGrammarStructureIssues,
   detectGrammarPunctuationIssues,
   detectTransitionMisuseIssues,
+  grammarStructurePenaltyPercent,
   grammarPunctuationPenaltyPercent,
 } from "@/lib/production-writing-penalties";
 
@@ -450,8 +452,14 @@ export function buildWritingAttemptReport(
   prepMinutes: number,
 ): WritingAttemptReport {
   const grammarPunctuationIssues = detectGrammarPunctuationIssues(essay);
+  const grammarStructureIssues = detectGrammarStructureIssues(essay);
   const transitionIssues = detectTransitionMisuseIssues(essay);
-  const g = Math.max(0, scoreGrammarPercent(essay) - grammarPunctuationPenaltyPercent(essay));
+  const g = Math.max(
+    0,
+    scoreGrammarPercent(essay) -
+      grammarPunctuationPenaltyPercent(essay) -
+      grammarStructurePenaltyPercent(essay),
+  );
   const v = scoreVocabularyPercent(essay);
   const c = Math.max(0, scoreCoherencePercent(essay) - coherenceTransitionPenaltyPercent(essay));
   const tk = scoreTaskPercent(essay, topic);
@@ -475,6 +483,11 @@ export function buildWritingAttemptReport(
       en: `Grammar (target complex structures when appropriate). Score: ${g}%.`,
       th: `เรื่องการเขียนให้ถูกต้อง คะแนน: ${g}%`,
     }, [
+      ...grammarStructureIssues.map((issue) => ({
+        excerpt: issue.excerpt || ex,
+        en: issue.reasonEn,
+        th: issue.reasonTh,
+      })),
       ...grammarPunctuationIssues.map((issue, idx) => ({
         excerpt: issue.excerpt || ex,
         en:
