@@ -164,22 +164,16 @@ export function LandingPageClient({
           </Link>
           <div className="flex w-full shrink-0 flex-wrap items-center justify-stretch gap-2 sm:w-auto sm:justify-end sm:gap-4">
             <a
+              href="/about"
+              className="ep-stat inline-flex min-h-[44px] flex-1 items-center justify-center border-2 border-black bg-white px-3 py-2 text-center text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-neutral-50 sm:flex-initial sm:text-sm"
+            >
+              <span className="leading-tight">About / เกี่ยวกับเรา</span>
+            </a>
+            <a
               href="/duolingo-english-test"
               className="ep-stat inline-flex min-h-[44px] flex-1 items-center justify-center border-2 border-black bg-[#e8f1ff] px-3 py-2 text-center text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-[#d6e8ff] sm:flex-initial sm:text-sm"
             >
-              <span className="leading-tight">
-                DET Guide
-                <span className="hidden sm:inline"> / คู่มือ DET</span>
-              </span>
-            </a>
-            <a
-              href="#preview"
-              className="ep-stat inline-flex min-h-[44px] flex-1 items-center justify-center border-2 border-black bg-white px-3 py-2 text-center text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-neutral-50 sm:flex-initial sm:text-sm"
-            >
-              <span className="leading-tight">
-                Preview
-                <span className="hidden sm:inline"> / ดูตัวอย่าง</span>
-              </span>
+              <span className="leading-tight">DET Guide / คู่มือ DET</span>
             </a>
             <button
               type="button"
@@ -206,102 +200,112 @@ export function LandingPageClient({
 
       <section className={cn("px-4 py-16 sm:px-6 sm:py-24", LANDING_PAGE_GRID_BG)}>
         <div className="mx-auto grid max-w-[1400px] items-center gap-12 lg:grid-cols-2 lg:gap-20">
-          <div>
+            <div>
+            <p className="ep-stat mb-5 inline-flex border-4 border-black bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-ep-blue shadow-[4px_4px_0_0_#000] sm:text-sm">
+              Thai-first DET prep platform
+            </p>
             <h1 className="text-4xl font-black leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
-              Master the
+              Start with a
               <br />
               <span className="relative text-ep-blue">
-                Duolingo
+                free DET check
                 <span
                   className="absolute bottom-2 left-0 -z-10 h-4 w-full bg-ep-yellow/30 sm:bottom-3 sm:h-5"
                   aria-hidden
                 />
               </span>
               <br />
-              English Test
+              then train what matters
             </h1>
-            <p className="mt-8 text-lg text-neutral-800 sm:text-2xl sm:leading-relaxed">
-              Complete DET preparation across all four skills—not only mock tests. AI feedback on
-              Production, Comprehension, Literacy, and Conversation with levels that match your goal.
+            <p className="mt-8 max-w-3xl text-lg text-neutral-800 sm:text-2xl sm:leading-relaxed">
+              New to Duolingo English Test? Start free, see your weak points, then choose the plan
+              that matches your target score.
               <br />
               <br />
               <span className="text-base font-semibold text-neutral-700 sm:text-lg">
-                เตรียมสอบ DET แบบครบวงจร เน้นทั้ง 4 ทักษะ พร้อมฟีดแบ็กจาก AI และระดับที่ปรับให้เหมาะกับคุณ
+                ฝึกสอบ DET แบบเป็นขั้นตอนสำหรับเด็กไทย เริ่มฟรีก่อน ดูจุดอ่อนของตัวเอง แล้วค่อยเลือกแพ็กเกจที่เหมาะกับเป้าหมายคะแนน
               </span>
             </p>
-            <div className="mt-6 inline-flex max-w-2xl items-start gap-3 border-4 border-black bg-[#fff7d6] px-5 py-4 shadow-[6px_6px_0_0_#000]">
-              <span className="mt-0.5 text-2xl font-black text-ep-blue">VIP</span>
-              <div className="text-sm font-bold leading-6 text-neutral-900 sm:text-base">
-                Students in the <span className="text-ep-blue">Duolingo Fast Track course</span> receive
-                <span className="bg-ep-yellow px-1.5 py-0.5"> VIP package access for 6 months</span>.
-                <br />
-                <span className="text-neutral-700">
+            <div className="mt-8 grid max-w-4xl gap-4 lg:grid-cols-[1.3fr_0.9fr]">
+              <div className="border-4 border-black bg-white px-5 py-5 shadow-[8px_8px_0_0_#000]">
+                <p className="ep-stat text-xs font-black uppercase tracking-[0.18em] text-ep-blue">
+                  New here? / เริ่มตรงนี้
+                </p>
+                <p className="mt-3 text-sm font-semibold leading-6 text-neutral-700 sm:text-base">
+                  Get one clear starting point instead of guessing. Try the free diagnostic first,
+                  then unlock more practice or mock tests only if you need them.
+                </p>
+                <div className="mt-5 flex flex-col gap-4 sm:flex-row">
+                  <Link
+                    href="/mini-diagnosis/start"
+                    className="inline-block border-4 border-black bg-ep-yellow px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
+                  >
+                    Start free diagnostic
+                  </Link>
+                  <a
+                    href="#pricing"
+                    className="inline-block border-4 border-black bg-ep-blue px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-white shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
+                  >
+                    Compare plans
+                  </a>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-bold text-neutral-700">
+                  <a href="/duolingo-english-test" className="underline decoration-2 underline-offset-4">
+                    Read the DET guide
+                  </a>
+                  <a href="#preview" className="underline decoration-2 underline-offset-4">
+                    See feedback preview
+                  </a>
+                  <Link href="/login" className="underline decoration-2 underline-offset-4">
+                    Sign in
+                  </Link>
+                </div>
+              </div>
+              <div className="border-4 border-black bg-[#fff7d6] px-5 py-5 shadow-[8px_8px_0_0_#000]">
+                <p className="ep-stat text-xs font-black uppercase tracking-[0.18em] text-ep-blue">
+                  Fast Track students
+                </p>
+                <p className="mt-3 text-lg font-black leading-tight text-neutral-900">
+                  VIP package access for 6 months
+                </p>
+                <p className="mt-3 text-sm font-semibold leading-6 text-neutral-700">
+                  If you are in the Duolingo Fast Track course, activate your special access here.
                   นักเรียนคอร์ส Duolingo Fast Track จะได้รับสิทธิ์แพ็กเกจ VIP นาน 6 เดือน
-                </span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setFastTrackOpen(true)}
+                  className="mt-5 inline-block w-full border-4 border-black bg-white px-6 py-4 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-ep-yellow hover:shadow-[3px_3px_0_0_#000]"
+                >
+                  Activate Fast Track VIP
+                </button>
               </div>
             </div>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
               <Link
-                href="/mini-diagnosis/start"
-                className="inline-block border-4 border-black bg-ep-yellow px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
+                href="/signup?next=%2Fpractice"
+                className="inline-block border-4 border-black bg-white px-6 py-4 text-center text-base font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-50 hover:shadow-[3px_3px_0_0_#000]"
               >
-                Mini diagnosis / เช็กระดับฟรี
+                Create free account
               </Link>
-              <a
-                href="#pricing"
-                className="inline-block border-4 border-black bg-ep-blue px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-white shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
-              >
-                Get started / เริ่มเลย
-              </a>
-              <a
-                href="/duolingo-english-test"
-                className="inline-block border-4 border-black bg-white px-8 py-5 text-center text-lg font-bold text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-100 hover:shadow-[4px_4px_0_0_#000]"
-              >
-                DET guide / คู่มือ DET
-              </a>
-              <a
-                href="#features"
-                className="inline-block border-4 border-black bg-white px-8 py-5 text-center text-lg font-bold text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-100 hover:shadow-[4px_4px_0_0_#000]"
-              >
-                See features / ดูฟีเจอร์
-              </a>
-              <a
-                href="#preview"
-                className="inline-block border-4 border-black bg-white px-8 py-5 text-center text-lg font-bold text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-100 hover:shadow-[4px_4px_0_0_#000]"
-              >
-                Preview / ดูตัวอย่าง
-              </a>
-              <Link
-                href="/login"
-                className="inline-block border-4 border-black bg-ep-yellow px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_#000]"
-              >
-                Sign in (VIP &amp; members) / เข้าสู่ระบบ
-              </Link>
-              <button
-                type="button"
-                onClick={() => setFastTrackOpen(true)}
-                className="inline-block border-4 border-black bg-white px-8 py-5 text-center text-lg font-black uppercase tracking-wide text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-neutral-50 hover:shadow-[4px_4px_0_0_#000]"
-              >
-                Duolingo Fast Track VIP (6 months) / เปิดสิทธิ์คอร์ส 6 เดือน
-              </button>
             </div>
             <div className="mt-8 flex flex-col gap-4 ep-stat sm:flex-row sm:gap-6">
               <div className="border-[3px] border-black bg-white px-6 py-4">
+                <span className="block text-3xl font-bold text-ep-yellow">1,000+</span>
+                <span className="text-xs uppercase tracking-wide text-neutral-700">
+                  Thai students taught / นักเรียนไทย
+                </span>
+              </div>
+              <div className="border-[3px] border-black bg-white px-6 py-4">
                 <span className="block text-3xl font-bold text-ep-yellow">600+</span>
                 <span className="text-xs uppercase tracking-wide text-neutral-700">
-                  Questions / ข้อสอบ
+                  Practice items / ข้อสอบฝึก
                 </span>
               </div>
               <div className="border-[3px] border-black bg-white px-6 py-4">
                 <span className="block text-3xl font-bold text-ep-yellow">4</span>
                 <span className="text-xs uppercase tracking-wide text-neutral-700">
-                  Skills / ทักษะ
-                </span>
-              </div>
-              <div className="border-[3px] border-black bg-white px-6 py-4">
-                <span className="block text-3xl font-bold text-ep-yellow">FREE</span>
-                <span className="text-xs uppercase tracking-wide text-neutral-700">
-                  Trial / ทดลอง
+                  Skills trained / ทักษะ
                 </span>
               </div>
             </div>
@@ -336,10 +340,10 @@ export function LandingPageClient({
       <div className="border-y-4 border-black bg-ep-yellow py-6 text-center">
         <div className="mx-auto flex max-w-[1400px] flex-wrap justify-center gap-8 px-4 sm:gap-16">
           {[
-            ["400+", "Students tested / นักเรียน"],
-            ["600+", "Updated items / ข้อสอบ"],
-            ["4 Skills", "Full training / ครบทุกทักษะ"],
-            ["AI", "Personalized feedback / ฟีดแบ็ก"],
+            ["1", "Clear free start / เริ่มฟรีชัดเจน"],
+            ["Thai", "Feedback in Thai / ฟีดแบ็กภาษาไทย"],
+            ["Goal", "Target-score planning / วางแผนตามเป้า"],
+            ["AI", "Personalized notes / ฟีดแบ็กเฉพาะบุคคล"],
           ].map(([n, l]) => (
             <div key={l} className="ep-stat">
               <span className="block text-3xl font-black text-neutral-900">{n}</span>
@@ -350,6 +354,62 @@ export function LandingPageClient({
           ))}
         </div>
       </div>
+
+      <section className={cn("px-4 py-16 sm:px-6 sm:py-20", LANDING_PAGE_GRID_BG)}>
+        <div className="mx-auto max-w-[1400px] border-4 border-black bg-white p-6 shadow-[12px_12px_0_0_#000] sm:p-8">
+          <div className="grid gap-6 lg:grid-cols-3">
+            {[
+              {
+                title: "New to DET / เพิ่งเริ่ม",
+                body:
+                  "Start with the free diagnostic first. You will know your level and what to practice next without paying upfront.",
+                cta: "Try free first",
+                href: "/mini-diagnosis/start",
+                tone: "bg-[#fff7d6]",
+              },
+              {
+                title: "Ready to train seriously / พร้อมฝึกจริงจัง",
+                body:
+                  "Compare Basic, Premium, and VIP if you already know you need more AI feedback, more practice lanes, or mock tests.",
+                cta: "See plans",
+                href: "#pricing",
+                tone: "bg-[#e8f1ff]",
+              },
+              {
+                title: "Fast Track student / นักเรียน Fast Track",
+                body:
+                  "Your path is different. Activate the 6-month VIP access lane directly from here instead of using the normal pricing flow.",
+                cta: "Open Fast Track",
+                href: "fast-track",
+                tone: "bg-[#fdf2ff]",
+              },
+            ].map((card) => (
+              <div key={card.title} className={cn("border-4 border-black p-6", card.tone)}>
+                <h2 className="text-2xl font-black">{card.title}</h2>
+                <p className="mt-4 text-sm font-semibold leading-6 text-neutral-700 sm:text-base">
+                  {card.body}
+                </p>
+                {card.href === "fast-track" ? (
+                  <button
+                    type="button"
+                    onClick={() => setFastTrackOpen(true)}
+                    className="mt-6 inline-block border-4 border-black bg-white px-6 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-ep-yellow hover:shadow-[3px_3px_0_0_#000]"
+                  >
+                    {card.cta}
+                  </button>
+                ) : (
+                  <a
+                    href={card.href}
+                    className="mt-6 inline-block border-4 border-black bg-white px-6 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-ep-yellow hover:shadow-[3px_3px_0_0_#000]"
+                  >
+                    {card.cta}
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className={cn("px-4 py-16 sm:px-6 sm:py-20", LANDING_PAGE_GRID_BG)}>
         <div className="mx-auto max-w-[1400px] border-4 border-black bg-white p-6 shadow-[12px_12px_0_0_#000] sm:p-8">
@@ -405,6 +465,44 @@ export function LandingPageClient({
         </div>
       </section>
 
+      <section className="bg-white px-4 py-20 sm:px-6 sm:py-24">
+        <div className="mx-auto max-w-[1400px]">
+          <header className="mb-10 text-center">
+            <p className="ep-stat mb-4 text-sm font-bold uppercase tracking-widest text-ep-blue">
+              Who this is for / เหมาะกับใคร
+            </p>
+            <h2 className="text-3xl font-black sm:text-5xl">
+              Built for Thai learners with different goals
+            </h2>
+          </header>
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              [
+                "ยังไม่รู้ระดับตัวเอง",
+                "เริ่มจาก mini diagnosis แล้วค่อยดูว่าควรฝึก writing, speaking, reading หรือ listening ก่อน",
+              ],
+              [
+                "อยากได้ 105–115",
+                "ใช้แพ็กเกจเริ่มต้นเพื่อเก็บพื้นฐาน ฝึกให้สม่ำเสมอ และดูจุดอ่อนที่ฉุดคะแนน",
+              ],
+              [
+                "อยากได้ 125+",
+                "ใช้ AI feedback และ mock tests เพื่ออัปเกรดโครงสร้างคำตอบ ความลื่นไหล และความแม่นยำ",
+              ],
+              [
+                "นักเรียน Fast Track",
+                "เปิดสิทธิ์ VIP 6 เดือนและข้ามเส้นทาง pricing ปกติได้เลย",
+              ],
+            ].map(([title, desc]) => (
+              <div key={title} className="border-4 border-black bg-[#fafafa] p-6 shadow-[8px_8px_0_0_#000]">
+                <h3 className="text-xl font-black">{title}</h3>
+                <p className="mt-4 text-sm font-semibold leading-6 text-neutral-700">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className={cn("px-4 py-20 sm:px-6 sm:py-28", LANDING_PAGE_GRID_BG)}>
         <div className="mx-auto max-w-[1400px]">
           <header className="mb-16 text-center">
@@ -419,23 +517,23 @@ export function LandingPageClient({
             {[
               {
                 n: "01",
-                t: "Sign up free / ลงทะเบียนฟรี",
-                d: "Google sign-in in seconds. No card required. / เข้าด้วย Google ไม่ต้องใช้บัตร",
+                t: "Start free / เริ่มฟรี",
+                d: "Open the mini diagnosis or create a free account first. No card required. / เริ่มจากมินิไดแอกโนซิสหรือสมัครฟรีก่อน โดยไม่ต้องใช้บัตร",
               },
               {
                 n: "02",
-                t: "Set your goal / ตั้งเป้าหมาย",
-                d: "Pick target score and difficulty. Practice stays on-level. / เลือกคะแนนและระดับที่เหมาะกับคุณ",
+                t: "See your weak points / ดูจุดอ่อน",
+                d: "Find which skill is holding your score back before you spend more time. / รู้ก่อนว่าทักษะไหนกำลังฉุดคะแนนของคุณ",
               },
               {
                 n: "03",
-                t: "Train 4 skills / ฝึก 4 ทักษะ",
-                d: "Production, Comprehension, Literacy, Conversation with AI help. / ฝึกครบพร้อม AI",
+                t: "Train the right skill / ฝึกให้ตรงจุด",
+                d: "Use targeted practice, AI feedback, or mock tests based on your goal. / เลือกฝึกจากเป้าหมายของคุณ ไม่ต้องเดาสุ่ม",
               },
               {
                 n: "04",
-                t: "Track progress / ติดตามผล",
-                d: "See growth across skills before test day. / เห็นความก้าวหน้าก่อนสอบจริง",
+                t: "Upgrade only if needed / ค่อยอัปเกรดเมื่อจำเป็น",
+                d: "Move to Basic, Premium, or VIP only when you need deeper limits. / ค่อยเลือกแพ็กเกจเมื่อคุณต้องการข้อสอบหรือฟีดแบ็กเพิ่ม",
               },
             ].map((s) => (
               <div
@@ -560,6 +658,10 @@ export function LandingPageClient({
               Pricing / ราคา
             </p>
             <h2 className="text-3xl font-black sm:text-5xl">Choose your plan / เลือกแพ็กเกจ</h2>
+            <p className="mx-auto mt-5 max-w-3xl text-base font-semibold leading-7 text-neutral-700">
+              Most new users should start free first. Come back to this section when you know whether
+              you need more AI feedback, more practice volume, or full mock tests.
+            </p>
           </header>
           {paymentErr ? (
             <div className="mx-auto mb-8 max-w-3xl border-4 border-black bg-[#fee2e2] p-4 text-left shadow-[8px_8px_0_0_#000]">
@@ -881,14 +983,24 @@ export function LandingPageClient({
             Ready for test day? / พร้อมสอบแล้วหรือยัง?
           </h2>
           <p className="mt-6 text-lg opacity-90">
-            Start free, then upgrade when you want deeper limits and mocks.
+            Start with the free diagnostic, or open your Fast Track VIP access if you already belong to
+            the course.
           </p>
-          <Link
-            href="/login"
-            className="mt-10 inline-block border-4 border-black bg-white px-12 py-6 text-lg font-black uppercase tracking-wide text-ep-blue shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-ep-yellow hover:text-neutral-900 hover:shadow-[4px_4px_0_0_#000]"
-          >
-            Open the app / เข้าแอป
-          </Link>
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link
+              href="/mini-diagnosis/start"
+              className="inline-block border-4 border-black bg-white px-10 py-5 text-lg font-black uppercase tracking-wide text-ep-blue shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-ep-yellow hover:text-neutral-900 hover:shadow-[4px_4px_0_0_#000]"
+            >
+              Start free
+            </Link>
+            <button
+              type="button"
+              onClick={() => setFastTrackOpen(true)}
+              className="inline-block border-4 border-black bg-ep-yellow px-10 py-5 text-lg font-black uppercase tracking-wide text-neutral-900 shadow-[8px_8px_0_0_#000] transition hover:translate-x-1 hover:translate-y-1 hover:bg-white hover:shadow-[4px_4px_0_0_#000]"
+            >
+              Fast Track VIP
+            </button>
+          </div>
         </div>
       </section>
 
