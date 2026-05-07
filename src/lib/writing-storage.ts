@@ -1,4 +1,8 @@
-import type { WritingAttemptReport, WritingTopic } from "@/types/writing";
+import type {
+  WritingAttemptReport,
+  WritingFollowUpPrompt,
+  WritingTopic,
+} from "@/types/writing";
 import defaultTopics from "@/data/default-writing-topics.json";
 import { WRITING_ROUND_NUMBERS, type WritingRoundNum } from "@/lib/writing-constants";
 
@@ -17,17 +21,51 @@ function emitWritingTopicsUpdate(): void {
   window.dispatchEvent(new Event("ep-writing-topics"));
 }
 
-function normalizeTopic(t: WritingTopic): WritingTopic {
+function normalizeFollowUps(raw: unknown): WritingFollowUpPrompt[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const clean = raw
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const row = item as Record<string, unknown>;
+      const promptEn = typeof row.promptEn === "string" ? row.promptEn.trim() : "";
+      const promptTh = typeof row.promptTh === "string" ? row.promptTh.trim() : "";
+      if (!promptEn) return null;
+      return { promptEn, promptTh };
+    })
+    .filter((item): item is WritingFollowUpPrompt => Boolean(item))
+    .slice(0, 3);
+  return clean.length > 0 ? clean : undefined;
+}
+
+function normalizeTopic(input: unknown): WritingTopic | null {
+  if (!input || typeof input !== "object") return null;
+  const t = input as Record<string, unknown>;
+  const id = typeof t.id === "string" ? t.id.trim() : "";
+  const titleEn = typeof t.titleEn === "string" ? t.titleEn.trim() : "";
+  const titleTh = typeof t.titleTh === "string" ? t.titleTh.trim() : "";
+  const promptEn = typeof t.promptEn === "string" ? t.promptEn.trim() : "";
+  const promptTh = typeof t.promptTh === "string" ? t.promptTh.trim() : "";
+  if (!id || !titleEn || !promptEn) return null;
+
   const r = t.round;
   const round: 1 | 2 | 3 | 4 | 5 =
     r === 1 || r === 2 || r === 3 || r === 4 || r === 5 ? r : 1;
-  const rawFu = t.followUps?.slice(0, 3).filter((f) => f.promptEn?.trim());
-  const followUps = rawFu?.length ? rawFu : undefined;
-  return { ...t, round, followUps };
+  const followUps = normalizeFollowUps(t.followUps);
+  return {
+    id,
+    titleEn,
+    titleTh,
+    promptEn,
+    promptTh,
+    round,
+    followUps,
+  };
 }
 
 function bundledWritingTopics(): WritingTopic[] {
-  return (defaultTopics as WritingTopic[]).map(normalizeTopic);
+  return (defaultTopics as unknown[])
+    .map(normalizeTopic)
+    .filter((topic): topic is WritingTopic => Boolean(topic));
 }
 
 export interface WritingAttemptSummary {
@@ -49,10 +87,13 @@ export function loadWritingTopics(): WritingTopic[] {
   try {
     const raw = localStorage.getItem(TOPICS_KEY);
     if (!raw) return hasBundled ? bundled : [];
-    const parsed = JSON.parse(raw) as WritingTopic[];
+    const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return hasBundled ? bundled : [];
-    if (parsed.length === 0) return hasBundled ? bundled : [];
-    return parsed.map(normalizeTopic);
+    const normalized = parsed
+      .map(normalizeTopic)
+      .filter((topic): topic is WritingTopic => Boolean(topic));
+    if (normalized.length === 0) return hasBundled ? bundled : [];
+    return normalized;
   } catch {
     return hasBundled ? bundled : [];
   }
@@ -60,7 +101,10 @@ export function loadWritingTopics(): WritingTopic[] {
 
 export function saveWritingTopics(topics: WritingTopic[]): void {
   try {
-    localStorage.setItem(TOPICS_KEY, JSON.stringify(topics));
+    const normalized = topics
+      .map(normalizeTopic)
+      .filter((topic): topic is WritingTopic => Boolean(topic));
+    localStorage.setItem(TOPICS_KEY, JSON.stringify(normalized));
   } catch {
     /* Safari/private mode: keep bundled/default topics available. */
   }
@@ -96,7 +140,10 @@ export function mergeWritingTopicsFromAdmin(incoming: WritingTopic[]): WritingTo
   const current = loadWritingTopics();
   const map = new Map<string, WritingTopic>();
   for (const t of current) map.set(t.id, t);
-  for (const t of incoming) map.set(t.id, t);
+  for (const t of incoming) {
+    const normalized = normalizeTopic(t);
+    if (normalized) map.set(normalized.id, normalized);
+  }
   const merged = [...map.values()];
   saveWritingTopics(merged);
   return merged;
