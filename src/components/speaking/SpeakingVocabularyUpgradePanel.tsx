@@ -55,19 +55,19 @@ export function SpeakingVocabularyUpgradePanel({
               </p>
             ) : null}
             {th ? (
-              u.exampleTh ? (
+              u.exampleEn ? (
+                <p className="mt-2 font-medium text-neutral-800">
+                  <span className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
+                    ตัวอย่าง (EN){" "}
+                  </span>
+                  {u.exampleEn}
+                </p>
+              ) : u.exampleTh ? (
                 <p className="mt-2 text-neutral-800">
                   <span className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
                     ตัวอย่าง{" "}
                   </span>
                   {u.exampleTh}
-                </p>
-              ) : u.exampleEn ? (
-                <p className="mt-2 font-medium text-neutral-800">
-                  <span className="ep-stat text-[10px] font-bold uppercase text-neutral-500">
-                    ตัวอย่าง{" "}
-                  </span>
-                  {u.exampleEn}
                 </p>
               ) : null
             ) : (
