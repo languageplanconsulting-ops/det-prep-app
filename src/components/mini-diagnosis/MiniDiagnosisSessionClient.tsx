@@ -58,19 +58,25 @@ export function MiniDiagnosisSessionClient({ sessionId }: { sessionId: string })
   const timer = usePhaseTimer();
 
   const load = async () => {
-    setLoading(true);
-    const res = await fetch(`/api/mini-diagnosis/session/${sessionId}`, {
-      credentials: "same-origin",
-      cache: "no-store",
-    });
-    const json = (await res.json().catch(() => ({}))) as { session?: SessionPayload; error?: string };
-    if (!res.ok || !json.session) {
-      setError(json.error ?? "Session not found");
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch(`/api/mini-diagnosis/session/${sessionId}`, {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      const json = (await res.json().catch(() => ({}))) as { session?: SessionPayload; error?: string };
+      if (!res.ok || !json.session) {
+        setError(json.error ?? "Session not found");
+        setLoading(false);
+        return;
+      }
+      setSession(json.session);
       setLoading(false);
-      return;
+    } catch {
+      setError("หน้านี้โหลดไม่สำเร็จ กรุณากดรีโหลดแล้วลองใหม่อีกครั้ง");
+      setLoading(false);
     }
-    setSession(json.session);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -114,25 +120,35 @@ export function MiniDiagnosisSessionClient({ sessionId }: { sessionId: string })
 
   const submit = async (answer: unknown) => {
     if (!current || submitting) return;
-    setSubmitting(true);
-    const res = await fetch(`/api/mini-diagnosis/session/${sessionId}/submit-step`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ stepIndex: current.step_index, answer }),
-    });
-    const json = (await res.json().catch(() => ({}))) as { complete?: boolean; error?: string };
-    if (!res.ok || json.error) {
-      setError(json.error ?? "Submit failed");
+    try {
+      setSubmitting(true);
+      setError(null);
+      const res = await fetch(`/api/mini-diagnosis/session/${sessionId}/submit-step`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ stepIndex: current.step_index, answer }),
+      });
+      const json = (await res.json().catch(() => ({}))) as { complete?: boolean; error?: string };
+      if (!res.ok || json.error) {
+        setError(json.error ?? "Submit failed");
+        setSubmitting(false);
+        return;
+      }
+      if (json.complete) {
+        if (typeof window !== "undefined") {
+          window.location.assign(`/mini-diagnosis/results/${sessionId}`);
+          return;
+        }
+        router.push(`/mini-diagnosis/results/${sessionId}`);
+        return;
+      }
+      await load();
       setSubmitting(false);
-      return;
+    } catch {
+      setError("ส่งคำตอบสำเร็จไม่ครบ กรุณาลองกดส่งอีกครั้งหรือรีโหลดหน้า");
+      setSubmitting(false);
     }
-    if (json.complete) {
-      router.push(`/mini-diagnosis/results/${sessionId}`);
-      return;
-    }
-    await load();
-    setSubmitting(false);
   };
 
   if (error) return <div className="p-8 text-center font-bold text-red-700">{error}</div>;

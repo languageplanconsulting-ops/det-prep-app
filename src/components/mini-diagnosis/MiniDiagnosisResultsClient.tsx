@@ -239,18 +239,33 @@ function renderObjectiveReview(taskType: string, answer: unknown, item: StepItem
 export function MiniDiagnosisResultsClient({ sessionId }: { sessionId: string }) {
   const [result, setResult] = useState<ResultRow | null>(null);
   const [stepItems, setStepItems] = useState<StepItem[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    void (async () => {
+  const loadReport = async () => {
+    try {
+      setLoadError(null);
       const res = await fetch(`/api/mini-diagnosis/results/${sessionId}/report`, {
         credentials: "same-origin",
         cache: "no-store",
       });
-      if (!res.ok) return;
-      const json = (await res.json()) as { result?: ResultRow; stepItems?: StepItem[] };
+      const json = (await res.json().catch(() => ({}))) as {
+        result?: ResultRow;
+        stepItems?: StepItem[];
+        error?: string;
+      };
+      if (!res.ok || !json.result) {
+        setLoadError(json.error ?? "ยังโหลดผล mini diagnosis ไม่สำเร็จ");
+        return;
+      }
       setResult(json.result ?? null);
       setStepItems(json.stepItems ?? []);
-    })();
+    } catch {
+      setLoadError("ยังโหลดผล mini diagnosis ไม่สำเร็จ กรุณากดรีโหลดอีกครั้ง");
+    }
+  };
+
+  useEffect(() => {
+    void loadReport();
   }, [sessionId]);
 
   const responses = useMemo(() => result?.report_payload?.responses ?? [], [result]);
@@ -263,6 +278,35 @@ export function MiniDiagnosisResultsClient({ sessionId }: { sessionId: string })
       })),
     [responses, stepItems],
   );
+
+  if (loadError) {
+    return (
+      <main className="min-h-screen bg-[#f3f4f6] px-4 py-10">
+        <div className="mx-auto max-w-xl border-4 border-black bg-white p-6 text-center shadow-[8px_8px_0_0_#111111]">
+          <p className="font-mono text-[10px] font-black uppercase tracking-[0.24em] text-[#004AAD]">
+            Mini diagnosis
+          </p>
+          <h1 className="mt-3 text-2xl font-black text-[#111111]">หน้านี้โหลดไม่สำเร็จ</h1>
+          <p className="mt-3 text-sm font-bold text-red-700">{loadError}</p>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={() => void loadReport()}
+              className="border-4 border-black bg-[#004AAD] px-5 py-3 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#111111]"
+            >
+              Reload / โหลดใหม่
+            </button>
+            <Link
+              href="/mini-diagnosis/start"
+              className="border-4 border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#111111]"
+            >
+              Back / กลับ
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (!result) return <div className="p-8 text-center font-black">Loading diagnosis report…</div>;
 
