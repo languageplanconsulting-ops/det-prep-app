@@ -23,18 +23,9 @@ export function MainNav() {
   const {
     isAdmin,
     previewEligible,
-    realTier,
-    vipGrantedByCourse,
-    hasStripeSubscription,
     loading,
   } = useEffectiveTier();
-  const showPracticeNav =
-    !loading &&
-    (isAdmin ||
-      previewEligible === true ||
-      realTier !== "free" ||
-      vipGrantedByCourse ||
-      hasStripeSubscription);
+  const showPracticeNav = !loading;
 
   const navLinks = useMemo(
     () =>

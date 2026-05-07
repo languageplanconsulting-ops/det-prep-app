@@ -50,20 +50,9 @@ export function LandingPageClient({
   const [paymentErr, setPaymentErr] = useState<string | null>(null);
   const { user, loading: billingLoading, startUpgradePromptPay } = useBillingActions();
   const {
-    isAdmin,
-    previewEligible,
-    realTier,
-    vipGrantedByCourse,
-    hasStripeSubscription,
     loading: tierLoading,
   } = useEffectiveTier();
-  const canAccessPracticeHub =
-    !tierLoading &&
-    (isAdmin ||
-      previewEligible === true ||
-      realTier !== "free" ||
-      vipGrantedByCourse ||
-      hasStripeSubscription);
+  const canAccessPracticeHub = !tierLoading && !billingLoading && !!user;
   const practiceHref = canAccessPracticeHub ? "/practice" : "#pricing";
 
   useEffect(() => {
@@ -621,7 +610,7 @@ export function LandingPageClient({
                   {
                     title: "Read / Vocab 15 หมายถึงอะไร?",
                     body:
-                      "ฝึกข้อสอบเต็มชุดของสายอ่านและคำศัพท์ได้รวม 15 ชุดต่อเดือน",
+                      "ฝึกข้อสอบ reading แบ่งเป็น 2 ส่วนคือ Vocabulary และ Reading Skills โดยนักเรียนจะได้เข้าใช้งานรวม 15 ครั้งต่อเดือน",
                   },
                   {
                     title: "Literacy 20 หมายถึงอะไร?",
@@ -662,7 +651,7 @@ export function LandingPageClient({
                   {
                     title: "Read / Vocab 30 หมายถึงอะไร?",
                     body:
-                      "ฝึกข้อสอบเต็มชุดของสายอ่านและคำศัพท์ได้รวม 30 ชุดต่อเดือน",
+                      "ฝึกข้อสอบ reading แบ่งเป็น 2 ส่วนคือ Vocabulary และ Reading Skills โดยนักเรียนจะได้เข้าใช้งานรวม 30 ครั้งต่อเดือน",
                   },
                   {
                     title: "Literacy 50 หมายถึงอะไร?",

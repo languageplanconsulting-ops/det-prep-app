@@ -198,6 +198,17 @@ export default function PracticeHubPage() {
 
   const hubs = useMemo(
     () => [
+      {
+        title: "Starter test",
+        subtitle: "Free baseline check",
+        items: [
+          {
+            label: "Mini diagnosis",
+            progress: "15–17 minutes",
+            href: "/mini-diagnosis/start",
+          },
+        ],
+      },
       ...hubsWithoutMock,
       {
         title: "Mock test",

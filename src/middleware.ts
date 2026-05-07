@@ -121,7 +121,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Practice hub: subscribers, DB admins, or code-admin (with optional preview tier).
+  // Practice hub: any signed-in learner may enter. Per-skill and per-quota gates happen inside
+  // the product routes/components themselves, so free users can still access their starter practice.
   if (practicePath && !user) {
     return NextResponse.redirect(new URL("/", request.url));
   }
@@ -148,7 +149,7 @@ export async function middleware(request: NextRequest) {
       if (codeOk && previewActive) {
         // Logged-in user using admin code + preview-as-tier
       } else {
-        return NextResponse.redirect(new URL("/pricing?expired=1", request.url));
+        // Free learners are allowed in. Individual practice surfaces enforce their own limits.
       }
     }
   }
