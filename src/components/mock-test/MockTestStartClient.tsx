@@ -298,6 +298,7 @@ export function MockTestStartClient() {
   const baseLimit = MOCK_TEST_MONTHLY_LIMIT[effectiveTier];
   const limit = isPreviewMode && baseLimit === 0 ? 1 : baseLimit;
   const remainingCount = Math.max(0, limit - used) + mockAddonRemaining;
+  const visibleMockQuota = Math.max(limit, used + remainingCount);
   const tierOk = used < limit;
   const canStart = !!selectedSetId && (adminCanPreview || (hasUser === true && launchLive && tierOk));
   const bestAttempt = useMemo(
@@ -482,9 +483,11 @@ export function MockTestStartClient() {
             (Mock Credits)
           </p>
           <p className="mt-2 text-4xl font-black">
-            {tierLoading ? "…" : `${remainingCount} / ${limit}`}
+            {tierLoading ? "…" : `${remainingCount} / ${visibleMockQuota}`}
           </p>
-          <p className="font-mono text-[9px] font-bold opacity-60">RENEW: {nextMonthResetLabel()}</p>
+          <p className="font-mono text-[9px] font-bold opacity-60">
+            {mockAddonRemaining > 0 ? `INCLUDES +${mockAddonRemaining} ADD-ON` : `RENEW: ${nextMonthResetLabel()}`}
+          </p>
         </div>
       </div>
 

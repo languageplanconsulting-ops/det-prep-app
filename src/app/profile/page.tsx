@@ -12,6 +12,7 @@ import {
   TIER_DISPLAY,
   type Tier,
 } from "@/lib/access-control";
+import { getPackageSummary } from "@/lib/package-copy";
 import { getNonApiReminderSnapshot } from "@/lib/non-api-practice-usage";
 import { mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
@@ -28,6 +29,8 @@ type QuotaResponse = {
   };
   mock?: {
     used?: number;
+    planLimit?: number;
+    planRemaining?: number;
     addonRemaining?: number;
     totalRemaining?: number;
   };
@@ -156,11 +159,13 @@ export default function ProfilePage() {
   const [mockUsed, setMockUsed] = useState(0);
   const [aiAddonRemaining, setAiAddonRemaining] = useState(0);
   const [mockAddonRemaining, setMockAddonRemaining] = useState(0);
+  const [mockTotalVisibleLimit, setMockTotalVisibleLimit] = useState<number | null>(null);
+  const [mockPlanRemaining, setMockPlanRemaining] = useState<number | null>(null);
   const [aiPlanRemainingOverride, setAiPlanRemainingOverride] = useState<number | null>(null);
   const [aiLimitOverride, setAiLimitOverride] = useState<number | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [practiceTick, setPracticeTick] = useState(0);
-  const { effectiveTier, loading } = useEffectiveTier();
+  const { effectiveTier, loading, vipGrantedByCourse } = useEffectiveTier();
 
   const loadAccountSummary = useCallback(async () => {
     const supabase = getBrowserSupabase();
@@ -196,8 +201,16 @@ export default function ProfilePage() {
           : Math.max(0, Number(json.ai.totalLimit)),
       );
       setMockUsed(Math.max(0, Number(json.mock?.used ?? 0)));
+      setMockPlanRemaining(
+        json.mock?.planRemaining == null ? null : Math.max(0, Number(json.mock.planRemaining)),
+      );
       setAiAddonRemaining(Math.max(0, Number(json.ai?.addonRemaining ?? 0)));
       setMockAddonRemaining(Math.max(0, Number(json.mock?.addonRemaining ?? 0)));
+      setMockTotalVisibleLimit(
+        json.mock?.totalRemaining == null
+          ? null
+          : Math.max(0, Number(json.mock.used ?? 0) + Number(json.mock.totalRemaining)),
+      );
     } else {
       const [{ data: profile }, { data: sessions }] = await Promise.all([
         supabase
@@ -215,7 +228,9 @@ export default function ProfilePage() {
       setExpiresAt((profile?.tier_expires_at as string | null) ?? null);
       setAiUsed(Math.max(0, Number(profile?.ai_credits_used ?? 0)));
       setMockUsed((sessions ?? []).length);
+      setMockPlanRemaining(null);
       setAiLimitOverride(null);
+      setMockTotalVisibleLimit(null);
     }
     setLoadingStats(false);
   }, []);
@@ -251,7 +266,13 @@ export default function ProfilePage() {
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[effectiveTier];
   const aiRemaining = (aiPlanRemainingOverride ?? Math.max(0, aiLimit - aiUsed)) + aiAddonRemaining;
   const mockRemaining = Math.max(0, mockLimit - mockUsed) + mockAddonRemaining;
+  const visibleMockLimit = mockTotalVisibleLimit ?? Math.max(mockLimit, mockUsed + mockRemaining);
   const daysLeft = getDaysLeft(expiresAt);
+  const packageSummary = getPackageSummary(effectiveTier);
+  const packageDurationText =
+    vipGrantedByCourse && effectiveTier === "vip"
+      ? "สิทธิ์ VIP จากคอร์สที่ได้รับ ไม่มีวันหมดอายุจนกว่าจะมีการเปลี่ยนสิทธิ์"
+      : packageSummary.durationTh;
 
   const examCredits = useMemo(() => {
     const vocabulary = getNonApiReminderSnapshot("vocabulary", effectiveTier);
@@ -345,13 +366,13 @@ export default function ProfilePage() {
         label: "Full Mock Test / ข้อสอบเสมือนจริง",
         category: "Mock Exam / ข้อสอบจำลอง",
         remaining: mockRemaining,
-        limit: mockLimit,
+        limit: visibleMockLimit,
         used: mockUsed,
         unit: "ครั้ง / เดือน",
         note:
           mockAddonRemaining > 0
-            ? `รวมสิทธิ์ Mock Test เพิ่มอีก ${mockAddonRemaining} ครั้งจาก add-on ของคุณ`
-            : "จำนวนครั้งที่ใช้ได้ตามแพลนของคุณในรอบเดือนนี้",
+            ? `แพ็กเกจหลักเหลือ ${mockPlanRemaining ?? Math.max(0, mockLimit - mockUsed)} ครั้ง และมี add-on เพิ่มอีก ${mockAddonRemaining} ครั้ง`
+            : "จำนวนครั้งที่ใช้ได้ตามแพ็กเกจของคุณในรอบปัจจุบัน",
       },
       {
         id: "ai",
@@ -378,7 +399,9 @@ export default function ProfilePage() {
     effectiveTier,
     mockAddonRemaining,
     mockLimit,
+    mockPlanRemaining,
     mockRemaining,
+    visibleMockLimit,
     mockUsed,
     practiceTick,
   ]);
@@ -456,23 +479,23 @@ export default function ProfilePage() {
                 <p className="mt-1 text-sm text-neutral-500">
                   {TIER_DISPLAY[effectiveTier].priceThb === 0
                     ? "เริ่มต้นใช้งานฟรี"
-                    : `${TIER_DISPLAY[effectiveTier].priceThb} บาท`}
+                    : `${TIER_DISPLAY[effectiveTier].priceThb} บาท / 30 วัน`}
                 </p>
               </div>
             </div>
 
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               <div className="rounded-2xl border border-black/10 bg-white p-3 text-sm font-semibold text-neutral-700">
-                แพลนนี้ออกแบบให้คุณเห็นสิทธิ์ที่เหลืออยู่ชัดเจน และวางแผนการฝึกได้ง่ายขึ้น
+                {packageSummary.aiTh}
               </div>
               <div className="rounded-2xl border border-black/10 bg-white p-3 text-sm font-semibold text-neutral-700">
-                หากแพลนของคุณหมดอายุ ระบบจะพาไปเลือกแพลนใหม่เพื่อใช้งานต่อ
+                {packageSummary.mockTh}
               </div>
               <div className="rounded-2xl border border-black/10 bg-white p-3 text-sm font-semibold text-neutral-700">
-                AI Feedback และ Mock Test จะแสดงรวมสิทธิ์จากแพลนและ add-on ของคุณ
+                {packageSummary.practiceTh}
               </div>
               <div className="rounded-2xl border border-black/10 bg-white p-3 text-sm font-semibold text-neutral-700">
-                สำหรับผู้ใช้ฟรี สิทธิ์ทดลองบางประเภทเป็นแบบใช้ได้ 1 ครั้งตลอดอายุบัญชี
+                {packageDurationText}
               </div>
             </div>
           </BrutalPanel>

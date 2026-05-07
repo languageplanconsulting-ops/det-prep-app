@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { useBillingActions } from "@/hooks/useBillingActions";
+import { getPackageSummary } from "@/lib/package-copy";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { ADD_ON_CATALOG, type AddOnSku } from "@/lib/paywall-upsell";
 
@@ -31,30 +32,30 @@ const PLAN_CARDS: Array<{
   },
   {
     tier: "basic",
-    price: "฿399 / เดือน",
+    price: "฿399 / 30 วัน",
     headlineTh: "เหมาะสำหรับคนที่เริ่มจริงจังและอยากวัดจุดอ่อน",
     headlineEn: "Best for steady learners starting serious prep.",
-    ai: "AI Feedback 12 ครั้ง / เดือน",
-    mocks: "Mock Test 2 ครั้ง / เดือน",
-    examAccess: "Comprehension 15 · Vocabulary 15 · Literacy 20 · Conversation 10",
+    ai: "AI Feedback 12 ครั้ง / 30 วัน",
+    mocks: "Mock Test 2 ครั้ง / 30 วัน",
+    examAccess: "Comprehension 15 · Vocabulary 15 · Literacy 20 · Conversation 10 / 30 วัน",
   },
   {
     tier: "premium",
-    price: "฿699 / เดือน",
+    price: "฿699 / 30 วัน",
     headlineTh: "เหมาะสำหรับคนที่ต้องการอัปคะแนนแบบต่อเนื่อง",
     headlineEn: "Best for frequent scoring, reports, and mock practice.",
-    ai: "AI Feedback 30 ครั้ง / เดือน",
-    mocks: "Mock Test 4 ครั้ง / เดือน",
-    examAccess: "Comprehension 30 · Vocabulary 30 · Literacy 50 · Conversation 20",
+    ai: "AI Feedback 30 ครั้ง / 30 วัน",
+    mocks: "Mock Test 4 ครั้ง / 30 วัน",
+    examAccess: "Comprehension 30 · Vocabulary 30 · Literacy 50 · Conversation 20 / 30 วัน",
     recommended: true,
   },
   {
     tier: "vip",
-    price: "฿999 / เดือน",
+    price: "฿999 / 30 วัน",
     headlineTh: "สำหรับผู้เตรียมสอบจริงจังที่ต้องการความยืดหยุ่นสูงสุด",
     headlineEn: "Best for the most intensive, least-interrupted prep.",
-    ai: "AI Feedback 60 ครั้ง / เดือน",
-    mocks: "Mock Test 6 ครั้ง / เดือน",
+    ai: "AI Feedback 60 ครั้ง / 30 วัน",
+    mocks: "Mock Test 6 ครั้ง / 30 วัน",
     examAccess: "Practice lanes ไม่จำกัด + priority-style prep feel",
   },
 ];
@@ -77,6 +78,10 @@ function PricingPageContent() {
   const sessionId = searchParams.get("session_id");
   const expired = searchParams.get("expired");
   const focusedAddOn = focusedSku ? ADD_ON_CATALOG[focusedSku as AddOnSku] : null;
+  const activePlanSummary =
+    focusedPlan === "basic" || focusedPlan === "premium" || focusedPlan === "vip"
+      ? getPackageSummary(focusedPlan)
+      : getPackageSummary(effectiveTier);
 
   useEffect(() => {
     if (focus === "addons") {
@@ -279,6 +284,26 @@ function PricingPageContent() {
                       ? "สิทธิ์ add-on ของคุณพร้อมใช้งานแล้ว สามารถเริ่มฝึกต่อได้เลย"
                       : activationMessage || "เราเปิดสิทธิ์แพลน 30 วันให้แล้ว สามารถเริ่มฝึกต่อได้ทันที"}
             </p>
+            {focus !== "addons" ? (
+              <div className="mt-4 grid gap-3 border-[3px] border-black bg-white p-4 shadow-[4px_4px_0_0_#111] md:grid-cols-2">
+                <div>
+                  <p className="font-mono text-[10px] font-black uppercase tracking-[0.22em] text-[#166534]">
+                    Activated package
+                  </p>
+                  <h3 className="mt-2 text-xl font-black text-neutral-900">
+                    {activePlanSummary.labelTh} / {activePlanSummary.labelEn}
+                  </h3>
+                  <p className="mt-1 text-sm font-semibold text-neutral-700">
+                    {activePlanSummary.durationTh}
+                  </p>
+                </div>
+                <div className="grid gap-2 text-sm font-semibold text-neutral-800">
+                  <p>{activePlanSummary.aiTh}</p>
+                  <p>{activePlanSummary.mockTh}</p>
+                  <p>{activePlanSummary.practiceTh}</p>
+                </div>
+              </div>
+            ) : null}
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
                 href={
