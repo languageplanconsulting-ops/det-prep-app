@@ -14,13 +14,42 @@ export function WritingReportPageClient({ attemptId }: { attemptId: string }) {
   );
 
   useLayoutEffect(() => {
+    let cancelled = false;
+
     const handoff = takeReportHandoff<WritingAttemptReport>(attemptId);
     if (handoff?.attemptId) {
       saveWritingReport(handoff);
-      setReport(handoff);
+      if (!cancelled) setReport(handoff);
       return;
     }
-    setReport(loadWritingReport(attemptId));
+
+    const local = loadWritingReport(attemptId);
+    if (local) {
+      if (!cancelled) setReport(local);
+      return;
+    }
+
+    void (async () => {
+      try {
+        const res = await fetch(`/api/writing-report/${attemptId}`, {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (!res.ok) {
+          if (!cancelled) setReport(null);
+          return;
+        }
+        const serverReport = (await res.json()) as WritingAttemptReport;
+        saveWritingReport(serverReport);
+        if (!cancelled) setReport(serverReport);
+      } catch {
+        if (!cancelled) setReport(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [attemptId]);
 
   if (report === undefined) {
