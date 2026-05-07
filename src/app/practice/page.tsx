@@ -275,6 +275,24 @@ export default function PracticeHubPage() {
         </p>
       </header>
 
+      {effectiveTier === "free" ? (
+        <div className="rounded-[4px] border-4 border-black bg-[#fff7d1] p-5 shadow-[6px_6px_0_0_#111]">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#004AAD]">
+            Free starter access
+          </p>
+          <h2 className="mt-2 text-2xl font-black text-neutral-900">
+            ผู้ใช้ฟรีเริ่มทำข้อสอบจริงได้อย่างละ 1 ครั้ง
+          </h2>
+          <p className="mt-2 max-w-4xl text-sm font-semibold leading-7 text-neutral-800">
+            คุณสามารถลอง <strong>Reading</strong>, <strong>Vocabulary</strong>, <strong>Dictation</strong>,
+            {" "} <strong>Fill in the Blank</strong>, <strong>Real Word</strong>, และ{" "}
+            <strong>Interactive Conversation</strong> ได้อย่างละ 1 ครั้งตลอดอายุบัญชี
+            พร้อม <strong>AI Feedback 1 เครดิต</strong> สำหรับเลือกลองงานพูดหรือเขียน 1 งาน
+            ส่วน <strong>Full Mock Test</strong> ยังไม่รวมในแพ็กเกจฟรี
+          </p>
+        </div>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-2">
         {hubs.map((hub) => (
           <BrutalPanel

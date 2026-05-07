@@ -26,9 +26,11 @@ export function getPackageSummary(tier: Tier): PackageSummary {
       aiEn: "1 lifetime AI feedback credit",
       mockTh: "Mock Test 0 ครั้ง",
       mockEn: "0 mock tests",
-      practiceTh: "ทดลองแต่ละ exam lane ได้อย่างละ 1 ครั้ง",
+      practiceTh:
+        "ใช้ฟรีได้อย่างละ 1 ครั้งสำหรับ Reading, Vocabulary, Dictation, Fill in the Blank, Real Word และ Interactive Conversation",
       bulletsTh: [
-        "เหมาะสำหรับลองระบบและดูรูปแบบข้อสอบก่อนอัปเกรด",
+        "เหมาะสำหรับลองระบบและดูรูปแบบข้อสอบจริงก่อนอัปเกรด",
+        "ใช้ฟรีได้อย่างละ 1 ครั้งในข้อสอบ non-mock ที่รองรับทุกประเภท",
         "ใช้ Personalized Feedback ได้ 1 ครั้งในงานพูด/เขียนที่กำหนด",
         "ไม่มี Full Mock Test ในแพ็กเกจฟรี",
       ],

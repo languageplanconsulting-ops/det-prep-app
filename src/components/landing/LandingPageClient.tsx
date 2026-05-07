@@ -577,7 +577,7 @@ export function LandingPageClient({
                 price: "฿0",
                 summaryRows: [
                   "1 mini diagnosis",
-                  "1 starter test for each exam lane",
+                  "1 free attempt for each real exam lane",
                   "1 personalized feedback credit",
                   "0 mock tests",
                 ],

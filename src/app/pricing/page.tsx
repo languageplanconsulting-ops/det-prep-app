@@ -28,7 +28,8 @@ const PLAN_CARDS: Array<{
     headlineEn: "Explore the platform before committing.",
     ai: "AI Feedback 1 ครั้งตลอดอายุการใช้งาน",
     mocks: "Mock Test 0 ครั้ง / เดือน",
-    examAccess: "Starter test lane ละ 1 ครั้ง",
+    examAccess:
+      "Reading, Vocabulary, Dictation, Fill in the Blank, Real Word และ Interactive Conversation ฟรีอย่างละ 1 ครั้ง",
   },
   {
     tier: "basic",
