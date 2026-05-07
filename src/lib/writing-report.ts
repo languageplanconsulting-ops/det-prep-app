@@ -17,10 +17,10 @@ import {
 } from "@/lib/production-writing-penalties";
 
 export const WRITING_RUBRIC_WEIGHTS = {
-  grammar: 0.3,
-  vocabulary: 0.25,
-  coherence: 0.25,
-  taskRelevancy: 0.2,
+  grammar: 0.4,
+  vocabulary: 0.3,
+  coherence: 0.2,
+  taskRelevancy: 0.1,
 } as const;
 
 function countWords(text: string): number {

@@ -17,9 +17,8 @@ import {
 } from "@/lib/writing-report-notebook";
 import { resolveGrammarFixDisplay } from "@/lib/grammar-fix-display";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
-import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
-import { withStudyPackDefaults } from "@/lib/writing-report";
+import { WRITING_RUBRIC_WEIGHTS, withStudyPackDefaults } from "@/lib/writing-report";
 import { getTopicById } from "@/lib/writing-storage";
 import type { SpeakingVocabularyUpgrade } from "@/types/speaking";
 import type {
@@ -143,7 +142,17 @@ function StudySentenceRow({
   return (
     <li className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]">
       {th ? (
-        <p className="font-medium text-neutral-900">{s.th?.trim() ? s.th : s.en}</p>
+        <>
+          <p className="font-medium text-neutral-900">{s.th?.trim() ? s.th : s.en}</p>
+          {s.en?.trim() ? (
+            <p className="mt-1 text-neutral-600">
+              <span className="ep-stat text-[10px] font-bold uppercase tracking-wide text-neutral-500">
+                English translation
+              </span>
+              <span className="mt-1 block">{s.en}</span>
+            </p>
+          ) : null}
+        </>
       ) : (
         <>
           <p className="font-medium text-neutral-900">{s.en}</p>
@@ -222,10 +231,10 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
   const uiLocale = "th" as const;
   const rubricTh = (
     <>
-      น้ำหนักเกณฑ์: ไวยากรณ์ {SPEAKING_RUBRIC_WEIGHTS.grammar * 100}% · คำศัพท์{" "}
-      {SPEAKING_RUBRIC_WEIGHTS.vocabulary * 100}% · ความต่อเนื่อง{" "}
-      {SPEAKING_RUBRIC_WEIGHTS.coherence * 100}% · การตอบโจทย์{" "}
-      {SPEAKING_RUBRIC_WEIGHTS.taskRelevancy * 100}%
+      น้ำหนักเกณฑ์: ไวยากรณ์ {WRITING_RUBRIC_WEIGHTS.grammar * 100}% · คำศัพท์{" "}
+      {WRITING_RUBRIC_WEIGHTS.vocabulary * 100}% · ความต่อเนื่อง{" "}
+      {WRITING_RUBRIC_WEIGHTS.coherence * 100}% · การตอบโจทย์{" "}
+      {WRITING_RUBRIC_WEIGHTS.taskRelevancy * 100}%
     </>
   );
   const grammarFixes: GrammarFixItem[] = fullReport.grammar.breakdown

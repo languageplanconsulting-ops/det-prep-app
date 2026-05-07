@@ -92,8 +92,8 @@ WORKFLOW (mandatory):
 2) For EACH follow-up answer (if any), punctuate separately → punctuatedFollowUpAnswers array in the SAME order as the raw follow-ups. Same rules.
 3) Score ONLY using the punctuated versions. All breakdown excerpts (exact quotes) must be exact contiguous substrings of the punctuated text for the relevant part (main or that follow-up).
 
-Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
-Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) × 1.6, each subscore 0-100.
+Score four criteria with weights: grammar 40%, vocabulary 30%, coherence 20%, task relevancy 10%.
+Total 0-160 = (0.4*G + 0.3*V + 0.2*C + 0.1*T) × 1.6, each subscore 0-100.
 
 For EACH criterion summary, include (A) brief assessment and (B) a line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" plus a concrete action tied to THIS learner's wording.
 
