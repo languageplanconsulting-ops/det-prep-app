@@ -124,7 +124,7 @@ export async function POST(req: Request) {
       customer: customerId,
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${base}/pricing?checkout=success&plan=${encodeURIComponent(tierRaw)}`,
+      success_url: `${base}/pricing?checkout=success&plan=${encodeURIComponent(tierRaw)}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/pricing?checkout=cancel&plan=${encodeURIComponent(tierRaw)}`,
       metadata: {
         userId,

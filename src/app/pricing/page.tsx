@@ -66,11 +66,15 @@ function PricingPageContent() {
   const { effectiveTier } = useEffectiveTier();
   const searchParams = useSearchParams();
   const [checkoutError, setCheckoutError] = useState("");
+  const [activationState, setActivationState] = useState<"idle" | "confirming" | "activated" | "pending" | "error">("idle");
+  const [activationMessage, setActivationMessage] = useState("");
+  const [handledSessionId, setHandledSessionId] = useState<string | null>(null);
 
   const focus = searchParams.get("focus");
   const focusedSku = searchParams.get("sku");
   const checkoutStatus = searchParams.get("checkout");
   const focusedPlan = searchParams.get("plan");
+  const sessionId = searchParams.get("session_id");
   const expired = searchParams.get("expired");
   const focusedAddOn = focusedSku ? ADD_ON_CATALOG[focusedSku as AddOnSku] : null;
 
@@ -82,6 +86,82 @@ function PricingPageContent() {
       }
     }
   }, [focus]);
+
+  useEffect(() => {
+    if (checkoutStatus !== "success") {
+      setActivationState("idle");
+      setActivationMessage("");
+      setHandledSessionId(null);
+      return;
+    }
+
+    if (!sessionId) {
+      window.dispatchEvent(new Event("ep-refresh-tier"));
+      setActivationState("activated");
+      setActivationMessage("เรารีเฟรชสิทธิ์ให้แล้ว หากสถานะยังไม่เปลี่ยนภายในไม่กี่วินาที ระบบกำลังรอ webhook จาก Stripe อยู่");
+      return;
+    }
+
+    if (handledSessionId === sessionId) {
+      return;
+    }
+
+    let cancelled = false;
+    const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+    const confirmCheckout = async () => {
+      setActivationState("confirming");
+      setActivationMessage("กำลังยืนยันการชำระเงินและเปิดสิทธิ์แพลนของคุณ...");
+
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        const res = await fetch("/api/stripe/confirm-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          cache: "no-store",
+          body: JSON.stringify({ sessionId }),
+        });
+
+        const json = (await res.json().catch(() => ({}))) as {
+          ok?: boolean;
+          pending?: boolean;
+          error?: string;
+        };
+
+        if (cancelled) return;
+
+        if (res.ok && json.ok) {
+          setHandledSessionId(sessionId);
+          setActivationState("activated");
+          setActivationMessage("สิทธิ์ของคุณพร้อมใช้งานแล้ว สามารถเริ่มฝึกต่อได้ทันที");
+          window.dispatchEvent(new Event("ep-refresh-tier"));
+          return;
+        }
+
+        if (res.status === 202 && json.pending) {
+          if (attempt < 3) {
+            await sleep(1500);
+            continue;
+          }
+          setHandledSessionId(sessionId);
+          setActivationState("pending");
+          setActivationMessage("Stripe ยืนยันว่าชำระเงินกำลังปิดงานอยู่ ระบบจะอัปเดตสิทธิ์ให้อัตโนมัติในอีกไม่กี่วินาที");
+          window.dispatchEvent(new Event("ep-refresh-tier"));
+          return;
+        }
+
+        setHandledSessionId(sessionId);
+        setActivationState("error");
+        setActivationMessage(json.error ?? "ยังยืนยันสิทธิ์หลังชำระเงินไม่สำเร็จ กรุณารีเฟรชหน้าอีกครั้ง");
+        return;
+      }
+    };
+
+    void confirmCheckout();
+    return () => {
+      cancelled = true;
+    };
+  }, [checkoutStatus, handledSessionId, sessionId]);
 
   const recommendation = useMemo(() => {
     if (effectiveTier === "free") return "premium";
@@ -189,9 +269,15 @@ function PricingPageContent() {
               ชำระเงินสำเร็จแล้ว / Payment successful
             </p>
             <p className="mt-1 text-sm font-semibold text-neutral-800">
-              {focus === "addons"
-                ? "สิทธิ์ add-on ของคุณถูกเติมแล้ว หากยังไม่เห็นยอดใหม่ ให้รีเฟรชหน้าอีกครั้ง"
-                : "เราเปิดสิทธิ์แพลน 30 วันให้แล้ว หากยังไม่เห็นยอดใหม่ ให้รีเฟรชหน้าอีกครั้ง"}
+              {activationState === "confirming"
+                ? activationMessage
+                : activationState === "pending"
+                  ? activationMessage
+                  : activationState === "error"
+                    ? activationMessage
+                    : focus === "addons"
+                      ? "สิทธิ์ add-on ของคุณพร้อมใช้งานแล้ว สามารถเริ่มฝึกต่อได้เลย"
+                      : activationMessage || "เราเปิดสิทธิ์แพลน 30 วันให้แล้ว สามารถเริ่มฝึกต่อได้ทันที"}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link

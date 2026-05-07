@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { VIPBadge } from "@/components/ui/VIPBadge";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -55,6 +55,8 @@ type ExamCreditCard = {
   unit: string;
   note: string;
 };
+
+const TIER_REFRESH_EVENT = "ep-refresh-tier";
 
 function formatExpiry(expiresAt: string | null, tier: Tier): string {
   if (!expiresAt) return tier === "free" || tier === "vip" ? "ไม่มีวันหมดอายุ" : "—";
@@ -160,6 +162,64 @@ export default function ProfilePage() {
   const [practiceTick, setPracticeTick] = useState(0);
   const { effectiveTier, loading } = useEffectiveTier();
 
+  const loadAccountSummary = useCallback(async () => {
+    const supabase = getBrowserSupabase();
+    if (!supabase) {
+      setLoadingStats(false);
+      return;
+    }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    setEmail(user?.email ?? null);
+    if (!user) {
+      setLoadingStats(false);
+      return;
+    }
+
+    const res = await fetch("/api/account/quota-summary", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const json = (await res.json()) as QuotaResponse;
+      setExpiresAt(json.expiresAt ?? null);
+      setAiUsed(Math.max(0, Number(json.ai?.used ?? 0)));
+      setAiPlanRemainingOverride(
+        json.ai?.planRemaining == null ? null : Math.max(0, Number(json.ai.planRemaining)),
+      );
+      setAiLimitOverride(
+        json.ai?.totalLimit == null
+          ? json.ai?.planLimit == null
+            ? null
+            : Math.max(0, Number(json.ai.planLimit))
+          : Math.max(0, Number(json.ai.totalLimit)),
+      );
+      setMockUsed(Math.max(0, Number(json.mock?.used ?? 0)));
+      setAiAddonRemaining(Math.max(0, Number(json.ai?.addonRemaining ?? 0)));
+      setMockAddonRemaining(Math.max(0, Number(json.mock?.addonRemaining ?? 0)));
+    } else {
+      const [{ data: profile }, { data: sessions }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("tier_expires_at, ai_credits_used")
+          .eq("id", user.id)
+          .maybeSingle(),
+        supabase
+          .from("mock_fixed_sessions")
+          .select("id")
+          .eq("user_id", user.id)
+          .gte("started_at", mockFixedMonthStartIso()),
+      ]);
+
+      setExpiresAt((profile?.tier_expires_at as string | null) ?? null);
+      setAiUsed(Math.max(0, Number(profile?.ai_credits_used ?? 0)));
+      setMockUsed((sessions ?? []).length);
+      setAiLimitOverride(null);
+    }
+    setLoadingStats(false);
+  }, []);
+
   useEffect(() => {
     const refreshPractice = () => setPracticeTick((value) => value + 1);
     for (const eventName of PRACTICE_STORAGE_EVENTS) {
@@ -173,61 +233,19 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    void (async () => {
-      const supabase = getBrowserSupabase();
-      if (!supabase) {
-        setLoadingStats(false);
-        return;
-      }
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setEmail(user?.email ?? null);
-      if (!user) {
-        setLoadingStats(false);
-        return;
-      }
+    void loadAccountSummary();
+  }, [loadAccountSummary]);
 
-      const res = await fetch("/api/account/quota-summary", { credentials: "same-origin" });
-      if (res.ok) {
-        const json = (await res.json()) as QuotaResponse;
-        setExpiresAt(json.expiresAt ?? null);
-        setAiUsed(Math.max(0, Number(json.ai?.used ?? 0)));
-        setAiPlanRemainingOverride(
-          json.ai?.planRemaining == null ? null : Math.max(0, Number(json.ai.planRemaining)),
-        );
-        setAiLimitOverride(
-          json.ai?.totalLimit == null
-            ? json.ai?.planLimit == null
-              ? null
-              : Math.max(0, Number(json.ai.planLimit))
-            : Math.max(0, Number(json.ai.totalLimit)),
-        );
-        setMockUsed(Math.max(0, Number(json.mock?.used ?? 0)));
-        setAiAddonRemaining(Math.max(0, Number(json.ai?.addonRemaining ?? 0)));
-        setMockAddonRemaining(Math.max(0, Number(json.mock?.addonRemaining ?? 0)));
-      } else {
-        const [{ data: profile }, { data: sessions }] = await Promise.all([
-          supabase
-            .from("profiles")
-            .select("tier_expires_at, ai_credits_used")
-            .eq("id", user.id)
-            .maybeSingle(),
-          supabase
-            .from("mock_fixed_sessions")
-            .select("id")
-            .eq("user_id", user.id)
-            .gte("started_at", mockFixedMonthStartIso()),
-        ]);
-
-        setExpiresAt((profile?.tier_expires_at as string | null) ?? null);
-        setAiUsed(Math.max(0, Number(profile?.ai_credits_used ?? 0)));
-        setMockUsed((sessions ?? []).length);
-        setAiLimitOverride(null);
-      }
-      setLoadingStats(false);
-    })();
-  }, []);
+  useEffect(() => {
+    const handleRefresh = () => {
+      setLoadingStats(true);
+      void loadAccountSummary();
+    };
+    window.addEventListener(TIER_REFRESH_EVENT, handleRefresh);
+    return () => {
+      window.removeEventListener(TIER_REFRESH_EVENT, handleRefresh);
+    };
+  }, [loadAccountSummary]);
 
   const aiLimit = aiLimitOverride ?? AI_MONTHLY_LIMIT[effectiveTier];
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[effectiveTier];

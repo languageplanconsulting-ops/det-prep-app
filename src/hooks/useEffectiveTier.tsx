@@ -39,6 +39,7 @@ export type EffectiveTierState = {
 };
 
 const EffectiveTierContext = createContext<EffectiveTierState | null>(null);
+const TIER_REFRESH_EVENT = "ep-refresh-tier";
 
 export function EffectiveTierProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -142,6 +143,16 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       void refreshProfile();
     });
     return () => subscription.unsubscribe();
+  }, [refreshProfile]);
+
+  useEffect(() => {
+    const handleRefresh = () => {
+      void refreshProfile();
+    };
+    window.addEventListener(TIER_REFRESH_EVENT, handleRefresh);
+    return () => {
+      window.removeEventListener(TIER_REFRESH_EVENT, handleRefresh);
+    };
   }, [refreshProfile]);
 
   useEffect(() => {

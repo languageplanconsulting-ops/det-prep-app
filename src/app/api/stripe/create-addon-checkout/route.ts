@@ -79,7 +79,7 @@ export async function POST(req: Request) {
             },
           },
       ],
-      success_url: `${base}/pricing?checkout=success&focus=addons&sku=${encodeURIComponent(sku)}`,
+      success_url: `${base}/pricing?checkout=success&focus=addons&sku=${encodeURIComponent(sku)}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${base}/pricing?checkout=cancel&focus=addons&sku=${encodeURIComponent(sku)}`,
       metadata: {
         userId: user.id,
