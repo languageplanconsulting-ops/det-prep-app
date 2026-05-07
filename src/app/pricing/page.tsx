@@ -72,6 +72,7 @@ function PricingPageContent() {
   const checkoutStatus = searchParams.get("checkout");
   const focusedPlan = searchParams.get("plan");
   const expired = searchParams.get("expired");
+  const focusedAddOn = focusedSku ? ADD_ON_CATALOG[focusedSku as AddOnSku] : null;
 
   useEffect(() => {
     if (focus === "addons") {
@@ -192,6 +193,37 @@ function PricingPageContent() {
                 ? "สิทธิ์ add-on ของคุณถูกเติมแล้ว หากยังไม่เห็นยอดใหม่ ให้รีเฟรชหน้าอีกครั้ง"
                 : "เราเปิดสิทธิ์แพลน 30 วันให้แล้ว หากยังไม่เห็นยอดใหม่ ให้รีเฟรชหน้าอีกครั้ง"}
             </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href={
+                  focus === "addons" && focusedAddOn?.kind === "mock"
+                    ? "/mock-test/start"
+                    : "/practice"
+                }
+                className="border-[3px] border-black bg-[#004aad] px-5 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111]"
+              >
+                {focus === "addons" && focusedAddOn?.kind === "mock"
+                  ? "เริ่มทำ Mock Test"
+                  : "เริ่มใช้ Practice"}
+              </Link>
+              <Link
+                href="/profile"
+                className="border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111]"
+              >
+                ดูสิทธิ์ในโปรไฟล์
+              </Link>
+              <Link
+                href="/mock-test/start"
+                className="border-[3px] border-black bg-[#ffcc00] px-5 py-3 text-sm font-black uppercase text-neutral-900 shadow-[4px_4px_0_0_#111]"
+              >
+                ไปหน้า Mock Test
+              </Link>
+            </div>
+            {focusedPlan ? (
+              <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-neutral-600">
+                Active checkout: {focusedPlan}
+              </p>
+            ) : null}
           </section>
         ) : null}
 
