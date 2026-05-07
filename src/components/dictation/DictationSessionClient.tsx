@@ -279,11 +279,7 @@ export function DictationSessionClient({
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">Dictation set {setNumber}</p>
         <h1 className="mt-2 text-2xl font-black tracking-tight">Listen and type</h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-600">
-          Use <strong>Play</strong> / <strong>Pause</strong> and <strong>Replay −5s</strong> as needed. Type the full sentence in the box
-          — no feedback until you submit.
-        </p>
-        <p className="mt-2 text-xs font-bold text-neutral-600">
-          Audio source: {hasSavedAudio ? "Saved audio (fallback: Gemini API -> Browser TTS)" : "Gemini API fallback"}
+          Listen carefully and type the full sentence in the box. You will see feedback after you submit.
         </p>
       </header>
 
