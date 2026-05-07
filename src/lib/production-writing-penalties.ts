@@ -2,6 +2,8 @@ type Issue = {
   excerpt: string;
   reasonEn: string;
   reasonTh: string;
+  suggestionEn?: string;
+  suggestionTh?: string;
 };
 
 const COMMA_SPLICE_RIGHT_START =
@@ -158,8 +160,10 @@ export function detectGrammarStructureIssues(text: string): Issue[] {
   if (!hasPassiveVoice(source)) {
     issues.push({
       excerpt,
-      reasonEn: "No passive voice appears in this answer. Grammar score includes a -10% structure penalty.",
-      reasonTh: "คำตอบนี้ไม่มี passive voice จึงถูกหักคะแนน grammar ด้านโครงสร้าง -10%",
+      reasonEn: "Grammar -10%: no passive voice appears in this answer.",
+      reasonTh: "หักคะแนน grammar -10% เพราะคำตอบนี้ไม่มี passive voice",
+      suggestionEn: "Add one natural passive pattern such as “is being built”, “was made”, or “is surrounded by” if it fits the task.",
+      suggestionTh: "ลองเพิ่ม passive voice แบบธรรมชาติ 1 จุด เช่น is being built, was made หรือ is surrounded by ถ้าเข้ากับโจทย์",
     });
   }
 
@@ -167,9 +171,13 @@ export function detectGrammarStructureIssues(text: string): Issue[] {
     issues.push({
       excerpt,
       reasonEn:
-        "No complex sentence pattern appears here (for example: subordinator, relative clause, -ing opener, or comma-based structure). Grammar score includes a -10% structure penalty.",
+        "Grammar -10%: no complex sentence pattern appears here (for example: subordinator, relative clause, -ing opener, or comma-based structure).",
       reasonTh:
-        "คำตอบนี้ยังไม่มีโครงสร้างประโยคซับซ้อน (เช่น คำเชื่อมย่อย relative clause, โครงสร้าง V-ing หรือประโยคที่มี comma) จึงถูกหักคะแนน grammar ด้านโครงสร้าง -10%",
+        "หักคะแนน grammar -10% เพราะคำตอบนี้ยังไม่มีโครงสร้างประโยคซับซ้อน เช่น although/because, which/who/where, V-ing หรือประโยคที่มี comma",
+      suggestionEn:
+        "Try one longer sentence with a connector like because/although, a relative clause like which/who, or an -ing opener.",
+      suggestionTh:
+        "ลองเพิ่มประโยคที่ยาวขึ้นอีก 1 ประโยค โดยใช้ because/although, which/who หรือเปิดด้วย V-ing",
     });
   }
 

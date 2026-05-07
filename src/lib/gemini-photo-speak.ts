@@ -335,6 +335,8 @@ export async function generatePhotoSpeakReportWithGemini(params: {
         en: issue.reasonEn,
         th: issue.reasonTh,
         excerpt: issue.excerpt,
+        suggestionEn: issue.suggestionEn,
+        suggestionTh: issue.suggestionTh,
       });
     }
   }

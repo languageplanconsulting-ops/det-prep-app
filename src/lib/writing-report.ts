@@ -487,6 +487,8 @@ export function buildWritingAttemptReport(
         excerpt: issue.excerpt || ex,
         en: issue.reasonEn,
         th: issue.reasonTh,
+        suggestionEn: issue.suggestionEn,
+        suggestionTh: issue.suggestionTh,
       })),
       ...grammarPunctuationIssues.map((issue, idx) => ({
         excerpt: issue.excerpt || ex,

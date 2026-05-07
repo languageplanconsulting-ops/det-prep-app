@@ -382,6 +382,8 @@ export async function generateWritingReportWithGemini(params: {
         en: issue.reasonEn,
         th: issue.reasonTh,
         excerpt: issue.excerpt,
+        suggestionEn: issue.suggestionEn,
+        suggestionTh: issue.suggestionTh,
       });
     }
   }
