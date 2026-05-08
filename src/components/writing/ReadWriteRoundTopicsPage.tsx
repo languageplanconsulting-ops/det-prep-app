@@ -3,28 +3,63 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { pullContentBankSnapshotFromSupabase } from "@/lib/content-bank-sync";
 import { ReadWriteTopicExamCard } from "@/components/writing/ReadWriteTopicExamCard";
 import type { WritingRoundNum } from "@/lib/writing-constants";
-import { loadWritingTopicsByRound } from "@/lib/writing-storage";
+import {
+  loadWritingTopicsByRound,
+  subscribeWritingTopics,
+} from "@/lib/writing-storage";
+import type { WritingTopic } from "@/types/writing";
 
 export function ReadWriteRoundTopicsPage({ round }: { round: number }) {
-  const [v, setV] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [hydrating, setHydrating] = useState(true);
+  const [topics, setTopics] = useState<WritingTopic[]>([]);
   const valid = round === 1 || round === 2 || round === 3 || round === 4 || round === 5;
   const r = (valid ? round : 1) as WritingRoundNum;
 
   useEffect(() => {
-    const refresh = () => setV((n) => n + 1);
-    window.addEventListener("storage", refresh);
-    window.addEventListener("ep-writing-topics", refresh);
-    window.addEventListener("ep-read-write-topic-progress", refresh);
-    window.addEventListener("focus", refresh);
-    return () => {
-      window.removeEventListener("storage", refresh);
-      window.removeEventListener("ep-writing-topics", refresh);
-      window.removeEventListener("ep-read-write-topic-progress", refresh);
-      window.removeEventListener("focus", refresh);
-    };
+    if (!mounted) return;
+    setTopics(loadWritingTopicsByRound(r));
+  }, [mounted, r]);
+
+  useEffect(() => {
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const refresh = () => {
+      setTopics(loadWritingTopicsByRound(r));
+    };
+
+    const hydrate = async () => {
+      if (!mounted) return;
+      refresh();
+      if (topics.length > 0) {
+        if (!cancelled) setHydrating(false);
+        return;
+      }
+      if (!cancelled) setHydrating(true);
+      try {
+        await pullContentBankSnapshotFromSupabase();
+        refresh();
+      } catch (e) {
+        console.warn("[ReadWriteRoundTopicsPage] topic hydration failed", e);
+      } finally {
+        if (!cancelled) setHydrating(false);
+      }
+    };
+
+    const unsubscribe = subscribeWritingTopics(refresh);
+    void hydrate();
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [mounted, topics.length, r]);
 
   if (!valid) {
     return (
@@ -37,10 +72,8 @@ export function ReadWriteRoundTopicsPage({ round }: { round: number }) {
     );
   }
 
-  const topics = loadWritingTopicsByRound(r);
-
   return (
-    <div key={v} className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
       <Link
         href="/practice/production/read-and-write"
         className="text-sm font-bold text-ep-blue hover:underline"
@@ -53,12 +86,20 @@ export function ReadWriteRoundTopicsPage({ round }: { round: number }) {
         </p>
         <h1 className="mt-2 text-3xl font-black">Round {r}</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          {topics.length === 0
+          {!mounted || (topics.length === 0 && hydrating)
+            ? "Loading topics for this round…"
+            : topics.length === 0
             ? "No topics in this round yet — ask your admin to upload JSON for this round."
             : "Choose a topic. After you submit, your latest score appears on the tile (same as write-about-photo)."}
         </p>
       </header>
-      {topics.length === 0 ? (
+      {!mounted || (topics.length === 0 && hydrating) ? (
+        <BrutalPanel title="Loading topics…">
+          <p className="text-sm text-neutral-700">
+            Syncing the latest read-and-write topic bank for this account.
+          </p>
+        </BrutalPanel>
+      ) : topics.length === 0 ? (
         <BrutalPanel title="No topics yet">
           <p className="text-sm text-neutral-700">
             Topics appear here when they are added in the admin panel with{" "}

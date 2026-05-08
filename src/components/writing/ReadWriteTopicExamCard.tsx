@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import {
   getReadWriteTopicProgress,
+  getReadWriteTopicProgressSnapshotToken,
   subscribeReadWriteTopicProgress,
 } from "@/lib/writing-storage";
 import type { WritingTopic } from "@/types/writing";
@@ -12,11 +13,12 @@ import type { WritingTopic } from "@/types/writing";
 const MAX_SCORE = 160;
 
 export function ReadWriteTopicExamCard({ topic }: { topic: WritingTopic }) {
-  const progress = useSyncExternalStore(
+  const progressSnapshot = useSyncExternalStore(
     subscribeReadWriteTopicProgress,
-    () => getReadWriteTopicProgress(topic.id),
-    () => undefined as ReturnType<typeof getReadWriteTopicProgress>,
+    getReadWriteTopicProgressSnapshotToken,
+    () => "",
   );
+  const progress = useMemo(() => getReadWriteTopicProgress(topic.id), [topic.id, progressSnapshot]);
 
   const started = !!progress;
   const latest = progress?.latestScore160 ?? null;
