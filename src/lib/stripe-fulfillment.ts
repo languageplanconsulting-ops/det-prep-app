@@ -112,16 +112,13 @@ export async function fulfillOneTimePlanPurchase(
       : session.payment_intent?.id ?? null;
 
   const supabase = createServiceRoleSupabase();
-  if (paymentIntentId) {
-    const { data: existingPayment } = await supabase
-      .from("payment_history")
-      .select("id")
-      .eq("stripe_payment_intent_id", paymentIntentId)
-      .maybeSingle();
-    if (existingPayment?.id) {
-      return { ok: true, userId, tier: tierMeta };
-    }
-  }
+  const { data: existingPayment } = paymentIntentId
+    ? await supabase
+        .from("payment_history")
+        .select("id")
+        .eq("stripe_payment_intent_id", paymentIntentId)
+        .maybeSingle()
+    : { data: null };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -153,19 +150,21 @@ export async function fulfillOneTimePlanPurchase(
       ? `${tierMeta} monthly access`
       : `Payment ${session.id}`;
 
-  const { error: payErr } = await supabase.from("payment_history").insert({
-    user_id: userId,
-    stripe_payment_intent_id: paymentIntentId,
-    amount: Number(session.amount_total ?? 0),
-    currency: String(session.currency ?? "thb"),
-    status: "succeeded",
-    tier: tierMeta,
-    payment_method: paymentMethod,
-    description,
-    receipt_url: null,
-  });
-  if (payErr && payErr.code !== "23505") {
-    console.error("[stripe] one-time plan payment_history insert", payErr.message);
+  if (!existingPayment?.id) {
+    const { error: payErr } = await supabase.from("payment_history").insert({
+      user_id: userId,
+      stripe_payment_intent_id: paymentIntentId,
+      amount: Number(session.amount_total ?? 0),
+      currency: String(session.currency ?? "thb"),
+      status: "succeeded",
+      tier: tierMeta,
+      payment_method: paymentMethod,
+      description,
+      receipt_url: null,
+    });
+    if (payErr && payErr.code !== "23505") {
+      console.error("[stripe] one-time plan payment_history insert", payErr.message);
+    }
   }
 
   await recordBusinessEvent({

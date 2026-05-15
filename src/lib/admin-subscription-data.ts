@@ -60,11 +60,13 @@ export type PaymentKind = "stripe" | "course_grant" | "manual" | "none";
 export function derivePaymentKind(p: {
   tier: string | null;
   stripe_subscription_id: string | null;
+  stripe_customer_id: string | null;
   vip_granted_by_course: boolean | null;
 }): PaymentKind {
   if (p.stripe_subscription_id) return "stripe";
   if (p.vip_granted_by_course) return "course_grant";
   const t = p.tier ?? "free";
+  if (p.stripe_customer_id) return "stripe";
   if (t !== "free") return "manual";
   return "none";
 }
