@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -14,15 +14,13 @@ import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import {
   getReadWriteTopicProgress,
-  getReadWriteTopicProgressSnapshotToken,
   getTopicById,
-  getWritingTopicsSnapshotToken,
   recordReadWriteTopicProgress,
   saveWritingReport,
   subscribeWritingTopics,
   subscribeReadWriteTopicProgress,
 } from "@/lib/writing-storage";
-import type { WritingAttemptReport } from "@/types/writing";
+import type { WritingAttemptReport, WritingTopic } from "@/types/writing";
 
 const MAX_SCORE = 160;
 
@@ -39,20 +37,10 @@ export function ReadWriteSession({
 }) {
   const router = useRouter();
   const vipGate = useVipAiFeedbackGate();
-  const topicsSnapshot = useSyncExternalStore(
-    subscribeWritingTopics,
-    getWritingTopicsSnapshotToken,
-    () => "",
-  );
-  const topic = useMemo(() => getTopicById(topicId), [topicId, topicsSnapshot]);
-  const progressSnapshot = useSyncExternalStore(
-    subscribeReadWriteTopicProgress,
-    getReadWriteTopicProgressSnapshotToken,
-    () => "",
-  );
-  const progress = useMemo(() => getReadWriteTopicProgress(topicId), [topicId, progressSnapshot]);
   const [mounted, setMounted] = useState(false);
   const [hydratingTopic, setHydratingTopic] = useState(true);
+  const [topic, setTopic] = useState<WritingTopic | null>(null);
+  const [progress, setProgress] = useState<ReturnType<typeof getReadWriteTopicProgress> | null>(null);
   const [prepChoice, setPrepChoice] = useState(3);
   const [phase, setPhase] = useState<"prep-pick" | "prep-run" | "write">("prep-pick");
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -67,16 +55,23 @@ export function ReadWriteSession({
 
   useEffect(() => {
     let cancelled = false;
+    const refreshTopic = () => {
+      const nextTopic = getTopicById(topicId) ?? null;
+      if (!cancelled) setTopic(nextTopic);
+      return nextTopic;
+    };
 
     const hydrateTopic = async () => {
       if (!mounted) return;
-      if (topic) {
+      const existing = refreshTopic();
+      if (existing) {
         if (!cancelled) setHydratingTopic(false);
         return;
       }
       if (!cancelled) setHydratingTopic(true);
       try {
         await pullContentBankSnapshotFromSupabase();
+        refreshTopic();
       } catch (e) {
         console.warn("[ReadWriteSession] topic hydration failed", e);
       } finally {
@@ -84,11 +79,23 @@ export function ReadWriteSession({
       }
     };
 
+    const unsubscribe = subscribeWritingTopics(refreshTopic);
     void hydrateTopic();
     return () => {
       cancelled = true;
+      unsubscribe();
     };
-  }, [mounted, topicId, topic, topicsSnapshot]);
+  }, [mounted, topicId]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const refreshProgress = () => {
+      setProgress(getReadWriteTopicProgress(topicId) ?? null);
+    };
+    refreshProgress();
+    const unsubscribe = subscribeReadWriteTopicProgress(refreshProgress);
+    return unsubscribe;
+  }, [mounted, topicId]);
 
   useEffect(() => {
     if (phase !== "prep-run") return;
@@ -113,7 +120,7 @@ export function ReadWriteSession({
 
   useEffect(() => {
     setFollowUpAnswers(followUps.map(() => ""));
-  }, [topic?.id, topicsSnapshot]);
+  }, [topic?.id, followUps.length]);
 
   if (!mounted || (!topic && hydratingTopic)) {
     return (

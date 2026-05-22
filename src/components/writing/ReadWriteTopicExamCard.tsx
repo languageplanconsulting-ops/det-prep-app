@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import {
   getReadWriteTopicProgress,
-  getReadWriteTopicProgressSnapshotToken,
   subscribeReadWriteTopicProgress,
 } from "@/lib/writing-storage";
 import type { WritingTopic } from "@/types/writing";
@@ -13,12 +12,16 @@ import type { WritingTopic } from "@/types/writing";
 const MAX_SCORE = 160;
 
 export function ReadWriteTopicExamCard({ topic }: { topic: WritingTopic }) {
-  const progressSnapshot = useSyncExternalStore(
-    subscribeReadWriteTopicProgress,
-    getReadWriteTopicProgressSnapshotToken,
-    () => "",
-  );
-  const progress = useMemo(() => getReadWriteTopicProgress(topic.id), [topic.id, progressSnapshot]);
+  const [progress, setProgress] = useState<ReturnType<typeof getReadWriteTopicProgress> | null>(null);
+
+  useEffect(() => {
+    const refreshProgress = () => {
+      setProgress(getReadWriteTopicProgress(topic.id) ?? null);
+    };
+    refreshProgress();
+    const unsubscribe = subscribeReadWriteTopicProgress(refreshProgress);
+    return unsubscribe;
+  }, [topic.id]);
 
   const started = !!progress;
   const latest = progress?.latestScore160 ?? null;
@@ -26,7 +29,10 @@ export function ReadWriteTopicExamCard({ topic }: { topic: WritingTopic }) {
   const showRedeem = started && !perfect;
 
   const sessionHref = `/practice/production/read-and-write/${topic.id}`;
-  const thumbLabel = topic.titleEn.trim().slice(0, 2).toUpperCase() || "RW";
+  const thumbLabel = useMemo(() => {
+    const rawTitle = typeof topic.titleEn === "string" ? topic.titleEn.trim() : "";
+    return rawTitle.slice(0, 2).toUpperCase() || "RW";
+  }, [topic.titleEn]);
 
   return (
     <BrutalPanel className="h-full overflow-hidden p-0">
