@@ -14,11 +14,6 @@ import {
 import { claimBootstrapAdminClient } from "@/lib/claim-bootstrap-admin";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
-function appOrigin(): string {
-  if (typeof window === "undefined") return "";
-  return window.location.origin;
-}
-
 export function SignupForm({ redirectTo = "/practice" }: { redirectTo?: string }) {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
@@ -27,12 +22,10 @@ export function SignupForm({ redirectTo = "/practice" }: { redirectTo?: string }
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [info, setInfo] = useState("");
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr("");
-    setInfo("");
     if (password.length < 8) {
       setErr("Password must be at least 8 characters.");
       return;
@@ -49,63 +42,47 @@ export function SignupForm({ redirectTo = "/practice" }: { redirectTo?: string }
       return;
     }
     setBusy(true);
-    const origin = appOrigin();
     const normalizedEmail = email.trim().toLowerCase();
-    const { data, error } = await supabase.auth.signUp({
-      email: normalizedEmail,
-      password,
-      options: {
-        emailRedirectTo: origin
-          ? `${origin}/api/auth/callback`
-          : undefined,
-        data: { full_name: fullName },
-      },
-    });
-    if (error) {
-      setBusy(false);
-      setErr(error.message);
-      return;
-    }
-    let hasSession = Boolean(data.session && data.user);
-
-    if (!hasSession && data.user) {
-      const signInFallback = await supabase.auth.signInWithPassword({
+    const signupRes = await fetch("/api/auth/signup-direct", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({
         email: normalizedEmail,
         password,
-      });
-      if (!signInFallback.error && signInFallback.data.session && signInFallback.data.user) {
-        hasSession = true;
-      }
-    }
+        fullName,
+      }),
+    });
 
-    if (hasSession) {
-      const res = await fetch("/api/auth/register-profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ fullName }),
-      });
-      if (!res.ok) {
-        const j = (await res.json().catch(() => ({}))) as { error?: string };
-        setBusy(false);
-        setErr(j.error ?? "Could not create profile.");
-        return;
-      }
-      await claimBootstrapAdminClient(supabase);
-      await fetch("/api/auth/sync-admin-role", {
-        method: "POST",
-        credentials: "same-origin",
-      });
+    if (!signupRes.ok) {
+      const payload = (await signupRes.json().catch(() => ({}))) as { error?: string };
       setBusy(false);
-      const next = redirectTo.startsWith("/") ? redirectTo : "/practice";
-      router.push(next);
-      router.refresh();
+      setErr(payload.error ?? "Could not create account.");
       return;
     }
+
+    const signInResult = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
+    if (signInResult.error || !signInResult.data.session || !signInResult.data.user) {
+      setBusy(false);
+      setErr(
+        signInResult.error?.message ??
+          "Your account was created, but automatic sign-in failed. Please try signing in now.",
+      );
+      return;
+    }
+
+    await claimBootstrapAdminClient(supabase);
+    await fetch("/api/auth/sync-admin-role", {
+      method: "POST",
+      credentials: "same-origin",
+    });
     setBusy(false);
-    setInfo(
-      "Your account was created, but this workspace did not start your session automatically. Try signing in now. If the next screen says your email is not confirmed, Supabase email confirmation is still turned on.",
-    );
+    const next = redirectTo.startsWith("/") ? redirectTo : "/practice";
+    router.push(next);
+    router.refresh();
   };
 
   return (
@@ -117,15 +94,10 @@ export function SignupForm({ redirectTo = "/practice" }: { redirectTo?: string }
         Create account / สร้างบัญชี
       </h1>
       <p className="mb-5 text-center text-sm text-neutral-600">
-        Sign up with your email and password, then start practicing right away.
+        Sign up with your email and password, then start practicing right away. No confirmation email is required.
       </p>
       <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
         {err ? <p className={authErrorBox}>{err}</p> : null}
-        {info ? (
-          <p className="border-4 border-black bg-[#FFCC00]/30 px-3 py-2 text-sm text-neutral-900">
-            {info}
-          </p>
-        ) : null}
         <label className="block">
           <span className={authLabel}>Full name</span>
           <input

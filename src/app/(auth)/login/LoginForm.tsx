@@ -18,7 +18,7 @@ function formatLoginError(message: string): string {
   const raw = message.trim();
   const lower = raw.toLowerCase();
   if (lower.includes("email not confirmed")) {
-    return "Email not confirmed / อีเมลนี้ยังไม่ได้ยืนยัน";
+    return "This account is stuck in an old confirmation state. Please try signing up again or contact support. / บัญชีนี้ค้างอยู่ในสถานะยืนยันอีเมลแบบเก่า กรุณาลองสมัครใหม่อีกครั้งหรือติดต่อทีมงาน";
   }
   if (lower.includes("invalid login credentials")) {
     return "Invalid email or password / อีเมลหรือรหัสผ่านไม่ถูกต้อง";
