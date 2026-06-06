@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import type { Tier } from "@/lib/access-control";
 import { currentTierForUser } from "@/lib/addon-credits";
 import { recordBusinessEvent } from "@/lib/business-events";
+import { sendNewPaidCustomerToAdmin } from "@/lib/notifications";
 import { nextMonthlyExpiryIso } from "@/lib/plan-status";
 import { getStripe } from "@/lib/stripe";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
@@ -183,6 +184,17 @@ export async function fulfillOneTimePlanPurchase(
       nextExpiry,
     },
   });
+
+  if (!error) {
+    await sendNewPaidCustomerToAdmin({
+      customerEmail: session.customer_details?.email ?? session.customer_email ?? null,
+      tier: tierMeta,
+      amount: Number(session.amount_total ?? 0),
+      currency: String(session.currency ?? "thb"),
+      paymentMethod,
+      fulfilledAtIso: now,
+    });
+  }
 
   return { ok: !error, userId, tier: tierMeta };
 }

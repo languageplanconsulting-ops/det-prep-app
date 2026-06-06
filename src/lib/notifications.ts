@@ -50,6 +50,51 @@ export async function sendFastTrackRequestToAdmin(params: {
   return r;
 }
 
+/** Admin receives a notification whenever a new paid plan purchase is fulfilled. */
+export async function sendNewPaidCustomerToAdmin(params: {
+  customerEmail: string | null;
+  tier: string;
+  amount: number;
+  currency: string;
+  paymentMethod: string;
+  fulfilledAtIso: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const to = notifyEmailDefault();
+  const email = params.customerEmail?.trim() || "—";
+  const amountDisplay =
+    Number.isFinite(params.amount) && params.amount > 0
+      ? `${(params.amount / 100).toLocaleString()} ${params.currency.toUpperCase()}`
+      : "—";
+  const html = `
+    <p><strong>New paid customer on ENGLISH PLAN</strong></p>
+    <p>
+      Email: <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a><br/>
+      Plan: <strong>${escapeHtml(params.tier)}</strong><br/>
+      Amount: ${escapeHtml(amountDisplay)}<br/>
+      Payment method: ${escapeHtml(params.paymentMethod)}<br/>
+      Fulfilled (UTC): ${escapeHtml(params.fulfilledAtIso)}
+    </p>
+    <p>Review in Admin → Subscriptions.</p>
+    <hr/>
+    <p><strong>มีลูกค้าชำระเงินใหม่ใน ENGLISH PLAN</strong></p>
+    <p>
+      อีเมล: ${escapeHtml(email)}<br/>
+      แพ็กเกจ: <strong>${escapeHtml(params.tier)}</strong><br/>
+      จำนวนเงิน: ${escapeHtml(amountDisplay)}<br/>
+      ช่องทางชำระเงิน: ${escapeHtml(params.paymentMethod)}
+    </p>
+  `;
+  const result = await sendResendEmail({
+    to,
+    subject: `[English Plan] New paid customer — ${params.tier} — ${email}`,
+    html,
+  });
+  if (!result.ok) {
+    console.error("[notifications] sendNewPaidCustomerToAdmin failed:", result.error);
+  }
+  return result;
+}
+
 /** Student receives access confirmation + personalized password after admin approval. */
 export async function sendFastTrackApprovedToStudent(params: {
   to: string;
