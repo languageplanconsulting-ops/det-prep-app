@@ -2,11 +2,21 @@ import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
 import { fetchSubscriptionList } from "@/lib/admin-subscription-data";
+import { repairMissingTierExpiries } from "@/lib/repair-missing-expiry";
 
 export async function GET(request: Request) {
   const auth = await getAdminAccess();
   if (!auth.ok) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Silently back-fill any paid users with NULL tier_expires_at so the
+  // list the admin sees reflects reality. Idempotent and cheap when
+  // nothing is broken. Failures are logged but never block the read.
+  try {
+    await repairMissingTierExpiries({ adminId: auth.adminUserId });
+  } catch (e) {
+    console.error("[admin/subscriptions] auto-repair failed", e);
   }
 
   const { searchParams } = new URL(request.url);
