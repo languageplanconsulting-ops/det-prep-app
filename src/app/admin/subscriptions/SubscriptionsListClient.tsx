@@ -111,6 +111,7 @@ export function SubscriptionsListClient() {
   const [payment, setPayment] = useState("all");
   const [sort, setSort] = useState("newest");
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [repairing, setRepairing] = useState(false);
 
   const limit = 25;
 
@@ -219,6 +220,43 @@ export function SubscriptionsListClient() {
     }
   };
 
+  const repairMissingExpiry = async () => {
+    if (repairing) return;
+    const ok = window.confirm(
+      "Find all paid users (basic/premium/vip) whose tier_expires_at is missing, then back-fill 30 days from their last payment, reset their AI counters, and clear lifetime_ai_used. Proceed?",
+    );
+    if (!ok) return;
+    setRepairing(true);
+    try {
+      const res = await fetch("/api/admin/subscriptions/repair-missing-expiry", {
+        method: "POST",
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? "Repair failed");
+      const count = Array.isArray(json.repaired) ? json.repaired.length : 0;
+      push({
+        type: "success",
+        titleEn:
+          count === 0
+            ? "No broken users found — all paid users have valid expiry."
+            : `Repaired ${count} user${count === 1 ? "" : "s"}.`,
+        titleTh:
+          count === 0
+            ? "ไม่พบผู้ใช้ที่ต้องซ่อม"
+            : `ซ่อมแซมผู้ใช้แล้ว ${count} คน`,
+      });
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Repair failed.",
+        titleTh: "ซ่อมแซมไม่สำเร็จ",
+      });
+    } finally {
+      setRepairing(false);
+    }
+  };
+
   const from = total === 0 ? 0 : (page - 1) * limit + 1;
   const to = Math.min(page * limit, total);
 
@@ -236,13 +274,25 @@ export function SubscriptionsListClient() {
             การจัดการการสมัครสมาชิก
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => exportCsv("all")}
-          className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
-        >
-          Export CSV / ส่งออก CSV
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={repairMissingExpiry}
+            disabled={repairing}
+            className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-4 py-2 text-sm font-black uppercase shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {repairing
+              ? "Repairing… / กำลังซ่อม…"
+              : "Repair missing expiries / ซ่อมวันหมดอายุ"}
+          </button>
+          <button
+            type="button"
+            onClick={() => exportCsv("all")}
+            className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+          >
+            Export CSV / ส่งออก CSV
+          </button>
+        </div>
       </header>
 
       {stats && (
