@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 
 import { getAdminAccess, logAdminAction } from "@/lib/admin-auth";
 import { fetchUserSubscriptionDetail } from "@/lib/admin-subscription-data";
+import { weekStartMondayIsoDate } from "@/lib/addon-credits";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+
+const MANUAL_UPGRADE_DAYS = 31;
 
 type Ctx = { params: Promise<{ userId: string }> };
 
@@ -89,17 +92,35 @@ export async function PATCH(request: Request, ctx: Ctx) {
     patch.tier = body.tier;
     requestedTier = body.tier;
   }
-  if (typeof body.tier_expires_at === "string" || body.tier_expires_at === null) {
-    patch.tier_expires_at = body.tier_expires_at;
+  const effectiveTier = requestedTier ?? (before.tier as string | null) ?? "free";
+  const isPaidTarget = effectiveTier !== "free";
+  const explicitExpiry =
+    typeof body.tier_expires_at === "string" && body.tier_expires_at.trim().length > 0
+      ? body.tier_expires_at
+      : body.tier_expires_at === null
+        ? null
+        : undefined;
+  if (explicitExpiry !== undefined) {
+    if (explicitExpiry === null && isPaidTarget) {
+      const next = new Date();
+      next.setDate(next.getDate() + MANUAL_UPGRADE_DAYS);
+      patch.tier_expires_at = next.toISOString();
+    } else {
+      patch.tier_expires_at = explicitExpiry;
+    }
   } else if (requestedTier) {
     if (requestedTier === "free") {
       patch.tier_expires_at = null;
-    } else if (!before.tier_expires_at) {
+    } else if (
+      !before.tier_expires_at ||
+      new Date(before.tier_expires_at as string).getTime() <= Date.now()
+    ) {
       const next = new Date();
-      next.setDate(next.getDate() + 30);
+      next.setDate(next.getDate() + MANUAL_UPGRADE_DAYS);
       patch.tier_expires_at = next.toISOString();
     }
   }
+
   if (typeof body.full_name === "string") {
     patch.full_name = body.full_name;
   }
@@ -121,10 +142,49 @@ export async function PATCH(request: Request, ctx: Ctx) {
     patch.vip_granted_by_course = body.vip_granted_by_course;
   }
 
+  const wasFree = (before.tier as string | null) === "free" || !before.tier;
+  const isUpgradeFromFree = Boolean(
+    wasFree && requestedTier && requestedTier !== "free",
+  );
+  if (isUpgradeFromFree) {
+    if (patch.ai_credits_used === undefined) patch.ai_credits_used = 0;
+    if (patch.lifetime_ai_used === undefined) patch.lifetime_ai_used = false;
+  }
+
+  const finalQuotaMode =
+    (patch.ai_quota_mode as string | undefined) ??
+    (before.ai_quota_mode as string | null) ??
+    "default";
+  const finalOverride =
+    patch.ai_monthly_limit_override !== undefined
+      ? (patch.ai_monthly_limit_override as number | null)
+      : (before.ai_monthly_limit_override as number | null);
+  if (
+    isPaidTarget &&
+    finalQuotaMode === "monthly_override" &&
+    (finalOverride === null || finalOverride === undefined || Number(finalOverride) <= 0)
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Monthly override mode is on but the monthly limit is 0 or empty. Set a positive ai_monthly_limit_override or switch ai_quota_mode to 'default'.",
+      },
+      { status: 400 },
+    );
+  }
+
   const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (isUpgradeFromFree) {
+    await supabase
+      .from("vip_weekly_ai_usage")
+      .delete()
+      .eq("user_id", userId)
+      .eq("week_start", weekStartMondayIsoDate());
   }
 
   await logAdminAction({

@@ -93,7 +93,7 @@ function getVipMonthlyOverrideLimit(profile: {
   );
 }
 
-function weekStartMondayIsoDate(now = new Date()): string {
+export function weekStartMondayIsoDate(now = new Date()): string {
   const date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dow = date.getDay();
   const daysSinceMonday = (dow + 6) % 7;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { buildStage1Assembly } from "@/lib/mock-test/v2/attempt-assembler";
+import { enforceMockMonthlyLimit } from "@/lib/mock-test/enforce-mock-quota";
 import { isMockTestAvailableNow } from "@/lib/mock-test/mock-test-availability";
 import { isUserAdminRole } from "@/lib/mock-test/mock-test-server-access";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
@@ -18,12 +19,32 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const isAdmin = await isUserAdminRole(supabase, user.id);
     const publicOpen = isMockTestAvailableNow();
-    if (!publicOpen && !(await isUserAdminRole(supabase, user.id))) {
+    if (!publicOpen && !isAdmin) {
       return NextResponse.json(
         { error: "Mock test is not available yet." },
         { status: 403 },
       );
+    }
+
+    const { data: me } = await supabase
+      .from("profiles")
+      .select("tier,tier_expires_at,vip_granted_by_course")
+      .eq("id", user.id)
+      .maybeSingle();
+    const quota = await enforceMockMonthlyLimit({
+      supabase,
+      userId: user.id,
+      isAdmin,
+      profile: me as {
+        tier: string | null;
+        tier_expires_at: string | null;
+        vip_granted_by_course: boolean | null;
+      } | null,
+    });
+    if (!quota.ok) {
+      return NextResponse.json({ error: quota.error }, { status: quota.status });
     }
 
     const { slots, acc, state } = await buildStage1Assembly(supabase, user.id);
