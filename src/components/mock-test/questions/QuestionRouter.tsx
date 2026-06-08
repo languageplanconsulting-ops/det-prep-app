@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type SyntheticEvent } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 
 import type { MockQuestionRow } from "@/lib/mock-test/types";
+import { browserSpeak, browserSpeakCancel, isBrowserTtsSupported } from "@/lib/browser-tts";
 
 import { ConversationSummaryMock } from "@/components/mock-test/questions/ConversationSummaryMock";
 import { ConversationSummaryFromInteractiveMock } from "@/components/mock-test/questions/ConversationSummaryFromInteractiveMock";
@@ -235,11 +236,37 @@ function InteractiveListening({
   const [multiAnswers, setMultiAnswers] = useState<string[]>([]);
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [playsUsed, setPlaysUsed] = useState(0);
+  const [audioFailed, setAudioFailed] = useState(false);
+  const [browserTtsActive, setBrowserTtsActive] = useState(false);
   const url = String(content.audio_url ?? "");
+  const transcript = String(
+    content.transcript ?? content.reference_text ?? content.text ?? "",
+  ).trim();
   const multiQuestions = Array.isArray(content.questions)
     ? (content.questions as Array<Record<string, unknown>>)
     : [];
   const maxPlays = Math.max(1, Number(content.max_plays ?? 3) || 3);
+
+  useEffect(() => () => browserSpeakCancel(), []);
+
+  const playBrowserTts = () => {
+    // Prefer transcript; otherwise fall back to questions strung together.
+    const fallbackText =
+      transcript ||
+      (multiQuestions.length > 0
+        ? multiQuestions
+            .map((q, i) => `Question ${i + 1}. ${String(q.question ?? "")}`)
+            .join(". ")
+        : String(content.question ?? ""));
+    if (!fallbackText) return;
+    if (playsUsed >= maxPlays) return;
+    setBrowserTtsActive(true);
+    setPlaysUsed((p) => p + 1);
+    browserSpeak(fallbackText, {
+      lang: "en-US",
+      onEnd: () => setBrowserTtsActive(false),
+    });
+  };
   const currentMulti = multiQuestions[activeQuestion];
   const opts =
     multiQuestions.length > 0
@@ -286,14 +313,41 @@ function InteractiveListening({
     <div className="space-y-4">
       <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
       <p className="text-xs text-neutral-600">{String(content.instruction ?? "")}</p>
-      {url ? (
-        <audio controls className="w-full" src={url} onPlay={handleAudioPlay}>
+      {url && !audioFailed ? (
+        <audio
+          controls
+          className="w-full"
+          src={url}
+          onPlay={handleAudioPlay}
+          onError={() => setAudioFailed(true)}
+        >
           <track kind="captions" />
         </audio>
       ) : null}
       <div className="rounded-[4px] border-4 border-black bg-[#fff9e6] px-3 py-2 text-xs font-black uppercase tracking-wide text-neutral-700">
         Plays used: {playsUsed}/{maxPlays} / จำนวนครั้งที่ฟัง: {playsUsed}/{maxPlays}
       </div>
+      {(audioFailed || !url) && isBrowserTtsSupported() ? (
+        <div className="rounded-[4px] border-4 border-black bg-yellow-50 p-3">
+          <p className="mb-2 text-xs font-bold text-neutral-700">
+            {url
+              ? "Hosted audio unavailable — use browser voice as backup."
+              : "No audio uploaded — use browser voice."}
+          </p>
+          <button
+            type="button"
+            disabled={submitting || browserTtsActive || playsUsed >= maxPlays}
+            onClick={playBrowserTts}
+            className="rounded-[4px] border-2 border-black bg-white px-3 py-2 text-xs font-black shadow-[2px_2px_0_0_#000] disabled:opacity-50"
+          >
+            {browserTtsActive
+              ? "🔊 Speaking…"
+              : playsUsed >= maxPlays
+                ? "Plays exhausted"
+                : "🔊 Read aloud (browser voice)"}
+          </button>
+        </div>
+      ) : null}
       <p className="font-bold">
         {multiQuestions.length > 0
           ? `Q${activeQuestion + 1}. ${String(currentMulti?.question ?? "")}`

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { synthesizeSpeechWithRetry } from "@/lib/admin-batch-speech";
+import { browserSpeak, browserSpeakCancel, isBrowserTtsSupported } from "@/lib/browser-tts";
 
 function base64ToBlob(base64: string, mime: string): Blob {
   const binary = atob(base64);
@@ -41,6 +42,31 @@ export function MockTestDictation({
     !audioUrl && !refSentence ? "Dictation needs reference_sentence (or audio_url)." : null,
   );
   const [playFinishedNotified, setPlayFinishedNotified] = useState(false);
+  const [audioFailed, setAudioFailed] = useState(false);
+  const [browserTtsActive, setBrowserTtsActive] = useState(false);
+
+  // Cancel any in-flight browser speech when the question changes / component unmounts.
+  useEffect(() => {
+    return () => {
+      browserSpeakCancel();
+    };
+  }, [refSentence, audioUrl]);
+
+  const playBrowserTts = () => {
+    if (!refSentence) return;
+    setBrowserTtsActive(true);
+    const started = browserSpeak(refSentence, {
+      lang: "en-US",
+      onEnd: () => {
+        setBrowserTtsActive(false);
+        if (!playFinishedNotified) {
+          onAudioPlaybackFinished?.();
+          setPlayFinishedNotified(true);
+        }
+      },
+    });
+    if (!started) setBrowserTtsActive(false);
+  };
 
   useEffect(() => {
     if (audioUrl) {
@@ -114,13 +140,14 @@ export function MockTestDictation({
       {status === "error" && error ? (
         <p className="rounded-[4px] border-4 border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>
       ) : null}
-      {playSrc ? (
+      {playSrc && !audioFailed ? (
         <audio
           controls
           autoPlay
           className="w-full"
           src={playSrc}
           key={playSrc}
+          onError={() => setAudioFailed(true)}
           onEnded={() => {
             if (!playFinishedNotified) {
               onAudioPlaybackFinished?.();
@@ -130,6 +157,21 @@ export function MockTestDictation({
         >
           <track kind="captions" />
         </audio>
+      ) : null}
+      {(audioFailed || status === "error") && refSentence && isBrowserTtsSupported() ? (
+        <div className="space-y-2 rounded-[4px] border-4 border-black bg-yellow-50 p-3">
+          <p className="text-xs font-bold text-neutral-700">
+            Hosted audio unavailable — use your browser's voice as a backup.
+          </p>
+          <button
+            type="button"
+            disabled={submitting || browserTtsActive}
+            onClick={playBrowserTts}
+            className="rounded-[4px] border-2 border-black bg-white px-3 py-2 text-xs font-black shadow-[2px_2px_0_0_#000] disabled:opacity-50"
+          >
+            {browserTtsActive ? "🔊 Speaking…" : "🔊 Read aloud (browser voice)"}
+          </button>
+        </div>
       ) : null}
       {playSrc && !playFinishedNotified ? (
         <button

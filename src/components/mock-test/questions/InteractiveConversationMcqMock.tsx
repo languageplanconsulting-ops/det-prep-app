@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { browserSpeak, browserSpeakCancel, isBrowserTtsSupported } from "@/lib/browser-tts";
+
 type McqTurn = {
   question_en: string;
   question_audio_url?: string;
@@ -66,6 +68,44 @@ export function InteractiveConversationMcqMock({
   const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
   const [ttsLoading, setTtsLoading] = useState(false);
   const [ttsError, setTtsError] = useState<string | null>(null);
+  const [audioFailed, setAudioFailed] = useState(false);
+  const [scenarioAudioFailed, setScenarioAudioFailed] = useState(false);
+  const [browserTtsActive, setBrowserTtsActive] = useState(false);
+
+  // Stop any browser TTS when component/turn changes.
+  useEffect(() => {
+    return () => {
+      browserSpeakCancel();
+    };
+  }, [idx]);
+
+  const playBrowserTtsForQuestion = () => {
+    const text = current?.question_en;
+    if (!text) return;
+    setBrowserTtsActive(true);
+    browserSpeak(text, {
+      lang: "en-US",
+      onEnd: () => {
+        setBrowserTtsActive(false);
+        setHasListened(true);
+      },
+    });
+  };
+
+  const playBrowserTtsForScenario = () => {
+    if (!scenarioText) {
+      setScenarioUnlocked(true);
+      return;
+    }
+    setBrowserTtsActive(true);
+    browserSpeak(scenarioText, {
+      lang: "en-US",
+      onEnd: () => {
+        setBrowserTtsActive(false);
+        setScenarioUnlocked(true);
+      },
+    });
+  };
 
   const current = allTurns[idx];
   if (!current || !allTurns.length) {
@@ -85,6 +125,7 @@ export function InteractiveConversationMcqMock({
     setGeneratedAudioUrl(null);
     setTtsLoading(false);
     setTtsError(null);
+    setAudioFailed(false);
     // Reset audio position for the next turn.
     try {
       if (audioRef.current) audioRef.current.currentTime = 0;
@@ -189,12 +230,13 @@ export function InteractiveConversationMcqMock({
 
       {isPhaseA && !scenarioUnlocked ? (
         <section className="rounded-[4px] border-4 border-black bg-white p-4">
-          {scenarioAudioUrl || generatedScenarioAudioUrl ? (
+          {(scenarioAudioUrl || generatedScenarioAudioUrl) && !scenarioAudioFailed ? (
             <audio
               ref={scenarioAudioRef}
               key={scenarioAudioUrl || generatedScenarioAudioUrl}
               src={scenarioAudioUrl || generatedScenarioAudioUrl || ""}
               preload="none"
+              onError={() => setScenarioAudioFailed(true)}
               onEnded={() => setScenarioUnlocked(true)}
             />
           ) : null}
@@ -210,16 +252,32 @@ export function InteractiveConversationMcqMock({
             Scenario text/transcript is hidden. Complete listening first to unlock first 3 questions.
           </p>
           {scenarioTtsError ? <p className="mt-1 text-xs font-bold text-red-700">{scenarioTtsError}</p> : null}
+          {(scenarioAudioFailed || scenarioTtsError) && scenarioText && isBrowserTtsSupported() ? (
+            <div className="mt-2 rounded-[4px] border-2 border-black bg-yellow-50 p-2">
+              <p className="mb-1 text-[11px] font-bold text-neutral-700">
+                Hosted audio unavailable — use browser voice as backup.
+              </p>
+              <button
+                type="button"
+                disabled={submitting || browserTtsActive}
+                onClick={playBrowserTtsForScenario}
+                className="rounded-[4px] border-2 border-black bg-white px-3 py-1.5 text-[11px] font-black shadow-[2px_2px_0_0_#000] disabled:opacity-50"
+              >
+                {browserTtsActive ? "🔊 Speaking…" : "🔊 Read scenario (browser voice)"}
+              </button>
+            </div>
+          ) : null}
         </section>
       ) : (
         <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
           <section className="rounded-[4px] border-4 border-black bg-neutral-50 p-3">
-            {audioSrc ? (
+            {audioSrc && !audioFailed ? (
               <audio
                 ref={audioRef}
                 key={audioSrc}
                 src={audioSrc}
                 preload="none"
+                onError={() => setAudioFailed(true)}
                 onEnded={() => setHasListened(true)}
               />
             ) : null}
@@ -272,6 +330,21 @@ export function InteractiveConversationMcqMock({
                 </button>
                 <p className="mt-2 text-xs font-bold text-neutral-600">Listen first, then answer.</p>
                 {ttsError ? <p className="mt-1 text-xs font-bold text-red-700">{ttsError}</p> : null}
+                {(audioFailed || ttsError) && current.question_en && isBrowserTtsSupported() ? (
+                  <div className="mt-2 rounded-[4px] border-2 border-black bg-yellow-50 p-2">
+                    <p className="mb-1 text-[11px] font-bold text-neutral-700">
+                      Hosted audio unavailable — use browser voice as backup.
+                    </p>
+                    <button
+                      type="button"
+                      disabled={submitting || browserTtsActive}
+                      onClick={playBrowserTtsForQuestion}
+                      className="rounded-[4px] border-2 border-black bg-white px-3 py-1.5 text-[11px] font-black shadow-[2px_2px_0_0_#000] disabled:opacity-50"
+                    >
+                      {browserTtsActive ? "🔊 Speaking…" : "🔊 Read question (browser voice)"}
+                    </button>
+                  </div>
+                ) : null}
               </>
             ) : (
               <p className="rounded-[4px] border-4 border-black bg-emerald-50 p-3 text-xs font-black text-emerald-800">
