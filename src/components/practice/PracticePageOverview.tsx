@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { SimpleLineChart } from "@/components/charts/SimpleLineChart";
 import { DashboardPlanCard } from "@/components/dashboard/DashboardPlanCard";
+import { DashboardHowToUseAnnouncement } from "@/components/dashboard/DashboardHowToUseAnnouncement";
 import { DashboardVipAnnouncement } from "@/components/dashboard/DashboardVipAnnouncement";
 import { PracticeExamCountdownPanel } from "@/components/practice/PracticeExamCountdownPanel";
 import { PracticeTimeBySkillPie } from "@/components/practice/PracticeTimeBySkillPie";
@@ -101,6 +102,7 @@ export function PracticePageOverview() {
 
   return (
     <div className="space-y-4">
+      <DashboardHowToUseAnnouncement />
       <DashboardVipAnnouncement />
 
       <div className="grid gap-4 lg:grid-cols-2">
