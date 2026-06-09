@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Notebook revamp</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f7f8fc;color:#0f172a}
+  .hand{font-family:"Caveat",cursive}
+  .coach-tip{display:flex;gap:12px;align-items:flex-start}
+  .coach-tip .avatar{width:44px;height:44px;border-radius:9999px;flex-shrink:0;background:#004AAD;color:#FFCC00;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;border:2.5px solid #FFCC00;box-shadow:0 3px 8px rgba(0,74,173,.18)}
+  .coach-tip .bub{flex:1;position:relative;background:#fff;padding:11px 14px 12px;border-radius:14px;border-top-left-radius:4px;box-shadow:0 4px 14px rgba(15,23,42,.06);border:1px solid rgba(0,74,173,.08)}
+  .coach-tip .bub::before{content:"";position:absolute;top:14px;left:-7px;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-right:7px solid #fff}
+  .coach-tip .lbl{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:#004AAD;background:#FFCC00;padding:5px 11px;border-radius:9999px;margin-bottom:8px}
+  .coach-tip .lbl .spark{font-size:11px;line-height:1}
+  .chip{display:inline-flex;align-items:center;gap:5px;border-radius:9999px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid #e2e8f0;background:#fff;color:#475569}
+  .chip.on{background:#004AAD;color:#fff;border-color:#004AAD}
+  .pill{display:inline-flex;align-items:center;gap:4px;border-radius:9999px;padding:2px 9px;font-size:10px;font-weight:800;letter-spacing:.03em}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;transition:all .14s}
+  .card:hover{border-color:#004AAD;box-shadow:0 8px 22px rgba(0,74,173,.07)}
+  .src{font-size:10px;color:#94a3b8;font-weight:600}
+  .btn-primary{background:#004AAD;color:#FFCC00;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+  .btn-ghost{background:#fff;color:#334155;border:1px solid #cbd5e1;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700}
+</style>
+</head>
+<body>
+<nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+  <span class="font-bold text-[#004AAD]">English Plan</span>
+  <span class="text-sm text-slate-500">📓 Notebook</span>
+  <span class="ml-auto text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">Notebook revamp · preview</span>
+</nav>
+
+<main class="mx-auto max-w-5xl px-6 py-7">
+  <p class="text-xs text-[#004AAD] font-bold uppercase tracking-wider">สมุดของฉัน</p>
+  <h1 class="mt-1 text-3xl font-bold">Notebook</h1>
+  <p class="mt-1 text-sm text-slate-600 max-w-2xl">ทุกคำศัพท์ จุดไวยากรณ์ และรายงานที่คุณเก็บจากการฝึก · เก็บไว้ทบทวนก่อนสอบ</p>
+
+  <!-- OUTCOME STRIP (Cagan) — turn a passive archive into an active study tool -->
+  <div class="mt-4 rounded-2xl bg-white ring-1 ring-slate-200 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+    <div class="flex-1 grid grid-cols-3 gap-3 text-center">
+      <div><p class="text-3xl font-bold text-[#004AAD] leading-none">128</p><p class="text-xs text-slate-500 mt-1">📚 คำศัพท์</p></div>
+      <div><p class="text-3xl font-bold text-violet-600 leading-none">34</p><p class="text-xs text-slate-500 mt-1">✍️ ไวยากรณ์</p></div>
+      <div><p class="text-3xl font-bold text-emerald-600 leading-none">9</p><p class="text-xs text-slate-500 mt-1">📊 รายงาน</p></div>
+    </div>
+    <div class="sm:border-l sm:border-slate-200 sm:pl-5 text-center">
+      <p class="text-xs text-slate-500 mb-2">12 คำยังไม่ได้ทบทวนวันนี้</p>
+      <button class="btn-primary">🎴 เริ่มทบทวน (flashcard)</button>
+    </div>
+  </div>
+
+  <!-- coach tip -->
+  <div class="coach-tip mt-4"><div class="avatar">D</div><div class="bub">
+    <span class="lbl"><span class="spark">✨</span>Tips from P'Doy</span>
+    <p class="text-[13px] leading-6 text-slate-800">วิธีใช้ Notebook ให้ได้ผล: <strong>กด "เริ่มทบทวน" ทุกวันวันละ 5 นาที</strong> — ระบบจะหยิบคำที่คุณเคยตอบผิดมาถามซ้ำ จำได้แน่นกว่าท่องเฉยๆ</p>
+  </div></div>
+
+  <!-- toolbar -->
+  <div class="mt-5 flex flex-wrap items-center gap-2">
+    <div class="relative flex-1 min-w-[200px]">
+      <input class="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm" placeholder="🔍 ค้นหาคำหรือข้อความที่เก็บไว้…">
+    </div>
+    <button class="btn-ghost">ล่าสุด ▾</button>
+  </div>
+  <div class="mt-3 flex flex-wrap gap-2">
+    <span class="chip on">ทั้งหมด · 171</span>
+    <span class="chip">📚 คำศัพท์ · 128</span>
+    <span class="chip">✍️ ไวยากรณ์ · 34</span>
+    <span class="chip">📊 รายงาน · 9</span>
+    <span class="chip">＋ โฟลเดอร์ใหม่</span>
+  </div>
+
+  <!-- card grid -->
+  <div class="mt-5 grid gap-3 md:grid-cols-2">
+
+    <!-- vocab card -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-2">
+        <span class="pill bg-emerald-100 text-emerald-700">📚 คำศัพท์</span>
+        <span class="src">#reading · 8 มิ.ย.</span>
+      </div>
+      <p class="text-xl font-bold">diverse</p>
+      <p class="text-sm text-slate-600 mt-0.5">หลากหลาย · adj.</p>
+      <p class="text-xs text-slate-500 mt-1">Synonyms: varied, mixed, assorted</p>
+      <p class="text-[13px] italic text-slate-400 mt-2 pl-2.5 border-l-2 border-slate-200">"Coral reefs are among the most diverse ecosystems…"</p>
+      <div class="flex items-center gap-2 mt-3">
+        <button class="btn-ghost">＋ เพิ่มโน้ต</button>
+        <label class="ml-auto flex items-center gap-1.5 text-xs text-slate-500"><input type="checkbox" checked class="accent-[#004AAD]"> ใส่ชุดทบทวน</label>
+      </div>
+    </div>
+
+    <!-- grammar card -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-2">
+        <span class="pill bg-violet-100 text-violet-700">✍️ ไวยากรณ์</span>
+        <span class="src">#read-write · 7 มิ.ย.</span>
+      </div>
+      <p class="text-sm"><span class="line-through text-rose-500">She go to school</span> → <strong class="text-emerald-600">She goes to school</strong></p>
+      <p class="text-[13px] text-slate-600 mt-2">Subject-verb agreement: ประธานเอกพจน์ใช้กริยาเติม -s</p>
+      <div class="flex items-center gap-2 mt-3">
+        <button class="btn-ghost">＋ เพิ่มโน้ต</button>
+        <label class="ml-auto flex items-center gap-1.5 text-xs text-slate-500"><input type="checkbox" class="accent-[#004AAD]"> ใส่ชุดทบทวน</label>
+      </div>
+    </div>
+
+    <!-- production report card -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-2">
+        <span class="pill bg-sky-100 text-sky-700">📊 รายงาน</span>
+        <span class="src">#speaking · 6 มิ.ย.</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-center"><p class="text-2xl font-bold text-[#004AAD] leading-none">138</p><p class="text-[10px] text-slate-500">/160</p></div>
+        <div class="flex-1">
+          <p class="text-sm font-bold">Speak about photo · รอบ 2</p>
+          <div class="flex gap-1 mt-1 text-[9px]">
+            <span class="pill bg-slate-100 text-slate-500">G 88%</span>
+            <span class="pill bg-slate-100 text-slate-500">V 82%</span>
+            <span class="pill bg-slate-100 text-slate-500">C 90%</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-ghost mt-3">📖 ดูรายงานเต็ม</button>
+    </div>
+
+    <!-- card with handwritten note open -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-2">
+        <span class="pill bg-emerald-100 text-emerald-700">📚 คำศัพท์</span>
+        <span class="src">#fill-blank · 5 มิ.ย.</span>
+      </div>
+      <p class="text-xl font-bold">adapt</p>
+      <p class="text-sm text-slate-600 mt-0.5">ปรับตัว · v.</p>
+      <div class="mt-3 rounded-lg p-3" style="background:repeating-linear-gradient(#fffdf6,#fffdf6 27px,#fde68a55 28px)">
+        <p class="text-[10px] uppercase tracking-wide text-amber-700 font-bold mb-1">โน้ตของฉัน</p>
+        <p class="hand text-lg text-slate-700">สับสนกับ adopt บ่อย! adapt = ปรับตัว, adopt = รับเลี้ยง/นำมาใช้</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW MODE peek -->
+  <div class="mt-8">
+    <p class="text-xs text-[#004AAD] font-bold uppercase tracking-wider mb-2">โหมดทบทวน (flashcard) — กดจาก "เริ่มทบทวน"</p>
+    <div class="rounded-2xl bg-[#004AAD] p-8 text-center">
+      <p class="text-xs text-[#FFCC00] font-bold uppercase tracking-wide mb-3">การ์ด 3 / 12 · แตะเพื่อพลิก</p>
+      <div class="mx-auto max-w-sm rounded-2xl bg-white p-8 shadow-lg">
+        <p class="text-3xl font-bold text-slate-900">diverse</p>
+        <p class="text-xs text-slate-400 mt-4">แตะเพื่อดูคำแปล →</p>
+      </div>
+      <div class="mt-4 flex justify-center gap-2">
+        <button class="rounded-xl bg-white/15 text-white px-5 py-2 text-sm font-bold">😕 ยังไม่แม่น</button>
+        <button class="rounded-xl bg-[#FFCC00] text-[#004AAD] px-5 py-2 text-sm font-bold">😎 จำได้แล้ว</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- rationale -->
+  <div class="mt-8 rounded-xl bg-white ring-1 ring-slate-200 p-4 text-xs text-slate-700 leading-7">
+    <p><strong class="text-[#004AAD]">เปลี่ยนอะไร (Krug + Cagan):</strong></p>
+    <ul class="mt-1.5 list-disc pl-4 space-y-1">
+      <li><strong>เลิกใช้ brutalist</strong> ที่ header/toolbar — เดิมเป็นขอบดำหนา ปนกับการ์ดสมัยใหม่ ดูไม่เป็นชุดเดียวกัน · ตอนนี้นุ่มทั้งหน้า</li>
+      <li><strong>Outcome strip ด้านบน</strong> (Cagan) — สรุปจำนวน + ปุ่ม "เริ่มทบทวน" เปลี่ยน notebook จาก "ที่เก็บของ" → "เครื่องมือทบทวน"</li>
+      <li><strong>โหมด flashcard</strong> — เดิม flip card ซ่อนอยู่ในรายงาน · ดึงออกมาเป็นโหมดทบทวนจริง (spaced recall)</li>
+      <li><strong>การ์ดแบบเดียวกันทุกชนิด</strong> — badge ประเภท + source tag + เนื้อหา + โน้ต (Krug: convention)</li>
+      <li><strong>Category เป็น chip</strong> นับจำนวน · ค้นหา/เรียงเรียบง่าย · โน้ตลายมือคงเสน่ห์เดิมไว้</li>
+    </ul>
+  </div>
+</main>
+</body></html>

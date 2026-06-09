@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mock Test revamp</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f7f8fc;color:#0f172a}
+  .stage-label{position:sticky;top:0;z-index:5;background:#004AAD;color:#FFCC00;padding:8px 16px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .stage-wrap{background:#eef1f6;padding:28px 0;border-bottom:1px solid #e2e8f0}
+  .coach-tip{display:flex;gap:12px;align-items:flex-start}
+  .coach-tip .avatar{width:44px;height:44px;border-radius:9999px;flex-shrink:0;background:#004AAD;color:#FFCC00;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;border:2.5px solid #FFCC00;box-shadow:0 3px 8px rgba(0,74,173,.18)}
+  .coach-tip .bub{flex:1;position:relative;background:#fff;padding:11px 14px 12px;border-radius:14px;border-top-left-radius:4px;box-shadow:0 4px 14px rgba(15,23,42,.06);border:1px solid rgba(0,74,173,.08)}
+  .coach-tip .bub::before{content:"";position:absolute;top:14px;left:-7px;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-right:7px solid #fff}
+  .coach-tip .lbl{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:#004AAD;background:#FFCC00;padding:5px 11px;border-radius:9999px;margin-bottom:8px}
+  .coach-tip .lbl .spark{font-size:11px;line-height:1}
+  .btn-primary{background:#004AAD;color:#FFCC00;padding:12px 24px;border-radius:12px;font-size:15px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+  .btn-ghost{background:#fff;color:#334155;border:1px solid #cbd5e1;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:700}
+  .pill{display:inline-flex;align-items:center;gap:4px;border-radius:9999px;padding:3px 10px;font-size:10px;font-weight:800;letter-spacing:.03em}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:16px}
+  .srow{position:relative;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px 12px 18px}
+  .srow::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:9999px}
+  .srow.ok::before{background:#22c55e}.srow.mid::before{background:#f59e0b}.srow.bad::before{background:#ef4444}
+</style>
+</head>
+<body>
+<nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+  <span class="font-bold text-[#004AAD]">English Plan</span>
+  <span class="text-sm text-slate-500">🏆 Mock Test</span>
+  <span class="ml-auto text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">Mock Test revamp · 2 screens</span>
+</nav>
+
+<!-- ════ SCREEN 1 · START / HUB ════ -->
+<div class="stage-label">1/2 · Mock Center — หน้าเริ่ม + แดชบอร์ด</div>
+<div class="stage-wrap"><main class="mx-auto max-w-5xl px-6">
+  <p class="text-xs text-[#004AAD] font-bold uppercase tracking-wider">DET · Mock Center</p>
+  <h1 class="mt-1 text-2xl font-bold">จำลองสอบเต็มรูปแบบ</h1>
+
+  <!-- OUTCOME HERO (Cagan) + primary CTA -->
+  <div class="mt-4 rounded-2xl card p-5 sm:p-6">
+    <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex-1">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">คะแนนดีที่สุดของคุณ</p>
+        <div class="mt-2 flex items-end gap-3">
+          <p class="text-4xl font-bold leading-none text-[#004AAD]">105</p>
+          <span class="mb-1 text-2xl text-slate-300">→</span>
+          <div><p class="text-[11px] text-slate-500">เป้าหมาย</p><p class="text-4xl font-bold leading-none text-emerald-600">120</p></div>
+          <span class="mb-1.5 ml-1 pill bg-emerald-50 text-emerald-700 text-xs px-3 py-1">อีก 15</span>
+        </div>
+        <div class="relative mt-4 h-2.5 max-w-md rounded-full bg-slate-100">
+          <div class="h-full rounded-full bg-[#004AAD]" style="width:65.6%"></div>
+          <div class="absolute -top-1 h-[18px] w-[3px] rounded bg-emerald-600" style="left:75%"></div>
+        </div>
+        <p class="mt-2 text-xs text-slate-500">ทำมาแล้ว 4 ครั้ง · ครั้งล่าสุด 8 มิ.ย.</p>
+      </div>
+      <div class="text-center">
+        <button class="btn-primary">▶ เริ่ม Mock ชุดถัดไป</button>
+        <p class="text-[11px] text-slate-500 mt-2">JUNE-02 · ~1 ชม. · ใช้ 1 credit</p>
+        <span class="pill bg-slate-100 text-slate-600 mt-2">เครดิตเดือนนี้ เหลือ 2 / 3</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="coach-tip mt-4"><div class="avatar">D</div><div class="bub">
+    <span class="lbl"><span class="spark">✨</span>Tips from P'Doy</span>
+    <p class="text-[13px] leading-6 text-slate-800">ทำ Mock <strong>อาทิตย์ละครั้ง</strong> เพื่อวัดพัฒนาการ · ไม่ต้องเปิดกล้อง ไม่กดดัน — นี่คือการฝึก · ออกกลางคันจะใช้ credit ไปแล้ว ระวังนะครับ</p>
+  </div></div>
+
+  <!-- system picks -->
+  <p class="mt-6 text-sm font-bold text-slate-700">🎯 ระบบเลือกให้แล้ว</p>
+  <div class="mt-2 grid gap-3 sm:grid-cols-3">
+    <div class="card p-4"><span class="pill bg-sky-100 text-sky-700">ทำต่อ</span><p class="text-sm font-bold mt-2">JUNE-02</p><p class="text-xs text-slate-500">ชุดปัจจุบัน</p></div>
+    <div class="card p-4"><span class="pill bg-amber-100 text-amber-700">เน้นจุดอ่อน</span><p class="text-sm font-bold mt-2">JUNE-04</p><p class="text-xs text-slate-500">เก็บคะแนน Reading</p></div>
+    <div class="card p-4"><span class="pill bg-emerald-100 text-emerald-700">ทำซ้ำชุดเด่น</span><p class="text-sm font-bold mt-2">MAY-03</p><p class="text-xs text-slate-500">เคยได้ 105</p></div>
+  </div>
+
+  <!-- personal best -->
+  <p class="mt-6 text-sm font-bold text-slate-700">📊 คะแนนสูงสุดรายทักษะ</p>
+  <div class="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="card p-4 text-center"><p class="text-2xl font-bold text-[#004AAD]">112</p><p class="text-xs text-slate-500">Speaking</p></div>
+    <div class="card p-4 text-center"><p class="text-2xl font-bold text-violet-600">98</p><p class="text-xs text-slate-500">Listening</p></div>
+    <div class="card p-4 text-center"><p class="text-2xl font-bold text-teal-600">120</p><p class="text-xs text-slate-500">Reading</p></div>
+    <div class="card p-4 text-center"><p class="text-2xl font-bold text-orange-600">90</p><p class="text-xs text-slate-500">Writing</p></div>
+  </div>
+
+  <!-- history -->
+  <p class="mt-6 text-sm font-bold text-slate-700">🕘 ประวัติการสอบ</p>
+  <div class="mt-2 card overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-500 text-xs"><tr>
+        <th class="text-left font-semibold px-4 py-2.5">วันที่</th><th class="text-left font-semibold px-4 py-2.5">ชุด</th>
+        <th class="text-right font-semibold px-4 py-2.5">คะแนน</th><th class="text-right font-semibold px-4 py-2.5">รายงาน</th></tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr class="hover:bg-slate-50"><td class="px-4 py-2.5">8 มิ.ย.</td><td class="px-4 py-2.5">JUNE-01</td><td class="px-4 py-2.5 text-right font-bold text-[#004AAD]">105</td><td class="px-4 py-2.5 text-right"><a class="text-[#004AAD] font-semibold text-xs">ดู →</a></td></tr>
+        <tr class="hover:bg-slate-50"><td class="px-4 py-2.5">1 มิ.ย.</td><td class="px-4 py-2.5">MAY-04</td><td class="px-4 py-2.5 text-right font-bold text-slate-700">93</td><td class="px-4 py-2.5 text-right"><a class="text-[#004AAD] font-semibold text-xs">ดู →</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main></div>
+
+<!-- ════ SCREEN 2 · RESULTS ════ -->
+<div class="stage-label">2/2 · ผลคะแนน Mock — รายงานเต็ม</div>
+<div class="stage-wrap"><main class="mx-auto max-w-4xl px-6">
+  <!-- score hero -->
+  <div class="card p-6">
+    <div class="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center gap-5">
+        <!-- ring -->
+        <div class="relative h-28 w-28">
+          <svg viewBox="0 0 100 100" class="h-28 w-28 -rotate-90">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#e2e8f0" stroke-width="9"/>
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#004AAD" stroke-width="9" stroke-linecap="round" stroke-dasharray="276" stroke-dashoffset="95"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-3xl font-bold text-[#004AAD] leading-none">105</span>
+            <span class="text-[10px] text-slate-500">/ 160</span>
+          </div>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">DET fixed mock · 20 ขั้น</p>
+          <h1 class="text-xl font-bold">รายงานผลของคุณ</h1>
+          <p class="text-xs text-slate-500 mt-1">เสร็จเมื่อ 8 มิ.ย. · ใช้เวลา 1 ชม 4 น</p>
+          <p class="text-xs text-emerald-600 font-semibold mt-1">+12 จากครั้งก่อน 📈</p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-ghost">← Mock อีกชุด</button>
+        <button class="btn-primary !text-sm !py-2.5">📌 บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- targets vs actual -->
+  <div class="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3">
+    <div class="card p-3 text-center"><p class="text-[10px] text-slate-500">รวม</p><p class="text-xl font-bold text-[#004AAD]">105</p><p class="text-[10px] text-emerald-600 font-bold">เป้า 120 · -15</p></div>
+    <div class="card p-3 text-center"><p class="text-[10px] text-slate-500">Listening</p><p class="text-xl font-bold">98</p><p class="text-[10px] text-rose-500 font-bold">-12</p></div>
+    <div class="card p-3 text-center"><p class="text-[10px] text-slate-500">Speaking</p><p class="text-xl font-bold">112</p><p class="text-[10px] text-emerald-600 font-bold">+2</p></div>
+    <div class="card p-3 text-center"><p class="text-[10px] text-slate-500">Reading</p><p class="text-xl font-bold">120</p><p class="text-[10px] text-emerald-600 font-bold">+8</p></div>
+    <div class="card p-3 text-center"><p class="text-[10px] text-slate-500">Writing</p><p class="text-xl font-bold">90</p><p class="text-[10px] text-rose-500 font-bold">-10</p></div>
+  </div>
+
+  <!-- skill bars -->
+  <div class="mt-4 card p-5">
+    <p class="text-sm font-bold mb-3">คะแนนรายทักษะ</p>
+    <div class="space-y-3">
+      <div><div class="flex justify-between text-xs mb-1"><span class="font-semibold">🗣️ Speaking</span><span class="font-bold text-[#004AAD]">112/160</span></div><div class="h-2 rounded-full bg-slate-100"><div class="h-full rounded-full bg-[#004AAD]" style="width:70%"></div></div></div>
+      <div><div class="flex justify-between text-xs mb-1"><span class="font-semibold">👂 Listening</span><span class="font-bold text-violet-600">98/160</span></div><div class="h-2 rounded-full bg-slate-100"><div class="h-full rounded-full bg-violet-600" style="width:61%"></div></div></div>
+      <div><div class="flex justify-between text-xs mb-1"><span class="font-semibold">📖 Reading</span><span class="font-bold text-teal-600">120/160</span></div><div class="h-2 rounded-full bg-slate-100"><div class="h-full rounded-full bg-teal-600" style="width:75%"></div></div></div>
+      <div><div class="flex justify-between text-xs mb-1"><span class="font-semibold">✍️ Writing</span><span class="font-bold text-orange-600">90/160</span></div><div class="h-2 rounded-full bg-slate-100"><div class="h-full rounded-full bg-orange-600" style="width:56%"></div></div></div>
+    </div>
+  </div>
+
+  <!-- step review with spines -->
+  <div class="mt-4 card p-5">
+    <p class="text-sm font-bold mb-3">ทบทวนทีละขั้น (20 ขั้น)</p>
+    <div class="space-y-2">
+      <div class="srow ok flex items-center justify-between"><div><p class="text-sm font-semibold">ขั้น 5 · Real English Word</p><p class="text-[11px] text-slate-500">SPK · จำกัด 1 นาที</p></div><span class="text-sm font-bold text-emerald-600">42 ✓</span></div>
+      <div class="srow mid flex items-center justify-between"><div><p class="text-sm font-semibold">ขั้น 11 · Dictation</p><p class="text-[11px] text-slate-500">LSN · จำกัด 1 นาที</p></div><span class="text-sm font-bold text-amber-600">26 ◆</span></div>
+      <div class="srow bad flex items-center justify-between"><div><p class="text-sm font-semibold">ขั้น 14 · Write about photo</p><p class="text-[11px] text-slate-500">WRT · จำกัด 5 นาที</p></div><span class="text-sm font-bold text-rose-600">18 ✗</span></div>
+    </div>
+    <p class="text-[11px] text-slate-400 mt-2">แตะแต่ละขั้นเพื่อดูคำตอบของคุณ vs เฉลย + "ทำยังไงให้คะแนนสูงขึ้น"</p>
+  </div>
+
+  <!-- coach tips -->
+  <div class="coach-tip mt-4"><div class="avatar">D</div><div class="bub">
+    <span class="lbl"><span class="spark">✨</span>Tips from P'Doy</span>
+    <p class="text-[13px] leading-6 text-slate-800">จุดที่ควรเก็บก่อน: <strong>Writing (90)</strong> และ <strong>Listening (98)</strong> ต่ำกว่าเป้า · ไปฝึก Dictation + Write about photo ในหน้า Practice แล้วกลับมาวัดใหม่</p>
+  </div></div>
+</main></div>
+
+<div class="bg-white px-6 py-6"><div class="mx-auto max-w-3xl text-xs text-slate-700 leading-7">
+  <p><strong class="text-[#004AAD]">เปลี่ยนอะไร (Krug + Cagan):</strong></p>
+  <ul class="mt-2 space-y-1.5 pl-4 list-disc">
+    <li><strong>เลิก brutalist</strong> ทั้งหน้า (เดิมขอบดำ shadow แข็ง monospace) → การ์ดนุ่ม อ่านสบาย</li>
+    <li><strong>หน้าเริ่ม: outcome hero</strong> (Cagan) — "105 → 120" + ปุ่ม "เริ่ม Mock ชุดถัดไป" ใหญ่ชัด 1 ปุ่ม · credit เป็น chip เงียบๆ ไม่ตะโกน</li>
+    <li><strong>ลดความรก</strong> (Krug: get rid of half the words) — how-to/access/upgrade ยุบลง · เน้นสิ่งที่ต้องทำต่อ</li>
+    <li><strong>หน้าผล: score ring คงไว้</strong> (ของเดิมดี) แต่ flatten · targets-vs-actual โชว์ delta สี · step review เป็นแถวมี spine เขียว/เหลือง/แดง สแกนเร็ว</li>
+    <li><strong>Coach tips → Tips from P'Doy</strong> บอกว่าควรไปเก็บทักษะไหนต่อ (Cagan: next action ชัด)</li>
+  </ul>
+</div></div>
+</body></html>
