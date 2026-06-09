@@ -192,6 +192,14 @@ export type MiniStudyPassageMcSession = MiniStudySessionBase & {
   exercises: MiniStudyPassageMcExercise[];
 };
 
+/** Reference-only session: pure lecture content, no built-in exercise. */
+export type MiniStudyLectureSession = MiniStudySessionBase & {
+  kind: "lecture-only";
+  /** Optional CTA shown on the lesson-complete screen. */
+  practiceCtaLabel?: string;
+  practiceCtaHref?: string;
+};
+
 export type MiniStudySession =
   | MiniStudyDictationSession
   | MiniStudyWritePhotoSession
@@ -201,7 +209,8 @@ export type MiniStudySession =
   | MiniStudyConversationSummarySession
   | MiniStudyEssayPickSession
   | MiniStudyEssayClozeSession
-  | MiniStudyPassageMcSession;
+  | MiniStudyPassageMcSession
+  | MiniStudyLectureSession;
 
 // Shared scenarios used by Sessions 7 & 8. Declared here (above MINI_STUDY_SESSIONS)
 // because the array initializer spreads `buildSessions7Through10()` which reads them.
@@ -1702,6 +1711,7 @@ function buildSessions7Through10(): MiniStudySession[] {
   const session14: MiniStudyPassageMcSession = buildSession14();
   const session15: MiniStudyPassageMcSession = buildSession15();
   const session16: MiniStudyEssayClozeSession = buildSession16();
+  const session17: MiniStudyLectureSession = buildSession17();
   return [
     session7,
     session8,
@@ -1713,6 +1723,7 @@ function buildSessions7Through10(): MiniStudySession[] {
     session14,
     session15,
     session16,
+    session17,
   ];
 }
 
@@ -3012,6 +3023,380 @@ function buildSession16(): MiniStudyEssayClozeSession {
               "Adverb (-ly) — blank อยู่หน้า adjective 'rising' เพื่อขยาย adjective นั้น → ต้องการ adverb · กฎ: blank + adjective หรือ blank + adverb อื่น → adverb (-ly)",
           },
         ],
+      },
+    ],
+  };
+}
+
+function buildSession17(): MiniStudyLectureSession {
+  return {
+    id: "session-17",
+    index: 17,
+    title: "Interactive Speaking — Format & 4 Patterns",
+    subtitle: "25 นาที · question type ใหม่ของ DET ตั้งแต่ 1 ก.ค. 2025",
+    durationLabel: "≈ 25 min",
+    kind: "lecture-only",
+    category: "speaking",
+    tierRequired: "vip",
+    shortHookTh: "4 patterns + vocab ครบทุกหัวข้อ — ตอบ 35 วินาทีให้ได้คะแนนสูงสุด",
+    practiceCtaLabel: "ไปฝึก Interactive Speaking →",
+    practiceCtaHref: "/practice",
+    explanation: [
+      {
+        heading: "ส่วนที่ 1 — Interactive Speaking คืออะไร?",
+        body: [
+          "Interactive Speaking เป็น **question type ใหม่** ที่เพิ่มเข้ามาในการสอบ DET เมื่อวันที่ **1 กรกฎาคม 2025** เพื่อแทนที่ \"Listen, Then Speak\" ที่ถูกยกเลิกไป",
+          "",
+          "**รูปแบบของ Interactive Speaking** คล้ายกับการสัมภาษณ์งาน โดยมีลักษณะดังนี้:",
+          "",
+          "• มี Interactive Speaking **เพียง 1 ชุด** ในการสอบ",
+          "• ได้ยินคำถามสั้นๆ **6–8 ข้อ**",
+          "• มีเวลา **35 วินาที** ในการตอบแต่ละข้อ",
+          "• ฟังคำถามได้ **เพียงครั้งเดียว** เท่านั้น — ไม่มีเวลาเตรียมตัวหลังจากคำถามจบ เพราะ **timer 35 วินาทีเริ่มทันที**",
+          "• หัวข้อจะ **เปลี่ยนไปกลางทาง** — ได้คำถามเกี่ยวกับหัวข้อหนึ่งก่อน แล้วที่เหลือจะเป็นหัวข้อใหม่",
+          "",
+          "หัวข้อที่ออกใน Interactive Speaking ใช้หัวข้อเดียวกับ writing และ speaking questions อื่นๆ ในการสอบ ดังนั้น **ไม่ต้องเรียนคำศัพท์พิเศษเพิ่มเติม**",
+        ].join("\n"),
+        coachTip: "**ฟังพี่นะครับ** — สิ่งที่นักเรียนต้องชินก่อนสอบจริงคือเสียง **timer เริ่มทันที** หลังคำถามจบ ไม่มีคำว่า \"ขอคิดก่อน\" เพราะเวลานับลงทันที พี่แนะนำให้ฝึกพูดทันทีหลังฟังคำถามจบในการฝึก ใครรอนาน 5-10 วินาทีจะเสีย point เยอะมากครับ",
+      },
+      {
+        heading: "ส่วนที่ 2 — DET ประเมินจาก 6 เรื่องนี้",
+        body: [
+          "ระบบประเมินคำตอบของคุณจาก **6 เกณฑ์**:",
+          "",
+          "**1. Content** — ตอบคำถามที่ถามจริงๆ ไหม? ตอบครบทุกส่วนของคำถามไหม? คำตอบที่ออกนอกเรื่องหรือท่องจำมาจะถูกตรวจจับ",
+          "",
+          "**2. Discourse Coherence** — คำตอบจัดระเบียบไหม? มีเปิด เนื้อหา และสรุปชัดเจน ความคิดต้องเชื่อมกันด้วยคำอย่าง *because, however, for example, as a result*",
+          "",
+          "**3. Grammar** — ประเมิน 2 สิ่งพร้อมกัน:",
+          "  • **ความถูกต้อง** (subject-verb agreement, tenses, articles)",
+          "  • **ความซับซ้อน** (ผสมประโยคง่ายและซับซ้อน)",
+          "  พูดแต่ present tense ธรรมดาจะจำกัดคะแนน",
+          "",
+          "**4. Lexis (Vocabulary)** — ประเมิน 2 สิ่ง:",
+          "  • **ความซับซ้อน** (ใช้คำที่แม่นยำและเหมาะกับหัวข้อ)",
+          "  • **ความหลากหลาย** (ไม่ซ้ำคำเดิม)",
+          "",
+          "**5. Fluency** — พูดในจังหวะที่สม่ำเสมอและเป็นธรรมชาติ การหยุดยาวส่งผลเสีย **มากกว่า** ไวยากรณ์ผิดเล็กน้อย",
+          "",
+          "**6. Pronunciation** — ผู้ฟังเข้าใจไหม? stress ของคำ intonation ของประโยค และเสียงที่ชัดเจนสำคัญมาก ไม่ต้องสำเนียงอเมริกัน/อังกฤษสมบูรณ์แบบ แค่ฟังออก",
+        ].join("\n"),
+        coachTip: "**สังเกตข้อ 5 ให้ดีนะครับ** — fluency สำคัญกว่าที่นักเรียนคิดมาก! ระบบประเมินบอกชัดเจนว่า \"การหยุดยาวส่งผลเสียมากกว่าไวยากรณ์ผิดเล็กน้อย\" แปลว่าถ้านักเรียนพูดผิด grammar นิดหน่อย แต่ลื่นไหล ก็ยังได้คะแนนดีกว่าพูดถูกแต่หยุดบ่อย เพราะฉะนั้น **พูดต่อเนื่อง > พูดสมบูรณ์แบบ** ครับ",
+      },
+      {
+        heading: "ส่วนที่ 3 — ⚠ ข้อผิดพลาดที่นักเรียนไทยทำบ่อย",
+        body: [
+          "**❌ ลืมกด \"Record Now\"**",
+          "หลังได้ยินคำถาม จะเห็นหน้าจอที่ timer เริ่มนับ แต่คำตอบจะ **ไม่ถูกบันทึก** ถ้าไม่กดปุ่ม \"Record now\" ที่มุมล่างขวา — ต้องทำสิ่งนี้เป็นอย่างแรกเสมอ",
+          "",
+          "**❌ คิดนานเกินไปก่อนพูด**",
+          "มีเวลาแค่ 35 วินาที — ไม่มีเวลาวางแผนคำตอบยาวๆ ดีกว่าเลือก idea แรกที่นึกออกและเริ่มพูดทันที นักเรียนไทยมักเสียเวลา 5–10 วินาทีไปกับการนึกว่าจะพูดอะไร ซึ่งเหลือเวลาพูดจริงแค่ 25 วินาที",
+          "",
+          "**❌ ไม่ฟังส่วนท้ายของคำถาม**",
+          "ผู้พูดมักเริ่มด้วยประโยคอย่าง *\"Thanks for that information\"* หรือ *\"Interesting, let me ask you another question\"* — ส่วนสำคัญของคำถามที่ต้องตอบจะอยู่ใน **ช่วงหลัง** ให้สังเกต question words อย่าง *describe, discuss, tell me about, do you think, why, how, what*",
+          "",
+          "**❌ พูดแค่ 10–15 วินาทีแล้วหยุด**",
+          "ควรพูดให้ได้ **30 วินาที** เพราะนั่นทำให้มีเวลาอธิบาย idea และใช้คำศัพท์ระดับสูง คำตอบสั้นเกินไปทำให้ระบบ **ไม่มีข้อมูลพอ** จะประเมิน fluency และ vocabulary",
+          "",
+          "**❌ พูดแต่คำง่ายๆ ซ้ำๆ**",
+          "*\"It is good. I like it. It is very nice.\"* — คำตอบแบบนี้ได้คะแนน vocabulary ต่ำมาก ต้องหลากหลายทั้งคำศัพท์และโครงสร้างประโยค",
+          "",
+          "**❌ ใช้ filler words มากเกินไป**",
+          "*\"Um... I think... um... like... you know...\"* — ทำลาย fluency score ถ้านึกไม่ออก ให้ใช้ **structured phrases** แทน เช่น *\"What comes to mind is...\"* หรือ *\"One thing I'd say is...\"*",
+        ].join("\n"),
+        coachTip: "**ข้อแรกสำคัญที่สุดเลยครับ — กด \"Record Now\" ก่อน!** นักเรียนหลายคนเสีย point ทั้งข้อเพราะลืมกดปุ่มนี้ พี่แนะนำให้ซ้อมที่บ้านโดยให้นิ้วชี้พร้อมกดปุ่มขวาล่างเสมอ ฟังคำถามจบ → กดปุ่ม → เริ่มพูดทันที จำเป็น 3 ขั้นตอนติดกันให้ขึ้นใจครับ ส่วน filler words ระวังด้วย — \"um... uh... like...\" ตัดได้ตัดเลย",
+      },
+      {
+        heading: "ส่วนที่ 4 — โครงสร้างคำตอบที่ดี: 3 ขั้นตอนใน 35 วินาที",
+        body: [
+          "สำหรับทุกคำตอบใน Interactive Speaking ให้ทำ **3 สิ่ง** นี้เพื่อให้คำตอบชัดเจน สอดคล้อง และได้คะแนนสูง:",
+          "",
+          "**1. ตอบคำถามตรงๆ ทันที** — ห้ามเริ่มด้วยประโยคเสียเวลาอย่าง *\"This is a very interesting topic\"* เพราะเสียเวลาและไม่ช่วยคะแนน เริ่มด้วยคำตอบทันที",
+          "",
+          "**2. อธิบายเหตุผลว่าทำไมคุณคิดแบบนั้น** — หลังพูด stance แล้ว บอกเหตุผลที่มีความคิดเห็นนั้น",
+          "",
+          "**3. ให้ตัวอย่างหรือรายละเอียดเฉพาะ** — สนับสนุนคำตอบและคำอธิบายด้วยรายละเอียดหรือตัวอย่างที่ชัดเจน",
+        ].join("\n"),
+        coachTip: "**3 ขั้นตอนนี้คือสูตรลับครับ** — Answer → Reason → Example นักเรียนคนไหนจำได้ขึ้นใจจะตอบได้ทุกคำถาม! พี่แนะนำให้ฝึกท่อง *\"ตอบ → เพราะ → ตัวอย่าง\"* ในใจก่อนเริ่มพูดทุกข้อ ใช้ 5 วินาทีแรกตั้งสติแล้วลุยตามสูตร — แค่นี้คะแนน Discourse Coherence ก็พุ่งแล้วครับ",
+      },
+      {
+        heading: "ส่วนที่ 5 — Pattern 1: Direct Answer + Reason + Example",
+        body: [
+          "**ใช้เมื่อ:** คำถามถามความชอบ ความคิดเห็น หรือประสบการณ์ส่วนตัว",
+          "เช่น: *\"Do you prefer...?\" / \"What do you enjoy...?\" / \"Tell me about a time...\"*",
+          "",
+          "**โครงสร้าง:**",
+          "• **ประโยคที่ 1** → ตอบตรงๆ + เหตุผลสั้น",
+          "• **ประโยคที่ 2** → ขยายเหตุผล",
+          "• **ประโยคที่ 3** → ยกตัวอย่างหรือรายละเอียด",
+          "• **ประโยคที่ 4** → mini-conclusion หรือ personal reflection",
+          "",
+          "**Template:**",
+          "*\"[Answer] because [reason]. This is because [expand]. For example, [specific detail]. That is why [restate stance].\"*",
+          "",
+          "**ตัวอย่าง** — คำถาม: *\"Do you prefer studying alone or with others?\"*",
+          "",
+          "*\"I prefer studying alone because I can concentrate much more effectively without distractions. When other people are around, I find it difficult to stay focused on what I am reading. For example, a two-hour study session at the library on my own covers far more material than three hours in a group. That is why I almost always choose to study by myself before an exam.\"*",
+          "",
+          "⏱ ประมาณ 30 วินาที ✅",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 6 — Pattern 2: Position + Two Reasons",
+        body: [
+          "**ใช้เมื่อ:** คำถามถามว่าคิดอย่างไรเกี่ยวกับประเด็นหนึ่ง หรือให้ justify ความคิดเห็น",
+          "เช่น: *\"Do you think...?\" / \"Should...?\" / \"Is it important to...?\"*",
+          "",
+          "**โครงสร้าง:**",
+          "• **ประโยคที่ 1** → บอก position ชัดเจน",
+          "• **ประโยคที่ 2** → เหตุผลที่ 1",
+          "• **ประโยคที่ 3** → เหตุผลที่ 2",
+          "• **ประโยคที่ 4** → สรุป position อีกครั้ง",
+          "",
+          "**Template:**",
+          "*\"I think [position]. First, [reason 1]. Additionally, [reason 2]. For these reasons, I believe [restate].\"*",
+          "",
+          "**ตัวอย่าง** — คำถาม: *\"Do you think young people should learn to cook?\"*",
+          "",
+          "*\"I strongly believe that young people should learn to cook. First, it teaches them to be independent and manage their own health by making nutritious meals rather than relying on fast food. Additionally, cooking is a valuable life skill that saves money in the long run, especially when living alone as a student. For these reasons, I think cooking should be part of every young person's education.\"*",
+          "",
+          "⏱ ประมาณ 30 วินาที ✅",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 7 — Pattern 3: Personal Experience Story",
+        body: [
+          "**ใช้เมื่อ:** คำถามถามประสบการณ์ส่วนตัว หรือเหตุการณ์ในอดีต",
+          "เช่น: *\"Describe a time when...\" / \"Tell me about an experience...\" / \"Have you ever...?\"*",
+          "",
+          "**โครงสร้าง:**",
+          "• **ประโยคที่ 1** → บอกบริบทสั้นๆ (ที่ไหน เมื่อไหร่ ใคร)",
+          "• **ประโยคที่ 2** → เกิดอะไรขึ้น",
+          "• **ประโยคที่ 3** → คุณทำอะไร / รู้สึกอย่างไร",
+          "• **ประโยคที่ 4** → บทเรียนหรือความหมายที่ได้รับ",
+          "",
+          "**Template:**",
+          "*\"One experience that comes to mind is [context]. At the time, [what happened]. I [what you did/felt]. Looking back, [lesson or meaning].\"*",
+          "",
+          "**ตัวอย่าง** — คำถาม: *\"Describe a time you had to overcome a challenge.\"*",
+          "",
+          "*\"One experience that comes to mind is when I had to give a presentation in front of fifty people for the first time during my second year of university. At the time, I was extremely nervous and nearly asked a classmate to take my place. I decided to prepare thoroughly and practice out loud every evening for a week. Looking back, that experience taught me that preparation builds confidence more effectively than any other strategy.\"*",
+          "",
+          "⏱ ประมาณ 30 วินาที ✅",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 8 — Pattern 4: Compare and Choose",
+        body: [
+          "**ใช้เมื่อ:** คำถามให้เปรียบเทียบสองสิ่งหรือถามว่าชอบอะไรมากกว่า",
+          "เช่น: *\"Which do you prefer...?\" / \"What is the difference between...?\" / \"Is X or Y better?\"*",
+          "",
+          "**โครงสร้าง:**",
+          "• **ประโยคที่ 1** → เลือกข้างทันที",
+          "• **ประโยคที่ 2** → บอกข้อดีของสิ่งที่เลือก",
+          "• **ประโยคที่ 3** → acknowledge ข้อดีของอีกฝ่ายสั้นๆ (ไม่บังคับ แต่ทำให้ฟังดู balanced)",
+          "• **ประโยคที่ 4** → ย้ำ choice ของตัวเอง",
+          "",
+          "**Template:**",
+          "*\"Between [A] and [B], I would choose [A]. [Reason why A is better]. While [B] has its advantages, [why A still wins for you]. Overall, [A] is the better choice for me because [core reason].\"*",
+          "",
+          "**ตัวอย่าง** — คำถาม: *\"Do you prefer living in a city or the countryside?\"*",
+          "",
+          "*\"Between city life and countryside living, I would choose the city without hesitation. Cities offer far greater access to career opportunities, education, and cultural experiences that are simply unavailable in rural areas. While the countryside provides a quieter and more peaceful environment, which I genuinely appreciate, the trade-off in opportunity is too significant for me personally. Overall, city living is the better choice for someone at my stage of life.\"*",
+          "",
+          "⏱ ประมาณ 30 วินาที ✅",
+        ].join("\n"),
+        coachTip: "**4 patterns นี้ครอบคลุม 95% ของคำถามที่ออกครับ** — พี่แนะนำให้นักเรียนเลือก **1-2 patterns ที่ถนัด** แล้วฝึกให้คล่อง ดีกว่าฝึกทั้ง 4 แบบครึ่งๆกลางๆ ลองดูว่านักเรียนตอบ Pattern 1 คล่องที่สุดไหม → ฝึก Pattern 1 ให้ชำนาญก่อน เพราะ Pattern 1 ใช้ได้กับคำถาม 60% ในข้อสอบครับ",
+      },
+      {
+        heading: "ส่วนที่ 9 — 🗣 Vocabulary: เริ่มต้นคำตอบ",
+        body: [
+          "ใช้แทน *\"I think...\"* ซ้ำๆ เพื่อยกระดับ vocabulary score:",
+          "",
+          "• *What comes to mind is...* — สิ่งที่นึกขึ้นมาคือ... · **ดี**",
+          "• *From my perspective,...* — จากมุมมองของฉัน... · **ดี**",
+          "• *In my experience,...* — จากประสบการณ์ของฉัน... · **ดี**",
+          "• *One thing I strongly believe is...* — สิ่งหนึ่งที่ฉันเชื่อมั่นคือ... · **ดีมาก**",
+          "• *If I'm being honest,...* — พูดตรงๆ ก็คือ... · **ดีมาก**",
+          "• *Speaking from personal experience,...* — พูดจากประสบการณ์ส่วนตัว... · **ดีมาก**",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 10 — 🔗 Vocabulary: เชื่อมความคิด (Linking)",
+        body: [
+          "• *This is because...* — ขยายเหตุผล",
+          "• *The reason for this is...* — อธิบายสาเหตุ",
+          "• *As a result,...* — แสดงผลลัพธ์",
+          "• *What's more,...* — เพิ่มข้อมูล (ไม่เป็นทางการ)",
+          "• *Furthermore,...* — เพิ่มข้อมูล (เป็นทางการ)",
+          "• *On the other hand,...* — แสดงมุมมองอีกด้าน",
+          "• *That said,...* — แต่ก็ต้องบอกว่า...",
+          "• *Having said that,...* — แม้จะบอกแบบนั้น แต่...",
+          "• *Not only that, but...* — ไม่เพียงแค่นั้น แต่...",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 11 — 📌 Vocabulary: ยกตัวอย่าง",
+        body: [
+          "• *For example,...* — **พื้นฐาน**",
+          "• *For instance,...* — **พื้นฐาน**",
+          "• *To give a specific example,...* — **ดี**",
+          "• *A clear example of this is...* — **ดี**",
+          "• *To illustrate,...* — **ดีมาก**",
+          "• *This can be seen in...* — **ดีมาก**",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 12 — 🎯 Vocabulary: แสดงความเห็น",
+        body: [
+          "• *I strongly believe that...* — **ดี**",
+          "• *I am convinced that...* — **ดีมาก**",
+          "• *It seems to me that...* — **ดี**",
+          "• *I tend to think that...* — **ดี**",
+          "• *There is little doubt that...* — **ดีมาก**",
+          "• *I would argue that...* — **ดีมาก**",
+          "• *Personally, I feel that...* — **ดี**",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 13 — 🏁 Vocabulary: ปิดคำตอบ",
+        body: [
+          "• *That is why I believe...* — **ดี**",
+          "• *For these reasons,...* — **ดี**",
+          "• *Overall, I think...* — **ดี**",
+          "• *All things considered,...* — **ดีมาก**",
+          "• *In short,...* — **ดี**",
+          "• *Ultimately,...* — **ดีมาก**",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 14 — 💡 คำแทนคำง่ายๆ ที่ใช้บ่อยเกินไป",
+        body: [
+          "ยกระดับคำศัพท์ทันทีโดยเปลี่ยนคำที่ใช้บ่อยเกินไปเป็นคำที่ดีกว่า:",
+          "",
+          "• **good** → *beneficial / valuable / rewarding / effective*",
+          "• **bad** → *harmful / detrimental / problematic / concerning*",
+          "• **important** → *essential / crucial / significant / vital*",
+          "• **like** → *appreciate / enjoy / find [adj] / prefer*",
+          "• **think** → *believe / consider / argue / feel / suggest*",
+          "• **a lot** → *significantly / considerably / greatly / substantially*",
+          "• **because** → *since / given that / due to the fact that / as*",
+          "• **show** → *demonstrate / illustrate / highlight / reveal*",
+          "• **help** → *support / assist / enable / facilitate*",
+          "• **change** → *transform / alter / reshape / influence*",
+        ].join("\n"),
+        coachTip: "**เคล็ดลับพี่ดอยครับ** — นักเรียนไม่ต้องจำคำหรูทั้งหมด! เลือก **3-4 คำที่ถนัด** แล้วใช้ให้คล่อง เช่น เปลี่ยน *good → beneficial*, *important → crucial*, *think → believe*, *because → since* แค่ 4 คำนี้ใช้ทุกข้อก็ยกระดับ vocabulary score ได้ทันทีครับ ใช้คำหรูที่ไม่รู้ความหมายแม่นๆ จะเสียคะแนนกว่าใช้คำง่ายที่ถูกบริบท",
+      },
+      {
+        heading: "ส่วนที่ 15 — 📚 Vocabulary: หัวข้อ Education",
+        body: [
+          "• *academic achievement* — ผลสำเร็จทางวิชาการ",
+          "• *critical thinking* — การคิดเชิงวิพากษ์",
+          "• *collaborative learning* — การเรียนรู้แบบร่วมมือ",
+          "• *self-directed learning* — การเรียนรู้ด้วยตนเอง",
+          "• *curriculum* — หลักสูตร",
+          "• *extracurricular activities* — กิจกรรมนอกหลักสูตร",
+          "• *foster a love of learning* — ปลูกฝังความรักในการเรียน",
+          "• *broaden one's horizons* — ขยายมุมมอง",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 16 — 💻 Vocabulary: หัวข้อ Technology",
+        body: [
+          "• *artificial intelligence* — ปัญญาประดิษฐ์",
+          "• *digital literacy* — ทักษะด้านดิจิทัล",
+          "• *privacy concerns* — ความกังวลเรื่องความเป็นส่วนตัว",
+          "• *screen time* — เวลาที่ใช้หน้าจอ",
+          "• *rely heavily on* — พึ่งพาอย่างมาก",
+          "• *transform the way we...* — เปลี่ยนวิธีที่เรา...",
+          "• *double-edged sword* — ดาบสองคม",
+          "• *keep up with advancements* — ตามทันความก้าวหน้า",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 17 — 🌍 Vocabulary: หัวข้อ Environment",
+        body: [
+          "• *climate change* — การเปลี่ยนแปลงสภาพภูมิอากาศ",
+          "• *carbon footprint* — รอยเท้าคาร์บอน",
+          "• *sustainable lifestyle* — วิถีชีวิตที่ยั่งยืน",
+          "• *renewable energy* — พลังงานทดแทน",
+          "• *raise awareness* — สร้างความตระหนักรู้",
+          "• *take individual responsibility* — รับผิดชอบในระดับบุคคล",
+          "• *long-term consequences* — ผลกระทบระยะยาว",
+          "• *endangered species* — สัตว์ใกล้สูญพันธุ์",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 18 — 👥 Vocabulary: หัวข้อ Society & Community",
+        body: [
+          "• *sense of belonging* — ความรู้สึกเป็นส่วนหนึ่ง",
+          "• *social inequality* — ความไม่เท่าเทียมทางสังคม",
+          "• *community engagement* — การมีส่วนร่วมในชุมชน",
+          "• *cultural diversity* — ความหลากหลายทางวัฒนธรรม",
+          "• *social media influence* — อิทธิพลของโซเชียลมีเดีย",
+          "• *break down barriers* — ทลายกำแพง",
+          "• *bridge the gap* — เชื่อมช่องว่าง",
+          "• *volunteering* — การเป็นอาสาสมัคร",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 19 — 💼 Vocabulary: หัวข้อ Work & Career",
+        body: [
+          "• *work-life balance* — ความสมดุลระหว่างงานและชีวิต",
+          "• *career prospects* — แนวโน้มอาชีพ",
+          "• *transferable skills* — ทักษะที่นำไปใช้ได้หลายด้าน",
+          "• *remote working* — การทำงานจากระยะไกล",
+          "• *job satisfaction* — ความพึงพอใจในงาน",
+          "• *pursue one's passion* — ทำตามความหลงใหล",
+          "• *professional development* — การพัฒนาทางวิชาชีพ",
+          "• *competitive job market* — ตลาดงานที่มีการแข่งขันสูง",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 20 — 🏥 Vocabulary: หัวข้อ Health & Wellbeing",
+        body: [
+          "• *mental health* — สุขภาพจิต",
+          "• *physical wellbeing* — สุขภาพกาย",
+          "• *sedentary lifestyle* — วิถีชีวิตที่นั่งนิ่ง ขาดการเคลื่อนไหว",
+          "• *reduce stress levels* — ลดระดับความเครียด",
+          "• *maintain a healthy diet* — รักษาอาหารที่ดีต่อสุขภาพ",
+          "• *preventive healthcare* — การดูแลสุขภาพเชิงป้องกัน",
+          "• *boost immunity* — เสริมภูมิคุ้มกัน",
+          "• *cope with pressure* — รับมือกับแรงกดดัน",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 21 — ✨ ตัวอย่างคำถาม + คำตอบจริง 4 ข้อ",
+        body: [
+          "**คำถามที่ 1 (Pattern 1)** — *\"What kind of hobby do you enjoy in your free time?\"*",
+          "",
+          "*\"What comes to mind immediately is reading, because it allows me to explore ideas and places I would never encounter in daily life. This is because books expose you to perspectives that are completely different from your own, which I find genuinely enriching. For example, reading about historical events has completely changed how I think about the problems we face today. That is why reading remains my most valued way of spending free time.\"*",
+          "",
+          "**คำถามที่ 2 (Pattern 2)** — *\"Do you think governments should invest more in public transportation?\"*",
+          "",
+          "*\"I am strongly convinced that governments should invest heavily in public transportation. First, well-funded public transit significantly reduces traffic congestion and air pollution in urban areas, which benefits the entire population. Additionally, it provides affordable mobility for people who cannot afford private vehicles, reducing social inequality in access to education and work. For these reasons, public transportation investment should be a national priority.\"*",
+          "",
+          "**คำถามที่ 3 (Pattern 3)** — *\"Describe a time when you learned something important from a mistake.\"*",
+          "",
+          "*\"One experience that comes to mind is when I submitted an important assignment without proofreading it, and received a much lower grade than I had expected. At the time, I had been overconfident and assumed my first draft was sufficient. That experience forced me to develop a habit of reviewing my work at least twice before submitting anything. Looking back, it taught me that careful attention to detail matters far more than speed.\"*",
+          "",
+          "**คำถามที่ 4 (Pattern 4)** — *\"Which do you think is more important: being creative or being organised?\"*",
+          "",
+          "*\"Between creativity and organisation, I would argue that organisation is ultimately more important in most situations. Being organised ensures that goals are achieved consistently and reliably, whereas creativity without structure often results in unfinished ideas. That said, creativity is genuinely valuable for generating new solutions and keeping work interesting. Overall, organisation is the stronger foundation, and creativity works best when it is channelled through clear structure.\"*",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 22 — 🧠 Checklist ก่อนตอบแต่ละคำถาม",
+        body: [
+          "☐ กด **\"Record Now\"** ทันทีก่อนพูด",
+          "☐ ตอบ **ตรงๆ ในประโยคแรก** ห้ามเริ่มด้วยประโยคเสียเวลา",
+          "☐ เลือก **pattern ที่เหมาะ** กับคำถาม (Pattern 1–4)",
+          "☐ พูดให้ได้ **30 วินาที**",
+          "☐ ใช้ **linking words** เชื่อมทุกความคิด",
+          "☐ ใช้คำศัพท์ที่ **หลากหลาย** ห้ามซ้ำคำเดิม",
+          "☐ ปิดด้วย **conclusion** ที่ย้ำ stance",
+        ].join("\n"),
+        coachTip: "**checklist นี้คือสรุปทั้งบทเรียนครับ** — บันทึกลง Notebook แล้วเปิดดูทุกครั้งก่อนซ้อม Interactive Speaking 1-2 อาทิตย์จะจำได้ขึ้นใจ ขอให้นักเรียนตั้งใจฝึกนะครับ — สู้ๆ! 💪",
       },
     ],
   };

@@ -70,7 +70,9 @@ export function MiniStudySessionClient({ session }: Props) {
                     ? "Start cloze exercises →"
                     : session.kind === "passage-mc"
                       ? "Start reading practice →"
-                      : "Start practice →";
+                      : session.kind === "lecture-only"
+                        ? "เรียนจบบทเรียน ✓"
+                        : "Start practice →";
     return (
       <MiniStudyExplanation
         sessionIndex={session.index}
@@ -107,6 +109,38 @@ export function MiniStudySessionClient({ session }: Props) {
   }
   if (session.kind === "essay-cloze") {
     return <MiniStudyEssayClozePhase session={session} />;
+  }
+  if (session.kind === "lecture-only") {
+    return (
+      <main className="mx-auto max-w-3xl space-y-6 px-4 py-10">
+        <div className="rounded-3xl bg-gradient-to-br from-green-50 to-emerald-50 p-8 text-center shadow-sm ring-1 ring-green-200">
+          <div className="text-6xl">🎉</div>
+          <h1 className="mt-3 text-2xl font-black tracking-tight text-slate-900">
+            เรียนจบบทเรียนนี้แล้ว!
+          </h1>
+          <p className="mt-3 text-sm leading-7 text-slate-700">
+            บทเรียนนี้เป็นเนื้อหาอ่านอย่างเดียว — ไม่มีแบบฝึกหัดในตัว
+            นำ pattern + vocabulary ที่เรียนไปใช้กับ <strong>Interactive Speaking</strong> จริงในการสอบได้เลย
+          </p>
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <Link
+              href="/practice/mini-study"
+              className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-800 ring-1 ring-slate-300 shadow-sm hover:shadow-md transition"
+            >
+              ← กลับไปหน้า Sessions
+            </Link>
+            {session.practiceCtaHref ? (
+              <Link
+                href={session.practiceCtaHref}
+                className="rounded-xl bg-[#004AAD] px-5 py-3 text-sm font-bold text-[#FFCC00] shadow-md hover:shadow-lg transition"
+              >
+                {session.practiceCtaLabel ?? "ไปฝึกต่อ →"}
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      </main>
+    );
   }
   return <MiniStudyPassageMcPhase session={session} />;
 }
