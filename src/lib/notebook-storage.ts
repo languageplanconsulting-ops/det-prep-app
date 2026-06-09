@@ -289,7 +289,9 @@ export async function addNotebookEntry(
                   ? "real-word"
                   : entry.source === "dialogue-summary"
                     ? "dialogue-summary"
-                    : "writing-read-and-write";
+                    : entry.source === "mini-study-lesson"
+                      ? "mini-study-lesson"
+                      : "writing-read-and-write";
   const id =
     typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()

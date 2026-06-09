@@ -211,7 +211,8 @@ export interface NotebookEntry {
     | "interactive-conversation"
     | "real-word"
     | "dialogue-summary"
-    | "interactive-speaking";
+    | "interactive-speaking"
+    | "mini-study-lesson";
   categoryIds: string[];
   titleEn: string;
   titleTh: string;

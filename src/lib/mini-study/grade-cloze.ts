@@ -69,6 +69,56 @@ const CATEGORY_LABELS: Record<
     exampleTh:
       "✅ ตัวอย่าง: *Distractions **make** it hard to focus.* (ห้าม makes) / *Family members **help** each other.*",
   },
+  // Session 16 — Word-form identification
+  "past-participle": {
+    titleTh: "หมวด — Past Participle (-ed)",
+    ruleTh:
+      "ถ้ามี **is/are/was/were/been** หน้า blank → passive voice ต้องเติม **-ed** · ถ้ามี **have/has/had** หน้า blank → perfect tense ต้องเติม **-ed** · ถ้า blank อยู่หลัง linking verb และอธิบาย **คนที่รู้สึก** → ใช้ **-ed adjective**",
+    exampleTh:
+      "✅ *The results were **surprised** → surprised* (อธิบายคน) · *She has **finished** her report.* · *He felt **tired** after the surgery.*",
+  },
+  "gerund": {
+    titleTh: "หมวด — Gerund (-ing)",
+    ruleTh:
+      "ถ้า blank อยู่หลัง **preposition** (by, in, of, for, without, after, before) → ต้องเติม **-ing** · ถ้า blank ทำหน้าที่เป็น **subject** ของประโยค → ต้องเติม **-ing** · ถ้ามี is/are/was/were + blank (continuous) → เติม **-ing**",
+    exampleTh:
+      "✅ *After **receiving** her degree, she started looking for work.* · *He improved by **practising** every day.* · ***Learning** a new language takes time.*",
+  },
+  "adjective-form": {
+    titleTh: "หมวด — Adjective Form",
+    ruleTh:
+      "ถ้า blank อยู่ **หน้า noun** → ต้องเป็น **adjective** · ถ้า blank อยู่หลัง linking verb (is, are, seems, feels, looks, becomes) → ต้องเป็น **adjective** · ระวัง **-ed adjective** (อธิบายคน) vs **-ing adjective** (อธิบายสิ่งของ/สถานการณ์)",
+    exampleTh:
+      "✅ *a **remarkable** achievement* · *The situation seems **complicated**.* · *The decision was **surprising** to experts.*",
+  },
+  "adverb-form": {
+    titleTh: "หมวด — Adverb Form (-ly)",
+    ruleTh:
+      "ถ้า blank อยู่ **หน้า adjective** หรือ **adverb อื่น** → ต้องเป็น **adverb** · ถ้า blank อยู่ **หลัง verb** และอธิบายวิธีที่ทำ → ต้องเป็น **adverb** · ถ้าอยู่ **ต้นประโยค** ก่อน comma แสดงความถี่/ระดับ → adverb",
+    exampleTh:
+      "✅ *The exam was **unexpectedly** difficult.* · *She spoke **clearly** during the presentation.* · ***Recently**, scientists discovered a new species.*",
+  },
+  "noun-form": {
+    titleTh: "หมวด — Noun Form",
+    ruleTh:
+      "ถ้ามี **article** (a/an/the) หน้า blank → ต้องเป็น **noun** · ถ้ามี **adjective** หน้า blank → ต้องเป็น noun · ถ้า blank เป็น **subject หรือ object** ของประโยค → ต้องเป็น noun · จำ suffixes: **-tion / -sion / -ment / -ness / -ity / -ance / -ence**",
+    exampleTh:
+      "✅ *The **development** of new technology takes years.* · *She showed great **determination**.* · *His **achievement** impressed everyone.*",
+  },
+  "preposition-form": {
+    titleTh: "หมวด — Preposition (Collocation)",
+    ruleTh:
+      "ภาษาอังกฤษมี **collocation ตายตัว** ที่ต้องจำ เช่น *interested **in**, responsible **for**, depend **on**, known **for**, good **at***  ถ้าเจอ verb/adjective ที่ตามด้วย preposition → ต้องจำเป็นคู่",
+    exampleTh:
+      "✅ *She is interested **in** science.* · *He is responsible **for** the project.* · *The company is well known **for** its design.*",
+  },
+  "transition-word": {
+    titleTh: "หมวด — Transition Word",
+    ruleTh:
+      "ถ้า blank อยู่ **ต้นประโยค** ก่อน comma และเชื่อมความคิด 2 ประโยค → ต้องเป็น **transition word** · เลือกตามความสัมพันธ์: **ตรงข้าม** (However) · **ผลลัพธ์** (Therefore, As a result) · **เพิ่มเติม** (Moreover, In addition)",
+    exampleTh:
+      "✅ *She studied hard. **However**, she failed the exam.* · *He missed the bus. **As a result**, he was late.* · *The food was cheap. **Moreover**, it was delicious.*",
+  },
 };
 
 function normalize(s: string): string {

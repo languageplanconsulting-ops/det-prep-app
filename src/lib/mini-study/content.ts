@@ -6,7 +6,12 @@ export type MiniStudyItem = {
   explanation: string;
 };
 
-export type MiniStudyExplanationBlock = { heading: string; body: string };
+export type MiniStudyExplanationBlock = {
+  heading: string;
+  body: string;
+  /** Optional พี่ดอย coach tip shown as a speech bubble after the block body. */
+  coachTip?: string;
+};
 
 export type MiniStudyCategory =
   | "listening"
@@ -140,7 +145,15 @@ export type MiniStudyClozeCategory =
   | "plural-noun"
   | "uncountable-noun"
   | "singular-after-a-an"
-  | "subject-verb-agreement-plural";
+  | "subject-verb-agreement-plural"
+  // Session 16 — Fill in the Blanks (word-form identification)
+  | "past-participle"
+  | "gerund"
+  | "adjective-form"
+  | "adverb-form"
+  | "noun-form"
+  | "preposition-form"
+  | "transition-word";
 
 export type MiniStudyClozeBlank = {
   number: number;
@@ -234,6 +247,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "นักเรียนไทยส่วนใหญ่พิมพ์คำได้ครบ แต่เสีย point เพราะ **ลืม comma** เพราะภาษาไทยไม่มี comma แบบอังกฤษ",
           "บทเรียนนี้สอน 2 กฎที่ออกบ่อยที่สุด — รู้แค่นี้ช่วยให้คุณเขียน comma ถูกเกือบ 100%",
         ].join("\n"),
+        coachTip: "บทเรียนนี้สอน **2 กฎ** ที่ออกบ่อยที่สุดครับ — รู้แค่นี้ช่วยให้นักเรียนเขียน comma ถูกเกือบ **100%** ตามพี่มาเลย 💪",
       },
       {
         heading: "กฎข้อ 1 — FANBOYS",
@@ -253,6 +267,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "⚠ **ระวัง!** ถ้าไม่มีประธานข้างหลัง → ไม่ต้องใส่ comma",
           "• *I was tired and went home.* (ไม่มี \"I\" อันที่ 2 → ไม่ใส่ comma)",
         ].join("\n"),
+        coachTip: "**เคล็ดลับพี่ดอยครับ:** ก่อนใส่ comma ให้ถามตัวเองว่า \"ข้างหลัง but/and/so มีประธานใหม่มั้ย?\" ถ้าไม่มี → **ตัด comma ทิ้ง** นักเรียนพลาดตรงนี้บ่อยที่สุด",
       },
       {
         heading: "กฎข้อ 2 — Subordinating conjunctions",
@@ -270,6 +285,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "",
           "🧠 **วิธีจำง่ายๆ:** Subordinator อยู่ **หน้า** → ใส่ comma หลังประโยครอง",
         ].join("\n"),
+        coachTip: "ลองท่องในใจว่า *\"หน้า-ใส่, หลัง-ไม่ใส่\"* ครับ — กฎสั้นๆ แค่นี้พอแล้ว ไม่ต้องจำกฎยาว ✌️ นักเรียนคนไหนท่องได้ขึ้นใจ comma ใน DET จะไม่มีพลาดเลย",
       },
       {
         heading: "วิธีทำแบบฝึกหัด",
@@ -365,6 +381,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "",
           "ได้ยินคำเหล่านี้ + คำกริยา regular → **เติม -ed เสมอ**",
         ].join("\n"),
+        coachTip: "**เคล็ดลับสำคัญที่ช่วยนักเรียนได้เยอะมากครับ:** ถ้านักเรียนได้ยิน verb ตัวใดตัวหนึ่งในประโยคเป็น past tense (เช่น *went, was, had, saw, took*) → อีก **99% verb ตัวอื่นในประโยคเดียวกันก็จะเป็น past tense ตามไปด้วย** เพราะภาษาอังกฤษมีกฎเรียกว่า **tense consistency** (ความสอดคล้องของเวลา) เช่นถ้าได้ยิน *\"I went to the store and...\"* → verb ถัดไปต้องเป็น past แน่นอน เช่น *bought, saw, met* ใช้เทคนิคนี้ช่วยเดาเวลานักเรียนฟังไม่ชัดได้เลยครับ",
       },
       {
         heading: "กฎข้อ 2 — Passive voice (be + V-ed)",
@@ -380,6 +397,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "",
           "🧠 **จำง่ายๆ:** เห็น **is/am/are/was/were/been/being** + คำกริยา → **น่าจะต้องเติม -ed**",
         ].join("\n"),
+        coachTip: "**ระวังให้ดีนะครับ** — passive voice เป็นจุดที่นักเรียนไทยเสีย point บ่อยที่สุด เพราะหูคนไทยไม่ค่อยได้ยินเสียง **-ed** ตอนท้ายเมื่อ verb ลงท้ายด้วยพยัญชนะ เช่น *delivered, finished, accepted, asked* พี่แนะนำให้นักเรียนสังเกต **was/were/is/are/been** ก่อนเลยครับ — ถ้าเจอคำพวกนี้ ให้สแกนหา verb ที่ต้องเติม **-ed** ตอนท้ายเสมอ อย่าลืม!",
       },
       {
         heading: "กฎข้อ 3 — เติม -s / -es (Present simple + ประธานเอกพจน์)",
@@ -396,6 +414,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "",
           "ได้ยินคำเหล่านี้ + ประธานเอกพจน์ → **เติม -s หรือ -es เสมอ**",
         ].join("\n"),
+        coachTip: "จำสูตรนี้ให้ขึ้นใจครับ: **ประธานเอกพจน์** (*he, she, it, the boy, my friend, the cat*) + verb ใน **present simple** → **ต้องเติม -s/-es เสมอ** DET วัดเรื่องนี้แทบทุกข้อใน Dictation เพราะเสียงสุดท้ายเบามาก หูเราเลยพลาดได้ง่าย เคล็ดลับ: ถ้าเห็นประธานเป็นคนคนเดียว/สิ่งเดียว — ใส่ s ไว้ก่อนเลย ปลอดภัยที่สุดครับ",
       },
       {
         heading: "วิธีทำแบบฝึกหัด",
@@ -481,6 +500,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "✗ **ผิดบ่อย:** ลืม comma ก่อน which",
           "*'She is wearing a coat which looks warm.'* → ความหมายเปลี่ยน! (กลายเป็นเลือกเฉพาะเสื้อที่ดูอบอุ่น)",
         ].join("\n"),
+        coachTip: "โครงสร้างนี้ใช้ **เพิ่มข้อมูลเสริมหลังคำนาม** ครับ — แต่ระวังนิดนึง! ใช้ **who is** สำหรับคน, **which is** สำหรับสิ่งของหรือสัตว์ พี่เห็นนักเรียนสลับกันบ่อยมาก เช่น *\"A woman, **which is** a doctor\"* (ผิด!) ที่ถูกคือ *\"A woman, **who is** a doctor\"* จำง่ายๆ ครับ: **who = ใคร, which = อะไร**",
       },
       {
         heading: "โครงสร้างที่ 2 — S + V, V-ing …",
@@ -496,6 +516,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "",
           "✗ **ผิดบ่อย:** *'A woman is sitting on a bench reading a book.'* (ลืม comma)",
         ].join("\n"),
+        coachTip: "โครงสร้างนี้ทรงพลังมากครับ — ใช้แสดงว่าประธาน \"ทำ 2 อย่างพร้อมกัน\" ในรูปแบบที่ฟังเป็นธรรมชาติ เคล็ดลับพี่: ถ้านักเรียนเห็นคนใน photo กำลังทำอะไรหลายอย่าง → ใช้ V-ing เชื่อมเลย เช่น *\"A man is sitting at a table, **typing** on his laptop\"* ฟังดูสวยกว่า *\"A man is sitting and typing\"* ครับ DET ให้คะแนน sentence variety สูงขึ้นด้วย",
       },
       {
         heading: "โครงสร้างที่ 3 — In/On/At … , S + V.",
@@ -510,6 +531,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "",
           "✗ **ผิดบ่อย:** *'In the background there are tall buildings.'* (ลืม comma หลัง background)",
         ].join("\n"),
+        coachTip: "โครงสร้างนี้คือ **prepositional phrase** อยู่หน้าประโยคครับ — กฎจำง่าย: **อะไรอยู่หน้า → ต้องมี comma หลัง** เพราะภาษาอังกฤษต้อง \"หยุดพัก\" หลัง phrase นำก่อนเข้าประโยคหลัก เคล็ดลับพี่: เริ่มประโยคแรกของนักเรียนด้วย *\"In the foreground,\"* หรือ *\"In the background,\"* ทุกครั้งเลยครับ — เป็นวิธีเปิดที่ DET ชอบมาก ดูเป็นมืออาชีพและตรงรูปแบบ academic writing",
       },
       {
         heading: "โครงสร้างที่ 4 — S + V + in/on/at …",
@@ -522,6 +544,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "",
           "**เหตุผล:** phrase ต่อจาก verb ได้เลย ไม่ต้องหยุดพัก",
         ].join("\n"),
+        coachTip: "โครงสร้างนี้คือกลับด้านของข้อ 3 ครับ — **phrase อยู่ท้าย → ไม่ใส่ comma** เพราะ phrase ต่อจาก verb ได้เลย ไม่ต้องหยุดพัก จำคู่กับข้อ 3 ไว้: *\"In the park, children are playing.\"* (หน้า = ใส่ comma) vs *\"Children are playing in the park.\"* (ท้าย = ไม่ใส่) เป็นกฎเดียวกันแต่ตำแหน่งต่างกัน — ห้ามใส่ comma ผิดเด็ดขาดนะครับ DET ตัดคะแนนทันที",
       },
       {
         heading: "🧠 จำง่ายๆ",
@@ -530,6 +553,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "• เพิ่มข้อมูล **หลัง** S+V → comma **ก่อน** ข้อมูลนั้น (โครงสร้าง 1 และ 2)",
           "• Phrase อยู่ **ท้าย** → **ไม่ใส่** comma (โครงสร้าง 4)",
         ].join("\n"),
+        coachTip: "**4 โครงสร้างนี้ครอบคลุม 90% ของประโยคที่ใช้ใน Write/Speak about Photo ครับ** — นักเรียนไม่ต้องเลือกอันใดอันหนึ่ง! เคล็ดลับพี่: **ลองสลับใช้ทั้ง 4 แบบในคำตอบ 3-4 ประโยคของนักเรียน** เพราะ DET ให้คะแนนพิเศษกับ **sentence variety** (ความหลากหลายของโครงสร้างประโยค) ถ้านักเรียนใช้ S+V ซ้ำๆ ทุกประโยค → คะแนน grammar จะตันที่ระดับหนึ่ง แต่ถ้าสลับทั้ง 4 โครงสร้างเป็น → คะแนนพุ่งขึ้นทันทีครับ",
       },
     ],
     items: [
@@ -607,6 +631,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "• **อย่าสับสน comma กับ full stop** — comma เชื่อมประโยค · full stop จบประโยค",
           "• **ประธานเอกพจน์ → เติม -s / -es** (He walk**s**, She watch**es**)",
         ].join("\n"),
+        coachTip: "**อย่าเริ่มประโยคด้วย \"I see…\" ตลอดนะครับ** — เป็นนิสัยที่นักเรียนไทยติดกันเยอะมาก DET จะลดคะแนนเรื่อง **vocabulary range** ทันที ลองสลับเป็นวลีพวกนี้แทนครับ: *\"In this picture…\"*, *\"The photo shows…\"*, *\"This image captures…\"*, *\"There is/are…\"* แค่เปลี่ยนคำเปิดประโยค คะแนน vocabulary ขยับขึ้นแน่นอน",
       },
       {
         heading: "Pattern 1 — ภาพรวม → รายละเอียด → ความรู้สึก",
@@ -620,6 +645,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "**ประโยค 3 (บอกอารมณ์ภาพ):** *Overall, the vibrant scene evokes a warm and lively atmosphere.*",
           "  (โดยรวม ฉากที่สดใสนี้ให้บรรยากาศที่อบอุ่นและมีชีวิตชีวา)",
         ].join("\n"),
+        coachTip: "จำสูตร **3 ชั้น** นี้ไว้ให้ขึ้นใจครับ — ขึ้นต้นกว้าง (บอกว่าภาพคืออะไร) → แคบลงเป็นรายละเอียด (คน/สิ่งของ/กิจกรรม) → ปิดท้ายด้วยความรู้สึกหรือบรรยากาศ พี่ใช้สูตรนี้สอนนักเรียนทุกคนเลยครับ เพราะมันตรงกับสิ่งที่ DET ต้องการเห็นเป๊ะๆ ลองคิดเป็น **กรวยกลับหัว** จากกว้างไปแคบ จำง่ายและใช้ได้กับทุกภาพ",
       },
       {
         heading: "Pattern 2 — คน → กิจกรรม → ฉาก",
@@ -700,6 +726,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "• พูดให้ครบ **6 ประโยคพอดี** — ไม่มาก ไม่น้อย",
           "• ประธานเอกพจน์ → คำกริยาเติม **-s / -es**",
         ].join("\n"),
+        coachTip: "**พูดช้ากว่าปกตินิดนึงนะครับ** — ชัดดีกว่าเร็วเสมอ DET ฟัง **pronunciation** และ **clarity** มากกว่าความเร็วในการพูด ถ้านักเรียนรีบจนเสียงไม่ชัด AI จับคำไม่ได้ → ได้คะแนนน้อยกว่าคนพูดช้าและชัด เคล็ดลับ: ลองนึกว่ากำลังพูดคุยกับเพื่อนต่างชาติที่เพิ่งเรียนภาษาอังกฤษ — นักเรียนจะออกเสียงชัดเองโดยอัตโนมัติครับ",
       },
       {
         heading: "Pattern 1 — ภาพรวม → หน้า → หลัง → คน → สิ่งของ → บรรยากาศ",
@@ -788,6 +815,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
           "**active** /ˈæktɪv/ กระฉับกระเฉง — *an active person*",
           "**friendly** /ˈfrendli/ เป็นมิตร — *looks friendly*",
         ].join("\n"),
+        coachTip: "ไม่ต้องจำคำพวกนี้ทั้งหมดนะครับ — **เลือกแค่ 5-6 คำที่นักเรียนชอบ** แล้วใช้สลับกันให้คล่อง ดีกว่ารู้ 20 คำแต่ใช้ไม่ถูก พี่แนะนำให้เลือก: *smiling, looking, holding, wearing, sitting, standing* — แค่ 6 คำนี้ใช้กับ 80% ของภาพในข้อสอบได้แล้วครับ!",
       },
       {
         heading: "คำศัพท์ — บรรยายสิ่งของ",
@@ -860,10 +888,12 @@ function buildSessions7Through10(): MiniStudySession[] {
           "• **เรื่องอะไร?** (หัวข้อ/แนวคิดที่กำลังคุย)",
           "• **กังวลอะไร?** (ความกังวลที่ถูกระบุใน scenario)",
         ].join("\n"),
+        coachTip: "**ฟังครั้งแรกอย่ารีบจดทุกอย่างครับ** — สมองจะล้นทันที! เคล็ดลับพี่: จับ **WHO + WHERE** ให้ได้ก่อน (ใคร กับ ที่ไหน) อย่างอื่นจะตามมาเอง ถ้านักเรียนรู้ว่า *\"พนักงานต้อนรับกับลูกค้าที่โรงแรม\"* — นักเรียนเดาได้แล้วว่าจะคุยเรื่อง check-in/check-out ทำให้ฟังรายละเอียดอื่นเข้าใจง่ายขึ้นเยอะครับ",
       },
       {
         heading: "วิธีทำบทนี้",
         body: "กด ▶ ฟัง scenario แล้วตอบ 3 คำถามจากความจำ · เสียงจะไม่เล่นซ้ำอัตโนมัติ — ตั้งใจฟังครั้งแรกให้ดี เหมือนข้อสอบจริง",
+        coachTip: "ถ้าฟังพลาด 1 รอบ **ไม่เป็นไรนะครับ** — กดเล่นซ้ำในแบบฝึกได้ แต่อย่าเล่นเกิน **3 รอบ** เพราะในข้อสอบจริง **เล่นได้แค่ครั้งเดียวเท่านั้น!** การฝึกแบบจำกัดรอบจะทำให้สมองชินกับการจับใจความครั้งเดียว ซึ่งเป็นทักษะที่ DET ต้องการครับ",
       },
     ],
     scenarios: [
@@ -1090,10 +1120,12 @@ function buildSessions7Through10(): MiniStudySession[] {
           "ต้องเริ่มบทสนทนาให้ถูกต้องตาม **บริบทของ scenario** ไม่ใช่ตามว่าฟังดู \"พอใช้ได้\" ในชีวิตประจำวัน",
           "วิธีคิด: ก่อนเลือกคำตอบทุกครั้ง ถามตัวเองว่า — ฉันเป็นใคร · ฉันคุยกับใคร · ฉันมาที่นี่เพื่ออะไร",
         ].join("\n"),
+        coachTip: "เคล็ดลับฝึกสมองให้เร็วขึ้นครับ: **ฟัง turn แรกเสร็จ → หยุดสักครู่ → ลองทาย turn ถัดไปในใจก่อนกดดูเฉลย** ฝึกแบบนี้บ่อยๆ นักเรียนจะเริ่มคาดเดา pattern ของบทสนทนาได้เอง เพราะภาษาอังกฤษมี **conversational pattern** ที่ค่อนข้างตายตัว เช่น *\"How are you?\" → \"I'm fine, thanks. And you?\"* รู้ pattern = ฟังเข้าใจไวขึ้น 2 เท่าครับ",
       },
       {
         heading: "วิธีทำบทนี้",
         body: "ฟัง scenario ของแต่ละข้อ แล้วตอบคำถาม who · why · opener · **opener คือประโยคแรกที่จะใช้เริ่มบทสนทนา** อย่าเลือกแค่ \"ฟังดูเป็นธรรมชาติ\" — ให้เลือกตัวที่ **ตรงกับ scenario** เท่านั้น",
+        coachTip: "ฟัง **intonation** (น้ำเสียงขึ้น/ลง) ด้วยนะครับ — บางครั้งคำตอบอยู่ที่ tone ไม่ใช่ที่คำพูด ถ้าเสียงปลายประโยคขึ้น → เป็นคำถาม รอคำตอบ ถ้าเสียงลง → เป็นคำบอกเล่า รอคำตอบรับ การฟัง intonation ช่วยให้นักเรียนเลือกคำตอบที่เป็นธรรมชาติได้แม่นขึ้นมากครับ",
       },
     ],
     scenarios: [
@@ -1354,6 +1386,7 @@ function buildSessions7Through10(): MiniStudySession[] {
           "**🎯 จำ scenario ไว้ตลอด** — ก่อนเลือกทุกครั้ง ถามตัวเอง: \"ฉันเป็นใคร? · ฉันมาทำไม? · ฉันคุยกับใคร?\"",
           "ถ้าคำตอบขัดกับข้อใดข้อหนึ่ง — ผิดแน่นอน",
         ].join("\n"),
+        coachTip: "**เทคนิคนี้ช่วยพี่ผ่าน DET ครั้งแรกครับ** — อ่าน choice **ปลายประโยคก่อนเสมอ** เพราะปลายประโยคบอกว่าคำตอบเกี่ยวกับอะไร (action, place, time, person) เมื่อนักเรียนรู้ \"หมวด\" ของแต่ละ choice แล้ว → ตอนฟังบทสนทนา นักเรียนจะจับ keyword ได้แม่นขึ้น พี่ลองสอนนักเรียนเทคนิคนี้ — ทุกคนคะแนน Listening ขยับขึ้นในรอบเดียวครับ",
       },
       {
         heading: "ส่วนที่ 4 — กลยุทธ์สำหรับคำถามท้ายบทสนทนา",
@@ -1374,6 +1407,7 @@ function buildSessions7Through10(): MiniStudySession[] {
           "",
           "ผ่าน 4 ข้อ → เลือกได้เลย",
         ].join("\n"),
+        coachTip: "ถ้าเหลือ 2 ตัวเลือกแล้วลังเลมาก — **เลือกตัวที่สั้นกว่า** และ **เป็นธรรมชาติกว่า** มักจะถูกครับ! เพราะ DET ออกแบบ choice ที่ผิดให้ดู \"ฟุ่มเฟือย\" หรือใส่ข้อมูลเกินจำเป็น คำตอบที่ถูกมักจะกระชับและตรงประเด็น เคล็ดลับเสริม: ถ้า choice ไหนใช้คำศัพท์ \"หรู\" เกินไปสำหรับบทสนทนาธรรมดา → ตัดทิ้งได้เลยครับ",
       },
     ],
     exercises: [
@@ -1610,6 +1644,7 @@ function buildSessions7Through10(): MiniStudySession[] {
           "",
           "**❌ เขียนยาวเกินไป** — 3 ประโยคครบถ้วน > 6 ประโยคไวยากรณ์ผิด",
         ].join("\n"),
+        coachTip: "**อย่าพูดทุกอย่างที่ได้ยินครับ!** DET ให้คะแนนการ \"สรุป\" ไม่ใช่ \"ทวน\" — พูด **3-4 ประโยคหลัก** พอ ครอบคลุม: **ใคร + ทำอะไร + ผลลัพธ์/สิ่งที่ตกลงกัน** ถ้านักเรียนพูดยาวเกินไป → จะรีบ → ภาษาผิด → เสียคะแนนทั้ง grammar และ pronunciation พี่เห็นนักเรียนเก่ง grammar แต่คะแนน Summary ต่ำเพราะอันนี้บ่อยมากครับ",
       },
       {
         heading: "ส่วนที่ 3 — Transitional words ที่ควรใช้",
@@ -1644,6 +1679,7 @@ function buildSessions7Through10(): MiniStudySession[] {
           "• **10–60s** — เขียน 3 ประโยคตาม pattern",
           "• **60–75s** — อ่านทวนและแก้ tense ที่ผิด",
         ].join("\n"),
+        coachTip: "**ใช้ 10 วินาทีแรกในการคิด อย่าเพิ่งพูดทันทีครับ** — คุณภาพประโยคสำคัญกว่าจำนวน! แบ่งเวลาคร่าวๆ: 10 วินาทีคิด → 50 วินาทีพูด → 15 วินาทีสำรอง ถ้านักเรียนเริ่มพูดทันทีโดยไม่คิด สมองจะวนคำซ้ำ ใช้เวลาแรกตั้งสติ เลือก pattern ที่จะใช้ แล้วค่อยเริ่มครับ",
       },
     ],
     conversation: [
@@ -1665,6 +1701,7 @@ function buildSessions7Through10(): MiniStudySession[] {
   const session13: MiniStudyPassageMcSession = buildSession13();
   const session14: MiniStudyPassageMcSession = buildSession14();
   const session15: MiniStudyPassageMcSession = buildSession15();
+  const session16: MiniStudyEssayClozeSession = buildSession16();
   return [
     session7,
     session8,
@@ -1675,6 +1712,7 @@ function buildSessions7Through10(): MiniStudySession[] {
     session13,
     session14,
     session15,
+    session16,
   ];
 }
 
@@ -1727,6 +1765,7 @@ function buildSession11(): MiniStudyEssayPickSession {
           "**❌ ลืม conclusion** — แค่ 1 ประโยคก็พอ แต่ต้องมี",
           "**❌ copy ประโยคแรกมาเป็น conclusion** — ต้องย้ำ stance ด้วยคำที่ต่างไป",
         ].join("\n"),
+        coachTip: "**นับคำให้ครบ 70-90 คำครับ** อย่าน้อยไป อย่าเยอะไป — DET ตัดคะแนนทันทีถ้าหลุดช่วงนี้! เคล็ดลับนับเร็ว: 1 ประโยคทั่วไป ~ 10-15 คำ → 5-7 ประโยค คือ sweet spot ถ้านักเรียนเขียนใน practice แล้วได้ 60 คำ → เพิ่มอีก 1 ประโยค ถ้าได้ 100 คำ → ลบ 1 ประโยคออก ฝึกประเมินสายตาให้เร็วครับ",
       },
       {
         heading: "Pattern 1 — Opinion Essay (5 ส่วน)",
@@ -1746,6 +1785,7 @@ function buildSession11(): MiniStudyEssayPickSession {
           "**5. Conclusion** — ปิด essay",
           "   *Overall, I think …* / *Therefore, I believe …* / *In conclusion, …*",
         ].join("\n"),
+        coachTip: "**ถ้า prompt ถามว่า \"agree/disagree\" หรือ \"do you think…?\"** → ใช้ pattern Opinion นี้ได้เลยครับ ไม่ต้องคิดมาก! Pattern Opinion เหมาะกับคำถามที่ต้องการ \"จุดยืน\" ส่วน Pattern Listing (อันถัดไป) เหมาะกับคำถามที่ถามเหตุผลหลายข้อ เช่น *\"What are the benefits of…?\"* รู้ว่า prompt แบบไหนใช้ pattern ไหน = ตอบเร็วขึ้น 2 เท่าครับ",
       },
       {
         heading: "Pattern 2 — Listing Essay (4 ส่วน)",
@@ -1960,6 +2000,7 @@ function buildSession12(): MiniStudyEssayClozeSession {
           "4. **คำนามเอกพจน์หลัง a/an** — ห้ามเติม -s",
           "5. **Subject-verb agreement** — ประธานพหูพจน์ + กริยาไม่เติม -s",
         ].join("\n"),
+        coachTip: "**อ่านช้าๆ ทีละคำนะครับ** ไม่ใช่กวาดสายตาผ่าน — error เล็กๆ ซ่อนอยู่ในรายละเอียดเสมอ เช่น *\"He don't\"* (ผิด ต้อง *doesn't*), *\"There is many\"* (ผิด ต้อง *are*) ถ้านักเรียนอ่านเร็วเกินไป สมองจะ \"เติมเต็ม\" สิ่งที่ควรเห็นแทนสิ่งที่เห็นจริงๆ → พลาดทันที เทคนิค: อ่านในใจเสียงปกติ ไม่ใช่เสียงเร็วครับ",
       },
       {
         heading: "วิธีทำ",
@@ -1970,6 +2011,7 @@ function buildSession12(): MiniStudyEssayClozeSession {
           "• กด **Check answers** แล้วระบบจะตรวจทุกข้อทันทีและแสดงรายงานจุดอ่อนเป็นภาษาไทย",
           "• กด **Save to notebook** เพื่อเก็บรายงานไว้ทบทวน",
         ].join("\n"),
+        coachTip: "**ตรวจ verb ก่อนเสมอครับ** — 80% ของ error ในข้อสอบนี้อยู่ที่ verb! เช็คตามลำดับนี้: (1) **Tense** ถูกไหม? (past/present/future) (2) **s/es** สำหรับประธานเอกพจน์? (3) **-ed** สำหรับ past tense / passive? (4) **be + V-ing** สำหรับ continuous? ถ้านักเรียน scan verb หมดแล้วไม่เจอ error → ค่อยไปดู noun (a/an/the) กับ preposition",
       },
       {
         heading: "ระดับความยาก",
@@ -2083,6 +2125,7 @@ function buildSession13(): MiniStudyPassageMcSession {
           "• **Main Idea** = ประเด็นหลักที่ผู้เขียนต้องการสื่อ — มักเป็นประโยคสมบูรณ์",
           "• ทั้งสองสะท้อนภาพรวมเหมือนกัน แต่ Title เป็นวลีสั้น Main Idea เป็นประโยค",
         ].join("\n"),
+        coachTip: "**กฎเหล็กครับ:** title ต้องครอบคลุม **ทั้ง passage** ไม่ใช่แค่ย่อหน้าเดียว ถ้า choice พูดถึงแค่ครึ่งเดียวของเนื้อหา → **ตัดทิ้งได้เลย** เทคนิคพี่: หลังอ่าน passage จบ → ลองอธิบายในใจสั้นๆ ว่า \"บทความนี้พูดเรื่องอะไรโดยรวม?\" คำตอบที่ตรงกับสิ่งนั้นที่สุด = title ที่ถูกครับ",
       },
       {
         heading: "ส่วนที่ 3 — Title ต้องเป็น \"ภาพรวม\" ไม่ใช่ \"รายละเอียด\"",
@@ -2092,6 +2135,7 @@ function buildSession13(): MiniStudyPassageMcSession {
           "• ถ้า title พูดถึงแค่ 1 ย่อหน้า → ผิดแน่นอน",
           "• ถ้า title ครอบคลุมทุกย่อหน้าพอดี → นั่นคือคำตอบ",
         ].join("\n"),
+        coachTip: "**เคล็ดลับเร็วสุดครับ:** ตัวเลือกที่ **specific เกินไป** (มีตัวเลข ชื่อคน ชื่อสถานที่ วันที่ ปี ค.ศ.) → มักไม่ใช่คำตอบ เพราะ title ที่ดีต้องสรุปภาพใหญ่ ไม่ใช่จุดเดียว ลองดู choice ทุกตัว → ตัดที่ specific ออกก่อนเลย ที่เหลือมักเป็นคำตอบที่ถูก พี่ใช้เทคนิคนี้ตัด choice ออกได้ 1-2 ตัวเสมอครับ",
       },
       {
         heading: "ส่วนที่ 4 — กับดักที่ DET ชอบออก",
@@ -2652,6 +2696,323 @@ function buildSession15(): MiniStudyPassageMcSession {
           ["D", "Urbanisation began during the Industrial Revolution in the eighteenth century in Europe.", "ประวัติศาสตร์ ไม่นำไปสู่ \"At the same time\""],
         ],
       ),
+    ],
+  };
+}
+
+function buildSession16(): MiniStudyEssayClozeSession {
+  return {
+    id: "session-16",
+    index: 16,
+    title: "Fill in the Blanks — How to Spot What the Blank Needs",
+    subtitle: "20 นาที · Grammar, not just vocabulary",
+    durationLabel: "≈ 20 min",
+    kind: "essay-cloze",
+    category: "writing",
+    tierRequired: "vip",
+    shortHookTh: "40% ของ blanks ทดสอบ grammar ไม่ใช่ vocabulary — เรียนวิธีอ่าน blank ใน 20 วินาที",
+    explanation: [
+      {
+        heading: "ส่วนที่ 1 — Fill in the Blanks ใน DET คืออะไร?",
+        body: [
+          "ใน **Fill in the Blanks** คุณจะได้รับประโยคที่มีคำที่หายไปบางส่วน หน้าที่ของคุณคือเติมตัวอักษรที่หายไปให้สมบูรณ์",
+          "คำถามนี้ออกแบบมาเพื่อทดสอบ **vocabulary** แต่ไม่ใช่แค่การรู้จักคำ — ต้องรู้ว่าใช้คำนั้น **ในบริบท** อย่างไรด้วย",
+          "มีเวลาประมาณ **20 วินาที** ต่อคำถามหนึ่งข้อ และมีทั้งหมด **6–9 ประโยค**",
+          "",
+          "**สิ่งที่นักเรียนส่วนใหญ่ไม่รู้:** ประมาณ **40%** ของ blanks ไม่ได้ทดสอบ vocabulary แต่ทดสอบ **grammar** — ถ้าคุณรู้จักคำแล้ว ยังต้องรู้ว่าจะใช้รูปแบบไหน",
+        ].join("\n"),
+        coachTip: "**ฟังพี่นะครับ** — นักเรียนส่วนใหญ่เสีย point ในส่วนนี้เพราะคิดว่ามันเป็น vocab test แต่จริงๆ มัน **grammar test ซ่อนรูป** ครับ! ถ้านักเรียนรู้กฎ word form ที่จะสอนต่อไปนี้ คะแนน Fill in the Blanks จะพุ่งขึ้นทันที เพราะนักเรียนจะไม่เดาแบบสุ่มอีกต่อไป ตามพี่มาเรียนกัน 7 ตัวชี้บอกที่ช่วยให้รู้ว่า blank ต้องการอะไรครับ",
+      },
+      {
+        heading: "ส่วนที่ 2 — 3 ประเภทของ blank",
+        body: [
+          "blank ใน Fill in the Blanks แบ่งออกเป็น **3 ประเภทหลัก**:",
+          "",
+          "**ประเภทที่ 1 — Grammar-based blanks:** ต้องการ **preposition, conjunction, หรือ article** ซึ่งต้องใช้ความรู้ด้านไวยากรณ์มากกว่า vocabulary",
+          "",
+          "**ประเภทที่ 2 — Vocabulary-based blanks:** ต้องเลือก **noun, verb, หรือ adjective** ที่ถูกต้องตามความหมายในประโยค",
+          "",
+          "**ประเภทที่ 3 — Contextual / transitional blanks:** ต้องการ **transition words** เช่น \"however,\" \"therefore,\" \"meanwhile\" ที่แสดงความสัมพันธ์ระหว่างสองประโยค",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 3 — 7 ตัวชี้บอกที่ต้องจำ",
+        body: [
+          "ก่อนเติมคำใดๆ ให้ถามตัวเองว่า \"blank นี้ต้องการ **word form** ไหน?\" โดยใช้ตัวชี้บอกในประโยค",
+          "",
+          "**🔍 1. blank ต้องการ verb + -ed (past participle / passive)**",
+          "• มี **is / are / was / were / been** อยู่หน้า blank → passive voice",
+          "• มี **have / has / had** อยู่หน้า blank → perfect tense",
+          "• blank อยู่หลัง linking verb และอธิบาย subject → past participle as adjective",
+          "ตัวอย่าง: *The results were **surprised*** · *She has **finished** her report.* · *The window was **broken** during the storm.*",
+          "",
+          "**🔍 2. blank ต้องการ verb + -ing (gerund / present participle)**",
+          "• มี **is / are / was / were** อยู่หน้า blank และไม่มีคำอื่นต่อ → present continuous",
+          "• blank อยู่หลัง preposition เช่น **by, in, of, for, without, after, before** → gerund",
+          "• blank ทำหน้าที่เป็น **subject** ของประโยค → gerund",
+          "ตัวอย่าง: *She is **studying** for the exam.* · *He improved by **practising** every day.* · ***Learning** a new language takes time.*",
+          "",
+          "**🔍 3. blank ต้องการ adjective**",
+          "• blank อยู่ **หน้า noun** → adjective modifier",
+          "• blank อยู่หลัง linking verb (**is, are, seems, feels, looks, becomes**) → predicate adjective",
+          "ตัวอย่าง: *It was a **remarkable** achievement.* · *The situation seems **complicated**.* · *She felt **exhausted** after the exam.*",
+          "",
+          "**🔍 4. blank ต้องการ adverb**",
+          "• blank อยู่ **หน้า adjective** หรือ adverb อื่น → adverb modifier",
+          "• blank อยู่ **หลัง verb** และอธิบายวิธีที่ทำ → adverb of manner",
+          "• blank อยู่ **ต้นประโยค** ก่อน comma และแสดงความถี่หรือระดับ",
+          "ตัวอย่าง: *The exam was **unexpectedly** difficult.* · *She spoke **clearly** during the presentation.* · ***Recently**, scientists discovered a new species.*",
+          "",
+          "**🔍 5. blank ต้องการ noun form**",
+          "• มี **article** (a, an, the) อยู่หน้า blank → ต้องการ noun",
+          "• มี **adjective** อยู่หน้า blank → ต้องการ noun",
+          "• blank เป็น subject หรือ object ของประโยค",
+          "ตัวอย่าง: *The **development** of new technology takes years.* · *She showed great **determination**.* · *His **achievement** impressed everyone.*",
+          "",
+          "**🔍 6. blank ต้องการ preposition**",
+          "• blank อยู่ระหว่าง noun/verb กับ noun/pronoun และแสดงความสัมพันธ์",
+          "• มี collocation ที่ตายตัว เช่น **interested ___, responsible ___, depend ___**",
+          "• blank อยู่หน้า time expression หรือ place",
+          "ตัวอย่าง: *She is interested **in** science.* · *He is responsible **for** the project.* · *They arrived **on** Monday.*",
+          "",
+          "**🔍 7. blank ต้องการ transition word**",
+          "• blank อยู่ **ต้นประโยค** ก่อน comma และเชื่อมความคิด 2 ข้อ",
+          "• ประโยคก่อนและหลัง blank มีความสัมพันธ์ที่ชัดเจน (ตรงข้าม / ผลลัพธ์ / เพิ่มเติม)",
+          "ตัวอย่าง: *She studied hard. **However**, she failed the exam.* (ตรงข้าม) · *He missed the bus. **As a result**, he was late.* (ผลลัพธ์) · *The food was cheap. **Moreover**, it was delicious.* (เพิ่มเติม)",
+        ].join("\n"),
+        coachTip: "**เคล็ดลับพี่ดอยครับ:** ตัวชี้บอก 7 ข้อนี้ไม่ต้องท่อง — ใช้บ่อยๆ แล้วจะจำได้เองครับ พี่แนะนำให้นักเรียน **focus ที่ตัวชี้บอก 1, 2, และ 5 ก่อน** เพราะ -ed / -ing / noun-form เป็น 60% ของ blanks ทั้งหมดในข้อสอบจริง ส่วน adverb (-ly) กับ preposition collocation นั้นค่อยฝึกหลังๆ ก็ได้ เริ่มจากที่ง่ายและออกบ่อยก่อนครับ",
+      },
+      {
+        heading: "ส่วนที่ 4 — ⚠ ข้อผิดพลาดที่นักเรียนไทยทำบ่อย",
+        body: [
+          "**❌ เดาคำศัพท์โดยไม่ดู word form**",
+          "• รู้จักคำว่า *\"surprise\"* แต่ไม่คิดว่าต้องเป็น *\"surprised\"* หรือ *\"surprising\"*",
+          "• **แก้:** ดู **สิ่งที่อยู่รอบๆ blank** ก่อนเสมอ อย่าเพิ่งเติมคำ",
+          "",
+          "**❌ สับสนระหว่าง -ed และ -ing adjectives**",
+          "• *surprised* (รู้สึกประหลาดใจ — อธิบายคน) vs *surprising* (น่าประหลาดใจ — อธิบายสิ่งของ)",
+          "• กฎ: ถ้า blank อธิบาย **คน** หรือสิ่งที่รู้สึก → มักเป็น **-ed**",
+          "• กฎ: ถ้า blank อธิบาย **สิ่งของ สถานการณ์ หรือข่าว** → มักเป็น **-ing**",
+          "",
+          "**❌ ใช้ adjective แทน adverb**",
+          "• *\"She spoke clear\"* → ผิด ต้องเป็น *\"She spoke clearly\"*",
+          "• กฎ: ถ้า blank อธิบาย **verb** → ต้องการ **adverb (-ly)**",
+          "• กฎ: ถ้า blank อธิบาย **noun** → ต้องการ **adjective**",
+          "",
+          "**❌ ใช้ verb form แทน noun form**",
+          "• *\"The develop of technology...\"* → ผิด ต้องเป็น *\"The development of technology...\"*",
+          "• กฎ: ถ้ามี **article** หรือ **adjective** อยู่หน้า blank → ต้องการ **noun เสมอ**",
+          "",
+          "**❌ ลืม suffix ของ noun forms**",
+          "• **-tion / -sion:** education, decision, information",
+          "• **-ment:** development, achievement, improvement",
+          "• **-ness:** happiness, awareness, weakness",
+          "• **-ity:** ability, creativity, possibility",
+          "• **-ance / -ence:** performance, difference, importance",
+        ].join("\n"),
+        coachTip: "**ระวังจุดสับสน -ed กับ -ing ให้ดีครับ** — เป็นข้อผิดพลาดอันดับ 1 ของนักเรียนไทย! จำสูตรง่ายๆ: ***คน → -ed (รู้สึก) · ของ → -ing (ทำให้รู้สึก)*** เช่น *\"I am bored\"* (ฉันรู้สึกเบื่อ) vs *\"The movie is boring\"* (หนังน่าเบื่อ) ถ้านักเรียนจำสูตรนี้ได้ จะไม่พลาดเลยครับ",
+      },
+      {
+        heading: "ส่วนที่ 5 — 🎯 วิธีอ่าน blank ใน 20 วินาที",
+        body: [
+          "เวลาเพียง 20 วินาที ต้องทำตามลำดับนี้:",
+          "",
+          "**วินาทีที่ 0–5** — อ่านประโยคทั้งหมดก่อน อย่าเพิ่งดู blank",
+          "**วินาทีที่ 5–10** — ดูสิ่งที่อยู่ **รอบๆ blank ซ้ายและขวา** ถามว่า \"ต้องการ word form ไหน?\"",
+          "**วินาทีที่ 10–15** — เติมคำที่คิดว่าถูก",
+          "**วินาทีที่ 15–20** — อ่านประโยคซ้ำ ตรวจว่า make sense ไหม",
+        ].join("\n"),
+        coachTip: "**อย่ารีบเติมก่อนอ่านประโยคจบนะครับ!** — นี่คือข้อผิดพลาดที่ทำให้นักเรียนเสียคะแนนเยอะที่สุดในส่วนนี้ บางคนเห็น blank ปุ๊บ พิมพ์ปั๊บโดยไม่ดูบริบท → ผิดทันที พี่แนะนำให้ฝึกท่อง *\"อ่าน → ดูรอบๆ → เติม → ตรวจ\"* ทุกครั้ง 5 วินาทีแรกสำคัญที่สุดครับ",
+      },
+      {
+        heading: "ส่วนที่ 6 — 🧠 Checklist ก่อนเติมคำ",
+        body: [
+          "☐ มี **article (a/an/the)** หรือ **adjective** หน้า blank → ต้องการ **noun**",
+          "☐ มี **is/are/was/were** + blank → ตรวจว่าเป็น passive (**-ed**) หรือ continuous (**-ing**)",
+          "☐ มี **have/has/had** หน้า blank → ต้องการ **past participle (-ed/irregular)**",
+          "☐ blank อธิบาย **verb** → ต้องการ **adverb (-ly)**",
+          "☐ blank อธิบาย **noun** หรืออยู่หลัง **linking verb** → ต้องการ **adjective**",
+          "☐ blank อยู่หลัง **preposition** → ต้องการ **gerund (-ing)**",
+          "☐ blank อยู่ **ต้นประโยค** และเชื่อมสองประโยค → ต้องการ **transition word**",
+        ].join("\n"),
+        coachTip: "**checklist นี้คือสรุปทั้งบทเรียนครับ** — ถ้านักเรียนจำได้แค่ตารางนี้ตารางเดียว ก็สอบ Fill in the Blanks ได้คะแนนสูงแล้ว! พี่แนะนำให้บันทึก checklist นี้ลง Notebook → เปิดดูทุกครั้งก่อนทำ practice → 1-2 อาทิตย์ จะจำได้ขึ้นใจ ไม่ต้องเปิดดูอีก ขอให้นักเรียนตั้งใจฝึกนะครับ — สู้ๆ! 💪",
+      },
+    ],
+    studentInstructionsTh:
+      "อ่านประโยคให้จบก่อน แล้วเติมคำในรูปที่ถูกต้องตามไวยากรณ์ ใช้ base word ในวงเล็บเป็นตัวตั้ง เปลี่ยน word form ให้เหมาะกับบริบท",
+    exercises: [
+      {
+        id: "s16-1",
+        patternLabel: "ข้อ 1 — Past participle adjective",
+        topic: "Many scientists are concerned about climate change",
+        essayTemplate:
+          "Many scientists are ___ about the effects of climate change on biodiversity.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: concern",
+            correct: "concerned",
+            category: "past-participle",
+            ruleNoteTh:
+              "Past participle as adjective — อยู่หลัง linking verb 'are' + อธิบายความรู้สึกของคน (scientists) → ใช้ -ed · กฎ: คน + รู้สึก → -ed / สิ่งของ + ทำให้รู้สึก → -ing",
+          },
+        ],
+      },
+      {
+        id: "s16-2",
+        patternLabel: "ข้อ 2 — -ing adjective",
+        topic: "Government's surprising decision on renewable energy",
+        essayTemplate:
+          "The government's decision to invest in renewable energy was ___ to many industry experts.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: surprise",
+            correct: "surprising",
+            category: "adjective-form",
+            ruleNoteTh:
+              "-ing adjective — อยู่หลัง linking verb 'was' + อธิบาย 'decision' (สิ่งของ ไม่ใช่คน) → ใช้ -ing · กฎ: สิ่งของ/สถานการณ์ที่ทำให้รู้สึก → -ing",
+          },
+        ],
+      },
+      {
+        id: "s16-3",
+        patternLabel: "ข้อ 3 — Gerund after preposition",
+        topic: "Starting work after graduation",
+        essayTemplate:
+          "After ___ her degree, she immediately started looking for work in her field.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: receive",
+            correct: "receiving",
+            category: "gerund",
+            ruleNoteTh:
+              "Gerund (-ing) — blank อยู่หลัง preposition 'After' → ต้องเติม -ing เสมอ · กฎ: หลัง preposition ทุกตัว (by, in, of, for, without, after, before) → ต้องการ -ing",
+          },
+        ],
+      },
+      {
+        id: "s16-4",
+        patternLabel: "ข้อ 4 — Noun form after article",
+        topic: "Development of electric vehicles",
+        essayTemplate:
+          "The ___ of affordable electric vehicles has changed the automotive industry significantly.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: develop",
+            correct: "development",
+            category: "noun-form",
+            ruleNoteTh:
+              "Noun form — มี article 'The' อยู่หน้า blank → ต้องการ noun เสมอ · กฎ: a/an/the + blank → noun ต้องลงท้ายด้วย -ment, -tion, -ness, -ity",
+          },
+        ],
+      },
+      {
+        id: "s16-5",
+        patternLabel: "ข้อ 5 — Adverb describing verb",
+        topic: "Confidently answering interview questions",
+        essayTemplate:
+          "She answered all the interview questions ___ and impressed the hiring committee.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: confident",
+            correct: "confidently",
+            category: "adverb-form",
+            ruleNoteTh:
+              "Adverb (-ly) — blank อยู่หลัง verb 'answered' และอธิบายวิธีที่เธอตอบ → ต้องการ adverb · กฎ: blank อธิบาย verb → adverb ที่ลงท้าย -ly",
+          },
+        ],
+      },
+      {
+        id: "s16-6",
+        patternLabel: "ข้อ 6 — Past participle (present perfect passive)",
+        topic: "Research paper review process",
+        essayTemplate:
+          "The research paper has been ___ by three independent experts before publication.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: review",
+            correct: "reviewed",
+            category: "past-participle",
+            ruleNoteTh:
+              "Past participle — มี 'has been' หน้า blank → present perfect passive → ต้องเติม -ed · กฎ: have/has/had + been + blank → past participle (-ed) เสมอ",
+          },
+        ],
+      },
+      {
+        id: "s16-7",
+        patternLabel: "ข้อ 7 — Transition word (result)",
+        topic: "Studying hard leads to success",
+        essayTemplate:
+          "He studied very hard for months. ___, he passed the exam with the highest score in the class.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: (transition)",
+            correct: "Therefore",
+            acceptedAlts: ["therefore", "As a result", "as a result", "Consequently", "consequently"],
+            category: "transition-word",
+            ruleNoteTh:
+              "Transition word แสดงผลลัพธ์ — ประโยคก่อน: เหตุ (เรียนหนัก) / ประโยคหลัง: ผล (สอบผ่าน) → Therefore / As a result / Consequently · ไม่ใช่ However (ขัดแย้ง) หรือ In addition (เพิ่ม)",
+          },
+        ],
+      },
+      {
+        id: "s16-8",
+        patternLabel: "ข้อ 8 — Past participle adjective (feelings)",
+        topic: "Tired patient after surgery",
+        essayTemplate:
+          "The patient felt ___ after the surgery and needed several days to recover.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: tire",
+            correct: "tired",
+            category: "past-participle",
+            ruleNoteTh:
+              "Past participle as adjective — อยู่หลัง linking verb 'felt' + อธิบายความรู้สึกของคน (patient) → ใช้ -ed · กฎ: felt/seemed/looked/appeared + blank อธิบายคน → -ed adjective",
+          },
+        ],
+      },
+      {
+        id: "s16-9",
+        patternLabel: "ข้อ 9 — Preposition collocation",
+        topic: "Company known for innovation",
+        essayTemplate:
+          "The company is well known ___ its innovative approach to product design.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: (preposition)",
+            correct: "for",
+            category: "preposition-form",
+            ruleNoteTh:
+              "Preposition collocation — 'well known ___' เป็น collocation ตายตัว → for · จำเป็นคู่: known for = มีชื่อเสียงในเรื่อง / known as = เป็นที่รู้จักในชื่อ",
+          },
+        ],
+      },
+      {
+        id: "s16-10",
+        patternLabel: "ข้อ 10 — Adverb modifying adjective",
+        topic: "Rapidly rising sea levels",
+        essayTemplate:
+          "___ rising sea levels pose a serious threat to coastal communities around the world.",
+        blanks: [
+          {
+            number: 1,
+            cue: "BASE: rapid",
+            correct: "Rapidly",
+            acceptedAlts: ["rapidly"],
+            category: "adverb-form",
+            ruleNoteTh:
+              "Adverb (-ly) — blank อยู่หน้า adjective 'rising' เพื่อขยาย adjective นั้น → ต้องการ adverb · กฎ: blank + adjective หรือ blank + adverb อื่น → adverb (-ly)",
+          },
+        ],
+      },
     ],
   };
 }

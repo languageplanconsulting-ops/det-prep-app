@@ -60,7 +60,9 @@ function entryHaystack(e: NotebookEntry): string {
                     ? "dialogue summary listening scenario transcript"
                     : e.source === "interactive-speaking"
                       ? "interactive speaking interview follow up conversation"
-                      : "writing write";
+                      : e.source === "mini-study-lesson"
+                        ? "mini study lesson grammar comma fanboys subordinating"
+                        : "writing write";
   return [
     origin,
     e.titleEn,
@@ -130,6 +132,7 @@ function sourceHashtag(e: NotebookEntry): string {
     "real-word": "real-word",
     "dialogue-summary": "dialogue-summary",
     "interactive-speaking": "interactive-speaking",
+    "mini-study-lesson": "mini-study",
   };
   return m[e.source] ?? "note";
 }
@@ -246,6 +249,7 @@ function notebookSourceLabel(e: NotebookEntry): string {
     "real-word": "Real word",
     "dialogue-summary": "Dialogue summary",
     "interactive-speaking": "Interactive speaking",
+    "mini-study-lesson": "Mini Study lesson",
   };
   return m[e.source] ?? "Notebook";
 }
