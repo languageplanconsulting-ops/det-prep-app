@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MiniStudyDictationSession } from "@/lib/mini-study/content";
+import { getCachedAudioUrl } from "@/lib/mini-study/audio-cache";
 
 type Props = { session: MiniStudyDictationSession };
 
@@ -34,6 +35,12 @@ export function MiniStudyDictationPhase({ session }: Props) {
       setAudioLoading(true);
       setAudioError(null);
       try {
+        const cached = await getCachedAudioUrl(text);
+        if (cached) {
+          setAudioByItem((prev) => ({ ...prev, [itemId]: cached }));
+          setAudioLoading(false);
+          return cached;
+        }
         const res = await fetch("/api/speech-synthesize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

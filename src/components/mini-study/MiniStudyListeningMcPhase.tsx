@@ -7,6 +7,7 @@ import type {
   MiniStudyListeningScenario,
   MiniStudyMcQuestion,
 } from "@/lib/mini-study/content";
+import { getCachedAudioUrl } from "@/lib/mini-study/audio-cache";
 
 type Props = { session: MiniStudyListeningMcSession };
 
@@ -32,6 +33,13 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
       setAudioLoading(true);
       setAudioError(null);
       try {
+        // Try pre-baked static MP3 first — instant playback, no API call.
+        const cached = await getCachedAudioUrl(text);
+        if (cached) {
+          setAudioByScenario((p) => ({ ...p, [id]: cached }));
+          setAudioLoading(false);
+          return cached;
+        }
         const res = await fetch("/api/speech-synthesize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

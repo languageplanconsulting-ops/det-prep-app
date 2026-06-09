@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:audio": "tsx scripts/build-mini-study-audio.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",

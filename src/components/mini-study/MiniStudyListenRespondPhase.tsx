@@ -6,6 +6,7 @@ import type {
   MiniStudyListenRespondExercise,
   MiniStudyListenRespondSession,
 } from "@/lib/mini-study/content";
+import { getCachedAudioUrl } from "@/lib/mini-study/audio-cache";
 
 type Props = { session: MiniStudyListenRespondSession };
 
@@ -30,6 +31,12 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
       setAudioLoading(true);
       setAudioError(null);
       try {
+        const cached = await getCachedAudioUrl(text);
+        if (cached) {
+          setAudioByEx((p) => ({ ...p, [id]: cached }));
+          setAudioLoading(false);
+          return cached;
+        }
         const res = await fetch("/api/speech-synthesize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
