@@ -63,7 +63,17 @@ export default function MiniStudyHubPage() {
           >
             <p className="mb-4 text-sm text-neutral-600">{s.subtitle}</p>
             <p className="mb-4 text-xs font-bold uppercase tracking-wide text-neutral-500">
-              {s.items.length} dictation items
+              {s.kind === "dictation"
+                ? `${s.items.length} dictation items`
+                : s.kind === "write-about-photo"
+                  ? "Photo + AI-graded writing"
+                  : s.kind === "speak-about-photo"
+                    ? "Photo + AI-graded speaking"
+                    : s.kind === "interactive-listening-mc"
+                      ? `${s.scenarios.length} scenarios · MC questions`
+                      : s.kind === "listen-respond"
+                        ? `${s.exercises.length} turn-based exercises`
+                        : "Conversation summary · Gemini Lite feedback"}
             </p>
             <Link
               href={`/practice/mini-study/${s.id}`}
