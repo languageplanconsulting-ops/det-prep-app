@@ -28,7 +28,7 @@ export function MiniStudyExplanation(props: Props) {
   const [view, setView] = useState<View>(defaultView);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6">
+    <main className="mx-auto max-w-5xl px-4 py-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <Link
           href="/practice/mini-study"
@@ -53,6 +53,20 @@ export function MiniStudyExplanation(props: Props) {
       )}
     </main>
   );
+}
+
+/**
+ * Turn a heading like "ส่วนที่ 1 — Title the Passage ใน DET คืออะไร?"
+ * into a tight TOC label like "Title the Passage ใน DET คืออะไร?"
+ */
+function tidyHeadingForToc(heading: string): string {
+  return heading
+    .replace(/^[^\p{L}\p{N}]+/u, "")
+    .replace(
+      /^(ส่วนที่|กฎข้อ|ข้อที่|Pattern|โครงสร้างที่|Section|Rule|Step|ขั้นที่)\s*\d+\s*[—\-:.)]*\s*/i,
+      "",
+    )
+    .trim();
 }
 
 /* ============================================================
@@ -107,6 +121,7 @@ function CardStack({
             durationLabel={durationLabel}
             title={title}
             subtitle={subtitle}
+            blocks={blocks}
           />
         )}
         {i > 0 && i <= blocks.length && (
@@ -158,28 +173,63 @@ function IntroCard({
   durationLabel,
   title,
   subtitle,
+  blocks,
 }: {
   sessionIndex: number;
   durationLabel: string;
   title: string;
   subtitle: string;
+  blocks: MiniStudyExplanationBlock[];
 }) {
+  // Cap the visible TOC at 6 items so the intro doesn't become a wall.
+  // If there are more, we show "และอีก N หัวข้อ" to set expectations
+  // without listing everything.
+  const tocItems = blocks.slice(0, 6).map((b) => tidyHeadingForToc(b.heading));
+  const hiddenCount = Math.max(0, blocks.length - tocItems.length);
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-start gap-3">
+    <div className="space-y-5">
+      <div className="flex items-start gap-4">
         <CoachAvatar size="md" />
         <div className="flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-red-700">
-            Session {sessionIndex} · {durationLabel}
+          <p className="text-[11px] font-bold uppercase tracking-wider text-red-700">
+            Session {sessionIndex} · ⏱ {durationLabel}
           </p>
           <h1 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">
             {title}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">{subtitle}</p>
+          <p className="mt-1.5 text-base text-slate-600">{subtitle}</p>
         </div>
       </div>
+
+      {/* "What's in this lesson" — a clear Thai table of contents so students
+          know exactly what they're about to learn. Wired into blocks[] so the
+          list always matches the actual content the lesson teaches. */}
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-[#004AAD]">
+          📘 บทเรียนนี้สอนอะไรบ้าง
+        </p>
+        <ol className="mt-3 space-y-2.5 text-[15px] leading-7 text-slate-800">
+          {tocItems.map((label, idx) => (
+            <li key={idx} className="flex gap-3">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-[11px] font-black text-white">
+                {idx + 1}
+              </span>
+              <span className="flex-1">{label}</span>
+            </li>
+          ))}
+          {hiddenCount > 0 ? (
+            <li className="pl-9 text-sm text-slate-500">
+              …และอีก {hiddenCount} หัวข้อ
+            </li>
+          ) : null}
+        </ol>
+      </div>
+
       <Coach>
-        สวัสดีครับ! บทเรียนนี้พี่จะพานักเรียนไปทีละการ์ด ไม่ต้องรีบ — แตะ <strong>"ต่อไป"</strong> เมื่อพร้อม
+        สวัสดีครับ! บทเรียนนี้พี่จะพานักเรียนไปทีละการ์ด ไม่ต้องรีบ — แตะ{" "}
+        <strong>"ต่อไป"</strong> เมื่อพร้อม · หรือถ้าอยากอ่านยาวๆ
+        ทั้งบทรวด สลับไปแถบ <strong>"📖 สรุป"</strong> ด้านบนได้เลยครับ
       </Coach>
     </div>
   );
@@ -202,7 +252,7 @@ function BlockCard({
         </span>
       </div>
       <h2 className="text-2xl font-black tracking-tight">{block.heading}</h2>
-      <div className="space-y-2 text-[15px] leading-7 text-slate-800 whitespace-pre-wrap">
+      <div className="space-y-2 text-base leading-8 text-slate-800 whitespace-pre-wrap">
         {renderMarkdownLines(block.body)}
       </div>
       {block.coachTip && (
@@ -402,7 +452,7 @@ function LectureSummary({
 
             <div className={`h-1 w-12 rounded-full mb-4 ${variant.bar}`} />
 
-            <div className="space-y-2 text-[15px] leading-7 text-slate-800 whitespace-pre-wrap">
+            <div className="space-y-2 text-base leading-8 text-slate-800 whitespace-pre-wrap">
               {renderMarkdownLines(block.body)}
             </div>
 

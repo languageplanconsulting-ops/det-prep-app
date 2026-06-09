@@ -75,7 +75,7 @@ export function MiniStudyPhotoWritePhase({ session }: Props) {
   };
 
   return (
-    <main className="relative mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <main className="relative mx-auto max-w-5xl space-y-6 px-4 py-8">
       {submitting ? (
         <GradingProgressLoader eyebrow="Grading your response" variant="premium" />
       ) : null}
@@ -129,7 +129,7 @@ export function MiniStudyPhotoWritePhase({ session }: Props) {
             disabled={!canSubmit}
             className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
           >
-            {submitting ? "AI กำลังตรวจ…" : "ส่งให้ AI ตรวจ"}
+            {submitting ? "กำลังประเมิน…" : "ส่งให้ประเมิน"}
           </button>
         </div>
       </div>

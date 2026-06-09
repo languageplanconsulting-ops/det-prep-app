@@ -21,7 +21,7 @@ export function MiniStudyPassageMcPhase({ session }: Props) {
   if (done) {
     const num = results.filter((r) => r.correct).length;
     return (
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
             เรียนจบบทนี้แล้ว
@@ -45,7 +45,7 @@ export function MiniStudyPassageMcPhase({ session }: Props) {
   const isCorrect = picked === ex.correctLetter;
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
       <header className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
           Session {session.index} · Exercise {idx + 1} / {total}

@@ -86,7 +86,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
   if (done) {
     const numCorrect = results.filter((r) => r.correct).length;
     return (
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
             เรียนจบบทนี้แล้ว
@@ -113,7 +113,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
   const isCorrect = picked === ex.correctLetter;
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
       <audio ref={audioRef} className="hidden" preload="auto" />
 
       <header className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">

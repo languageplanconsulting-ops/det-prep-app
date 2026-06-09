@@ -108,7 +108,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
 
   if (phase === "prep") {
     return (
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
         <header className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
             Session {session.index} · Summarize the conversation
@@ -152,7 +152,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
   if (phase === "write") {
     const timeUp = secondsLeft <= 0;
     return (
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+      <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
         <header className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
@@ -199,7 +199,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
               disabled={grading || !summary.trim()}
               className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
             >
-              {grading ? "AI กำลังตรวจ…" : "ส่งให้ AI ตรวจ"}
+              {grading ? "กำลังประเมิน…" : "ส่งให้ประเมิน"}
             </button>
           </div>
         </div>
@@ -210,10 +210,10 @@ export function MiniStudySummaryPhase({ session }: Props) {
   // graded
   if (!result) return null;
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <main className="mx-auto max-w-5xl space-y-6 px-4 py-8">
       <header className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
-          AI feedback · Session {session.index}
+          ผลการประเมิน · Session {session.index}
         </p>
         <h1 className="mt-1 text-2xl font-black tracking-tight">Your summary, graded</h1>
       </header>

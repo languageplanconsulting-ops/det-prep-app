@@ -24,7 +24,7 @@ export function MiniStudySessionClient({ session }: Props) {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-10 text-sm text-neutral-500">
+      <main className="mx-auto max-w-5xl px-4 py-10 text-sm text-neutral-500">
         กำลังโหลด…
       </main>
     );
@@ -32,7 +32,7 @@ export function MiniStudySessionClient({ session }: Props) {
 
   if (!adminLike) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <main className="mx-auto max-w-5xl px-4 py-10">
         <div className="rounded-2xl bg-[#fff7d1] p-6 shadow-sm ring-1 ring-[#FFCC00]/40">
           <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
             Admin only
