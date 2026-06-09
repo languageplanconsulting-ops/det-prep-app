@@ -216,7 +216,7 @@ export default function MiniStudyHubPage() {
               <p className="truncate text-sm font-semibold text-slate-800">
                 ลองเรียน{" "}
                 <span className="text-[#004AAD]">
-                  เทคนิคที่ {currentSession.index} · {currentSession.title}
+                  เทคนิคที่ {currentSession.index} · {titleTh(currentSession)}
                 </span>
               </p>
             </div>
@@ -256,7 +256,10 @@ export default function MiniStudyHubPage() {
                   </p>
                 </div>
               </header>
-              <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3">
+              {/* flex-wrap (not CSS grid) so a 1-card row doesn't stretch the
+                  single card across the whole bed. Cards get a fixed comfy
+                  width — they wrap as needed. */}
+              <div className="flex flex-wrap gap-2.5">
                 {sessions.map((s) => {
                   const isDone = completed.has(s.id);
                   const isCurrent = currentSession?.id === s.id;
@@ -336,8 +339,10 @@ function TipCard({
   onClick: () => void;
 }) {
   const emoji = SESSION_EMOJI[session.id] ?? "📚";
+  // Fixed comfy width (≈180 px) so a 1-card row doesn't stretch a single card
+  // across the entire bed — it sits left-aligned at a normal tile size.
   const base =
-    "relative flex flex-col items-center rounded-xl border bg-white p-3 text-center transition-all duration-150 ease-out hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]";
+    "relative flex w-[170px] flex-col items-center rounded-xl border bg-white p-3 text-center transition-all duration-150 ease-out hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] sm:w-[180px]";
   const stateClass =
     state === "done"
       ? "border-slate-200 bg-slate-50"
@@ -368,9 +373,9 @@ function TipCard({
         </span>
       ) : null}
 
-      <span className="mb-1.5 text-2xl leading-none">{emoji}</span>
-      <span className="text-[12px] font-bold leading-tight text-slate-800">
-        {session.title}
+      <span className="mb-1.5 text-3xl leading-none">{emoji}</span>
+      <span className="text-[13px] font-bold leading-tight text-slate-800">
+        {titleTh(session)}
       </span>
       <span
         className={`mt-1 text-[10px] ${
@@ -485,7 +490,7 @@ function LessonModal({
               ⏱ {session.durationLabel} · {MINI_STUDY_CATEGORY_LABEL_TH[session.category]}
             </p>
             <h2 className="mt-0.5 text-lg font-bold leading-tight">
-              เทคนิคที่ {session.index} · {session.title}
+              เทคนิคที่ {session.index} · {titleTh(session)}
             </h2>
           </div>
           <button
@@ -576,3 +581,33 @@ const SESSION_EMOJI: Record<string, string> = {
   "session-14": "💡",
   "session-15": "🧩",
 };
+
+/**
+ * Short Thai titles used on the hub tiles + modal header.
+ * The full session.title is often a long mixed English/Thai phrase like
+ * "Interactive listening — find the essentials in the scenario" which
+ * doesn't fit on a tile. These are the friendly Thai labels we show to
+ * students. Falls back to session.title if no entry exists.
+ */
+const SESSION_TITLE_TH: Record<string, string> = {
+  "session-1": "Comma · FANBOYS &amp; Subordinating",
+  "session-2": "เติม -ed, -s, Passive voice",
+  "session-3": "4 โครงสร้าง Comma สำหรับภาพ",
+  "session-4": "เขียนเกี่ยวกับภาพ",
+  "session-5": "พูดเกี่ยวกับภาพ",
+  "session-7": "หาประเด็นใน Scenario",
+  "session-8": "เริ่ม 2 turn แรกให้ถูก",
+  "session-9": "ฟังแล้วเลือกตอบ (Listen &amp; Respond)",
+  "session-10": "สรุปบทสนทนา 75 วินาที",
+  "session-11": "เลือก Essay ที่ดีที่สุด",
+  "session-12": "หาจุดอ่อนไวยากรณ์ของคุณ",
+  "session-13": "หา Title ที่ดีที่สุด",
+  "session-14": "หา Main idea",
+  "session-15": "หา Missing paragraph",
+};
+
+function titleTh(s: MiniStudySession): string {
+  // Decode the HTML entities we use to keep `&` from breaking JSX strings.
+  const raw = SESSION_TITLE_TH[s.id] ?? s.title;
+  return raw.replace(/&amp;/g, "&");
+}
