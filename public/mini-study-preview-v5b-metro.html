@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>V5b — Metro Line · Mini Study</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "IBM Plex Sans Thai","Inter",sans-serif; background:#f1f5f9; color:#0f172a; }
+
+    /* Metro line container */
+    .metro-line { position: relative; padding-left: 64px; }
+    .metro-line::before {
+      content: ""; position: absolute; left: 24px; top: 14px; bottom: 14px;
+      width: 8px; border-radius: 4px;
+    }
+    .line-dictation::before { background: #f59e0b; }
+    .line-speaking::before  { background: #ef4444; }
+    .line-listening::before { background: #0ea5e9; }
+    .line-writing::before   { background: #8b5cf6; }
+    .line-reading::before   { background: #10b981; }
+
+    /* Station marker */
+    .station {
+      position: relative; display: flex; align-items: center; gap: 16px;
+      padding: 14px 0; cursor: pointer; user-select: none;
+    }
+    .station::before {
+      content: ""; position: absolute; left: -50px; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 28px; border-radius: 9999px; background: white;
+      border: 6px solid; z-index: 1;
+    }
+    .station.s-dictation::before { border-color: #f59e0b; }
+    .station.s-speaking::before  { border-color: #ef4444; }
+    .station.s-listening::before { border-color: #0ea5e9; }
+    .station.s-writing::before   { border-color: #8b5cf6; }
+    .station.s-reading::before   { border-color: #10b981; }
+
+    .station.done::before {
+      background: currentColor; color: inherit;
+    }
+    .station.s-dictation.done::before { background: #f59e0b; color: white; }
+    .station.s-speaking.done::before  { background: #ef4444; color: white; }
+    .station.s-listening.done::before { background: #0ea5e9; color: white; }
+    .station.s-writing.done::before   { background: #8b5cf6; color: white; }
+    .station.s-reading.done::before   { background: #10b981; color: white; }
+    .station.done::after {
+      content: "✓"; position: absolute; left: -50px; top: 50%; transform: translateY(-50%);
+      width: 28px; text-align: center; color: white; font-weight: 900; font-size: 14px; z-index: 2;
+    }
+
+    .station.current::before {
+      animation: pulse-ring 2s ease-in-out infinite;
+      background: #FFCC00; border-color: #f59e0b;
+    }
+    .station.current::after {
+      content: ""; position: absolute; left: -36px; top: 50%; transform: translateY(-50%);
+      width: 0; height: 0; border-left: 8px solid #0f172a;
+      border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+    }
+    @keyframes pulse-ring {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+      50%      { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+    }
+
+    .station-card {
+      flex: 1; background: white; border-radius: 12px; padding: 12px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: all 0.15s ease;
+    }
+    .station:hover .station-card { transform: translateX(4px); box-shadow: 0 6px 14px rgba(0,0,0,0.08); }
+    .station.current .station-card { background: #fff7d1; box-shadow: 0 4px 14px rgba(245,158,11,0.2); }
+    .station.upcoming .station-card { background: white; opacity: 0.78; }
+    .station.done .station-card { background: #f0fdf4; }
+
+    /* Line header (like BTS station signage) */
+    .line-header {
+      background: linear-gradient(135deg, var(--line-color), var(--line-dark));
+      color: white; padding: 16px 20px; border-radius: 14px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.1);
+      display: flex; align-items: center; gap: 14px;
+      margin: 28px 0 12px;
+    }
+    .line-header .badge {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 900;
+    }
+
+    /* Transfer station */
+    .transfer-pill {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+      background: white; border-radius: 9999px; font-size: 10px; font-weight: 700;
+      color: #0f172a; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-top: 6px;
+    }
+
+    /* Modal */
+    .backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.55);
+      display: none; align-items: center; justify-content: center; z-index: 50;
+      backdrop-filter: blur(4px);
+    }
+    .backdrop.open { display: flex; }
+    .modal {
+      background: white; border-radius: 22px; padding: 28px;
+      width: min(560px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      max-height: 90vh; overflow-y: auto;
+    }
+
+    .coach {
+      position: fixed; bottom: 24px; right: 24px; z-index: 30; max-width: 320px;
+      background: white; border-radius: 20px; padding: 14px 16px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .coach .avatar {
+      width: 44px; height: 44px; border-radius: 9999px;
+      background: linear-gradient(145deg,#0ea5e9,#0369a1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    .coach .name { font-size: 11px; color: #0369a1; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-6">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <span class="text-sm text-slate-500 hidden sm:inline">หน้าแรก · ฝึก · Mock test</span>
+    <a href="/mini-study-preview-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← เวอร์ชันอื่น</a>
+    <span class="text-xs bg-sky-700 text-white px-2.5 py-1 rounded-md font-semibold">V5b · Metro Line</span>
+  </nav>
+
+  <!-- Sticky -->
+  <div class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200 px-6 py-3">
+    <div class="mx-auto max-w-3xl flex items-center gap-3">
+      <span class="text-xl">🚇</span>
+      <div class="flex-1">
+        <p class="text-xs text-slate-500 font-semibold">DET Express · ผ่านสถานี 4 จาก 15</p>
+        <div class="h-2 bg-slate-200 rounded-full overflow-hidden mt-1">
+          <div class="h-full rounded-full bg-gradient-to-r from-amber-400 via-rose-400 via-sky-400 via-violet-400 to-emerald-400" style="width:26%"></div>
+        </div>
+      </div>
+      <span class="text-xs font-bold text-slate-700">⭐ 32</span>
+    </div>
+  </div>
+
+  <main class="mx-auto max-w-3xl px-4 py-8 pb-32">
+    <!-- Intro -->
+    <header class="bg-white rounded-2xl p-6 shadow-sm ring-1 ring-slate-200 mb-6">
+      <div class="flex items-start gap-4">
+        <div class="text-5xl">🚇</div>
+        <div class="flex-1">
+          <h1 class="text-xl font-bold">DET Express Line</h1>
+          <p class="mt-1 text-sm text-slate-700 leading-7">
+            แต่ละทักษะคือสายรถไฟใต้ดิน 5 สี · เริ่มสถานีไหนก็ได้ ·
+            แต่ถ้าเป็นมือใหม่แนะนำให้เริ่มจากสาย <strong class="text-amber-700">Dictation (สีเหลือง)</strong> ก่อน
+          </p>
+          <div class="flex flex-wrap gap-2 mt-3 text-xs">
+            <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 font-semibold px-2.5 py-1 rounded-full"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Dictation</span>
+            <span class="inline-flex items-center gap-1.5 bg-rose-50 text-rose-800 font-semibold px-2.5 py-1 rounded-full"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Speaking</span>
+            <span class="inline-flex items-center gap-1.5 bg-sky-50 text-sky-800 font-semibold px-2.5 py-1 rounded-full"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> Listening</span>
+            <span class="inline-flex items-center gap-1.5 bg-violet-50 text-violet-800 font-semibold px-2.5 py-1 rounded-full"><span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span> Writing</span>
+            <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded-full"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Reading</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- DICTATION LINE -->
+    <div class="line-header" style="--line-color:#f59e0b;--line-dark:#b45309;">
+      <div class="badge">🟡</div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider opacity-90">สาย Dictation · เส้นทางพื้นฐาน</p>
+        <h2 class="text-lg font-bold">📝 ปลายทาง: สถานี Comma Foundation</h2>
+        <p class="text-xs opacity-90 mt-1">3 สถานี · ประมาณ 45 นาที</p>
+      </div>
+    </div>
+
+    <div class="metro-line line-dictation">
+      <div class="station s-dictation done" onclick="openModal('s1')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-emerald-700">สถานี #1 · ผ่านแล้ว ⭐⭐⭐</p>
+          <p class="text-sm font-bold mt-1">FANBOYS &amp; Subordinating</p>
+          <p class="text-xs text-slate-600 mt-0.5">⏱ 14 นาที · 10 ข้อฝึก</p>
+        </div>
+      </div>
+      <div class="station s-dictation done" onclick="openModal('s2')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-emerald-700">สถานี #2 · ผ่านแล้ว ⭐⭐</p>
+          <p class="text-sm font-bold mt-1">เติม -ed / -s / Passive voice</p>
+          <p class="text-xs text-slate-600 mt-0.5">⏱ 13 นาที</p>
+        </div>
+      </div>
+      <div class="station s-dictation done" onclick="openModal('s3')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-emerald-700">สถานี #3 · ผ่านแล้ว ⭐⭐⭐</p>
+          <p class="text-sm font-bold mt-1">4 โครงสร้าง Comma สำหรับภาพ</p>
+          <span class="transfer-pill">🔄 จุดเปลี่ยนสาย → Speaking</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPEAKING LINE -->
+    <div class="line-header" style="--line-color:#ef4444;--line-dark:#991b1b;">
+      <div class="badge">🔴</div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider opacity-90">สาย พูด/เขียนเกี่ยวกับภาพ</p>
+        <h2 class="text-lg font-bold">🗣 ปลายทาง: สถานี AI Feedback</h2>
+        <p class="text-xs opacity-90 mt-1">2 สถานี · AI ตรวจคำตอบ</p>
+      </div>
+    </div>
+
+    <div class="metro-line line-speaking">
+      <div class="station s-speaking done" onclick="openModal('s4')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-emerald-700">สถานี #4 · ผ่านแล้ว ⭐⭐</p>
+          <p class="text-sm font-bold mt-1">เขียนเกี่ยวกับภาพ</p>
+          <p class="text-xs text-slate-600 mt-0.5">⏱ 15 นาที · AI ตรวจ</p>
+        </div>
+      </div>
+      <div class="station s-speaking current" onclick="openModal('s5')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-amber-700">สถานี #5 · ขบวนถัดไป ⚡</p>
+          <p class="text-base font-bold mt-1">พูดเกี่ยวกับภาพ</p>
+          <p class="text-xs text-slate-700 mt-0.5">6 ประโยคจบ ใช้ is/are + V-ing</p>
+          <button class="mt-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 text-xs font-bold shadow-sm">▶ ขึ้นขบวนเลย</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTENING LINE -->
+    <div class="line-header" style="--line-color:#0ea5e9;--line-dark:#075985;">
+      <div class="badge">🔵</div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider opacity-90">สาย Listening</p>
+        <h2 class="text-lg font-bold">🎧 ปลายทาง: สถานี Conversation Master</h2>
+        <p class="text-xs opacity-90 mt-1">3 สถานี · กลยุทธ์ฟังในมหาวิทยาลัย</p>
+      </div>
+    </div>
+
+    <div class="metro-line line-listening">
+      <div class="station s-listening upcoming" onclick="openModal('s7','skip')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-slate-500">สถานี #7 · ขบวนถัดไป (ถ้าข้าม)</p>
+          <p class="text-sm font-bold mt-1 text-slate-800">หาประเด็นใน Scenario</p>
+          <p class="text-xs text-slate-500 mt-0.5">⏱ 15 นาที · 5 scenarios</p>
+        </div>
+      </div>
+      <div class="station s-listening upcoming" onclick="openModal('s8','skip')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-slate-500">สถานี #8</p>
+          <p class="text-sm font-bold mt-1 text-slate-800">เริ่ม 2 turn แรกให้ถูก</p>
+        </div>
+      </div>
+      <div class="station s-listening upcoming" onclick="openModal('s9','skip')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-slate-500">สถานี #9</p>
+          <p class="text-sm font-bold mt-1 text-slate-800">ฟังแล้วเลือกตอบ</p>
+          <span class="transfer-pill">🔄 จุดเปลี่ยนสาย → Writing</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- WRITING LINE -->
+    <div class="line-header" style="--line-color:#8b5cf6;--line-dark:#5b21b6;">
+      <div class="badge">🟣</div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider opacity-90">สาย Writing</p>
+        <h2 class="text-lg font-bold">✍️ ปลายทาง: สถานี Essay Mastery</h2>
+        <p class="text-xs opacity-90 mt-1">3 สถานี · 2 สถานี VIP only</p>
+      </div>
+    </div>
+
+    <div class="metro-line line-writing">
+      <div class="station s-writing upcoming" onclick="openModal('s10','skip')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-slate-500">สถานี #10</p>
+          <p class="text-sm font-bold mt-1 text-slate-800">สรุปบทสนทนา 75 วินาที</p>
+          <p class="text-xs text-slate-500 mt-0.5">Gemini ตรวจ</p>
+        </div>
+      </div>
+      <div class="station s-writing upcoming" onclick="openModal('s11','vip')">
+        <div class="station-card">
+          <div class="flex items-center justify-between">
+            <p class="text-xs font-bold text-amber-700">สถานี #11 · 🔒 VIP เท่านั้น</p>
+            <span class="text-[10px] bg-gradient-to-r from-amber-300 to-yellow-400 text-slate-900 font-bold px-2 py-0.5 rounded-full">VIP</span>
+          </div>
+          <p class="text-sm font-bold mt-1 text-slate-800">เลือก Essay ที่ดีที่สุด</p>
+        </div>
+      </div>
+      <div class="station s-writing upcoming" onclick="openModal('s12','vip')">
+        <div class="station-card">
+          <div class="flex items-center justify-between">
+            <p class="text-xs font-bold text-amber-700">สถานี #12 · 🔒 VIP เท่านั้น</p>
+            <span class="text-[10px] bg-gradient-to-r from-amber-300 to-yellow-400 text-slate-900 font-bold px-2 py-0.5 rounded-full">VIP</span>
+          </div>
+          <p class="text-sm font-bold mt-1 text-slate-800">หาจุดอ่อนไวยากรณ์ของคุณ</p>
+          <span class="transfer-pill">🔄 จุดเปลี่ยนสาย → Reading</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- READING LINE -->
+    <div class="line-header" style="--line-color:#10b981;--line-dark:#047857;">
+      <div class="badge">🟢</div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider opacity-90">สาย Reading</p>
+        <h2 class="text-lg font-bold">📖 ปลายทาง: สถานี Final Stop 🏆</h2>
+      </div>
+    </div>
+
+    <div class="metro-line line-reading">
+      <div class="station s-reading upcoming" onclick="openModal('s13','skip')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-slate-500">สถานี #13</p>
+          <p class="text-sm font-bold mt-1 text-slate-800">หา Title ที่ดีที่สุด</p>
+        </div>
+      </div>
+      <div class="station s-reading upcoming" onclick="openModal('s14','skip')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-slate-500">สถานี #14</p>
+          <p class="text-sm font-bold mt-1 text-slate-800">หา Main idea</p>
+        </div>
+      </div>
+      <div class="station s-reading upcoming" onclick="openModal('s15','skip')">
+        <div class="station-card">
+          <p class="text-xs font-bold text-emerald-700">🏁 สถานีปลายทาง #15</p>
+          <p class="text-sm font-bold mt-1 text-slate-800">หา Missing paragraph</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rationale -->
+    <aside class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 mt-10 text-xs text-slate-700 leading-7">
+      <strong class="text-slate-900">เหตุผลที่เลือก Metro Line:</strong>
+      นักเรียนไทยคุ้นเคยกับ BTS/MRT — เห็นปุ๊ปเข้าใจปั๊ป ·
+      สี 5 สีเชื่อมโยงกับหมวดทักษะ จดจำง่าย ·
+      "ข้ามสถานี" รู้สึกเป็นเรื่องปกติ (เหมือนนั่ง express) ·
+      ไม่มี hard lock — คลิกสถานีใดก็ได้
+    </aside>
+  </main>
+
+  <!-- Modal -->
+  <div class="backdrop" id="modal" onclick="if(event.target.id==='modal') closeModal()">
+    <div class="modal" id="modal-body"></div>
+  </div>
+
+  <!-- Pi Doi -->
+  <div class="coach">
+    <div class="avatar">🦉</div>
+    <div class="text-xs leading-6 text-slate-700">
+      <span class="name">พี่ดอย</span><br/>
+      ขบวนถัดไปจะถึงสถานี #5 · ขึ้นได้เลย ✨
+    </div>
+  </div>
+
+  <script>
+    const LESSONS = {
+      "s1":  { emoji:"📝", num:1,  title:"FANBOYS & Subordinating", gain:"เรียน comma ที่ออกบ่อยที่สุดใน Dictation", state:"done", time:"14 นาที" },
+      "s2":  { emoji:"✏️", num:2,  title:"เติม -ed / -s / Passive", gain:"ทำเป็นนิสัยใน 15 นาที", state:"done", time:"13 นาที" },
+      "s3":  { emoji:"✒️", num:3,  title:"4 โครงสร้าง Comma", gain:"ใช้กับ Write/Speak Photo", state:"done", time:"16 นาที" },
+      "s4":  { emoji:"✍️", num:4,  title:"เขียนเกี่ยวกับภาพ", gain:"3 pattern + AI ตรวจ", state:"done", time:"15 นาที" },
+      "s5":  { emoji:"🎤", num:5,  title:"พูดเกี่ยวกับภาพ", gain:"6 ประโยคจบ ใช้ is/are + V-ing", state:"current", time:"15 นาที" },
+      "s7":  { emoji:"🎧", num:7,  title:"หาประเด็นใน Scenario", gain:"เรียนวิธีจับ who · why · topic", state:"upcoming", time:"15 นาที" },
+      "s8":  { emoji:"💬", num:8,  title:"เริ่ม 2 turn แรกให้ถูก", gain:"คำตอบต้องตรง scenario", state:"upcoming", time:"15 นาที" },
+      "s9":  { emoji:"🎯", num:9,  title:"ฟังแล้วเลือกตอบ", gain:"เทคนิค Opener Elimination", state:"upcoming", time:"15 นาที" },
+      "s10": { emoji:"📝", num:10, title:"สรุปบทสนทนา 75 วินาที", gain:"Pattern 3 ประโยค + Gemini ตรวจ", state:"upcoming", time:"15 นาที" },
+      "s11": { emoji:"📜", num:11, title:"เลือก Essay ที่ดีที่สุด", gain:"5 ตัวอย่างเปรียบเทียบ", state:"vip", time:"15 นาที" },
+      "s12": { emoji:"🔍", num:12, title:"หาจุดอ่อนไวยากรณ์ของคุณ", gain:"ระบบบอกจุดอ่อนเป็นไทย", state:"vip", time:"15 นาที" },
+      "s13": { emoji:"📖", num:13, title:"หา Title ที่ดีที่สุด", gain:"Title ต้องครอบคลุมทุกย่อหน้า", state:"upcoming", time:"15 นาที" },
+      "s14": { emoji:"💡", num:14, title:"หา Main idea", gain:"แยก main idea กับ detail", state:"upcoming", time:"15 นาที" },
+      "s15": { emoji:"🧩", num:15, title:"หา Missing paragraph", gain:"สัญญาณ pronoun + transition", state:"upcoming", time:"15 นาที" },
+    };
+
+    function openModal(id, mode) {
+      const L = LESSONS[id]; if (!L) return;
+      const skipHint = mode === 'skip' ? `
+        <div class="mt-4 rounded-xl bg-sky-50 ring-1 ring-sky-200 p-4 text-sm leading-7 text-sky-900">
+          <strong>🚇 ข้ามขบวนไปสถานีนี้?</strong><br/>
+          สถานีนี้อยู่หลังสถานี #5 ที่คุณกำลังจะขึ้น — ขึ้นตามลำดับจะเข้าใจเส้นทางง่ายขึ้น
+          แต่ถ้ารู้แล้วก็ข้ามไปได้เลย
+        </div>` : '';
+      const vipPanel = mode === 'vip' ? `
+        <div class="mt-4 rounded-xl bg-gradient-to-br from-amber-100 to-yellow-100 ring-1 ring-amber-300 p-4">
+          <p class="text-xs font-bold text-amber-900 mb-1">🔒 สถานีนี้สำหรับสายขบวนเฉพาะ VIP</p>
+          <p class="text-xs text-slate-700 mb-3">สมัครสมาชิก VIP เพื่อปลดล็อก Writing Essay + ฟีเจอร์ AI ตรวจละเอียดเป็นไทย</p>
+          <button class="w-full rounded-lg bg-slate-900 text-white px-4 py-2.5 text-xs font-bold">ENGLISH PLAN TEAM · อัปเกรดเป็น VIP → ฿999/เดือน</button>
+        </div>` : '';
+
+      let cta = '';
+      if (L.state === 'current') cta = `<button class="w-full mt-5 rounded-xl bg-amber-500 text-white px-6 py-3.5 text-base font-bold hover:bg-amber-600">▶ ขึ้นขบวนเลย</button>`;
+      else if (L.state === 'done') cta = `<div class="flex gap-2 mt-5"><button class="flex-1 rounded-xl bg-white ring-1 ring-slate-300 px-5 py-3 text-sm font-semibold">↻ ทบทวน</button><button class="flex-1 rounded-xl bg-amber-400 text-slate-900 px-5 py-3 text-sm font-semibold">📖 ดูเฉลย</button></div>`;
+      else if (mode === 'skip') cta = `<div class="flex gap-2 mt-5"><button onclick="closeModal()" class="flex-1 rounded-xl bg-white ring-1 ring-slate-300 px-5 py-3 text-sm font-semibold">กลับสถานี #5</button><button class="flex-1 rounded-xl bg-sky-600 text-white px-5 py-3 text-sm font-semibold">🚇 ขึ้นสถานีนี้</button></div>`;
+
+      document.getElementById('modal-body').innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center text-3xl text-white">${L.emoji}</div>
+            <div>
+              <p class="text-xs font-semibold text-slate-500">⏱ ${L.time}</p>
+              <h2 class="text-xl font-bold mt-0.5">สถานี #${L.num} · ${L.title}</h2>
+            </div>
+          </div>
+          <button onclick="closeModal()" class="rounded-full bg-slate-100 hover:bg-slate-200 w-9 h-9 flex items-center justify-center">✕</button>
+        </div>
+        <div class="mt-4 rounded-xl bg-sky-50 ring-1 ring-sky-200 p-3 text-sm leading-7"><strong class="text-sky-700">คุณจะได้:</strong> ${L.gain}</div>
+        ${skipHint}
+        ${vipPanel}
+        ${cta}
+      `;
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  </script>
+</body>
+</html>

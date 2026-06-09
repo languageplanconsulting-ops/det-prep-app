@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>V4 — Journey · Mini Study</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "IBM Plex Sans Thai", "Inter", ui-sans-serif, system-ui, sans-serif;
+      background:#f7f8fc; color:#0f172a;
+    }
+
+    /* ---------- NODE ---------- */
+    .node {
+      position: relative;
+      display: inline-flex; flex-direction: column; align-items: center;
+      cursor: pointer; user-select: none;
+    }
+    .node .circle {
+      width: 72px; height: 72px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      border: 6px solid; transition: all 0.15s ease;
+      box-shadow: 0 4px 0 0 rgba(0,0,0,0.18);
+    }
+    .node:hover .circle { transform: translateY(-2px); }
+    .node:hover { z-index: 10; }
+
+    /* States */
+    .state-done .circle {
+      background: #16a34a; border-color: #15803d; color: #fff;
+    }
+    .state-done .circle::after {
+      content: "👑"; position: absolute; top:-18px; right:-6px; font-size:22px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .state-current .circle {
+      background: #FFCC00; border-color: #c79900; color: #0f172a;
+      animation: bounce 1.6s ease-in-out infinite;
+    }
+    .state-current::before {
+      content: "เริ่ม / START"; position:absolute; top:-32px; left:50%; transform:translateX(-50%);
+      background:#0f172a; color:#FFCC00; font-size:11px; font-weight:700; padding:4px 10px; border-radius:6px;
+      white-space:nowrap; box-shadow:0 4px 8px rgba(0,0,0,0.15);
+    }
+    .state-current::after {
+      content:""; position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+      border:6px solid transparent; border-top-color:#0f172a;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%     { transform: translateY(-6px); }
+    }
+    .state-locked .circle {
+      background: #cbd5e1; border-color: #94a3b8; color: #64748b;
+      cursor: not-allowed;
+    }
+    .state-locked.vip .circle {
+      background: linear-gradient(145deg, #fff7d1, #fde68a);
+      border-color: #d97706; color: #92400e;
+    }
+    .state-locked.vip::before {
+      content:"🔒 VIP"; position:absolute; top:-18px; right:-12px;
+      background: linear-gradient(135deg, #FFCC00, #f59e0b); color:#0f172a;
+      font-size:10px; font-weight:700; padding:3px 8px; border-radius:9999px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .node .label {
+      margin-top: 8px; font-size: 12px; font-weight: 600; text-align: center;
+      max-width: 110px; line-height: 1.3;
+    }
+    .node .meta {
+      margin-top: 2px; font-size: 10px; color: #64748b;
+    }
+
+    /* ---------- ZIGZAG PATH ---------- */
+    .path-row {
+      display: flex; justify-content: center; align-items: center;
+      gap: 64px; padding: 28px 0; position: relative;
+    }
+    .path-row::before {
+      content: ""; position: absolute; left: 50%; top: 0;
+      width: 4px; height: 100%; background: #e2e8f0; z-index: 0;
+      border-radius: 9999px;
+    }
+    .path-row > * { position: relative; z-index: 1; }
+    .offset-l { transform: translateX(-110px); }
+    .offset-l2 { transform: translateX(-60px); }
+    .offset-r { transform: translateX(110px); }
+    .offset-r2 { transform: translateX(60px); }
+
+    /* ---------- SECTION HEADER ---------- */
+    .section-band {
+      position: relative;
+      border-radius: 18px;
+      padding: 18px 22px;
+      color: white;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    }
+    .section-band .toolbar {
+      position: absolute; top: 14px; right: 18px;
+      background: rgba(255,255,255,0.22); color:white; font-size:11px;
+      padding: 4px 10px; border-radius: 9999px; font-weight: 600;
+    }
+    .band-dictation { background: linear-gradient(135deg, #d97706, #f59e0b); }
+    .band-speaking  { background: linear-gradient(135deg, #be123c, #f43f5e); }
+    .band-listening { background: linear-gradient(135deg, #0369a1, #0ea5e9); }
+    .band-writing   { background: linear-gradient(135deg, #6d28d9, #8b5cf6); }
+    .band-reading   { background: linear-gradient(135deg, #047857, #10b981); }
+
+    /* ---------- TREASURE between sections ---------- */
+    .chest {
+      width: 64px; height: 64px; border-radius: 12px;
+      background: linear-gradient(145deg, #FFCC00, #d97706);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; box-shadow: 0 4px 0 0 #92400e;
+      margin: 8px auto;
+    }
+    .chest-locked {
+      background: linear-gradient(145deg, #cbd5e1, #94a3b8);
+      box-shadow: 0 4px 0 0 #64748b;
+      filter: grayscale(0.6);
+    }
+
+    /* ---------- MODAL ---------- */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.55);
+      display: none; align-items: center; justify-content: center; z-index: 50;
+      backdrop-filter: blur(4px);
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: white; border-radius: 22px; padding: 28px;
+      width: min(560px, 92vw); box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      max-height: 90vh; overflow-y: auto;
+    }
+
+    /* ---------- GUIDE ---------- */
+    .guide {
+      position: fixed; bottom: 24px; right: 24px; z-index: 30;
+      background: white; border-radius: 20px; padding: 12px 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      display: flex; gap: 10px; align-items: center;
+      max-width: 340px;
+    }
+    .guide .owl {
+      width: 48px; height: 48px; border-radius: 9999px;
+      background: linear-gradient(135deg, #FFCC00, #f59e0b);
+      display: flex; align-items: center; justify-content: center; font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    /* ---------- TOP BAR ---------- */
+    .top-bar {
+      position: sticky; top: 0; z-index: 20; background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 24px;
+    }
+    .progress-bar {
+      height: 14px; background: #e2e8f0; border-radius: 9999px; overflow: hidden;
+      border: 2px solid #94a3b8;
+    }
+    .progress-bar > div {
+      height: 100%; background: linear-gradient(90deg, #FFCC00, #f59e0b);
+      transition: width 0.3s ease;
+    }
+
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
+  </style>
+</head>
+<body>
+  <!-- Top nav -->
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-6">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <span class="text-sm text-slate-500 hidden sm:inline">หน้าแรก · เกี่ยวกับ · ฝึก · Mock test</span>
+    <a href="/mini-study-preview-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← ดูเวอร์ชันอื่น</a>
+    <span class="text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">Preview V4 · Journey</span>
+  </nav>
+
+  <!-- Sticky progress -->
+  <div class="top-bar">
+    <div class="mx-auto max-w-3xl flex items-center gap-4">
+      <span class="text-xl">🔥</span>
+      <div class="flex-1">
+        <div class="flex items-center justify-between text-xs text-slate-600 mb-1">
+          <span class="font-semibold">ความก้าวหน้า · เรียนจบแล้ว 4 บท จาก 15 บท</span>
+          <span class="font-semibold text-[#004AAD]">26%</span>
+        </div>
+        <div class="progress-bar"><div style="width:26%"></div></div>
+      </div>
+      <div class="text-right">
+        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">ดาวสะสม</div>
+        <div class="text-lg font-bold">⭐ 32</div>
+      </div>
+    </div>
+  </div>
+
+  <main class="mx-auto max-w-3xl px-4 py-8 space-y-4 pb-32">
+
+    <!-- HEADER / INSTRUCTIONS -->
+    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <p class="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">Mini Study</p>
+      <h1 class="mt-1 text-2xl font-bold">เส้นทางการเรียน DET 15 บท</h1>
+      <p class="mt-3 text-sm leading-7 text-slate-700">
+        เรียนทีละบทตามเส้นทาง — แต่ละบทใช้เวลาประมาณ <strong>15 นาที</strong>
+        ทำเสร็จแล้วจะปลดล็อกบทถัดไปอัตโนมัติ และคุณจะได้ดาว <strong>⭐ 1-3 ดวง</strong>
+        ขึ้นกับว่าทำได้ถูกแค่ไหน
+      </p>
+      <div class="mt-4 rounded-xl bg-[#fff7d1] p-4 ring-1 ring-[#FFCC00]/50 text-sm leading-7">
+        <p class="font-semibold mb-1">📖 วิธีอ่านสัญลักษณ์ในเส้นทาง</p>
+        <ul class="space-y-1 text-xs">
+          <li>🟢 <strong>วงเขียวมีมงกุฎ 👑</strong> = ทำเสร็จแล้ว · กลับมาทบทวนได้</li>
+          <li>🟡 <strong>วงเหลือง กระโดดอยู่</strong> = บทปัจจุบัน · กดเพื่อเริ่ม</li>
+          <li>⚪ <strong>วงเทา</strong> = ยังล็อก · ต้องเรียนบทก่อนหน้าให้จบก่อน</li>
+          <li>🔒 <strong>วงทอง VIP</strong> = สำหรับสมาชิก VIP เท่านั้น</li>
+          <li>🎁 <strong>หีบสมบัติ</strong> = ทำครบทั้งหมวด เพื่อปลดล็อกหมวดถัดไป</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ====================== SECTION 1: DICTATION ====================== -->
+    <div class="section-band band-dictation mt-8">
+      <p class="text-xs font-semibold uppercase tracking-wider opacity-90">หมวด 1 · พื้นฐาน</p>
+      <h2 class="mt-1 text-xl font-bold">📝 Dictation — ฝึกฟังแล้วเขียน</h2>
+      <p class="mt-1 text-xs opacity-90 leading-6">
+        เรียนกฎ comma + การเติม -s / -ed ที่ DET ออกบ่อยที่สุด เริ่มจากบทที่ง่ายสุด
+      </p>
+      <button class="toolbar">📘 คู่มือหมวดนี้</button>
+    </div>
+
+    <!-- PATH: Dictation nodes (3) -->
+    <div class="space-y-2">
+      <div class="path-row">
+        <div class="node state-done offset-l" onclick="openModal('s1')">
+          <div class="circle">📝</div>
+          <div class="label">บทที่ 1 · FANBOYS</div>
+          <div class="meta">⭐⭐⭐ · 14 นาที</div>
+        </div>
+      </div>
+      <div class="path-row">
+        <div class="node state-done offset-r" onclick="openModal('s2')">
+          <div class="circle">✏️</div>
+          <div class="label">บทที่ 2 · เติม -ed / -s</div>
+          <div class="meta">⭐⭐ · 13 นาที</div>
+        </div>
+      </div>
+      <div class="path-row">
+        <div class="node state-done offset-l2" onclick="openModal('s3')">
+          <div class="circle">✒️</div>
+          <div class="label">บทที่ 3 · 4 โครงสร้าง Comma</div>
+          <div class="meta">⭐⭐⭐ · 16 นาที</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TREASURE: section 1 complete -->
+    <div class="text-center my-6">
+      <div class="chest">🎁</div>
+      <p class="mt-2 text-xs font-bold text-amber-700">หมวด Dictation ครบแล้ว! · +50 ⭐</p>
+    </div>
+
+    <!-- ====================== SECTION 2: SPEAKING/WRITING PHOTO ====================== -->
+    <div class="section-band band-speaking">
+      <p class="text-xs font-semibold uppercase tracking-wider opacity-90">หมวด 2 · ฝึกพูด/เขียนจากภาพ</p>
+      <h2 class="mt-1 text-xl font-bold">🗣 พูด/เขียนเกี่ยวกับภาพ</h2>
+      <p class="mt-1 text-xs opacity-90 leading-6">
+        นำกฎ comma จากหมวด 1 มาใช้กับงานจริง — AI ให้คะแนนทันที
+      </p>
+      <button class="toolbar">📘 คู่มือหมวดนี้</button>
+    </div>
+
+    <div class="space-y-2">
+      <div class="path-row">
+        <div class="node state-done offset-r2" onclick="openModal('s4')">
+          <div class="circle">✍️</div>
+          <div class="label">บทที่ 4 · เขียนเกี่ยวกับภาพ</div>
+          <div class="meta">⭐⭐ · AI ตรวจ</div>
+        </div>
+      </div>
+      <div class="path-row">
+        <div class="node state-current offset-l" onclick="openModal('s5')">
+          <div class="circle">🎤</div>
+          <div class="label">บทที่ 5 · พูดเกี่ยวกับภาพ</div>
+          <div class="meta">15 นาที · AI ตรวจ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- locked treasure -->
+    <div class="text-center my-6">
+      <div class="chest chest-locked">🔒</div>
+      <p class="mt-2 text-xs font-semibold text-slate-500">ปลดล็อกเมื่อจบบทที่ 5</p>
+    </div>
+
+    <!-- ====================== SECTION 3: LISTENING ====================== -->
+    <div class="section-band band-listening opacity-70">
+      <p class="text-xs font-semibold uppercase tracking-wider opacity-90">หมวด 3 · 🔒 ปลดล็อกเมื่อจบหมวด 2</p>
+      <h2 class="mt-1 text-xl font-bold">🎧 Interactive Listening</h2>
+      <p class="mt-1 text-xs opacity-90 leading-6">
+        ฝึกฟังบทสนทนาในมหาวิทยาลัย + กลยุทธ์เลือกคำตอบที่ถูกต้อง
+      </p>
+    </div>
+
+    <div class="space-y-2">
+      <div class="path-row">
+        <div class="node state-locked offset-l2" onclick="openModal('s7')">
+          <div class="circle">🎧</div>
+          <div class="label">บทที่ 7</div>
+          <div class="meta">🔒</div>
+        </div>
+      </div>
+      <div class="path-row">
+        <div class="node state-locked offset-r" onclick="openModal('s8')">
+          <div class="circle">💬</div>
+          <div class="label">บทที่ 8</div>
+          <div class="meta">🔒</div>
+        </div>
+      </div>
+      <div class="path-row">
+        <div class="node state-locked offset-l" onclick="openModal('s9')">
+          <div class="circle">🎯</div>
+          <div class="label">บทที่ 9</div>
+          <div class="meta">🔒</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== SECTION 4: WRITING ====================== -->
+    <div class="section-band band-writing opacity-60 mt-8">
+      <p class="text-xs font-semibold uppercase tracking-wider opacity-90">หมวด 4 · 🔒 ปลดล็อกเมื่อจบหมวด 3</p>
+      <h2 class="mt-1 text-xl font-bold">✍️ Writing — สรุปและ Essay</h2>
+      <p class="mt-1 text-xs opacity-90 leading-6">
+        ฝึกสรุปบทสนทนาภายใน 75 วินาที + เขียน Essay (บทที่ 11-12 = VIP)
+      </p>
+    </div>
+
+    <div class="space-y-2">
+      <div class="path-row">
+        <div class="node state-locked offset-r2" onclick="openModal('s10')">
+          <div class="circle">📝</div>
+          <div class="label">บทที่ 10</div>
+          <div class="meta">🔒</div>
+        </div>
+      </div>
+      <div class="path-row">
+        <div class="node state-locked vip offset-l" onclick="openModal('s11')">
+          <div class="circle">📜</div>
+          <div class="label">บทที่ 11 · Essay</div>
+          <div class="meta">VIP เท่านั้น</div>
+        </div>
+      </div>
+      <div class="path-row">
+        <div class="node state-locked vip offset-r" onclick="openModal('s12')">
+          <div class="circle">🔍</div>
+          <div class="label">บทที่ 12 · จุดอ่อนไวยากรณ์</div>
+          <div class="meta">VIP เท่านั้น</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================== SECTION 5: READING ====================== -->
+    <div class="section-band band-reading opacity-60 mt-8">
+      <p class="text-xs font-semibold uppercase tracking-wider opacity-90">หมวด 5 · 🔒 ปลดล็อกเมื่อจบหมวด 4</p>
+      <h2 class="mt-1 text-xl font-bold">📖 Reading — ทำข้อสอบ Interactive Reading</h2>
+      <p class="mt-1 text-xs opacity-90 leading-6">
+        Title · Main idea · Missing paragraph — สามคำถามที่ออกบ่อยที่สุด
+      </p>
+    </div>
+
+    <div class="space-y-2">
+      <div class="path-row">
+        <div class="node state-locked offset-l" onclick="openModal('s13')">
+          <div class="circle">📖</div>
+          <div class="label">บทที่ 13 · Title</div>
+          <div class="meta">🔒</div>
+        </div>
+      </div>
+      <div class="path-row">
+        <div class="node state-locked offset-r2" onclick="openModal('s14')">
+          <div class="circle">💡</div>
+          <div class="label">บทที่ 14 · Main idea</div>
+          <div class="meta">🔒</div>
+        </div>
+      </div>
+      <div class="path-row">
+        <div class="node state-locked offset-l2" onclick="openModal('s15')">
+          <div class="circle">🧩</div>
+          <div class="label">บทที่ 15 · Missing paragraph</div>
+          <div class="meta">🔒</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final trophy -->
+    <div class="text-center mt-10">
+      <div style="font-size:80px; opacity:0.4;">🏆</div>
+      <p class="mt-2 text-xs font-semibold text-slate-500">เรียนครบ 15 บท เพื่อปลดล็อกถ้วยรางวัล!</p>
+    </div>
+
+    <!-- UX rationale -->
+    <aside class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 text-xs text-slate-700 leading-7 mt-8">
+      <strong class="text-slate-900">ทำไมดีไซน์นี้ถึงเวิร์ก:</strong>
+      ใช้หลักเดียวกับ Duolingo — <em>เส้นทางเรียงตามลำดับ</em> (ลด choice paralysis ตามกฎ Hick) ·
+      <em>node สีเหลือง "กระโดด"</em> ดึงสายตา (von Restorff) · <em>หีบสมบัติ + ดาว</em>
+      เป็น variable reward · <em>การล็อก</em> สร้าง Zeigarnik tension ทำให้อยากเรียนให้จบ ·
+      <em>มงกุฎเขียว</em> ทำให้ภาคภูมิใจกับสิ่งที่ทำสำเร็จ (endowed progress)
+    </aside>
+
+    <!-- TAB: Inside a lesson -->
+    <div class="mt-10 pt-6 border-t-2 border-slate-200">
+      <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">ตัวอย่าง · เมื่อกด node บทปัจจุบัน</p>
+      <p class="text-sm text-slate-700 mt-1">↑ ลองคลิกที่ <strong>วงเหลืองที่กระโดด (บทที่ 5)</strong> ด้านบน จะมี popup ขึ้นมาบอกขั้นตอนชัดเจน</p>
+    </div>
+
+  </main>
+
+  <!-- ============== MODAL ============== -->
+  <div class="modal-backdrop" id="modal" onclick="closeIfBackdrop(event)">
+    <div class="modal" id="modal-body"></div>
+  </div>
+
+  <!-- ============== GUIDE (Owl) ============== -->
+  <div class="guide">
+    <div class="owl">🦉</div>
+    <div class="text-xs leading-6 text-slate-700">
+      <strong>ครูเพื่อนรู้ใจ:</strong><br/>
+      ตอนนี้คุณอยู่บทที่ 5 · เก่งมาก! เหลือ 2 บทก็จบหมวด พูด/เขียน แล้ว ✨
+    </div>
+  </div>
+
+  <script>
+    // ============ Lesson instructions (Thai) ============
+    const LESSONS = {
+      "s1": {
+        emoji: "📝", num: 1, title: "Comma + FANBOYS & Subordinating",
+        category: "Dictation · พื้นฐาน", time: "14 นาที", state: "done",
+        gain: "เรียน comma ที่ออกบ่อยที่สุดใน Dictation — บทเดียวจบ ใช้ได้ตลอดชีวิต",
+        steps: [
+          "อ่านบทเรียนเรื่อง FANBOYS (For, And, Nor, But, Or, Yet, So)",
+          "ฟัง 10 ประโยคจาก Deepgram TTS แล้วพิมพ์ตามให้ตรงทุกตัวอักษร — รวม comma",
+          "ระบบตรวจ 100% strict · ถ้าผิด กดดูเฉลย + คำอธิบายภาษาไทยได้",
+        ],
+        cta: "ทบทวนอีกครั้ง", action: "review",
+      },
+      "s2": {
+        emoji: "✏️", num: 2, title: "เติม -ed, -s, Passive voice",
+        category: "Dictation · พื้นฐาน", time: "13 นาที", state: "done",
+        gain: "เคยพิมพ์ Dictation แล้วลืมเติม -s ไหม? บทนี้สอนทำเป็นนิสัย",
+        steps: [
+          "เรียน 3 กฎ: past tense (-ed) · passive voice (be + V-ed) · present simple (-s/-es)",
+          "ฟัง 10 ประโยคผสมทั้ง 3 กฎ + comma จากบทที่ 1",
+          "เน้นจุดที่ DET ชอบกลืนเสียงท้าย — คุณต้องเติมเองโดยใช้ไวยากรณ์ ไม่ใช่หู",
+        ],
+        cta: "ทบทวนอีกครั้ง", action: "review",
+      },
+      "s3": {
+        emoji: "✒️", num: 3, title: "4 โครงสร้าง Comma สำหรับบรรยายภาพ",
+        category: "Dictation · พื้นฐาน", time: "16 นาที", state: "done",
+        gain: "รู้ 4 รูปแบบนี้แล้วบรรยายภาพไม่พลาด comma อีก ใช้กับ Write/Speak Photo",
+        steps: [
+          "เรียน 4 โครงสร้าง: S+V, which · S+V, V-ing · In…, S+V · S+V + in…",
+          "ฟัง 10 ประโยคจาก Deepgram TTS แล้วพิมพ์ตาม",
+          "ใช้บทนี้เป็นฐานก่อนเข้าหมวด 2 (พูด/เขียนเกี่ยวกับภาพ)",
+        ],
+        cta: "ทบทวนอีกครั้ง", action: "review",
+      },
+      "s4": {
+        emoji: "✍️", num: 4, title: "เขียนเกี่ยวกับภาพ",
+        category: "พูด/เขียนเกี่ยวกับภาพ", time: "15 นาที · AI ตรวจ", state: "done",
+        gain: "3 pattern + คำคุณศัพท์ที่ใช้ได้จริง — AI ให้คะแนนทันที",
+        steps: [
+          "อ่าน 3 patterns: Overview→Detail→Feeling · Subject→Action→Context · Location→Action→Impression",
+          "ดูภาพแล้วเขียน 3-5 ประโยค โดยใช้ pattern ใด pattern หนึ่ง · ห้ามใช้ past tense",
+          "ส่งให้ AI ตรวจ — ได้คะแนน + บันทึก notebook ได้",
+        ],
+        cta: "ทบทวนอีกครั้ง", action: "review",
+      },
+      "s5": {
+        emoji: "🎤", num: 5, title: "พูดเกี่ยวกับภาพ",
+        category: "พูด/เขียนเกี่ยวกับภาพ", time: "15 นาที · AI ตรวจ", state: "current",
+        gain: "6 ประโยคจบ ใช้แต่ is/are + V-ing ไม่ต้องกลัวผิด -ed",
+        steps: [
+          "อ่านกฎเหล็ก: ใช้ is/are + V-ing เท่านั้น · หลีกเลี่ยง -ed · พูดให้ครบ 6 ประโยค",
+          "เลือก pattern (ภาพรวม → หน้า → หลัง → คน → สิ่งของ → บรรยากาศ) แล้วฝึกตามภาพ",
+          "กดปุ่ม mic แล้วพูดตาม pattern · ถ้า mic ใช้ไม่ได้ พิมพ์ก็ได้ · AI ตรวจให้",
+        ],
+        cta: "▶ เริ่มเรียนเลย", action: "start", primary: true,
+      },
+      "s7": {
+        emoji: "🎧", num: 7, title: "หาประเด็นใน Scenario",
+        category: "Interactive Listening · ล็อก", time: "15 นาที", state: "locked",
+        gain: "เข้าใจ Scenario = ทำได้ครึ่งแล้ว — เรียนวิธีจับ who · why · topic",
+        steps: ["ฟัง scenario", "ตอบ 3 คำถามจากความจำ", "ระบบเฉลยพร้อมเหตุผล"],
+        locked: "ต้องเรียนหมวด 2 (พูด/เขียนเกี่ยวกับภาพ) ให้จบก่อน",
+      },
+      "s8": {
+        emoji: "💬", num: 8, title: "เริ่ม 2 turn แรกให้ถูก",
+        category: "Interactive Listening · ล็อก", time: "15 นาที", state: "locked",
+        gain: "คำตอบ 2 turn แรกต้องตรง Scenario ไม่ใช่แค่ฟังดูดี",
+        steps: ["ฟัง scenario", "เลือก opener ที่ตรง scenario", "ระบบเฉลยเปรียบเทียบ"],
+        locked: "ต้องเรียนบทที่ 7 ให้จบก่อน",
+      },
+      "s9": {
+        emoji: "🎯", num: 9, title: "ฟังแล้วเลือกตอบ",
+        category: "Interactive Listening · ล็อก", time: "15 นาที", state: "locked",
+        gain: "เทคนิค Opener Elimination — ตัดตัวเลือกผิดได้ใน 5 วินาที",
+        steps: ["เรียนกลยุทธ์ Opener Elimination", "ฝึก 5 ข้อ turn-based", "ระบบบอกเหตุผลทุกตัวเลือก"],
+        locked: "ต้องเรียนบทที่ 8 ให้จบก่อน",
+      },
+      "s10": {
+        emoji: "📝", num: 10, title: "สรุปบทสนทนา 75 วินาที",
+        category: "Writing · ล็อก", time: "15 นาที", state: "locked",
+        gain: "Pattern 3 ประโยค + Gemini ตรวจ บอกจุดอ่อนเป็นไทย",
+        steps: ["เรียน pattern 3 ประโยค", "อ่านบทสนทนา + เขียนสรุป (จับเวลา 75 วิ)", "AI ตรวจ + บันทึก notebook"],
+        locked: "ต้องเรียนบทที่ 9 ให้จบก่อน",
+      },
+      "s11": {
+        emoji: "📜", num: 11, title: "เลือก Essay ที่ดีที่สุด",
+        category: "Writing Essay · VIP", time: "15 นาที", state: "locked", vip: true,
+        gain: "เห็นทันทีว่า Essay ระดับสูงเขียนยังไง — 5 ตัวอย่างเปรียบเทียบ",
+        steps: ["อ่านบทเรียน 70-90 word essay patterns", "เลือก essay ที่ดีที่สุดจาก 3 ตัว", "ดูเฉลย + ตารางเปรียบเทียบ"],
+        locked: "ต้องเป็นสมาชิก VIP (฿999/เดือน)",
+      },
+      "s12": {
+        emoji: "🔍", num: 12, title: "หาจุดอ่อนไวยากรณ์ของคุณ",
+        category: "Writing Essay · VIP", time: "15 นาที", state: "locked", vip: true,
+        gain: "เติมคำใน Essay 3 ระดับ — ระบบบอกจุดอ่อนเป็นไทย + บันทึก notebook",
+        steps: ["เติมคำใน Essay 3 ระดับ", "ระบบวิเคราะห์จุดอ่อนตามหมวด", "บันทึก notebook"],
+        locked: "ต้องเป็นสมาชิก VIP (฿999/เดือน)",
+      },
+      "s13": {
+        emoji: "📖", num: 13, title: "หา Title ที่ดีที่สุด",
+        category: "Reading · ล็อก", time: "15 นาที", state: "locked",
+        gain: "Title ที่ดีต้องครอบคลุมทุกย่อหน้า ไม่ใช่แค่บางส่วน",
+        steps: ["เรียนวิธีหา title + กับดักของ DET", "ฝึก 10 ข้อ", "เฉลย + อธิบายทุกตัวเลือก"],
+        locked: "ต้องเรียนบทที่ 12 ให้จบก่อน",
+      },
+      "s14": {
+        emoji: "💡", num: 14, title: "หา Main idea",
+        category: "Reading · ล็อก", time: "15 นาที", state: "locked",
+        gain: "แยก main idea กับ detail — เลิกหลงตัวเลือกที่ดูถูกแต่ผิด",
+        steps: ["เรียนความต่างระหว่าง main idea กับ detail", "ฝึก 10 ข้อ", "เฉลย + อธิบายภาษาไทย"],
+        locked: "ต้องเรียนบทที่ 13 ให้จบก่อน",
+      },
+      "s15": {
+        emoji: "🧩", num: 15, title: "หา Missing paragraph",
+        category: "Reading · ล็อก", time: "15 นาที", state: "locked",
+        gain: "เรียนสัญญาณ pronoun + transition word ที่บอกประโยคถูก",
+        steps: ["เรียนสัญญาณ pronoun + transition", "ฝึก 10 ข้อ", "เฉลย + อธิบาย"],
+        locked: "ต้องเรียนบทที่ 14 ให้จบก่อน",
+      },
+    };
+
+    function openModal(id) {
+      const L = LESSONS[id]; if (!L) return;
+      const stateBadge =
+        L.state === "done"
+          ? '<span class="rounded-full bg-emerald-100 text-emerald-800 px-3 py-0.5 text-xs font-semibold">👑 เรียนจบแล้ว</span>'
+          : L.state === "current"
+            ? '<span class="rounded-full bg-[#FFCC00] text-slate-900 px-3 py-0.5 text-xs font-bold">⚡ บทปัจจุบัน</span>'
+            : L.vip
+              ? '<span class="rounded-full bg-gradient-to-r from-[#FFCC00] to-amber-500 text-slate-900 px-3 py-0.5 text-xs font-bold">🔒 VIP เท่านั้น</span>'
+              : '<span class="rounded-full bg-slate-200 text-slate-700 px-3 py-0.5 text-xs font-semibold">🔒 ยังล็อก</span>';
+
+      let ctaHtml;
+      if (L.state === "current") {
+        ctaHtml = `<button class="w-full mt-5 rounded-xl bg-[#004AAD] text-[#FFCC00] px-6 py-4 text-base font-bold shadow-md hover:shadow-lg transition">▶ เริ่มเรียนเลย</button>`;
+      } else if (L.state === "done") {
+        ctaHtml = `<div class="flex gap-2 mt-5">
+          <button class="flex-1 rounded-xl bg-white px-5 py-3 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition">↻ ทบทวนอีกครั้ง</button>
+          <button class="flex-1 rounded-xl bg-[#FFCC00] px-5 py-3 text-sm font-semibold shadow-sm hover:brightness-95 transition">📖 ดูเฉลยของฉัน</button>
+        </div>`;
+      } else if (L.vip) {
+        ctaHtml = `<div class="mt-5 rounded-xl bg-[#fff7d1] p-4 ring-1 ring-[#FFCC00]/50">
+          <p class="text-xs font-bold text-slate-900 mb-2">🔒 ${L.locked}</p>
+          <button class="w-full rounded-xl bg-gradient-to-r from-[#FFCC00] to-amber-500 text-slate-900 px-5 py-3 text-sm font-bold shadow-sm">อัปเกรดเป็น VIP → ฿999/เดือน</button>
+        </div>`;
+      } else {
+        ctaHtml = `<div class="mt-5 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-200">
+          <p class="text-xs text-slate-600">🔒 ${L.locked}</p>
+        </div>`;
+      }
+
+      document.getElementById('modal-body').innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FFCC00] to-amber-500 flex items-center justify-center text-3xl">${L.emoji}</div>
+            <div>
+              <p class="text-xs font-semibold text-slate-500">${L.category} · ⏱ ${L.time}</p>
+              <h2 class="text-xl font-bold mt-0.5">บทที่ ${L.num} · ${L.title}</h2>
+            </div>
+          </div>
+          <button onclick="closeModal()" class="rounded-full bg-slate-100 hover:bg-slate-200 w-9 h-9 flex items-center justify-center text-lg">✕</button>
+        </div>
+
+        <div class="mt-4">${stateBadge}</div>
+
+        <div class="mt-4 rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30 text-sm leading-7">
+          <strong class="text-[#004AAD]">คุณจะได้อะไรจากบทนี้:</strong><br/>${L.gain}
+        </div>
+
+        <div class="mt-5">
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">📝 บทเรียนนี้มี 3 ขั้น</p>
+          <ol class="space-y-2 text-sm leading-7">
+            ${L.steps.map((s, i) => `<li class="flex gap-3"><span class="shrink-0 w-7 h-7 rounded-full bg-[#FFCC00] text-slate-900 font-bold flex items-center justify-center text-sm">${i + 1}</span><span>${s}</span></li>`).join("")}
+          </ol>
+        </div>
+
+        ${ctaHtml}
+      `;
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+    }
+    function closeIfBackdrop(e) {
+      if (e.target.id === 'modal') closeModal();
+    }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  </script>
+</body>
+</html>

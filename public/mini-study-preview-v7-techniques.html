@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>V7 — เทคนิคทำคะแนน DET · Mini Study</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "IBM Plex Sans Thai","Inter",sans-serif; background:#f1f5f9; color:#0f172a; min-height:100vh; }
+
+    /* Bed = category */
+    .bed { background: white; border-radius: 16px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
+    .bed-head { display:flex; align-items:center; gap:14px; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid #e2e8f0; }
+    .bed-head .badge {
+      width:46px; height:46px; border-radius:12px;
+      background:#004AAD; color:white;
+      display:flex; align-items:center; justify-content:center; font-size:22px;
+      flex-shrink:0; position:relative;
+    }
+    .bed-head .badge::after {
+      content: ""; position:absolute; top:-2px; right:-2px;
+      width:14px; height:14px; border-radius:9999px; border:2px solid white;
+    }
+    .bed-1 .badge::after { background:#FFCC00; }
+    .bed-2 .badge::after { background:#ef4444; }
+    .bed-3 .badge::after { background:#0ea5e9; }
+    .bed-4 .badge::after { background:#8b5cf6; }
+    .bed-5 .badge::after { background:#10b981; }
+
+    /* Card grid */
+    .card-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    .tip-card {
+      position:relative; cursor:pointer; user-select:none;
+      background:white; border:1px solid #e2e8f0; border-radius:12px;
+      padding:14px 12px;
+      display:flex; flex-direction:column; align-items:center; text-align:center;
+      transition: all 0.15s ease;
+    }
+    .tip-card:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,74,173,0.08); border-color:#004AAD; }
+
+    .tip-card .icon { font-size:32px; line-height:1; margin-bottom:6px; }
+    .tip-card .label { font-size:12px; font-weight:700; line-height:1.3; }
+    .tip-card .meta { font-size:10px; color:#64748b; margin-top:4px; }
+    .tip-card .num {
+      position:absolute; top:8px; left:8px;
+      min-width:18px; height:18px; border-radius:9999px;
+      background:#eef4ff; color:#004AAD;
+      font-size:9px; font-weight:800; padding:0 5px;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    /* States — no gradients */
+    .tip-card.done { background:#f8fafc; }
+    .tip-card.done::after {
+      content:"✓"; position:absolute; top:-6px; right:-6px;
+      width:22px; height:22px; border-radius:9999px;
+      background:#16a34a; color:white; font-weight:900; font-size:12px;
+      display:flex; align-items:center; justify-content:center;
+      border:2px solid white;
+    }
+    .tip-card.current {
+      border-color:#FFCC00; border-width:2px;
+      box-shadow: 0 0 0 3px rgba(255,204,0,0.18);
+    }
+    .tip-card.current::after {
+      content:"⚡"; position:absolute; top:-8px; right:-4px;
+      background:#FFCC00; color:#0f172a;
+      width:24px; height:24px; border-radius:9999px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:13px; border:2px solid white;
+    }
+    .tip-card.upcoming { opacity: 0.7; }
+    .tip-card.upcoming .icon { filter: grayscale(0.4); }
+    .tip-card.vip { border-color:#FFCC00; }
+    .tip-card.vip::after {
+      content:"🔒"; position:absolute; top:-6px; right:-6px;
+      background:#FFCC00; color:#0f172a;
+      width:22px; height:22px; border-radius:9999px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; border:2px solid white;
+    }
+
+    /* Modal */
+    .backdrop {
+      position:fixed; inset:0; background:rgba(15,23,42,0.55);
+      display:none; align-items:center; justify-content:center; z-index:50;
+      backdrop-filter: blur(4px);
+    }
+    .backdrop.open { display:flex; }
+    .modal {
+      background:white; border-radius:18px; padding:24px;
+      width: min(520px, 92vw); max-height:90vh; overflow-y:auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    /* Pi Doi photo */
+    .pidoy-circle {
+      border-radius:9999px; object-fit:cover; flex-shrink:0;
+      border:3px solid white;
+    }
+
+    /* Coach chip — floating */
+    .coach {
+      position:fixed; bottom:20px; right:20px; z-index:30; max-width:280px;
+      background:white; border-radius:14px; padding:10px 14px;
+      box-shadow: 0 10px 24px rgba(0,74,173,0.15);
+      border:1px solid #e2e8f0;
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .coach .name { font-size:11px; color:#004AAD; font-weight:700; }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-6">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <span class="text-sm text-slate-500 hidden sm:inline">หน้าแรก · ฝึก · Mock test</span>
+    <a href="/mini-study-preview-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← เวอร์ชันอื่น</a>
+    <span class="text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">V7 · เทคนิค DET</span>
+  </nav>
+
+  <!-- Sticky progress -->
+  <div class="sticky top-0 z-20 bg-white border-b border-slate-200 px-6 py-3">
+    <div class="mx-auto max-w-3xl flex items-center gap-3">
+      <span class="text-sm font-semibold text-slate-700">ทำเสร็จแล้ว 4 จาก 15</span>
+      <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+        <div class="h-full bg-[#004AAD] rounded-full" style="width:26%"></div>
+      </div>
+      <span class="text-xs font-bold text-[#004AAD]">26%</span>
+    </div>
+  </div>
+
+  <main class="mx-auto max-w-3xl px-4 py-6 pb-32">
+
+    <!-- HERO: พี่ดอย introduces -->
+    <section class="rounded-2xl bg-[#004AAD] text-white p-5 mb-5">
+      <div class="flex items-start gap-4">
+        <img src="https://i.postimg.cc/Pxyw0bwR/Untitled-September-20-2025-at-16-21-25.png" alt="พี่ดอย" class="pidoy-circle" style="width:64px;height:64px;border-color:#FFCC00;">
+        <div class="flex-1">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">เทคนิคจากพี่ดอย</p>
+          <h1 class="mt-0.5 text-xl font-bold">สวัสดีครับ พี่ดอยเอง</h1>
+          <p class="mt-2 text-sm leading-6 text-white/90">
+            รวม <strong class="text-[#FFCC00]">15 เทคนิคทำคะแนน DET ให้สูงขึ้น</strong>
+            จากที่พี่ดอยสอนนักเรียนมาเป็นร้อยคน · แต่ละเทคนิคใช้เวลา <strong>15 นาที</strong>
+          </p>
+          <p class="mt-2 text-xs bg-white/10 rounded-md px-2.5 py-1 inline-block">
+            💡 เลือกเทคนิคไหนก่อนก็ได้ · ไม่บังคับลำดับ
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIP OF THE DAY -->
+    <section class="rounded-xl bg-white p-3 border-l-4 border-[#FFCC00] mb-5 flex items-center gap-3 border border-slate-200">
+      <img src="https://i.postimg.cc/Pxyw0bwR/Untitled-September-20-2025-at-16-21-25.png" alt="พี่ดอย" class="pidoy-circle" style="width:36px;height:36px;border-color:#FFCC00;">
+      <div class="flex-1 min-w-0">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">เทคนิควันนี้</p>
+        <p class="text-sm font-semibold truncate">ลองทำ <span class="text-[#004AAD]">เทคนิคที่ 5 · พูดเกี่ยวกับภาพ</span> ใช้เวลา 15 นาที</p>
+      </div>
+      <button onclick="openModal('s5')" class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-3 py-1.5 text-xs font-bold flex-shrink-0">ทำเลย →</button>
+    </section>
+
+    <!-- BED 1: Dictation -->
+    <div class="bed bed-1">
+      <div class="bed-head">
+        <div class="badge">📝</div>
+        <div class="flex-1">
+          <p class="text-[10px] text-[#004AAD] font-bold uppercase tracking-wider">หมวด 1 · พื้นฐาน</p>
+          <h2 class="text-base font-bold">Dictation — กฎ comma + เติม -ed / -s</h2>
+          <p class="text-xs text-slate-500 mt-0.5">3 เทคนิค · ทำแล้ว 3</p>
+        </div>
+      </div>
+      <div class="card-grid">
+        <div class="tip-card done" onclick="openModal('s1')">
+          <div class="num">1</div>
+          <div class="icon">📝</div>
+          <p class="label">FANBOYS &amp; Subordinating</p>
+          <p class="meta">14 นาที · ⭐⭐⭐</p>
+        </div>
+        <div class="tip-card done" onclick="openModal('s2')">
+          <div class="num">2</div>
+          <div class="icon">✏️</div>
+          <p class="label">เติม -ed / -s / Passive</p>
+          <p class="meta">13 นาที · ⭐⭐</p>
+        </div>
+        <div class="tip-card done" onclick="openModal('s3')">
+          <div class="num">3</div>
+          <div class="icon">✒️</div>
+          <p class="label">4 โครงสร้าง Comma</p>
+          <p class="meta">16 นาที · ⭐⭐⭐</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BED 2: Speaking/Writing -->
+    <div class="bed bed-2">
+      <div class="bed-head">
+        <div class="badge">🗣</div>
+        <div class="flex-1">
+          <p class="text-[10px] text-[#004AAD] font-bold uppercase tracking-wider">หมวด 2 · ฝึกจริง</p>
+          <h2 class="text-base font-bold">พูด/เขียนเกี่ยวกับภาพ</h2>
+          <p class="text-xs text-slate-500 mt-0.5">2 เทคนิค · ทำแล้ว 1 · เหลือ 1 ที่กำลังทำ</p>
+        </div>
+      </div>
+      <div class="card-grid">
+        <div class="tip-card done" onclick="openModal('s4')">
+          <div class="num">4</div>
+          <div class="icon">✍️</div>
+          <p class="label">เขียนเกี่ยวกับภาพ</p>
+          <p class="meta">AI ตรวจ · ⭐⭐</p>
+        </div>
+        <div class="tip-card current" onclick="openModal('s5')">
+          <div class="num">5</div>
+          <div class="icon">🎤</div>
+          <p class="label">พูดเกี่ยวกับภาพ</p>
+          <p class="meta text-[#004AAD] font-bold">ตอนนี้ · 15 นาที</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BED 3: Listening -->
+    <div class="bed bed-3">
+      <div class="bed-head">
+        <div class="badge">🎧</div>
+        <div class="flex-1">
+          <p class="text-[10px] text-[#004AAD] font-bold uppercase tracking-wider">หมวด 3 · ทักษะฟัง</p>
+          <h2 class="text-base font-bold">Interactive Listening</h2>
+          <p class="text-xs text-slate-500 mt-0.5">3 เทคนิค · ยังไม่เริ่ม</p>
+        </div>
+      </div>
+      <div class="card-grid">
+        <div class="tip-card upcoming" onclick="openModal('s7','skip')">
+          <div class="num">7</div>
+          <div class="icon">🎧</div>
+          <p class="label">หาประเด็นใน Scenario</p>
+          <p class="meta">15 นาที · 5 scenarios</p>
+        </div>
+        <div class="tip-card upcoming" onclick="openModal('s8','skip')">
+          <div class="num">8</div>
+          <div class="icon">💬</div>
+          <p class="label">เริ่ม 2 turn แรกให้ถูก</p>
+          <p class="meta">15 นาที</p>
+        </div>
+        <div class="tip-card upcoming" onclick="openModal('s9','skip')">
+          <div class="num">9</div>
+          <div class="icon">🎯</div>
+          <p class="label">ฟังแล้วเลือกตอบ</p>
+          <p class="meta">Opener Elimination</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BED 4: Writing -->
+    <div class="bed bed-4">
+      <div class="bed-head">
+        <div class="badge">✍️</div>
+        <div class="flex-1">
+          <p class="text-[10px] text-[#004AAD] font-bold uppercase tracking-wider">หมวด 4 · งานเขียน</p>
+          <h2 class="text-base font-bold">Writing · สรุป + Essay</h2>
+          <p class="text-xs text-slate-500 mt-0.5">3 เทคนิค · 2 เทคนิคสำหรับ VIP</p>
+        </div>
+      </div>
+      <div class="card-grid">
+        <div class="tip-card upcoming" onclick="openModal('s10','skip')">
+          <div class="num">10</div>
+          <div class="icon">📝</div>
+          <p class="label">สรุปบทสนทนา 75 วินาที</p>
+          <p class="meta">Gemini ตรวจ</p>
+        </div>
+        <div class="tip-card vip" onclick="openModal('s11','vip')">
+          <div class="num">11</div>
+          <div class="icon">📜</div>
+          <p class="label">เลือก Essay ที่ดีที่สุด</p>
+          <p class="meta text-amber-700 font-semibold">VIP เท่านั้น</p>
+        </div>
+        <div class="tip-card vip" onclick="openModal('s12','vip')">
+          <div class="num">12</div>
+          <div class="icon">🔍</div>
+          <p class="label">หาจุดอ่อนไวยากรณ์</p>
+          <p class="meta text-amber-700 font-semibold">VIP เท่านั้น</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BED 5: Reading -->
+    <div class="bed bed-5">
+      <div class="bed-head">
+        <div class="badge">📖</div>
+        <div class="flex-1">
+          <p class="text-[10px] text-[#004AAD] font-bold uppercase tracking-wider">หมวด 5 · ทักษะอ่าน</p>
+          <h2 class="text-base font-bold">Reading — Interactive Reading</h2>
+          <p class="text-xs text-slate-500 mt-0.5">3 เทคนิค · ยังไม่เริ่ม</p>
+        </div>
+      </div>
+      <div class="card-grid">
+        <div class="tip-card upcoming" onclick="openModal('s13','skip')">
+          <div class="num">13</div>
+          <div class="icon">📖</div>
+          <p class="label">หา Title ที่ดีที่สุด</p>
+        </div>
+        <div class="tip-card upcoming" onclick="openModal('s14','skip')">
+          <div class="num">14</div>
+          <div class="icon">💡</div>
+          <p class="label">หา Main idea</p>
+        </div>
+        <div class="tip-card upcoming" onclick="openModal('s15','skip')">
+          <div class="num">15</div>
+          <div class="icon">🧩</div>
+          <p class="label">หา Missing paragraph</p>
+        </div>
+      </div>
+    </div>
+
+    <aside class="rounded-xl bg-white p-3 ring-1 ring-slate-200 mt-2 text-xs text-slate-700 leading-6">
+      <strong class="text-[#004AAD]">เกี่ยวกับดีไซน์นี้:</strong>
+      ไม่มีคำเปรียบเปรย "ต้นไม้" หรือ "สวน" · ไม่ใช้ gradient ·
+      สีหลัก #004AAD blue + #FFCC00 yellow · พี่ดอยปรากฏ 4 จุด · ทุก card คลิกได้หมด ไม่มี hard lock
+    </aside>
+  </main>
+
+  <!-- Modal -->
+  <div class="backdrop" id="modal" onclick="if(event.target.id==='modal') closeModal()">
+    <div class="modal" id="modal-body"></div>
+  </div>
+
+  <!-- Floating coach -->
+  <div class="coach">
+    <img src="https://i.postimg.cc/Pxyw0bwR/Untitled-September-20-2025-at-16-21-25.png" alt="พี่ดอย" class="pidoy-circle" style="width:36px;height:36px;border-color:#004AAD;">
+    <div class="text-xs leading-6 text-slate-700 flex-1">
+      <span class="name">พี่ดอย</span><br/>
+      เทคนิคที่ 5 — เริ่มได้เลย ✨
+    </div>
+  </div>
+
+  <script>
+    const PIDOY_PIC = "https://i.postimg.cc/Pxyw0bwR/Untitled-September-20-2025-at-16-21-25.png";
+    const LESSONS = {
+      "s1":  { emoji:"📝", num:1,  title:"FANBOYS & Subordinating", tip:"FANBOYS เชื่อม 2 ประโยคสมบูรณ์ → ใส่ comma ก่อนคำเชื่อมเสมอ จำเป็นต้องเขียน Dictation ให้ตรง 100%", state:"done", time:"14 นาที" },
+      "s2":  { emoji:"✏️", num:2,  title:"เติม -ed / -s / Passive", tip:"เสียง DET กลืน -ed กับ -s บ่อย — ต้องเติมเองโดยใช้ไวยากรณ์ ไม่ใช่หู", state:"done", time:"13 นาที" },
+      "s3":  { emoji:"✒️", num:3,  title:"4 โครงสร้าง Comma", tip:"จำ 4 รูปแบบนี้ใช้ได้ทั้งชีวิต — Write/Speak Photo จะไม่พลาด comma อีก", state:"done", time:"16 นาที" },
+      "s4":  { emoji:"✍️", num:4,  title:"เขียนเกี่ยวกับภาพ", tip:"3 patterns + คำคุณศัพท์ที่ใช้ได้จริง — AI ตรวจ + ให้คะแนนทันที", state:"done", time:"15 นาที" },
+      "s5":  { emoji:"🎤", num:5,  title:"พูดเกี่ยวกับภาพ", tip:"ใช้แต่ is/are + V-ing · เลี่ยง -ed · 6 ประโยคจบ — ทำให้ตัวเองพูดถูกง่ายขึ้น", state:"current", time:"15 นาที" },
+      "s7":  { emoji:"🎧", num:7,  title:"หาประเด็นใน Scenario", tip:"เข้าใจ scenario = ทำได้ครึ่งแล้ว — จับ who · why · topic", state:"upcoming", time:"15 นาที" },
+      "s8":  { emoji:"💬", num:8,  title:"เริ่ม 2 turn แรกให้ถูก", tip:"คำตอบต้องตรง scenario ไม่ใช่แค่ฟังดูดีในชีวิตประจำวัน", state:"upcoming", time:"15 นาที" },
+      "s9":  { emoji:"🎯", num:9,  title:"ฟังแล้วเลือกตอบ", tip:"เทคนิค Opener Elimination — ตัดตัวเลือกผิดได้ใน 5 วินาที", state:"upcoming", time:"15 นาที" },
+      "s10": { emoji:"📝", num:10, title:"สรุปบทสนทนา 75 วินาที", tip:"Pattern 3 ประโยค · Gemini ตรวจ + บอกจุดอ่อนเป็นไทย", state:"upcoming", time:"15 นาที" },
+      "s11": { emoji:"📜", num:11, title:"เลือก Essay ที่ดีที่สุด", tip:"เห็นทันทีว่า Essay ระดับสูงเขียนยังไง — 5 ตัวอย่างเปรียบเทียบ", state:"vip", time:"15 นาที" },
+      "s12": { emoji:"🔍", num:12, title:"หาจุดอ่อนไวยากรณ์ของคุณ", tip:"เติมคำใน Essay 3 ระดับ — ระบบบอกจุดอ่อนเป็นไทย + บันทึก notebook", state:"vip", time:"15 นาที" },
+      "s13": { emoji:"📖", num:13, title:"หา Title ที่ดีที่สุด", tip:"Title ต้องครอบคลุมทุกย่อหน้า ไม่ใช่แค่บางส่วน — รู้กับดักของ DET", state:"upcoming", time:"15 นาที" },
+      "s14": { emoji:"💡", num:14, title:"หา Main idea", tip:"แยก main idea กับ detail ออกจากกัน — เลิกหลงตัวเลือกที่ดูถูก", state:"upcoming", time:"15 นาที" },
+      "s15": { emoji:"🧩", num:15, title:"หา Missing paragraph", tip:"เรียนสัญญาณ pronoun + transition word ที่บอกประโยคถูก", state:"upcoming", time:"15 นาที" },
+    };
+
+    function openModal(id, mode) {
+      const L = LESSONS[id]; if (!L) return;
+      const skipHint = mode === 'skip' ? `
+        <div class="mt-3 rounded-lg bg-slate-50 border-l-4 border-[#004AAD] p-3 text-xs leading-6 text-slate-700">
+          <strong class="text-[#004AAD]">จะลองเทคนิคนี้ก่อนเลยไหม?</strong>
+          เทคนิคนี้อยู่ในหมวดถัดไป — ถ้าเริ่มใหม่ ทำหมวดก่อนหน้าให้ครบจะมั่นใจขึ้น
+          แต่ถ้ามีพื้นฐานแล้ว เริ่มได้เลย
+        </div>` : '';
+
+      const vipPanel = mode === 'vip' ? `
+        <div class="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-4">
+          <p class="text-xs font-bold text-amber-900 mb-1">🔒 เทคนิคนี้สำหรับสมาชิก VIP</p>
+          <p class="text-xs text-slate-700 mb-3">สมัครสมาชิก VIP เพื่อปลดล็อก Writing Essay + ฟีเจอร์ AI ตรวจละเอียดเป็นไทย</p>
+          <button class="w-full rounded-lg bg-slate-900 text-white px-4 py-2.5 text-xs font-bold">ENGLISH PLAN TEAM · อัปเกรดเป็น VIP → ฿999/เดือน</button>
+        </div>` : '';
+
+      let cta = '';
+      if (L.state === 'current') cta = `<button class="w-full mt-4 rounded-lg bg-[#004AAD] text-[#FFCC00] px-6 py-3.5 text-base font-bold hover:opacity-90">▶ เริ่มเทคนิคนี้</button>`;
+      else if (L.state === 'done') cta = `<div class="flex gap-2 mt-4"><button class="flex-1 rounded-lg bg-white ring-1 ring-slate-300 px-5 py-3 text-sm font-semibold">↻ ทบทวน</button><button class="flex-1 rounded-lg bg-[#FFCC00] text-slate-900 px-5 py-3 text-sm font-semibold">📖 ดูเฉลย</button></div>`;
+      else if (mode === 'skip') cta = `<div class="flex gap-2 mt-4"><button onclick="closeModal()" class="flex-1 rounded-lg bg-white ring-1 ring-slate-300 px-5 py-3 text-sm font-semibold">กลับเทคนิคที่ 5</button><button class="flex-1 rounded-lg bg-[#004AAD] text-[#FFCC00] px-5 py-3 text-sm font-semibold">▶ เริ่มเทคนิคนี้</button></div>`;
+
+      const tipCard = `
+        <div class="mt-4 rounded-lg bg-slate-50 border-l-4 border-[#004AAD] p-3 flex items-start gap-3">
+          <img src="${PIDOY_PIC}" class="pidoy-circle" style="width:36px;height:36px;border-color:#004AAD;">
+          <div>
+            <p class="text-[10px] font-bold text-[#004AAD] uppercase tracking-wider">💡 เทคนิคของพี่ดอย</p>
+            <p class="text-sm leading-6 text-slate-800 mt-0.5">${L.tip}</p>
+          </div>
+        </div>`;
+
+      document.getElementById('modal-body').innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-[#004AAD] flex items-center justify-center text-2xl text-white">${L.emoji}</div>
+            <div>
+              <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">⏱ ${L.time}</p>
+              <h2 class="text-lg font-bold mt-0.5">เทคนิคที่ ${L.num} · ${L.title}</h2>
+            </div>
+          </div>
+          <button onclick="closeModal()" class="rounded-full bg-slate-100 hover:bg-slate-200 w-9 h-9 flex items-center justify-center">✕</button>
+        </div>
+        ${tipCard}
+        ${skipHint}
+        ${vipPanel}
+        ${cta}
+      `;
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  </script>
+</body>
+</html>
