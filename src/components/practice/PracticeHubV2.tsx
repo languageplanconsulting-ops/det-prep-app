@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { RevampAnnouncementModal } from "@/components/announcements/RevampAnnouncementModal";
 
 /**
  * PracticeHubV2 — soft-modern redesign of the practice hub (Cagan + Krug).
@@ -147,6 +148,9 @@ export function PracticeHubV2({
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+      {/* Launch announcement — admin-only preview for now (not shown to users) */}
+      <RevampAnnouncementModal />
+
       {/* Admin / phase banner so it's never mistaken for the live page */}
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-[#fff7d1] px-3 py-2 text-xs ring-1 ring-[#FFCC00]">
         <span className="rounded bg-[#004AAD] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FFCC00]">
