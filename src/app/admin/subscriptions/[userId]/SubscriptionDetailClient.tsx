@@ -727,6 +727,66 @@ export function SubscriptionDetailClient() {
                   Cancel Stripe / ยกเลิก Stripe
                 </button>
               ) : null}
+              {profile.stripe_customer_id ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(
+                        `/api/admin/subscriptions/${userId}/stripe-resync`,
+                        { method: "POST", credentials: "include" },
+                      );
+                      const data = (await res.json().catch(() => ({}))) as {
+                        ok?: boolean;
+                        error?: string;
+                        processed?: {
+                          sessionId: string;
+                          fulfilled: boolean;
+                          tier: string | null;
+                          paymentStatus: string;
+                          reason?: string;
+                        }[];
+                      };
+                      if (!res.ok || !data.ok) {
+                        push({
+                          type: "error",
+                          titleEn: `Re-sync failed: ${data.error ?? "Unknown error"}`,
+                          titleTh: `ดึงข้อมูล Stripe ไม่สำเร็จ: ${data.error ?? "เกิดข้อผิดพลาด"}`,
+                        });
+                        return;
+                      }
+                      const fulfilled = (data.processed ?? []).filter(
+                        (p) => p.fulfilled,
+                      );
+                      if (fulfilled.length === 0) {
+                        push({
+                          type: "info",
+                          titleEn: "Re-sync ran · nothing to enrol (already up to date or no settled payment)",
+                          titleTh: "สแกนแล้วไม่พบ payment ที่ค้าง (อาจขึ้นเรียบร้อยอยู่แล้วหรือยังไม่ชำระเงิน)",
+                        });
+                      } else {
+                        push({
+                          type: "success",
+                          titleEn: `Re-sync enrolled ${fulfilled.length} payment(s): ${fulfilled.map((p) => p.tier ?? "?").join(", ")}`,
+                          titleTh: `เก็บ payment ${fulfilled.length} รายการเรียบร้อย: ${fulfilled.map((p) => p.tier ?? "?").join(", ")}`,
+                        });
+                        // Reload to reflect new tier/expiry.
+                        window.setTimeout(() => window.location.reload(), 1200);
+                      }
+                    } catch (e) {
+                      push({
+                        type: "error",
+                        titleEn: `Re-sync error: ${e instanceof Error ? e.message : "Network error"}`,
+                        titleTh: `ดึงข้อมูล Stripe ผิดพลาด: ${e instanceof Error ? e.message : "เครือข่ายมีปัญหา"}`,
+                      });
+                    }
+                  }}
+                  className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-3 py-2 text-xs font-black shadow-[4px_4px_0_0_#000]"
+                  title="If the customer paid via Stripe (especially PromptPay) but tier is still wrong, this scans Stripe for paid checkout sessions and re-runs fulfillment. Safe to click multiple times."
+                >
+                  ↻ Re-sync from Stripe / ดึง Stripe มาเก็บใหม่
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={() =>

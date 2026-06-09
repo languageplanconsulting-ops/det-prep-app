@@ -43,6 +43,46 @@ export async function POST(req: Request) {
         break;
       }
 
+      // Defensive fallback for PromptPay / async payments: if the Stripe Dashboard
+      // doesn't have `async_payment_succeeded` enabled, we'd otherwise miss the
+      // settlement event. payment_intent.succeeded fires for any successful
+      // PaymentIntent, so we use it to look up the associated checkout session
+      // and re-run fulfillment. Idempotent via payment_history insert (line ~167
+      // in stripe-fulfillment.ts).
+      case "payment_intent.succeeded": {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        const stripeClient = getStripe();
+        // Find any Checkout Session attached to this PaymentIntent.
+        const sessions = await stripeClient.checkout.sessions.list({
+          payment_intent: pi.id,
+          limit: 1,
+        });
+        const session = sessions.data[0];
+        if (!session) {
+          break; // PaymentIntent not from a Checkout (e.g. direct API call) — skip.
+        }
+        if (session.mode === "payment" && session.metadata?.purchaseKind === "plan") {
+          await fulfillOneTimePlanPurchase(session);
+          break;
+        }
+        if (session.mode === "payment" && session.metadata?.addonSku) {
+          await fulfillAddonPurchase(session);
+          break;
+        }
+        break;
+      }
+
+      case "checkout.session.async_payment_failed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        console.log("[stripe] checkout.session.async_payment_failed", {
+          sessionId: session.id,
+          customerId: session.customer,
+          userId: session.metadata?.userId ?? null,
+          tier: session.metadata?.tier ?? null,
+        });
+        break;
+      }
+
       case "invoice.payment_succeeded": {
         break;
       }
