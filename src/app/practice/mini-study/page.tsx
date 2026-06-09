@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   MINI_STUDY_CATEGORY_LABEL_TH,
@@ -136,7 +137,7 @@ export default function MiniStudyHubPage() {
       <div className="sticky top-0 z-20 border-b border-slate-200 bg-white px-6 py-3">
         <div className="mx-auto flex max-w-3xl items-center gap-3">
           <span className="text-sm font-semibold text-slate-700">
-            ทำเสร็จแล้ว {doneCount} จาก {totalCount}
+            เรียนเสร็จแล้ว {doneCount} จาก {totalCount}
           </span>
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
             <div
@@ -199,7 +200,7 @@ export default function MiniStudyHubPage() {
           <button
             type="button"
             onClick={() => openSession(currentSession, { warnSkip: false })}
-            className="flex w-full items-center gap-3 rounded-xl border border-slate-200 border-l-4 border-l-[#FFCC00] bg-white p-3 text-left transition hover:border-[#004AAD]"
+            className="flex w-full items-center gap-3 rounded-xl border border-slate-200 border-l-4 border-l-[#FFCC00] bg-white p-3 text-left transition-all duration-150 ease-out hover:border-[#004AAD] hover:shadow-md active:scale-[0.99]"
           >
             <Image
               src={PIDOY_PHOTO}
@@ -213,14 +214,14 @@ export default function MiniStudyHubPage() {
                 เทคนิควันนี้
               </p>
               <p className="truncate text-sm font-semibold text-slate-800">
-                ลองทำ{" "}
+                ลองเรียน{" "}
                 <span className="text-[#004AAD]">
                   เทคนิคที่ {currentSession.index} · {currentSession.title}
                 </span>
               </p>
             </div>
             <span className="flex-shrink-0 rounded-lg bg-[#004AAD] px-3 py-1.5 text-xs font-bold text-[#FFCC00]">
-              ทำเลย →
+              เรียนเลย →
             </span>
           </button>
         ) : null}
@@ -251,7 +252,7 @@ export default function MiniStudyHubPage() {
                     {MINI_STUDY_CATEGORY_LABEL_TH[cat]} — {CATEGORY_SUBTITLE_TH[cat]}
                   </h2>
                   <p className="mt-0.5 text-xs text-slate-500">
-                    {sessions.length} เทคนิค · ทำแล้ว {doneInCat}
+                    {sessions.length} เทคนิค · เรียนแล้ว {doneInCat}
                   </p>
                 </div>
               </header>
@@ -293,32 +294,34 @@ export default function MiniStudyHubPage() {
         })}
 
         <p className="text-center text-[11px] text-slate-400">
-          {doneCount}/{totalCount} เทคนิค · ทุก card คลิกได้ ไม่บังคับลำดับ
+          {doneCount}/{totalCount} เทคนิค · ทุก card คลิกเรียนได้ ไม่บังคับลำดับ
         </p>
       </main>
 
-      {/* Floating coach chip */}
-      <div className="fixed bottom-5 right-5 z-30 flex max-w-[280px] items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg">
-        <Image
-          src={PIDOY_PHOTO}
-          alt="พี่ดอย"
-          width={36}
-          height={36}
-          className="h-9 w-9 flex-shrink-0 rounded-full border-[3px] border-[#004AAD] object-cover"
-        />
-        <div className="text-xs leading-6 text-slate-700">
-          <span className="text-[11px] font-bold text-[#004AAD]">พี่ดอย</span>
-          <br />
-          {currentSession
-            ? `เทคนิคที่ ${currentSession.index} — เริ่มได้เลย ✨`
-            : `เก่งมาก! ทำครบ ${totalCount} เทคนิคแล้ว 🎉`}
+      {/* Floating coach chip — pointer-events:none on wrapper so it never
+          blocks card clicks, but the chip itself stays clickable. */}
+      <div className="pointer-events-none fixed bottom-5 right-5 z-30">
+        <div className="pointer-events-auto flex max-w-[260px] items-start gap-2.5 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-lg">
+          <Image
+            src={PIDOY_PHOTO}
+            alt="พี่ดอย"
+            width={32}
+            height={32}
+            className="h-8 w-8 flex-shrink-0 rounded-full border-2 border-[#004AAD] object-cover"
+          />
+          <div className="text-[11px] leading-5 text-slate-700">
+            <span className="text-[10px] font-bold text-[#004AAD]">พี่ดอย</span>
+            <br />
+            {currentSession
+              ? `เทคนิคที่ ${currentSession.index} — เริ่มได้เลย ✨`
+              : `เก่งมาก! เรียนครบ ${totalCount} เทคนิคแล้ว 🎉`}
+          </div>
         </div>
       </div>
 
-      {/* Lesson modal */}
-      {modal.kind === "open" ? (
-        <LessonModal modal={modal} onClose={closeModal} />
-      ) : null}
+      {/* Lesson modal — rendered via portal to body so it's always centred
+          in the viewport (independent of scroll/transform/parent overflow). */}
+      <LessonModalPortal modal={modal} onClose={closeModal} />
     </>
   );
 }
@@ -334,7 +337,7 @@ function TipCard({
 }) {
   const emoji = SESSION_EMOJI[session.id] ?? "📚";
   const base =
-    "relative flex flex-col items-center rounded-xl border bg-white p-3 text-center transition-transform hover:-translate-y-[2px]";
+    "relative flex flex-col items-center rounded-xl border bg-white p-3 text-center transition-all duration-150 ease-out hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]";
   const stateClass =
     state === "done"
       ? "border-slate-200 bg-slate-50"
@@ -388,18 +391,57 @@ function TipCard({
   );
 }
 
+/**
+ * Portal-rendered modal. Doing this through createPortal(document.body) is
+ * what guarantees the modal sits in the viewport-centred coordinate space —
+ * any parent's transform/overflow/sticky container would otherwise hijack
+ * `position: fixed` and pin the modal to the bottom of the visible area
+ * (which is what was happening before).
+ *
+ * The component is always mounted so the close transition can play out — it
+ * just renders nothing when `modal.kind === "closed"`. We split into two
+ * components (`LessonModalPortal` wraps mount/unmount; `LessonModal` is the
+ * actual content) because we need a render-then-mount tick so the CSS
+ * transition has frames to animate over.
+ */
+function LessonModalPortal({
+  modal,
+  onClose,
+}: {
+  modal: ModalState;
+  onClose: () => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+  return createPortal(<LessonModal modal={modal} onClose={onClose} />, document.body);
+}
+
 function LessonModal({
   modal,
   onClose,
 }: {
-  modal: Extract<ModalState, { kind: "open" }>;
+  modal: ModalState;
   onClose: () => void;
 }) {
-  const { session, access, warnSkip } = modal;
-  const emoji = SESSION_EMOJI[session.id] ?? "📚";
+  // Keep the last-opened session around for one extra frame so the close
+  // transition can paint with the same content (no flicker to blank).
+  const [snapshot, setSnapshot] = useState<Extract<ModalState, { kind: "open" }> | null>(
+    null,
+  );
+  const isOpen = modal.kind === "open";
 
-  // Lock keyboard escape + body scroll while modal is open.
   useEffect(() => {
+    if (modal.kind === "open") setSnapshot(modal);
+  }, [modal]);
+
+  // Lock keyboard escape + body scroll while the modal is open.
+  useEffect(() => {
+    if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -410,18 +452,30 @@ function LessonModal({
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [onClose]);
+  }, [isOpen, onClose]);
 
+  if (!snapshot) return null;
+  const { session, access, warnSkip } = snapshot;
+  const emoji = SESSION_EMOJI[session.id] ?? "📚";
   const isVipLocked = !access.allowed;
+
+  // Transition classes — backdrop fades in, modal scales + fades + slides in.
+  const backdropClass = isOpen ? "opacity-100" : "opacity-0 pointer-events-none";
+  const modalClass = isOpen
+    ? "translate-y-0 opacity-100 scale-100"
+    : "translate-y-2 opacity-0 scale-95";
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4"
+      className={`fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4 transition-opacity duration-200 ${backdropClass}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
+      aria-hidden={!isOpen}
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <div
+        className={`max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl transition-all duration-200 ease-out ${modalClass}`}
+      >
         <div className="flex items-start gap-3">
           <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[#004AAD] text-2xl text-white">
             {emoji}
