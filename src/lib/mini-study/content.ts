@@ -8,12 +8,49 @@ export type MiniStudyItem = {
 
 export type MiniStudyExplanationBlock = { heading: string; body: string };
 
+export type MiniStudyCategory =
+  | "listening"
+  | "speaking"
+  | "writing"
+  | "reading"
+  | "dictation";
+
+export type MiniStudyTier = "premium" | "vip";
+
+export const MINI_STUDY_CATEGORY_LABEL_TH: Record<MiniStudyCategory, string> = {
+  listening: "ฟัง",
+  speaking: "พูด",
+  writing: "เขียน",
+  reading: "อ่าน",
+  dictation: "Dictation",
+};
+
+export const MINI_STUDY_CATEGORY_ICON: Record<MiniStudyCategory, string> = {
+  listening: "🎧",
+  speaking: "🗣",
+  writing: "✍️",
+  reading: "📖",
+  dictation: "📝",
+};
+
+export const MINI_STUDY_CATEGORY_ORDER: MiniStudyCategory[] = [
+  "dictation",
+  "speaking",
+  "listening",
+  "writing",
+  "reading",
+];
+
 export type MiniStudySessionBase = {
   id: string;
   index: number;
   title: string;
   subtitle: string;
   durationLabel: string;
+  category: MiniStudyCategory;
+  tierRequired: MiniStudyTier;
+  /** 1–2 sentence Thai hook shown on the hub card to incentivize the learner. */
+  shortHookTh: string;
   explanation: MiniStudyExplanationBlock[];
 };
 
@@ -129,6 +166,19 @@ export type MiniStudyEssayClozeSession = MiniStudySessionBase & {
   exercises: MiniStudyClozeExercise[];
 };
 
+export type MiniStudyPassageMcExercise = {
+  id: string;
+  passage: string;
+  question: string;
+  options: (MiniStudyMcOption & { explanationTh: string })[];
+  correctLetter: "A" | "B" | "C" | "D";
+};
+
+export type MiniStudyPassageMcSession = MiniStudySessionBase & {
+  kind: "passage-mc";
+  exercises: MiniStudyPassageMcExercise[];
+};
+
 export type MiniStudySession =
   | MiniStudyDictationSession
   | MiniStudyWritePhotoSession
@@ -137,7 +187,33 @@ export type MiniStudySession =
   | MiniStudyListenRespondSession
   | MiniStudyConversationSummarySession
   | MiniStudyEssayPickSession
-  | MiniStudyEssayClozeSession;
+  | MiniStudyEssayClozeSession
+  | MiniStudyPassageMcSession;
+
+// Shared scenarios used by Sessions 7 & 8. Declared here (above MINI_STUDY_SESSIONS)
+// because the array initializer spreads `buildSessions7Through10()` which reads them.
+const SCENARIO_TEXTS = {
+  officeHours:
+    "You are a psychology student in your second year of university. Last week, your professor gave a lecture on research methods, and one concept — confounding variables — was particularly confusing to you. You weren't sure how it affects the results of an experiment, and you're worried because your exam is coming up in a few days. You decided to visit your professor during office hours to ask for an explanation. When you arrive, you knock on the office door and your professor invites you in. You sit down and get ready to ask your question.",
+  groupProject:
+    "You are a graduate student in an English literature course. Your professor has assigned a group research paper on post-colonial fiction, and your group needs to submit a completed draft by the end of the month. There are three people in your group, but so far no one has agreed on who should do what. You are meeting your classmate, Jordan, at the university library today to figure out how to divide the work fairly. You arrive first and find a quiet table. Jordan arrives a few minutes later and sits across from you.",
+  advisor:
+    "You are a first-year international student studying at a university in the United States. Next semester's course registration opens in two weeks, and you need to choose two elective courses. However, you are not sure which courses are allowed under your degree requirements, and you are also worried about whether your course load will be too heavy. You have made an appointment with your academic advisor, Ms. Chen, to get some guidance. You walk into her office, and she greets you warmly and asks how she can help you today.",
+  labPartner:
+    "You are a second-year chemistry student. Next week, your class will conduct a titration experiment in the laboratory, and you are expected to come fully prepared with the right materials and a clear understanding of the procedure. Unfortunately, you were sick on the day of the pre-lab briefing and missed all the instructions. You decide to call your lab partner, Marcus, to find out what you need to bring and what the experiment involves. You pick up your phone and dial his number.",
+  studyGroup:
+    "You are a student in an introductory economics course. Your midterm exam is in three days and will cover several topics you have been struggling with, including supply and demand, elasticity, and market equilibrium. You feel that studying alone is not enough, so you organized a study group with two of your classmates, Priya and Daniel. You are all meeting this afternoon at a café near campus to go through the most difficult concepts together. You arrive at the café, order a coffee, and your classmates walk in shortly after.",
+} as const;
+
+const TH_LISTEN_INSTRUCTION =
+  "ฟัง Scenario ด้านบนให้จบก่อน แล้วตอบคำถามต่อไปนี้โดยไม่ต้องฟังซ้ำ พยายามจำเนื้อหาที่ได้ยินให้ได้มากที่สุด คำตอบไม่จำเป็นต้องยาว ใช้คำสั้นๆ หรือวลีก็พอ";
+
+// Hoisted above MINI_STUDY_SESSIONS because the array initializer spreads
+// `buildSessions7Through10()` which transitively calls buildSession13/14/15
+// — those reference this const, so it must already be initialised when the
+// builder runs.
+const READING_LESSON_NOTE_TH =
+  "ฟังคำสั่ง: อ่าน passage ให้จบก่อน แล้วเลือก option ที่ดีที่สุด ห้ามรีบเลือกตัวแรกที่ฟังดูดี · กดเฉลยเพื่อดูคำอธิบายภาษาไทยของทุกตัวเลือก";
 
 export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
   {
@@ -147,6 +223,9 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
     subtitle: "15 minutes · Dictation foundation",
     durationLabel: "≈ 15 min",
     kind: "dictation",
+    category: "dictation",
+    tierRequired: "premium",
+    shortHookTh: "เรียน comma ที่ออกบ่อยที่สุดใน Dictation — บทเดียวจบ ใช้ได้ตลอดชีวิต",
     explanation: [
       {
         heading: "Rule 1 — FANBOYS (coordinating conjunctions)",
@@ -241,6 +320,9 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
     subtitle: "15 minutes · Endings you must add yourself",
     durationLabel: "≈ 15 min",
     kind: "dictation",
+    category: "dictation",
+    tierRequired: "premium",
+    shortHookTh: "เคยพิมพ์ Dictation แล้วลืมเติม -s ไหม? บทนี้สอนทำเป็นนิสัยใน 15 นาที",
     explanation: [
       {
         heading: "Why this matters",
@@ -339,6 +421,9 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
     subtitle: "15 minutes · Comma placement in descriptions",
     durationLabel: "≈ 15 min",
     kind: "dictation",
+    category: "dictation",
+    tierRequired: "premium",
+    shortHookTh: "รู้ 4 รูปแบบนี้แล้วบรรยายภาพไม่พลาด comma อีก ใช้กับ Write/Speak Photo",
     explanation: [
       {
         heading: "Structure 1 —  S + V, which is …",
@@ -447,6 +532,9 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
     subtitle: "15 minutes · 3 description patterns + AI feedback",
     durationLabel: "≈ 15 min",
     kind: "write-about-photo",
+    category: "writing",
+    tierRequired: "premium",
+    shortHookTh: "3 pattern + คำคุณศัพท์ที่ใช้ได้จริง — AI ตรวจ + ให้คะแนนทันที",
     explanation: [
       {
         heading: "How this session works",
@@ -525,6 +613,9 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
     subtitle: "15 minutes · Simple grammar, no -ed",
     durationLabel: "≈ 15 min",
     kind: "speak-about-photo",
+    category: "speaking",
+    tierRequired: "premium",
+    shortHookTh: "6 ประโยคจบ ใช้แต่ is/are + V-ing ไม่ต้องกลัวผิด -ed",
     explanation: [
       {
         heading: "Remember (จำไว้)",
@@ -663,24 +754,8 @@ export function getMiniStudySession(id: string): MiniStudySession | null {
 }
 
 // ============================================================================
-// Sessions 7-10: shared scenario texts + session builders
+// Sessions 7-12: session builders (shared consts hoisted above MINI_STUDY_SESSIONS)
 // ============================================================================
-
-const SCENARIO_TEXTS = {
-  officeHours:
-    "You are a psychology student in your second year of university. Last week, your professor gave a lecture on research methods, and one concept — confounding variables — was particularly confusing to you. You weren't sure how it affects the results of an experiment, and you're worried because your exam is coming up in a few days. You decided to visit your professor during office hours to ask for an explanation. When you arrive, you knock on the office door and your professor invites you in. You sit down and get ready to ask your question.",
-  groupProject:
-    "You are a graduate student in an English literature course. Your professor has assigned a group research paper on post-colonial fiction, and your group needs to submit a completed draft by the end of the month. There are three people in your group, but so far no one has agreed on who should do what. You are meeting your classmate, Jordan, at the university library today to figure out how to divide the work fairly. You arrive first and find a quiet table. Jordan arrives a few minutes later and sits across from you.",
-  advisor:
-    "You are a first-year international student studying at a university in the United States. Next semester's course registration opens in two weeks, and you need to choose two elective courses. However, you are not sure which courses are allowed under your degree requirements, and you are also worried about whether your course load will be too heavy. You have made an appointment with your academic advisor, Ms. Chen, to get some guidance. You walk into her office, and she greets you warmly and asks how she can help you today.",
-  labPartner:
-    "You are a second-year chemistry student. Next week, your class will conduct a titration experiment in the laboratory, and you are expected to come fully prepared with the right materials and a clear understanding of the procedure. Unfortunately, you were sick on the day of the pre-lab briefing and missed all the instructions. You decide to call your lab partner, Marcus, to find out what you need to bring and what the experiment involves. You pick up your phone and dial his number.",
-  studyGroup:
-    "You are a student in an introductory economics course. Your midterm exam is in three days and will cover several topics you have been struggling with, including supply and demand, elasticity, and market equilibrium. You feel that studying alone is not enough, so you organized a study group with two of your classmates, Priya and Daniel. You are all meeting this afternoon at a café near campus to go through the most difficult concepts together. You arrive at the café, order a coffee, and your classmates walk in shortly after.",
-} as const;
-
-const TH_LISTEN_INSTRUCTION =
-  "ฟัง Scenario ด้านบนให้จบก่อน แล้วตอบคำถามต่อไปนี้โดยไม่ต้องฟังซ้ำ พยายามจำเนื้อหาที่ได้ยินให้ได้มากที่สุด คำตอบไม่จำเป็นต้องยาว ใช้คำสั้นๆ หรือวลีก็พอ";
 
 function buildSessions7Through10(): MiniStudySession[] {
   const session7: MiniStudyListeningMcSession = {
@@ -690,6 +765,9 @@ function buildSessions7Through10(): MiniStudySession[] {
     subtitle: "15 minutes · Who · Why · Topic",
     durationLabel: "≈ 15 min",
     kind: "interactive-listening-mc",
+    category: "listening",
+    tierRequired: "premium",
+    shortHookTh: "เข้าใจ Scenario = ทำได้ครึ่งแล้ว — เรียนวิธีจับ who · why · topic",
     explanation: [
       {
         heading: "Why this matters",
@@ -922,6 +1000,9 @@ function buildSessions7Through10(): MiniStudySession[] {
     subtitle: "15 minutes · Choose your opener that matches the scenario",
     durationLabel: "≈ 15 min",
     kind: "interactive-listening-mc",
+    category: "listening",
+    tierRequired: "premium",
+    shortHookTh: "คำตอบ 2 turn แรกต้องตรง Scenario ไม่ใช่แค่ฟังดูดีในชีวิตประจำวัน",
     explanation: [
       {
         heading: "บทเรียน (Thai)",
@@ -1153,6 +1234,9 @@ function buildSessions7Through10(): MiniStudySession[] {
     subtitle: "15 minutes · Strategies + 5 turn-based exercises",
     durationLabel: "≈ 15 min",
     kind: "listen-respond",
+    category: "listening",
+    tierRequired: "premium",
+    shortHookTh: "เทคนิค Opener Elimination — ตัดตัวเลือกผิดได้ใน 5 วินาที",
     explanation: [
       {
         heading: "ส่วนที่ 1 — DET วัดอะไรจริงๆ",
@@ -1419,6 +1503,9 @@ function buildSessions7Through10(): MiniStudySession[] {
     subtitle: "Pattern + Gemini-graded practice + save to notebook",
     durationLabel: "≈ 15 min",
     kind: "conversation-summary",
+    category: "writing",
+    tierRequired: "premium",
+    shortHookTh: "Pattern 3 ประโยค + Gemini ตรวจ บอกจุดอ่อนเป็นไทย บันทึก notebook",
     explanation: [
       {
         heading: "ส่วนที่ 1 — ทำไมต้องมี pattern?",
@@ -1497,7 +1584,20 @@ function buildSessions7Through10(): MiniStudySession[] {
 
   const session11: MiniStudyEssayPickSession = buildSession11();
   const session12: MiniStudyEssayClozeSession = buildSession12();
-  return [session7, session8, session9, session10, session11, session12];
+  const session13: MiniStudyPassageMcSession = buildSession13();
+  const session14: MiniStudyPassageMcSession = buildSession14();
+  const session15: MiniStudyPassageMcSession = buildSession15();
+  return [
+    session7,
+    session8,
+    session9,
+    session10,
+    session11,
+    session12,
+    session13,
+    session14,
+    session15,
+  ];
 }
 
 function buildSession11(): MiniStudyEssayPickSession {
@@ -1508,6 +1608,9 @@ function buildSession11(): MiniStudyEssayPickSession {
     subtitle: "Lesson on essay patterns + 5 multi-choice exercises",
     durationLabel: "≈ 15 min",
     kind: "essay-pick",
+    category: "writing",
+    tierRequired: "vip",
+    shortHookTh: "เห็นทันทีว่า Essay ระดับสูงเขียนยังไง — 5 ตัวอย่างเปรียบเทียบ",
     explanation: [
       {
         heading: "ส่วนที่ 1 — 50-word essay ในข้อสอบ DET คืออะไร?",
@@ -1762,6 +1865,9 @@ function buildSession12(): MiniStudyEssayClozeSession {
     subtitle: "3 cloze essays · auto-graded weakness report (Thai)",
     durationLabel: "≈ 15 min",
     kind: "essay-cloze",
+    category: "writing",
+    tierRequired: "vip",
+    shortHookTh: "เติมคำใน Essay 3 ระดับ — ระบบบอกจุดอ่อนเป็นไทย + บันทึก notebook",
     explanation: [
       {
         heading: "ทำไมต้องฝึกเรื่องนี้ (Thai)",
@@ -1864,5 +1970,626 @@ function buildSession12(): MiniStudyEssayClozeSession {
         ],
       },
     ],
+  };
+}
+
+// ============================================================================
+// Reading sessions 13-15: shared passage-mc lessons
+// ============================================================================
+
+function buildSession13(): MiniStudyPassageMcSession {
+  return {
+    id: "session-13",
+    index: 13,
+    title: "Reading — find the best title",
+    subtitle: "Lesson + 10 passage-pick MC exercises",
+    durationLabel: "≈ 15 min",
+    kind: "passage-mc",
+    category: "reading",
+    tierRequired: "premium",
+    shortHookTh: "Title ที่ดีต้องครอบคลุมทุกย่อหน้า ไม่ใช่แค่บางส่วน — รู้กับดักที่ DET ใช้",
+    explanation: [
+      {
+        heading: "ส่วนที่ 1 — Title the Passage ใน DET คืออะไร?",
+        body: [
+          "ใน **Interactive Reading** ของ DET มีคำถามประเภท \"Title the Passage\" ที่วัดความเข้าใจ passage **โดยรวม**",
+          "• ให้ passage สั้นๆ + ตัวเลือก 4 ตัว — เลือกชื่อเรื่องที่เหมาะที่สุด",
+          "• Title ที่ดีต้อง **ครอบคลุม passage ทั้งหมด** ไม่ใช่แค่บางส่วน",
+          "• **ไม่ใช่** คำถามที่ถามรายละเอียด — ถามภาพรวม",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 2 — Title ≠ Main Idea",
+        body: [
+          "• **Title** = ชื่อเรื่อง สั้น กระชับ ครอบคลุมทุกอย่าง (เช่น *\"The Rise of Urban Farming\"*)",
+          "• **Main Idea** = ประเด็นหลักที่ผู้เขียนต้องการสื่อ — มักเป็นประโยคสมบูรณ์",
+          "• ทั้งสองสะท้อนภาพรวมเหมือนกัน แต่ Title เป็นวลีสั้น Main Idea เป็นประโยค",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 3 — Title ต้องเป็น \"ภาพรวม\" ไม่ใช่ \"รายละเอียด\"",
+        body: [
+          "✅ Title ที่ดี **ครอบคลุมทุกย่อหน้า**",
+          "❌ Title ที่ผิดมักพูดถึงแค่ **ตัวอย่างหนึ่ง** หรือ **รายละเอียดเดียว**",
+          "• ถ้า title พูดถึงแค่ 1 ย่อหน้า → ผิดแน่นอน",
+          "• ถ้า title ครอบคลุมทุกย่อหน้าพอดี → นั่นคือคำตอบ",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 4 — กับดักที่ DET ชอบออก",
+        body: [
+          "**❌ กับดัก 1 — ใช้คำใน passage แต่ผิดความหมาย** — อย่าเลือกเพราะเห็นคำคุ้นเคย",
+          "**❌ กับดัก 2 — Specific เกินไป** — passage พูดเรื่องการเรียนออนไลน์โดยรวม แต่ title พูดแค่ *\"How Zoom Changed University Classes in 2020\"*",
+          "**❌ กับดัก 3 — กว้างเกินไป** — passage พูดเรื่องการเรียนออนไลน์ในมหาวิทยาลัย แต่ title พูดว่า *\"The Future of Education\"*",
+          "**❌ กับดัก 4 — ถูกแค่ครึ่งเดียว** — ครอบคลุมแค่ส่วนหนึ่งของ passage",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 5 — ขั้นตอนการหา Title",
+        body: [
+          "1. อ่าน passage ทั้งหมดอย่างรวดเร็ว จับว่าแต่ละย่อหน้าพูดเรื่องอะไร",
+          "2. ถามตัวเอง: *\"passage นี้พูดเรื่องอะไรโดยรวม?\"* — สรุปในหัว 1 ประโยค",
+          "3. อ่านตัวเลือก **ทุกตัว** ห้ามเลือกตัวแรกที่ฟังดูดี",
+          "4. ตัดตัวเลือกที่ specific เกินไป กว้างเกินไป หรือพูดถึงแค่บางส่วนออก",
+          "5. เลือกตัวที่เหลือและตรวจสอบว่าครอบคลุมทุกย่อหน้าจริงๆ",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 6 — Tips สรุป",
+        body: [
+          "✅ ต้องครอบคลุม **ทุกย่อหน้า** ไม่ใช่แค่บางส่วน",
+          "✅ อ่านตัวเลือก **ทุกตัว** ก่อนเลือก",
+          "✅ ตัด title ที่ specific เกินไปออกก่อนเสมอ — มักเป็นกับดัก",
+          "✅ ตัด title ที่ **กว้างเกินไป** ออก",
+          "✅ ตอนเจอ Title the Passage คุณคุ้นเคยกับ passage มากแล้ว มักไม่ต้องอ่านใหม่ทั้งหมด",
+          "❌ ห้ามเลือกเพราะเห็นคำคุ้นเคย",
+          "❌ ห้ามเลือกที่พูดถึงแค่ตัวอย่างหนึ่งหรือรายละเอียดเดียว",
+        ].join("\n"),
+      },
+      {
+        heading: "วิธีทำแบบฝึกหัด",
+        body: READING_LESSON_NOTE_TH,
+      },
+    ],
+    exercises: [
+      passageMc(
+        "s13-1",
+        "Many cities around the world are dealing with a growing problem: too much plastic waste. Plastic bags, bottles, and packaging are filling up landfills and polluting rivers and oceans. Some governments have responded by banning single-use plastics entirely. Others have introduced taxes on plastic bags to discourage people from using them. Meanwhile, companies are investing in biodegradable alternatives made from plants or recycled materials. Despite these efforts, experts say that consumer behaviour must also change for real progress to happen.",
+        "Best title?",
+        "B",
+        [
+          ["A", "Why Plastic Bags Are Harmful to Marine Life", "Specific เกินไป — พูดแค่เรื่องทะเล"],
+          ["B", "The Global Effort to Reduce Plastic Waste", "ครอบคลุมทุกย่อหน้า (รัฐบาล / บริษัท / พฤติกรรมผู้บริโภค)"],
+          ["C", "How Governments Are Taxing Plastic Products", "พูดถึงแค่มาตรการหนึ่งใน passage"],
+          ["D", "The History of Plastic Manufacturing", "Passage ไม่ได้พูดถึงประวัติศาสตร์เลย"],
+        ],
+      ),
+      passageMc(
+        "s13-2",
+        "Sleep is essential for good health, yet many people in modern society are not getting enough of it. Research shows that adults need between seven and nine hours of sleep per night, but surveys suggest that large numbers of people regularly sleep fewer than six hours. The consequences of sleep deprivation include reduced concentration, weakened immune systems, and a higher risk of serious conditions such as heart disease and diabetes. Experts recommend reducing screen time before bed, keeping a consistent sleep schedule, and avoiding caffeine in the evenings as ways to improve sleep quality.",
+        "Best title?",
+        "C",
+        [
+          ["A", "The Dangers of Drinking Too Much Coffee", "กาแฟเป็นแค่รายละเอียดเล็กน้อย"],
+          ["B", "Why Modern Life Makes It Hard to Sleep Well", "Passage ไม่ได้โฟกัสแค่สาเหตุจากชีวิตสมัยใหม่"],
+          ["C", "The Importance of Sleep and How to Improve It", "ครอบคลุมทั้งความสำคัญ ผลกระทบ และวิธีแก้ไข"],
+          ["D", "How Sleep Affects Athletic Performance", "Passage ไม่ได้พูดเรื่องนักกีฬาเลย"],
+        ],
+      ),
+      passageMc(
+        "s13-3",
+        "The concept of working from home has changed dramatically in recent years. Before 2020, remote work was seen as unusual or a privilege for a small number of workers. The global pandemic forced millions of companies to allow their employees to work remotely almost overnight. Since then, many workers have reported higher job satisfaction and better work-life balance. However, some employers have expressed concerns about productivity and team communication. As a result, many companies are now adopting hybrid models that combine office days with remote working.",
+        "Best title?",
+        "A",
+        [
+          ["A", "How the Pandemic Changed the Way People Work", "ครอบคลุมทั้งประวัติ การเปลี่ยนแปลง ผลดีผลเสีย และแนวโน้มปัจจุบัน"],
+          ["B", "The Problems with Working from Home", "Passage พูดทั้งข้อดีและข้อเสีย ไม่ใช่แค่ปัญหา"],
+          ["C", "Why Companies Prefer Office Work", "Passage ไม่ได้บอกว่าบริษัทชอบ office work"],
+          ["D", "Video Conferencing Tools for Remote Workers", "Passage ไม่ได้พูดเรื่อง video tools เลย"],
+        ],
+      ),
+      passageMc(
+        "s13-4",
+        "Volunteering has long been associated with personal fulfilment and community service, but recent studies suggest it may also have significant health benefits. Research indicates that people who volunteer regularly report lower levels of stress and depression compared to those who do not. Scientists believe this is partly because volunteering creates a sense of purpose and social connection. Additionally, older adults who volunteer tend to remain physically active longer and show slower rates of cognitive decline. These findings suggest that volunteering may be as beneficial to the volunteer as it is to the people being helped.",
+        "Best title?",
+        "B",
+        [
+          ["A", "How to Find Volunteering Opportunities in Your Community", "Passage ไม่ได้แนะนำวิธีหาโอกาส"],
+          ["B", "The Health Benefits of Regular Volunteering", "Passage ทั้งหมดพูดเรื่องประโยชน์ต่อสุขภาพ"],
+          ["C", "Why Young People Should Volunteer More Often", "Passage พูดถึงคนทั่วไปและผู้สูงอายุ ไม่ใช่แค่คนหนุ่มสาว"],
+          ["D", "The Economic Value of Volunteer Work", "Passage ไม่ได้พูดถึงมูลค่าทางเศรษฐกิจ"],
+        ],
+      ),
+      passageMc(
+        "s13-5",
+        "Bees play a vital role in maintaining healthy ecosystems. As they move from flower to flower collecting nectar, they transfer pollen, enabling plants to reproduce. This process, known as pollination, is essential for the growth of many fruits, vegetables, and nuts that humans rely on for food. Without bees, large portions of the global food supply would be at risk. Unfortunately, bee populations worldwide have been declining due to habitat loss, pesticide use, and climate change. Scientists and governments are now working to create protected areas and reduce harmful chemical use to preserve bee populations.",
+        "Best title?",
+        "B",
+        [
+          ["A", "How Honey Is Produced by Bees", "Passage ไม่ได้พูดถึงการผลิตน้ำผึ้งเลย"],
+          ["B", "The Role of Bees in Food Production and Ecosystem Health", "ครอบคลุมทั้งบทบาทผึ้ง ความสำคัญต่ออาหาร และการอนุรักษ์"],
+          ["C", "Why Pesticides Are Dangerous to Insects", "สารเคมีเป็นแค่รายละเอียดในย่อหน้าสุดท้าย"],
+          ["D", "The Life Cycle of a Honeybee", "Passage ไม่ได้พูดถึงวงจรชีวิตของผึ้ง"],
+        ],
+      ),
+      passageMc(
+        "s13-6",
+        "Public libraries have always been an important part of communities, but their role has evolved significantly in the digital age. While books remain central to what libraries offer, many now provide free internet access, digital lending services, and computer training programs. Some libraries have become community hubs, hosting events, workshops, and even maker spaces equipped with 3D printers. Despite predictions that digital technology would make libraries obsolete, usage statistics in many cities show that visits have actually increased in recent years as libraries adapt to meet new community needs.",
+        "Best title?",
+        "B",
+        [
+          ["A", "Why People Still Prefer Printed Books to E-books", "Passage ไม่ได้เปรียบเทียบหนังสือกับ e-books"],
+          ["B", "How Public Libraries Are Adapting to the Digital Age", "ครอบคลุมการเปลี่ยนแปลงบทบาท บริการใหม่ และสถิติการใช้งาน"],
+          ["C", "The History of Public Libraries Around the World", "Passage ไม่ได้พูดถึงประวัติศาสตร์"],
+          ["D", "How 3D Printing Is Changing Education", "3D printing เป็นแค่ตัวอย่างเล็กๆ"],
+        ],
+      ),
+      passageMc(
+        "s13-7",
+        "Artificial intelligence is increasingly being used in the field of medicine. Algorithms can now analyse medical images such as X-rays and MRI scans with a level of accuracy that rivals experienced doctors. AI tools are also being used to predict which patients are at risk of developing certain diseases, allowing for earlier intervention. In drug development, AI has significantly reduced the time needed to identify potential treatments. Despite these advancements, many medical professionals emphasise that AI should support rather than replace human judgement, particularly when making complex decisions about patient care.",
+        "Best title?",
+        "B",
+        [
+          ["A", "The Dangers of Using AI in Hospitals", "Passage ไม่ได้พูดเรื่องอันตราย แค่พูดถึงข้อควรระวัง"],
+          ["B", "How AI is Transforming Medical Diagnosis and Treatment", "ครอบคลุมการวินิจฉัย พยากรณ์โรค พัฒนายา และมุมมองแพทย์"],
+          ["C", "Why Doctors Are Afraid of Artificial Intelligence", "Passage ไม่ได้บอกว่าแพทย์กลัว AI"],
+          ["D", "The Use of MRI Scans in Modern Medicine", "MRI เป็นแค่ตัวอย่างหนึ่ง"],
+        ],
+      ),
+      passageMc(
+        "s13-8",
+        "The way children learn has changed considerably over the past two decades. Traditional classroom teaching, which focused on memorisation and standardised tests, is gradually being replaced or supplemented by more interactive approaches. Project-based learning encourages students to solve real-world problems, while collaborative activities develop communication and teamwork skills. Technology has also entered the classroom, with tablets and educational software providing personalised learning experiences. Research suggests that students who learn through these varied methods tend to be more engaged and retain information more effectively than those taught through traditional methods alone.",
+        "Best title?",
+        "B",
+        [
+          ["A", "Why Standardised Tests Should Be Abolished", "Passage ไม่ได้เรียกร้องให้ยกเลิกการสอบ"],
+          ["B", "The Shift Toward Modern and Interactive Learning Methods", "ครอบคลุมการเปลี่ยนแปลง project-based เทคโนโลยี และผลวิจัย"],
+          ["C", "How Technology Is Replacing Teachers in Schools", "Passage บอกว่าเทคโนโลยีเสริม ไม่ใช่แทนที่ครู"],
+          ["D", "The Benefits of Learning Mathematics Through Projects", "คณิตศาสตร์ไม่ได้ถูกกล่าวถึงเลย"],
+        ],
+      ),
+      passageMc(
+        "s13-9",
+        "Water scarcity is one of the most pressing challenges facing the world today. While water covers most of the Earth's surface, only a small fraction is fresh water, and even less is accessible for human use. Growing populations, increased agricultural demands, and climate change are putting enormous pressure on freshwater supplies. In response, many regions are investing in water recycling technologies, desalination plants, and more efficient irrigation systems. Experts warn that without significant changes in how we manage and consume water, shortages could affect billions of people within the next few decades.",
+        "Best title?",
+        "B",
+        [
+          ["A", "How Desalination Plants Work", "Desalination เป็นแค่ตัวอย่างหนึ่งของวิธีแก้ไข"],
+          ["B", "The Causes and Solutions of Global Water Scarcity", "ครอบคลุมสาเหตุ ปัญหา และวิธีแก้ไข"],
+          ["C", "Why Farmers Use Too Much Water", "เกษตรกรรมเป็นแค่หนึ่งในหลายสาเหตุ"],
+          ["D", "The Effects of Climate Change on Ocean Levels", "Passage ไม่ได้พูดเรื่องระดับน้ำทะเล"],
+        ],
+      ),
+      passageMc(
+        "s13-10",
+        "Street food culture is an integral part of life in many cities across Asia, Latin America, and the Middle East. For millions of people, street food provides affordable, convenient, and often highly flavourful meals that reflect local culinary traditions. Vendors frequently pass down recipes through generations, preserving cultural heritage one dish at a time. In recent years, street food has also gained international recognition, with food tourism becoming a major draw for travellers seeking authentic local experiences. However, concerns about hygiene and food safety have led some governments to regulate or restrict street food vendors in urban areas.",
+        "Best title?",
+        "B",
+        [
+          ["A", "The Best Street Foods to Try When Travelling Asia", "Passage ไม่ได้แนะนำอาหารเฉพาะเจาะจง"],
+          ["B", "Street Food: Culture, Tradition, and Modern Challenges", "ครอบคลุมวัฒนธรรม ประเพณี การท่องเที่ยว และกฎระเบียบ"],
+          ["C", "Why Street Food Is Cheaper Than Restaurant Food", "ราคาเป็นแค่รายละเอียดเล็กน้อย"],
+          ["D", "How Food Safety Laws Affect Small Businesses", "กฎหมายอาหารปลอดภัยเป็นแค่ย่อหน้าสุดท้าย"],
+        ],
+      ),
+    ],
+  };
+}
+
+function buildSession14(): MiniStudyPassageMcSession {
+  return {
+    id: "session-14",
+    index: 14,
+    title: "Reading — find the main idea",
+    subtitle: "Lesson + 10 main-idea MC exercises",
+    durationLabel: "≈ 15 min",
+    kind: "passage-mc",
+    category: "reading",
+    tierRequired: "premium",
+    shortHookTh: "แยก main idea กับ detail ออกจากกัน — เลิกหลงตัวเลือกที่ดูถูกแต่ผิด",
+    explanation: [
+      {
+        heading: "ส่วนที่ 1 — Identify the Idea ใน DET คืออะไร?",
+        body: [
+          "ใน **Interactive Reading** ของ DET มีคำถามประเภท \"Identify the Idea\" ที่ถามให้หา main idea ของ passage",
+          "• แตกต่างจาก Title ตรงที่ Main Idea มักเป็น **ประโยคที่สมบูรณ์**",
+          "• Main Idea = **ประเด็นหลัก** ที่ผู้เขียนพยายามบอก ไม่ใช่รายละเอียด",
+          "• ทุกย่อหน้าใน passage ต้องสนับสนุน main idea นี้",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 2 — Main Idea อยู่ที่ไหน?",
+        body: [
+          "• **บ่อยที่สุด** — อยู่ในประโยคแรกหรือสองประโยคแรก (topic sentence)",
+          "• **บางครั้ง** — อยู่ในประโยคสุดท้ายเป็นการสรุป",
+          "• **นานๆ ครั้ง** — ต้องสรุปเองจากทั้ง passage",
+          "• ห้ามหยุดอ่านแค่ประโยคแรก — ต้องอ่านจนจบเพื่อยืนยัน",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 3 — Main Idea ≠ Detail",
+        body: [
+          "• **Main Idea** = สิ่งที่ passage พูดถึงโดยรวม",
+          "  *เช่น \"Exercise has many benefits for both physical and mental health.\"*",
+          "• **Detail** = ข้อมูลเฉพาะที่ใช้สนับสนุน",
+          "  *เช่น \"Running for 30 minutes a day reduces the risk of heart disease by 35%.\"*",
+          "• **กฎง่ายๆ**: ถ้าตัวเลือกพูดถึง **ตัวเลข ชื่อเฉพาะ วันที่ สถานที่เฉพาะ** — มักเป็น detail",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 4 — กับดักที่ DET ชอบออก",
+        body: [
+          "**❌ กับดัก 1 — Detail ที่ถูกต้องแต่ไม่ใช่ main idea** — ครอบคลุมแค่บางส่วน",
+          "**❌ กับดัก 2 — ถูกบางส่วนแต่เพิ่มข้อมูลที่ passage ไม่ได้พูดถึง**",
+          "**❌ กับดัก 3 — ใช้คำจาก passage แต่บิดความหมาย** — อย่าเลือกเพราะคำคุ้นเคย",
+          "**❌ กับดัก 4 — กว้างเกินไปจนครอบคลุมสิ่งที่ passage ไม่ได้พูดถึง**",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 5 — ขั้นตอนการหา Main Idea",
+        body: [
+          "1. อ่าน **ประโยคแรกของแต่ละย่อหน้า** (topic sentences) อย่างรวดเร็ว",
+          "2. ถามตัวเอง: *\"ทุกย่อหน้าพูดเรื่องอะไรร่วมกัน?\"*",
+          "3. **สร้าง main idea ในหัวก่อนดูตัวเลือก** — เป็นประโยคสั้นๆ",
+          "4. อ่านตัวเลือก **ทุกตัว** หาตัวที่ใกล้เคียงกับที่คิดไว้",
+          "5. ตัดตัวเลือกที่เป็น detail หรือกว้าง/แคบเกินไป",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 6 — Tips สรุป",
+        body: [
+          "✅ Main idea ต้อง **ครอบคลุมทั้ง passage** ไม่ใช่แค่ย่อหน้าเดียว",
+          "✅ **สร้าง main idea ในหัวก่อนดูตัวเลือก** — กันถูกหลอกด้วยตัวเลือกที่ฟังดูดี",
+          "✅ อ่านทุกตัวเลือกก่อนเลือก — DET ออกแบบให้มีตัวที่ดูถูกแต่ไม่ใช่",
+          "✅ มี **ตัวเลข / ชื่อเฉพาะ / รายละเอียดเฉพาะ** → มักเป็น detail",
+          "❌ ห้ามเลือกตัวเลือกที่มีข้อมูลที่ passage ไม่ได้พูดถึง",
+          "❌ ห้ามสับสน main idea (ประโยคสมบูรณ์) กับ title (วลีสั้น)",
+        ].join("\n"),
+      },
+      {
+        heading: "วิธีทำแบบฝึกหัด",
+        body: READING_LESSON_NOTE_TH,
+      },
+    ],
+    exercises: [
+      passageMc(
+        "s14-1",
+        "Cycling has become an increasingly popular form of transport in many cities worldwide. Local governments have responded by building dedicated cycle lanes and offering bike-sharing schemes. Studies show that cities with strong cycling infrastructure see fewer traffic accidents and lower levels of air pollution. On an individual level, regular cycling improves cardiovascular health and reduces stress. Economic research also indicates that cycling infrastructure costs far less to build and maintain than roads designed for cars.",
+        "Main idea?",
+        "C",
+        [
+          ["A", "Cycling is popular because it saves money on petrol.", "Passage ไม่ได้พูดเรื่องน้ำมัน"],
+          ["B", "Building cycle lanes is expensive for local governments.", "Passage บอกตรงข้ามว่า cycle lanes ถูกกว่า"],
+          ["C", "Cycling offers significant benefits for cities, individuals, and the economy.", "ครอบคลุมทุกย่อหน้า (เมือง / บุคคล / เศรษฐกิจ)"],
+          ["D", "Air pollution in cities has decreased due to cycling programmes.", "เป็นแค่ detail หนึ่ง"],
+        ],
+      ),
+      passageMc(
+        "s14-2",
+        "Many scientists now believe that spending time in nature has measurable positive effects on mental health. Studies conducted in Japan, where the practice of \"forest bathing\" originated, found that spending time among trees lowers cortisol levels and reduces blood pressure. Similar research in Europe and North America has confirmed that even short walks in parks or green spaces can reduce symptoms of anxiety and depression. Healthcare providers in some countries are now formally prescribing time outdoors as part of treatment plans for patients with mild mental health conditions.",
+        "Main idea?",
+        "B",
+        [
+          ["A", "Forest bathing is a Japanese tradition that involves walking in forests.", "เป็นแค่รายละเอียดเรื่องญี่ปุ่น"],
+          ["B", "Spending time in nature can significantly improve mental health.", "ครอบคลุมทุกย่อหน้าที่พูดเรื่องธรรมชาติกับสุขภาพจิต"],
+          ["C", "Doctors in Japan prescribe forest walks to patients with heart disease.", "บิดข้อมูล — passage ไม่ได้พูดเรื่องโรคหัวใจ"],
+          ["D", "Anxiety and depression are among the most common mental health conditions.", "Passage ไม่ได้พูดเรื่องความชุกของโรค"],
+        ],
+      ),
+      passageMc(
+        "s14-3",
+        "The fashion industry is one of the largest contributors to environmental pollution globally. The production of clothing requires enormous amounts of water, and synthetic fabrics shed microplastics that end up in waterways. The industry also generates significant carbon emissions through manufacturing and shipping. In response, a growing number of brands are adopting sustainable practices, such as using organic materials, reducing waste in production, and offering repair and recycling programmes. Consumers are also becoming more conscious, with surveys showing increased interest in second-hand clothing and sustainable brands.",
+        "Main idea?",
+        "C",
+        [
+          ["A", "Synthetic fabrics release microplastics that pollute rivers and oceans.", "เป็นแค่ detail หนึ่งในย่อหน้าแรก"],
+          ["B", "Second-hand clothing is becoming more fashionable among young people.", "เป็นแค่ detail เล็กน้อย"],
+          ["C", "The fashion industry causes serious environmental damage, but change is happening.", "ครอบคลุมทั้งปัญหาและการเปลี่ยนแปลง"],
+          ["D", "Carbon emissions from clothing manufacturing are higher than from aviation.", "Passage ไม่ได้เปรียบเทียบกับอุตสาหกรรมการบิน"],
+        ],
+      ),
+      passageMc(
+        "s14-4",
+        "The ability to read maps was once considered an essential life skill. Today, GPS navigation systems and smartphone apps have made it possible for people to travel anywhere without ever consulting a traditional map. While this technology is undeniably convenient, some researchers worry that heavy reliance on GPS may be weakening people's spatial awareness and sense of direction. Studies suggest that people who regularly use GPS show less activity in the parts of the brain associated with navigation compared to those who navigate independently.",
+        "Main idea?",
+        "C",
+        [
+          ["A", "Smartphones have made traditional map-reading unnecessary in modern life.", "Passage ไม่ได้บอกว่าแผนที่กระดาษไม่จำเป็น เพียงแต่ใช้น้อยลง"],
+          ["B", "GPS technology improves travel safety by reducing navigation errors.", "Passage ไม่ได้พูดเรื่องความปลอดภัย"],
+          ["C", "While GPS is convenient, it may be reducing people's natural navigation abilities.", "ครอบคลุมทั้งความสะดวกและความกังวล"],
+          ["D", "People who use GPS regularly have better travel experiences.", "Passage ไม่ได้บอกว่าประสบการณ์การเดินทางดีขึ้น"],
+        ],
+      ),
+      passageMc(
+        "s14-5",
+        "Community gardens are shared spaces where local residents grow fruit, vegetables, and flowers together. Originally established in areas with little access to green space, they have spread to suburbs and even wealthy urban neighbourhoods. Beyond providing fresh produce, community gardens offer important social benefits: they bring together people from different backgrounds, reduce loneliness, and give residents a sense of ownership over their neighbourhood. Some research also indicates that areas with active community gardens experience reduced rates of vandalism and crime.",
+        "Main idea?",
+        "B",
+        [
+          ["A", "Community gardens produce large amounts of fresh food for local families.", "Passage ไม่ได้เน้นปริมาณอาหาร"],
+          ["B", "Community gardens bring social and environmental benefits to neighbourhoods.", "ครอบคลุมทั้งผลทางสังคม สิ่งแวดล้อม และชุมชน"],
+          ["C", "Vandalism decreases in areas where residents grow their own vegetables.", "เป็นแค่รายละเอียดในย่อหน้าสุดท้าย"],
+          ["D", "Wealthy neighbourhoods have more community gardens than poorer areas.", "Passage บอกตรงข้าม เริ่มจากพื้นที่ยากจนก่อน"],
+        ],
+      ),
+      passageMc(
+        "s14-6",
+        "Digital literacy, defined as the ability to use digital tools and evaluate online information critically, has become an essential skill in the modern world. Schools in many countries have begun incorporating digital literacy into their curricula, teaching students to identify fake news, protect their personal data, and use technology responsibly. However, progress has been uneven, with students in wealthier schools often receiving better instruction than those in underfunded schools. Experts argue that closing this digital skills gap is crucial to ensuring equal opportunities for young people in an increasingly technology-driven society.",
+        "Main idea?",
+        "C",
+        [
+          ["A", "Fake news is a growing problem on social media platforms worldwide.", "Passage ไม่ได้โฟกัสที่ปัญหา fake news"],
+          ["B", "Digital literacy is now a required subject in all secondary schools.", "Passage บอกว่าหลายประเทศเริ่มทำ ไม่ใช่ทุกโรงเรียน"],
+          ["C", "Digital literacy is an essential modern skill, though access to quality education in it remains unequal.", "ครอบคลุมทั้งความสำคัญ การสอน และความไม่เท่าเทียม"],
+          ["D", "Wealthier students perform better academically because they have access to better technology.", "Passage พูดเรื่องทักษะดิจิทัล ไม่ใช่ผลการเรียนโดยรวม"],
+        ],
+      ),
+      passageMc(
+        "s14-7",
+        "Meditation, once considered a niche spiritual practice, has entered the mainstream in many Western countries. Corporations now offer meditation programmes to employees to reduce workplace stress and increase productivity. Schools are introducing mindfulness sessions to help students manage exam anxiety. Hospitals and clinics use meditation-based therapies to help patients dealing with chronic pain and mental health disorders. Despite its growing acceptance, some scientists caution that while research results are promising, more rigorous studies are needed before strong clinical conclusions can be drawn.",
+        "Main idea?",
+        "B",
+        [
+          ["A", "Meditation is an ancient spiritual practice that originated in Asia.", "Passage ไม่ได้พูดเรื่องต้นกำเนิด"],
+          ["B", "Meditation is now widely used across many sectors of society, though its clinical benefits still require further research.", "ครอบคลุมการแพร่หลายและข้อสงวน"],
+          ["C", "Companies that offer meditation programmes to employees see significant increases in productivity.", "เป็นแค่รายละเอียดเรื่องบริษัท"],
+          ["D", "Scientists have proven that meditation cures chronic pain and mental health disorders.", "Passage บอกตรงข้ามว่ายังต้องการงานวิจัยเพิ่ม"],
+        ],
+      ),
+      passageMc(
+        "s14-8",
+        "Microfinance programmes provide small loans to individuals in developing countries who do not have access to traditional banking services. The idea, pioneered by economist Muhammad Yunus in Bangladesh in the 1970s, was that small amounts of credit could help poor people start businesses and escape poverty. Since then, microfinance has expanded globally and helped millions of people, particularly women, gain economic independence. However, critics point out that high interest rates charged by some microfinance institutions have left borrowers in debt, suggesting that the model needs careful regulation to be truly effective.",
+        "Main idea?",
+        "B",
+        [
+          ["A", "Muhammad Yunus invented microfinance to help poor women in Bangladesh start businesses.", "เป็นแค่ background detail"],
+          ["B", "Microfinance has helped millions of people but also faces criticism for its high interest rates.", "ครอบคลุมทั้งประโยชน์และคำวิจารณ์"],
+          ["C", "High interest rates are the main reason why microfinance programmes fail in developing countries.", "Passage ไม่ได้บอกว่าโปรแกรมล้มเหลว"],
+          ["D", "Traditional banks refuse to lend money to people in developing countries.", "เป็นแค่ context ในประโยคแรก"],
+        ],
+      ),
+      passageMc(
+        "s14-9",
+        "The popularity of podcasts has grown enormously over the past decade. What began as a niche hobby for tech enthusiasts has become a major media format consumed by hundreds of millions of people worldwide. Podcasts now cover virtually every topic imaginable, from true crime and history to business and personal development. Major media companies and individual creators alike have found success in the format. Advertisers have followed, with podcast advertising becoming a multi-billion dollar industry. Analysts suggest that podcasts are popular because they fit naturally into busy modern lifestyles, offering entertainment and information that can be consumed while commuting, exercising, or doing household tasks.",
+        "Main idea?",
+        "C",
+        [
+          ["A", "True crime podcasts are the most popular genre among podcast listeners.", "Passage ไม่ได้บอกว่า true crime ยอดนิยมที่สุด"],
+          ["B", "Podcast advertising has become more profitable than traditional radio advertising.", "Passage ไม่ได้เปรียบเทียบกับ radio"],
+          ["C", "Podcasts have grown from a niche hobby into a major global media industry.", "ครอบคลุมการเติบโต ความหลากหลาย และอุตสาหกรรม"],
+          ["D", "People listen to podcasts mainly while commuting to and from work.", "เป็นแค่หนึ่งในตัวอย่าง"],
+        ],
+      ),
+      passageMc(
+        "s14-10",
+        "Animal-assisted therapy, which involves trained animals visiting patients in hospitals, care homes, and rehabilitation centres, has shown promising results in a variety of healthcare settings. Interacting with animals has been found to reduce anxiety, lower blood pressure, and improve mood in patients recovering from surgery or dealing with long-term illness. Children with autism have shown improved communication skills through programmes involving horses. Elderly residents in care homes who receive regular animal visits report lower levels of loneliness and depression. Despite the growing evidence, full integration into standard healthcare practices remains limited due to concerns about hygiene and logistics.",
+        "Main idea?",
+        "B",
+        [
+          ["A", "Horses are particularly effective in helping children with communication difficulties.", "เป็นแค่ detail เรื่องเด็กออทิสติกและม้า"],
+          ["B", "Animal-assisted therapy shows clear health benefits across multiple groups but faces integration challenges.", "ครอบคลุมประโยชน์ กลุ่มต่างๆ และอุปสรรค"],
+          ["C", "Hospitals should allow pets to visit patients because it makes them feel happier.", "บิดข้อมูล passage ไม่ได้เรียกร้องให้ทำสิ่งนี้"],
+          ["D", "Animal-assisted therapy has been proven to cure depression in elderly patients.", "Passage บอกว่าช่วยลด ไม่ใช่รักษาให้หาย"],
+        ],
+      ),
+    ],
+  };
+}
+
+function buildSession15(): MiniStudyPassageMcSession {
+  return {
+    id: "session-15",
+    index: 15,
+    title: "Reading — find the missing paragraph",
+    subtitle: "Lesson + 10 complete-the-passage MC exercises",
+    durationLabel: "≈ 15 min",
+    kind: "passage-mc",
+    category: "reading",
+    tierRequired: "premium",
+    shortHookTh: "เรียนสัญญาณ pronoun + transition word ที่บอกประโยคถูกในช่องว่าง",
+    explanation: [
+      {
+        heading: "ส่วนที่ 1 — Complete the Passage ใน DET คืออะไร?",
+        body: [
+          "ใน **Interactive Reading** ของ DET มีคำถามประเภท \"Complete the Passage\" ให้เลือกประโยคที่หายไปเพื่อเติม passage",
+          "• ทดสอบว่าคุณเข้าใจว่าแต่ละ idea เชื่อมต่อกันยังไงภายใน passage",
+          "• จะมี **ช่องว่าง** ใน passage + ตัวเลือก 4 ประโยค",
+          "• ไม่ใช่แค่หาประโยคที่ \"ฟังดูดี\" — ต้องเชื่อมกับ **ทั้งประโยคก่อนและหลัง**",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 2 — ประโยคที่หายไปต้องทำ 3 สิ่งพร้อมกัน",
+        body: [
+          "✅ **เชื่อมกับประโยคก่อนหน้า** — รับ idea จากประโยคก่อนมาอย่างสมเหตุสมผล",
+          "✅ **เชื่อมกับประโยคหลัง** — นำไปสู่ประโยคถัดไปอย่างเป็นธรรมชาติ",
+          "✅ **สอดคล้องกับ idea หลัก** — ไม่นำเรื่องใหม่ที่ไม่เกี่ยวข้องเข้ามา",
+          "ผ่านแค่ 1-2 ข้อ — ยังผิดอยู่",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 3 — สัญญาณที่ต้องหาในประโยคก่อนและหลัง",
+        body: [
+          "**Pronoun signals** — ถ้าประโยคหลังขึ้นต้นด้วย *This / These / It / They / Such* → ประโยคที่หายไปต้อง **แนะนำสิ่งที่ pronoun นั้นอ้างถึง**",
+          "  *เช่น \"This approach has been widely adopted.\" → ประโยคที่หายไปต้องพูดถึง \"approach\" บางอย่าง*",
+          "",
+          "**Transition signals** — ถ้าประโยคหลังขึ้นต้นด้วย *However / As a result / Therefore / In contrast* → ประโยคที่หายไปต้องสร้าง **ความสัมพันธ์ที่ transition นั้นจะใช้**",
+          "  *เช่น \"However, not everyone agrees.\" → ประโยคที่หายไปต้องพูดมุมมองฝ่ายที่เห็นด้วยก่อน*",
+          "",
+          "**Topic continuation** — ห้ามเปลี่ยน topic กลางคัน",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 4 — กับดักที่ DET ชอบออก",
+        body: [
+          "**❌ กับดัก 1 — เชื่อมกับประโยคก่อนได้แต่ไม่เชื่อมกับประโยคหลัง** — ตรวจสอบ **ทั้งสองทิศทาง** เสมอ",
+          "**❌ กับดัก 2 — นำข้อมูลใหม่ที่ไม่เกี่ยวข้องเข้ามา** — \"ประโยคนี้เกี่ยวกับ topic เดิมไหม?\"",
+          "**❌ กับดัก 3 — ซ้ำ idea ที่พูดไปแล้ว**",
+          "**❌ กับดัก 4 — ขัดแย้งกับข้อมูลใน passage**",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 5 — ขั้นตอนการหาประโยคที่หายไป",
+        body: [
+          "1. อ่าน passage ทั้งหมด **รวมถึงส่วนที่อยู่หลังช่องว่าง** — สำคัญที่สุด",
+          "2. อ่านประโยคก่อนช่องว่าง — จับ idea หลักและ keyword",
+          "3. อ่านประโยคหลังช่องว่าง — จับ **pronoun** และ **transition words**",
+          "4. อ่านตัวเลือกทุกตัว ทดสอบกับ **ทั้งสองทิศทาง**",
+          "5. เลือกตัวที่เชื่อมได้ทั้งสองทิศทางและสอดคล้องกับ passage โดยรวม",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 6 — Tips สรุป",
+        body: [
+          "✅ อ่าน **ทั้งประโยคก่อนและหลัง** ช่องว่าง — ไม่ใช่แค่ด้านเดียว",
+          "✅ หา **pronoun** ในประโยคหลัง → บอกว่าประโยคที่หายไปต้องพูดถึงอะไร",
+          "✅ หา **transition words** ในประโยคหลัง → บอกทิศทางของความสัมพันธ์",
+          "✅ อ่านตัวเลือกทั้งหมดก่อนเลือก",
+          "❌ ห้ามเลือกประโยคที่นำ topic ใหม่เข้ามา",
+          "❌ ห้ามเลือกแค่เพราะ \"เชื่อมกับประโยคก่อน\" โดยไม่ตรวจสอบประโยคหลัง",
+        ].join("\n"),
+      },
+      {
+        heading: "วิธีทำแบบฝึกหัด",
+        body: "ใน passage จะมี **[___]** บอกตำแหน่งของประโยคที่หายไป · เลือกตัวเลือกที่เหมาะที่สุด · กดเฉลยเพื่อดูเหตุผลทุกตัวเลือก",
+      },
+    ],
+    exercises: [
+      passageMc(
+        "s15-1",
+        "Urban noise pollution has become a serious public health concern in many cities. Constant exposure to traffic, construction, and industrial sounds can lead to sleep disturbances, increased stress levels, and even hearing loss over time. [___] In response, some city planners are designing quieter urban environments by increasing green spaces, which absorb sound, and introducing regulations that limit construction noise during night hours.",
+        "Best sentence for [___]?",
+        "B",
+        [
+          ["A", "Music festivals in cities attract large numbers of tourists every year.", "เรื่องเทศกาลดนตรีไม่เกี่ยวกับ passage"],
+          ["B", "These health consequences have prompted governments and planners to take action.", "เชื่อมทั้งสองทิศทาง — รับเรื่องผลกระทบต่อสุขภาพแล้วนำไปสู่การตอบสนอง"],
+          ["C", "Noise pollution is less damaging than air pollution in most urban areas.", "เปรียบเทียบกับมลพิษทางอากาศซึ่ง passage ไม่ได้พูดถึง"],
+          ["D", "Many people choose to wear headphones to block out street noise.", "พฤติกรรมส่วนบุคคล ไม่นำไปสู่เรื่องนักวางแผนเมือง"],
+        ],
+      ),
+      passageMc(
+        "s15-2",
+        "The concept of a four-day working week has gained significant attention in recent years. Supporters argue that reducing working hours can improve employee wellbeing and increase productivity. Several large-scale trials conducted in Iceland, Japan, and the United Kingdom produced largely positive results. [___] However, critics argue that the model may not be suitable for all industries, particularly those that require continuous operations such as healthcare and emergency services.",
+        "Best sentence for [___]?",
+        "A",
+        [
+          ["A", "Employees in these trials reported higher job satisfaction and lower stress levels, while productivity either remained the same or improved.", "ให้รายละเอียดผลบวกของการทดลอง นำไปสู่การค้านด้วย However"],
+          ["B", "Iceland is known for having some of the happiest workers in the world.", "ไม่นำไปสู่ However"],
+          ["C", "Working fewer hours means that employees earn less money each month.", "ขัดแย้งกับ idea ของ passage"],
+          ["D", "Japan has one of the longest average working weeks of any developed country.", "ข้อมูลเรื่องญี่ปุ่นไม่เชื่อมกับประโยคก่อนหรือหลัง"],
+        ],
+      ),
+      passageMc(
+        "s15-3",
+        "In many parts of the world, traditional crafts are in danger of disappearing. Skills such as pottery, weaving, and woodcarving that were once passed down through generations are now practised by only a small number of elderly artisans. [___] Digital platforms have also opened new markets, allowing craftspeople to sell their work internationally and attract younger buyers interested in handmade, authentic products.",
+        "Best sentence for [___]?",
+        "B",
+        [
+          ["A", "Mass-produced goods from factories are cheaper and easier to find than handmade items.", "ไม่นำไปสู่ประโยคเรื่อง digital platforms"],
+          ["B", "Several organisations and governments are working to preserve these crafts through training programmes and cultural funding.", "เชื่อมทั้งสองทิศทาง — รับปัญหาและนำไปสู่วิธีแก้เพิ่มเติม"],
+          ["C", "Young people today prefer to pursue careers in technology rather than traditional trades.", "ไม่เกี่ยวกับการอนุรักษ์"],
+          ["D", "Pottery is one of the oldest crafts in human history, dating back thousands of years.", "ไม่เชื่อมกับ passage"],
+        ],
+      ),
+      passageMc(
+        "s15-4",
+        "Online misinformation spreads far more quickly than accurate information, according to a major study published by researchers at MIT. The study, which analysed millions of tweets over a twelve-year period, found that false stories were 70% more likely to be shared than true ones. [___] The researchers suggest this is because false news tends to be more novel and emotionally engaging, making people more likely to share it without first verifying the information.",
+        "Best sentence for [___]?",
+        "B",
+        [
+          ["A", "Twitter is the most popular social media platform among adults under 30.", "ไม่เกี่ยวกับการวิจัย"],
+          ["B", "This pattern was consistent across different topics, including politics, science, and entertainment.", "ขยาย finding และเชื่อมกับ \"this\" ในประโยคถัดไป"],
+          ["C", "Social media companies have introduced fact-checking tools to combat the spread of fake news.", "Passage ยังไม่ได้พูดถึงตรงนั้น"],
+          ["D", "Reading news from reliable sources is the best way to stay informed.", "คำแนะนำส่วนบุคคล ไม่ใช่ส่วนของงานวิจัย"],
+        ],
+      ),
+      passageMc(
+        "s15-5",
+        "The ocean plays a crucial role in regulating the Earth's climate. It absorbs roughly a quarter of the carbon dioxide released by human activity each year and stores vast amounts of heat. [___] Scientists warn that if ocean temperatures continue to rise, these critical functions could be disrupted, with potentially catastrophic consequences for weather patterns and biodiversity.",
+        "Best sentence for [___]?",
+        "C",
+        [
+          ["A", "Many species of fish are currently endangered due to overfishing in international waters.", "ไม่เกี่ยวกับ climate regulation"],
+          ["B", "The ocean is also home to millions of species of marine plants and animals.", "ไม่นำไปสู่ประโยคเรื่องอุณหภูมิ"],
+          ["C", "However, rising ocean temperatures caused by climate change are threatening the ocean's ability to carry out these functions.", "เชื่อมทั้งสองทิศทาง — รับ idea เรื่องบทบาทและนำสู่ภัยคุกคาม"],
+          ["D", "Carbon dioxide is one of the main gases responsible for the greenhouse effect.", "อธิบาย CO2 แบบทั่วไป ไม่เชื่อมกับ passage"],
+        ],
+      ),
+      passageMc(
+        "s15-6",
+        "The concept of emotional intelligence, or EQ, refers to the ability to recognise, understand, and manage one's own emotions as well as those of other people. Psychologists began formalising this concept in the 1990s, and it has since gained significant attention in education and the workplace. Research suggests that individuals with high EQ tend to be more effective leaders, communicate better under pressure, and build stronger professional relationships. [___] This has led many organisations to incorporate EQ assessment into their hiring processes alongside traditional measures of cognitive ability.",
+        "Best sentence for [___]?",
+        "B",
+        [
+          ["A", "Intelligence quotient, or IQ, was developed in the early twentieth century to measure cognitive ability.", "ไม่ใช่ focus ของ passage"],
+          ["B", "High EQ has also been linked to better mental health outcomes and greater overall life satisfaction.", "เพิ่มประโยชน์เพิ่มเติมของ EQ ทำให้ \"This has led many organisations...\" สมบูรณ์"],
+          ["C", "Some psychologists believe that emotional intelligence cannot be taught and is mostly determined by genetics.", "ขัดแย้งกับ tone ของ passage"],
+          ["D", "Leadership training programmes are offered by most large companies to senior managers.", "ไม่เกี่ยวกับ EQ assessment"],
+        ],
+      ),
+      passageMc(
+        "s15-7",
+        "Food waste is a major global problem. Approximately one third of all food produced for human consumption is lost or wasted each year, according to the United Nations. This waste occurs at every stage of the food supply chain, from farms where surplus crops are left unpicked to supermarkets that discard food approaching its sell-by date. [___] Tackling food waste has therefore become a priority for governments, businesses, and consumers alike, with initiatives ranging from food donation programmes to legislation that restricts supermarkets from throwing away edible food.",
+        "Best sentence for [___]?",
+        "B",
+        [
+          ["A", "Composting is an effective way to recycle food waste at home.", "วิธีแก้ส่วนบุคคล ไม่ใช่เหตุผลสำคัญ"],
+          ["B", "The environmental consequences of food waste are significant, as decomposing food in landfills produces methane, a potent greenhouse gas.", "ให้ผลกระทบที่นำไปสู่ \"therefore\" ในประโยคถัดไป"],
+          ["C", "Vegetarian diets produce less food waste than diets that include meat.", "Passage ไม่ได้พูดถึง"],
+          ["D", "Many restaurants now offer smaller portion sizes to reduce the amount of food left on plates.", "ไม่นำไปสู่ \"therefore\""],
+        ],
+      ),
+      passageMc(
+        "s15-8",
+        "Remote areas of the world have long struggled with limited access to quality healthcare. Patients in rural regions often have to travel long distances to reach the nearest hospital, and specialist care may be entirely unavailable locally. Telemedicine, which allows patients to consult with doctors via video call, has offered a promising solution. [___] This has made it possible for patients to receive specialist advice without leaving their communities, significantly improving health outcomes in underserved areas.",
+        "Best sentence for [___]?",
+        "B",
+        [
+          ["A", "However, many patients in rural areas do not have access to reliable internet connections.", "พูดเรื่องอุปสรรค แต่ประโยคถัดไปพูดผลสำเร็จ ขัดกัน"],
+          ["B", "By connecting patients with doctors located in cities or even other countries, telemedicine removes the barrier of physical distance.", "อธิบายกลไกที่นำไปสู่ \"This\" ในประโยคถัดไป"],
+          ["C", "Video calling technology was originally developed for business communication, not healthcare.", "ไม่เกี่ยวกับ passage"],
+          ["D", "Some doctors are concerned that telemedicine reduces the quality of patient care.", "ขัดแย้งกับ tone ที่สนับสนุน telemedicine"],
+        ],
+      ),
+      passageMc(
+        "s15-9",
+        "The sharing economy, characterised by platforms that allow people to share resources such as cars, homes, and tools, has transformed several traditional industries. Ride-sharing services have disrupted the taxi industry, while home-sharing platforms have changed the hotel sector. [___] Critics, however, point to concerns about worker rights, safety regulations, and the impact on local housing markets, particularly in popular tourist destinations where short-term rentals have driven up property prices.",
+        "Best sentence for [___]?",
+        "B",
+        [
+          ["A", "Taxi drivers in many cities have protested against ride-sharing services.", "มุมมองเชิงลบ ไม่เหมาะก่อน \"Critics, however\""],
+          ["B", "Proponents of the sharing economy argue that it creates economic opportunity, reduces waste by making better use of existing resources, and offers consumers more affordable options.", "มุมมองเชิงบวก นำไปสู่ \"however\" ของ critics"],
+          ["C", "The sharing economy relies heavily on smartphone apps and digital payment systems.", "เรื่องเทคโนโลยี ไม่นำไปสู่คำวิจารณ์"],
+          ["D", "Home-sharing platforms now operate in over one hundred countries worldwide.", "สถิติ ไม่นำไปสู่ \"Critics, however\""],
+        ],
+      ),
+      passageMc(
+        "s15-10",
+        "The migration of people from rural areas to cities, known as urbanisation, is one of the defining trends of the modern era. By 2050, it is estimated that nearly 70% of the world's population will live in urban areas. This rapid growth presents enormous challenges for infrastructure, housing, and public services. [___] At the same time, cities that are well-managed can offer significant advantages, including better access to education, healthcare, and economic opportunities, making them powerful drivers of national development.",
+        "Best sentence for [___]?",
+        "C",
+        [
+          ["A", "Some governments are trying to encourage people to move back to rural areas by offering financial incentives.", "ไม่เกี่ยวกับ challenges ที่กล่าวถึง"],
+          ["B", "Traffic congestion is one of the most visible and frustrating problems in rapidly growing cities.", "เป็นแค่ตัวอย่างเดียว ไม่ครอบคลุม challenges ทั้งหมด"],
+          ["C", "Without adequate planning and investment, cities risk becoming overcrowded and unable to meet the basic needs of their residents.", "ขยาย challenges นำสู่ \"At the same time\" ในประโยคถัดไป"],
+          ["D", "Urbanisation began during the Industrial Revolution in the eighteenth century in Europe.", "ประวัติศาสตร์ ไม่นำไปสู่ \"At the same time\""],
+        ],
+      ),
+    ],
+  };
+}
+
+function passageMc(
+  id: string,
+  passage: string,
+  question: string,
+  correctLetter: "A" | "B" | "C" | "D",
+  rows: [letter: "A" | "B" | "C" | "D", text: string, explanationTh: string][],
+): MiniStudyPassageMcExercise {
+  return {
+    id,
+    passage,
+    question,
+    correctLetter,
+    options: rows.map(([letter, text, explanationTh]) => ({ letter, text, explanationTh })),
   };
 }

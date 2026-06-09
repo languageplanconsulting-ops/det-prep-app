@@ -80,8 +80,8 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
     const numCorrect = results.filter((r) => r.correct).length;
     return (
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-        <div className="rounded-sm border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#111]">
-          <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-[#004AAD]">
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
             Session complete
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight">
@@ -90,7 +90,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
         </div>
         <Link
           href="/practice/mini-study"
-          className="inline-block rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+          className="inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
         >
           ← All sessions
         </Link>
@@ -109,8 +109,8 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
       <audio ref={audioRef} className="hidden" preload="auto" />
 
-      <header className="rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#111]">
-        <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
+      <header className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+        <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
           Session {session.index}
         </p>
         <h1 className="mt-1 text-lg font-black">
@@ -118,11 +118,11 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
         </h1>
       </header>
 
-      <div className="rounded-sm border-2 border-[#004AAD] bg-[#eef4ff] p-3 text-sm leading-7 text-neutral-800">
+      <div className="rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30 text-sm leading-7 text-neutral-800">
         <strong>บริบทสั้นๆ:</strong> {ex.scenarioRecapTh}
       </div>
 
-      <div className="rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#111]">
+      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-sm font-black uppercase tracking-wide text-neutral-500">
           Conversation so far
         </h2>
@@ -135,14 +135,14 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
         </div>
       </div>
 
-      <div className="rounded-sm border-4 border-black bg-white p-5 shadow-[6px_6px_0_0_#111]">
+      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-base font-black text-[#004AAD]">{ex.turnLabel}</h2>
         <div className="mt-3 flex items-center gap-3">
           <button
             type="button"
             onClick={playAudio}
             disabled={audioLoading}
-            className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-3 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+            className="rounded-lg bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
           >
             {audioLoading ? "Loading…" : plays === 0 ? "▶ Play audio" : "↻ Play again"}
           </button>
@@ -155,7 +155,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
           {ex.options.map((o) => {
             const isPicked = picked === o.letter;
             const isCorrectOption = o.letter === ex.correctLetter;
-            const baseClass = "block w-full rounded-sm border-2 px-3 py-2 text-left text-sm";
+            const baseClass = "block w-full rounded-xl border px-3 py-2 text-left text-sm";
             const colorClass = checked
               ? isCorrectOption
                 ? "border-green-700 bg-green-50"
@@ -183,7 +183,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
         {checked ? (
           <div className="mt-4 space-y-3">
             <div
-              className={`rounded-sm border-2 p-3 text-sm font-bold ${
+              className={`rounded-xl border p-3 text-sm font-semibold ${
                 isCorrect ? "border-green-700 bg-green-50 text-green-800" : "border-red-700 bg-red-50 text-red-800"
               }`}
             >
@@ -191,7 +191,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
                 ? `✓ Correct — ${ex.correctLetter}`
                 : `✗ Not quite — correct answer is ${ex.correctLetter}`}
             </div>
-            <div className="space-y-2 rounded-sm border-2 border-[#004AAD] bg-[#eef4ff] p-3 text-sm leading-7">
+            <div className="space-y-2 rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30 text-sm leading-7">
               <p>
                 <strong>คำอธิบาย:</strong>
               </p>
@@ -216,7 +216,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
                   setIdx((i) => i + 1);
                   setPicked(null);
                 }}
-                className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-2 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
+                className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
               >
                 {idx + 1 >= total ? "Finish" : "Next exercise →"}
               </button>

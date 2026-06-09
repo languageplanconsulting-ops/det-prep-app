@@ -68,8 +68,15 @@ function statusDot(s: string) {
     return <span className="text-green-600">● Active / ใช้งาน</span>;
   if (s === "expired")
     return <span className="text-red-600">● Expired / หมดอายุ</span>;
-  if (s === "cancelled")
-    return <span className="text-neutral-500">● Cancelled / ยกเลิก</span>;
+  if (s === "unsynced" || s === "cancelled")
+    return (
+      <span
+        className="text-amber-600"
+        title="Stripe customer ID present but tier is free. The webhook may have missed an async PromptPay confirmation. Open this user and click 'Re-sync from Stripe' to repair."
+      >
+        ⚠ Unsynced / ต้องดึง Stripe
+      </span>
+    );
   return <span className="text-blue-600">● Free trial / ทดลอง</span>;
 }
 
@@ -359,7 +366,7 @@ export function SubscriptionsListClient() {
           {(
             [
               ["tier", "Tier", ["all", "free", "basic", "premium", "vip"]],
-              ["status", "Status", ["all", "active", "expired", "cancelled", "vip_course", "trial"]],
+              ["status", "Status", ["all", "active", "expired", "unsynced", "vip_course", "trial"]],
               ["payment", "Payment", ["all", "stripe", "manual", "course_grant"]],
               ["sort", "Sort", ["newest", "oldest", "name", "tier", "expiry"]],
             ] as const

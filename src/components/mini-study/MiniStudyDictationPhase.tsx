@@ -85,8 +85,8 @@ export function MiniStudyDictationPhase({ session }: Props) {
     const numCorrect = results.filter((r) => r.correct).length;
     return (
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-        <div className="rounded-sm border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#111]">
-          <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-[#004AAD]">
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
             Session complete
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight">
@@ -103,7 +103,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
             return (
               <li
                 key={r.id}
-                className={`rounded-sm border-2 ${r.correct ? "border-green-700 bg-green-50" : "border-red-700 bg-red-50"} p-3 text-sm`}
+                className={`rounded-xl border-2 ${r.correct ? "border-green-700 bg-green-50" : "border-red-700 bg-red-50"} p-3 text-sm`}
               >
                 <span className="font-bold">{i + 1}.</span>{" "}
                 <span className={r.correct ? "text-green-800" : "text-red-800"}>
@@ -118,7 +118,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
         <div className="flex justify-between gap-3">
           <Link
             href="/practice/mini-study"
-            className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
           >
             ← All sessions
           </Link>
@@ -134,7 +134,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
               setPlaysUsed({});
               setDone(false);
             }}
-            className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+            className="rounded-lg bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:brightness-95 transition"
           >
             Restart session
           </button>
@@ -169,9 +169,9 @@ export function MiniStudyDictationPhase({ session }: Props) {
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
       <audio ref={audioRef} className="hidden" preload="auto" />
 
-      <header className="flex items-center justify-between rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#111]">
+      <header className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         <div>
-          <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
+          <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
             Session {session.index}
           </p>
           <h1 className="text-lg font-black">
@@ -181,13 +181,13 @@ export function MiniStudyDictationPhase({ session }: Props) {
         <div className="text-xs text-neutral-500">Plays used: {playsForCurrent}</div>
       </header>
 
-      <div className="rounded-sm border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#111]">
+      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={playAudio}
             disabled={audioLoading}
-            className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-3 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+            className="rounded-lg bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
           >
             {audioLoading ? "Loading…" : playsForCurrent === 0 ? "▶ Play audio" : "↻ Play again"}
           </button>
@@ -209,13 +209,13 @@ export function MiniStudyDictationPhase({ session }: Props) {
           }}
           placeholder="Type the sentence here…"
           rows={3}
-          className="mt-4 w-full rounded-sm border-2 border-black bg-white p-3 text-base"
+          className="mt-4 w-full rounded-xl bg-white p-3 ring-1 ring-slate-200 text-base"
           autoFocus
         />
 
         {checked ? (
           <div
-            className={`mt-3 rounded-sm border-2 p-3 text-sm font-bold ${
+            className={`mt-3 rounded-xl border p-3 text-sm font-semibold ${
               correct ? "border-green-700 bg-green-50 text-green-800" : "border-red-700 bg-red-50 text-red-800"
             }`}
           >
@@ -224,7 +224,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
         ) : null}
 
         {showSolution ? (
-          <div className="mt-3 space-y-2 rounded-sm border-2 border-[#004AAD] bg-[#eef4ff] p-3">
+          <div className="mt-3 space-y-2 rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30">
             <div className="text-xs font-bold uppercase tracking-wide text-[#004AAD]">
               Solution
             </div>
@@ -239,7 +239,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
               type="button"
               onClick={handleCheck}
               disabled={!input.trim()}
-              className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+              className="rounded-lg bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:brightness-95 transition disabled:opacity-50"
             >
               Check
             </button>
@@ -248,7 +248,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
             <button
               type="button"
               onClick={() => setShowSolution(true)}
-              className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+              className="rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
             >
               Show solution
             </button>
@@ -257,7 +257,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
             <button
               type="button"
               onClick={handleNext}
-              className="ml-auto rounded-[4px] border-4 border-black bg-[#004AAD] px-4 py-2 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
+              className="ml-auto rounded-lg bg-[#004AAD] px-4 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
             >
               {idx + 1 >= total ? "Finish" : "Next →"}
             </button>

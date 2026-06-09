@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Study — เวิร์กชอป (V3)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "IBM Plex Sans Thai", "Inter", ui-sans-serif, system-ui, sans-serif;
+      background:#fafbfc; color:#0f172a;
+    }
+    .tab.active { background:#004AAD; color:#FFCC00; }
+    .chip.active { background:#004AAD; color:#FFCC00; }
+    .col-listening { --hue: #f0f9ff; --ring:#bae6fd; --tag:#0369a1; }
+    .col-dictation { --hue: #fff7d1; --ring:#fde68a; --tag:#a16207; }
+    .col-speaking  { --hue: #fef2f2; --ring:#fecaca; --tag:#b91c1c; }
+    .col-writing   { --hue: #f5f3ff; --ring:#ddd6fe; --tag:#6d28d9; }
+    .col-reading   { --hue: #ecfdf5; --ring:#a7f3d0; --tag:#047857; }
+    .col-head { background: var(--hue); border-bottom: 1px solid var(--ring); }
+    .col-tag { color: var(--tag); background: white; border: 1px solid var(--ring); }
+    .session-card {
+      background: white; border: 1px solid #e2e8f0;
+      transition: all 0.15s ease; cursor:pointer;
+    }
+    .session-card:hover {
+      border-color: #FFCC00; transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .session-card.locked { background:#fafbfc; cursor:not-allowed; }
+    .session-card.locked:hover { border-color:#e2e8f0; transform:none; box-shadow:none; }
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
+    .tooltip { position: relative; }
+    .tooltip-bubble {
+      visibility: hidden; opacity: 0;
+      position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-4px);
+      background: #0f172a; color: white; font-size: 12px; padding: 8px 12px; border-radius: 8px;
+      width: 240px; line-height: 1.6; transition: opacity 0.15s ease; z-index: 10;
+    }
+    .tooltip:hover .tooltip-bubble { visibility: visible; opacity: 1; }
+    .glossary { border-bottom: 1px dotted #004AAD; cursor: help; }
+    .vip-badge {
+      background: linear-gradient(135deg, #FFCC00, #f59e0b);
+      color: #0f172a; font-weight: 700; font-size: 10px;
+      padding: 2px 7px; border-radius: 9999px;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.12);
+    }
+    .premium-badge {
+      background: #eef4ff; color: #004AAD; font-weight: 600; font-size: 10px;
+      padding: 2px 7px; border-radius: 9999px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-6">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <span class="text-sm text-slate-500 hidden sm:inline">หน้าแรก · เกี่ยวกับ · ฝึก · Mock test</span>
+    <span class="ml-auto text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">Preview V3 · เวิร์กชอป</span>
+  </nav>
+
+  <main class="mx-auto max-w-6xl px-6 py-8 space-y-6">
+    <div class="flex gap-2 text-xs font-semibold">
+      <button class="tab active px-4 py-2 rounded-lg ring-1 ring-slate-200" onclick="show('hub')">หน้าหลัก</button>
+      <button class="tab bg-white px-4 py-2 rounded-lg ring-1 ring-slate-200" onclick="show('inside')">ในบทเรียน</button>
+      <a href="/mini-study-preview-index.html" class="ml-auto bg-white px-4 py-2 rounded-lg ring-1 ring-slate-200">← ดูเวอร์ชันอื่น</a>
+    </div>
+
+    <!-- =============== HUB =============== -->
+    <section id="hub" class="space-y-6">
+      <!-- Top intro -->
+      <header class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <p class="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">Mini Study</p>
+        <h1 class="mt-1 text-2xl font-bold tracking-tight">บทเรียนสั้น 15 บท · เรียนเทคนิคทำข้อสอบ DET ทีละนิด</h1>
+        <p class="mt-3 text-sm leading-7 text-slate-700 max-w-3xl">
+          แต่ละบทเป็นบทเรียนสั้นๆ ที่สอน <strong>เทคนิคทำข้อสอบ DET</strong> ในเวลาแค่ 15 นาที
+          เหมาะกับวันที่ไม่มีเวลาเยอะ แบ่งเป็น 5 หมวดทักษะหลัก — ฟัง · พูด · เขียน · อ่าน · Dictation
+          คุณเลือกหมวดที่อยากเก่งขึ้นก่อน หรือให้ระบบสุ่มให้ก็ได้
+        </p>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button class="rounded-xl bg-gradient-to-r from-[#004AAD] to-[#003a8a] text-[#FFCC00] px-5 py-3 text-sm font-semibold shadow-md hover:shadow-lg transition flex items-center gap-2">
+            <span>🎲</span> สุ่มบทให้หน่อย
+          </button>
+          <span class="text-xs text-slate-500">เหมาะมากถ้าคุณยังเลือกไม่ถูกว่าจะเริ่มจากตรงไหน</span>
+        </div>
+      </header>
+
+      <!-- Access notice (Premium + VIP only) -->
+      <div class="rounded-2xl ring-1 ring-[#FFCC00]/50 bg-[#fff7d1] p-5 flex items-start gap-3">
+        <div class="text-2xl shrink-0">🔑</div>
+        <div class="text-sm leading-7 text-slate-800">
+          <p><strong>Mini Study เปิดให้เฉพาะสมาชิก Premium และ VIP เท่านั้น</strong></p>
+          <p class="mt-1 text-xs">
+            <span class="premium-badge">Premium</span>
+            ใช้ได้ทุกบทยกเว้นกลุ่ม <strong>Writing Essay</strong>
+            · <span class="vip-badge">VIP</span>
+            ใช้ได้ครบทุกบทรวม <strong>Writing Essay</strong> และ <strong>Interactive Speaking</strong> ที่ AI ตรวจให้ละเอียดเป็นภาษาไทย
+          </p>
+        </div>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="flex flex-wrap gap-2">
+        <button class="chip active rounded-full px-4 py-1.5 text-xs font-semibold ring-1 ring-slate-200">ทั้งหมด 15 บท</button>
+        <button class="chip bg-white rounded-full px-4 py-1.5 text-xs font-semibold ring-1 ring-slate-200 hover:ring-[#FFCC00]">🎧 ฟัง</button>
+        <button class="chip bg-white rounded-full px-4 py-1.5 text-xs font-semibold ring-1 ring-slate-200 hover:ring-[#FFCC00]">🗣 พูด</button>
+        <button class="chip bg-white rounded-full px-4 py-1.5 text-xs font-semibold ring-1 ring-slate-200 hover:ring-[#FFCC00]">✍️ เขียน</button>
+        <button class="chip bg-white rounded-full px-4 py-1.5 text-xs font-semibold ring-1 ring-slate-200 hover:ring-[#FFCC00]">📖 อ่าน</button>
+        <button class="chip bg-white rounded-full px-4 py-1.5 text-xs font-semibold ring-1 ring-slate-200 hover:ring-[#FFCC00]">📝 Dictation</button>
+        <span class="ml-auto text-xs text-slate-500 self-center">เรียง: <strong class="text-slate-900">ง่ายไปยาก ▾</strong></span>
+      </div>
+
+      <!-- Kanban -->
+      <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+
+        <!-- Dictation -->
+        <div class="col-dictation rounded-2xl ring-1 ring-slate-200 bg-white overflow-hidden">
+          <div class="col-head px-4 py-3 flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-800">📝 Dictation</span>
+            <span class="col-tag text-[10px] font-semibold rounded-full px-2 py-0.5">3 บท</span>
+          </div>
+          <div class="p-3 space-y-2">
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 1 · ง่ายสุด</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">FANBOYS &amp; Subordinating</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                เรียน comma ที่ออกบ่อยที่สุดใน Dictation — บทเดียวจบ ใช้ได้ตลอดชีวิต
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 14 นาที</span><span>·</span><span>10 ข้อฝึก</span>
+              </div>
+            </article>
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 2</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">เติม -ed / -s / Passive</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                เคยพิมพ์ Dictation แล้วลืมเติม -s ไหม? บทนี้สอนทำเป็นนิสัยใน 15 นาที
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 13 นาที</span><span>·</span><span>10 ข้อฝึก</span>
+              </div>
+            </article>
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 3</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">4 โครงสร้าง Comma สำหรับภาพ</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                รู้ 4 รูปแบบนี้แล้วบรรยายภาพไม่พลาด comma อีก ใช้กับ Write/Speak Photo
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 16 นาที</span><span>·</span><span>10 ข้อฝึก</span>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Speaking (5) + Writing-photo (4) — call this หมวด "พูด" since both involve photo prompt -->
+        <div class="col-speaking rounded-2xl ring-1 ring-slate-200 bg-white overflow-hidden">
+          <div class="col-head px-4 py-3 flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-800">🗣 พูด/เขียนภาพ</span>
+            <span class="col-tag text-[10px] font-semibold rounded-full px-2 py-0.5">2 บท</span>
+          </div>
+          <div class="p-3 space-y-2">
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 4</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">เขียนเกี่ยวกับภาพ</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                3 pattern + คำคุณศัพท์ที่ใช้ได้จริง — AI ตรวจ + ให้คะแนนทันที
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 14 นาที</span><span>·</span><span>AI ตรวจ</span>
+              </div>
+            </article>
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 5</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">พูดเกี่ยวกับภาพ</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                6 ประโยคจบ ใช้แต่ is/are + V-ing ไม่ต้องกลัวผิด -ed
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 15 นาที</span><span>·</span><span>AI ตรวจ</span>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Listening -->
+        <div class="col-listening rounded-2xl ring-1 ring-slate-200 bg-white overflow-hidden">
+          <div class="col-head px-4 py-3 flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-800">🎧 ฟัง</span>
+            <span class="col-tag text-[10px] font-semibold rounded-full px-2 py-0.5">3 บท</span>
+          </div>
+          <div class="p-3 space-y-2">
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 7</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">หาประเด็นใน Scenario</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                เข้าใจ Scenario = ทำได้ครึ่งแล้ว — เรียนวิธีจับ who · why · topic
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 15 นาที</span><span>·</span><span>5 Scenario</span>
+              </div>
+            </article>
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 8</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">เริ่ม 2 turn แรกให้ถูก</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                คำตอบ 2 turn แรกต้องตรง Scenario ไม่ใช่แค่ฟังดูดีในชีวิตประจำวัน
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 15 นาที</span><span>·</span><span>5 Scenario</span>
+              </div>
+            </article>
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 9 · ยากสุด</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">ฟังแล้วเลือกตอบ</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                เทคนิค Opener Elimination — ตัดตัวเลือกผิดได้ใน 5 วินาที
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 15 นาที</span><span>·</span><span>5 ข้อฝึก</span>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Writing — Sessions 10, 11, 12. 11 & 12 are VIP only. -->
+        <div class="col-writing rounded-2xl ring-1 ring-slate-200 bg-white overflow-hidden">
+          <div class="col-head px-4 py-3 flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-800">✍️ เขียน</span>
+            <span class="col-tag text-[10px] font-semibold rounded-full px-2 py-0.5">3 บท</span>
+          </div>
+          <div class="p-3 space-y-2">
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 10</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">สรุปบทสนทนา 75 วินาที</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                Pattern 3 ประโยค + Gemini ตรวจ บอกจุดอ่อนเป็นไทย บันทึก notebook
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 14 นาที</span><span>·</span><span>AI ตรวจ</span>
+              </div>
+            </article>
+            <article class="session-card locked rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 11</p>
+                <span class="vip-badge ml-auto">🔒 VIP</span>
+              </div>
+              <p class="text-sm font-semibold mt-1 text-slate-700">เลือก Essay ที่ดีที่สุด</p>
+              <p class="text-[11px] leading-5 text-slate-500 mt-1">
+                เห็นทันทีว่า Essay ระดับสูงเขียนยังไง — 5 ตัวอย่างเปรียบเทียบ
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-400">
+                <span>⏱ 15 นาที</span><span>·</span><span>VIP เท่านั้น</span>
+              </div>
+            </article>
+            <article class="session-card locked rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 12 · ยากสุด</p>
+                <span class="vip-badge ml-auto">🔒 VIP</span>
+              </div>
+              <p class="text-sm font-semibold mt-1 text-slate-700">หาจุดอ่อนไวยากรณ์ของคุณ</p>
+              <p class="text-[11px] leading-5 text-slate-500 mt-1">
+                เติมคำใน Essay 3 ระดับ — ระบบบอกจุดอ่อนเป็นไทย + บันทึก notebook
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-400">
+                <span>⏱ 15 นาที</span><span>·</span><span>VIP เท่านั้น</span>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Reading -->
+        <div class="col-reading rounded-2xl ring-1 ring-slate-200 bg-white overflow-hidden">
+          <div class="col-head px-4 py-3 flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-800">📖 อ่าน</span>
+            <span class="col-tag text-[10px] font-semibold rounded-full px-2 py-0.5">3 บท</span>
+          </div>
+          <div class="p-3 space-y-2">
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 13</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">หา Title ที่ดีที่สุด</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                Title ที่ดีต้องครอบคลุมทุกย่อหน้า ไม่ใช่แค่บางส่วน — รู้กับดักที่ DET ใช้
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 15 นาที</span><span>·</span><span>10 ข้อฝึก</span>
+              </div>
+            </article>
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 14</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">หา Main idea</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                แยก main idea กับ detail ออกจากกัน — เลิกหลงตัวเลือกที่ดูถูกแต่ผิด
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 15 นาที</span><span>·</span><span>10 ข้อฝึก</span>
+              </div>
+            </article>
+            <article class="session-card rounded-xl p-3">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-500">บทที่ 15</p>
+                <span class="premium-badge ml-auto">Premium</span>
+              </div>
+              <p class="text-sm font-semibold mt-1">หา Missing paragraph</p>
+              <p class="text-[11px] leading-5 text-slate-600 mt-1">
+                เรียนสัญญาณ pronoun + transition word ที่บอกประโยคถูกในช่องว่าง
+              </p>
+              <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+                <span>⏱ 15 นาที</span><span>·</span><span>10 ข้อฝึก</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <aside class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 text-xs text-slate-700 leading-7">
+        <strong class="text-slate-900">ทำไมดีไซน์นี้ถึงเวิร์ก:</strong>
+        แบ่ง 15 บทเป็น 5 หมวดทักษะ ทำให้สมองจัดการง่าย (Miller's Law)
+        · สีแต่ละคอลัมน์ใช้คงที่ทั้งแอปเพื่อสร้างความจำเชื่อมโยง
+        · คำอธิบายสั้นๆ ใต้ชื่อบทแต่ละบทดึงดูดความสนใจ (incentive)
+        · ปุ่ม "สุ่มบทให้หน่อย" สำหรับคนที่ยังไม่รู้จะเริ่มตรงไหน
+        · ในแต่ละหมวดเรียงจากง่ายไปยาก สร้างความรู้สึกเก่งขึ้นทีละขั้น
+      </aside>
+    </section>
+
+    <!-- =============== INSIDE =============== -->
+    <section id="inside" class="space-y-6 hidden">
+      <header class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <p class="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">📝 Dictation · บทที่ 1</p>
+        <h1 class="text-2xl font-bold mt-1">Comma + FANBOYS &amp; Subordinating</h1>
+        <p class="mt-1 text-xs text-slate-600">เรียน 15 นาที · 10 ข้อฝึก · Premium เข้าได้</p>
+      </header>
+
+      <div class="grid gap-6 lg:grid-cols-5">
+        <!-- Lesson column -->
+        <div class="lg:col-span-3 space-y-3">
+          <article class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <h2 class="text-sm font-bold text-[#004AAD]">กฎข้อ 1 · FANBOYS</h2>
+            <p class="mt-2 text-sm leading-7">
+              <span class="tooltip glossary">FANBOYS<span class="tooltip-bubble">คำเชื่อม 7 คำ: For, And, Nor, But, Or, Yet, So</span></span>
+              ใช้เชื่อมประโยคสมบูรณ์ 2 ประโยค โดยใส่ comma <em>ก่อน</em> คำเชื่อมเสมอ
+            </p>
+            <p class="mt-2 text-sm leading-7">ตัวอย่าง: <em>I wanted to study, <strong>but</strong> I was too tired.</em></p>
+            <button class="mt-3 text-xs font-semibold text-[#004AAD] hover:underline">เข้าใจแล้ว ✓</button>
+          </article>
+
+          <article class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <h2 class="text-sm font-bold text-[#004AAD]">กฎข้อ 2 · Subordinating</h2>
+            <p class="mt-2 text-sm leading-7">
+              ถ้า
+              <span class="tooltip glossary">Subordinate clause<span class="tooltip-bubble">ประโยครองที่อยู่เดี่ยวๆ ไม่ได้ — เริ่มด้วยคำเชื่อมอย่าง although, because, when, if</span></span>
+              มาก่อน ให้ใส่ comma หลังประโยครอง
+            </p>
+            <p class="mt-2 text-sm leading-7">ตัวอย่าง: <em><strong>Although</strong> it was raining, we went outside.</em></p>
+            <button class="mt-3 text-xs font-semibold text-[#004AAD] hover:underline">เข้าใจแล้ว ✓</button>
+          </article>
+
+          <article class="rounded-2xl bg-[#fff7d1] p-5 ring-1 ring-[#FFCC00]/40">
+            <h2 class="text-sm font-bold">🧠 จำง่ายๆ</h2>
+            <p class="mt-1 text-sm">Subordinator อยู่ข้างหน้า → ใส่ comma หลังประโยครอง</p>
+            <button class="mt-3 text-xs font-semibold text-[#004AAD] hover:underline">เข้าใจแล้ว ✓</button>
+          </article>
+        </div>
+
+        <!-- Persistent practice panel -->
+        <div class="lg:col-span-2 lg:sticky lg:top-6 self-start">
+          <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">ฝึกจริง · ข้อ 6 / 10</p>
+            <div class="mt-3 flex items-center gap-3">
+              <button class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-4 py-2.5 font-semibold text-sm">↻ เล่นเสียง</button>
+              <span class="text-xs text-slate-500">ฟังไป: 1 ครั้ง</span>
+            </div>
+            <textarea rows="3" class="mt-3 w-full rounded-xl border border-slate-200 focus:border-[#004AAD] focus:ring-2 focus:ring-[#004AAD]/20 outline-none p-3 text-sm" placeholder="พิมพ์ประโยคที่ได้ยิน…"></textarea>
+            <div class="mt-3 flex gap-2">
+              <button class="rounded-lg bg-[#FFCC00] px-4 py-2 text-xs font-semibold">ตรวจคำตอบ</button>
+              <button class="rounded-lg bg-white ring-1 ring-slate-300 px-4 py-2 text-xs font-semibold">ดูเฉลย</button>
+            </div>
+
+            <!-- Mini-progress dots -->
+            <div class="mt-4 flex gap-1.5 justify-center">
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <span class="w-3 h-3 rounded-full bg-red-400"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <span class="w-3 h-3 rounded-full bg-[#FFCC00] ring-2 ring-[#FFCC00]/40 ring-offset-1"></span>
+              <span class="w-3 h-3 rounded-full bg-slate-200"></span>
+              <span class="w-3 h-3 rounded-full bg-slate-200"></span>
+              <span class="w-3 h-3 rounded-full bg-slate-200"></span>
+              <span class="w-3 h-3 rounded-full bg-slate-200"></span>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-500 mt-3 text-center">
+            เคล็ดลับ: เลื่อนเมาส์ไปวางบน<span class="glossary">คำมีจุด</span>เพื่อดูความหมายภาษาไทย
+          </p>
+        </div>
+      </div>
+
+      <aside class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 text-xs text-slate-700 leading-7">
+        <strong class="text-slate-900">ทำไมดีไซน์นี้ถึงเวิร์ก:</strong>
+        2 คอลัมน์เลื่อนอ่านบทเรียนได้โดยไม่ต้องเสียโฟกัสจากการฝึก ·
+        ปุ่ม "เข้าใจแล้ว ✓" ทำให้บทที่เรียนแล้วจางลง บทที่ยังไม่อ่านเด่นชัด ·
+        Hover glossary ลดภาระเรื่องคำศัพท์โดยไม่ขัดการอ่าน
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    function show(id) {
+      document.getElementById('hub').classList.toggle('hidden', id !== 'hub');
+      document.getElementById('inside').classList.toggle('hidden', id !== 'inside');
+      document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active','bg-white'));
+      document.querySelectorAll('.tab').forEach((t) => {
+        var text = t.textContent.trim();
+        var wantHub = id === 'hub';
+        var isHubTab = text.indexOf('หน้าหลัก') !== -1;
+        if ((wantHub && isHubTab) || (!wantHub && !isHubTab && text.indexOf('ในบท') !== -1)) {
+          t.classList.add('active');
+        } else {
+          t.classList.add('bg-white');
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

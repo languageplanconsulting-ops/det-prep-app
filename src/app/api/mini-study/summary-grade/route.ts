@@ -1,24 +1,13 @@
 import { NextResponse } from "next/server";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { getAdminAccess } from "@/lib/admin-auth";
 import { gradeConversationSummary } from "@/lib/mini-study/grade-summary";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
-  // Admin gate — this is preview-only functionality
-  const supabase = await createRouteHandlerSupabase();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
-  }
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (profile?.role !== "admin") {
+  // Admin gate — matches the rest of the app (DB role OR admin-code cookie).
+  const auth = await getAdminAccess();
+  if (!auth.ok) {
     return NextResponse.json({ error: "Admin only" }, { status: 403 });
   }
 

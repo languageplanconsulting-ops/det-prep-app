@@ -3,23 +3,23 @@
 import Link from "next/link";
 import { useState } from "react";
 import type {
-  MiniStudyEssayPickExercise,
-  MiniStudyEssayPickSession,
+  MiniStudyPassageMcExercise,
+  MiniStudyPassageMcSession,
 } from "@/lib/mini-study/content";
 
-type Props = { session: MiniStudyEssayPickSession };
+type Props = { session: MiniStudyPassageMcSession };
 
-export function MiniStudyEssayPickPhase({ session }: Props) {
+export function MiniStudyPassageMcPhase({ session }: Props) {
   const [idx, setIdx] = useState(0);
-  const [picked, setPicked] = useState<"A" | "B" | "C" | null>(null);
+  const [picked, setPicked] = useState<"A" | "B" | "C" | "D" | null>(null);
   const [results, setResults] = useState<{ id: string; correct: boolean }[]>([]);
   const [done, setDone] = useState(false);
 
-  const ex: MiniStudyEssayPickExercise | undefined = session.exercises[idx];
+  const ex: MiniStudyPassageMcExercise | undefined = session.exercises[idx];
   const total = session.exercises.length;
 
   if (done) {
-    const numCorrect = results.filter((r) => r.correct).length;
+    const num = results.filter((r) => r.correct).length;
     return (
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
@@ -27,7 +27,7 @@ export function MiniStudyEssayPickPhase({ session }: Props) {
             Session complete
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight">
-            {numCorrect} / {total} correct
+            {num} / {total} correct
           </h1>
         </div>
         <Link
@@ -41,7 +41,6 @@ export function MiniStudyEssayPickPhase({ session }: Props) {
   }
 
   if (!ex) return null;
-
   const checked = picked !== null;
   const isCorrect = picked === ex.correctLetter;
 
@@ -51,27 +50,29 @@ export function MiniStudyEssayPickPhase({ session }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
           Session {session.index} · Exercise {idx + 1} / {total}
         </p>
-        <h1 className="mt-1 text-base font-black">
-          หัวข้อ: <span className="text-[#004AAD]">{ex.topic}</span>
-        </h1>
-        <p className="mt-2 text-xs leading-6 text-neutral-600">
-          เลือก essay ที่ดีที่สุด · ดู checklist 4 ข้อ: stance · Explain ก่อน Example ·
-          transitional words · conclusion
-        </p>
+        <h1 className="mt-1 text-base font-black">{ex.question}</h1>
       </header>
 
-      <div className="space-y-4">
+      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <p className="whitespace-pre-wrap text-sm leading-7 text-neutral-900">
+          {ex.passage}
+        </p>
+      </div>
+
+      <div className="space-y-2">
         {ex.options.map((o) => {
           const isPicked = picked === o.letter;
           const isCorrectOption = o.letter === ex.correctLetter;
+          const baseClass =
+            "block w-full rounded-xl border px-3 py-2 text-left text-sm";
           const colorClass = checked
             ? isCorrectOption
               ? "border-green-700 bg-green-50"
               : isPicked
                 ? "border-red-700 bg-red-50"
-                : "border-neutral-300 bg-white"
+                : "border-neutral-300 bg-white text-neutral-500"
             : isPicked
-              ? "border-[#004AAD] bg-[#eef4ff]"
+              ? "border-[#004AAD] bg-[#eef4ff] font-bold"
               : "border-black bg-white hover:bg-neutral-50";
           return (
             <button
@@ -79,14 +80,10 @@ export function MiniStudyEssayPickPhase({ session }: Props) {
               type="button"
               onClick={() => !checked && setPicked(o.letter)}
               disabled={checked}
-              className={`block w-full rounded-xl border p-4 text-left shadow-sm ${colorClass}`}
+              className={`${baseClass} ${colorClass}`}
             >
-              <p className="text-xs font-black uppercase tracking-wide text-neutral-500">
-                Option {o.letter}
-              </p>
-              <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-neutral-900">
-                {o.essayText}
-              </p>
+              <span className="mr-2 font-black">{o.letter}.</span>
+              {o.text}
             </button>
           );
         })}
@@ -102,37 +99,26 @@ export function MiniStudyEssayPickPhase({ session }: Props) {
             }`}
           >
             {isCorrect
-              ? `✓ Correct — Option ${ex.correctLetter} is the best essay`
-              : `✗ Best answer is Option ${ex.correctLetter}`}
+              ? `✓ Correct — ${ex.correctLetter}`
+              : `✗ Best answer is ${ex.correctLetter}`}
           </div>
-
-          <div className="overflow-x-auto rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30">
-            <table className="min-w-full text-xs">
-              <thead>
-                <tr className="text-left">
-                  <th className="py-1 pr-3 text-neutral-700">เกณฑ์</th>
-                  <th className="py-1 pr-3 text-center">A</th>
-                  <th className="py-1 pr-3 text-center">B</th>
-                  <th className="py-1 pr-3 text-center">C</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ex.analysisRowsTh.map((r, i) => (
-                  <tr key={i} className="border-t border-neutral-300">
-                    <td className="py-1 pr-3 font-bold">{r.label}</td>
-                    <td className="py-1 pr-3 text-center">{r.A}</td>
-                    <td className="py-1 pr-3 text-center">{r.B}</td>
-                    <td className="py-1 pr-3 text-center">{r.C}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-2 rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30 text-sm leading-7">
+            <p>
+              <strong>คำอธิบาย:</strong>
+            </p>
+            {ex.options.map((o) => (
+              <p key={o.letter}>
+                <span
+                  className={
+                    o.letter === ex.correctLetter ? "text-green-800" : "text-red-800"
+                  }
+                >
+                  {o.letter === ex.correctLetter ? "✅" : "❌"}
+                </span>{" "}
+                <strong>{o.letter}</strong> — {o.explanationTh}
+              </p>
+            ))}
           </div>
-
-          <div className="rounded-xl bg-white p-3 ring-1 ring-slate-200 text-sm leading-7">
-            <strong>คำอธิบาย:</strong> {ex.rationaleTh}
-          </div>
-
           <div className="flex justify-end">
             <button
               type="button"
@@ -153,7 +139,10 @@ export function MiniStudyEssayPickPhase({ session }: Props) {
         </div>
       ) : null}
 
-      <Link href="/practice/mini-study" className="inline-block text-xs text-neutral-500 underline">
+      <Link
+        href="/practice/mini-study"
+        className="inline-block text-xs text-neutral-500 underline"
+      >
         Exit session
       </Link>
     </main>

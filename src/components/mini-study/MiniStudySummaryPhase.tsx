@@ -109,15 +109,15 @@ export function MiniStudySummaryPhase({ session }: Props) {
   if (phase === "prep") {
     return (
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-        <header className="rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#111]">
-          <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
+        <header className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
             Session {session.index} · Summarize the conversation
           </p>
           <h1 className="mt-1 text-2xl font-black tracking-tight">Read the conversation</h1>
           <p className="mt-2 text-sm text-neutral-700 leading-7">{session.instructionsTh}</p>
         </header>
 
-        <div className="rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#111]">
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
           <h2 className="text-sm font-black uppercase tracking-wide text-neutral-500">
             Conversation
           </h2>
@@ -133,14 +133,14 @@ export function MiniStudySummaryPhase({ session }: Props) {
         <div className="flex items-center justify-between gap-3">
           <Link
             href="/practice/mini-study"
-            className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
           >
             ← Sessions
           </Link>
           <button
             type="button"
             onClick={() => setPhase("write")}
-            className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-2 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
+            className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
           >
             Start 75-second timer →
           </button>
@@ -153,15 +153,15 @@ export function MiniStudySummaryPhase({ session }: Props) {
     const timeUp = secondsLeft <= 0;
     return (
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-        <header className="flex items-center justify-between rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#111]">
+        <header className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
           <div>
-            <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
+            <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
               Session {session.index}
             </p>
             <h1 className="text-lg font-black">Write your summary</h1>
           </div>
           <div
-            className={`rounded-sm border-2 px-3 py-1 text-lg font-black ${
+            className={`rounded-xl border px-3 py-1 text-lg font-bold ${
               timeUp
                 ? "border-red-700 bg-red-50 text-red-800"
                 : secondsLeft <= 15
@@ -173,7 +173,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
           </div>
         </header>
 
-        <div className="rounded-sm border-4 border-black bg-white p-5 shadow-[6px_6px_0_0_#111]">
+        <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
           <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
             3-sentence summary · present simple only
           </label>
@@ -182,7 +182,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
             onChange={(e) => setSummary(e.target.value)}
             rows={6}
             placeholder="In this conversation, …"
-            className="mt-2 w-full rounded-sm border-2 border-black bg-white p-3 text-base leading-7"
+            className="mt-2 w-full rounded-xl bg-white p-3 ring-1 ring-slate-200 text-base leading-7"
             autoFocus
           />
           {error ? <p className="mt-2 text-sm font-bold text-red-700">{error}</p> : null}
@@ -197,7 +197,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
               type="button"
               onClick={submit}
               disabled={grading || !summary.trim()}
-              className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-2 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+              className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
             >
               {grading ? "Grading…" : "Submit for AI feedback"}
             </button>
@@ -211,14 +211,14 @@ export function MiniStudySummaryPhase({ session }: Props) {
   if (!result) return null;
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-      <header className="rounded-sm border-4 border-black bg-white p-5 shadow-[6px_6px_0_0_#111]">
-        <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-[#004AAD]">
+      <header className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
           AI feedback · Session {session.index}
         </p>
         <h1 className="mt-1 text-2xl font-black tracking-tight">Your summary, graded</h1>
       </header>
 
-      <section className="rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#111]">
+      <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-sm font-black uppercase tracking-wide text-neutral-500">
           Original
         </h2>
@@ -226,7 +226,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
       </section>
 
       {result.grammarMistakes.length > 0 ? (
-        <section className="rounded-sm border-4 border-red-700 bg-red-50 p-5 shadow-[4px_4px_0_0_#111]">
+        <section className="rounded-2xl bg-red-50 p-5 shadow-sm ring-1 ring-red-200">
           <h2 className="text-sm font-black uppercase tracking-wide text-red-800">
             Grammar mistakes
           </h2>
@@ -242,7 +242,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
           </ul>
         </section>
       ) : (
-        <section className="rounded-sm border-4 border-green-700 bg-green-50 p-5 shadow-[4px_4px_0_0_#111]">
+        <section className="rounded-2xl bg-green-50 p-5 shadow-sm ring-1 ring-green-200">
           <p className="text-sm font-bold text-green-800">
             ✓ ไม่มีข้อผิดด้านไวยากรณ์
           </p>
@@ -250,7 +250,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
       )}
 
       {result.vocabMistakes.length > 0 ? (
-        <section className="rounded-sm border-4 border-amber-600 bg-amber-50 p-5 shadow-[4px_4px_0_0_#111]">
+        <section className="rounded-2xl bg-amber-50 p-5 shadow-sm ring-1 ring-amber-200">
           <h2 className="text-sm font-black uppercase tracking-wide text-amber-800">
             Vocabulary mistakes
           </h2>
@@ -267,14 +267,14 @@ export function MiniStudySummaryPhase({ session }: Props) {
         </section>
       ) : null}
 
-      <section className="rounded-sm border-4 border-[#004AAD] bg-[#eef4ff] p-5 shadow-[4px_4px_0_0_#111]">
+      <section className="rounded-2xl bg-[#eef4ff] p-5 shadow-sm ring-1 ring-[#004AAD]/30">
         <h2 className="text-sm font-black uppercase tracking-wide text-[#004AAD]">
           Revised (grammar fixed only)
         </h2>
         <p className="mt-2 whitespace-pre-wrap text-sm leading-7">{result.revised}</p>
       </section>
 
-      <section className="rounded-sm border-4 border-black bg-[#fff7d1] p-5 shadow-[6px_6px_0_0_#111]">
+      <section className="rounded-2xl bg-[#fff7d1] p-5 shadow-sm ring-1 ring-[#FFCC00]/40">
         <h2 className="text-sm font-black uppercase tracking-wide text-red-700">
           จุดอ่อนของคุณ (Thai)
         </h2>
@@ -288,7 +288,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/practice/mini-study"
-          className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+          className="rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
         >
           ← All sessions
         </Link>
@@ -296,7 +296,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
           type="button"
           onClick={saveToNotebook}
           disabled={saving || savedToNotebook}
-          className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+          className="rounded-lg bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:brightness-95 transition disabled:opacity-50"
         >
           {savedToNotebook ? "✓ Saved to notebook" : saving ? "Saving…" : "Save to notebook"}
         </button>

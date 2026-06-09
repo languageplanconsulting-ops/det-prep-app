@@ -116,7 +116,8 @@ const READ_AND_WRITE_HREF = "/practice/production/read-and-write";
 
 export default function PracticeHubPage() {
   const router = useRouter();
-  const { effectiveTier, isAdmin } = useEffectiveTier();
+  const { effectiveTier, isAdmin, previewEligible } = useEffectiveTier();
+  const showMiniStudy = isAdmin || previewEligible;
   const vipAiGate = useVipAiFeedbackGate();
   const isVip = effectiveTier === "vip";
   const [readingIntroOpen, setReadingIntroOpen] = useState(false);
@@ -264,7 +265,7 @@ export default function PracticeHubPage() {
       />
       <PracticePageOverview />
 
-      {isAdmin ? (
+      {showMiniStudy ? (
         <div className="rounded-sm border-4 border-black bg-[#fff7d1] p-5 shadow-[6px_6px_0_0_#111]">
           <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
             Admin preview · Not visible to users

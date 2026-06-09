@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>V1 — เส้นทางการเรียน · Mini Study</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "IBM Plex Sans Thai", "Inter", ui-sans-serif, system-ui, sans-serif;
+      background:#fafbfc; color:#0f172a;
+    }
+    .node { display:flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:9999px; font-weight:700; font-size:14px; }
+    .node.done { background:#22c55e; color:#fff; }
+    .node.current { background:#FFCC00; color:#0f172a; box-shadow: 0 0 0 4px rgba(255, 204, 0, 0.25); animation: pulse 1.8s ease-in-out infinite; }
+    .node.locked { background:#e2e8f0; color:#94a3b8; }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 4px rgba(255, 204, 0, 0.25); }
+      50%     { box-shadow: 0 0 0 10px rgba(255, 204, 0, 0.10); }
+    }
+    .connector { width:2px; background:#cbd5e1; flex:1; min-height: 22px; }
+    .connector.done { background:#22c55e; }
+    .tab.active { background:#004AAD; color:#FFCC00; }
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-6">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <span class="text-sm text-slate-500 hidden sm:inline">หน้าแรก · เกี่ยวกับ · ฝึก · Mock test</span>
+    <span class="ml-auto text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">Preview V1 · เส้นทางการเรียน</span>
+  </nav>
+
+  <main class="mx-auto max-w-4xl px-6 py-8 space-y-6">
+
+    <div class="flex gap-2 text-xs font-semibold">
+      <button class="tab active px-4 py-2 rounded-lg ring-1 ring-slate-200" onclick="show('hub')">หน้าหลัก</button>
+      <button class="tab bg-white px-4 py-2 rounded-lg ring-1 ring-slate-200" onclick="show('inside')">ในเซสชัน</button>
+      <a href="/mini-study-preview-index.html" class="ml-auto bg-white px-4 py-2 rounded-lg ring-1 ring-slate-200">← ดูเวอร์ชันอื่น</a>
+    </div>
+
+    <!-- =============== HUB =============== -->
+    <section id="hub" class="space-y-6">
+      <header class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">เส้นทางของคุณ · ทำเสร็จแล้ว 4 / 15</p>
+            <h1 class="mt-1 text-2xl font-bold tracking-tight">ทำต่อจากที่ค้างไว้</h1>
+          </div>
+          <div class="text-right">
+            <div class="text-xs uppercase tracking-wider text-slate-500">ต่อเนื่อง</div>
+            <div class="text-2xl font-bold">🔥 3 วัน</div>
+          </div>
+        </div>
+
+        <!-- Next-up CTA -->
+        <div class="mt-5 flex flex-wrap items-center gap-3 rounded-xl border border-[#004AAD]/30 bg-gradient-to-r from-[#eef4ff] to-white p-4">
+          <div class="hidden sm:block text-2xl text-[#004AAD]">→</div>
+          <div class="flex-1 min-w-[200px]">
+            <p class="text-[11px] uppercase tracking-wider text-[#004AAD] font-semibold">เซสชันถัดไป</p>
+            <p class="text-base font-bold mt-0.5">เซสชัน 5 — พูดเกี่ยวกับภาพ</p>
+            <p class="text-xs text-slate-600 mt-0.5">≈ 15 นาที · ภาพ + AI ตรวจการพูด · เมื่อวานคุณทำได้ 80%</p>
+          </div>
+          <button class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-5 py-2.5 text-sm font-semibold shadow-sm hover:shadow-md transition">ทำต่อ →</button>
+        </div>
+
+        <div class="mt-5">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
+            <span>ความคืบหน้า</span>
+            <span>4 / 15</span>
+          </div>
+          <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div class="h-full bg-[#004AAD] rounded-full" style="width: 26.6%"></div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Path -->
+      <div class="space-y-4">
+        <!-- บทที่ 1 -->
+        <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+          <div class="flex items-center justify-between bg-emerald-50 px-5 py-3 border-b border-emerald-100">
+            <p class="text-sm font-semibold text-emerald-800">บทที่ 1 · พื้นฐาน Dictation</p>
+            <p class="text-xs font-semibold text-emerald-700">3 / 3 ✓</p>
+          </div>
+          <div class="p-5 flex items-stretch gap-4">
+            <div class="flex flex-col items-center w-11 shrink-0">
+              <div class="node done">✓</div>
+              <div class="connector done"></div>
+              <div class="node done">✓</div>
+              <div class="connector done"></div>
+              <div class="node done">✓</div>
+            </div>
+            <div class="flex flex-col gap-2.5 flex-1">
+              <div class="rounded-xl px-4 py-3 bg-slate-50 hover:bg-slate-100 transition cursor-pointer">
+                <p class="text-sm font-semibold">เซสชัน 1 — Comma + FANBOYS &amp; Subordinating</p>
+                <p class="text-xs text-slate-500 mt-0.5">10 / 10 · ★★★★★ · 14 นาที</p>
+              </div>
+              <div class="rounded-xl px-4 py-3 bg-slate-50 hover:bg-slate-100 transition cursor-pointer">
+                <p class="text-sm font-semibold">เซสชัน 2 — เติม -ed / -s / Passive voice</p>
+                <p class="text-xs text-slate-500 mt-0.5">9 / 10 · ★★★★☆ · 13 นาที</p>
+              </div>
+              <div class="rounded-xl px-4 py-3 bg-slate-50 hover:bg-slate-100 transition cursor-pointer">
+                <p class="text-sm font-semibold">เซสชัน 3 — 4 โครงสร้าง Comma สำหรับบรรยายภาพ</p>
+                <p class="text-xs text-slate-500 mt-0.5">10 / 10 · ★★★★★ · 16 นาที</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- บทที่ 2 -->
+        <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden">
+          <div class="flex items-center justify-between bg-[#fff7d1] px-5 py-3 border-b border-[#FFCC00]/50">
+            <p class="text-sm font-semibold text-[#004AAD]">บทที่ 2 · ฝึก Production จากภาพ</p>
+            <p class="text-xs font-semibold text-[#004AAD]">1 / 2 · กำลังทำ</p>
+          </div>
+          <div class="p-5 flex items-stretch gap-4">
+            <div class="flex flex-col items-center w-11 shrink-0">
+              <div class="node done">✓</div>
+              <div class="connector"></div>
+              <div class="node current">5</div>
+            </div>
+            <div class="flex flex-col gap-2.5 flex-1">
+              <div class="rounded-xl px-4 py-3 bg-slate-50 hover:bg-slate-100 transition cursor-pointer">
+                <p class="text-sm font-semibold">เซสชัน 4 — เขียนเกี่ยวกับภาพ</p>
+                <p class="text-xs text-slate-500 mt-0.5">120 คำ · AI ให้ 105 / 160</p>
+              </div>
+              <div class="rounded-xl px-4 py-3 bg-[#fff7d1] ring-1 ring-[#FFCC00]/60 cursor-pointer">
+                <p class="text-sm font-bold">เซสชัน 5 — พูดเกี่ยวกับภาพ</p>
+                <p class="text-xs text-slate-600 mt-0.5">15 นาที · 6 ประโยค · ใช้ is/are + V-ing</p>
+                <button class="mt-2 rounded-lg bg-[#004AAD] text-[#FFCC00] px-3 py-1.5 text-xs font-semibold">เริ่มเลย →</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- บทที่ 3 ล็อก -->
+        <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 overflow-hidden opacity-90">
+          <div class="flex items-center justify-between bg-slate-50 px-5 py-3 border-b border-slate-200">
+            <p class="text-sm font-semibold text-slate-500">บทที่ 3 · Interactive Listening</p>
+            <p class="text-xs font-semibold text-slate-500">🔒 ปลดล็อกเมื่อจบเซสชัน 5</p>
+          </div>
+          <div class="p-5 flex items-stretch gap-4">
+            <div class="flex flex-col items-center w-11 shrink-0">
+              <div class="node locked">7</div>
+              <div class="connector"></div>
+              <div class="node locked">8</div>
+              <div class="connector"></div>
+              <div class="node locked">9</div>
+            </div>
+            <div class="flex flex-col gap-2.5 flex-1">
+              <div class="rounded-xl px-4 py-3 bg-slate-50 text-slate-500">
+                <p class="text-sm font-semibold">เซสชัน 7 — หาประเด็นสำคัญใน Scenario</p>
+              </div>
+              <div class="rounded-xl px-4 py-3 bg-slate-50 text-slate-500">
+                <p class="text-sm font-semibold">เซสชัน 8 — 2 turn แรกของบทสนทนา</p>
+              </div>
+              <div class="rounded-xl px-4 py-3 bg-slate-50 text-slate-500">
+                <p class="text-sm font-semibold">เซสชัน 9 — เลือกคำตอบที่ดีที่สุด</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <details class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+          <summary class="px-5 py-4 font-semibold text-sm flex items-center justify-between">
+            <span>ดูบทที่เหลือ (Summary · Essay · Reading)</span>
+            <span class="text-slate-400 text-xs">เปิด ▾</span>
+          </summary>
+          <div class="px-5 pb-4 text-xs text-slate-600 leading-6">
+            <strong>บทที่ 4:</strong> เซสชัน 10 — สรุปบทสนทนา (จับเวลา 75 วินาที + Gemini ตรวจให้)<br/>
+            <strong>บทที่ 5:</strong> เซสชัน 11–15 — เลือก Essay · Cloze ไวยากรณ์ · Title · Main idea · Missing paragraph
+          </div>
+        </details>
+      </div>
+
+      <aside class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 text-xs text-slate-700 leading-7">
+        <strong class="text-slate-900">ทำไมดีไซน์นี้ถึงเวิร์ก:</strong>
+        มีปุ่มหลักปุ่มเดียวที่ด้านบน (ลด choice paralysis ตามกฎ Hick) ·
+        แบ่งเป็นบทละ 2-3 เซสชัน ทำให้สมองจำได้ง่าย (Miller's Law)
+        · บทที่ถูกล็อกสร้างแรงดึงให้อยากทำต่อ (Zeigarnik) ·
+        node สีเหลืองที่กำลังจะเริ่ม "เต้น" ดึงสายตา (von Restorff)
+        · 🔥 streak นับวันต่อเนื่องเป็นรางวัลย่อยให้กลับมาฝึก
+      </aside>
+    </section>
+
+    <!-- =============== INSIDE =============== -->
+    <section id="inside" class="space-y-6 hidden">
+      <header class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">เซสชัน 1 · ขั้น 3 จาก 3</p>
+            <h1 class="text-xl font-bold tracking-tight">ฝึกจริง — Comma + FANBOYS &amp; Subordinating</h1>
+          </div>
+          <button class="text-xs font-semibold underline text-slate-500">บันทึก &amp; ออก</button>
+        </div>
+        <div class="mt-4 flex gap-2 text-xs">
+          <div class="flex-1 px-3 py-2 rounded-lg bg-emerald-50 ring-1 ring-emerald-200 font-semibold text-emerald-700">✓ เรียนกฎ</div>
+          <div class="flex-1 px-3 py-2 rounded-lg bg-emerald-50 ring-1 ring-emerald-200 font-semibold text-emerald-700">✓ ดูตัวอย่าง</div>
+          <div class="flex-1 px-3 py-2 rounded-lg bg-[#FFCC00] ring-1 ring-[#FFCC00] font-semibold text-slate-900">ฝึกจริง (ตอนนี้)</div>
+        </div>
+      </header>
+
+      <div class="flex flex-col items-center gap-2">
+        <div class="flex gap-1.5">
+          <span class="w-4 h-4 rounded-full bg-emerald-500"></span>
+          <span class="w-4 h-4 rounded-full bg-emerald-500"></span>
+          <span class="w-4 h-4 rounded-full bg-emerald-500"></span>
+          <span class="w-4 h-4 rounded-full bg-red-400"></span>
+          <span class="w-4 h-4 rounded-full bg-emerald-500"></span>
+          <span class="w-4 h-4 rounded-full bg-[#FFCC00] ring-2 ring-[#FFCC00]/40 ring-offset-2"></span>
+          <span class="w-4 h-4 rounded-full bg-slate-200"></span>
+          <span class="w-4 h-4 rounded-full bg-slate-200"></span>
+          <span class="w-4 h-4 rounded-full bg-slate-200"></span>
+          <span class="w-4 h-4 rounded-full bg-slate-200"></span>
+        </div>
+        <p class="text-xs text-slate-500">ข้อ 6 / 10 · เหลือ 4 ข้อ</p>
+      </div>
+
+      <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="flex items-center gap-3">
+          <button class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-4 py-2.5 font-semibold text-sm shadow-sm">↻ ฟังอีกครั้ง</button>
+          <p class="text-xs text-slate-500">ฟังไปแล้ว: 1 ครั้ง · พิมพ์ตามที่ได้ยินทุกตัวอักษร รวม comma ด้วย</p>
+        </div>
+        <textarea rows="3" class="mt-4 w-full rounded-xl border border-slate-200 focus:border-[#004AAD] focus:ring-2 focus:ring-[#004AAD]/20 outline-none p-3 text-base" placeholder="พิมพ์ประโยคที่ได้ยินที่นี่…"></textarea>
+        <div class="mt-4 flex gap-2 items-center">
+          <button class="rounded-lg bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-slate-900 hover:brightness-95">ตรวจคำตอบ</button>
+          <button class="rounded-lg bg-white ring-1 ring-slate-300 px-4 py-2 text-sm font-semibold">ดูเฉลย</button>
+          <span class="ml-auto text-xs text-slate-400">กด ⌘ + Enter เพื่อตรวจ</span>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-[#fff7d1] p-5 text-center shadow-sm ring-1 ring-[#FFCC00]/40">
+        <p class="text-3xl">🎉</p>
+        <p class="text-base font-bold mt-1">ผ่านครึ่งทางแล้ว!</p>
+        <p class="text-xs text-slate-700 mt-1">+25 XP · เหลืออีก 4 ข้อ ฮึดอีกนิด</p>
+      </div>
+
+      <aside class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 text-xs text-slate-700 leading-7">
+        <strong class="text-slate-900">ทำไมดีไซน์นี้ถึงเวิร์ก:</strong>
+        ขั้น 3 ขั้นที่ด้านบนบอกตำแหน่งชัดเจน ลดความสับสน ·
+        จุดสีเขียว/แดง/ว่างทำให้เห็นเป้าหมายชัดเจนแบบจับต้องได้ (Goal-gradient)
+        · ยิ่งเข้าใกล้จุดสุดท้าย แรงฮึดยิ่งเพิ่ม ·
+        การฉลองตอนผ่านครึ่งทาง (50%) คือจุดที่ดีที่สุดที่จะให้ dopamine
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    function show(id) {
+      document.getElementById('hub').classList.toggle('hidden', id !== 'hub');
+      document.getElementById('inside').classList.toggle('hidden', id !== 'inside');
+      document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active','bg-white'));
+      document.querySelectorAll('.tab').forEach((t) => {
+        var text = t.textContent.trim();
+        var wantHub = id === 'hub';
+        var isHubTab = text.indexOf('หน้าหลัก') !== -1;
+        if ((wantHub && isHubTab) || (!wantHub && !isHubTab && text.indexOf('ในเซสชัน') !== -1)) {
+          t.classList.add('active');
+        } else {
+          t.classList.add('bg-white');
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

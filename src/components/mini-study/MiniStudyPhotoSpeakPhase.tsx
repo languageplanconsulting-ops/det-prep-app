@@ -194,30 +194,30 @@ export function MiniStudyPhotoSpeakPhase({ session }: Props) {
         <GradingProgressLoader eyebrow="Grading your response" variant="premium" />
       ) : null}
 
-      <header className="rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#111]">
-        <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
+      <header className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
           Session {session.index} · Speak about photo
         </p>
         <h1 className="mt-1 text-2xl font-black tracking-tight">{photo.titleEn}</h1>
         <p className="text-sm text-neutral-600">{photo.titleTh}</p>
       </header>
 
-      <div className="overflow-hidden rounded-sm border-4 border-black">
+      <div className="overflow-hidden rounded-xl ring-1 ring-slate-200">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={photo.imageUrl} alt={photo.titleEn} className="block w-full" />
       </div>
 
-      <div className="rounded-sm border-2 border-black bg-[#fffbe6] p-3 text-sm leading-6 text-neutral-800">
+      <div className="rounded-xl bg-[#fffbe6] p-3 ring-1 ring-[#FFCC00]/40 text-sm leading-6 text-neutral-800">
         <strong>Prompt:</strong> {photo.promptEn}
       </div>
 
-      <div className="rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#111]">
+      <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <div className="flex flex-wrap items-center gap-3">
           {!listening ? (
             <button
               type="button"
               onClick={startListening}
-              className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-3 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
+              className="rounded-lg bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
             >
               🎙 Start speaking
             </button>
@@ -225,7 +225,7 @@ export function MiniStudyPhotoSpeakPhase({ session }: Props) {
             <button
               type="button"
               onClick={stopRecognition}
-              className="rounded-[4px] border-4 border-black bg-red-600 px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
+              className="rounded-lg bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:shadow-md transition"
             >
               ■ Stop ({secondsLeft}s)
             </button>
@@ -246,7 +246,7 @@ export function MiniStudyPhotoSpeakPhase({ session }: Props) {
           onChange={(e) => setTranscript(e.target.value)}
           rows={8}
           placeholder="Your spoken transcript will appear here. You can also type directly."
-          className="mt-2 w-full rounded-sm border-2 border-black bg-white p-3 text-base leading-7"
+          className="mt-2 w-full rounded-xl bg-white p-3 ring-1 ring-slate-200 text-base leading-7"
         />
         <p className="mt-2 text-xs text-neutral-500">
           {wc} words · need at least 15 to submit
@@ -258,7 +258,7 @@ export function MiniStudyPhotoSpeakPhase({ session }: Props) {
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/practice/mini-study"
-            className="rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+            className="rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
           >
             ← Sessions
           </Link>
@@ -266,7 +266,7 @@ export function MiniStudyPhotoSpeakPhase({ session }: Props) {
             type="button"
             onClick={submit}
             disabled={!canSubmit}
-            className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-2 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+            className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
           >
             {submitting ? "Grading…" : "Submit for AI feedback"}
           </button>

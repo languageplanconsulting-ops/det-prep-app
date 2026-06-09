@@ -83,8 +83,8 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
     const numCorrect = all.filter((a) => a.correct).length;
     return (
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
-        <div className="rounded-sm border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#111]">
-          <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-[#004AAD]">
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
             Session complete
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight">
@@ -93,7 +93,7 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
         </div>
         <Link
           href="/practice/mini-study"
-          className="inline-block rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+          className="inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
         >
           ← All sessions
         </Link>
@@ -107,9 +107,9 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
       <audio ref={audioRef} className="hidden" preload="auto" />
 
-      <header className="flex items-center justify-between rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#111]">
+      <header className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         <div>
-          <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
+          <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
             Session {session.index}
           </p>
           <h1 className="text-lg font-black">
@@ -120,10 +120,10 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
       </header>
 
       {phase === "listen" ? (
-        <div className="rounded-sm border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#111]">
+        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <h2 className="text-base font-black text-[#004AAD]">Listen to the scenario</h2>
           {scenario.thaiInstruction ? (
-            <p className="mt-2 rounded-sm border-2 border-[#004AAD] bg-[#eef4ff] p-3 text-sm leading-7 text-neutral-800">
+            <p className="mt-2 rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30 text-sm leading-7 text-neutral-800">
               {scenario.thaiInstruction}
             </p>
           ) : null}
@@ -132,7 +132,7 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
               type="button"
               onClick={playAudio}
               disabled={audioLoading}
-              className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-3 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+              className="rounded-lg bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
             >
               {audioLoading ? "Loading…" : plays === 0 ? "▶ Play scenario" : "↻ Play again"}
             </button>
@@ -147,7 +147,7 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
               type="button"
               onClick={() => setPhase("answer")}
               disabled={plays === 0}
-              className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-5 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+              className="rounded-lg bg-[#FFCC00] px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:brightness-95 transition disabled:opacity-50"
             >
               I'm ready · Answer questions →
             </button>
@@ -199,7 +199,7 @@ function QuestionsPanel({
   const allAnswered = scenario.questions.every((q) => picks[q.id]);
 
   return (
-    <div className="rounded-sm border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#111]">
+    <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
       <h2 className="text-base font-black text-[#004AAD]">
         Answer from memory (don't replay)
       </h2>
@@ -227,7 +227,7 @@ function QuestionsPanel({
             )
           }
           disabled={!allAnswered}
-          className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-2 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+          className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
         >
           Submit answers →
         </button>
@@ -258,7 +258,7 @@ function QuestionBlock({
             key={o.letter}
             type="button"
             onClick={() => onPick(o.letter)}
-            className={`block w-full rounded-sm border-2 px-3 py-2 text-left text-sm ${
+            className={`block w-full rounded-xl border px-3 py-2 text-left text-sm ${
               chosen === o.letter
                 ? "border-[#004AAD] bg-[#eef4ff] font-bold"
                 : "border-black bg-white hover:bg-neutral-50"
@@ -285,7 +285,7 @@ function ReviewPanel({
   isLast: boolean;
 }) {
   return (
-    <div className="space-y-4 rounded-sm border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#111]">
+    <div className="space-y-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
       <h2 className="text-base font-black text-[#004AAD]">Review</h2>
       <ol className="space-y-3">
         {scenario.questions.map((q, qi) => {
@@ -296,7 +296,7 @@ function ReviewPanel({
           return (
             <li
               key={q.id}
-              className={`rounded-sm border-2 p-3 text-sm ${
+              className={`rounded-xl border-2 p-3 text-sm ${
                 correct ? "border-green-700 bg-green-50" : "border-red-700 bg-red-50"
               }`}
             >
@@ -318,14 +318,14 @@ function ReviewPanel({
           );
         })}
       </ol>
-      <div className="rounded-sm border-2 border-[#004AAD] bg-[#eef4ff] p-3 text-xs leading-6 text-neutral-800">
+      <div className="rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30 text-xs leading-6 text-neutral-800">
         <span className="font-bold">Scenario reference:</span> {scenario.scenarioText}
       </div>
       <div className="flex justify-end">
         <button
           type="button"
           onClick={onNext}
-          className="rounded-[4px] border-4 border-black bg-[#004AAD] px-5 py-2 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000]"
+          className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
         >
           {isLast ? "Finish session" : "Next scenario →"}
         </button>

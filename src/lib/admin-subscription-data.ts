@@ -16,7 +16,7 @@ export const TIER_MONTHLY_THB: Record<string, number> = {
 export type DerivedStatus =
   | "active"
   | "expired"
-  | "cancelled"
+  | "unsynced"
   | "trial"
   | "free_trial";
 
@@ -40,8 +40,15 @@ export function deriveSubscriptionStatus(p: {
     return "expired";
   }
 
+  // `tier === "free"` + has a Stripe customer ID means one of two real-world cases:
+  //   (a) a paid customer was manually downgraded to free, or
+  //   (b) a fresh Stripe payment didn't sync (webhook missed it, common for
+  //       PromptPay where async_payment_succeeded must be enabled in the
+  //       Dashboard). The admin should click "Re-sync from Stripe" to repair.
+  // Previously this returned "cancelled" which was misleading — this app uses
+  // one-time payments, not subscriptions, so "cancelled" doesn't apply.
   if (tier === "free" && p.stripe_customer_id && !p.stripe_subscription_id) {
-    return "cancelled";
+    return "unsynced";
   }
 
   if (tier === "free" && !p.stripe_customer_id) {
@@ -470,7 +477,11 @@ export async function fetchSubscriptionList(params: {
     if (params.status && params.status !== "all") {
       if (params.status === "active" && st !== "active") return false;
       if (params.status === "expired" && st !== "expired") return false;
-      if (params.status === "cancelled" && st !== "cancelled") return false;
+      if (
+        (params.status === "cancelled" || params.status === "unsynced") &&
+        st !== "unsynced"
+      )
+        return false;
       if (params.status === "vip_course" && !p.vip_granted_by_course)
         return false;
       if (
