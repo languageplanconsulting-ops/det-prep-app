@@ -532,7 +532,7 @@ function LessonModal({
               🔒 {access.headlineTh}
             </p>
             <p className="mb-3 text-xs leading-6 text-slate-700">
-              สมัครสมาชิกเพื่อปลดล็อก Writing Essay + ฟีเจอร์ AI ตรวจละเอียดเป็นภาษาไทย
+              สมัครสมาชิกเพื่อปลดล็อก Writing Essay + ฟีเจอร์ประเมินละเอียดเป็นภาษาไทย
             </p>
             <Link
               href={access.href}

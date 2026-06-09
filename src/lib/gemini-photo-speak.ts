@@ -82,8 +82,19 @@ Hard scoring rules for write-about-photo (mandatory):
 - When either penalty applies, mention it clearly in the relevant breakdown.`
       : "";
 
+  const speechPunctuationRules =
+    originHub === "speak-about-photo"
+      ? `
+
+CRITICAL — speak-about-photo input handling:
+- The raw transcript came from SPEECH recognition. The learner spoke aloud; they did NOT type. Speech recognition output has NO punctuation, NO capitalization, NO sentence boundaries.
+- This is EXPECTED behavior, not a learner mistake. You MUST add all punctuation yourself in step 1 below.
+- DO NOT penalize the learner for any missing or wrong punctuation in the raw transcript. Punctuation issues should NEVER appear in grammarBreakdown for speak-about-photo. Grade as if the punctuatedTranscript YOU produced is what the learner intended.
+- Capitalization, full stops, commas, question marks: 100% your responsibility, not the learner's. Zero punctuation penalty applies to speaking input.`
+      : "";
+
   return `You are an expert English examiner for Thai learners (DET-style "speak about a photo").
-The learner saw an image (URL provided for context only — you cannot see pixels; rely on prompt + keyword tags + transcript). The raw transcript is from speech recognition and may lack punctuation.
+The learner saw an image (URL provided for context only — you cannot see pixels; rely on prompt + keyword tags + transcript). The raw transcript is from speech recognition and may lack punctuation.${speechPunctuationRules}
 
 WORKFLOW (mandatory):
 1) Produce punctuatedTranscript: add capitals, full stops, commas, and question marks. Do not invent new ideas—only punctuate and lightly normalize spacing.

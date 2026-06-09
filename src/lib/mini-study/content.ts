@@ -699,7 +699,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
       id: "mini-study-write-photo",
       titleEn: "Describe this scene",
       titleTh: "บรรยายภาพนี้",
-      imageUrl: "https://picsum.photos/seed/mini-study-write-cafe/960/640",
+      imageUrl: "https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=960&h=640&fit=crop&auto=format",
       promptEn:
         "Write about what you see in the photo using one of the three description patterns. Use present tense only, include transitional words, and use adjectives for people, objects, and places where appropriate.",
       promptTh:
@@ -844,7 +844,7 @@ export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
       id: "mini-study-speak-photo",
       titleEn: "Speak about this scene",
       titleTh: "พูดบรรยายภาพนี้",
-      imageUrl: "https://picsum.photos/seed/mini-study-speak-park/960/640",
+      imageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=960&h=640&fit=crop&auto=format",
       promptEn:
         "Speak about the photo for about 30–60 seconds using one of the three patterns. Use is/are + V-ing as your main structure and avoid -ed forms. Aim for exactly 6 sentences.",
       promptTh:
