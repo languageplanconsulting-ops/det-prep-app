@@ -268,7 +268,7 @@ export function MiniStudyPhotoSpeakPhase({ session }: Props) {
             disabled={!canSubmit}
             className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
           >
-            {submitting ? "Grading…" : "Submit for AI feedback"}
+            {submitting ? "AI กำลังตรวจ…" : "ส่งให้ AI ตรวจ"}
           </button>
         </div>
       </div>

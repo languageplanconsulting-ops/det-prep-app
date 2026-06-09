@@ -113,7 +113,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
           <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
             Session {session.index} · Summarize the conversation
           </p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight">Read the conversation</h1>
+          <h1 className="mt-1 text-2xl font-black tracking-tight">อ่านบทสนทนา</h1>
           <p className="mt-2 text-sm text-neutral-700 leading-7">{session.instructionsTh}</p>
         </header>
 
@@ -199,7 +199,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
               disabled={grading || !summary.trim()}
               className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
             >
-              {grading ? "Grading…" : "Submit for AI feedback"}
+              {grading ? "AI กำลังตรวจ…" : "ส่งให้ AI ตรวจ"}
             </button>
           </div>
         </div>
@@ -290,7 +290,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
           href="/practice/mini-study"
           className="rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
         >
-          ← All sessions
+          ← กลับไปหน้าหลัก
         </Link>
         <button
           type="button"
@@ -298,7 +298,7 @@ export function MiniStudySummaryPhase({ session }: Props) {
           disabled={saving || savedToNotebook}
           className="rounded-lg bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:brightness-95 transition disabled:opacity-50"
         >
-          {savedToNotebook ? "✓ Saved to notebook" : saving ? "Saving…" : "Save to notebook"}
+          {savedToNotebook ? "✓ บันทึก notebook แล้ว" : saving ? "กำลังบันทึก…" : "บันทึก notebook"}
         </button>
       </div>
     </main>

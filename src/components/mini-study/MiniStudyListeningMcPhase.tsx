@@ -43,14 +43,14 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
           error?: string;
         };
         if (!res.ok || !json.audioBase64) {
-          setAudioError(json.error ?? "Could not generate audio.");
+          setAudioError(json.error ?? "สร้างเสียงไม่สำเร็จ");
           return null;
         }
         const url = `data:${json.mimeType ?? "audio/mpeg"};base64,${json.audioBase64}`;
         setAudioByScenario((p) => ({ ...p, [id]: url }));
         return url;
       } catch {
-        setAudioError("TTS connection failed.");
+        setAudioError("เชื่อมต่อ TTS ไม่สำเร็จ");
         return null;
       } finally {
         setAudioLoading(false);
@@ -85,7 +85,7 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
-            Session complete
+            เรียนจบบทนี้แล้ว
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight">
             {numCorrect} / {all.length} correct
@@ -95,7 +95,7 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
           href="/practice/mini-study"
           className="inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
         >
-          ← All sessions
+          ← กลับไปหน้าหลัก
         </Link>
       </main>
     );
@@ -116,12 +116,12 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
             {scenario.title} ({scenarioIdx + 1} / {total})
           </h1>
         </div>
-        <div className="text-xs text-neutral-500">Plays: {plays}</div>
+        <div className="text-xs text-neutral-500">ฟังไป: {plays}</div>
       </header>
 
       {phase === "listen" ? (
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h2 className="text-base font-black text-[#004AAD]">Listen to the scenario</h2>
+          <h2 className="text-base font-black text-[#004AAD]">ฟัง scenario</h2>
           {scenario.thaiInstruction ? (
             <p className="mt-2 rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30 text-sm leading-7 text-neutral-800">
               {scenario.thaiInstruction}
@@ -134,10 +134,10 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
               disabled={audioLoading}
               className="rounded-lg bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
             >
-              {audioLoading ? "Loading…" : plays === 0 ? "▶ Play scenario" : "↻ Play again"}
+              {audioLoading ? "กำลังโหลด…" : plays === 0 ? "▶ เล่น scenario" : "↻ เล่นซ้ำ"}
             </button>
             <p className="text-xs text-neutral-500">
-              Listen carefully — try to remember who you are, who you're talking to, and why.
+              ตั้งใจฟัง — จำให้ได้ว่าคุณเป็นใคร · คุยกับใคร · มาทำไม
             </p>
           </div>
           {audioError ? <p className="mt-3 text-sm text-red-700">{audioError}</p> : null}
@@ -149,7 +149,7 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
               disabled={plays === 0}
               className="rounded-lg bg-[#FFCC00] px-5 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:brightness-95 transition disabled:opacity-50"
             >
-              I'm ready · Answer questions →
+              พร้อมแล้ว · ตอบคำถาม →
             </button>
           </div>
         </div>
@@ -182,7 +182,7 @@ export function MiniStudyListeningMcPhase({ session }: Props) {
       ) : null}
 
       <Link href="/practice/mini-study" className="inline-block text-xs text-neutral-500 underline">
-        Exit session
+        ออกจากบทเรียน
       </Link>
     </main>
   );
@@ -201,7 +201,7 @@ function QuestionsPanel({
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
       <h2 className="text-base font-black text-[#004AAD]">
-        Answer from memory (don't replay)
+        ตอบจากความจำ (อย่ากดฟังซ้ำ)
       </h2>
       <div className="mt-4 space-y-5">
         {scenario.questions.map((q, qi) => (
@@ -229,7 +229,7 @@ function QuestionsPanel({
           disabled={!allAnswered}
           className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
         >
-          Submit answers →
+          ส่งคำตอบ →
         </button>
       </div>
     </div>
@@ -304,14 +304,14 @@ function ReviewPanel({
                 {qi + 1}. {q.prompt}
               </p>
               <p className="mt-1">
-                Your answer: {a?.chosen}. {chosenOpt?.text}{" "}
+                คำตอบของคุณ: {a?.chosen}. {chosenOpt?.text}{" "}
                 <span className={correct ? "text-green-800" : "text-red-800"}>
                   {correct ? "✓" : "✗"}
                 </span>
               </p>
               {!correct ? (
                 <p className="mt-1 text-green-800">
-                  Correct: {q.correctLetter}. {correctOpt?.text}
+                  ที่ถูก: {q.correctLetter}. {correctOpt?.text}
                 </p>
               ) : null}
             </li>
@@ -319,7 +319,7 @@ function ReviewPanel({
         })}
       </ol>
       <div className="rounded-xl bg-[#eef4ff] p-3 ring-1 ring-[#004AAD]/30 text-xs leading-6 text-neutral-800">
-        <span className="font-bold">Scenario reference:</span> {scenario.scenarioText}
+        <span className="font-bold">อ้างอิง scenario:</span> {scenario.scenarioText}
       </div>
       <div className="flex justify-end">
         <button
@@ -327,7 +327,7 @@ function ReviewPanel({
           onClick={onNext}
           className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
         >
-          {isLast ? "Finish session" : "Next scenario →"}
+          {isLast ? "เรียนจบบท" : "Scenario ถัดไป →"}
         </button>
       </div>
     </div>

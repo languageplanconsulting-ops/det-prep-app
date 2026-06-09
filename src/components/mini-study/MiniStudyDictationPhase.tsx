@@ -45,7 +45,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
           error?: string;
         };
         if (!res.ok || !json.audioBase64) {
-          setAudioError(json.error ?? "Could not generate audio. Please try again.");
+          setAudioError(json.error ?? "สร้างเสียงไม่สำเร็จ Please try again.");
           return null;
         }
         const mime = json.mimeType ?? "audio/mpeg";
@@ -53,7 +53,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
         setAudioByItem((prev) => ({ ...prev, [itemId]: url }));
         return url;
       } catch {
-        setAudioError("TTS connection failed. Please try again.");
+        setAudioError("เชื่อมต่อ TTS ไม่สำเร็จ Please try again.");
         return null;
       } finally {
         setAudioLoading(false);
@@ -87,13 +87,13 @@ export function MiniStudyDictationPhase({ session }: Props) {
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
-            Session complete
+            เรียนจบบทนี้แล้ว
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight">
             {numCorrect} / {total} correct
           </h1>
           <p className="mt-2 text-sm text-neutral-600">
-            Strict match grading — only exact-match counts as correct.
+            ตรวจแบบ 100% — ต้องตรงทุกตัวอักษรถึงจะถูก
           </p>
         </div>
 
@@ -120,7 +120,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
             href="/practice/mini-study"
             className="rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
           >
-            ← All sessions
+            ← กลับไปหน้าหลัก
           </Link>
           <button
             type="button"
@@ -136,7 +136,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
             }}
             className="rounded-lg bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:brightness-95 transition"
           >
-            Restart session
+            เริ่มบทใหม่
           </button>
         </div>
       </main>
@@ -178,7 +178,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
             Item {idx + 1} / {total}
           </h1>
         </div>
-        <div className="text-xs text-neutral-500">Plays used: {playsForCurrent}</div>
+        <div className="text-xs text-neutral-500">ฟังไป: {playsForCurrent}</div>
       </header>
 
       <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
@@ -189,10 +189,10 @@ export function MiniStudyDictationPhase({ session }: Props) {
             disabled={audioLoading}
             className="rounded-lg bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
           >
-            {audioLoading ? "Loading…" : playsForCurrent === 0 ? "▶ Play audio" : "↻ Play again"}
+            {audioLoading ? "กำลังโหลด…" : playsForCurrent === 0 ? "▶ เล่นเสียง" : "↻ เล่นซ้ำ"}
           </button>
           <p className="text-xs text-neutral-500">
-            Type EXACTLY what you hear, including all punctuation.
+            พิมพ์ตามที่ได้ยินทุกตัวอักษร รวม comma ด้วย
           </p>
         </div>
         {audioError ? <p className="mt-3 text-sm text-red-700">{audioError}</p> : null}
@@ -207,7 +207,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
               setShowSolution(false);
             }
           }}
-          placeholder="Type the sentence here…"
+          placeholder="พิมพ์ประโยคที่ได้ยินที่นี่…"
           rows={3}
           className="mt-4 w-full rounded-xl bg-white p-3 ring-1 ring-slate-200 text-base"
           autoFocus
@@ -219,7 +219,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
               correct ? "border-green-700 bg-green-50 text-green-800" : "border-red-700 bg-red-50 text-red-800"
             }`}
           >
-            {correct ? "✓ Correct — 100% match!" : "✗ Not a 100% match. Try again, or click Show solution."}
+            {correct ? "✓ ถูกต้อง — ตรง 100%!" : "✗ Not a 100% match. Try again, or click ดูเฉลย."}
           </div>
         ) : null}
 
@@ -250,7 +250,7 @@ export function MiniStudyDictationPhase({ session }: Props) {
               onClick={() => setShowSolution(true)}
               className="rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
             >
-              Show solution
+              ดูเฉลย
             </button>
           ) : null}
           {checked ? (
@@ -259,14 +259,14 @@ export function MiniStudyDictationPhase({ session }: Props) {
               onClick={handleNext}
               className="ml-auto rounded-lg bg-[#004AAD] px-4 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
             >
-              {idx + 1 >= total ? "Finish" : "Next →"}
+              {idx + 1 >= total ? "จบ" : "Next →"}
             </button>
           ) : null}
         </div>
       </div>
 
       <Link href="/practice/mini-study" className="inline-block text-xs text-neutral-500 underline">
-        Exit session
+        ออกจากบทเรียน
       </Link>
     </main>
   );

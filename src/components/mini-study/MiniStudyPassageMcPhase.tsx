@@ -24,7 +24,7 @@ export function MiniStudyPassageMcPhase({ session }: Props) {
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
-            Session complete
+            เรียนจบบทนี้แล้ว
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight">
             {num} / {total} correct
@@ -34,7 +34,7 @@ export function MiniStudyPassageMcPhase({ session }: Props) {
           href="/practice/mini-study"
           className="inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
         >
-          ← All sessions
+          ← กลับไปหน้าหลัก
         </Link>
       </main>
     );
@@ -133,7 +133,7 @@ export function MiniStudyPassageMcPhase({ session }: Props) {
               }}
               className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
             >
-              {idx + 1 >= total ? "Finish" : "Next exercise →"}
+              {idx + 1 >= total ? "จบ" : "ข้อถัดไป →"}
             </button>
           </div>
         </div>
@@ -143,7 +143,7 @@ export function MiniStudyPassageMcPhase({ session }: Props) {
         href="/practice/mini-study"
         className="inline-block text-xs text-neutral-500 underline"
       >
-        Exit session
+        ออกจากบทเรียน
       </Link>
     </main>
   );

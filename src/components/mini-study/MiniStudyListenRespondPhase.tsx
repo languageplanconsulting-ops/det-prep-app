@@ -41,14 +41,14 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
           error?: string;
         };
         if (!res.ok || !json.audioBase64) {
-          setAudioError(json.error ?? "Could not generate audio.");
+          setAudioError(json.error ?? "สร้างเสียงไม่สำเร็จ");
           return null;
         }
         const url = `data:${json.mimeType ?? "audio/mpeg"};base64,${json.audioBase64}`;
         setAudioByEx((p) => ({ ...p, [id]: url }));
         return url;
       } catch {
-        setAudioError("TTS connection failed.");
+        setAudioError("เชื่อมต่อ TTS ไม่สำเร็จ");
         return null;
       } finally {
         setAudioLoading(false);
@@ -82,7 +82,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
-            Session complete
+            เรียนจบบทนี้แล้ว
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight">
             {numCorrect} / {total} correct
@@ -92,7 +92,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
           href="/practice/mini-study"
           className="inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
         >
-          ← All sessions
+          ← กลับไปหน้าหลัก
         </Link>
       </main>
     );
@@ -124,7 +124,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
 
       <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-sm font-black uppercase tracking-wide text-neutral-500">
-          Conversation so far
+          บทสนทนาที่ผ่านมา
         </h2>
         <div className="mt-2 space-y-2 text-sm leading-7">
           {ex.conversationSoFar.map((t, i) => (
@@ -144,9 +144,9 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
             disabled={audioLoading}
             className="rounded-lg bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"
           >
-            {audioLoading ? "Loading…" : plays === 0 ? "▶ Play audio" : "↻ Play again"}
+            {audioLoading ? "กำลังโหลด…" : plays === 0 ? "▶ เล่นเสียง" : "↻ เล่นซ้ำ"}
           </button>
-          <span className="text-xs text-neutral-500">Plays: {plays}</span>
+          <span className="text-xs text-neutral-500">ฟังไป: {plays}</span>
         </div>
         {audioError ? <p className="mt-2 text-sm text-red-700">{audioError}</p> : null}
 
@@ -218,7 +218,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
                 }}
                 className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
               >
-                {idx + 1 >= total ? "Finish" : "Next exercise →"}
+                {idx + 1 >= total ? "จบ" : "ข้อถัดไป →"}
               </button>
             </div>
           </div>
@@ -226,7 +226,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
       </div>
 
       <Link href="/practice/mini-study" className="inline-block text-xs text-neutral-500 underline">
-        Exit session
+        ออกจากบทเรียน
       </Link>
     </main>
   );

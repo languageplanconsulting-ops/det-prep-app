@@ -40,7 +40,7 @@ export function MiniStudyEssayClozePhase({ session }: Props) {
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <p className="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">
-            Session complete
+            เรียนจบบทนี้แล้ว
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight">
             {correct} / {total} blanks correct
@@ -50,7 +50,7 @@ export function MiniStudyEssayClozePhase({ session }: Props) {
           href="/practice/mini-study"
           className="inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold ring-1 ring-slate-300 shadow-sm hover:bg-slate-50 transition"
         >
-          ← All sessions
+          ← กลับไปหน้าหลัก
         </Link>
       </main>
     );
@@ -166,7 +166,7 @@ export function MiniStudyEssayClozePhase({ session }: Props) {
               disabled={!allFilled}
               className="rounded-lg bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:brightness-95 transition disabled:opacity-50"
             >
-              Check answers
+              ตรวจคำตอบ
             </button>
           </div>
         ) : null}
@@ -231,10 +231,10 @@ export function MiniStudyEssayClozePhase({ session }: Props) {
               className="rounded-lg bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:brightness-95 transition disabled:opacity-50"
             >
               {savedIds.has(ex.id)
-                ? "✓ Saved to notebook"
+                ? "✓ บันทึก notebook แล้ว"
                 : savingId === ex.id
-                  ? "Saving…"
-                  : "Save to notebook"}
+                  ? "กำลังบันทึก…"
+                  : "บันทึก notebook"}
             </button>
             <button
               type="button"
@@ -247,14 +247,14 @@ export function MiniStudyEssayClozePhase({ session }: Props) {
               }}
               className="rounded-lg bg-[#004AAD] px-5 py-2 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
             >
-              {idx + 1 >= total ? "Finish" : "Next exercise →"}
+              {idx + 1 >= total ? "จบ" : "ข้อถัดไป →"}
             </button>
           </div>
         </>
       ) : null}
 
       <Link href="/practice/mini-study" className="inline-block text-xs text-neutral-500 underline">
-        Exit session
+        ออกจากบทเรียน
       </Link>
     </main>
   );
