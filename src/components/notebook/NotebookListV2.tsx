@@ -152,7 +152,9 @@ export function NotebookListV2() {
     reload();
   };
 
-  const deck = reviewDeck.length ? reviewDeck : entries;
+  // Review deck = vocabulary entries only. Never fall back to all entries —
+  // production-report/grammar cards have no front-of-card word and would render blank.
+  const deck = reviewDeck;
   const reviewCard = deck[review.idx];
 
   return (
@@ -359,6 +361,7 @@ export function NotebookListV2() {
                     โน้ตของฉัน
                   </p>
                   <textarea
+                    key={e.id + e.userNote}
                     defaultValue={e.userNote}
                     onChange={(ev) => setNoteDraft((p) => ({ ...p, [e.id]: ev.target.value }))}
                     onBlur={() => saveNote(e.id)}

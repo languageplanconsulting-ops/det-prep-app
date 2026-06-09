@@ -135,7 +135,6 @@ function CoachTip({ children }: { children: ReactNode }) {
 /* ── main component ──────────────────────────────────────────────────── */
 
 export function PracticeHubV2({
-  isVip,
   showMiniStudy,
   conversationGate,
   onReadingIntro,
@@ -496,9 +495,7 @@ export function PracticeHubV2({
           <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">🔥 ต่อเนื่อง</span>
-              <span className="text-sm font-bold text-amber-600">
-                {isVip ? "—" : "5 วัน"}
-              </span>
+              <span className="text-sm font-bold text-amber-600">5 วัน</span>
             </div>
           </div>
 

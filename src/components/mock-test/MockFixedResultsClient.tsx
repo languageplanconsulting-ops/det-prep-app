@@ -7,7 +7,10 @@ import { useRouter } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import type { FixedMockScoredRow } from "@/lib/mock-test/fixed-mock-score-buckets";
 
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+
 import { MockFixedReportBrandedView } from "./MockFixedReportBrandedView";
+import { MockFixedReportBrandedViewV2 } from "./MockFixedReportBrandedViewV2";
 
 type FixedStepItem = {
   step_index: number;
@@ -43,6 +46,7 @@ function avg(list: number[]): number {
 
 export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   const router = useRouter();
+  const { isAdmin } = useEffectiveTier();
   const [row, setRow] = useState<FixedResult | null>(null);
   const [stepItems, setStepItems] = useState<FixedStepItem[]>([]);
   const [dashboardSavedAt, setDashboardSavedAt] = useState<string | null>(null);
@@ -116,9 +120,11 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   const reading = Math.round(Number(row.actual_reading ?? 0));
   const writing = Math.round(Number(row.actual_writing ?? 0));
 
+  const ReportView = isAdmin ? MockFixedReportBrandedViewV2 : MockFixedReportBrandedView;
+
   return (
     <>
-      <MockFixedReportBrandedView
+      <ReportView
         sessionId={sessionId}
         total={totalScore}
         listening={listening}
