@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Makeover A — โค้ชส่วนตัว (Coach Mode)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "IBM Plex Sans Thai", sans-serif; background:#f1f5f9; color:#0f172a; }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <a href="/practice-preview-makeover-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← เปรียบเทียบ</a>
+    <span class="text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">A · โค้ชส่วนตัว</span>
+  </nav>
+
+  <main class="mx-auto max-w-5xl px-6 py-8 space-y-6">
+
+    <!-- HERO: Coach + Today's recommendation -->
+    <section class="rounded-3xl bg-[#004AAD] p-6 text-white shadow-lg">
+      <div class="flex items-start gap-5">
+        <img src="/pidoy.png" class="h-24 w-24 rounded-full ring-4 ring-[#FFCC00] object-cover flex-shrink-0" alt="พี่ดอย">
+        <div class="flex-1">
+          <p class="text-xs font-bold uppercase tracking-wider text-[#FFCC00]">คำแนะนำจากพี่ดอย · 9 มิ.ย.</p>
+          <h1 class="mt-1 text-2xl font-bold leading-snug">วันนี้ฝึก <strong class="text-[#FFCC00]">Dictation</strong> สัก 15 นาทีนะครับ</h1>
+          <p class="mt-2 text-sm leading-7 text-white/85">
+            เห็นว่าคุณยังไม่ได้แตะ Dictation มา 4 วันแล้ว · ที่ผ่านมาทำ Reading เยอะแล้ว ลองเปลี่ยนเป็น Dictation บ้างจะช่วย<strong class="text-[#FFCC00]">เปิดทักษะใหม่</strong>
+          </p>
+          <div class="mt-4 flex flex-wrap items-center gap-3">
+            <a href="#" class="rounded-xl bg-[#FFCC00] text-slate-900 px-5 py-3 text-sm font-bold shadow-md hover:shadow-lg transition">▶ เริ่มเลย · 15 นาที</a>
+            <button class="text-xs underline text-white/80">วันนี้ฉันอยากฝึกอย่างอื่น</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Three columns of quick stats -->
+    <div class="grid gap-4 md:grid-cols-3">
+      <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+        <p class="text-xs text-slate-500 font-semibold">🔥 ต่อเนื่อง</p>
+        <p class="mt-1 text-2xl font-bold text-[#004AAD]">5 วัน</p>
+        <p class="text-xs text-slate-500 mt-1">อย่าให้ขาดนะ!</p>
+      </div>
+      <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+        <p class="text-xs text-slate-500 font-semibold">📊 คะแนนล่าสุด (Mock)</p>
+        <p class="mt-1 text-2xl font-bold text-[#004AAD]">95 <span class="text-base text-slate-400">/ 160</span></p>
+        <p class="text-xs text-emerald-600 mt-1">+12 จากครั้งก่อน 📈</p>
+      </div>
+      <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+        <p class="text-xs text-slate-500 font-semibold">🎯 เป้าหมาย</p>
+        <p class="mt-1 text-2xl font-bold text-[#004AAD]">120</p>
+        <p class="text-xs text-slate-500 mt-1">เหลืออีก 25 คะแนน</p>
+      </div>
+    </div>
+
+    <!-- Pi Doi's plan for the week -->
+    <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <div class="flex items-center gap-3 mb-5">
+        <img src="/pidoy.png" class="h-10 w-10 rounded-full ring-2 ring-[#004AAD] object-cover" alt="">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">แผนสัปดาห์นี้</p>
+          <h2 class="text-lg font-bold">พี่ดอยจัดให้ครับ — สลับทักษะให้สมดุล</h2>
+        </div>
+      </div>
+      <div class="grid gap-2 md:grid-cols-7">
+        <DayCard></DayCard>
+      </div>
+      <div class="grid gap-2 md:grid-cols-7 text-xs">
+        <div class="rounded-lg bg-emerald-50 ring-1 ring-emerald-200 p-3 text-center">
+          <p class="font-bold text-emerald-700">จ.</p>
+          <p class="mt-1 text-[10px] text-slate-600">✓ Reading</p>
+        </div>
+        <div class="rounded-lg bg-emerald-50 ring-1 ring-emerald-200 p-3 text-center">
+          <p class="font-bold text-emerald-700">อ.</p>
+          <p class="mt-1 text-[10px] text-slate-600">✓ Vocabulary</p>
+        </div>
+        <div class="rounded-lg bg-emerald-50 ring-1 ring-emerald-200 p-3 text-center">
+          <p class="font-bold text-emerald-700">พ.</p>
+          <p class="mt-1 text-[10px] text-slate-600">✓ Dictation</p>
+        </div>
+        <div class="rounded-lg bg-emerald-50 ring-1 ring-emerald-200 p-3 text-center">
+          <p class="font-bold text-emerald-700">พฤ.</p>
+          <p class="mt-1 text-[10px] text-slate-600">✓ Write photo</p>
+        </div>
+        <div class="rounded-lg bg-emerald-50 ring-1 ring-emerald-200 p-3 text-center">
+          <p class="font-bold text-emerald-700">ศ.</p>
+          <p class="mt-1 text-[10px] text-slate-600">✓ FITB</p>
+        </div>
+        <div class="rounded-lg bg-[#FFCC00] ring-2 ring-[#004AAD] p-3 text-center font-bold">
+          <p class="font-bold text-slate-900">ส.</p>
+          <p class="mt-1 text-[10px] text-slate-800">⭐ Dictation</p>
+          <p class="text-[10px] text-[#004AAD]">วันนี้</p>
+        </div>
+        <div class="rounded-lg bg-slate-50 ring-1 ring-slate-200 p-3 text-center">
+          <p class="font-bold text-slate-500">อา.</p>
+          <p class="mt-1 text-[10px] text-slate-500">Mock test</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- All tools — categorised -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-slate-900">📚 เครื่องมือฝึกทั้งหมด</h2>
+        <span class="text-xs text-slate-500">15 เครื่องมือ · เปิดได้ตลอดเวลา</span>
+      </div>
+
+      <details open class="rounded-xl bg-white ring-1 ring-slate-200 mb-3">
+        <summary class="cursor-pointer px-5 py-3 font-semibold text-sm flex items-center gap-2">
+          <span class="text-lg">🎧</span> ฟัง (Listening) — 2 เครื่องมือ
+        </summary>
+        <div class="grid gap-2 p-4 md:grid-cols-2 border-t border-slate-200">
+          <ToolLink></ToolLink>
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">บทสนทนา (Interactive Conversation)</p>
+            <p class="text-xs text-slate-600 mt-0.5">ฟังบทสนทนา 5 ฉาก แล้วตอบ</p>
+          </a>
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">ฟังบทสนทนา + สรุปด้วย AI</p>
+            <p class="text-xs text-slate-600 mt-0.5">ตรวจคำสรุปด้วย Gemini</p>
+          </a>
+        </div>
+      </details>
+
+      <details class="rounded-xl bg-white ring-1 ring-slate-200 mb-3">
+        <summary class="cursor-pointer px-5 py-3 font-semibold text-sm flex items-center gap-2">
+          <span class="text-lg">🗣</span> พูด (Speaking) — 2 เครื่องมือ
+        </summary>
+        <div class="grid gap-2 p-4 md:grid-cols-2 border-t border-slate-200">
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">พูดเกี่ยวกับภาพ</p>
+            <p class="text-xs text-slate-600 mt-0.5">บรรยายภาพ 30 วินาที + AI ตรวจ</p>
+          </a>
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">อ่านแล้วพูด (Read &amp; Speak)</p>
+            <p class="text-xs text-slate-600 mt-0.5">อ่านบทแล้วเล่าด้วยคำของคุณ</p>
+          </a>
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">การสนทนาแบบโต้ตอบ</p>
+            <p class="text-xs text-slate-600 mt-0.5">Interactive Speaking · 6 turn</p>
+          </a>
+        </div>
+      </details>
+
+      <details class="rounded-xl bg-white ring-1 ring-slate-200 mb-3">
+        <summary class="cursor-pointer px-5 py-3 font-semibold text-sm flex items-center gap-2">
+          <span class="text-lg">✍️</span> เขียน (Writing) — 2 เครื่องมือ
+        </summary>
+        <div class="grid gap-2 p-4 md:grid-cols-2 border-t border-slate-200">
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">เขียนเกี่ยวกับภาพ</p>
+            <p class="text-xs text-slate-600 mt-0.5">บรรยายภาพ 50 คำ + AI ตรวจ</p>
+          </a>
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">อ่านแล้วเขียน (Read &amp; Write)</p>
+            <p class="text-xs text-slate-600 mt-0.5">สรุปบทอ่านเป็นภาษาเขียน</p>
+          </a>
+        </div>
+      </details>
+
+      <details class="rounded-xl bg-white ring-1 ring-slate-200 mb-3">
+        <summary class="cursor-pointer px-5 py-3 font-semibold text-sm flex items-center gap-2">
+          <span class="text-lg">📖</span> อ่าน (Reading) — 2 เครื่องมือ
+        </summary>
+        <div class="grid gap-2 p-4 md:grid-cols-2 border-t border-slate-200">
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">บทอ่าน (Reading)</p>
+            <p class="text-xs text-slate-600 mt-0.5">5 รอบ · หาประโยคที่หาย + MCQ</p>
+          </a>
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">คำศัพท์ (Vocabulary)</p>
+            <p class="text-xs text-slate-600 mt-0.5">เลือกคำให้ตรงบริบท</p>
+          </a>
+        </div>
+      </details>
+
+      <details class="rounded-xl bg-white ring-1 ring-slate-200 mb-3">
+        <summary class="cursor-pointer px-5 py-3 font-semibold text-sm flex items-center gap-2">
+          <span class="text-lg">📝</span> ฝึกพื้นฐาน (Literacy) — 3 เครื่องมือ
+        </summary>
+        <div class="grid gap-2 p-4 md:grid-cols-3 border-t border-slate-200">
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">Dictation</p>
+            <p class="text-xs text-slate-600 mt-0.5">ฟังแล้วพิมพ์ตาม</p>
+          </a>
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">เติมคำในประโยค</p>
+            <p class="text-xs text-slate-600 mt-0.5">Fill in the Blank</p>
+          </a>
+          <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">Real word</p>
+            <p class="text-xs text-slate-600 mt-0.5">แยกคำจริงกับคำปลอม</p>
+          </a>
+        </div>
+      </details>
+
+      <div class="grid gap-3 md:grid-cols-2 mt-5">
+        <a class="rounded-xl bg-emerald-50 ring-1 ring-emerald-200 p-5 hover:ring-emerald-500 transition block">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">🆓 ฟรี · เริ่มที่นี่</p>
+          <h3 class="mt-1 text-lg font-bold">Mini Diagnosis</h3>
+          <p class="text-xs text-slate-600 mt-0.5">ทดสอบระดับใน 15-17 นาที · รู้จุดอ่อนทันที</p>
+        </a>
+        <a class="rounded-xl bg-[#004AAD] text-white p-5 hover:opacity-90 transition block">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">🏆 ทดสอบจริง</p>
+          <h3 class="mt-1 text-lg font-bold">Full Mock Test</h3>
+          <p class="text-xs text-white/85 mt-0.5">จำลองสนามสอบเต็มรูปแบบ · ใช้เวลา ~45 นาที</p>
+        </a>
+      </div>
+    </section>
+
+    <aside class="rounded-xl bg-white p-4 ring-1 ring-slate-200 text-xs text-slate-700 leading-7 mt-2">
+      <strong class="text-[#004AAD]">เหตุผลที่เลือกแบบนี้:</strong>
+      Hero เป็นคำแนะนำจากพี่ดอย ลด choice paralysis (Hick's Law) ·
+      Streak + คะแนนล่าสุด + เป้าหมาย เป็น variable reward ที่ใช้ ·
+      ตารางสัปดาห์ทำให้รู้สึกมีโค้ชดูแล · เครื่องมือทั้งหมดยังเข้าถึงได้ตลอดด้านล่าง
+    </aside>
+  </main>
+</body>
+</html>

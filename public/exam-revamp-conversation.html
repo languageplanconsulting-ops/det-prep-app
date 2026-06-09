@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Exam revamp · Conversation</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f7f8fc;color:#0f172a}
+  .stage-label{position:sticky;top:0;z-index:5;background:#004AAD;color:#FFCC00;padding:8px 16px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .stage-wrap{background:#eef1f6;padding:28px 0;border-bottom:1px solid #e2e8f0}
+  .coach-tip{display:flex;gap:12px;align-items:flex-start}
+  .coach-tip .avatar{width:44px;height:44px;border-radius:9999px;flex-shrink:0;background:#004AAD;color:#FFCC00;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;border:2.5px solid #FFCC00;box-shadow:0 3px 8px rgba(0,74,173,.18)}
+  .coach-tip .bub{flex:1;position:relative;background:#fff;padding:11px 14px 12px;border-radius:14px;border-top-left-radius:4px;box-shadow:0 4px 14px rgba(15,23,42,.06);border:1px solid rgba(0,74,173,.08)}
+  .coach-tip .bub::before{content:"";position:absolute;top:14px;left:-7px;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-right:7px solid #fff}
+  .coach-tip .lbl{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:#004AAD;background:#FFCC00;padding:5px 11px;border-radius:9999px;margin-bottom:8px}
+  .coach-tip .lbl .spark{font-size:11px;line-height:1}
+  .btn-primary{background:#004AAD;color:#FFCC00;padding:11px 22px;border-radius:12px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+  .btn-primary[disabled]{opacity:.4}
+  .btn-ghost{background:#fff;color:#334155;border:1px solid #cbd5e1;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:700}
+  .btn-play{background:#FFCC00;color:#004AAD;padding:14px 24px;border-radius:14px;font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+  .pill{display:inline-flex;align-items:center;gap:5px;border-radius:9999px;padding:3px 10px;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+  .mcq{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;transition:all .12s;margin-bottom:8px}
+  .mcq:hover{border-color:#004AAD;background:#f8faff}
+  .mcq .key{flex-shrink:0;width:22px;height:22px;border-radius:7px;background:#eef4ff;color:#004AAD;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .mcq.sel{border-color:#004AAD;background:#eef4ff}
+  .mcq.correct{border-color:#16a34a;background:#f0fdf4}.mcq.correct .key{background:#16a34a;color:#fff}
+  .mcq.wrong{border-color:#dc2626;background:#fef2f2}.mcq.wrong .key{background:#dc2626;color:#fff}
+  .ta{width:100%;border:1.5px solid #e2e8f0;border-radius:14px;padding:14px;font-size:15px;line-height:1.7;resize:vertical;background:#fff}
+  .ta:focus{outline:none;border-color:#004AAD}
+  .s-tint{background:#f0f9ff}    /* sky category tint */
+  .bubble-l{background:#e0f2fe;border-radius:14px;border-top-left-radius:4px;padding:9px 13px;font-size:14px;max-width:80%}
+  .bubble-r{background:#fef3c7;border-radius:14px;border-top-right-radius:4px;padding:9px 13px;font-size:14px;max-width:80%;margin-left:auto}
+  .spk{width:26px;height:26px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+</style>
+</head>
+<body>
+<nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+  <span class="font-bold text-[#004AAD]">English Plan</span>
+  <span class="text-sm text-sky-700 font-semibold">🎧 Conversation</span>
+  <a href="/exam-revamp-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← ทุกหมวด</a>
+  <span class="text-xs bg-sky-600 text-white px-2.5 py-1 rounded-md font-semibold">Conversation exams</span>
+</nav>
+
+<div class="bg-white px-6 py-5 border-b border-slate-200">
+  <p class="text-xs text-sky-700 font-bold uppercase tracking-wider">Exam revamp · Conversation</p>
+  <h1 class="mt-1 text-2xl font-bold">หน้าจอ "ตอนทำข้อสอบ" แบบใหม่ · 2 ทักษะ</h1>
+  <p class="mt-2 text-sm text-slate-600 max-w-3xl">Interactive conversation (เลือกตอบ) + Dialogue → summary (เขียนสรุป) — ปุ่มฟังเด่น, ตัวเลือก A/B/C/D, บทสนทนาเป็นแชทบับเบิล · ไม่มี gradient</p>
+</div>
+
+<!-- ════ INTERACTIVE CONVERSATION ════ -->
+<div class="stage-label">1/2 · Interactive conversation — ฟังแล้วเลือกประโยคตอบ</div>
+<div class="stage-wrap"><div class="mx-auto max-w-2xl px-6">
+  <div class="rounded-2xl s-tint ring-1 ring-sky-200 p-5 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-xl text-white">🎧</div>
+        <div><p class="text-[10px] font-bold uppercase tracking-wider text-sky-700">บทสนทนาโต้ตอบ · รอบ 1 · Medium</p>
+        <h2 class="text-lg font-bold">Main dialogue 3 / 5</h2></div>
+      </div>
+      <span class="pill bg-sky-100 text-sky-700">เต็ม 160 คะแนน</span>
+    </div>
+    <!-- progress: scenario + 3 + 5 = 8 -->
+    <div class="flex gap-1 mb-1">
+      <span class="h-1.5 flex-1 rounded-full bg-sky-500"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-sky-500"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-sky-500"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-sky-500"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-sky-500"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-[#FFCC00]"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+    </div>
+    <p class="text-[10px] text-slate-400 mb-4">Scenario · คำถาม 3 ข้อ · บทสนทนาหลัก 5 ข้อ = 8 ข้อ</p>
+    <!-- play + transcript toggle -->
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-4 text-center">
+      <button class="btn-play">🔊 เล่นบทสนทนา</button>
+      <p class="text-xs text-slate-500 mt-3">กดฟังก่อน — ตัวเลือกจะปลดล็อกเมื่อเสียงเริ่ม</p>
+      <button class="text-xs font-bold text-sky-700 mt-2 underline">แสดง transcript</button>
+    </div>
+    <!-- MCQ -->
+    <p class="text-[13px] font-bold mb-3">เลือกประโยคตอบที่เหมาะที่สุด:</p>
+    <button class="mcq"><span class="key">A</span><span>"No, I haven't been there before."</span></button>
+    <button class="mcq sel"><span class="key">B</span><span>"Sure, what time should we meet?"</span></button>
+    <button class="mcq"><span class="key">C</span><span>"I don't like coffee very much."</span></button>
+    <button class="mcq"><span class="key">D</span><span>"The weather is nice today."</span></button>
+    <div class="coach-tip mt-5"><div class="avatar">D</div><div class="bub">
+      <span class="lbl"><span class="spark">✨</span>Tips from P'Doy</span>
+      <p class="text-[13px] leading-6 text-slate-800">หัวใจคือ <strong>Scenario Memory</strong> — จำให้ได้ว่าเริ่มเรื่องคุยกันเรื่องอะไร ใครคุยกับใคร · ฟัง 1 ครั้งก่อน เปิด transcript เฉพาะตอนอยากอ่านตาม</p>
+    </div></div>
+  </div>
+  <!-- result -->
+  <div class="rounded-2xl bg-white ring-1 ring-slate-200 p-5 mt-4">
+    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">หลังจบ — ผลทีละข้อ</p>
+    <div class="flex items-center gap-4 mb-3">
+      <div class="text-center"><p class="text-4xl font-bold text-[#004AAD] leading-none">140</p><p class="text-xs text-slate-500">/ 160</p></div>
+      <p class="text-sm text-slate-600">ตอบถูก <strong class="text-emerald-600">7 / 8</strong> (88%)</p>
+    </div>
+    <div class="mcq correct" style="margin:0 0 8px"><span class="key">✓</span><span class="text-sm">ข้อ 5 — เลือกถูก · มีปุ่มเล่นเสียงซ้ำ</span></div>
+    <div class="mcq wrong" style="margin:0"><span class="key">✕</span><span class="text-sm">ข้อ 6 — คุณตอบ B · <strong>ที่ถูก A</strong> + คำอธิบายไทย · กด "แก้เฉพาะข้อผิด" ได้</span></div>
+  </div>
+</div></div>
+
+<!-- ════ DIALOGUE → SUMMARY ════ -->
+<div class="stage-label">2/2 · Dialogue → summary — ฟัง/อ่านแล้วเขียนสรุป</div>
+<div class="stage-wrap"><div class="mx-auto max-w-2xl px-6">
+  <div class="rounded-2xl s-tint ring-1 ring-sky-200 p-5 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-xl text-white">💬</div>
+        <div><p class="text-[10px] font-bold uppercase tracking-wider text-sky-700">Dialogue → summary · รอบ 1 · Easy</p>
+        <h2 class="text-lg font-bold">Set 3 · เขียนสรุป</h2></div>
+      </div>
+      <div class="flex gap-1.5">
+        <span class="pill bg-sky-100 text-sky-700">ตรงประเด็น 40%</span>
+        <span class="pill bg-rose-100 text-rose-700">ไวยากรณ์ 30%</span>
+      </div>
+    </div>
+    <!-- scenario -->
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-3">
+      <p class="text-[11px] font-bold uppercase text-slate-500 mb-2">📌 สถานการณ์ (5 ประโยค)</p>
+      <ol class="list-decimal pl-5 text-sm text-slate-700 space-y-1">
+        <li>Two coworkers are planning a team lunch.</li>
+        <li>They disagree about the restaurant choice.</li>
+        <li>One prefers Thai food; the other wants pizza.</li>
+        <li>They consider everyone's dietary needs.</li>
+        <li>Finally they decide to ask the whole team.</li>
+      </ol>
+    </div>
+    <!-- dialogue chat -->
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-3">
+      <p class="text-[11px] font-bold uppercase text-slate-500 mb-3">🗣️ บทสนทนา</p>
+      <div class="space-y-2.5">
+        <div class="flex gap-2 items-start"><span class="spk bg-sky-500">A</span><div class="bubble-l"><strong class="text-sky-700 text-xs block">Anna</strong>How about Thai food for the team lunch?</div></div>
+        <div class="flex gap-2 items-start flex-row-reverse"><span class="spk bg-amber-500">B</span><div class="bubble-r"><strong class="text-amber-700 text-xs block">Ben</strong>Hmm, not everyone likes spicy food though.</div></div>
+        <div class="flex gap-2 items-start"><span class="spk bg-sky-500">A</span><div class="bubble-l"><strong class="text-sky-700 text-xs block">Anna</strong>Good point. Maybe we should ask the team first.</div></div>
+      </div>
+    </div>
+    <!-- write summary -->
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4">
+      <p class="text-[11px] font-bold uppercase text-slate-500 mb-2">✍️ เขียนสรุปเป็นภาษาอังกฤษ (ขั้นต่ำ 20 คำ)</p>
+      <textarea class="ta" rows="4" placeholder="Write your English summary — include the main problem, what they agree/disagree on, and the outcome…"></textarea>
+      <div class="flex items-center justify-between mt-2">
+        <span class="text-xs text-slate-500">ความคืบหน้า</span>
+        <span class="text-xs font-bold text-slate-400">0 / 20 คำ</span>
+      </div>
+      <div class="h-2 rounded-full bg-slate-100 overflow-hidden mt-1"><div class="h-full bg-[#004AAD]" style="width:0%"></div></div>
+      <button class="btn-primary mt-4" disabled>ส่งให้ตรวจ — ตรวจให้ทันที →</button>
+    </div>
+    <div class="coach-tip mt-5"><div class="avatar">D</div><div class="bub">
+      <span class="lbl"><span class="spark">✨</span>Tips from P'Doy</span>
+      <p class="text-[13px] leading-6 text-slate-800">สรุปให้ครบ 3 อย่าง: <strong>ปัญหาหลัก · เห็นด้วย/ไม่เห็นด้วยเรื่องอะไร · ผลสรุป</strong> · เขียนด้วยคำของตัวเอง อย่าลอกประโยคเดิม</p>
+    </div></div>
+  </div>
+  <div class="rounded-2xl bg-white ring-1 ring-slate-200 p-5 mt-4">
+    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">หลังส่ง — คะแนน + rubric</p>
+    <div class="flex items-center gap-4">
+      <div class="text-center"><p class="text-4xl font-bold text-[#004AAD] leading-none">128</p><p class="text-xs text-slate-500">/ 160</p></div>
+      <div class="flex-1 grid grid-cols-2 gap-2 text-xs">
+        <span class="pill bg-sky-100 text-sky-700">ตรงประเด็น 40%</span>
+        <span class="pill bg-rose-100 text-rose-700">ไวยากรณ์ 30%</span>
+        <span class="pill bg-emerald-100 text-emerald-700">ความต่อเนื่อง 20%</span>
+        <span class="pill bg-amber-100 text-amber-700">คำศัพท์ 10%</span>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500 mt-3">+ feedback ราย criterion (ไทย/อังกฤษ) · แก้ไวยากรณ์ · transcript ไฮไลต์ · ปุ่ม "ทำชุดอื่น"</p>
+  </div>
+</div></div>
+
+<div class="bg-white px-6 py-6"><div class="mx-auto max-w-2xl text-xs text-slate-700 leading-7">
+  <p><strong class="text-[#004AAD]">หลักที่ใช้ (Krug + Cagan):</strong></p>
+  <ul class="mt-2 space-y-1.5 pl-4 list-disc">
+    <li><strong>ปุ่มฟังเหลืองเด่น</strong> ตรงกลาง — รู้ทันทีว่าต้องกดฟังก่อน · transcript ซ่อนได้</li>
+    <li><strong>Progress 8 ขีด</strong> (scenario + 3 + 5) — เห็นว่าเหลือกี่ข้อใน Interactive conversation</li>
+    <li><strong>บทสนทนาเป็นแชทบับเบิล</strong> ซ้าย/ขวา แยกผู้พูดด้วยสี + อักษรย่อ — อ่านง่ายกว่า list เดิม</li>
+    <li><strong>Word counter + progress bar</strong> ติดช่องเขียน · ปุ่มส่ง disabled จนถึง 20 คำ</li>
+    <li>ไฮไลต์ถูก=เขียว ผิด=แดง + คำว่า "ที่ถูก" ภาษาไทย · ไม่มี brutalist/gradient</li>
+  </ul>
+</div></div>
+</body></html>

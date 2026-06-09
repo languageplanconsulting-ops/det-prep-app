@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Practice v2-A · Status Bar (Krug)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "IBM Plex Sans Thai", sans-serif; background:#f7f8fc; color:#0f172a; }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <a href="/practice-v2-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← เปรียบเทียบ</a>
+    <span class="text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">V2-A · Status Bar (Krug)</span>
+  </nav>
+
+  <main class="mx-auto max-w-6xl px-6 py-8 space-y-6">
+
+    <!-- KRUG #1: "Where am I?" answered in 1 second.
+         Big status bar with 3 numbers + nothing else. -->
+    <section class="grid gap-4 md:grid-cols-3">
+      <div class="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+        <p class="text-xs font-semibold text-slate-500">คะแนน DET ล่าสุด</p>
+        <p class="mt-1 text-5xl font-bold text-[#004AAD]">105<span class="text-2xl text-slate-400">/160</span></p>
+        <p class="mt-1 text-xs text-slate-600">สอบเมื่อ 8 มิ.ย. · 2 วันที่แล้ว · <span class="text-emerald-600 font-semibold">+12</span> จากครั้งก่อน</p>
+      </div>
+      <div class="rounded-2xl bg-[#004AAD] text-white p-5">
+        <p class="text-xs font-semibold text-white/80">วันสอบจริง</p>
+        <p class="mt-1 text-5xl font-bold text-[#FFCC00]">23 <span class="text-2xl text-white/70">วัน</span></p>
+        <p class="mt-1 text-xs text-white/85">3 ก.ค. 2026 · เป้าหมาย <strong class="text-[#FFCC00]">120 คะแนน</strong></p>
+      </div>
+      <div class="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+        <p class="text-xs font-semibold text-slate-500">ฝึกสะสมสัปดาห์นี้</p>
+        <p class="mt-1 text-5xl font-bold text-emerald-600">2ชม 40น</p>
+        <p class="mt-1 text-xs text-slate-600">🔥 ฝึกต่อเนื่อง 5 วัน · เฉลี่ย 30 นาที/วัน</p>
+      </div>
+    </section>
+
+    <!-- KRUG #2: One obvious next action. -->
+    <section class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 flex items-center gap-4">
+      <img src="/pidoy.png" class="h-14 w-14 rounded-full ring-2 ring-[#FFCC00] object-cover">
+      <div class="flex-1">
+        <p class="text-xs font-semibold text-[#004AAD]">พี่ดอยแนะนำสำหรับวันนี้</p>
+        <h2 class="text-lg font-bold mt-0.5">เทคนิคที่ 5 · พูดเกี่ยวกับภาพ <span class="text-xs font-normal text-slate-500">· 15 นาที</span></h2>
+      </div>
+      <a class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-6 py-3 text-sm font-bold hover:opacity-90 transition">เริ่มเลย →</a>
+    </section>
+
+    <!-- CAGAN: Outcome-focused categorisation that mirrors how DET scores
+         the test. Tool labels are Thai-first, English-second. -->
+    <section class="space-y-5">
+
+      <!-- COMPREHENSION -->
+      <div>
+        <div class="flex items-end justify-between mb-2">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-[#004AAD]">📖 ความเข้าใจ · COMPREHENSION</h3>
+          <span class="text-xs text-slate-500">ทักษะ อ่าน + ฟัง</span>
+        </div>
+        <div class="grid gap-3 md:grid-cols-4">
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">📖 บทอ่าน</p>
+            <p class="text-xs text-slate-500 mt-0.5">Reading · 5 รอบ</p>
+          </a>
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">📚 คำศัพท์</p>
+            <p class="text-xs text-slate-500 mt-0.5">Vocabulary in Context</p>
+          </a>
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">🎧 บทสนทนา</p>
+            <p class="text-xs text-slate-500 mt-0.5">Interactive Conversation</p>
+          </a>
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">💬 ฟัง + สรุป</p>
+            <p class="text-xs text-slate-500 mt-0.5">Dialogue → Summary · AI</p>
+          </a>
+        </div>
+      </div>
+
+      <!-- PRODUCTION -->
+      <div>
+        <div class="flex items-end justify-between mb-2">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-[#004AAD]">✍️ การสื่อสาร · PRODUCTION</h3>
+          <span class="text-xs text-slate-500">ทักษะ เขียน + พูด · AI ตรวจ</span>
+        </div>
+        <div class="grid gap-3 md:grid-cols-3">
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">📸 เขียนเกี่ยวกับภาพ</p>
+            <p class="text-xs text-slate-500 mt-0.5">Write about Photo</p>
+          </a>
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">📄 อ่านแล้วเขียน</p>
+            <p class="text-xs text-slate-500 mt-0.5">Read &amp; Write</p>
+          </a>
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">🎤 พูดเกี่ยวกับภาพ</p>
+            <p class="text-xs text-slate-500 mt-0.5">Speak about Photo</p>
+          </a>
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">📑 อ่านแล้วพูด</p>
+            <p class="text-xs text-slate-500 mt-0.5">Read &amp; Speak</p>
+          </a>
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">🗨️ การสนทนา</p>
+            <p class="text-xs text-slate-500 mt-0.5">Interactive Speaking</p>
+          </a>
+        </div>
+      </div>
+
+      <!-- LITERACY -->
+      <div>
+        <div class="flex items-end justify-between mb-2">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-[#004AAD]">📝 พื้นฐาน · LITERACY</h3>
+          <span class="text-xs text-slate-500">ทำซ้ำได้ไม่จำกัด</span>
+        </div>
+        <div class="grid gap-3 md:grid-cols-3">
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">🎧 Dictation</p>
+            <p class="text-xs text-slate-500 mt-0.5">ฟังแล้วพิมพ์ตาม</p>
+          </a>
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">✏️ Fill in the Blank</p>
+            <p class="text-xs text-slate-500 mt-0.5">เติมคำที่หาย</p>
+          </a>
+          <a class="rounded-xl bg-white p-3 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+            <p class="text-sm font-bold">🔤 Real Word</p>
+            <p class="text-xs text-slate-500 mt-0.5">แยกคำจริง/ปลอม</p>
+          </a>
+        </div>
+      </div>
+
+      <!-- MINI LESSONS (newly public) -->
+      <div>
+        <div class="flex items-end justify-between mb-2">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-[#004AAD]">🎯 บทเรียนสั้น · MINI LESSONS</h3>
+          <span class="text-xs bg-[#FFCC00] text-slate-900 font-bold px-2 py-0.5 rounded-full">ใหม่!</span>
+        </div>
+        <a class="block rounded-xl bg-[#004AAD] text-white p-5 hover:opacity-95 transition">
+          <div class="flex items-center gap-4">
+            <img src="/pidoy.png" class="h-14 w-14 rounded-full ring-2 ring-[#FFCC00] object-cover">
+            <div class="flex-1">
+              <p class="text-xs font-bold text-[#FFCC00]">15 เทคนิคทำคะแนน DET</p>
+              <h4 class="text-lg font-bold mt-0.5">บทเรียนสั้น 15 นาที · จากพี่ดอย</h4>
+              <p class="text-xs text-white/85 mt-1">เลือกเทคนิคไหนก็ได้ · เปิดให้ทุกคนแล้ว</p>
+            </div>
+            <span class="text-2xl">→</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- KRUG: time-spent line graph. -->
+    <section class="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+      <div class="flex items-end justify-between mb-3">
+        <div>
+          <h3 class="text-sm font-bold">⏱ เวลาฝึก · เลือกช่วงเวลา</h3>
+          <p class="text-xs text-slate-500 mt-0.5">รวมเวลาที่ใช้ในเครื่องมือทุกประเภท</p>
+        </div>
+        <div class="flex gap-1 text-xs">
+          <button class="rounded-lg px-3 py-1 bg-slate-100 hover:bg-slate-200">วัน</button>
+          <button class="rounded-lg px-3 py-1 bg-[#004AAD] text-white">สัปดาห์</button>
+          <button class="rounded-lg px-3 py-1 bg-slate-100 hover:bg-slate-200">เดือน</button>
+          <button class="rounded-lg px-3 py-1 bg-slate-100 hover:bg-slate-200">ปี</button>
+        </div>
+      </div>
+      <!-- inline SVG line chart -->
+      <svg viewBox="0 0 600 180" class="w-full h-auto">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#004AAD" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#004AAD" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- grid lines -->
+        <line x1="0" y1="40" x2="600" y2="40" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+        <line x1="0" y1="90" x2="600" y2="90" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+        <line x1="0" y1="140" x2="600" y2="140" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+        <!-- area -->
+        <path d="M 30 130 L 110 80 L 190 110 L 270 60 L 350 90 L 430 50 L 510 70 L 570 30 L 570 160 L 30 160 Z" fill="url(#g1)"/>
+        <!-- line -->
+        <path d="M 30 130 L 110 80 L 190 110 L 270 60 L 350 90 L 430 50 L 510 70 L 570 30" fill="none" stroke="#004AAD" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- dots -->
+        <circle cx="30" cy="130" r="5" fill="#004AAD"/>
+        <circle cx="110" cy="80" r="5" fill="#004AAD"/>
+        <circle cx="190" cy="110" r="5" fill="#004AAD"/>
+        <circle cx="270" cy="60" r="5" fill="#004AAD"/>
+        <circle cx="350" cy="90" r="5" fill="#004AAD"/>
+        <circle cx="430" cy="50" r="5" fill="#004AAD"/>
+        <circle cx="510" cy="70" r="5" fill="#004AAD"/>
+        <circle cx="570" cy="30" r="6" fill="#FFCC00" stroke="#004AAD" stroke-width="3"/>
+        <!-- x labels -->
+        <text x="30" y="175" text-anchor="middle" font-size="11" fill="#64748b">จ.</text>
+        <text x="110" y="175" text-anchor="middle" font-size="11" fill="#64748b">อ.</text>
+        <text x="190" y="175" text-anchor="middle" font-size="11" fill="#64748b">พ.</text>
+        <text x="270" y="175" text-anchor="middle" font-size="11" fill="#64748b">พฤ.</text>
+        <text x="350" y="175" text-anchor="middle" font-size="11" fill="#64748b">ศ.</text>
+        <text x="430" y="175" text-anchor="middle" font-size="11" fill="#64748b">ส.</text>
+        <text x="510" y="175" text-anchor="middle" font-size="11" fill="#64748b">อา.</text>
+        <text x="570" y="175" text-anchor="middle" font-size="11" fill="#0f172a" font-weight="700">วันนี้</text>
+      </svg>
+      <p class="text-xs text-slate-500 mt-2 text-center">📈 ฝึกเฉลี่ย 30 นาที/วัน · เพิ่มขึ้น 15% จากสัปดาห์ก่อน</p>
+    </section>
+
+    <!-- Diagnosis + Mock -->
+    <div class="grid gap-3 md:grid-cols-2">
+      <a class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 hover:ring-[#004AAD] transition flex items-center gap-3">
+        <span class="text-3xl">🩺</span>
+        <div>
+          <p class="text-sm font-bold">Mini Diagnosis</p>
+          <p class="text-xs text-slate-500">15 นาที · ทำซ้ำได้ฟรี</p>
+        </div>
+      </a>
+      <a class="rounded-2xl bg-[#004AAD] text-white p-4 hover:opacity-90 transition flex items-center gap-3">
+        <span class="text-3xl">🏆</span>
+        <div>
+          <p class="text-sm font-bold">Full Mock Test</p>
+          <p class="text-xs text-white/85">~45 นาที · จำลอง DET</p>
+        </div>
+      </a>
+    </div>
+
+    <aside class="rounded-xl bg-white p-4 ring-1 ring-slate-200 text-xs text-slate-700 leading-7">
+      <strong class="text-[#004AAD]">หลัก UX ที่ใช้:</strong>
+      <em>Krug</em> — "Where am I?" ตอบใน 1 วินาทีด้วยสถานะ 3 อัน · ไม่มีคำเกินจำเป็น ·
+      ทุกหมวดอ่านได้แบบ scan · <em>Cagan</em> — จัดตาม outcome ของ DET (Comprehension/Production/Literacy) ไม่ใช่ "feature list"
+    </aside>
+  </main>
+</body>
+</html>

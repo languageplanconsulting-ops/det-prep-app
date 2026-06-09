@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Practice v2-C · Two Column (Inline Difficulty)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "IBM Plex Sans Thai", sans-serif; background:#f7f8fc; color:#0f172a; }
+    .tool-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; border-radius: 10px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(0,0,0,0.04);
+      transition: all 0.12s ease;
+    }
+    .tool-row:hover { background: white; border-color: #004AAD; transform: translateX(2px); }
+    .tool-row .arrow { color: #cbd5e1; }
+    .tool-row:hover .arrow { color: #004AAD; }
+
+    /* Difficulty pill — appears in EVERY category header so the skill ladder
+       info is right where the user makes the click decision. */
+    .diff-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 9999px;
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .diff-pill::before {
+      content: ""; width: 6px; height: 6px; border-radius: 9999px;
+    }
+    .diff-easy   { background:#dcfce7; color:#166534; }
+    .diff-easy::before   { background:#16a34a; }
+    .diff-medium { background:#fef3c7; color:#92400e; }
+    .diff-medium::before { background:#f59e0b; }
+    .diff-hard   { background:#fee2e2; color:#991b1b; }
+    .diff-hard::before   { background:#dc2626; }
+
+    /* "Tips from P'Doy" — designed as an actual speech bubble with พี่ดอย's
+       photo as the speaker so it reads like a thought, not a generic info box.
+       Same shape across all categories (Krug: convention). */
+    .coach-tip {
+      margin-top: 16px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .coach-tip .coach-avatar {
+      width: 44px; height: 44px; border-radius: 9999px;
+      flex-shrink: 0;
+      background: #004AAD;
+      color: #FFCC00;
+      display: flex; align-items: center; justify-content: center;
+      font-family: "IBM Plex Sans Thai", sans-serif;
+      font-weight: 800; font-size: 20px;
+      border: 2.5px solid #FFCC00;
+      box-shadow: 0 3px 8px rgba(0, 74, 173, 0.18);
+    }
+    .coach-tip .coach-bubble {
+      flex: 1;
+      position: relative;
+      background: white;
+      padding: 11px 14px 12px;
+      border-radius: 14px;
+      border-top-left-radius: 4px;          /* speech-tail shape */
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+      border: 1px solid rgba(0, 74, 173, 0.08);
+    }
+    /* Small triangle pointer connecting bubble to avatar */
+    .coach-tip .coach-bubble::before {
+      content: "";
+      position: absolute;
+      top: 14px; left: -7px;
+      width: 0; height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-right: 7px solid white;
+      filter: drop-shadow(-1px 0 0 rgba(0, 74, 173, 0.08));
+    }
+    .coach-tip .coach-label {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 800; line-height: 1;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: #004AAD;
+      background: #FFCC00;                 /* flat yellow, no gradient */
+      padding: 5px 11px; border-radius: 9999px;
+      margin-bottom: 8px;
+    }
+    .coach-tip .coach-label .spark { font-size: 11px; line-height: 1; }
+    .coach-tip .coach-text {
+      font-size: 13px;
+      line-height: 23px;
+      color: #1e293b;
+    }
+    .coach-tip .coach-text strong { color: #0f172a; }
+    .coach-tip .coach-text a { color: #004AAD; font-weight: 700; }
+    .coach-tip .coach-text a:hover { text-decoration: underline; }
+    .step-circle {
+      width: 32px; height: 32px; border-radius: 9999px;
+      background:#004AAD; color:#FFCC00;
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 800; font-size: 14px;
+      flex-shrink:0;
+    }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <a href="/practice-v2-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← เปรียบเทียบ</a>
+    <span class="text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">V2-C · Inline Difficulty</span>
+  </nav>
+
+  <main class="mx-auto max-w-7xl px-6 py-6">
+
+    <!-- ═══════════════════════════════════════════
+         OUTCOME HERO (Cagan: outcome-first) — the FIRST thing
+         the user sees. Answers "am I on track to my goal?"
+         ═══════════════════════════════════════════ -->
+    <div class="mb-4 rounded-2xl bg-white ring-1 ring-slate-200 p-5 sm:p-6">
+      <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex-1">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">เส้นทางของคุณ</p>
+          <div class="mt-2 flex items-end gap-3">
+            <div>
+              <p class="text-[11px] text-slate-500">คะแนน Mock ล่าสุด</p>
+              <p class="text-4xl font-bold leading-none text-[#004AAD]">105</p>
+            </div>
+            <span class="mb-1 text-2xl text-slate-300">→</span>
+            <div>
+              <p class="text-[11px] text-slate-500">เป้าหมาย</p>
+              <p class="text-4xl font-bold leading-none text-emerald-600">120</p>
+            </div>
+            <span class="mb-1.5 ml-1 inline-block rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">อีก 15 คะแนน</span>
+          </div>
+          <!-- progress on a 0–160 scale with a target tick -->
+          <div class="relative mt-4 h-2.5 max-w-md rounded-full bg-slate-100">
+            <div class="h-full rounded-full bg-[#004AAD]" style="width:65.6%"></div>
+            <div class="absolute -top-1 h-[18px] w-[3px] rounded bg-emerald-600" style="left:75%"></div>
+          </div>
+          <div class="mt-1 flex max-w-md justify-between text-[10px] text-slate-400">
+            <span>0</span><span class="font-bold text-emerald-600">▲ เป้า 120</span><span>160</span>
+          </div>
+          <p class="mt-2 text-xs font-semibold text-emerald-600">+12 จาก Mock ครั้งก่อน · มาถูกทางแล้ว 📈</p>
+        </div>
+        <div class="rounded-xl bg-[#004AAD] px-6 py-4 text-center text-white sm:min-w-[150px]">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">เหลือถึงวันสอบ</p>
+          <p class="mt-1 text-4xl font-bold leading-none text-[#FFCC00]">23</p>
+          <p class="mt-1 text-xs text-white/80">วัน · 3 ก.ค. 2026</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY-STATE variant (shown only when no Mock yet). Labeled here so you
+         can see both states side by side in the preview. -->
+    <div class="mb-4 rounded-xl border border-dashed border-slate-300 p-2">
+      <p class="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">↓ ตัวอย่าง: ผู้ที่ยังไม่เคยทำ Mock จะเห็นแบบนี้แทน</p>
+      <div class="flex flex-col items-start gap-4 rounded-xl bg-[#fff7d1] p-5 ring-1 ring-[#FFCC00] sm:flex-row sm:items-center">
+        <div class="flex-1">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">เริ่มต้นที่นี่</p>
+          <h3 class="mt-1 text-lg font-bold">ยังไม่มีคะแนน Mock</h3>
+          <p class="mt-1 text-sm text-slate-700">ทำ Full Mock Test ครั้งแรกเพื่อดูคะแนนเริ่มต้น แล้วพี่ดอยจะช่วยวางแผนฝึกให้ตรงจุด</p>
+        </div>
+        <a class="rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">🏆 ทำ Mock Test →</a>
+      </div>
+    </div>
+
+    <!-- Strategy strip — show the ranking ONCE at the top, then let each
+         category remind the user inline. -->
+    <div class="mb-5 flex flex-wrap items-center gap-2 text-xs">
+      <span class="font-semibold text-slate-600">เริ่มฝึกจากซ้ายไปขวา · ได้คะแนนเพิ่มเร็วสุด:</span>
+      <span class="diff-pill diff-easy">✍️ Production</span>
+      <span class="text-slate-400">→</span>
+      <span class="diff-pill diff-easy">📝 Literacy</span>
+      <span class="text-slate-400">→</span>
+      <span class="diff-pill diff-medium">🎧 Conversation</span>
+      <span class="text-slate-400">→</span>
+      <span class="diff-pill diff-medium">📖 Reading</span>
+      <span class="text-slate-400">→</span>
+      <span class="diff-pill diff-hard">📚 Vocabulary</span>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1fr,300px]">
+
+      <!-- ═══════════════════════════════════════════
+           LEFT: 4 colour-coded category sections
+           Each card now carries its own difficulty pill
+           + a single-line พี่ดอย strategic tip footer.
+           ═══════════════════════════════════════════ -->
+      <section class="space-y-5 order-2 lg:order-1">
+
+        <!-- ───── PRODUCTION (violet · easiest) ───── -->
+        <div class="rounded-2xl bg-violet-50 p-5 ring-1 ring-violet-200">
+          <header class="mb-4 flex flex-wrap items-end justify-between gap-2 border-b border-violet-200 pb-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-xl text-white shadow-sm">✍️</div>
+              <div>
+                <h3 class="text-base font-bold text-violet-900">Production</h3>
+                <p class="text-[11px] text-violet-700">การสื่อสาร — เขียน + พูด · ตรวจให้ทันที</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="diff-pill diff-easy">ง่ายสุด</span>
+              <span class="text-xs text-violet-700 font-semibold">5 รูปแบบข้อสอบ</span>
+            </div>
+          </header>
+          <div class="grid gap-2 sm:grid-cols-2">
+            <a class="tool-row">
+              <span><strong class="text-sm">📸 Write about photo</strong><br/><span class="text-xs text-slate-600">เขียนบรรยายภาพ · 50 คำ</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+            <a class="tool-row">
+              <span><strong class="text-sm">📄 Read, then write</strong><br/><span class="text-xs text-slate-600">อ่านแล้วเขียนสรุป</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+            <a class="tool-row">
+              <span><strong class="text-sm">🎤 Speak about photo</strong><br/><span class="text-xs text-slate-600">พูดบรรยายภาพ · 30 วินาที</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+            <a class="tool-row">
+              <span><strong class="text-sm">📑 Read, then speak</strong><br/><span class="text-xs text-slate-600">อ่านแล้วพูดด้วยคำของคุณ</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+            <a class="tool-row sm:col-span-2">
+              <span><strong class="text-sm">🗨️ Interactive speaking</strong><br/><span class="text-xs text-slate-600">การสนทนาแบบโต้ตอบ · 6 turn</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+          </div>
+          <div class="coach-tip">
+            <div class="coach-avatar">D</div>
+            <div class="coach-bubble">
+              <span class="coach-label"><span class="spark">✨</span>Tips from P'Doy</span>
+              <p class="coach-text">
+                <strong class="text-violet-900">เตรียม script ล่วงหน้าได้</strong> — แก้จุดอ่อนได้ตอนนี้เลย จึงเป็นทักษะที่ <strong>เพิ่มคะแนนเร็วที่สุด</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── LITERACY (amber · easy) — moved up so easy skills cluster ───── -->
+        <div class="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200">
+          <header class="mb-4 flex flex-wrap items-end justify-between gap-2 border-b border-amber-200 pb-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-600 text-xl text-white shadow-sm">📝</div>
+              <div>
+                <h3 class="text-base font-bold text-amber-900">Literacy</h3>
+                <p class="text-[11px] text-amber-700">พื้นฐานการเข้าใจและคำศัพท์ · ทำซ้ำได้</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="diff-pill diff-easy">ง่าย</span>
+              <span class="text-xs text-amber-700 font-semibold">3 รูปแบบข้อสอบ</span>
+            </div>
+          </header>
+          <div class="grid gap-2 sm:grid-cols-3">
+            <a class="tool-row">
+              <span><strong class="text-sm">🎧 Dictation</strong><br/><span class="text-xs text-slate-600">ฟังแล้วพิมพ์ตาม</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+            <a class="tool-row">
+              <span><strong class="text-sm">✏️ Fill in the blank</strong><br/><span class="text-xs text-slate-600">เติมคำที่หาย</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+            <a class="tool-row">
+              <span><strong class="text-sm">🔤 Real word</strong><br/><span class="text-xs text-slate-600">แยกคำจริง/ปลอม</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+          </div>
+          <div class="coach-tip">
+            <div class="coach-avatar">D</div>
+            <div class="coach-bubble">
+              <span class="coach-label"><span class="spark">✨</span>Tips from P'Doy</span>
+              <p class="coach-text">
+                โดยเฉพาะ <strong>Dictation</strong> — ระวังแค่ <strong>-ed, -es, comma</strong> ก็ได้คะแนนเพิ่ม
+                <a>→ มีบทเรียนสั้นแล้ว</a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── CONVERSATION (sky · medium) ───── -->
+        <div class="rounded-2xl bg-sky-50 p-5 ring-1 ring-sky-200">
+          <header class="mb-4 flex flex-wrap items-end justify-between gap-2 border-b border-sky-200 pb-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-xl text-white shadow-sm">🎧</div>
+              <div>
+                <h3 class="text-base font-bold text-sky-900">Conversation</h3>
+                <p class="text-[11px] text-sky-700">การฟัง — บทสนทนา + สรุป</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="diff-pill diff-medium">ปานกลาง</span>
+              <span class="text-xs text-sky-700 font-semibold">2 รูปแบบข้อสอบ</span>
+            </div>
+          </header>
+          <div class="grid gap-2 sm:grid-cols-2">
+            <a class="tool-row">
+              <span><strong class="text-sm">🎧 Interactive conversation</strong><br/><span class="text-xs text-slate-600">ฟังบทสนทนา · 5 ฉาก</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+            <a class="tool-row">
+              <span><strong class="text-sm">💬 Dialogue → summary</strong><br/><span class="text-xs text-slate-600">ฟังแล้วเขียนสรุป · ตรวจให้ทันที</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+          </div>
+          <div class="coach-tip">
+            <div class="coach-avatar">D</div>
+            <div class="coach-bubble">
+              <span class="coach-label"><span class="spark">✨</span>Tips from P'Doy</span>
+              <p class="coach-text">
+                คำศัพท์พื้นฐาน — เน้น <strong>จำ scenario + คำศัพท์ชีวิตในมหาวิทยาลัย</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── COMPREHENSION (emerald · medium-hard) ───── -->
+        <div class="rounded-2xl bg-emerald-50 p-5 ring-1 ring-emerald-200">
+          <header class="mb-4 flex flex-wrap items-end justify-between gap-2 border-b border-emerald-200 pb-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-xl text-white shadow-sm">📖</div>
+              <div>
+                <h3 class="text-base font-bold text-emerald-900">Comprehension</h3>
+                <p class="text-[11px] text-emerald-700">การเข้าใจ — อ่าน + คำศัพท์</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="diff-pill diff-medium">Reading · ปานกลาง</span>
+              <span class="diff-pill diff-hard">Vocab · ยากสุด</span>
+              <span class="text-xs text-emerald-700 font-semibold">2 รูปแบบข้อสอบ</span>
+            </div>
+          </header>
+          <div class="grid gap-2 sm:grid-cols-2">
+            <a class="tool-row">
+              <span><strong class="text-sm">📖 Reading</strong><br/><span class="text-xs text-slate-600">บทอ่าน · 5 รอบ · หา title + MCQ</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+            <a class="tool-row">
+              <span><strong class="text-sm">📚 Vocabulary</strong><br/><span class="text-xs text-slate-600">คำศัพท์ในบริบท · เลือกคำให้ตรง</span></span>
+              <span class="arrow text-base">→</span>
+            </a>
+          </div>
+          <div class="coach-tip">
+            <div class="coach-avatar">D</div>
+            <div class="coach-bubble">
+              <span class="coach-label"><span class="spark">✨</span>Tips from P'Doy</span>
+              <p class="coach-text">
+                <strong>Reading</strong> — เรียนแยก <strong>main idea ↔ specific idea</strong> ให้ได้ก่อน
+                <a>→ มีบทเรียนสั้น</a> ·
+                ส่วน <strong class="text-red-700">Vocabulary</strong> มี 100,000+ คำ ใช้เวลานานสุด แต่ส่งผลต่อทุกทักษะ — เก็บทีละนิดทุกวัน
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── MINI LESSONS (newly public) ───── -->
+        <a class="block rounded-2xl bg-[#fff7d1] p-5 ring-2 ring-[#FFCC00] hover:ring-[#004AAD] transition">
+          <div class="mb-3 flex items-center gap-3">
+            <span class="text-[10px] bg-[#FFCC00] text-slate-900 font-bold uppercase px-2 py-0.5 rounded">ใหม่ · เปิดให้ทุกคนแล้ว</span>
+            <span class="text-[11px] text-slate-600">15 เทคนิค · 15 นาที/บท</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-2 ring-[#FFCC00]">D</div>
+            <div class="flex-1">
+              <h3 class="text-base font-bold text-slate-900">🎯 บทเรียนสั้นจากพี่ดอย</h3>
+              <p class="text-xs text-slate-700 mt-1">เทคนิคทำคะแนน DET ให้สูงขึ้น · เลือกเทคนิคไหนก็ได้</p>
+            </div>
+            <span class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-4 py-2 text-sm font-bold">เริ่ม →</span>
+          </div>
+        </a>
+
+        <!-- Starter test + Mock test -->
+        <div class="grid gap-3 sm:grid-cols-2">
+          <a class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 hover:ring-emerald-500 transition flex items-center gap-3">
+            <span class="text-2xl">🩺</span>
+            <div>
+              <p class="text-sm font-bold">Mini Diagnosis</p>
+              <p class="text-xs text-slate-500">เช็คระดับ · 15 นาที · ฟรี</p>
+            </div>
+          </a>
+          <a class="rounded-2xl bg-[#004AAD] text-white p-4 hover:opacity-90 transition flex items-center gap-3">
+            <span class="text-2xl">🏆</span>
+            <div>
+              <p class="text-sm font-bold">Full Mock Test</p>
+              <p class="text-xs text-white/85">สนามจริง · ~45 นาที</p>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           RIGHT SIDEBAR (compact now — no skill ladder)
+           ═══════════════════════════════════════════ -->
+      <aside class="space-y-4 order-1 lg:order-2">
+
+        <!-- Compact persistent status — the rich version lives in the top hero;
+             this slim card keeps it visible while scrolling (Krug: persistent status). -->
+        <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Mock → เป้า</p>
+              <p class="text-lg font-bold text-[#004AAD]">105 <span class="text-slate-300">→</span> <span class="text-emerald-600">120</span></p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-500">เหลือ</p>
+              <p class="text-lg font-bold text-[#004AAD]">23 <span class="text-xs font-normal text-slate-500">วัน</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Streak -->
+        <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500">🔥 ต่อเนื่อง</span>
+            <span class="text-sm font-bold text-amber-600">5 วัน</span>
+          </div>
+        </div>
+
+        <!-- Mini time graph -->
+        <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-semibold text-slate-500">⏱ เวลาฝึก</p>
+            <div class="flex gap-1 text-[10px]">
+              <button class="rounded px-1.5 py-0.5 bg-slate-100">วัน</button>
+              <button class="rounded px-1.5 py-0.5 bg-[#004AAD] text-white">สัปดาห์</button>
+              <button class="rounded px-1.5 py-0.5 bg-slate-100">เดือน</button>
+              <button class="rounded px-1.5 py-0.5 bg-slate-100">ปี</button>
+            </div>
+          </div>
+          <p class="text-xl font-bold text-[#004AAD]">2 ชม 40 น</p>
+          <p class="text-[10px] text-slate-500 mb-2">เฉลี่ย 30 น/วัน</p>
+          <svg viewBox="0 0 280 80" class="w-full h-auto">
+            <path d="M 15 60 L 55 30 L 95 50 L 135 20 L 175 40 L 215 15 L 255 25 L 255 75 L 15 75 Z" fill="#004AAD" fill-opacity="0.10"/>
+            <path d="M 15 60 L 55 30 L 95 50 L 135 20 L 175 40 L 215 15 L 255 25" fill="none" stroke="#004AAD" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="255" cy="25" r="4" fill="#FFCC00" stroke="#004AAD" stroke-width="2"/>
+          </svg>
+        </div>
+
+        <!-- ───── HOW-TO-USE (3 steps only) ───── -->
+        <div class="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+          <header class="flex items-center gap-2 mb-3 pb-3 border-b border-slate-200">
+            <span class="text-xl">📘</span>
+            <div>
+              <h3 class="text-sm font-bold text-[#004AAD]">วิธีใช้แอปนี้ให้ได้ผลสุด</h3>
+              <p class="text-[10px] text-slate-500">อ่านครั้งเดียวพอ</p>
+            </div>
+          </header>
+
+          <!-- Step 1 -->
+          <div class="flex gap-3 mb-3">
+            <div class="step-circle">1</div>
+            <div class="flex-1">
+              <p class="text-sm font-bold">🏆 ทำ Mock Test ก่อน</p>
+              <p class="text-xs text-slate-600 mt-1 leading-6">
+                ใช้เวลา <strong>~1 ชั่วโมง</strong> · ครั้งแรกอาจรู้สึกงง <strong>ไม่ต้องห่วง</strong> —
+                นี่คือวิธีรู้จุดอ่อนของตัวเอง
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="flex gap-3 mb-3">
+            <div class="step-circle">2</div>
+            <div class="flex-1">
+              <p class="text-sm font-bold">📊 อ่านรายงานคะแนน</p>
+              <p class="text-xs text-slate-600 mt-1 leading-6">
+                ดูว่า <strong>จุดแข็ง / จุดอ่อน</strong> อยู่ที่ทักษะไหน
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="flex gap-3">
+            <div class="step-circle">3</div>
+            <div class="flex-1">
+              <p class="text-sm font-bold">🎯 ฝึกตามจุดอ่อน</p>
+              <p class="text-xs text-slate-600 mt-1 leading-6">
+                ในแต่ละหมวด <strong>พี่ดอยจะบอก</strong> ว่าควรเน้นอะไร · เริ่มจาก <strong>หมวดที่ "ง่ายสุด"</strong> ขึ้นก่อน
+              </p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <aside class="rounded-xl bg-white p-4 ring-1 ring-slate-200 text-xs text-slate-700 leading-7 mt-6">
+      <strong class="text-[#004AAD]">ที่แก้ไขรอบนี้ (ตามหนังสือ Krug + Cagan):</strong>
+      <ul class="mt-1.5 list-disc space-y-1 pl-4">
+        <li><strong>Outcome hero ด้านบนสุด</strong> (Cagan: outcome-first) — "105 → 120 · อีก 15 คะแนน · เหลือ 23 วัน" บอกทันทีว่า "ใกล้เป้าหรือยัง" + มี progress bar 0–160 พร้อม tick เป้าหมาย · มีเวอร์ชัน <strong>empty-state</strong> สำหรับคนยังไม่เคยทำ Mock</li>
+        <li><strong>ตัด gradient ออกหมด</strong> — ป้าย ✨ Tips from P'Doy เป็นเหลืองทึบ + จัดกึ่งกลางแล้ว · กราฟเวลาเปลี่ยนเป็น fill ทึบบางๆ</li>
+        <li><strong>Sidebar ไม่ซ้ำกับ hero</strong> — รวมการ์ดคะแนน+countdown เหลือการ์ดเดียวเล็กๆ (Krug: persistent status เห็นตอน scroll โดยไม่ซ้ำ)</li>
+        <li><strong>ใช้ D avatar ทุกที่</strong> แทนรูปถ่าย เพื่อความสม่ำเสมอ</li>
+        <li>tip footer ยังเป็น speech-bubble มี personality เหมือนพี่ดอยพูด</li>
+      </ul>
+    </aside>
+  </main>
+</body>
+</html>

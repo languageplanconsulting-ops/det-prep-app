@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Read &amp; Write · 3-screen preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "IBM Plex Sans Thai", sans-serif; background:#f7f8fc; color:#0f172a; }
+    .stage-label {
+      position: sticky; top: 0; z-index: 5;
+      background: #004AAD; color:#FFCC00;
+      padding: 8px 16px; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      box-shadow: 0 2px 10px rgba(0,74,173,0.18);
+    }
+    .stage-wrap { background:#f1f5f9; padding: 30px 0; border-bottom: 1px solid #e2e8f0; }
+
+    /* Tip bubble — same convention as practice page */
+    .coach-tip { display:flex; gap:12px; align-items:flex-start; }
+    .coach-tip .avatar {
+      width:44px; height:44px; border-radius:9999px;
+      flex-shrink:0;
+      background:#004AAD; color:#FFCC00;
+      display:flex; align-items:center; justify-content:center;
+      font-family:"IBM Plex Sans Thai", sans-serif;
+      font-weight:800; font-size:20px;
+      border:2.5px solid #FFCC00;
+      box-shadow:0 3px 8px rgba(0,74,173,0.18);
+    }
+    .coach-tip .bub {
+      flex:1; position:relative; background:white;
+      padding:11px 14px 12px; border-radius:14px; border-top-left-radius:4px;
+      box-shadow:0 4px 14px rgba(15,23,42,0.06);
+      border:1px solid rgba(0,74,173,0.08);
+    }
+    .coach-tip .bub::before {
+      content:""; position:absolute; top:14px; left:-7px; width:0; height:0;
+      border-top:6px solid transparent; border-bottom:6px solid transparent;
+      border-right:7px solid white;
+      filter: drop-shadow(-1px 0 0 rgba(0,74,173,0.08));
+    }
+    .coach-tip .lbl {
+      display:inline-flex; align-items:center; gap:5px;
+      font-size:9.5px; font-weight:800; letter-spacing:0.1em;
+      text-transform:uppercase; color:#004AAD;
+      background:linear-gradient(135deg,#FFCC00,#fde68a);
+      padding:3px 8px 3px 6px; border-radius:9999px; margin-bottom:7px;
+    }
+
+    /* Topic card — soft, scannable, Thai-prominent */
+    .topic-card {
+      background:white; border:1px solid #e2e8f0; border-radius:16px;
+      padding:16px; transition: all 0.15s ease;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .topic-card:hover {
+      border-color:#004AAD; transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(0,74,173,0.08);
+    }
+    .topic-card.done {
+      background: linear-gradient(180deg, #f0fdf4, white);
+      border-color:#a7f3d0;
+    }
+    .topic-tag {
+      display:inline-flex; align-items:center; gap:5px;
+      background:#eef4ff; color:#004AAD;
+      padding:3px 9px; border-radius:9999px;
+      font-size:10px; font-weight:800; letter-spacing:0.05em;
+    }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <span class="text-sm text-slate-500 hidden sm:inline">หน้าแรก · ฝึก · Mock test</span>
+    <a href="/practice-v2-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← เปรียบเทียบ</a>
+    <span class="text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">Preview · Read &amp; Write 3 screens</span>
+  </nav>
+
+  <div class="bg-white px-6 py-5 border-b border-slate-200">
+    <p class="text-xs text-[#004AAD] font-bold uppercase tracking-wider">Preview ก่อน implement</p>
+    <h1 class="mt-1 text-2xl font-bold">Read &amp; Write — 3 หน้าจอ</h1>
+    <p class="mt-2 text-sm text-slate-600 max-w-3xl">
+      เลื่อนลงไปดูทั้ง 3 หน้าจอเรียงกัน · ทุกหน้าใช้สไตล์เดียวกับหน้า Practice ใหม่ —
+      สี <strong class="text-[#004AAD]">#004AAD</strong> · ไม่มี brutalist · มี "Tips from P'Doy" speech bubble · Thai-first
+    </p>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════════
+       SCREEN 1 — Intro modal (popup)
+       Shown ตอนเข้ามาครั้งแรก หรือกดปุ่ม "?"
+       ╚══════════════════════════════════════════════════ -->
+  <div class="stage-label">หน้า 1/3 · Intro popup (เปิดครั้งแรก)</div>
+  <div class="stage-wrap">
+    <div class="mx-auto max-w-2xl px-6">
+      <!-- modal card with soft backdrop hint -->
+      <div class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-200 relative">
+        <!-- close X -->
+        <button class="absolute right-4 top-4 h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-base">✕</button>
+
+        <!-- Header with category -->
+        <div class="flex items-center gap-3 mb-4">
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-600 text-2xl text-white shadow-sm">📄</div>
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-violet-700">Production · 15 นาที</p>
+            <h2 class="text-xl font-bold leading-tight">Read &amp; Write — เขียนเรียงความสั้น</h2>
+          </div>
+        </div>
+
+        <!-- Coach speech bubble — the "thought" -->
+        <div class="coach-tip mb-5">
+          <div class="avatar">D</div>
+          <div class="bub">
+            <span class="lbl">✨ Tips from P'Doy</span>
+            <p class="text-[13px] leading-6 text-slate-800">
+              ข้อสอบนี้คุณจะได้ <strong>เลือกหัวข้อ essay 1 หัวข้อ</strong> ·
+              วางแผน <strong>1-5 นาที</strong> · เขียน <strong>อย่างน้อย 50 คำ</strong> ·
+              ระบบจะตรวจให้ทันที — เหมือนกับ Write about photo เลยครับ
+            </p>
+          </div>
+        </div>
+
+        <!-- "ทำยังไง" 3 numbered steps -->
+        <div class="rounded-xl bg-slate-50 ring-1 ring-slate-200 p-4 mb-5">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD] mb-3">📝 ทำยังไง</p>
+          <ol class="space-y-2.5 text-sm">
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-[11px] font-black text-[#FFCC00]">1</span>
+              <span>เลือก <strong>ชุดข้อสอบ</strong> ที่อยากทำ (Round 1-5)</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-[11px] font-black text-[#FFCC00]">2</span>
+              <span>เลือก <strong>หัวข้อเรียงความ</strong> (1 ใน 15-18 หัวข้อ)</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-[11px] font-black text-[#FFCC00]">3</span>
+              <span>วางแผน 1-5 นาที <strong>เขียนอย่างน้อย 50 คำ</strong> · ระบบตรวจให้ทันที</span>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Meta info -->
+        <div class="grid grid-cols-3 gap-2 mb-5 text-center">
+          <div class="rounded-lg bg-slate-50 p-2.5">
+            <p class="text-[10px] text-slate-500 font-semibold">เวลาแนะนำ</p>
+            <p class="mt-0.5 text-sm font-bold text-slate-900">~15 นาที</p>
+          </div>
+          <div class="rounded-lg bg-slate-50 p-2.5">
+            <p class="text-[10px] text-slate-500 font-semibold">ขั้นต่ำ</p>
+            <p class="mt-0.5 text-sm font-bold text-slate-900">50 คำ</p>
+          </div>
+          <div class="rounded-lg bg-slate-50 p-2.5">
+            <p class="text-[10px] text-slate-500 font-semibold">ตรวจโดย</p>
+            <p class="mt-0.5 text-sm font-bold text-slate-900">ตรวจทันที</p>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="flex flex-wrap items-center gap-3">
+          <button class="flex-1 rounded-xl bg-[#004AAD] text-[#FFCC00] px-6 py-3.5 text-sm font-bold hover:opacity-90 transition">
+            ▶ เลือกชุดข้อสอบ
+          </button>
+          <button class="rounded-xl bg-white ring-1 ring-slate-300 text-slate-700 px-4 py-3.5 text-xs font-semibold hover:bg-slate-50">
+            แตะ "?" เพื่อเปิดอีกครั้ง
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════════
+       SCREEN 2 — Round selector
+       ╚══════════════════════════════════════════════════ -->
+  <div class="stage-label">หน้า 2/3 · Round selector (หลังกดเริ่ม)</div>
+  <div class="stage-wrap">
+    <main class="mx-auto max-w-5xl px-6">
+      <!-- Header with breadcrumb -->
+      <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+        <a class="hover:text-[#004AAD]">ฝึก</a>
+        <span>›</span>
+        <a class="hover:text-[#004AAD]">Production</a>
+        <span>›</span>
+        <span class="text-slate-900 font-semibold">Read &amp; Write</span>
+      </div>
+
+      <div class="flex items-start gap-3 mb-2">
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-600 text-2xl text-white shadow-sm">📄</div>
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-violet-700">Production · เลือกชุดข้อสอบ</p>
+          <h1 class="text-2xl font-bold">Read &amp; Write — เขียนเรียงความสั้น</h1>
+        </div>
+        <button class="ml-auto rounded-full bg-slate-100 hover:bg-slate-200 h-9 w-9 flex items-center justify-center text-base" title="ดูคำแนะนำ">?</button>
+      </div>
+
+      <!-- Quick reminder -->
+      <div class="coach-tip mb-5">
+        <div class="avatar">D</div>
+        <div class="bub">
+          <span class="lbl">✨ Tips from P'Doy</span>
+          <p class="text-[13px] leading-6 text-slate-800">
+            <strong>ชุดที่ 1</strong> มีหัวข้อมากสุด — เริ่มที่นี่ก่อนได้เลย ·
+            แต่ละชุดเป็นอิสระ ไม่ต้องทำตามลำดับ
+          </p>
+        </div>
+      </div>
+
+      <!-- Round cards -->
+      <div class="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
+
+        <!-- Round 1 -->
+        <a class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-[#004AAD] hover:shadow-md transition block">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">ชุดที่ 1 · Round 1</p>
+            <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold uppercase px-2 py-0.5 rounded-full">พร้อมทำ</span>
+          </div>
+          <p class="text-4xl font-bold text-slate-900">18</p>
+          <p class="text-xs text-slate-500 mt-0.5">หัวข้อให้เลือก</p>
+          <div class="mt-3 pt-3 border-t border-slate-100">
+            <p class="text-[11px] text-slate-600">ทำแล้ว <strong class="text-slate-900">3 / 18</strong></p>
+            <div class="h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden">
+              <div class="h-full bg-[#004AAD] rounded-full" style="width:17%"></div>
+            </div>
+          </div>
+          <p class="mt-3 text-xs font-bold text-[#004AAD]">เลือกหัวข้อ →</p>
+        </a>
+
+        <!-- Round 2 -->
+        <a class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-[#004AAD] hover:shadow-md transition block">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">ชุดที่ 2</p>
+            <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold uppercase px-2 py-0.5 rounded-full">พร้อมทำ</span>
+          </div>
+          <p class="text-4xl font-bold text-slate-900">15</p>
+          <p class="text-xs text-slate-500 mt-0.5">หัวข้อให้เลือก</p>
+          <div class="mt-3 pt-3 border-t border-slate-100">
+            <p class="text-[11px] text-slate-600">ทำแล้ว <strong class="text-slate-900">0 / 15</strong></p>
+            <div class="h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden">
+              <div class="h-full bg-[#004AAD] rounded-full" style="width:0%"></div>
+            </div>
+          </div>
+          <p class="mt-3 text-xs font-bold text-[#004AAD]">เลือกหัวข้อ →</p>
+        </a>
+
+        <!-- Round 3 -->
+        <a class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-[#004AAD] hover:shadow-md transition block">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">ชุดที่ 3</p>
+            <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold uppercase px-2 py-0.5 rounded-full">พร้อมทำ</span>
+          </div>
+          <p class="text-4xl font-bold text-slate-900">15</p>
+          <p class="text-xs text-slate-500 mt-0.5">หัวข้อให้เลือก</p>
+          <div class="mt-3 pt-3 border-t border-slate-100">
+            <p class="text-[11px] text-slate-600">ทำแล้ว <strong class="text-slate-900">0 / 15</strong></p>
+            <div class="h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden"></div>
+          </div>
+          <p class="mt-3 text-xs font-bold text-[#004AAD]">เลือกหัวข้อ →</p>
+        </a>
+
+        <!-- Round 4 — empty -->
+        <div class="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200 opacity-70">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">ชุดที่ 4</p>
+            <span class="text-[10px] bg-slate-200 text-slate-500 font-bold uppercase px-2 py-0.5 rounded-full">เร็วๆ นี้</span>
+          </div>
+          <p class="text-4xl font-bold text-slate-400">0</p>
+          <p class="text-xs text-slate-400 mt-0.5">ยังไม่มีหัวข้อ</p>
+          <p class="mt-3 pt-3 text-[11px] text-slate-400 border-t border-slate-200">รอเปิดเร็วๆ นี้</p>
+        </div>
+
+        <!-- Round 5 — empty -->
+        <div class="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200 opacity-70">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">ชุดที่ 5</p>
+            <span class="text-[10px] bg-slate-200 text-slate-500 font-bold uppercase px-2 py-0.5 rounded-full">เร็วๆ นี้</span>
+          </div>
+          <p class="text-4xl font-bold text-slate-400">0</p>
+          <p class="text-xs text-slate-400 mt-0.5">ยังไม่มีหัวข้อ</p>
+          <p class="mt-3 pt-3 text-[11px] text-slate-400 border-t border-slate-200">รอเปิดเร็วๆ นี้</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ╔══════════════════════════════════════════════════
+       SCREEN 3 — Topic list (Round 1 with 18 topics)
+       ╚══════════════════════════════════════════════════ -->
+  <div class="stage-label">หน้า 3/3 · Topic list (ในชุดที่ 1)</div>
+  <div class="stage-wrap pb-12">
+    <main class="mx-auto max-w-5xl px-6">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+        <a class="hover:text-[#004AAD]">ฝึก</a>
+        <span>›</span>
+        <a class="hover:text-[#004AAD]">Production</a>
+        <span>›</span>
+        <a class="hover:text-[#004AAD]">Read &amp; Write</a>
+        <span>›</span>
+        <span class="text-slate-900 font-semibold">ชุดที่ 1</span>
+      </div>
+
+      <!-- Round header -->
+      <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-600 text-2xl text-white shadow-sm">📄</div>
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-violet-700">Production · Read &amp; Write</p>
+            <h1 class="text-2xl font-bold">ชุดที่ 1 · 18 หัวข้อ</h1>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500">ทำแล้ว</span>
+          <span class="text-sm font-bold text-[#004AAD]">3 / 18</span>
+          <button class="rounded-full bg-slate-100 hover:bg-slate-200 h-9 w-9 flex items-center justify-center text-base ml-2" title="คำแนะนำ">?</button>
+        </div>
+      </div>
+
+      <!-- Instruction strip -->
+      <div class="coach-tip mb-5">
+        <div class="avatar">D</div>
+        <div class="bub">
+          <span class="lbl">✨ Tips from P'Doy</span>
+          <p class="text-[13px] leading-6 text-slate-800">
+            <strong>เลือก 1 หัวข้อ</strong> · วางแผน 1-5 นาที · เขียนอย่างน้อย <strong>50 คำ</strong> ·
+            พอส่งแล้วคะแนนล่าสุดจะโชว์บน tile (เหมือน Write about photo) ·
+            ทำซ้ำได้ตลอด คะแนนจะอัปเดต
+          </p>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <button class="rounded-full bg-[#004AAD] text-white px-4 py-1.5 text-xs font-bold">ทั้งหมด · 18</button>
+        <button class="rounded-full bg-white ring-1 ring-slate-300 px-4 py-1.5 text-xs font-semibold hover:ring-[#004AAD]">ยังไม่ทำ · 15</button>
+        <button class="rounded-full bg-white ring-1 ring-slate-300 px-4 py-1.5 text-xs font-semibold hover:ring-[#004AAD]">ทำแล้ว · 3</button>
+        <span class="ml-auto text-xs text-slate-500">เรียง: <strong>ตามลำดับเดิม ▾</strong></span>
+      </div>
+
+      <!-- Topic cards · grid of 2 per row -->
+      <div class="grid gap-3 md:grid-cols-2">
+
+        <!-- DONE example -->
+        <div class="topic-card done">
+          <div class="flex items-center justify-between">
+            <span class="topic-tag">📝 ESSAY · #1</span>
+            <span class="inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-700 font-bold uppercase px-2 py-0.5 rounded-full">
+              ✓ ทำแล้ว · 138/160
+            </span>
+          </div>
+          <p class="text-[15px] font-semibold leading-7 text-slate-900">
+            นักเรียนควรถูกบังคับให้ใส่ชุดนักเรียนหรือไม่? เพราะเหตุใด? ใช้เหตุผลที่ชัดเจนเพื่อสนับสนุนคำตอบของคุณ
+          </p>
+          <p class="text-xs italic text-slate-500 leading-6">
+            Should students be required to wear school uniforms? Why or why not? Use specific reasons to support your answer.
+          </p>
+          <div class="flex items-center gap-2 mt-1">
+            <button class="rounded-lg bg-white ring-1 ring-slate-300 text-slate-700 px-4 py-2 text-xs font-bold hover:bg-slate-50">📖 ดูคำตอบเดิม</button>
+            <button class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-4 py-2 text-xs font-bold hover:opacity-90">↻ ทำใหม่</button>
+          </div>
+        </div>
+
+        <!-- DONE example #2 -->
+        <div class="topic-card done">
+          <div class="flex items-center justify-between">
+            <span class="topic-tag">📝 ESSAY · #2</span>
+            <span class="inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-700 font-bold uppercase px-2 py-0.5 rounded-full">
+              ✓ ทำแล้ว · 122/160
+            </span>
+          </div>
+          <p class="text-[15px] font-semibold leading-7 text-slate-900">
+            วิชาพลศึกษา (PE) ควรเป็นวิชาบังคับทุกวันหรือไม่? มันช่วยได้อย่างไร? ยกตัวอย่างเพื่อสนับสนุนความคิดเห็นของคุณ
+          </p>
+          <p class="text-xs italic text-slate-500 leading-6">
+            Should Physical Education (PE) classes be mandatory every day? How does it help? Use examples to support your view.
+          </p>
+          <div class="flex items-center gap-2 mt-1">
+            <button class="rounded-lg bg-white ring-1 ring-slate-300 text-slate-700 px-4 py-2 text-xs font-bold hover:bg-slate-50">📖 ดูคำตอบเดิม</button>
+            <button class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-4 py-2 text-xs font-bold hover:opacity-90">↻ ทำใหม่</button>
+          </div>
+        </div>
+
+        <!-- NOT DONE — main pattern -->
+        <div class="topic-card">
+          <div class="flex items-center justify-between">
+            <span class="topic-tag">📝 ESSAY · #3</span>
+            <span class="text-[10px] text-slate-400">ยังไม่ทำ</span>
+          </div>
+          <p class="text-[15px] font-semibold leading-7 text-slate-900">
+            การเรียนภาษาที่สองควรเป็นข้อบังคับสำหรับทุกคนหรือไม่? เพราะเหตุใด? ยกตัวอย่างที่ชัดเจนเพื่อสนับสนุนคำตอบของคุณ
+          </p>
+          <p class="text-xs italic text-slate-500 leading-6">
+            Should learning a second language be compulsory for everyone? Why or why not? Use specific examples to support your answer.
+          </p>
+          <button class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-5 py-2.5 text-sm font-bold hover:opacity-90 self-start">▶ เริ่มเขียน</button>
+        </div>
+
+        <div class="topic-card">
+          <div class="flex items-center justify-between">
+            <span class="topic-tag">📝 ESSAY · #4</span>
+            <span class="text-[10px] text-slate-400">ยังไม่ทำ</span>
+          </div>
+          <p class="text-[15px] font-semibold leading-7 text-slate-900">
+            การศึกษาระดับมหาวิทยาลัยควรเรียนฟรีสำหรับทุกคนหรือไม่? เพราะเหตุใด? ยกตัวอย่างที่ชัดเจนเพื่อสนับสนุนความคิดเห็นของคุณ
+          </p>
+          <p class="text-xs italic text-slate-500 leading-6">
+            Should university education be free for everyone? Why or why not? Use specific examples to support your view.
+          </p>
+          <button class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-5 py-2.5 text-sm font-bold hover:opacity-90 self-start">▶ เริ่มเขียน</button>
+        </div>
+
+        <div class="topic-card">
+          <div class="flex items-center justify-between">
+            <span class="topic-tag">📝 ESSAY · #5</span>
+            <span class="text-[10px] text-slate-400">ยังไม่ทำ</span>
+          </div>
+          <p class="text-[15px] font-semibold leading-7 text-slate-900">
+            กีฬาเอ็กซ์ตรีมอันตรายเกินไปที่จะเล่นหรือไม่? เพราะเหตุใด? ยกตัวอย่างเพื่อสนับสนุนคำตอบของคุณ
+          </p>
+          <p class="text-xs italic text-slate-500 leading-6">
+            Are extreme sports too dangerous to be practiced? Why or why not? Give examples to support your answer.
+          </p>
+          <button class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-5 py-2.5 text-sm font-bold hover:opacity-90 self-start">▶ เริ่มเขียน</button>
+        </div>
+
+        <div class="topic-card">
+          <div class="flex items-center justify-between">
+            <span class="topic-tag">📝 ESSAY · #6</span>
+            <span class="text-[10px] text-slate-400">ยังไม่ทำ</span>
+          </div>
+          <p class="text-[15px] font-semibold leading-7 text-slate-900">
+            คนดังควรได้รับการยอมรับว่าเป็นแบบอย่างที่ดีสำหรับเยาวชนหรือไม่? เพราะเหตุใด? ยกตัวอย่างเพื่อสนับสนุนความคิดเห็นของคุณ
+          </p>
+          <p class="text-xs italic text-slate-500 leading-6">
+            Should celebrities be considered good role models for youth? Why or why not? Use examples to support your view.
+          </p>
+          <button class="rounded-lg bg-[#004AAD] text-[#FFCC00] px-5 py-2.5 text-sm font-bold hover:opacity-90 self-start">▶ เริ่มเขียน</button>
+        </div>
+
+        <!-- compact form of remaining topics — placeholder for the rest -->
+        <div class="md:col-span-2 rounded-2xl bg-white p-4 ring-1 ring-slate-200 text-center text-xs text-slate-500">
+          + อีก 12 หัวข้อ (ในเวอร์ชันจริงจะแสดงครบ 18 ใบ)
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Bottom rationale -->
+  <div class="bg-white px-6 py-6">
+    <div class="mx-auto max-w-3xl text-xs text-slate-700 leading-7">
+      <p><strong class="text-[#004AAD]">หลัก UX ที่ใช้ — Krug + Cagan:</strong></p>
+      <ul class="mt-2 space-y-1.5 pl-4 list-disc">
+        <li><strong>Thai-first</strong> — ภาษาไทยตัวใหญ่/หนา · ภาษาอังกฤษ italic เล็ก (เพราะ user อ่านไทยก่อน, อังกฤษเป็น reference)</li>
+        <li><strong>ชุดข้อสอบ แทน Round</strong> — "Round" ฟังดูเหมือนเกม "ชุดข้อสอบ" คนไทยเข้าใจทันทีว่าเป็นข้อสอบ</li>
+        <li><strong>หัวข้อ แทน topic</strong> — คำไทยที่นักเรียนคุ้นเคย</li>
+        <li><strong>ปุ่ม "▶ เริ่มเขียน"</strong> แทน "START EXAM" — กดแล้วไม่กดดัน เป็นการเริ่มกิจกรรม ไม่ใช่เริ่มสอบ</li>
+        <li><strong>เห็นคะแนนเดิมบน tile</strong> — "✓ ทำแล้ว · 138/160" + ปุ่ม "↻ ทำใหม่" ให้ทำซ้ำได้ทันที</li>
+        <li><strong>Tips from P'Doy speech bubble</strong> — ทำให้ instruction รู้สึกเหมือนครูบอก ไม่ใช่ระบบเตือน</li>
+        <li><strong>Filter chips</strong> (ทั้งหมด/ยังไม่ทำ/ทำแล้ว) — Krug pattern คุ้นเคย + ลด choice paralysis</li>
+        <li><strong>Breadcrumb</strong> — "ฝึก › Production › Read &amp; Write › ชุดที่ 1" บอก "ฉันอยู่ตรงไหน" ตลอด</li>
+        <li><strong>Empty rounds (4, 5)</strong> dimmed + "เร็วๆ นี้" — set expectation ดีกว่าซ่อนหรือล็อก</li>
+        <li><strong>คำชี้แจง popup (หน้า 1)</strong> ต้องสั้น scan ได้ใน 5 วินาที — ปุ่ม "เลือกชุดข้อสอบ" ใหญ่อยู่ล่างสุด</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

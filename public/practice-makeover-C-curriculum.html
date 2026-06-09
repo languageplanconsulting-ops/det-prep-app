@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Makeover C — เส้นทาง 4 ขั้น (Curriculum Path)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "IBM Plex Sans Thai", sans-serif; background:#f1f5f9; color:#0f172a; }
+    .step-num {
+      width: 56px; height: 56px; border-radius: 9999px;
+      background: #004AAD; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 74, 173, 0.25);
+    }
+    .step-num.done { background: #16a34a; }
+    .step-num.locked { background: #cbd5e1; color: #64748b; box-shadow: none; }
+    .connector { width: 4px; background: #e2e8f0; height: 32px; margin-left: 26px; }
+    .connector.done { background: #16a34a; }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <a href="/practice-preview-makeover-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← เปรียบเทียบ</a>
+    <span class="text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">C · เส้นทาง 4 ขั้น</span>
+  </nav>
+
+  <main class="mx-auto max-w-3xl px-6 py-8">
+    <div class="text-center mb-8">
+      <p class="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">การฝึก DET ของคุณ</p>
+      <h1 class="mt-1 text-3xl font-bold">เริ่มจากขั้นที่ 1 · ไปทีละขั้น</h1>
+      <p class="mt-2 text-sm text-slate-600 max-w-lg mx-auto">
+        นักเรียนเก่งที่สุดของพี่ดอย ไม่ได้ไปแบบสุ่ม · เริ่มจากเช็คระดับ → ปูพื้นฐาน → ฝึกทักษะ → สอบจำลอง
+      </p>
+      <div class="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 ring-1 ring-emerald-200">
+        <span class="text-xs font-semibold text-emerald-700">✓ ขั้นที่ 1 ทำแล้ว · กำลังอยู่ขั้นที่ 2</span>
+      </div>
+    </div>
+
+    <!-- STEP 1: DIAGNOSE -->
+    <section class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 mb-2">
+      <div class="flex items-start gap-4">
+        <div class="step-num done">✓</div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">ขั้นที่ 1 · เช็คระดับ ✓ จบแล้ว</p>
+            <span class="text-xs text-slate-500">ใช้เวลา 15 นาที</span>
+          </div>
+          <h2 class="mt-1 text-lg font-bold">รู้จุดอ่อนของตัวเองก่อน</h2>
+          <p class="mt-1 text-sm text-slate-600">ทำแบบทดสอบสั้นๆ เพื่อรู้ว่าทักษะไหนต้องเร่งฝึก</p>
+          <div class="mt-3">
+            <a class="inline-flex items-center gap-2 rounded-lg bg-white ring-1 ring-slate-300 px-4 py-2 text-xs font-semibold hover:bg-slate-50">
+              🩺 Mini Diagnosis · ทำซ้ำได้ฟรี →
+            </a>
+            <span class="ml-2 text-xs text-slate-500">คะแนน: 95/160 · จุดอ่อน: Speaking, Writing</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="connector done"></div>
+
+    <!-- STEP 2: FOUNDATION -->
+    <section class="rounded-2xl bg-white p-5 ring-2 ring-[#FFCC00] shadow-md mb-2">
+      <div class="flex items-start gap-4">
+        <div class="step-num">2</div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">ขั้นที่ 2 · ปูพื้นฐาน · ⚡ กำลังทำ</p>
+            <span class="text-xs text-slate-500">3 เครื่องมือ · ฝึกวันละ 15 นาที</span>
+          </div>
+          <h2 class="mt-1 text-lg font-bold">ปูพื้นฐานทักษะอ่าน-เขียนให้แน่นก่อน</h2>
+          <p class="mt-1 text-sm text-slate-600">เครื่องมือ 3 ตัวนี้ฝึกความแม่นยำพื้นฐาน · ทำซ้ำได้ไม่จำกัด</p>
+          <div class="grid gap-2 mt-4 md:grid-cols-3">
+            <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+              <p class="text-sm font-bold">📝 Dictation</p>
+              <p class="text-xs text-slate-600 mt-0.5">ฟัง + พิมพ์ตาม</p>
+              <p class="text-[10px] text-emerald-600 mt-1">✓ ทำแล้ว 3 รอบ</p>
+            </a>
+            <a class="rounded-lg p-3 bg-[#fff7d1] ring-2 ring-[#FFCC00] hover:ring-[#004AAD] transition block">
+              <p class="text-sm font-bold">📝 Fill in the Blank</p>
+              <p class="text-xs text-slate-600 mt-0.5">เติมคำที่หายไป</p>
+              <p class="text-[10px] text-[#004AAD] mt-1">⚡ ทำต่อ</p>
+            </a>
+            <a class="rounded-lg p-3 bg-slate-50 ring-1 ring-slate-200 hover:ring-[#004AAD] transition block">
+              <p class="text-sm font-bold">📝 Real Word</p>
+              <p class="text-xs text-slate-600 mt-0.5">แยกคำจริงกับปลอม</p>
+              <p class="text-[10px] text-slate-500 mt-1">ยังไม่ได้เริ่ม</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="connector"></div>
+
+    <!-- STEP 3: SKILL DRILL -->
+    <section class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 mb-2 opacity-90">
+      <div class="flex items-start gap-4">
+        <div class="step-num">3</div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">ขั้นที่ 3 · ฝึกทักษะ 4 ด้าน · ยังไม่เริ่ม</p>
+            <span class="text-xs text-slate-500">9 เครื่องมือ</span>
+          </div>
+          <h2 class="mt-1 text-lg font-bold">ฝึก 4 ทักษะหลัก — ฟัง · พูด · เขียน · อ่าน</h2>
+          <p class="mt-1 text-sm text-slate-600">เมื่อจบขั้นที่ 2 แล้ว ขั้นที่ 3 จะเปิดเครื่องมือฝึกเฉพาะทักษะ</p>
+          <div class="grid gap-2 mt-4 md:grid-cols-2 text-xs">
+            <div class="flex items-center gap-2 p-2 rounded bg-slate-50">
+              <span class="text-base">🎧</span> ฟัง — บทสนทนา · ฟัง+สรุป AI
+            </div>
+            <div class="flex items-center gap-2 p-2 rounded bg-slate-50">
+              <span class="text-base">📖</span> อ่าน — บทอ่าน · คำศัพท์
+            </div>
+            <div class="flex items-center gap-2 p-2 rounded bg-slate-50">
+              <span class="text-base">✍️</span> เขียน — เขียนเกี่ยวกับภาพ · อ่านแล้วเขียน
+            </div>
+            <div class="flex items-center gap-2 p-2 rounded bg-slate-50">
+              <span class="text-base">🗣</span> พูด — พูดเกี่ยวกับภาพ · อ่านแล้วพูด · สนทนา
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="connector"></div>
+
+    <!-- STEP 4: MOCK -->
+    <section class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 mb-2 opacity-90">
+      <div class="flex items-start gap-4">
+        <div class="step-num">4</div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500">ขั้นที่ 4 · ทดสอบจริง · ยังไม่เริ่ม</p>
+            <span class="text-xs text-slate-500">~45 นาที</span>
+          </div>
+          <h2 class="mt-1 text-lg font-bold">ลองสนามจริง · Full Mock Test</h2>
+          <p class="mt-1 text-sm text-slate-600">จำลอง DET เต็มรูปแบบ · ใกล้สอบทำเดือนละ 1 ครั้ง</p>
+          <div class="mt-3 inline-flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-1.5 text-xs text-slate-600">
+            🔒 ปลดล็อกเมื่อจบขั้น 2 และ 3
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom: Mini Study admin -->
+    <a class="block mt-8 rounded-2xl bg-[#004AAD] text-white p-5 hover:opacity-90 transition">
+      <div class="flex items-start gap-3">
+        <img src="/pidoy.png" class="h-12 w-12 rounded-full ring-2 ring-[#FFCC00] object-cover">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">เพิ่มเติม</p>
+          <h3 class="text-base font-bold">15 เทคนิคทำคะแนน DET จากพี่ดอย</h3>
+          <p class="text-xs text-white/85 mt-1">บทเรียนสั้น 15 นาที · เลือกหัวข้อไหนก่อนก็ได้</p>
+        </div>
+        <span class="ml-auto text-2xl">→</span>
+      </div>
+    </a>
+
+    <aside class="rounded-xl bg-white p-4 ring-1 ring-slate-200 text-xs text-slate-700 leading-7 mt-6">
+      <strong class="text-[#004AAD]">เหตุผลที่เลือกแบบนี้:</strong>
+      เป็นแบบ "เส้นทาง" ที่เคลียร์ที่สุด — มือใหม่จะไม่งงว่าเริ่มยังไง ·
+      ใช้ Zeigarnik (ขั้นที่ยังไม่เสร็จดึงดูดให้กลับมาทำ) + Goal-gradient (ใกล้จบขั้นต่อไป) ·
+      เครื่องมือไม่หายไป แค่ถูกจัดเป็น "ขั้น"
+    </aside>
+  </main>
+</body>
+</html>

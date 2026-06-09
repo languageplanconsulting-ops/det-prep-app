@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Exam revamp · Production</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f7f8fc;color:#0f172a}
+  .stage-label{position:sticky;top:0;z-index:5;background:#004AAD;color:#FFCC00;padding:8px 16px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .stage-wrap{background:#eef1f6;padding:28px 0;border-bottom:1px solid #e2e8f0}
+  .coach-tip{display:flex;gap:12px;align-items:flex-start}
+  .coach-tip .avatar{width:44px;height:44px;border-radius:9999px;flex-shrink:0;background:#004AAD;color:#FFCC00;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;border:2.5px solid #FFCC00;box-shadow:0 3px 8px rgba(0,74,173,.18)}
+  .coach-tip .bub{flex:1;position:relative;background:#fff;padding:11px 14px 12px;border-radius:14px;border-top-left-radius:4px;box-shadow:0 4px 14px rgba(15,23,42,.06);border:1px solid rgba(0,74,173,.08)}
+  .coach-tip .bub::before{content:"";position:absolute;top:14px;left:-7px;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-right:7px solid #fff}
+  .coach-tip .lbl{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:#004AAD;background:#FFCC00;padding:5px 11px;border-radius:9999px;margin-bottom:8px}
+  .coach-tip .lbl .spark{font-size:11px;line-height:1}
+  .btn-primary{background:#004AAD;color:#FFCC00;padding:11px 22px;border-radius:12px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+  .btn-primary[disabled]{opacity:.4}
+  .btn-ghost{background:#fff;color:#334155;border:1px solid #cbd5e1;padding:11px 18px;border-radius:12px;font-size:13px;font-weight:700}
+  .btn-rec{background:#e11d48;color:#fff;padding:11px 22px;border-radius:12px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px}
+  .btn-mic{background:#FFCC00;color:#004AAD;padding:11px 22px;border-radius:12px;font-size:14px;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+  .prompt-en{font-size:16px;font-weight:600;line-height:1.55;color:#0f172a}
+  .prompt-th{font-size:13px;line-height:1.6;color:#64748b;margin-top:6px;padding-left:10px;border-left:2px solid #e2e8f0}
+  .ta{width:100%;border:1.5px solid #e2e8f0;border-radius:14px;padding:14px;font-size:15px;line-height:1.7;resize:vertical;background:#fff}
+  .ta:focus{outline:none;border-color:#004AAD}
+  .pill{display:inline-flex;align-items:center;gap:5px;border-radius:9999px;padding:3px 10px;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+  .v-tint{background:#f5f3ff}    /* violet category tint */
+</style>
+</head>
+<body>
+<nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+  <span class="font-bold text-[#004AAD]">English Plan</span>
+  <span class="text-sm text-violet-700 font-semibold">✍️ Production</span>
+  <a href="/exam-revamp-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← ทุกหมวด</a>
+  <span class="text-xs bg-violet-600 text-white px-2.5 py-1 rounded-md font-semibold">Production exams</span>
+</nav>
+
+<div class="bg-white px-6 py-5 border-b border-slate-200">
+  <p class="text-xs text-violet-700 font-bold uppercase tracking-wider">Exam revamp · Production</p>
+  <h1 class="mt-1 text-2xl font-bold">หน้าจอ "ตอนทำข้อสอบ" แบบใหม่ · 4 ทักษะ</h1>
+  <p class="mt-2 text-sm text-slate-600 max-w-3xl">เลื่อนดูทีละทักษะ · เน้นหน้าจอตอนทำจริง (active exam) ที่เปลี่ยนเป็นสไตล์ใหม่ — ไม่มี brutalist, ไม่มี gradient, โจทย์อังกฤษนำ + คำแปลไทย, ปุ่มชัด, Tips from P'Doy</p>
+</div>
+
+<!-- ════ 1 · WRITE ABOUT PHOTO ════ -->
+<div class="stage-label">1/4 · Write about photo — ตอนทำข้อสอบ</div>
+<div class="stage-wrap"><div class="mx-auto max-w-3xl px-6">
+  <div class="rounded-2xl v-tint ring-1 ring-violet-200 p-5 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-xl text-white">📸</div>
+        <div><p class="text-[10px] font-bold uppercase tracking-wider text-violet-700">Production · รอบ 1</p>
+        <h2 class="text-lg font-bold">Write about photo</h2></div>
+      </div>
+      <span class="pill bg-violet-100 text-violet-700">เขียน · ขั้นต่ำ 15 คำ</span>
+    </div>
+    <!-- photo -->
+    <div class="rounded-xl overflow-hidden ring-1 ring-slate-200 mb-4 bg-slate-100 h-48 flex items-center justify-center text-slate-400 text-sm">🖼️ รูปภาพข้อสอบ</div>
+    <!-- prompt EN-first -->
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-4">
+      <p class="prompt-en">Describe what you see in this photo. Include as many details as you can.</p>
+      <p class="prompt-th">บรรยายสิ่งที่คุณเห็นในภาพนี้ ใส่รายละเอียดให้มากที่สุดเท่าที่ทำได้</p>
+    </div>
+    <!-- input -->
+    <textarea class="ta" rows="6" placeholder="พิมพ์คำตอบ หรือกดไมค์เพื่อพูดให้ระบบถอดเสียง…"></textarea>
+    <div class="flex items-center justify-between mt-2 mb-4">
+      <span class="text-xs text-slate-500">จำนวนคำ: <strong class="text-[#004AAD]">0</strong> · ต้องการอย่างน้อย 15 คำ</span>
+      <button class="btn-mic">🎙️ พูดให้ถอดเสียงสด</button>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="btn-primary" disabled>ส่งคำตอบ — ตรวจให้ทันที →</button>
+      <button class="btn-ghost">เริ่มใหม่</button>
+    </div>
+    <div class="coach-tip mt-5"><div class="avatar">D</div><div class="bub">
+      <span class="lbl"><span class="spark">✨</span>Tips from P'Doy</span>
+      <p class="text-[13px] leading-6 text-slate-800">ไม่มีเวลาเตรียม — พิมพ์ได้เลย · เขียนให้ครบ <strong>ใคร ทำอะไร ที่ไหน</strong> แล้วเพิ่มรายละเอียดสี/จำนวน/อารมณ์ ก็ได้ครบ 15 คำง่ายๆ</p>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ════ 2 · SPEAK ABOUT PHOTO ════ -->
+<div class="stage-label">2/4 · Speak about photo — เตรียม 1 นาที + อัดเสียง</div>
+<div class="stage-wrap"><div class="mx-auto max-w-3xl px-6">
+  <div class="rounded-2xl v-tint ring-1 ring-violet-200 p-5 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-xl text-white">🎤</div>
+        <div><p class="text-[10px] font-bold uppercase tracking-wider text-violet-700">Production · รอบ 1</p>
+        <h2 class="text-lg font-bold">Speak about photo</h2></div>
+      </div>
+      <!-- prep timer -->
+      <div class="text-center rounded-xl bg-[#004AAD] text-white px-4 py-2">
+        <p class="text-[9px] font-bold uppercase tracking-wide text-[#FFCC00]">เวลาเตรียม</p>
+        <p class="text-2xl font-bold leading-none text-[#FFCC00]">0:48</p>
+      </div>
+    </div>
+    <div class="rounded-xl overflow-hidden ring-1 ring-slate-200 mb-4 bg-slate-100 h-44 flex items-center justify-center text-slate-400 text-sm">🖼️ รูปภาพข้อสอบ</div>
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-4">
+      <p class="prompt-en">Speak about this photo for about 30 seconds. Describe the scene and what is happening.</p>
+      <p class="prompt-th">พูดเกี่ยวกับภาพนี้ประมาณ 30 วินาที · บรรยายฉากและสิ่งที่กำลังเกิดขึ้น</p>
+    </div>
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-4">
+      <p class="text-[11px] font-bold uppercase text-slate-500 mb-2">คำพูดของคุณ (live caption — แก้ก่อนส่งได้)</p>
+      <textarea class="ta" rows="4" placeholder="ข้อความจะขึ้นตอนคุณพูด…"></textarea>
+      <p class="text-xs text-slate-500 mt-2">จำนวนคำ: <strong class="text-[#004AAD]">0</strong> · อย่างน้อย 15 คำ</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="btn-rec">⏺ เริ่มพูด</button>
+      <button class="btn-primary" disabled>ส่งคำตอบ →</button>
+    </div>
+    <div class="coach-tip mt-5"><div class="avatar">D</div><div class="bub">
+      <span class="lbl"><span class="spark">✨</span>Tips from P'Doy</span>
+      <p class="text-[13px] leading-6 text-slate-800">ใช้ <strong>1 นาทีเตรียม</strong> วางประโยคในหัวก่อน — In this photo I can see… · There are… · It looks like… แล้วค่อยกดอัด จะพูดลื่นกว่ามาก</p>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ════ 3 · READ THEN SPEAK ════ -->
+<div class="stage-label">3/4 · Read, then speak — เลือกการ์ดคำถาม + อัด</div>
+<div class="stage-wrap"><div class="mx-auto max-w-3xl px-6">
+  <!-- prep picker mini -->
+  <div class="rounded-2xl bg-white ring-1 ring-slate-200 p-4 mb-3 flex flex-wrap items-center gap-3">
+    <span class="text-sm font-semibold">⏱ เลือกเวลาเตรียม:</span>
+    <span class="pill bg-slate-100 text-slate-600">1 นาที</span>
+    <span class="pill bg-[#004AAD] text-white">2 นาที</span>
+    <span class="pill bg-slate-100 text-slate-600">3 นาที</span>
+    <span class="text-xs text-slate-400 ml-auto">→ กด "เริ่มจับเวลา"</span>
+  </div>
+  <div class="rounded-2xl v-tint ring-1 ring-violet-200 p-5 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-xl text-white">📑</div>
+        <div><p class="text-[10px] font-bold uppercase tracking-wider text-violet-700">Production · รอบ 1 · การ์ด 2/3</p>
+        <h2 class="text-lg font-bold">Read, then speak</h2></div>
+      </div>
+      <span class="pill bg-emerald-100 text-emerald-700">คะแนนเดิม 132/160</span>
+    </div>
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-4">
+      <p class="prompt-en">Some people prefer to work in a team, while others prefer to work alone. Which do you prefer and why?</p>
+      <p class="prompt-th">บางคนชอบทำงานเป็นทีม บางคนชอบทำงานคนเดียว · คุณชอบแบบไหนและเพราะอะไร?</p>
+    </div>
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-4">
+      <p class="text-[11px] font-bold uppercase text-slate-500 mb-2">Live transcript (แก้ก่อนส่งได้)</p>
+      <textarea class="ta" rows="4" placeholder="พูดแล้วข้อความจะขึ้นที่นี่ · พิมพ์แก้เองได้…"></textarea>
+      <p class="text-xs text-slate-500 mt-2">0 คำ · ต้องการอย่างน้อย 15 คำ</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-3">
+      <button class="btn-rec">⏺ เริ่มพูด (live caption)</button>
+      <button class="btn-primary" disabled>ส่ง →</button>
+      <button class="btn-ghost">เลือกการ์ดอื่น</button>
+    </div>
+    <div class="coach-tip mt-5"><div class="avatar">D</div><div class="bub">
+      <span class="lbl"><span class="spark">✨</span>Tips from P'Doy</span>
+      <p class="text-[13px] leading-6 text-slate-800">โครงตอบเร็ว: <strong>เลือกข้าง → 2 เหตุผล → ตัวอย่างสั้น → สรุป</strong> · เตรียมในช่วงจับเวลาให้พอ แล้วพูดตามโครง</p>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ════ 4 · INTERACTIVE SPEAKING ════ -->
+<div class="stage-label">4/4 · Interactive speaking — 6 turn · ฟัง→เตรียม 10 วิ→พูด 35 วิ</div>
+<div class="stage-wrap"><div class="mx-auto max-w-3xl px-6">
+  <div class="rounded-2xl v-tint ring-1 ring-violet-200 p-5 sm:p-6">
+    <!-- turn progress -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-xl text-white">🗨️</div>
+        <div><p class="text-[10px] font-bold uppercase tracking-wider text-violet-700">การสนทนาแบบโต้ตอบ</p>
+        <h2 class="text-lg font-bold">Turn 3 / 6</h2></div>
+      </div>
+      <div class="text-center rounded-xl bg-[#004AAD] text-white px-4 py-2">
+        <p class="text-[9px] font-bold uppercase tracking-wide text-[#FFCC00]">เวลาพูด</p>
+        <p class="text-2xl font-bold leading-none text-[#FFCC00]">0:28</p>
+      </div>
+    </div>
+    <!-- progress dots -->
+    <div class="flex gap-1.5 mb-4">
+      <span class="h-1.5 flex-1 rounded-full bg-[#004AAD]"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-[#004AAD]"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-[#FFCC00]"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+      <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+    </div>
+    <!-- play audio + question -->
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-4">
+      <button class="btn-mic mb-3">🔊 ฟังคำถามอีกครั้ง</button>
+      <p class="prompt-en">That sounds interesting! Can you tell me more about why you chose that hobby?</p>
+      <p class="prompt-th">น่าสนใจ! เล่าเพิ่มได้ไหมว่าทำไมถึงเลือกงานอดิเรกนั้น?</p>
+    </div>
+    <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 mb-4">
+      <p class="text-[11px] font-bold uppercase text-slate-500 mb-2">คำตอบของคุณ (live caption)</p>
+      <textarea class="ta" rows="3" placeholder="พูดแล้วข้อความจะขึ้น · พิมพ์แก้ได้…"></textarea>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="btn-rec">⏹ หยุด &amp; ไป turn ถัดไป</button>
+    </div>
+    <div class="coach-tip mt-5"><div class="avatar">D</div><div class="bub">
+      <span class="lbl"><span class="spark">✨</span>Tips from P'Doy</span>
+      <p class="text-[13px] leading-6 text-slate-800">เห็นแค่คำถามแรก ที่เหลือระบบถามตามที่คุณพูด · <strong>ฟัง 1 ครั้ง → เตรียม 10 วิ → พูด ~35 วิ</strong> · ตอบตรงคำถาม แล้วต่อยอด 1 ประโยค</p>
+    </div></div>
+  </div>
+
+  <!-- shared result strip -->
+  <div class="rounded-2xl bg-white ring-1 ring-slate-200 p-5 mt-4">
+    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">หลังส่ง — หน้าผลคะแนน (เหมือนกันทุกทักษะ Production)</p>
+    <div class="flex items-center gap-4">
+      <div class="text-center">
+        <p class="text-4xl font-bold text-[#004AAD] leading-none">138</p>
+        <p class="text-xs text-slate-500">/ 160</p>
+      </div>
+      <div class="flex-1 grid grid-cols-2 gap-2 text-xs">
+        <span class="pill bg-slate-100 text-slate-600">ไวยากรณ์ 25%</span>
+        <span class="pill bg-slate-100 text-slate-600">คำศัพท์ 25%</span>
+        <span class="pill bg-slate-100 text-slate-600">ความต่อเนื่อง 25%</span>
+        <span class="pill bg-slate-100 text-slate-600">การตอบโจทย์ 25%</span>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500 mt-3">+ transcript ไฮไลต์จุดเด่น/จุดแก้ · แก้ไวยากรณ์ · คำศัพท์แนะนำ · ปุ่ม "ทำอีกครั้ง"</p>
+  </div>
+</div></div>
+
+<div class="bg-white px-6 py-6"><div class="mx-auto max-w-3xl text-xs text-slate-700 leading-7">
+  <p><strong class="text-[#004AAD]">หลักที่ใช้ (Krug + Cagan):</strong></p>
+  <ul class="mt-2 space-y-1.5 pl-4 list-disc">
+    <li><strong>โจทย์อังกฤษนำ</strong> (ตัวหนา) + คำแปลไทยใต้เส้น — ตรงกับของจริงที่เป็นภาษาอังกฤษ</li>
+    <li><strong>Timer เป็นการ์ดสีน้ำเงิน</strong> มุมขวา — เห็นเวลาเตรียม/เวลาพูดชัด ไม่ต้องค้นหา</li>
+    <li><strong>Word count + ขั้นต่ำ</strong> อยู่ติดช่องพิมพ์ · ปุ่มส่ง disabled จนกว่าจะถึงเกณฑ์ (กันส่งพลาด)</li>
+    <li><strong>Turn progress dots</strong> ใน Interactive speaking — รู้ว่าอยู่ turn ไหน/เหลือกี่ turn</li>
+    <li><strong>ปุ่มแยกสี</strong>: น้ำเงิน=ส่ง · เหลือง=ไมค์/ฟัง · แดง=อัด/หยุด — convention เดียวกันทุกทักษะ</li>
+    <li>ไม่มี brutalist, ไม่มี gradient · result strip เหมือนกันทุกทักษะ (Cagan: outcome ชัด /160)</li>
+  </ul>
+</div></div>
+</body></html>

@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { DictationIntroModal } from "@/components/dictation/DictationIntroModal";
 import { FillInBlankIntroModal } from "@/components/fitb/FillInBlankIntroModal";
 import { InteractiveSpeakingIntroModal } from "@/components/interactive-speaking/InteractiveSpeakingIntroModal";
+import { PracticeHubV2 } from "@/components/practice/PracticeHubV2";
 import { PracticePageOverview } from "@/components/practice/PracticePageOverview";
 import { ReadingSkillsIntroModal } from "@/components/reading/ReadingSkillsIntroModal";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -227,7 +228,7 @@ export default function PracticeHubPage() {
   );
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <>
       <ReadingSkillsIntroModal
         open={readingIntroOpen}
         onOpenChange={setReadingIntroOpen}
@@ -263,9 +264,24 @@ export default function PracticeHubPage() {
         onOpenChange={setFitbIntroOpen}
         onEnter={() => router.push(FITB_HREF)}
       />
-      <PracticePageOverview />
+      {isAdmin ? (
+        <PracticeHubV2
+          effectiveTier={effectiveTier}
+          isVip={isVip}
+          isAdmin={isAdmin}
+          showMiniStudy={showMiniStudy}
+          conversationGate={canAccessSkill(effectiveTier, "conversation")}
+          onReadingIntro={() => setReadingIntroOpen(true)}
+          onDictationIntro={() => setDictationIntroOpen(true)}
+          onFitbIntro={() => setFitbIntroOpen(true)}
+          onInteractiveSpeakingIntro={() => setInteractiveSpeakingIntroOpen(true)}
+          onReadWriteIntro={() => setReadWriteIntroOpen(true)}
+        />
+      ) : (
+        <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+          <PracticePageOverview />
 
-      {showMiniStudy ? (
+          {showMiniStudy ? (
         <div className="rounded-sm border-4 border-black bg-[#fff7d1] p-5 shadow-[6px_6px_0_0_#111]">
           <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
             Admin preview · Not visible to users
@@ -450,7 +466,9 @@ export default function PracticeHubPage() {
             </ul>
           </BrutalPanel>
         ))}
-      </div>
-    </main>
+          </div>
+        </main>
+      )}
+    </>
   );
 }

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Practice v2 — 4 versions (Cagan + Krug)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "IBM Plex Sans Thai", sans-serif; background:#f1f5f9; color:#0f172a; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <main class="mx-auto max-w-5xl px-6 py-12 space-y-8">
+    <header>
+      <p class="text-xs font-semibold uppercase tracking-wider text-[#004AAD]">หน้า /practice · เลือก v2</p>
+      <h1 class="mt-1 text-4xl font-bold tracking-tight">4 versions — Cagan + Krug applied</h1>
+      <p class="mt-3 max-w-3xl text-base leading-7 text-slate-700">
+        ทั้ง 4 แบบมีองค์ประกอบเดียวกัน — <strong>คะแนนล่าสุด (out of 160 + วันสอบ Mock)</strong> ·
+        <strong>เครื่องมือจัดตามหมวด</strong> (Comprehension · Production · Literacy) ·
+        <strong>Mini Lessons เปิดให้ทุกคนแล้ว</strong> ·
+        <strong>กราฟเส้นเวลาฝึก</strong> (วัน · สัปดาห์ · เดือน · ปี) · <strong>countdown วันสอบ</strong>
+        · ใช้สี <strong class="text-[#004AAD]">#004AAD</strong> · ต่างกันแค่ <strong>วิธีจัดลำดับความสำคัญ</strong>
+      </p>
+    </header>
+
+    <div class="space-y-4">
+
+      <a href="/practice-v2-A-status-bar.html" class="block rounded-2xl bg-white p-6 ring-1 ring-slate-200 hover:ring-[#004AAD] hover:shadow-lg transition">
+        <div class="flex items-start gap-4">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#004AAD] text-3xl">📊</div>
+          <div class="flex-1">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">Version A · Krug "Don't Make Me Think"</p>
+            <h2 class="text-2xl font-bold">Status Bar</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-700">
+              สถานะ 3 อันใหญ่ๆ ตอบ "Where am I?" ใน 1 วินาที · เครื่องมือเรียงตาม category · กราฟเวลาแยกอยู่ด้านล่าง
+              <br/>
+              <strong>เหมาะกับ:</strong> นักเรียนที่ open หน้านี้ทุกวันแค่ scan แล้วเลือกทำต่อ
+            </p>
+            <p class="mt-2 text-xs text-slate-500">หลักที่ใช้: Krug "Where am I/Where can I go" · scan over read · convention</p>
+          </div>
+          <span class="text-[#004AAD] font-bold text-xl">→</span>
+        </div>
+      </a>
+
+      <a href="/practice-v2-B-mission-control.html" class="block rounded-2xl bg-white p-6 ring-1 ring-slate-200 hover:ring-[#004AAD] hover:shadow-lg transition">
+        <div class="flex items-start gap-4">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#004AAD] text-3xl">🎯</div>
+          <div class="flex-1">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">Version B · Cagan "Inspired"</p>
+            <h2 class="text-2xl font-bold">Mission Control</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-700">
+              Outcome-first: hero แสดง "105 → 120 ใน 23 วัน" · เครื่องมือเรียงตาม impact ที่จะเพิ่มคะแนน
+              ไม่ใช่ตาม feature · กราฟเวลามี <em>target line</em>
+              <br/>
+              <strong>เหมาะกับ:</strong> นักเรียนใกล้สอบ · ต้องการรู้ "ฉันจะถึงเป้ายังไง"
+            </p>
+            <p class="mt-2 text-xs text-slate-500">หลักที่ใช้: Cagan outcome-first · ordered by impact · target-driven</p>
+          </div>
+          <span class="text-[#004AAD] font-bold text-xl">→</span>
+        </div>
+      </a>
+
+      <a href="/practice-v2-C-two-column.html" class="block rounded-2xl bg-white p-6 ring-1 ring-slate-200 hover:ring-[#004AAD] hover:shadow-lg transition">
+        <div class="flex items-start gap-4">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">🗂</div>
+          <div class="flex-1">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">Version C · Hybrid Library + Persistent Sidebar</p>
+            <h2 class="text-2xl font-bold">Two Column</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-700">
+              สถานะอยู่ใน sidebar ขวาตลอด (visible แม้ scroll ลง) · ซ้ายเป็นไลบรารีเครื่องมือ ·
+              Mini Lessons highlight ตรงกลาง
+              <br/>
+              <strong>เหมาะกับ:</strong> desktop user ที่อยากเห็นทุกอย่างพร้อมๆ กัน
+            </p>
+            <p class="mt-2 text-xs text-slate-500">หลักที่ใช้: persistent status (Krug) · scan-able tool library</p>
+          </div>
+          <span class="text-[#004AAD] font-bold text-xl">→</span>
+        </div>
+      </a>
+
+      <a href="/practice-v2-D-newspaper.html" class="block rounded-2xl bg-white p-6 ring-1 ring-slate-200 hover:ring-[#004AAD] hover:shadow-lg transition">
+        <div class="flex items-start gap-4">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-3xl">📰</div>
+          <div class="flex-1">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">Version D · Front Page</p>
+            <h2 class="text-2xl font-bold">Newspaper Layout</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-700">
+              4 widget เล็กๆ "above the fold" ตอบสถานะใน 2 วินาที · Mini Lessons เป็น "lead story" + side graph ·
+              3 คอลัมน์ tool list ด้านล่าง
+              <br/>
+              <strong>เหมาะกับ:</strong> นักเรียนที่ open ทุกครั้งและคาดหวังจะเห็นข่าวสารใหม่
+            </p>
+            <p class="mt-2 text-xs text-slate-500">หลักที่ใช้: above-the-fold priority · ranked stories · scannable index</p>
+          </div>
+          <span class="text-[#004AAD] font-bold text-xl">→</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+      <h2 class="text-base font-bold mb-3">📚 จากหนังสือ 2 เล่ม</h2>
+      <div class="grid gap-4 md:grid-cols-2 text-sm leading-7 text-slate-700">
+        <div>
+          <p class="font-bold text-[#004AAD]">Inspired — Marty Cagan</p>
+          <ul class="mt-1 text-xs space-y-1">
+            <li>• Outcome over output: เรียง action ตามผลลัพธ์</li>
+            <li>• Show how user reaches their goal</li>
+            <li>• Customer obsession: พี่ดอย persona</li>
+            <li>• Feature ใหม่ (Mini Lessons) ต้องชัด</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-bold text-[#004AAD]">Don't Make Me Think — Steve Krug</p>
+          <ul class="mt-1 text-xs space-y-1">
+            <li>• Scan over read: bullet สั้น</li>
+            <li>• Conventions: sidebar/grid/widget pattern</li>
+            <li>• Visual hierarchy: ตัวเลขใหญ่ที่สุดสำคัญสุด</li>
+            <li>• Get rid of half the words</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-xl bg-[#fff7d1] p-4 ring-1 ring-[#FFCC00]/50 text-xs leading-6 text-slate-700">
+      <strong class="text-[#004AAD]">คำแนะนำ:</strong> ลองทั้ง 4 บนมือถือและ desktop · เปิด 2 หน้าพร้อมกันแล้วเทียบ ·
+      จุดที่ต้องสังเกต: <strong>ใช้เวลานานแค่ไหนถึงรู้ "ฉันควรกดอะไรต่อ?"</strong> นั่นคือเกณฑ์ Krug
+    </div>
+  </main>
+</body>
+</html>

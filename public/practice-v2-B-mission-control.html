@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Practice v2-B · Mission Control (Cagan)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: "IBM Plex Sans Thai", sans-serif; background:#f1f5f9; color:#0f172a; }
+  </style>
+</head>
+<body>
+  <nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+    <span class="font-bold text-[#004AAD]">English Plan</span>
+    <a href="/practice-v2-index.html" class="ml-auto text-xs bg-white px-3 py-1.5 rounded-lg ring-1 ring-slate-200 font-semibold">← เปรียบเทียบ</a>
+    <span class="text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">V2-B · Mission Control</span>
+  </nav>
+
+  <main class="mx-auto max-w-6xl px-6 py-8 space-y-6">
+
+    <!-- HERO: Cagan's "outcome-first" — frame everything as the gap between
+         current and target, with a time constraint.  -->
+    <section class="rounded-3xl bg-[#004AAD] text-white p-8 shadow-xl">
+      <p class="text-xs font-bold uppercase tracking-wider text-[#FFCC00]">เป้าหมายของคุณ</p>
+      <div class="mt-2 flex flex-wrap items-center gap-6">
+        <div>
+          <p class="text-sm text-white/80">ตอนนี้</p>
+          <p class="text-6xl font-bold">105 <span class="text-2xl text-white/60">/160</span></p>
+          <p class="text-xs text-white/70 mt-1">สอบ Mock 8 มิ.ย. · <span class="text-emerald-300">+12</span></p>
+        </div>
+        <div class="text-3xl text-[#FFCC00]">→</div>
+        <div>
+          <p class="text-sm text-white/80">เป้าหมาย</p>
+          <p class="text-6xl font-bold text-[#FFCC00]">120</p>
+          <p class="text-xs text-white/70 mt-1">ภายใน <strong class="text-white">3 ก.ค. 2026</strong> · เหลือ 23 วัน</p>
+        </div>
+        <div class="flex-1 min-w-[200px]">
+          <p class="text-sm text-white/80 mb-2">เหลืออีก <strong class="text-[#FFCC00]">15 คะแนน</strong></p>
+          <div class="h-3 bg-white/20 rounded-full overflow-hidden">
+            <div class="h-full bg-[#FFCC00] rounded-full" style="width:87%"></div>
+          </div>
+          <p class="text-xs text-white/70 mt-1">87% ของทาง</p>
+        </div>
+      </div>
+      <p class="mt-5 text-sm leading-6 text-white/90 max-w-3xl">
+        พี่ดอยคำนวณให้แล้ว — ถ้าฝึก <strong class="text-[#FFCC00]">30 นาที/วัน</strong> ตามแผนนี้ คุณจะถึงเป้า 120 ก่อนสอบ
+      </p>
+    </section>
+
+    <!-- ACTIONS ordered by predicted score impact (Cagan).
+         Speaking is weakest → highest leverage. -->
+    <section>
+      <h2 class="text-lg font-bold mb-4">📊 ฝึกตามลำดับ — สิ่งที่จะเพิ่มคะแนนคุณเร็วที่สุด</h2>
+
+      <div class="space-y-3">
+        <!-- #1 Speaking — highest leverage -->
+        <a class="block rounded-2xl bg-white p-5 ring-1 ring-rose-300 hover:ring-rose-500 transition">
+          <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-2xl font-bold text-rose-700">1</div>
+            <div class="flex-1">
+              <p class="text-xs font-bold uppercase tracking-wider text-rose-600">+8 คะแนนคาดการณ์ · จุดอ่อนของคุณ</p>
+              <h3 class="text-base font-bold mt-0.5">🗣 ฝึก Production (พูด/เขียน)</h3>
+              <p class="text-xs text-slate-600 mt-1">5 เครื่องมือ · เริ่มที่ "พูดเกี่ยวกับภาพ" · 15 นาที</p>
+            </div>
+            <span class="text-2xl text-rose-600">→</span>
+          </div>
+        </a>
+
+        <!-- #2 Mini Lessons -->
+        <a class="block rounded-2xl bg-[#004AAD] text-white p-5 hover:opacity-95 transition">
+          <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#FFCC00] text-2xl font-bold text-slate-900">2</div>
+            <div class="flex-1">
+              <p class="text-xs font-bold uppercase tracking-wider text-[#FFCC00]">+5 คะแนนคาดการณ์ · ใหม่ เปิดให้ทุกคนแล้ว</p>
+              <h3 class="text-base font-bold mt-0.5">🎯 บทเรียนสั้นจากพี่ดอย (15 เทคนิค)</h3>
+              <p class="text-xs text-white/85 mt-1">15 นาทีต่อบท · ฝึกเทคนิค dictation, essay, reading</p>
+            </div>
+            <img src="/pidoy.png" class="h-12 w-12 rounded-full ring-2 ring-[#FFCC00] object-cover">
+          </div>
+        </a>
+
+        <!-- #3 Comprehension -->
+        <a class="block rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-[#004AAD] transition">
+          <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl font-bold text-emerald-700">3</div>
+            <div class="flex-1">
+              <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">+3 คะแนนคาดการณ์ · รักษาคะแนนที่แข็งแรงอยู่</p>
+              <h3 class="text-base font-bold mt-0.5">📖 ฝึก Comprehension (อ่าน/ฟัง)</h3>
+              <p class="text-xs text-slate-600 mt-1">4 เครื่องมือ · บทอ่าน · คำศัพท์ · บทสนทนา · สรุป AI</p>
+            </div>
+            <span class="text-2xl text-emerald-600">→</span>
+          </div>
+        </a>
+
+        <!-- #4 Literacy -->
+        <a class="block rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-[#004AAD] transition">
+          <div class="flex items-center gap-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-2xl font-bold text-slate-700">4</div>
+            <div class="flex-1">
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-500">+2 คะแนนคาดการณ์ · ใช้เป็น warm-up</p>
+              <h3 class="text-base font-bold mt-0.5">📝 ฝึกพื้นฐาน (Literacy)</h3>
+              <p class="text-xs text-slate-600 mt-1">3 เครื่องมือ · Dictation · FITB · Real Word · ทำซ้ำได้</p>
+            </div>
+            <span class="text-2xl text-slate-500">→</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Time tracker -->
+    <section class="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+      <div class="flex items-end justify-between mb-3">
+        <div>
+          <h3 class="text-sm font-bold">⏱ ติดตามความสม่ำเสมอ</h3>
+          <p class="text-xs text-slate-500 mt-0.5">เป้าหมาย 30 นาที/วัน — คุณทำได้ <span class="text-emerald-600 font-bold">เกินเป้า 12 นาที</span></p>
+        </div>
+        <div class="flex gap-1 text-xs">
+          <button class="rounded-lg px-3 py-1 bg-slate-100 hover:bg-slate-200">วัน</button>
+          <button class="rounded-lg px-3 py-1 bg-[#004AAD] text-white">สัปดาห์</button>
+          <button class="rounded-lg px-3 py-1 bg-slate-100 hover:bg-slate-200">เดือน</button>
+          <button class="rounded-lg px-3 py-1 bg-slate-100 hover:bg-slate-200">ปี</button>
+        </div>
+      </div>
+      <svg viewBox="0 0 600 200" class="w-full h-auto">
+        <defs>
+          <linearGradient id="gradB" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#004AAD" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#004AAD" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- target 30 min line -->
+        <line x1="0" y1="100" x2="600" y2="100" stroke="#FFCC00" stroke-width="2" stroke-dasharray="6,4"/>
+        <text x="595" y="95" text-anchor="end" font-size="10" fill="#a16207" font-weight="700">เป้า 30 นาที</text>
+        <!-- area -->
+        <path d="M 30 140 L 110 80 L 190 120 L 270 70 L 350 110 L 430 60 L 510 75 L 570 40 L 570 180 L 30 180 Z" fill="url(#gradB)"/>
+        <!-- line -->
+        <path d="M 30 140 L 110 80 L 190 120 L 270 70 L 350 110 L 430 60 L 510 75 L 570 40" fill="none" stroke="#004AAD" stroke-width="3" stroke-linejoin="round"/>
+        <circle cx="30" cy="140" r="4" fill="#004AAD"/>
+        <circle cx="110" cy="80" r="4" fill="#004AAD"/>
+        <circle cx="190" cy="120" r="4" fill="#004AAD"/>
+        <circle cx="270" cy="70" r="4" fill="#004AAD"/>
+        <circle cx="350" cy="110" r="4" fill="#004AAD"/>
+        <circle cx="430" cy="60" r="4" fill="#004AAD"/>
+        <circle cx="510" cy="75" r="4" fill="#004AAD"/>
+        <circle cx="570" cy="40" r="6" fill="#FFCC00" stroke="#004AAD" stroke-width="3"/>
+        <text x="30" y="195" text-anchor="middle" font-size="10" fill="#64748b">จ.</text>
+        <text x="110" y="195" text-anchor="middle" font-size="10" fill="#64748b">อ.</text>
+        <text x="190" y="195" text-anchor="middle" font-size="10" fill="#64748b">พ.</text>
+        <text x="270" y="195" text-anchor="middle" font-size="10" fill="#64748b">พฤ.</text>
+        <text x="350" y="195" text-anchor="middle" font-size="10" fill="#64748b">ศ.</text>
+        <text x="430" y="195" text-anchor="middle" font-size="10" fill="#64748b">ส.</text>
+        <text x="510" y="195" text-anchor="middle" font-size="10" fill="#64748b">อา.</text>
+        <text x="570" y="195" text-anchor="middle" font-size="10" font-weight="700" fill="#0f172a">วันนี้</text>
+      </svg>
+    </section>
+
+    <!-- Bottom: less important tools -->
+    <div class="grid gap-3 md:grid-cols-2">
+      <a class="rounded-xl bg-white p-4 ring-1 ring-slate-200 hover:ring-[#004AAD] transition flex items-center gap-3">
+        <span class="text-2xl">🩺</span>
+        <div>
+          <p class="text-sm font-bold">อัปเดตคะแนนของคุณ</p>
+          <p class="text-xs text-slate-500">Mini Diagnosis · 15 นาที ฟรี</p>
+        </div>
+      </a>
+      <a class="rounded-xl bg-white p-4 ring-1 ring-slate-200 hover:ring-[#004AAD] transition flex items-center gap-3">
+        <span class="text-2xl">🏆</span>
+        <div>
+          <p class="text-sm font-bold">สอบ Mock Test ครั้งใหม่</p>
+          <p class="text-xs text-slate-500">~45 นาที · เดือนละ 1 ครั้ง</p>
+        </div>
+      </a>
+    </div>
+
+    <aside class="rounded-xl bg-white p-4 ring-1 ring-slate-200 text-xs text-slate-700 leading-7">
+      <strong class="text-[#004AAD]">หลัก UX ที่ใช้:</strong>
+      <em>Cagan</em> — Outcome-first: หน้านี้ตอบ "ฉันจะถึงเป้าหมายยังไง" ตั้งแต่บนสุด · เครื่องมือเรียงตาม impact (ไม่ใช่ตาม feature) ·
+      <em>Krug</em> — เลขใหญ่ + bullet สั้น · scan ได้ใน 5 วินาที
+    </aside>
+  </main>
+</body>
+</html>
