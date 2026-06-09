@@ -77,13 +77,67 @@ export type MiniStudyConversationSummarySession = MiniStudySessionBase & {
   instructionsTh: string;
 };
 
+export type MiniStudyEssayPickRow = { label: string; A: string; B: string; C: string };
+
+export type MiniStudyEssayPickOption = {
+  letter: "A" | "B" | "C";
+  essayText: string;
+};
+
+export type MiniStudyEssayPickExercise = {
+  id: string;
+  topic: string;
+  options: MiniStudyEssayPickOption[];
+  correctLetter: "A" | "B" | "C";
+  analysisRowsTh: MiniStudyEssayPickRow[];
+  rationaleTh: string;
+};
+
+export type MiniStudyEssayPickSession = MiniStudySessionBase & {
+  kind: "essay-pick";
+  exercises: MiniStudyEssayPickExercise[];
+};
+
+export type MiniStudyClozeCategory =
+  | "present-simple-singular"
+  | "plural-noun"
+  | "uncountable-noun"
+  | "singular-after-a-an"
+  | "subject-verb-agreement-plural";
+
+export type MiniStudyClozeBlank = {
+  number: number;
+  cue: string;
+  correct: string;
+  acceptedAlts?: string[];
+  category: MiniStudyClozeCategory;
+  ruleNoteTh: string;
+};
+
+export type MiniStudyClozeExercise = {
+  id: string;
+  patternLabel: string;
+  topic: string;
+  noteTh?: string;
+  essayTemplate: string;
+  blanks: MiniStudyClozeBlank[];
+};
+
+export type MiniStudyEssayClozeSession = MiniStudySessionBase & {
+  kind: "essay-cloze";
+  studentInstructionsTh: string;
+  exercises: MiniStudyClozeExercise[];
+};
+
 export type MiniStudySession =
   | MiniStudyDictationSession
   | MiniStudyWritePhotoSession
   | MiniStudySpeakPhotoSession
   | MiniStudyListeningMcSession
   | MiniStudyListenRespondSession
-  | MiniStudyConversationSummarySession;
+  | MiniStudyConversationSummarySession
+  | MiniStudyEssayPickSession
+  | MiniStudyEssayClozeSession;
 
 export const MINI_STUDY_SESSIONS: MiniStudySession[] = [
   {
@@ -1441,5 +1495,374 @@ function buildSessions7Through10(): MiniStudySession[] {
       "อ่านบทสนทนาด้านบนให้จบ แล้วเขียน summary ภาษาอังกฤษ **3 ประโยค** โดยใช้ pattern ที่เรียนมา ใช้เวลาไม่เกิน 75 วินาที **ห้ามดู template ระหว่างเขียน**",
   };
 
-  return [session7, session8, session9, session10];
+  const session11: MiniStudyEssayPickSession = buildSession11();
+  const session12: MiniStudyEssayClozeSession = buildSession12();
+  return [session7, session8, session9, session10, session11, session12];
+}
+
+function buildSession11(): MiniStudyEssayPickSession {
+  return {
+    id: "session-11",
+    index: 11,
+    title: "Writing essay — pick the best 70–90 word essay",
+    subtitle: "Lesson on essay patterns + 5 multi-choice exercises",
+    durationLabel: "≈ 15 min",
+    kind: "essay-pick",
+    explanation: [
+      {
+        heading: "ส่วนที่ 1 — 50-word essay ในข้อสอบ DET คืออะไร?",
+        body: [
+          "• DET มีข้อสอบให้ **เขียน essay สั้นๆ** จากหัวข้อ + เวลาจำกัด",
+          "• หัวข้อมักถาม **ความคิดเห็น** เช่น",
+          "  *\"Do you prefer studying alone or with others?\"*",
+          "  *\"Is it better to live in a city or in the countryside?\"*",
+          "• เป้าหมาย: **สื่อสารชัด + ไวยากรณ์ถูก**",
+          "• เขียน **70–90 คำ** — ไม่ต้องนับทุกคำ แค่รู้สึกว่าเต็มและครบโครงสร้าง",
+          "• **ห้ามอิมโพรไวส์** — ต้องใช้ pattern ที่ฝึกมาเสมอ",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 2 — DET ประเมินอะไร",
+        body: [
+          "✅ **ความชัดเจน** — อ่านแล้วเข้าใจทันทีว่าคุณคิดอะไร",
+          "✅ **ไวยากรณ์ถูก** — ประโยคสมบูรณ์ tense ถูก",
+          "✅ **มี stance ชัดเจน** — เลือกข้าง ห้ามกลาง",
+          "✅ **โครงสร้างครบ** — มีเปิด เนื้อหา และปิด",
+        ].join("\n"),
+      },
+      {
+        heading: "ส่วนที่ 3 — ข้อผิดพลาดที่ต้องหลีกเลี่ยง",
+        body: [
+          "**❌ ไม่มี stance** — เขียนกลางๆ",
+          "  ผิด: *Both options have advantages and disadvantages.*",
+          "  ถูก: *I think living in a city is better because there are more opportunities.*",
+          "",
+          "**❌ สลับลำดับ Explain ↔ Example** (ร้ายแรงที่สุด)",
+          "  ลำดับที่ถูก: **Explain ก่อนเสมอ** แล้วค่อย Example",
+          "  ผิด: *For example, I study better at home. I prefer studying alone because I can focus.*",
+          "  ถูก: *I prefer studying alone because I can focus better. For example, when I study at home I finish my work much faster.*",
+          "",
+          "**❌ ใช้คำซับซ้อนโดยไม่จำเป็น** — ไวยากรณ์ถูกสำคัญกว่าคำหรู",
+          "**❌ ลืม conclusion** — แค่ 1 ประโยคก็พอ แต่ต้องมี",
+          "**❌ copy ประโยคแรกมาเป็น conclusion** — ต้องย้ำ stance ด้วยคำที่ต่างไป",
+        ].join("\n"),
+      },
+      {
+        heading: "Pattern 1 — Opinion Essay (5 ส่วน)",
+        body: [
+          "**1. Introduction** — บอก stance ทันที (**ไม่ต้องใช้** transitional word)",
+          "   *I think … because …* / *I prefer … because …* / *In my opinion, … because …*",
+          "",
+          "**2. Explain** — ขยายเหตุผล (**ต้องเริ่มด้วย** transitional word)",
+          "   *This is because …* / *The reason is that …* / *Specifically, …*",
+          "",
+          "**3. Example** — ยกตัวอย่าง (**มาหลัง Explain เสมอ**)",
+          "   *For example, …* / *For instance, …* / *To illustrate, …*",
+          "",
+          "**4. Mini-conclusion** — ย้ำว่าเหตุผลนี้สำคัญ",
+          "   *This shows that …* / *Because of this, …* / *As a result, …*",
+          "",
+          "**5. Conclusion** — ปิด essay",
+          "   *Overall, I think …* / *Therefore, I believe …* / *In conclusion, …*",
+        ].join("\n"),
+      },
+      {
+        heading: "Pattern 2 — Listing Essay (4 ส่วน)",
+        body: [
+          "**1. Introduction** — บอก stance + จำนวนเหตุผล",
+          "   *There are two main reasons why …* / *I think there are two main benefits of …*",
+          "",
+          "**2. First reason** — *First, …* / *Firstly, …* / *To begin with, …*",
+          "",
+          "**3. Second reason** — *Second, …* / *In addition, …* / *Furthermore, …*",
+          "",
+          "**4. Conclusion** — *Overall, I think …* / *For these reasons, …* / *In conclusion, …*",
+        ].join("\n"),
+      },
+      {
+        heading: "ตัวอย่าง — Pattern 1 (Opinion)",
+        body:
+          "**หัวข้อ:** *Do you prefer studying alone or with others?*\n\n*I prefer studying alone because I can focus much better without distractions. **This is because** when other people are around, it is easy to lose concentration and start talking about unrelated things. **For example**, a one-hour study session with friends sometimes becomes only thirty minutes of actual studying. **This shows that** studying alone helps me use my time more effectively. **Overall, I believe** that studying alone is the better choice for me.*",
+      },
+      {
+        heading: "ตัวอย่าง — Pattern 2 (Listing)",
+        body:
+          "**หัวข้อ:** *What are the benefits of learning a second language?*\n\n*I think there are two main benefits of learning a second language. **First**, it helps people communicate with more people around the world, which opens up better opportunities in work and travel. **In addition**, learning a new language trains the brain to think in different ways, which can improve memory and problem-solving skills. **For these reasons**, I believe that learning a second language is very valuable for everyone.*",
+      },
+      {
+        heading: "Checklist ก่อนเลือกตัวเลือกในแบบฝึกหัด",
+        body: [
+          "☐ มี **stance** ชัดเจนตั้งแต่ต้น (ไม่กลาง)",
+          "☐ **Explain มาก่อน Example** เสมอ",
+          "☐ ทุกส่วนมี **transitional word**",
+          "☐ มี **conclusion** ที่ปิด essay (ไม่มีข้อมูลใหม่หลัง Overall/In conclusion)",
+        ].join("\n"),
+      },
+    ],
+    exercises: [
+      {
+        id: "s11-1",
+        topic: "Do you prefer living in a city or in the countryside?",
+        correctLetter: "B",
+        options: [
+          {
+            letter: "A",
+            essayText:
+              "Living in a city and living in the countryside both have good points. Cities have more jobs but the countryside is more peaceful. For example, the countryside has fresh air and nature. But cities have better hospitals. I think both are good depending on the person.",
+          },
+          {
+            letter: "B",
+            essayText:
+              "I prefer living in a city because there are more opportunities for work and education. This is because cities have more companies and public services than rural areas. For example, in a big city there are thousands of job options compared to a small town. This shows that living in a city gives people more choices in life. Overall, I believe that living in a city is the better option.",
+          },
+          {
+            letter: "C",
+            essayText:
+              "I prefer living in a city. For example, big cities have many job opportunities and universities. This is because cities are more developed. Overall I think cities are better because there are more things to do.",
+          },
+        ],
+        analysisRowsTh: [
+          { label: "Stance ชัดเจน", A: "❌ กลางๆ", B: "✅", C: "✅" },
+          { label: "Explain ก่อน Example", A: "—", B: "✅", C: "❌ Example ก่อน Explain" },
+          { label: "Transitional words ครบ", A: "❌ ขาดหลายส่วน", B: "✅", C: "❌ ขาด mini-conclusion" },
+          { label: "มี conclusion", A: "❌", B: "✅", C: "✅" },
+        ],
+        rationaleTh:
+          "A ผิดเพราะไม่มี stance ชัดเจน เขียนกลางๆ ตลอด · C ผิดเพราะสลับลำดับ — ยก Example ก่อน Explain",
+      },
+      {
+        id: "s11-2",
+        topic: "What are the benefits of doing exercise regularly?",
+        correctLetter: "A",
+        options: [
+          {
+            letter: "A",
+            essayText:
+              "I think there are two main benefits of exercising regularly. First, it improves physical health by making the heart and muscles stronger. In addition, it also reduces stress and helps people feel happier every day. For these reasons, I believe that exercising regularly is one of the best habits a person can have.",
+          },
+          {
+            letter: "B",
+            essayText:
+              "Exercising is very good for you. For example, running every day makes you feel better. This is because exercise helps your body stay strong. Also walking is a good exercise too. I think everyone should exercise because it is healthy.",
+          },
+          {
+            letter: "C",
+            essayText:
+              "I believe exercising regularly has many benefits for both the body and the mind. This is because it strengthens muscles and improves heart health over time. For example, people who walk every day tend to feel more energetic and get sick less often. This shows that even simple exercise can make a big difference. For these reasons, I think everyone should try to exercise regularly, even for just thirty minutes a day.",
+          },
+        ],
+        analysisRowsTh: [
+          { label: "Stance ชัดเจน", A: "✅", B: "❌ ไม่บอก pattern", C: "✅" },
+          { label: "โครงสร้างถูก", A: "✅", B: "❌ Example ก่อน Explain", C: "✅" },
+          { label: "Transitional words ครบ", A: "✅", B: "❌ ขาดหลายส่วน", C: "✅" },
+          { label: "มี conclusion ที่ดี", A: "✅", B: "❌", C: "❌ ใส่ข้อมูลใหม่หลัง conclusion" },
+        ],
+        rationaleTh:
+          "B ผิดเพราะ Example มาก่อน Explain และไม่มี conclusion จริงๆ · C ผิดเพราะยาวเกินไป + ใส่ข้อมูลใหม่ใน conclusion — conclusion ที่ดีต้องย้ำ stance เท่านั้น",
+      },
+      {
+        id: "s11-3",
+        topic: "Do you think it is better to study online or in a classroom?",
+        correctLetter: "A",
+        options: [
+          {
+            letter: "A",
+            essayText:
+              "I think studying in a classroom is better because students can interact with their teacher directly. This is because face-to-face communication helps students understand lessons more quickly. For example, if a student does not understand something, they can raise their hand and get help right away. This shows that direct interaction makes learning more effective. Overall, I believe classroom studying leads to better results.",
+          },
+          {
+            letter: "B",
+            essayText:
+              "I think studying online is more convenient because you can study anywhere at any time. For example, many students in Thailand study from home using their phones. This is because online platforms are easy to access. Overall, I think online studying is the future of education and everyone should try it.",
+          },
+          {
+            letter: "C",
+            essayText:
+              "Studying online has many benefits and so does studying in a classroom. For example, online studying is flexible. But classroom studying is more social. This is because you can meet friends. I think both are good in different situations and it depends on the student.",
+          },
+        ],
+        analysisRowsTh: [
+          { label: "Stance ชัดเจน", A: "✅", B: "✅", C: "❌ กลางๆ" },
+          { label: "Explain ก่อน Example", A: "✅", B: "❌ Example ก่อน Explain", C: "❌ Example ก่อน Explain" },
+          { label: "Transitional words ครบ", A: "✅", B: "❌ ขาด mini-conclusion", C: "❌ ขาดหลายส่วน" },
+          { label: "มี conclusion", A: "✅", B: "✅", C: "❌" },
+        ],
+        rationaleTh:
+          "B ผิดเพราะสลับลำดับ — Example มาก่อน Explain · C ผิดเพราะไม่มี stance และโครงสร้างสับสน",
+      },
+      {
+        id: "s11-4",
+        topic: "Should university students be required to do an internship before graduating?",
+        correctLetter: "A",
+        options: [
+          {
+            letter: "A",
+            essayText:
+              "I think there are two reasons why university students should do an internship. First, it gives them real work experience that they cannot get in a classroom. In addition, it also helps them build a professional network which is useful when looking for a job after graduation. For these reasons, I believe internships should be required for all university students.",
+          },
+          {
+            letter: "B",
+            essayText:
+              "University students should do an internship before graduating because it is very helpful. For example, many students who did internships found jobs faster after graduation. This is because they already had experience. Also internships teach you things school cannot. Overall, doing an internship is a great idea for every student.",
+          },
+          {
+            letter: "C",
+            essayText:
+              "I think internships are very important for students. This is because working in a real company teaches you many things. For example, you learn how to communicate professionally and manage your time. This shows that internships are useful. Overall, I believe all students should do an internship. Also it is good experience and helps with finding a job later.",
+          },
+        ],
+        analysisRowsTh: [
+          { label: "Stance ชัดเจน", A: "✅", B: "✅", C: "✅" },
+          { label: "โครงสร้างถูก", A: "✅", B: "❌ Example ก่อน Explain", C: "✅" },
+          { label: "Transitional words ครบ", A: "✅", B: "❌ ขาด mini-conclusion", C: "✅" },
+          { label: "มี conclusion (ไม่ใส่ข้อมูลใหม่)", A: "✅", B: "✅", C: "❌ มีข้อมูลใหม่หลัง conclusion" },
+        ],
+        rationaleTh:
+          "B ผิดเพราะ Example มาก่อน Explain ในเหตุผลแรก · C ผิดเพราะเขียน Overall แล้วยังเพิ่มข้อมูลอีก — เมื่อปิดต้องจบเลย",
+      },
+      {
+        id: "s11-5",
+        topic: "Do you prefer reading books or watching videos to learn new things?",
+        correctLetter: "B",
+        options: [
+          {
+            letter: "A",
+            essayText:
+              "I prefer watching videos to learn new things because it is easier to understand visual information. For example, science channels on YouTube explain difficult topics using animation and graphics. This is because videos can show things that words alone cannot describe easily. This shows that visual learning is more effective for complex topics. Overall, I think watching videos is a better way to learn for most people.",
+          },
+          {
+            letter: "B",
+            essayText:
+              "I prefer reading books because I can learn at my own pace. This is because books allow me to stop, re-read, and think carefully about the information. For example, when I read about history I can go back and recheck important dates and facts as many times as I need. This shows that reading gives more control over the learning process. Overall, I believe reading is a more effective way to learn.",
+          },
+          {
+            letter: "C",
+            essayText:
+              "Reading books and watching videos are both good ways to learn. This is because some people learn better by reading and some by watching. For example, students who prefer videos can find many good channels online. Also, books are good because they have more detailed information. I think the best way depends on the person and the subject.",
+          },
+        ],
+        analysisRowsTh: [
+          { label: "Stance ชัดเจน", A: "✅", B: "✅", C: "❌ กลางๆ" },
+          { label: "Explain ก่อน Example", A: "❌ Example ก่อน Explain", B: "✅", C: "✅" },
+          { label: "Transitional words ครบ", A: "❌ Explain มาหลัง Example", B: "✅", C: "❌ ขาด conclusion" },
+          { label: "มี conclusion", A: "✅", B: "✅", C: "❌" },
+        ],
+        rationaleTh:
+          "A ผิดเพราะสลับลำดับ — Example มาก่อน Explain · C ผิดเพราะไม่มี stance และไม่มี conclusion จริงๆ",
+      },
+    ],
+  };
+}
+
+function buildSession12(): MiniStudyEssayClozeSession {
+  return {
+    id: "session-12",
+    index: 12,
+    title: "Writing essay — find your grammar mistakes",
+    subtitle: "3 cloze essays · auto-graded weakness report (Thai)",
+    durationLabel: "≈ 15 min",
+    kind: "essay-cloze",
+    explanation: [
+      {
+        heading: "ทำไมต้องฝึกเรื่องนี้ (Thai)",
+        body: [
+          "DET essay **ใช้ไวยากรณ์เป็นเกณฑ์หลักในการให้คะแนน**",
+          "ถ้าอยากได้คะแนนสูง คุณต้อง **เติม -s/-es** ในคำกริยา present simple ให้ถูก และ **ใช้คำนามเอกพจน์/พหูพจน์/นับไม่ได้** ให้ถูก",
+          "แบบฝึกหัดนี้จะทดสอบ 5 จุดอ่อนยอดฮิตของนักเรียนไทย:",
+          "",
+          "1. **Present Simple** — ประธานเอกพจน์ ต้องเติม -s/-es",
+          "2. **คำนามพหูพจน์** — แนวคิดทั่วไปต้องเป็นพหูพจน์",
+          "3. **คำนามนับไม่ได้** — ห้ามเติม -s (loneliness, information, advice…)",
+          "4. **คำนามเอกพจน์หลัง a/an** — ห้ามเติม -s",
+          "5. **Subject-verb agreement** — ประธานพหูพจน์ + กริยาไม่เติม -s",
+        ].join("\n"),
+      },
+      {
+        heading: "วิธีทำ",
+        body: [
+          "• แต่ละช่องจะมี **cue ในวงเล็บ** เช่น [VERB: help] หรือ [NOUN: friend]",
+          "• เติม **รูปที่ถูกต้องตามไวยากรณ์** — ไม่ใช่คำในวงเล็บตรงๆ",
+          "• ใช้ **คำเดียว** (ห้ามเขียนคำสั้น)",
+          "• กด **Check answers** แล้วระบบจะตรวจทุกข้อทันทีและแสดงรายงานจุดอ่อนเป็นภาษาไทย",
+          "• กด **Save to notebook** เพื่อเก็บรายงานไว้ทบทวน",
+        ].join("\n"),
+      },
+      {
+        heading: "ระดับความยาก",
+        body: [
+          "• **ข้อ 1** — present simple + พหูพจน์พื้นฐาน",
+          "• **ข้อ 2** — เพิ่มพหูพจน์ผิดปกติ + subject-verb agreement ซับซ้อนขึ้น",
+          "• **ข้อ 3** — เพิ่ม **คำนามนับไม่ได้** + กับดักเรื่อง **which** ที่เป็นประธานเอกพจน์",
+        ].join("\n"),
+      },
+    ],
+    studentInstructionsTh:
+      "อ่าน essay ให้จบก่อน แล้วเติมคำในรูปที่ถูกต้องตามไวยากรณ์ ห้ามเปลี่ยนคำอื่นในประโยค",
+    exercises: [
+      {
+        id: "s12-1",
+        patternLabel: "Pattern 1 — Opinion Essay",
+        topic: "Do you prefer studying alone or with others?",
+        essayTemplate:
+          "I prefer studying alone because it ___ me focus much better. This is because ___ from other people ___ it harder to concentrate on my work. For example, a study session with ___ often ___ into a social event instead of actual studying. This shows that ___ who study alone ___ to use their time more effectively. Overall, I believe that studying alone ___ the better choice for most ___.",
+        blanks: [
+          { number: 1, cue: "VERB: help", correct: "helps", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (it) ต้องเติม -s" },
+          { number: 2, cue: "NOUN: distraction", correct: "distractions", acceptedAlts: ["Distractions"], category: "plural-noun", ruleNoteTh: "คำนามแนวคิดทั่วไป — ต้องเป็นพหูพจน์" },
+          { number: 3, cue: "VERB: make", correct: "make", category: "subject-verb-agreement-plural", ruleNoteTh: "ประธานพหูพจน์ (distractions) — กริยาไม่เติม -s" },
+          { number: 4, cue: "NOUN: friend", correct: "friends", category: "plural-noun", ruleNoteTh: "คำนามทั่วไปในรูปพหูพจน์" },
+          { number: 5, cue: "VERB: turn", correct: "turns", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (a study session) ต้องเติม -s" },
+          { number: 6, cue: "NOUN: student", correct: "students", acceptedAlts: ["Students"], category: "plural-noun", ruleNoteTh: "กลุ่มทั่วไป — ต้องเป็นพหูพจน์" },
+          { number: 7, cue: "VERB: tend", correct: "tend", category: "subject-verb-agreement-plural", ruleNoteTh: "ประธานพหูพจน์ (students) — กริยาไม่เติม -s" },
+          { number: 8, cue: "VERB: be", correct: "is", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (studying alone) ใช้ 'is'" },
+          { number: 9, cue: "NOUN: person", correct: "people", category: "plural-noun", ruleNoteTh: "คำนามพหูพจน์ผิดปกติ: person → people" },
+        ],
+      },
+      {
+        id: "s12-2",
+        patternLabel: "Pattern 2 — Listing Essay",
+        topic: "What are the benefits of learning a second language?",
+        noteTh:
+          "ระวัง: คำที่อยู่หลัง 'two main ___' ต้องเป็นพหูพจน์เสมอ · ประธานพหูพจน์ → กริยาไม่เติม -s",
+        essayTemplate:
+          "I think there are two main ___ of learning a second language. First, it ___ people to communicate with a much wider range of ___ around the world. This is because many international ___ in work and travel ___ more than one language. In addition, learning a new language also ___ the brain to think in different ___, which ___ both memory and problem-solving ___. For these reasons, I believe that learning a second language ___ people a significant advantage in life.",
+        blanks: [
+          { number: 1, cue: "NOUN: benefit", correct: "benefits", category: "plural-noun", ruleNoteTh: "หลัง 'two main' ต้องเป็นพหูพจน์" },
+          { number: 2, cue: "VERB: allow", correct: "allows", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (it)" },
+          { number: 3, cue: "NOUN: person", correct: "people", category: "plural-noun", ruleNoteTh: "พหูพจน์ผิดปกติ: person → people" },
+          { number: 4, cue: "NOUN: opportunity", correct: "opportunities", category: "plural-noun", ruleNoteTh: "พหูพจน์ที่ y → ies" },
+          { number: 5, cue: "VERB: require", correct: "require", category: "subject-verb-agreement-plural", ruleNoteTh: "ประธานพหูพจน์ (opportunities) — กริยาไม่เติม -s" },
+          { number: 6, cue: "VERB: train", correct: "trains", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (learning…)" },
+          { number: 7, cue: "NOUN: way", correct: "ways", category: "plural-noun", ruleNoteTh: "หลัง 'different' โดยทั่วไปเป็นพหูพจน์" },
+          { number: 8, cue: "VERB: improve", correct: "improves", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (which → the act of training)" },
+          { number: 9, cue: "NOUN: skill", correct: "skills", category: "plural-noun", ruleNoteTh: "แนวคิดทั่วไป — ต้องเป็นพหูพจน์" },
+          { number: 10, cue: "VERB: give", correct: "gives", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (learning a second language)" },
+        ],
+      },
+      {
+        id: "s12-3",
+        patternLabel: "Pattern 1 — Opinion Essay (advanced)",
+        topic: "Do you think it is better to live with family or alone?",
+        noteTh:
+          "ระวัง: คำนามนับไม่ได้ (loneliness) ห้ามเติม -s · คำหลัง 'a young' ต้องเป็นเอกพจน์ · which เป็นประธานเอกพจน์",
+        essayTemplate:
+          "I believe that living with family ___ better because it ___ both emotional and financial support. This is because ___ ___ each other during difficult ___, which ___ stress and ___. For example, when a young ___ ___ a problem at work, having family at home ___ them a sense of comfort and security. This shows that family ___ a support system that ___ alone cannot always replace. Overall, I think living with family ___ the better choice for most ___.",
+        blanks: [
+          { number: 1, cue: "VERB: be", correct: "is", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (living with family)" },
+          { number: 2, cue: "VERB: provide", correct: "provides", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (it)" },
+          { number: 3, cue: "NOUN: family member", correct: "family members", category: "plural-noun", ruleNoteTh: "กลุ่มทั่วไป — ต้องเป็นพหูพจน์" },
+          { number: 4, cue: "VERB: help", correct: "help", category: "subject-verb-agreement-plural", ruleNoteTh: "ประธานพหูพจน์ (family members) — กริยาไม่เติม -s" },
+          { number: 5, cue: "NOUN: time", correct: "times", category: "plural-noun", ruleNoteTh: "หลัง 'difficult' โดยทั่วไปเป็นพหูพจน์" },
+          { number: 6, cue: "VERB: reduce", correct: "reduces", category: "present-simple-singular", ruleNoteTh: "Present simple — which เป็นประธานเอกพจน์ (อ้างถึงประโยคก่อน)" },
+          { number: 7, cue: "NOUN: loneliness", correct: "loneliness", category: "uncountable-noun", ruleNoteTh: "คำนามนับไม่ได้ — ห้ามเติม -s" },
+          { number: 8, cue: "NOUN: adult", correct: "adult", category: "singular-after-a-an", ruleNoteTh: "หลัง 'a young' — ต้องเป็นเอกพจน์" },
+          { number: 9, cue: "VERB: face", correct: "faces", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (a young adult)" },
+          { number: 10, cue: "VERB: give", correct: "gives", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (having family at home)" },
+          { number: 11, cue: "VERB: provide", correct: "provides", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (family)" },
+          { number: 12, cue: "NOUN: friend", correct: "friends", category: "plural-noun", ruleNoteTh: "กลุ่มทั่วไป — ต้องเป็นพหูพจน์" },
+          { number: 13, cue: "VERB: be", correct: "is", category: "present-simple-singular", ruleNoteTh: "Present simple — ประธานเอกพจน์ (living with family)" },
+          { number: 14, cue: "NOUN: person", correct: "people", category: "plural-noun", ruleNoteTh: "พหูพจน์ผิดปกติ: person → people" },
+        ],
+      },
+    ],
+  };
 }

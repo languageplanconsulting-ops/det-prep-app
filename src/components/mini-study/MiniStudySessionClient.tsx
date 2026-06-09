@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import type { MiniStudySession } from "@/lib/mini-study/content";
 import { MiniStudyDictationPhase } from "./MiniStudyDictationPhase";
+import { MiniStudyEssayClozePhase } from "./MiniStudyEssayClozePhase";
+import { MiniStudyEssayPickPhase } from "./MiniStudyEssayPickPhase";
 import { MiniStudyExplanation } from "./MiniStudyExplanation";
 import { MiniStudyListenRespondPhase } from "./MiniStudyListenRespondPhase";
 import { MiniStudyListeningMcPhase } from "./MiniStudyListeningMcPhase";
@@ -60,7 +62,11 @@ export function MiniStudySessionClient({ session }: Props) {
               ? "Start listening →"
               : session.kind === "listen-respond"
                 ? "Start exercises →"
-                : "Start practice →";
+                : session.kind === "essay-pick"
+                  ? "Start essay practice →"
+                  : session.kind === "essay-cloze"
+                    ? "Start cloze exercises →"
+                    : "Start practice →";
     return (
       <MiniStudyExplanation
         sessionIndex={session.index}
@@ -89,5 +95,11 @@ export function MiniStudySessionClient({ session }: Props) {
   if (session.kind === "listen-respond") {
     return <MiniStudyListenRespondPhase session={session} />;
   }
-  return <MiniStudySummaryPhase session={session} />;
+  if (session.kind === "conversation-summary") {
+    return <MiniStudySummaryPhase session={session} />;
+  }
+  if (session.kind === "essay-pick") {
+    return <MiniStudyEssayPickPhase session={session} />;
+  }
+  return <MiniStudyEssayClozePhase session={session} />;
 }

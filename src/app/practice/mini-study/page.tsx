@@ -73,7 +73,11 @@ export default function MiniStudyHubPage() {
                       ? `${s.scenarios.length} scenarios · MC questions`
                       : s.kind === "listen-respond"
                         ? `${s.exercises.length} turn-based exercises`
-                        : "Conversation summary · Gemini Lite feedback"}
+                        : s.kind === "conversation-summary"
+                          ? "Conversation summary · Gemini Lite feedback"
+                          : s.kind === "essay-pick"
+                            ? `${s.exercises.length} essay-pick MC exercises`
+                            : `${s.exercises.length} cloze essays · grammar weakness report`}
             </p>
             <Link
               href={`/practice/mini-study/${s.id}`}
