@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { QuestionRouter } from "@/components/mock-test/questions/QuestionRouter";
 import { MockTestTimerBar } from "@/components/mock-test/MockTestTimerBar";
 import { usePhaseTimer } from "@/hooks/usePhaseTimer";
+import { MiniInteractiveListeningStep } from "@/components/mini-diagnosis/MiniInteractiveListeningStep";
 
 type SessionPayload = {
   id: string;
@@ -33,7 +34,7 @@ const TASK_LABELS: Record<string, { en: string; th: string; hint: string }> = {
   real_english_word: { en: "Real English Word", th: "คำอังกฤษจริง", hint: "Pick only the real English words." },
   vocabulary_reading: { en: "Vocabulary Reading", th: "คำศัพท์ + การอ่าน", hint: "Balance vocab accuracy and passage understanding." },
   fill_in_blanks: { en: "Fill in the Blanks", th: "เติมคำในช่องว่าง", hint: "Use grammar and context together." },
-  interactive_listening: { en: "Listening Mini Test", th: "มินิเทสต์การฟัง", hint: "You can listen up to 3 times, then answer all 5 questions." },
+  interactive_listening: { en: "Listening Mini Test", th: "มินิเทสต์การฟัง", hint: "ฟังบทสนทนาในแคมปัส 3 สถานการณ์ กดฟังได้ไม่เกิน 3 ครั้งต่อสถานการณ์ แล้วตอบคำถามทั้งหมด / 3 campus scenarios, up to 3 plays each, then answer every question." },
   write_about_photo: { en: "Write About Photo", th: "เขียนจากภาพ", hint: "Keep your sentence structure clear and on topic." },
   read_then_speak: { en: "Read Then Speak", th: "อ่านแล้วพูด", hint: "Read quickly, then speak in full connected ideas." },
 };
@@ -209,16 +210,24 @@ export function MiniDiagnosisSessionClient({ sessionId }: { sessionId: string })
         </section>
 
         <section className="border-4 border-black bg-white p-5 shadow-[8px_8px_0_0_#111111]">
-          <QuestionRouter
-            question={question as any}
-            submitting={submitting}
-            onDictationAudioFinished={() => {
-              if (dictationTimerStarted) return;
-              setDictationTimerStarted(true);
-              timer.resumeTimer();
-            }}
-            onSubmit={submit}
-          />
+          {current.task_type === "interactive_listening" ? (
+            <MiniInteractiveListeningStep
+              content={current.content}
+              submitting={submitting}
+              onSubmit={submit}
+            />
+          ) : (
+            <QuestionRouter
+              question={question as any}
+              submitting={submitting}
+              onDictationAudioFinished={() => {
+                if (dictationTimerStarted) return;
+                setDictationTimerStarted(true);
+                timer.resumeTimer();
+              }}
+              onSubmit={submit}
+            />
+          )}
         </section>
       </div>
     </main>

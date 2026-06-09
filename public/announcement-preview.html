@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Announcement style preview</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Sarabun:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ep-blue:#004aad;
+    --ep-yellow:#ffcc00;
+    --ep-pink:#ff5fa2;
+    --ep-green:#22c55e;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:'Sarabun',system-ui,sans-serif;
+    background:#f5f5f5;color:#111;
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+  .label{
+    font-family:var(--mono);font-weight:800;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:#555;margin-bottom:10px;
+  }
+  h1.page{
+    font-family:var(--mono);font-weight:800;margin:0 0 24px;font-size:18px;
+    color:var(--ep-blue);
+  }
+  .switcher{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
+  .switcher a{
+    font-family:var(--mono);font-size:11px;text-decoration:none;color:#111;
+    background:#fff;border:2px solid #000;padding:6px 10px;
+    box-shadow:2px 2px 0 0 #000;
+  }
+  .switcher a:hover{background:var(--ep-yellow)}
+
+  /* ============ STYLE 1 — Brutalist Step Cards (matches existing app) ============ */
+  .s1{
+    background:linear-gradient(180deg,rgba(255,204,0,.35),#fff);
+    border:3px solid #000;border-radius:4px;padding:22px;
+    box-shadow:6px 6px 0 0 #000;
+  }
+  .s1 h2{
+    font-family:var(--mono);font-weight:800;color:var(--ep-blue);
+    border-bottom:4px solid #000;padding-bottom:8px;margin:0 0 16px;font-size:18px;
+  }
+  .s1 .lead{font-size:14px;line-height:1.7;margin:0 0 18px}
+  .s1 .priority-title{
+    font-family:var(--mono);font-weight:800;font-size:12px;letter-spacing:.08em;
+    text-transform:uppercase;margin:18px 0 10px;color:#000;
+  }
+  .s1 .step{
+    border:2.5px solid #000;background:#fff;border-radius:4px;
+    padding:14px 14px 14px 56px;margin-bottom:12px;position:relative;
+    box-shadow:3px 3px 0 0 #000;
+  }
+  .s1 .step .n{
+    position:absolute;left:-14px;top:-14px;width:38px;height:38px;
+    background:var(--ep-yellow);border:2.5px solid #000;border-radius:50%;
+    display:grid;place-items:center;font-family:var(--mono);font-weight:800;
+    box-shadow:2px 2px 0 0 #000;
+  }
+  .s1 .step h3{margin:0 0 4px;font-size:14px;font-weight:800}
+  .s1 .step .tag{
+    display:inline-block;font-family:var(--mono);font-size:10px;font-weight:800;
+    letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border:2px solid #000;
+    background:#fff;margin-left:6px;vertical-align:middle;
+  }
+  .s1 .step .tag.fast{background:var(--ep-green);color:#fff}
+  .s1 .step .tag.med{background:var(--ep-yellow)}
+  .s1 .step .tag.slow{background:var(--ep-pink);color:#fff}
+  .s1 .step p{margin:6px 0 0;font-size:13px;line-height:1.65;color:#222}
+  .s1 .summary{
+    margin-top:18px;padding:14px;border:2.5px solid #000;background:#000;color:#fff;
+    border-radius:4px;font-size:13px;line-height:1.7;
+  }
+  .s1 .summary b{color:var(--ep-yellow)}
+
+  /* ============ STYLE 2 — Clean Editorial / Magazine ============ */
+  .s2{
+    background:#fff;border:1px solid #e5e5e5;border-radius:12px;
+    padding:28px 28px 24px;
+    box-shadow:0 1px 0 #e5e5e5, 0 24px 48px -32px rgba(0,0,0,.18);
+  }
+  .s2 .kicker{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ep-blue);margin:0 0 6px;font-weight:800;
+  }
+  .s2 h2{margin:0 0 14px;font-size:22px;font-weight:800;line-height:1.3}
+  .s2 .rule{height:1px;background:#111;width:48px;margin:14px 0 18px}
+  .s2 .lead{font-size:15px;line-height:1.75;color:#222;margin:0 0 24px}
+  .s2 .pri-list{counter-reset:pri;list-style:none;padding:0;margin:0}
+  .s2 .pri-list li{
+    counter-increment:pri;display:grid;grid-template-columns:42px 1fr;gap:14px;
+    padding:18px 0;border-top:1px solid #ececec;
+  }
+  .s2 .pri-list li:first-child{border-top:none;padding-top:6px}
+  .s2 .pri-list li::before{
+    content:counter(pri,decimal-leading-zero);
+    font-family:var(--mono);font-weight:800;font-size:20px;color:var(--ep-blue);
+    line-height:1;padding-top:2px;
+  }
+  .s2 .pri-list h3{margin:0 0 4px;font-size:15px;font-weight:800}
+  .s2 .pri-list .meta{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:#666;margin-left:8px;
+  }
+  .s2 .pri-list p{margin:6px 0 0;font-size:13.5px;line-height:1.7;color:#333}
+  .s2 .footnote{
+    margin-top:22px;padding:14px 16px;border-left:3px solid var(--ep-blue);
+    background:#f6f8fc;font-size:13.5px;line-height:1.7;border-radius:0 8px 8px 0;
+  }
+
+  /* ============ STYLE 3 — Duolingo Path / Playful ============ */
+  .s3{
+    background:radial-gradient(1200px 400px at 20% -10%, #e6f0ff 0%, transparent 60%),
+              radial-gradient(900px 400px at 110% 10%, #fff7d6 0%, transparent 60%),
+              #fff;
+    border-radius:20px;padding:24px;border:1px solid #eee;
+  }
+  .s3 .pill{
+    display:inline-flex;align-items:center;gap:6px;background:var(--ep-blue);color:#fff;
+    padding:6px 12px;border-radius:999px;font-family:var(--mono);font-size:11px;
+    font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  }
+  .s3 h2{margin:12px 0 6px;font-size:22px;font-weight:800}
+  .s3 .lead{font-size:14.5px;line-height:1.75;color:#333;margin:0 0 22px;max-width:62ch}
+  .s3 .path{position:relative;padding-left:28px}
+  .s3 .path::before{
+    content:'';position:absolute;left:11px;top:18px;bottom:18px;width:4px;
+    background:repeating-linear-gradient(180deg,#cbd5e1 0 8px,transparent 8px 16px);
+    border-radius:4px;
+  }
+  .s3 .node{position:relative;margin-bottom:14px}
+  .s3 .node .dot{
+    position:absolute;left:-28px;top:6px;width:26px;height:26px;border-radius:50%;
+    display:grid;place-items:center;color:#fff;font-family:var(--mono);font-weight:800;
+    font-size:12px;border:3px solid #fff;
+    box-shadow:0 0 0 2px #000;
+  }
+  .s3 .node.fast .dot{background:var(--ep-green)}
+  .s3 .node.warm .dot{background:var(--ep-yellow);color:#000;box-shadow:0 0 0 2px #000}
+  .s3 .node.med  .dot{background:#fb923c}
+  .s3 .node.slow .dot{background:var(--ep-pink)}
+  .s3 .card{
+    background:#fff;border:2px solid #111;border-radius:14px;padding:14px 16px;
+    box-shadow:0 4px 0 0 #111;
+  }
+  .s3 .card h3{margin:0;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .s3 .card .chip{
+    font-family:var(--mono);font-size:10.5px;font-weight:800;letter-spacing:.06em;
+    text-transform:uppercase;padding:3px 8px;border-radius:999px;background:#f1f5f9;color:#111;
+  }
+  .s3 .card .chip.fast{background:#dcfce7;color:#14532d}
+  .s3 .card .chip.slow{background:#fce7f3;color:#9d174d}
+  .s3 .card p{margin:6px 0 0;font-size:13.5px;line-height:1.7;color:#222}
+  .s3 .summary{
+    margin-top:20px;background:var(--ep-blue);color:#fff;border-radius:14px;
+    padding:16px 18px;font-size:13.5px;line-height:1.7;
+  }
+  .s3 .summary b{background:var(--ep-yellow);color:#000;padding:0 6px;border-radius:4px}
+
+  /* ============ STYLE 4 — Minimalist Notion / Quiet ============ */
+  .s4{
+    background:#fff;border:1px solid #ebebeb;border-radius:8px;padding:28px 30px;
+  }
+  .s4 .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .s4 .top .ico{
+    width:28px;height:28px;border-radius:6px;background:#111;color:#fff;
+    display:grid;place-items:center;font-family:var(--mono);font-weight:800;font-size:13px;
+  }
+  .s4 .top .t{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#666;font-weight:700}
+  .s4 h2{margin:0 0 8px;font-size:19px;font-weight:800}
+  .s4 .lead{font-size:14.5px;line-height:1.8;color:#333;margin:0 0 22px;max-width:64ch}
+  .s4 .group-h{
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:#666;margin:0 0 12px;font-weight:700;
+  }
+  .s4 .row{
+    display:grid;grid-template-columns:36px 1fr auto;gap:14px;align-items:start;
+    padding:14px 0;border-top:1px solid #f0f0f0;
+  }
+  .s4 .row:first-of-type{border-top:none}
+  .s4 .row .num{
+    font-family:var(--mono);font-weight:800;color:#9aa0a6;font-size:15px;padding-top:1px;
+  }
+  .s4 .row h3{margin:0 0 4px;font-size:14.5px;font-weight:700}
+  .s4 .row p{margin:4px 0 0;font-size:13.5px;line-height:1.7;color:#444}
+  .s4 .row .tag{
+    font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 8px;border-radius:4px;background:#f3f4f6;color:#374151;font-weight:700;
+    white-space:nowrap;
+  }
+  .s4 .row .tag.fast{background:#ecfdf5;color:#065f46}
+  .s4 .row .tag.med{background:#fef3c7;color:#92400e}
+  .s4 .row .tag.slow{background:#fef2f2;color:#991b1b}
+  .s4 .callout{
+    margin-top:24px;padding:14px 16px;background:#fafafa;border:1px solid #ececec;
+    border-radius:6px;font-size:13.5px;line-height:1.75;color:#222;
+  }
+  .s4 .callout b{color:#000}
+
+  .section{scroll-margin-top:24px}
+  .divider{height:1px;background:#e0e0e0;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1 class="page">Announcement section — 4 style proposals</h1>
+    <div class="switcher">
+      <a href="#s1">① Brutalist Step Cards</a>
+      <a href="#s2">② Editorial / Magazine</a>
+      <a href="#s3">③ Duolingo Path / Playful</a>
+      <a href="#s4">④ Minimal Notion / Quiet</a>
+    </div>
+  </div>
+
+  <!-- ===== STYLE 1 ===== -->
+  <div class="section" id="s1">
+    <div class="label">Style 1 — Brutalist step cards (matches existing app aesthetic)</div>
+    <section class="s1">
+      <h2>วิธีใช้แอปนี้ให้ได้คะแนนเพิ่มขึ้นเร็วที่สุด</h2>
+      <p class="lead">
+        ก่อนอื่นเลย สิ่งที่แนะนำให้ทำเป็นอันดับแรกคือการทำ <b>Mock Test</b> ก่อน
+        ไม่ต้องรีบทำข้อสอบแบบสุ่มเลย ให้ใช้เวลา 1–2 ชั่วโมงทำ Mock Test ให้เสร็จก่อน
+        แล้วระบบจะบอกเองว่าจุดอ่อนของเราคืออะไร — ไม่ใช่แค่ "อ่อน Reading" กว้าง ๆ
+        แต่จะบอกละเอียดเลยว่าคำถามประเภทไหนทำให้คะแนนรวมหล่นมากที่สุด เช่น Dictation, Essay Writing หรือ Speaking
+        เพื่อให้เราวางแผนการเรียนได้ตรงจุด
+      </p>
+
+      <div class="priority-title">▌ ลำดับความสำคัญในการฝึก</div>
+
+      <div class="step">
+        <div class="n">1</div>
+        <h3>Production (Writing &amp; Speaking) <span class="tag fast">เพิ่มคะแนนเร็วสุด</span></h3>
+        <p>ทุกอย่างที่เกี่ยวกับการเขียนและการพูด — ฝึกที่บ้านได้ง่ายและ "หลีกเลี่ยง" จุดอ่อนที่รู้แล้วได้ เช่น
+          ถ้ารู้ว่าเขียน complex sentence ไม่แม่น ก็ใช้ simple sentence ก่อนได้ Speaking ก็เช่นกัน
+          ถ้ารู้ว่าคำไหนออกเสียงไม่ถนัด ก็เลี่ยงไปใช้คำอื่น ทำให้คะแนนส่วนนี้เพิ่มขึ้นได้เร็วมาก</p>
+      </div>
+
+      <div class="step">
+        <div class="n">2</div>
+        <h3>Literacy — Dictation <span class="tag fast">เห็นผลชัด</span></h3>
+        <p>ฟังแล้วพิมพ์ตาม หลายคนพลาดคะแนนส่วนนี้ไปโดยไม่รู้ตัว เพราะไม่ใช่แค่การสะกดคำ
+          แต่ที่พลาดบ่อยที่สุดคือ <b>Grammar ปลายประโยค</b> และ <b>comma (,)</b>
+          ฝึกบ่อย ๆ คะแนนขึ้นเร็วเพราะสิ่งที่ต้องฝึกมีจำกัดและชัดเจน</p>
+      </div>
+
+      <div class="step">
+        <div class="n">3</div>
+        <h3>Conversation <span class="tag med">จำ scenario = ได้เปรียบ</span></h3>
+        <p>ข้อสอบส่วนนี้ไม่ได้วัดว่าเราคุยเก่งแค่ไหน แต่วัดว่าเราเข้าใจ scenario หรือเปล่า
+          ถ้าเคยเจอ scenario นั้นมาก่อน โอกาสทำคะแนนได้ดีขึ้นเกือบ 50% ทันที
+          คำศัพท์ส่วนนี้เป็นคำในชีวิตประจำวันและ Campus Life ระดับไม่ยากมาก</p>
+      </div>
+
+      <div class="step">
+        <div class="n">4</div>
+        <h3>Comprehension (Reading &amp; Vocabulary) <span class="tag slow">ยากที่สุด</span></h3>
+        <p>ส่วนที่ยากและใช้เวลานานที่สุดในการเพิ่มคะแนน เพราะคำศัพท์มีมหาศาล ออกอะไรก็ได้
+          ถ้าพื้นฐานยังไม่แข็งแรง อย่าเพิ่งโฟกัสตรงนี้ — กลับมาฝึกหลังจากที่ Production, Dictation, Conversation
+          ขึ้นมาในระดับนึงแล้วครับ</p>
+      </div>
+
+      <div class="summary">
+        <b>สรุปแผน:</b> ทำ Mock Test ก่อน 1 ครั้ง → ดูว่าส่วนไหนคะแนนหล่นมากที่สุด →
+        เริ่มฝึกตาม priority ข้างต้น → <b>อย่าสุ่มทำข้อสอบโดยไม่มีแผน</b> เพราะจะเสียเวลาโดยไม่เห็นผลครับ
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== STYLE 2 ===== -->
+  <div class="section" id="s2">
+    <div class="label">Style 2 — Editorial / magazine (clean, calm, premium feel)</div>
+    <section class="s2">
+      <div class="kicker">วิธีใช้แอป · Getting Started</div>
+      <h2>วิธีใช้แอปนี้ให้ได้คะแนนเพิ่มขึ้นเร็วที่สุด</h2>
+      <div class="rule"></div>
+      <p class="lead">
+        สิ่งที่แนะนำให้ทำเป็นอันดับแรกคือการทำ Mock Test ก่อน ไม่ต้องรีบทำข้อสอบแบบสุ่ม
+        ใช้เวลา 1–2 ชั่วโมงทำ Mock Test ให้เสร็จก่อน แล้วระบบจะบอกเองว่าจุดอ่อนของเราคืออะไร
+        ไม่ใช่แค่ "อ่อน Reading" กว้าง ๆ แต่จะบอกละเอียดเลยว่าคำถามประเภทไหนที่ทำให้คะแนนรวมหล่นมากที่สุด
+        เช่น Dictation, Essay Writing หรือ Speaking เพื่อให้วางแผนการเรียนได้ตรงจุด
+      </p>
+
+      <ol class="pri-list">
+        <li>
+          <div>
+            <h3>Production — Writing &amp; Speaking <span class="meta">· Fastest gains</span></h3>
+            <p>ฝึกที่บ้านง่าย และ "หลีกเลี่ยง" จุดอ่อนที่รู้แล้วได้ — ถ้าเขียน complex sentence ไม่แม่น
+              ใช้ simple sentence ก่อนได้ ถ้าคำไหนออกเสียงไม่ถนัด เลี่ยงไปใช้คำอื่นได้ คะแนนขึ้นเร็วมาก</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Literacy — Dictation <span class="meta">· High ROI</span></h3>
+            <p>ฟังแล้วพิมพ์ตาม สิ่งที่คนมักพลาดบ่อยที่สุดคือ Grammar ปลายประโยค และ comma
+              ฝึกบ่อย ๆ คะแนนขึ้นเร็ว เพราะสิ่งที่ต้องฝึกมีจำกัดและชัดเจน</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Conversation <span class="meta">· Scenario recognition</span></h3>
+            <p>ไม่ได้วัดว่าคุยเก่งแค่ไหน แต่วัดว่าเข้าใจ scenario หรือเปล่า เคยเจอมาก่อนคะแนนดีขึ้นเกือบ 50% ทันที
+              คำศัพท์เป็นภาษาประจำวันและ Campus Life</p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h3>Comprehension — Reading &amp; Vocabulary <span class="meta">· Long horizon</span></h3>
+            <p>ยากและใช้เวลานานที่สุด คำศัพท์มีมหาศาล ออกอะไรก็ได้
+              แนะนำให้กลับมาโฟกัสหลังจาก Production, Dictation, Conversation ขึ้นมาในระดับนึงแล้ว</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="footnote">
+        <b>สรุปแผน · </b>ทำ Mock Test ก่อน 1 ครั้ง → ดูว่าส่วนไหนคะแนนหล่นมากที่สุด →
+        เริ่มฝึกตาม priority ข้างต้น → อย่าสุ่มทำข้อสอบโดยไม่มีแผน เพราะจะเสียเวลาโดยไม่เห็นผลครับ
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== STYLE 3 ===== -->
+  <div class="section" id="s3">
+    <div class="label">Style 3 — Duolingo path / playful (energetic, gamified)</div>
+    <section class="s3">
+      <span class="pill">✦ Welcome · Start here</span>
+      <h2>วิธีใช้แอปนี้ให้ได้คะแนนเพิ่มขึ้นเร็วที่สุด</h2>
+      <p class="lead">
+        เริ่มที่ <b>Mock Test</b> ก่อนเสมอ ใช้เวลา 1–2 ชั่วโมง ระบบจะบอกเองว่าจุดอ่อนของเราคืออะไร —
+        ไม่ใช่แค่ "อ่อน Reading" กว้าง ๆ แต่จะระบุละเอียดว่าคำถามประเภทไหนทำให้คะแนนรวมหล่นมากที่สุด
+        เช่น Dictation, Essay Writing หรือ Speaking
+      </p>
+
+      <div class="path">
+        <div class="node fast">
+          <div class="dot">1</div>
+          <div class="card">
+            <h3>Production — Writing &amp; Speaking <span class="chip fast">เพิ่มคะแนนเร็วสุด</span></h3>
+            <p>ฝึกที่บ้านง่าย และหลีกเลี่ยงจุดอ่อนที่รู้แล้วได้ — เขียน complex ไม่แม่นก็ใช้ simple ก่อน
+              คำที่ออกเสียงไม่ถนัดก็เลี่ยงไปใช้คำอื่น คะแนนขึ้นเร็วมาก</p>
+          </div>
+        </div>
+        <div class="node warm">
+          <div class="dot">2</div>
+          <div class="card">
+            <h3>Literacy — Dictation <span class="chip fast">เห็นผลชัด</span></h3>
+            <p>ฟัง→พิมพ์ จุดที่พลาดบ่อยคือ Grammar ปลายประโยค และ comma — ฝึกบ่อย ๆ คะแนนขึ้นเร็ว</p>
+          </div>
+        </div>
+        <div class="node med">
+          <div class="dot">3</div>
+          <div class="card">
+            <h3>Conversation <span class="chip">จำ scenario</span></h3>
+            <p>วัด scenario ไม่ใช่ความเก่งในการคุย — เคยเจอ scenario มาก่อน โอกาสได้คะแนนดีขึ้นเกือบ 50% ทันที</p>
+          </div>
+        </div>
+        <div class="node slow">
+          <div class="dot">4</div>
+          <div class="card">
+            <h3>Comprehension — Reading &amp; Vocabulary <span class="chip slow">ยากที่สุด</span></h3>
+            <p>คำศัพท์มีมหาศาล ออกอะไรก็ได้ — อย่าเพิ่งโฟกัสถ้ายังไม่พร้อม กลับมาฝึกหลัง 3 ส่วนแรกขึ้นมาแล้ว</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <b>สรุปแผน</b> — ทำ Mock Test → ดูจุดที่คะแนนหล่นมากสุด → ฝึกตาม priority → อย่าสุ่มข้อสอบโดยไม่มีแผน
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== STYLE 4 ===== -->
+  <div class="section" id="s4">
+    <div class="label">Style 4 — Minimal Notion / quiet (text-forward, low chrome)</div>
+    <section class="s4">
+      <div class="top">
+        <div class="ico">i</div>
+        <div class="t">How to use · Read first</div>
+      </div>
+      <h2>วิธีใช้แอปนี้ให้ได้คะแนนเพิ่มขึ้นเร็วที่สุด</h2>
+      <p class="lead">
+        สิ่งแรกที่แนะนำคือทำ Mock Test ก่อน ใช้เวลา 1–2 ชั่วโมง แล้วระบบจะบอกเองว่าจุดอ่อนคืออะไร —
+        ไม่ใช่กว้าง ๆ ว่า "อ่อน Reading" แต่จะระบุประเภทคำถามที่ทำให้คะแนนรวมหล่นมากที่สุด เช่น Dictation,
+        Essay Writing หรือ Speaking
+      </p>
+
+      <div class="group-h">ลำดับความสำคัญในการฝึก</div>
+
+      <div class="row">
+        <div class="num">01</div>
+        <div>
+          <h3>Production — Writing &amp; Speaking</h3>
+          <p>ฝึกที่บ้านง่าย หลีกเลี่ยงจุดอ่อนที่รู้แล้วได้ ใช้ simple sentence แทน complex,
+            เลี่ยงคำที่ออกเสียงไม่ถนัด คะแนนขึ้นเร็วมาก</p>
+        </div>
+        <div class="tag fast">Fast</div>
+      </div>
+
+      <div class="row">
+        <div class="num">02</div>
+        <div>
+          <h3>Literacy — Dictation</h3>
+          <p>พลาดบ่อยที่ Grammar ปลายประโยคและ comma ฝึกบ่อยขึ้นเร็ว เพราะสิ่งที่ต้องฝึกมีจำกัด</p>
+        </div>
+        <div class="tag fast">Fast</div>
+      </div>
+
+      <div class="row">
+        <div class="num">03</div>
+        <div>
+          <h3>Conversation</h3>
+          <p>วัดความเข้าใจ scenario — เคยเจอมาก่อนคะแนนดีขึ้นเกือบ 50% ทันที คำศัพท์เป็นชีวิตประจำวันและ Campus Life</p>
+        </div>
+        <div class="tag med">Medium</div>
+      </div>
+
+      <div class="row">
+        <div class="num">04</div>
+        <div>
+          <h3>Comprehension — Reading &amp; Vocabulary</h3>
+          <p>ยากที่สุด ใช้เวลานาน เพราะคำศัพท์มหาศาล กลับมาโฟกัสหลังสามส่วนแรกขึ้นมาแล้ว</p>
+        </div>
+        <div class="tag slow">Slow</div>
+      </div>
+
+      <div class="callout">
+        <b>สรุปแผน — </b>ทำ Mock Test 1 ครั้ง → ดูจุดที่หล่นมากสุด → ฝึกตาม priority → อย่าสุ่มข้อสอบโดยไม่มีแผน
+      </div>
+    </section>
+  </div>
+
+</div>
+</body>
+</html>

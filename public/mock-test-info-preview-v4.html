@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mock Test page — 5 UX improvements (preview)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     Visual language: KEEP existing brutalist tokens (yellow/black,
+     thick borders, mono accents). Only the STRUCTURE changes.
+     ============================================================ */
+  :root{
+    --ink:#0a0a0a;
+    --blue:#0055ff;
+    --yellow:#ffd600;
+    --orange:#ff5c00;
+    --paper:#f4f0e6;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+    --green:#16a34a;
+    --red:#c1121f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Sarabun',system-ui,sans-serif;background:var(--paper);color:var(--ink);
+    padding:32px 16px 100px;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1240px;margin:0 auto}
+
+  /* meta header */
+  h1.meta{font-family:var(--mono);font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;margin:0 0 6px;color:var(--blue)}
+  .lead{font-size:14px;line-height:1.65;color:#444;margin:0 0 24px;max-width:64ch}
+  .toc{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 36px;font-family:var(--mono)}
+  .toc a{font-size:11px;text-decoration:none;color:#111;background:#fff;border:2px solid #000;padding:6px 10px;box-shadow:2px 2px 0 0 #000}
+  .toc a:hover{background:var(--yellow)}
+
+  /* section frame */
+  .scene{margin-bottom:80px}
+  .scene-hd{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0 0 8px}
+  .scene-hd .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;background:#000;color:#fff;padding:4px 8px;font-weight:800}
+  .scene-hd h2{font-size:22px;font-weight:900;margin:0;letter-spacing:-.005em}
+  .scene-note{font-size:13px;line-height:1.65;color:#444;margin:0 0 18px;max-width:72ch}
+  .scene-note b{color:#000}
+  .scene-note .px{color:var(--blue);font-weight:700}
+
+  /* ============================================================
+     Shared page chrome — KEPT from existing app
+     ============================================================ */
+  .page{background:#fff;border:3px solid #000;padding:22px;box-shadow:8px 8px 0 0 #000}
+
+  .hero{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:18px;border-bottom:2px dashed #000}
+  .hero .back{font-family:var(--mono);font-size:11px;font-weight:700;margin:0 0 6px;cursor:pointer}
+  .hero h1.title{margin:0;font-size:34px;font-weight:900;font-style:italic;line-height:.95;letter-spacing:-.02em;text-transform:uppercase}
+  .hero h1.title .blue{display:block;color:var(--blue);font-style:normal;font-size:24px;letter-spacing:-.01em;margin-top:4px}
+  .hero .lede{margin:10px 0 0;font-size:12.5px;font-weight:700;color:#555;max-width:46ch}
+
+  /* ===== IMPROVEMENT ④ — reframed cadence tile ===== */
+  .cad{min-width:280px;border:4px solid #000;background:var(--yellow);padding:14px 16px;box-shadow:6px 6px 0 0 #000}
+  .cad .hd{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .cad .big{font-size:22px;font-weight:900;margin:4px 0 6px;line-height:1}
+  .cad .big b{font-size:34px}
+  .cad .dots{display:flex;gap:6px;margin:6px 0 8px}
+  .cad .dot{width:18px;height:18px;border:2px solid #000;background:#fff;border-radius:50%}
+  .cad .dot.used{background:#000}
+  .cad .dot.next{background:var(--orange);border-color:#000}
+  .cad .nudge{font-family:'Sarabun',sans-serif;font-size:11.5px;font-weight:500;color:#3a2a00;line-height:1.55;border-top:2px solid rgba(0,0,0,.15);padding-top:8px;margin-top:4px}
+  .cad .nudge .em{font-weight:800;color:#000}
+
+  /* ============================================================
+     IMPROVEMENT ① — first-time vs returning user view
+     ============================================================ */
+
+  /* --- Welcome panel (first-time only) --- */
+  .welcome{border:3px solid #000;background:linear-gradient(180deg,rgba(255,214,0,.35),#fff);padding:24px;margin-bottom:18px;box-shadow:6px 6px 0 0 #000}
+  .welcome .pill{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;background:#000;color:var(--yellow);padding:4px 10px;margin-bottom:10px}
+  .welcome h2{margin:0 0 6px;font-size:24px;font-weight:900;letter-spacing:-.01em}
+  .welcome .sub{margin:0 0 18px;font-size:13.5px;color:#444;line-height:1.65;max-width:60ch}
+  .welcome .chunks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+  @media (max-width:780px){.welcome .chunks{grid-template-columns:1fr}}
+  .chunk{position:relative;background:#fff;border:2.5px solid #000;padding:14px 14px 14px 50px;box-shadow:3px 3px 0 0 #000}
+  .chunk .n{position:absolute;left:-12px;top:-12px;width:34px;height:34px;border-radius:50%;background:var(--yellow);border:2.5px solid #000;display:grid;place-items:center;font-family:var(--mono);font-weight:800;box-shadow:2px 2px 0 0 #000}
+  .chunk h3{margin:0 0 4px;font-size:13.5px;font-weight:800}
+  .chunk p{margin:4px 0 0;font-size:12px;line-height:1.65;color:#222}
+  .chunk p .warn{color:#b91c1c;font-weight:700}
+  .chunk p b{color:#000}
+  .welcome .cta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:2px dashed #000;padding-top:16px}
+  .welcome .cta .btn{background:var(--blue);color:#fff;border:3px solid #000;padding:14px 22px;font-family:var(--mono);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;box-shadow:4px 4px 0 0 #000;cursor:pointer}
+  .welcome .cta .meta{font-size:12px;color:#555;font-weight:700}
+
+  /* --- Returning-user reopener strip --- */
+  .reopener{border:3px solid #000;background:#fff;padding:10px 14px;margin-bottom:16px;box-shadow:4px 4px 0 0 #000;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
+  .reopener .l{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:flex;gap:8px;align-items:center}
+  .reopener .l .ic{width:22px;height:22px;background:var(--yellow);border:2px solid #000;border-radius:50%;display:grid;place-items:center;font-weight:900}
+  .reopener .r{font-family:var(--mono);font-size:10px;color:#666;font-weight:700}
+
+  /* ============================================================
+     IMPROVEMENT ③ — Monthly Archive as centerpiece grid
+     ============================================================ */
+  .archive{border:3px solid #000;background:#fff;padding:18px;margin-bottom:18px;box-shadow:6px 6px 0 0 #000}
+  .archive-hd{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;padding-bottom:10px;border-bottom:2px solid #000;margin-bottom:14px}
+  .archive-hd h3{margin:0;font-size:16px;font-weight:900;letter-spacing:-.005em}
+  .archive-hd .sub{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#555}
+  .archive-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:780px){.archive-grid{grid-template-columns:1fr 1fr}}
+  @media (max-width:500px){.archive-grid{grid-template-columns:1fr}}
+
+  /* ===== IMPROVEMENT ② — per-set credit warning, on the button ===== */
+  .set-card{position:relative;border:2.5px solid #000;background:#fff;padding:12px 12px 10px;box-shadow:3px 3px 0 0 #000;cursor:pointer;text-align:left;font-family:inherit}
+  .set-card:hover{background:#eff6ff}
+  .set-card.completed{background:#f8f8f6}
+  .set-card.recommended{background:#fffbea;border-color:#000}
+  .set-card.recommended::before{
+    content:'RECOMMENDED NEXT';position:absolute;top:-10px;left:8px;background:var(--orange);color:#fff;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.1em;padding:2px 6px;border:2px solid #000;
+  }
+  .set-card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+  .set-card .name{font-size:14px;font-weight:800}
+  .set-card .status{font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border:1.5px solid #000;background:#fff}
+  .set-card .status.done{background:var(--green);color:#fff;border-color:#000}
+  .set-card .status.new{background:var(--yellow);color:#000}
+  .set-card .last-score{font-family:var(--mono);font-size:10.5px;font-weight:700;color:#555;margin-bottom:8px}
+  .set-card .last-score b{font-family:'Sarabun',sans-serif;font-size:14px;color:#000}
+  .set-card .footer{border-top:1.5px dashed #000;padding-top:6px;font-family:var(--mono);font-size:10px;font-weight:700;color:#444;display:flex;justify-content:space-between;align-items:center}
+  .set-card .footer .credit{color:var(--red);font-weight:800}
+  .set-card.completed .footer .credit{color:#888;text-decoration:line-through}
+  .past-strip{margin-top:10px;border-top:2px dashed #000;padding-top:10px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#444;cursor:pointer}
+  .past-strip:hover{color:#000}
+
+  /* ============================================================
+     Personal Best + History (KEPT from existing layout)
+     ============================================================ */
+  .cols{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:18px}
+  @media (max-width:900px){.cols{grid-template-columns:1fr}}
+  .panel{border:3px solid #000;background:#fff;box-shadow:6px 6px 0 0 #000}
+  .panel .ph{background:#000;color:#fff;padding:9px 12px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;display:flex;justify-content:space-between}
+  .panel .pb{padding:14px}
+  .pbest{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:8px;align-items:center}
+  .pbest .big{border-right:2px dashed #000;text-align:center;padding-right:8px}
+  .pbest .big .lbl{font-family:var(--mono);font-size:9px;color:#999;font-weight:800;text-transform:uppercase}
+  .pbest .big .v{font-size:54px;font-weight:900;color:var(--blue);line-height:1}
+  .pbest .cell{border:2px solid #000;text-align:center;padding:6px}
+  .pbest .cell .lbl{font-family:var(--mono);font-size:8px;opacity:.55;font-weight:800;text-transform:uppercase}
+  .pbest .cell .v{font-size:18px;font-weight:900;color:var(--orange)}
+  .hist table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .hist thead{background:#f4f4f0}
+  .hist th{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:7px 8px;border-bottom:2px solid #000;text-align:left}
+  .hist td{padding:8px 8px;border-bottom:1px solid #ececec;font-weight:700}
+  .hist td.s{font-size:15px;color:var(--blue)}
+
+  /* First-run hint box (replaces empty Personal Best) */
+  .first-run{border:3px dashed #000;background:#fff;padding:18px;text-align:center;color:#555}
+  .first-run h4{margin:0 0 6px;font-size:14px;font-weight:800;color:#000}
+  .first-run p{margin:0;font-size:12.5px;line-height:1.6}
+
+  /* ============================================================
+     IMPROVEMENT ⑤ — slimmed preflight modal
+     ============================================================ */
+  .modal-stage{background:radial-gradient(#111 1px,transparent 1px);background-size:20px 20px;background-color:#eee;border:1px solid #ccc;padding:32px;border-radius:4px}
+  .modal{max-width:520px;margin:0 auto;background:#fff;border:4px solid #000;box-shadow:10px 10px 0 0 #000;padding:24px}
+  .modal .eyebrow{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin:0 0 4px}
+  .modal h3{margin:0 0 14px;font-size:24px;font-weight:900;font-style:italic;letter-spacing:-.01em;line-height:1.05}
+  .modal h3 .blue{display:block;color:var(--blue);font-style:normal;font-size:16px;margin-top:2px}
+  .modal .selected{display:flex;justify-content:space-between;align-items:center;border:2.5px solid #000;background:#f4f0e6;padding:10px 12px;margin-bottom:12px}
+  .modal .selected .l{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.55}
+  .modal .selected .v{font-size:15px;font-weight:800;font-style:italic;color:var(--blue)}
+  .modal .warn{display:flex;align-items:flex-start;gap:10px;border:2.5px solid #000;background:var(--yellow);padding:12px;margin-bottom:12px;box-shadow:3px 3px 0 0 #000}
+  .modal .warn .ic{font-size:22px;line-height:1}
+  .modal .warn .t{font-size:12px;font-weight:700;line-height:1.55}
+  .modal .warn .t b{text-decoration:underline}
+  .modal .reassure{display:flex;align-items:flex-start;gap:10px;border:2.5px solid #000;background:#dcfce7;padding:11px;margin-bottom:18px}
+  .modal .reassure .ic{font-size:18px}
+  .modal .reassure .t{font-size:12px;font-weight:600;line-height:1.55;color:#14532d}
+  .modal .reassure .t b{color:#000}
+  .modal .targets{margin-bottom:18px}
+  .modal .targets summary{cursor:pointer;list-style:none;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;border:2px solid #000;background:#fff;display:flex;justify-content:space-between;align-items:center}
+  .modal .targets summary::-webkit-details-marker{display:none}
+  .modal .targets summary .pre{font-family:'Sarabun',sans-serif;font-weight:600;text-transform:none;letter-spacing:0;color:#555;font-size:11.5px}
+  .modal .targets[open] summary{background:#000;color:#fff}
+  .modal .targets .form{padding:12px;border:2px solid #000;border-top:none;background:#fafafa}
+  .modal .targets .form input{width:100%;padding:6px 8px;border:2px solid #000;font-weight:800;margin-bottom:6px;font-family:inherit}
+  .modal .btns{display:flex;gap:10px;align-items:center}
+  .modal .btn-primary{flex:1;background:var(--blue);color:#fff;border:3px solid #000;padding:14px;font-family:var(--mono);font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;box-shadow:4px 4px 0 0 #000;cursor:pointer}
+  .modal .btn-primary .tiny{display:block;font-family:'Sarabun',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;text-transform:none;opacity:.85;margin-top:2px}
+  .modal .btn-cancel{background:#fff;color:#777;border:3px solid #000;padding:14px 18px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;box-shadow:3px 3px 0 0 #000;cursor:pointer}
+
+  /* annotation labels */
+  .ann{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);background:#fff;border:2px solid var(--blue);padding:3px 6px;display:inline-block;margin-right:6px}
+  .ann.bad{color:var(--red);border-color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="meta">Mock Test page · UX improvements ① – ⑤ · live mocks</h1>
+  <p class="lead">Same visual language as the existing app (yellow/black/mono accents). Only the <b>structure</b> changes — driven by what we discussed: route by user state, move credit warning to action point, promote archive to centerpiece, reframe quota as cadence, slim the modal. Three scenes below show how it actually composes.</p>
+
+  <div class="toc">
+    <a href="#new">Scene A · New user (zero attempts)</a>
+    <a href="#ret">Scene B · Returning user (4 attempts, 2/6 this month)</a>
+    <a href="#modal">Scene C · Slimmed preflight modal</a>
+  </div>
+
+  <!-- ================================================================
+       SCENE A — first-time user
+       ================================================================ -->
+  <section class="scene" id="new">
+    <div class="scene-hd">
+      <span class="tag">Scene A · NEW user</span>
+      <h2>วันแรกที่เปิด Mock Test — 0 attempts</h2>
+    </div>
+    <p class="scene-note">
+      <b>Improvements visible:</b>
+      <span class="px">①</span> Page leads with Welcome panel containing the 4 info chunks.
+      <span class="px">②</span> Each set button shows "uses 1 credit when you start".
+      <span class="px">③</span> Monthly Archive is the centerpiece, 6-card grid, "Recommended next" badge on Set 1.
+      <span class="px">④</span> Yellow credits tile reframed as cadence + dot row + soft implementation-intention nudge.
+      Personal Best and Attempt History are <b>hidden</b> because they would be empty placeholder slots — those return after the first attempt.
+    </p>
+
+    <div class="page">
+      <!-- Hero with reframed cadence tile (④) -->
+      <header class="hero">
+        <div>
+          <div class="back">← BACK / กลับ</div>
+          <h1 class="title">DET · MOCK CENTER<span class="blue">แดชบอร์ดและการจำลองสอบ</span></h1>
+          <p class="lede">20-step adaptive simulation · ~1h 0m – 1h 15m per set</p>
+        </div>
+        <div class="cad">
+          <div class="hd"><span>เดือนนี้ · January</span><span>VIP</span></div>
+          <div class="big"><b>6</b> ครั้ง / 6 · เหลือเต็ม</div>
+          <div class="dots">
+            <span class="dot next"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+          <div class="nudge">🗓 <span class="em">วางแผน:</span> นักเรียนส่วนใหญ่จัด 1.5 ชม. เสาร์-อาทิตย์ — จดวันในปฏิทินไว้เลย · refresh 1 ก.พ.</div>
+        </div>
+      </header>
+
+      <!-- ① Welcome panel (only for new users) -->
+      <div class="welcome">
+        <span class="pill">START HERE · เริ่มที่นี่</span>
+        <h2>ยินดีต้อนรับสู่ Mock Test 👋</h2>
+        <p class="sub">ก่อนเริ่ม อ่าน 4 ข้อสั้น ๆ นี้ก่อนนะครับ — ใช้เวลาไม่ถึง 2 นาที แล้วกดเริ่มชุดแรกได้เลย</p>
+        <div class="chunks">
+          <div class="chunk">
+            <span class="n">1</span>
+            <h3>เกี่ยวกับชุดข้อสอบ</h3>
+            <p>อัปโหลดชุดใหม่ทุกเดือนตั้งแต่ ม.ค. 2026 จากข้อสอบ DET จริงในเดือนนั้น ๆ <b>เดือนละ 6 ชุด</b>ตรงกับโควต้า เลือกเริ่มจากชุดไหนก็ได้</p>
+          </div>
+          <div class="chunk">
+            <span class="n">2</span>
+            <h3>ก่อนเริ่มทำ</h3>
+            <p>ใช้เวลา <b>1 ชม. – 1 ชม. 15 นาที</b> ต่อชุด · <span class="warn">ถ้าออกระบบกลางคัน ระบบจะนับว่าใช้โควต้าแล้ว</span> · ตัวเลขชุดไม่ใช่ระดับความยาก ทุกชุดเป็น Adaptive</p>
+          </div>
+          <div class="chunk">
+            <span class="n">3</span>
+            <h3>นี่คือการฝึก ไม่ใช่สอบจริง</h3>
+            <p>ไม่ต้องตั้งกล้อง เปิดเน็ตค้นได้ ไม่มีบันทึก — แต่<b>สอบจริง</b> Duolingo เข้มมาก ควรอ่านกฎก่อนสอบจริง</p>
+          </div>
+          <div class="chunk">
+            <span class="n">4</span>
+            <h3>Feedback &amp; แจ้งปัญหา</h3>
+            <p>หลังจบแต่ละชุดได้ Feedback เฉพาะบุคคล บันทึกเก็บได้ติดตามพัฒนาการ — ปัญหาแจ้งที่ <b>languageplan.consulting@gmail.com</b></p>
+          </div>
+        </div>
+        <div class="cta">
+          <button class="btn">▶ Start Mock Set 01 · ใช้ 1 credit</button>
+          <span class="meta">หรือเลือกชุดอื่นจาก Monthly Archive ด้านล่าง</span>
+        </div>
+      </div>
+
+      <!-- ③ Monthly archive as centerpiece -->
+      <section class="archive">
+        <div class="archive-hd">
+          <h3>📚 January 2026 · เลือกชุดเริ่มทำ</h3>
+          <span class="sub">0 of 6 used · ทุกชุดยังพร้อมทำ</span>
+        </div>
+        <div class="archive-grid">
+          <button class="set-card recommended">
+            <div class="top">
+              <span class="name">Mock Set 01</span>
+              <span class="status new">NEW</span>
+            </div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+          <button class="set-card">
+            <div class="top"><span class="name">Mock Set 02</span><span class="status new">NEW</span></div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+          <button class="set-card">
+            <div class="top"><span class="name">Mock Set 03</span><span class="status new">NEW</span></div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+          <button class="set-card">
+            <div class="top"><span class="name">Mock Set 04</span><span class="status new">NEW</span></div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+          <button class="set-card">
+            <div class="top"><span class="name">Mock Set 05</span><span class="status new">NEW</span></div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+          <button class="set-card">
+            <div class="top"><span class="name">Mock Set 06</span><span class="status new">NEW</span></div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+        </div>
+        <div class="past-strip"><span>▾ Past months · December 2025</span><span>6 sets</span></div>
+      </section>
+
+      <!-- First-run replacements (instead of empty Personal Best/History) -->
+      <div class="cols">
+        <div class="first-run">
+          <h4>📊 Personal Best จะปรากฏหลังทำชุดแรก</h4>
+          <p>ทำ Mock Set แรกให้จบเพื่อดูคะแนนรวม คะแนนรายทักษะ (Lit / Comp / Prod / Conv) และ Feedback เฉพาะบุคคล</p>
+        </div>
+        <div class="first-run">
+          <h4>📜 ประวัติการสอบ</h4>
+          <p>เริ่มสอบเพื่อบันทึกการพัฒนา · pin คะแนนได้สูงสุด 50 ครั้ง</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       SCENE B — returning user
+       ================================================================ -->
+  <section class="scene" id="ret">
+    <div class="scene-hd">
+      <span class="tag">Scene B · RETURNING user</span>
+      <h2>กลับมาฝึก — 4 attempts, 2 of 6 used this month</h2>
+    </div>
+    <p class="scene-note">
+      <b>Improvements visible:</b>
+      <span class="px">①</span> Welcome panel compressed into a small dismissible "ℹ︎ How it works" reopener — info still 1 click away, but doesn't push the dashboard down.
+      <span class="px">②</span> Per-set credit warning still on each card.
+      <span class="px">③</span> Monthly archive grid — Set 1 &amp; 2 marked done (checkmark + last score), "Recommended next" badge on Set 3.
+      <span class="px">④</span> Cadence tile shows progress dots (2 used, 1 next, 3 remaining).
+      Personal Best and Attempt History return — same data the user came for.
+    </p>
+
+    <div class="page">
+      <header class="hero">
+        <div>
+          <div class="back">← BACK / กลับ</div>
+          <h1 class="title">DET · MOCK CENTER<span class="blue">แดชบอร์ดและการจำลองสอบ</span></h1>
+          <p class="lede">20-step adaptive simulation · ~1h 0m – 1h 15m per set</p>
+        </div>
+        <div class="cad">
+          <div class="hd"><span>เดือนนี้ · January</span><span>VIP</span></div>
+          <div class="big"><b>4</b> ครั้ง / 6 เหลือ · ใช้ไป 2</div>
+          <div class="dots">
+            <span class="dot used"></span><span class="dot used"></span><span class="dot next"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          </div>
+          <div class="nudge">🗓 <span class="em">เหลือ 24 วัน</span> · ปกติเฉลี่ย 1 ชุด / สัปดาห์ก็ทันโควต้าครับ · refresh 1 ก.พ.</div>
+        </div>
+      </header>
+
+      <!-- ① compressed reopener -->
+      <div class="reopener">
+        <div class="l"><span class="ic">ℹ</span><span>วิธีใช้ Mock Test · How it works</span></div>
+        <div class="r">อ่านแล้ว · TAP TO REOPEN ▾</div>
+      </div>
+
+      <!-- ③ archive as centerpiece w/ completed + recommended states -->
+      <section class="archive">
+        <div class="archive-hd">
+          <h3>📚 January 2026 · เลือกชุดต่อไป</h3>
+          <span class="sub">2 of 6 used · 4 ชุดเหลือทำ</span>
+        </div>
+        <div class="archive-grid">
+          <button class="set-card completed">
+            <div class="top"><span class="name">Mock Set 01</span><span class="status done">✓ DONE</span></div>
+            <div class="last-score">คะแนน: <b>108</b> · 24 ธ.ค.</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">used</span></div>
+          </button>
+          <button class="set-card completed">
+            <div class="top"><span class="name">Mock Set 02</span><span class="status done">✓ DONE</span></div>
+            <div class="last-score">คะแนน: <b>115</b> · 28 ธ.ค. <span style="color:var(--orange)">(best)</span></div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">used</span></div>
+          </button>
+          <button class="set-card recommended">
+            <div class="top"><span class="name">Mock Set 03</span><span class="status new">NEW</span></div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+          <button class="set-card">
+            <div class="top"><span class="name">Mock Set 04</span><span class="status new">NEW</span></div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+          <button class="set-card">
+            <div class="top"><span class="name">Mock Set 05</span><span class="status new">NEW</span></div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+          <button class="set-card">
+            <div class="top"><span class="name">Mock Set 06</span><span class="status new">NEW</span></div>
+            <div class="last-score">ยังไม่เคยทำ</div>
+            <div class="footer"><span>~1h 0m – 1h 15m</span><span class="credit">uses 1 credit</span></div>
+          </button>
+        </div>
+        <div class="past-strip"><span>▾ Past months · December 2025 (4 of 6 done)</span><span>2 sets remaining</span></div>
+      </section>
+
+      <!-- Existing Personal Best + History (kept) -->
+      <div class="cols">
+        <div class="panel">
+          <div class="ph"><span>Personal Best // คะแนนสูงสุด</span><span>UPDATED 28 DEC</span></div>
+          <div class="pb">
+            <div class="pbest">
+              <div class="big"><div class="lbl">High Score</div><div class="v">115</div></div>
+              <div class="cell"><div class="lbl">Lit</div><div class="v">120</div></div>
+              <div class="cell"><div class="lbl">Comp</div><div class="v">110</div></div>
+              <div class="cell"><div class="lbl">Prod</div><div class="v">115</div></div>
+              <div class="cell"><div class="lbl">Conv</div><div class="v">115</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel hist">
+          <div class="ph"><span>History · last 4</span><span>4 / 50</span></div>
+          <table>
+            <thead><tr><th>Date</th><th>Set</th><th style="text-align:right">Score</th></tr></thead>
+            <tbody>
+              <tr><td>28 ธ.ค.</td><td>Set 02 (Dec)</td><td class="s" style="text-align:right">115</td></tr>
+              <tr><td>24 ธ.ค.</td><td>Set 01 (Dec)</td><td class="s" style="text-align:right">108</td></tr>
+              <tr><td>19 ธ.ค.</td><td>Trial 03</td><td class="s" style="text-align:right">102</td></tr>
+              <tr><td>14 ธ.ค.</td><td>Trial 02</td><td class="s" style="text-align:right">98</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       SCENE C — slimmed preflight modal (⑤)
+       ================================================================ -->
+  <section class="scene" id="modal">
+    <div class="scene-hd">
+      <span class="tag">Scene C · Preflight modal</span>
+      <h2>กดเลือกชุด → Confirm to start</h2>
+    </div>
+    <p class="scene-note">
+      <b>Improvements visible:</b>
+      <span class="px">⑤</span> Modal stripped back to one decision — the warning, the selected set, and ONE primary button.
+      The "this is practice, not real exam" reassurance line lands exactly when fear peaks.
+      Target inputs collapsed to an optional ▾ expander (pre-filled with last best + 5).
+      No more 5 mandatory-feeling input fields in the way of "start".
+    </p>
+
+    <div class="modal-stage">
+      <div class="modal">
+        <p class="eyebrow">Preflight · ก่อนเริ่มสอบ</p>
+        <h3>ยืนยันการเริ่มสอบ <span class="blue">Start Mock Set</span></h3>
+
+        <div class="selected">
+          <div>
+            <div class="l">Selected · ชุดที่เลือก</div>
+            <div class="v">Mock Set 03 (Jan 2026)</div>
+          </div>
+          <div style="text-align:right">
+            <div class="l">Credits left</div>
+            <div class="v">4 / 6</div>
+          </div>
+        </div>
+
+        <div class="warn">
+          <span class="ic">⚠️</span>
+          <div class="t">
+            กด Start = ใช้ <b>1 Mock Credit ทันที</b><br>
+            ออกระบบกลางคัน = <b>ไม่คืน credit</b> · จัดเวลาให้พร้อม ~1h 0m – 1h 15m
+          </div>
+        </div>
+
+        <div class="reassure">
+          <span class="ic">🌱</span>
+          <div class="t">
+            <b>นี่คือการฝึก ไม่ใช่สอบจริง</b> — ไม่ต้องตั้งกล้อง เปิดเน็ตค้นได้ ไม่มีบันทึก
+          </div>
+        </div>
+
+        <details class="targets">
+          <summary>
+            <span>🎯 SET TARGETS (OPTIONAL)</span>
+            <span class="pre">pre-filled: 120 / 125 / 115 / 110 / 115</span>
+          </summary>
+          <div class="form">
+            <input value="125" placeholder="Total target">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <input value="120" placeholder="Listening">
+              <input value="115" placeholder="Speaking">
+              <input value="115" placeholder="Reading">
+              <input value="110" placeholder="Writing">
+            </div>
+          </div>
+        </details>
+
+        <div class="btns">
+          <button class="btn-primary">
+            ▶ Start now
+            <span class="tiny">ใช้ 1 credit ทันที</span>
+          </button>
+          <button class="btn-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

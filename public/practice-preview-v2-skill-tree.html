@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Practice V2 — Skill tree</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Sarabun:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0a0a0a;--blue:#004aad;--yellow:#ffcc00;--green:#16a34a;--purple:#7c3aed;--orange:#ea580c;--mono:'JetBrains Mono',ui-monospace,monospace}
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{font-family:'Sarabun',system-ui,sans-serif;background:#dfe6f2;color:var(--ink);padding:24px 12px 80px;-webkit-font-smoothing:antialiased}
+  .meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--blue);margin:0 0 6px;text-align:center}
+  .lead{font-size:13px;color:#444;text-align:center;max-width:60ch;margin:0 auto 22px;line-height:1.6}
+  .lead b{color:#000}
+
+  .phone{max-width:440px;margin:0 auto;background:#fff;border:3px solid #000;box-shadow:8px 8px 0 0 #000;border-radius:24px;overflow:hidden}
+
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fff;border-bottom:2px solid #000}
+  .logo{display:flex;align-items:center;gap:8px}
+  .logo .b{width:28px;height:28px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:900;font-size:12px;border-radius:6px}
+  .logo .n{font-weight:900;font-size:13px}
+
+  .head{padding:16px 18px 8px;background:linear-gradient(180deg,#fff,#f4f6fb)}
+  .head h2{margin:0 0 4px;font-size:20px;font-weight:900}
+  .head .sub{font-size:12.5px;color:#666;margin:0}
+
+  /* score progress on top */
+  .score{margin:14px 18px;background:#000;color:#fff;border-radius:14px;padding:14px;border:2.5px solid #000;box-shadow:4px 4px 0 0 var(--yellow)}
+  .score .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .score .lbl{font-family:var(--mono);font-size:10.5px;font-weight:800;letter-spacing:.1em;color:#aaa;text-transform:uppercase}
+  .score .now{font-family:var(--mono);font-size:24px;font-weight:900}
+  .score .tgt{font-family:var(--mono);font-size:14px;font-weight:800;color:var(--yellow)}
+  .score .bar{height:10px;background:#333;border-radius:99px;overflow:hidden;position:relative}
+  .score .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--yellow),#ffe066);width:55%}
+  .score .bar i{position:absolute;left:55%;top:-3px;width:4px;height:16px;background:#fff}
+  .score .nums{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;font-weight:700;color:#888;margin-top:5px}
+
+  /* skill tree */
+  .tree{padding:8px 0 16px;background:#fff;position:relative}
+  .tree h3{margin:14px 18px 14px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#666;text-align:center}
+
+  .node-row{display:flex;justify-content:center;align-items:flex-start;gap:12px;padding:8px 18px;position:relative}
+  .branch{display:flex;flex-direction:column;align-items:center;flex:1;max-width:140px}
+  .node{width:64px;height:64px;border-radius:50%;border:3px solid #000;display:grid;place-items:center;font-weight:900;font-size:22px;position:relative;cursor:pointer;background:#fff}
+  .node.done{background:var(--green);color:#fff;box-shadow:0 4px 0 0 #0e7c2f}
+  .node.cur{background:var(--yellow);box-shadow:0 4px 0 0 #c79c00;animation:pulse 1.8s ease-in-out infinite}
+  .node.next{background:#fff;box-shadow:0 4px 0 0 #bbb}
+  .node.lock{background:#eee;color:#aaa;box-shadow:0 4px 0 0 #bbb}
+  .node.mock{background:var(--purple);color:#fff;box-shadow:0 4px 0 0 #5b21b6}
+  .node .badge{position:absolute;top:-6px;right:-6px;background:#fff;border:1.5px solid #000;border-radius:99px;font-size:9px;font-family:var(--mono);font-weight:900;padding:2px 5px}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+  .branch .lbl{font-size:11.5px;font-weight:800;margin-top:8px;text-align:center;line-height:1.25}
+  .branch .lbl small{display:block;font-family:var(--mono);font-size:9.5px;color:#666;font-weight:700;margin-top:2px;letter-spacing:.04em}
+  .branch.cur .lbl{color:#000}
+  .branch.cur .lbl small{color:var(--blue)}
+  .branch.lock .lbl{color:#999}
+
+  /* connector lines */
+  .connector{height:24px;width:2px;background:#000;margin:0 auto}
+  .connector.dash{background:repeating-linear-gradient(to bottom,#000 0 4px,transparent 4px 8px)}
+
+  .center-col{display:flex;flex-direction:column;align-items:center;padding:0 18px}
+
+  /* current task detail */
+  .focus{margin:0 18px 14px;background:#fffef0;border:2.5px solid #000;border-radius:14px;padding:14px;box-shadow:4px 4px 0 0 #000}
+  .focus .pill{display:inline-block;background:var(--yellow);border:1.5px solid #000;font-family:var(--mono);font-size:10px;font-weight:900;letter-spacing:.1em;padding:3px 8px;border-radius:99px;margin-bottom:8px}
+  .focus h4{margin:0 0 4px;font-size:15px;font-weight:900}
+  .focus p{margin:0 0 12px;font-size:12.5px;color:#555;line-height:1.5}
+  .focus a{display:flex;justify-content:space-between;align-items:center;background:#000;color:#fff;padding:12px 14px;border-radius:10px;font-weight:900;font-size:14px;text-decoration:none}
+
+  .anno{max-width:440px;margin:14px auto 0;font-family:var(--mono);font-size:10.5px;color:#555;line-height:1.6;background:#fff;border:2px dashed #000;padding:10px 12px;border-radius:8px}
+  .anno b{color:var(--blue)}
+</style>
+</head>
+<body>
+  <p class="meta">Practice V2 · Skill tree</p>
+  <p class="lead"><b>Philosophy:</b> Replace flat grid with a branching mastery tree. Visual narrative of where the user IS, where they've been, what's next. No abstract analytics.</p>
+
+  <div class="phone">
+    <div class="nav">
+      <div class="logo"><span class="b">EP</span><span class="n">เส้นทางของคุณ</span></div>
+    </div>
+
+    <div class="head">
+      <h2>เส้นทางสอบ DET</h2>
+      <p class="sub">น้องเนย · เลเวล Bronze · 7 บทเรียนผ่านแล้ว</p>
+    </div>
+
+    <div class="score">
+      <div class="row"><span class="lbl">คะแนนตอนนี้</span><span class="tgt">เป้า 115</span></div>
+      <div class="row"><span class="now">95</span><span class="lbl" style="color:#fff">+20 อีก</span></div>
+      <div class="bar"><span></span><i></i></div>
+      <div class="nums"><span>0</span><span>60</span><span>115</span><span>160</span></div>
+    </div>
+
+    <div class="tree">
+      <h3>━ เส้นทางของคุณ ━</h3>
+
+      <div class="node-row">
+        <div class="branch">
+          <div class="node done">✓</div>
+          <p class="lbl">ฟัง<br><small>4/4</small></p>
+        </div>
+        <div class="branch">
+          <div class="node done">✓</div>
+          <p class="lbl">เขียนตามคำบอก<br><small>3/3</small></p>
+        </div>
+      </div>
+
+      <div class="center-col"><div class="connector"></div></div>
+
+      <div class="node-row">
+        <div class="branch cur">
+          <div class="node cur">▶<span class="badge">NOW</span></div>
+          <p class="lbl">เติมคำในประโยค<br><small>2/5 กำลังทำ</small></p>
+        </div>
+      </div>
+
+      <div class="center-col"><div class="connector dash"></div></div>
+
+      <div class="node-row">
+        <div class="branch">
+          <div class="node next">📖</div>
+          <p class="lbl">อ่านวิเคราะห์<br><small>0/5</small></p>
+        </div>
+        <div class="branch">
+          <div class="node next">🎤</div>
+          <p class="lbl">พูดอธิบาย<br><small>0/5</small></p>
+        </div>
+      </div>
+
+      <div class="center-col"><div class="connector dash"></div></div>
+
+      <div class="node-row">
+        <div class="branch lock">
+          <div class="node lock">🔒</div>
+          <p class="lbl">คำศัพท์ขั้นสูง<br><small>ปลดล็อก: Basic+</small></p>
+        </div>
+        <div class="branch lock">
+          <div class="node lock">🔒</div>
+          <p class="lbl">บทสนทนา<br><small>ปลดล็อก: Basic+</small></p>
+        </div>
+      </div>
+
+      <div class="center-col"><div class="connector dash"></div></div>
+
+      <div class="node-row">
+        <div class="branch">
+          <div class="node mock">👑</div>
+          <p class="lbl">MOCK TEST<br><small>เป้าหมายสุดท้าย</small></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="focus">
+      <span class="pill">⚡ ทำต่อ</span>
+      <h4>เติมคำในประโยค · ข้อ 2/5</h4>
+      <p>ฝึกแกรมมา + คำศัพท์ในประโยคจริง · ใช้เวลา 5 นาที</p>
+      <a href="#"><span>เริ่มเลย</span><span>→</span></a>
+    </div>
+  </div>
+
+  <div class="anno"><b>// psych levers:</b> Goal gradient (visible distance to mock test boss), endowed progress (done nodes filled), narrative coherence (linear path replaces grid chaos), aspirational locks (paid skills look reachable, not punitive).</div>
+</body>
+</html>

@@ -85,13 +85,26 @@ async function enrichMiniDiagnosisAudio(
     }
 
     if (row.task_type === "interactive_listening") {
-      const existing = String(content.audio_url ?? "").trim();
-      const script = String(
-        content.audio_script ?? content.script ?? content.transcript ?? content.narration ?? "",
-      ).trim();
-      if (!existing && script) {
-        const audio = await resolveAudio(script);
-        if (audio) content.audio_url = audio;
+      const scenarios = Array.isArray(content.scenarios) ? (content.scenarios as Record<string, unknown>[]) : [];
+      if (scenarios.length > 0) {
+        for (const sc of scenarios) {
+          const existing = String(sc.audio_url ?? "").trim();
+          const passage = String(sc.passage ?? sc.script ?? "").trim();
+          if (!existing && passage) {
+            const audio = await resolveAudio(passage);
+            if (audio) sc.audio_url = audio;
+          }
+        }
+        content.scenarios = scenarios;
+      } else {
+        const existing = String(content.audio_url ?? "").trim();
+        const script = String(
+          content.audio_script ?? content.script ?? content.transcript ?? content.narration ?? "",
+        ).trim();
+        if (!existing && script) {
+          const audio = await resolveAudio(script);
+          if (audio) content.audio_url = audio;
+        }
       }
       if (content.max_plays == null) content.max_plays = 3;
     }

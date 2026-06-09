@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mock Test page — info revision options</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Sarabun:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ep-blue:#0055ff;
+    --ep-yellow:#ffd600;
+    --ep-orange:#ff5c00;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:'Sarabun',system-ui,sans-serif;
+    background:#eee;color:#111;padding:32px 16px 100px;
+  }
+  .wrap{max-width:1180px;margin:0 auto}
+  h1.page{font-family:var(--mono);font-weight:800;margin:0 0 12px;font-size:18px;color:var(--ep-blue)}
+  .switcher{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 28px}
+  .switcher a{font-family:var(--mono);font-size:11px;text-decoration:none;color:#111;background:#fff;border:2px solid #000;padding:6px 10px;box-shadow:2px 2px 0 0 #000}
+  .switcher a:hover{background:var(--ep-yellow)}
+  .opt-label{font-family:var(--mono);font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#444;margin:0 0 10px}
+  .opt-note{font-size:12.5px;line-height:1.6;color:#444;margin:0 0 14px;max-width:70ch}
+  .opt{margin-bottom:64px;border:1px dashed #bbb;border-radius:6px;padding:18px;background:#fafafa}
+
+  /* shared mock-test-page chrome */
+  .page-shell{background:#fff;border:2px solid #000;padding:18px;box-shadow:6px 6px 0 0 #000}
+  .hero{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .hero h2{margin:6px 0 0;font-size:30px;font-weight:900;font-style:italic;letter-spacing:-1px;line-height:1;text-transform:uppercase}
+  .hero h2 .sub{display:block;color:var(--ep-blue);font-style:normal;font-size:22px;margin-top:4px}
+  .hero .back{font-family:var(--mono);font-size:11px;font-weight:700}
+  .hero .lead{margin:10px 0 0;font-size:12.5px;font-weight:700;color:#555;max-width:46ch}
+  .credit{min-width:200px;border:4px solid #000;background:var(--ep-yellow);padding:12px;text-align:center;box-shadow:6px 6px 0 0 #000}
+  .credit .l{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+  .credit .n{font-size:30px;font-weight:900;margin:4px 0 0}
+  .credit .r{font-family:var(--mono);font-size:9px;opacity:.65;font-weight:700}
+
+  .cols{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:16px}
+  @media (max-width:780px){.cols{grid-template-columns:1fr}}
+  .panel{border:3px solid #000;background:#fff;box-shadow:6px 6px 0 0 #000}
+  .panel .ph{background:#000;color:#fff;padding:10px 12px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+  .panel .pb{padding:14px}
+  .pbest{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;align-items:center}
+  .pbest .big{grid-column:span 2;border-right:2px dashed #000;text-align:center;padding:4px}
+  .pbest .big .lbl{font-family:var(--mono);font-size:9px;color:#999;font-weight:800;text-transform:uppercase}
+  .pbest .big .v{font-size:52px;font-weight:900;color:var(--ep-blue);line-height:1}
+  .pbest .cell{border:2px solid #000;text-align:center;padding:6px}
+  .pbest .cell .lbl{font-family:var(--mono);font-size:8px;opacity:.55;font-weight:800;text-transform:uppercase}
+  .pbest .cell .v{font-size:18px;font-weight:900;color:var(--ep-orange)}
+
+  .rules{border:3px solid #000;border-left:10px solid var(--ep-orange);background:#fff;padding:12px;box-shadow:6px 6px 0 0 #000}
+  .rules h4{margin:0 0 6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;border-bottom:2px solid #000;padding-bottom:4px}
+  .rules ul{margin:6px 0 0;padding:0;list-style:none;font-size:11.5px;line-height:1.5;font-weight:700}
+  .rules li{display:flex;gap:6px;align-items:flex-start;margin:5px 0}
+  .rules li.red{color:#b91c1c}
+
+  .archive{border:3px solid #000;background:#fff;box-shadow:6px 6px 0 0 #000;margin-top:14px}
+  .archive .ah{background:#000;color:#fff;padding:8px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+  .archive .sum{padding:8px 10px;background:var(--ep-yellow);font-family:var(--mono);font-size:11px;font-weight:800;display:flex;justify-content:space-between;border-top:2px solid #000;border-bottom:2px solid #000}
+  .archive .rows{padding:8px}
+  .archive .row{border:2px solid #000;padding:6px 8px;font-size:11px;font-weight:800;display:flex;justify-content:space-between;margin-bottom:6px}
+
+  /* ===== Option 1 — expanded rules card ===== */
+  .o1-rules{border:3px solid #000;border-left:10px solid var(--ep-orange);background:#fff;padding:0;box-shadow:6px 6px 0 0 #000}
+  .o1-rules h4{margin:0;padding:10px 12px;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;border-bottom:3px solid #000;background:#fff}
+  .o1-rules .tldr{padding:10px 12px;border-bottom:3px solid #000;background:#fffbea}
+  .o1-rules .tldr ul{margin:0;padding:0;list-style:none;font-size:11px;font-weight:700;line-height:1.5}
+  .o1-rules .tldr li{display:flex;gap:6px;margin:4px 0}
+  .o1-rules details{border-bottom:2px solid #000}
+  .o1-rules details:last-child{border-bottom:none}
+  .o1-rules summary{cursor:pointer;padding:8px 12px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+  .o1-rules summary:hover{background:#f5f5f5}
+  .o1-rules .body{padding:0 12px 10px;font-size:11.5px;line-height:1.65;color:#222}
+
+  /* ===== Option 2 — full-width brutalist info card (matches Practice-hub style) ===== */
+  .o2-info{
+    border:3px solid #000;border-radius:4px;
+    background:linear-gradient(180deg,rgba(255,214,0,.35),#fff);
+    padding:20px;box-shadow:6px 6px 0 0 #000;
+  }
+  .o2-info h3{
+    margin:0 0 12px;padding-bottom:8px;border-bottom:4px solid #000;
+    font-family:var(--mono);font-weight:800;font-size:16px;color:var(--ep-blue);
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  }
+  .o2-info .dismiss{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:2px solid #000;padding:4px 8px;cursor:pointer;box-shadow:2px 2px 0 0 #000}
+  .o2-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:700px){.o2-grid{grid-template-columns:1fr}}
+  .o2-card{position:relative;background:#fff;border:2.5px solid #000;padding:12px 14px 12px 50px;box-shadow:3px 3px 0 0 #000}
+  .o2-card .n{position:absolute;left:-12px;top:-12px;width:34px;height:34px;border-radius:50%;background:var(--ep-yellow);border:2.5px solid #000;display:grid;place-items:center;font-family:var(--mono);font-weight:800;box-shadow:2px 2px 0 0 #000}
+  .o2-card h4{margin:0 0 4px;font-size:13.5px;font-weight:800}
+  .o2-card p{margin:4px 0 0;font-size:12px;line-height:1.6;color:#222}
+  .o2-card .warn{color:#b91c1c}
+
+  /* ===== Option 3 — inline contextual placement ===== */
+  .o3-archive-note{font-family:'Sarabun',sans-serif;font-size:11px;font-weight:600;padding:8px 10px;background:#eff6ff;border-top:2px solid #000;border-bottom:2px solid #000;line-height:1.55}
+  .o3-rules-extra{margin-top:8px;padding-top:8px;border-top:2px dashed #000;font-size:11px;font-weight:700;line-height:1.55}
+  .o3-modal{margin-top:18px;border:3px solid #000;background:#fff;padding:16px;box-shadow:6px 6px 0 0 #000;max-width:520px;margin-left:auto;margin-right:auto;position:relative}
+  .o3-modal .badge{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#666}
+  .o3-modal h4{margin:6px 0 10px;font-size:16px;font-weight:800}
+  .o3-modal .warn{background:#fff7ed;border:2px solid #000;padding:10px;margin:10px 0;font-size:12px;font-weight:700;line-height:1.6}
+  .o3-modal .warn b{color:#b91c1c}
+  .o3-modal .btn{display:inline-block;margin-top:8px;background:var(--ep-blue);color:#fff;border:2px solid #000;padding:8px 12px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;box-shadow:3px 3px 0 0 #000}
+  .o3-history-badge{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:var(--ep-yellow);border:2px solid #000;padding:2px 6px;margin-left:8px}
+
+  /* ===== Option 4 — tabs ===== */
+  .o4-tabs{display:flex;gap:0;border:3px solid #000;background:#fff;box-shadow:6px 6px 0 0 #000;margin-bottom:16px}
+  .o4-tabs button{flex:1;border:none;background:#fff;padding:12px;font-family:var(--mono);font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-right:3px solid #000}
+  .o4-tabs button:last-child{border-right:none}
+  .o4-tabs button.active{background:#000;color:#fff}
+  .o4-tabs .badge{display:inline-block;background:var(--ep-yellow);color:#000;border:1.5px solid #000;border-radius:99px;font-size:9px;padding:1px 6px;margin-left:6px}
+  .o4-info{border:3px solid #000;background:#fff;padding:18px;box-shadow:6px 6px 0 0 #000}
+  .o4-info h3{margin:0 0 14px;font-size:18px;font-weight:800}
+  .o4-section{padding:14px 0;border-top:2px dashed #000}
+  .o4-section:first-of-type{border-top:none;padding-top:0}
+  .o4-section h4{margin:0 0 4px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ep-blue)}
+  .o4-section .h{font-size:14px;font-weight:800;margin:0 0 6px}
+  .o4-section p{margin:0;font-size:12.5px;line-height:1.7;color:#222}
+  .o4-section .warn{color:#b91c1c;font-weight:700}
+
+  /* ===== Option 5 — collapsible strip + pulled-out warnings ===== */
+  .o5-banner{margin-bottom:12px;border:3px solid #000;background:#fff7ed;padding:10px 14px;font-size:12.5px;font-weight:700;line-height:1.55;box-shadow:6px 6px 0 0 #000;display:flex;gap:10px;align-items:flex-start}
+  .o5-banner .ic{font-size:18px}
+  .o5-strip{border:3px solid #000;background:#fff;box-shadow:6px 6px 0 0 #000}
+  .o5-strip summary{cursor:pointer;background:var(--ep-yellow);padding:12px 14px;font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #000;list-style:none}
+  .o5-strip summary::-webkit-details-marker{display:none}
+  .o5-strip[open] summary{background:#000;color:#fff}
+  .o5-strip .inner{padding:14px}
+  .o5-strip .sec{padding:10px 0;border-top:2px dashed #000}
+  .o5-strip .sec:first-child{padding-top:0;border-top:none}
+  .o5-strip .sec h5{margin:0 0 4px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ep-blue)}
+  .o5-strip .sec p{margin:0;font-size:12px;line-height:1.65;color:#222}
+  .o5-rules .extra{margin-top:8px;padding:8px;background:#fff7ed;border:2px solid #000;font-size:11px;font-weight:700;line-height:1.5}
+  .o5-rules .extra b{color:#b91c1c}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="page">Mock Test page · 5 revision options</h1>
+  <div class="switcher">
+    <a href="#o1">① Expanded rules card</a>
+    <a href="#o2">② Full-width info card</a>
+    <a href="#o3">③ Inline contextual</a>
+    <a href="#o4">④ Tabbed Info / Dashboard</a>
+    <a href="#o5">⑤ Collapsible strip + warnings</a>
+  </div>
+
+  <!-- ============= OPTION 1 ============= -->
+  <section class="opt" id="o1">
+    <div class="opt-label">Option 1 — Expand the existing "Essential Rules" tile</div>
+    <div class="opt-note">Smallest change. Sidebar tile becomes a taller "Before You Start" card with a yellow TL;DR strip + 4 collapsible sections. Hero, Personal Best, and Attempt History stay exactly where they are.</div>
+
+    <div class="page-shell">
+      <div class="hero">
+        <div>
+          <div class="back">← BACK / กลับ</div>
+          <h2>DET · MOCK CENTER<span class="sub">แดชบอร์ดและการจำลองสอบ</span></h2>
+          <p class="lead">Full 20-step simulation · ~1h 0m – 1h 15m · one credit is used when you start.</p>
+        </div>
+        <div class="credit"><div class="l">สิทธิ์การสอบคงเหลือ<br>(Mock Credits)</div><div class="n">5 / 6</div><div class="r">RENEW: JAN 01</div></div>
+      </div>
+
+      <div class="cols">
+        <div>
+          <div class="panel">
+            <div class="ph">Personal Best // คะแนนสูงสุดของคุณ</div>
+            <div class="pb">
+              <div class="pbest">
+                <div class="big"><div class="lbl">High Score</div><div class="v">115</div></div>
+                <div class="cell"><div class="lbl">Lit</div><div class="v">120</div></div>
+                <div class="cell"><div class="lbl">Comp</div><div class="v">110</div></div>
+                <div class="cell"><div class="lbl">Prod</div><div class="v">115</div></div>
+                <div class="cell"><div class="lbl">Conv</div><div class="v">115</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel" style="margin-top:14px">
+            <div class="ph">Attempt History // ประวัติการสอบ</div>
+            <div class="pb" style="font-family:var(--mono);font-size:11px;color:#666">— table rows —</div>
+          </div>
+        </div>
+
+        <aside>
+          <div class="o1-rules">
+            <h4>Before You Start · ก่อนเริ่ม</h4>
+            <div class="tldr">
+              <ul>
+                <li>⏱️ ~1h 0m – 1h 15m duration</li>
+                <li style="color:#b91c1c">⚠️ One credit is used when you start</li>
+                <li>📊 Scores are estimates, not official DET</li>
+              </ul>
+            </div>
+            <details open>
+              <summary>① ชุดข้อสอบ <span style="font-family:var(--mono);font-size:10px">▾</span></summary>
+              <div class="body">อัปโหลดชุดใหม่ทุกเดือนตั้งแต่ ม.ค. 2026 — เดือนละ 6 ชุด ตรงกับโควต้า เลือกเริ่มจากชุดที่ 1, 3, หรือ 5 ก็ได้ ไม่มีลำดับบังคับ</div>
+            </details>
+            <details>
+              <summary>② ก่อนเริ่มทำ <span style="font-family:var(--mono);font-size:10px">▾</span></summary>
+              <div class="body">ชุดละ ~1h 0m – 1h 15m จัดเวลาให้พร้อม ออกระบบกลางคัน = นับว่าใช้โควต้าแล้ว · ตัวเลขชุดไม่ใช่ความยาก ทุกชุด Adaptive เท่ากัน</div>
+            </details>
+            <details>
+              <summary>③ ฝึก ไม่ใช่สอบจริง <span style="font-family:var(--mono);font-size:10px">▾</span></summary>
+              <div class="body">ไม่ต้องตั้งกล้อง เปิดอินเทอร์เน็ตค้นได้ — เพราะนี่คือการฝึก แต่สอบจริง Duolingo เข้มมาก ควรอ่านกฎก่อน</div>
+            </details>
+            <details>
+              <summary>④ Feedback <span style="font-family:var(--mono);font-size:10px">▾</span></summary>
+              <div class="body">หลังทำเสร็จได้ Feedback เฉพาะบุคคล บันทึกเก็บได้ ติดตามพัฒนาการของตัวเองได้ ปัญหาแจ้ง languageplan.consulting@gmail.com</div>
+            </details>
+          </div>
+
+          <div class="archive">
+            <div class="ah"><span>Monthly Archive // คลังข้อสอบ</span><span>+</span></div>
+            <div class="sum"><span>January 2026</span><span>+/-</span></div>
+            <div class="rows">
+              <div class="row"><span>Mock Set 1</span><span>▶</span></div>
+              <div class="row"><span>Mock Set 2</span><span>▶</span></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============= OPTION 2 ============= -->
+  <section class="opt" id="o2">
+    <div class="opt-label">Option 2 — Full-width brutalist info card above Personal Best</div>
+    <div class="opt-note">Matches the Practice-hub announcement style we just shipped. Sits between hero and Personal Best. Dismissible (X button) — once dismissed it collapses to a thin "ℹ︎ How mock tests work" reopen strip.</div>
+
+    <div class="page-shell">
+      <div class="hero">
+        <div>
+          <div class="back">← BACK / กลับ</div>
+          <h2>DET · MOCK CENTER<span class="sub">แดชบอร์ดและการจำลองสอบ</span></h2>
+          <p class="lead">Full 20-step simulation · ~1h 0m – 1h 15m · one credit is used when you start.</p>
+        </div>
+        <div class="credit"><div class="l">สิทธิ์การสอบคงเหลือ<br>(Mock Credits)</div><div class="n">5 / 6</div><div class="r">RENEW: JAN 01</div></div>
+      </div>
+
+      <div class="o2-info" style="margin-top:6px">
+        <h3>วิธีใช้ Mock Test · How mock tests work
+          <button class="dismiss">× Dismiss</button>
+        </h3>
+
+        <div class="o2-grid">
+          <div class="o2-card">
+            <div class="n">1</div>
+            <h4>เกี่ยวกับชุดข้อสอบ</h4>
+            <p>อัปโหลดชุดใหม่ทุกเดือนตั้งแต่ ม.ค. 2026 นำมาจากข้อสอบ DET จริงในเดือนนั้น ๆ เดือนละ 6 ชุดตรงกับโควต้า เลือกเริ่มจากชุดไหนก็ได้ ไม่มีลำดับบังคับ</p>
+          </div>
+          <div class="o2-card">
+            <div class="n">2</div>
+            <h4>ก่อนเริ่มทำ</h4>
+            <p>ใช้เวลา ~1h 0m – 1h 15m ต่อชุด <span class="warn"><b>ออกระบบกลางคัน = ใช้โควต้าแล้ว</b></span> · ตัวเลขชุดไม่ใช่ระดับความยาก ทุกชุดเป็น Adaptive เหมือนข้อสอบจริง — เจอข้อยากแปลว่าระบบกำลังหาขีดจำกัด</p>
+          </div>
+          <div class="o2-card">
+            <div class="n">3</div>
+            <h4>ฝึก ไม่ใช่สอบจริง</h4>
+            <p>ไม่ต้องตั้งกล้อง เปิดอินเทอร์เน็ตค้นได้ ไม่มีตรวจจับ — แต่ในสอบจริง Duolingo เข้มมากเรื่องกล้องและสภาพแวดล้อม ควรอ่านกฎก่อนสอบจริง</p>
+          </div>
+          <div class="o2-card">
+            <div class="n">4</div>
+            <h4>Feedback</h4>
+            <p>หลังจบแต่ละชุดได้ Feedback แบบเฉพาะบุคคล บันทึกเก็บได้ ติดตามพัฒนาการ — ปัญหาระหว่างทำ แจ้งที่ languageplan.consulting@gmail.com</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cols">
+        <div>
+          <div class="panel">
+            <div class="ph">Personal Best</div>
+            <div class="pb">
+              <div class="pbest">
+                <div class="big"><div class="lbl">High Score</div><div class="v">115</div></div>
+                <div class="cell"><div class="lbl">Lit</div><div class="v">120</div></div>
+                <div class="cell"><div class="lbl">Comp</div><div class="v">110</div></div>
+                <div class="cell"><div class="lbl">Prod</div><div class="v">115</div></div>
+                <div class="cell"><div class="lbl">Conv</div><div class="v">115</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <div class="rules">
+            <h4>Essential Rules</h4>
+            <ul>
+              <li>⏱️ ~1h 0m – 1h 15m duration</li>
+              <li class="red">⚠️ One credit is used when you start</li>
+              <li>📊 Estimates, not official DET</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============= OPTION 3 ============= -->
+  <section class="opt" id="o3">
+    <div class="opt-label">Option 3 — Inline contextual: split content where it's relevant</div>
+    <div class="opt-note">Each chunk lives next to the UI it explains. About-sets → archive header. Time/adaptive → rules card. Practice-vs-real → preflight modal (when they pick a set). Feedback → badge on history header. No big info block.</div>
+
+    <div class="page-shell">
+      <div class="hero">
+        <div>
+          <div class="back">← BACK / กลับ</div>
+          <h2>DET · MOCK CENTER<span class="sub">แดชบอร์ดและการจำลองสอบ</span></h2>
+          <p class="lead">Full 20-step simulation · ~1h 0m – 1h 15m · one credit is used when you start.</p>
+        </div>
+        <div class="credit"><div class="l">สิทธิ์การสอบคงเหลือ<br>(Mock Credits)</div><div class="n">5 / 6</div><div class="r">RENEW: JAN 01</div></div>
+      </div>
+
+      <div class="cols">
+        <div>
+          <div class="panel">
+            <div class="ph">
+              Attempt History
+              <span class="o3-history-badge">📥 Save feedback → dashboard</span>
+            </div>
+            <div class="pb" style="font-family:var(--mono);font-size:11px;color:#666">— table rows. Feedback note explained where it's used. —</div>
+          </div>
+        </div>
+
+        <aside>
+          <div class="rules">
+            <h4>Before You Start · ก่อนเริ่ม</h4>
+            <ul>
+              <li>⏱️ ~1h 0m – 1h 15m / ชุด</li>
+              <li class="red">⚠️ ออกระบบกลางคัน = ใช้โควต้าแล้ว</li>
+              <li>📊 ตัวเลขชุดไม่ใช่ความยาก — ทุกชุด Adaptive เท่ากัน</li>
+            </ul>
+            <div class="o3-rules-extra">
+              <b>Adaptive คืออะไร:</b> ระบบจะยากขึ้นตามที่คุณตอบถูก เจอข้อตอบไม่ได้คือเรื่องปกติ
+            </div>
+          </div>
+
+          <div class="archive">
+            <div class="ah"><span>Monthly Archive // คลังข้อสอบ</span><span>+</span></div>
+            <div class="o3-archive-note">
+              📅 อัปโหลดชุดใหม่ทุกเดือนตั้งแต่ ม.ค. 2026 จากข้อสอบ DET จริงในเดือนนั้น ๆ — เดือนละ 6 ชุดตรงกับโควต้า
+            </div>
+            <div class="sum"><span>January 2026</span><span>+/-</span></div>
+            <div class="rows">
+              <div class="row"><span>Mock Set 1</span><span>▶</span></div>
+              <div class="row"><span>Mock Set 2</span><span>▶</span></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- preflight modal (appears when user picks a set) -->
+      <div class="o3-modal">
+        <div class="badge">Pre-flight · เมื่อกดเลือกชุด</div>
+        <h4>Start Mock Set 1 — January 2026?</h4>
+        <div class="warn">
+          ⏱️ ใช้เวลา ~1h 0m – 1h 15m · <b>กดเริ่ม = ใช้ 1 credit ทันที</b> แม้จะออกกลางคัน
+        </div>
+        <div class="warn" style="background:#eff6ff">
+          🎥 <b>นี่คือการฝึก ไม่ใช่สอบจริง</b> — ไม่ต้องตั้งกล้อง เปิดอินเทอร์เน็ตได้ ไม่มีบันทึก ในสอบจริง Duolingo เข้มมากเรื่องกล้องและสภาพแวดล้อม
+        </div>
+        <button class="btn">Start Mock Test →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============= OPTION 4 ============= -->
+  <section class="opt" id="o4">
+    <div class="opt-label">Option 4 — Two tabs: Dashboard ↔ How Mock Tests Work</div>
+    <div class="opt-note">First-time users (zero attempts) land on Info tab by default; returners land on Dashboard. Tabs sit just below the hero. Info tab shows all 4 chunks as a clean structured doc.</div>
+
+    <div class="page-shell">
+      <div class="hero">
+        <div>
+          <div class="back">← BACK / กลับ</div>
+          <h2>DET · MOCK CENTER<span class="sub">แดชบอร์ดและการจำลองสอบ</span></h2>
+          <p class="lead">Full 20-step simulation · ~1h 0m – 1h 15m · one credit is used when you start.</p>
+        </div>
+        <div class="credit"><div class="l">สิทธิ์การสอบคงเหลือ<br>(Mock Credits)</div><div class="n">5 / 6</div><div class="r">RENEW: JAN 01</div></div>
+      </div>
+
+      <div class="o4-tabs">
+        <button>📊 Dashboard / แดชบอร์ด</button>
+        <button class="active">ℹ︎ How it works / วิธีใช้<span class="badge">NEW</span></button>
+      </div>
+
+      <div class="o4-info">
+        <h3>วิธีใช้ Mock Test · How mock tests work</h3>
+
+        <div class="o4-section">
+          <h4>① About the sets</h4>
+          <div class="h">ข้อมูลเกี่ยวกับชุดข้อสอบ</div>
+          <p>ข้อสอบ Mock Test จะมีการอัปโหลดชุดใหม่ทุกเดือน ตั้งแต่ ม.ค. 2026 — ข้อสอบแต่ละชุดนำมาจากข้อสอบ DET จริงที่ใช้สอบในช่วงเดือนนั้น ๆ ในแต่ละเดือนจะมี 6 ชุด ตรงกับโควต้าที่ได้รับต่อเดือน เลือกเริ่มจากชุดไหนก็ได้ ไม่มีลำดับบังคับ</p>
+        </div>
+
+        <div class="o4-section">
+          <h4>② Before you start</h4>
+          <div class="h">สิ่งที่ต้องรู้ก่อนเริ่มทำข้อสอบ</div>
+          <p>ใช้เวลาประมาณ <b>1 ชั่วโมง – 1 ชั่วโมง 15 นาที</b> ควรจัดเวลาให้พร้อม <span class="warn">ทำค้างไว้แล้วออกระบบ = นับว่าใช้โควต้าชุดนั้นไปแล้ว</span><br><br>
+          ตัวเลขชุด (1, 2, 3) ไม่ได้บ่งบอกระดับความยาก — ทุกชุดยากเท่ากัน เพราะเป็นแบบ <b>Adaptive</b> ระบบจะปรับยากขึ้นตามผลที่คุณตอบ ยิ่งตอบถูกมาก ข้อต่อไปยิ่งยาก เจอข้อตอบไม่ได้ ไม่ต้องตกใจ — นั่นคือเป้าหมายของระบบที่ต้องการหาขีดจำกัดของเรา</p>
+        </div>
+
+        <div class="o4-section">
+          <h4>③ Practice, not the real exam</h4>
+          <div class="h">ข้อสอบนี้คือการฝึก ไม่ใช่สอบจริง</div>
+          <p>ระหว่างทำ Mock Test ไม่ต้องกังวลเรื่องการตั้งกล้อง จะเปิดอินเทอร์เน็ตค้นข้อมูลก็ได้ — นี่คือการฝึกซ้อม ไม่มีการตรวจจับหรือบันทึก<br><br>
+          แต่ในการสอบจริง สิ่งเหล่านี้สำคัญมาก โดยเฉพาะการตั้งกล้องและสภาพแวดล้อม Duolingo กำหนดไว้อย่างเข้มงวด — ควรศึกษากฎของ Duolingo ก่อนสอบจริง</p>
+        </div>
+
+        <div class="o4-section">
+          <h4>④ Feedback &amp; problems</h4>
+          <div class="h">Feedback และการแจ้งปัญหา</div>
+          <p>หลังจากทำแต่ละชุดเสร็จ จะได้ Feedback แบบเฉพาะบุคคล บันทึกเก็บไว้ติดตามพัฒนาการได้ — Feedback นี้จะช่วยให้เห็นชัดว่าจุดอ่อนอยู่ที่ไหน นำไปวางแผนการเรียนได้ตรงจุด<br><br>
+          พบปัญหาระหว่างทำ แจ้งได้ที่ <b>languageplan.consulting@gmail.com</b></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============= OPTION 5 ============= -->
+  <section class="opt" id="o5">
+    <div class="opt-label">Option 5 — Collapsible strip + critical warnings always visible</div>
+    <div class="opt-note">Single collapsed strip below the hero contains the full info. Two highest-stakes warnings (credit-burn + practice-not-real-exam) are pulled out as always-visible callouts.</div>
+
+    <div class="page-shell">
+      <div class="hero">
+        <div>
+          <div class="back">← BACK / กลับ</div>
+          <h2>DET · MOCK CENTER<span class="sub">แดชบอร์ดและการจำลองสอบ</span></h2>
+          <p class="lead">Full 20-step simulation · ~1h 0m – 1h 15m · one credit is used when you start.</p>
+        </div>
+        <div class="credit"><div class="l">สิทธิ์การสอบคงเหลือ<br>(Mock Credits)</div><div class="n">5 / 6</div><div class="r">RENEW: JAN 01</div></div>
+      </div>
+
+      <div class="o5-banner">
+        <div class="ic">🎥</div>
+        <div>
+          <b>นี่คือการฝึก ไม่ใช่สอบจริง</b> — ไม่ต้องตั้งกล้อง เปิดอินเทอร์เน็ตค้นได้
+          (แต่ในการสอบจริง Duolingo เข้มมากเรื่องกล้องและสภาพแวดล้อม ควรอ่านกฎก่อนสอบจริง)
+        </div>
+      </div>
+
+      <details class="o5-strip" open>
+        <summary><span>ℹ︎ วิธีใช้ Mock Test · How it works</span><span>▾</span></summary>
+        <div class="inner">
+          <div class="sec">
+            <h5>① เกี่ยวกับชุดข้อสอบ</h5>
+            <p>อัปโหลดชุดใหม่ทุกเดือนตั้งแต่ ม.ค. 2026 จากข้อสอบ DET จริงเดือนนั้น ๆ — เดือนละ 6 ชุดตรงกับโควต้า เลือกเริ่มจากชุดไหนก็ได้</p>
+          </div>
+          <div class="sec">
+            <h5>② ก่อนเริ่มทำ</h5>
+            <p>ใช้เวลา ~1h 0m – 1h 15m ต่อชุด · ตัวเลขชุดไม่ใช่ระดับความยาก ทุกชุดเป็น Adaptive — เจอข้อยากแปลว่าระบบกำลังหาขีดจำกัด ไม่ต้องตกใจ</p>
+          </div>
+          <div class="sec">
+            <h5>③ Feedback &amp; แจ้งปัญหา</h5>
+            <p>หลังจบแต่ละชุดได้ Feedback เฉพาะบุคคล บันทึกเก็บได้ — ปัญหาระหว่างทำแจ้งที่ languageplan.consulting@gmail.com</p>
+          </div>
+        </div>
+      </details>
+
+      <div class="cols" style="margin-top:14px">
+        <div>
+          <div class="panel">
+            <div class="ph">Personal Best</div>
+            <div class="pb">
+              <div class="pbest">
+                <div class="big"><div class="lbl">High Score</div><div class="v">115</div></div>
+                <div class="cell"><div class="lbl">Lit</div><div class="v">120</div></div>
+                <div class="cell"><div class="lbl">Comp</div><div class="v">110</div></div>
+                <div class="cell"><div class="lbl">Prod</div><div class="v">115</div></div>
+                <div class="cell"><div class="lbl">Conv</div><div class="v">115</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside>
+          <div class="rules o5-rules">
+            <h4>Essential Rules</h4>
+            <ul>
+              <li>⏱️ ~1h 0m – 1h 15m duration</li>
+              <li class="red">⚠️ One credit is used when you start</li>
+              <li>📊 Estimates, not official DET</li>
+            </ul>
+            <div class="extra">
+              <b>⚠️ สำคัญ:</b> ออกระบบกลางคัน = นับว่าใช้โควต้าชุดนั้นไปแล้ว ควรจัดเวลาให้พร้อมก่อนเริ่ม
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

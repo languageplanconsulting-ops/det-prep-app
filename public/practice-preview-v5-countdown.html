@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Practice V5 — Exam countdown</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800;900&family=Sarabun:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0a0a0a;--blue:#004aad;--yellow:#ffcc00;--red:#dc2626;--green:#16a34a;--mono:'JetBrains Mono',ui-monospace,monospace}
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{font-family:'Sarabun',system-ui,sans-serif;background:#1a1a1a;color:var(--ink);padding:24px 12px 80px;-webkit-font-smoothing:antialiased}
+  .meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--yellow);margin:0 0 6px;text-align:center}
+  .lead{font-size:13px;color:#ccc;text-align:center;max-width:60ch;margin:0 auto 22px;line-height:1.6}
+  .lead b{color:#fff}
+
+  .phone{max-width:440px;margin:0 auto;background:#fff;border:3px solid #000;box-shadow:8px 8px 0 0 var(--yellow);border-radius:24px;overflow:hidden}
+
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#000;color:#fff;border-bottom:3px solid var(--yellow)}
+  .logo{display:flex;align-items:center;gap:8px}
+  .logo .b{width:28px;height:28px;background:var(--yellow);color:#000;display:grid;place-items:center;font-weight:900;font-size:12px;border-radius:6px}
+  .logo .n{font-weight:900;font-size:13px}
+  .nav .me{font-size:11px;font-weight:700;color:#aaa}
+
+  /* COUNTDOWN HERO — dominates the page */
+  .cd{background:#000;color:#fff;padding:22px 18px 24px;text-align:center;border-bottom:3px solid var(--yellow);position:relative;overflow:hidden}
+  .cd:before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,204,0,.04) 0 10px,transparent 10px 20px);pointer-events:none}
+  .cd .lbl{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.22em;color:var(--yellow);margin:0 0 8px;text-transform:uppercase}
+  .cd .big{font-family:var(--mono);font-size:88px;font-weight:900;line-height:.85;letter-spacing:-.04em;margin:0;color:#fff;text-shadow:4px 4px 0 var(--yellow)}
+  .cd .unit{font-family:var(--mono);font-size:18px;font-weight:800;letter-spacing:.18em;color:#fff;margin:6px 0 12px;text-transform:uppercase}
+  .cd .date{font-size:13px;font-weight:700;color:#bbb;margin:0 0 14px}
+  .cd .date b{color:#fff}
+
+  .cd-bar{height:8px;background:#333;border-radius:99px;overflow:hidden;margin:6px 0 6px}
+  .cd-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--yellow),#ff9500);width:30%}
+  .cd .meta-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;font-weight:800;color:#aaa;letter-spacing:.04em}
+
+  /* status banner */
+  .status{padding:14px 18px;background:#fff4dc;border-bottom:2px solid #000;display:flex;gap:10px;align-items:flex-start}
+  .status .ic{font-size:22px;line-height:1;margin-top:2px}
+  .status .t{flex:1;font-size:13px;font-weight:700;line-height:1.5}
+  .status .t b{color:#000}
+  .status .t i{font-style:normal;background:var(--yellow);padding:0 4px;font-weight:900}
+
+  /* skill rows — "X days of practice needed before exam" */
+  .skill-list{padding:14px 18px 8px;background:#fff}
+  .skill-list h3{margin:0 0 12px;font-size:14px;font-weight:900;display:flex;justify-content:space-between;align-items:baseline}
+  .skill-list h3 small{font-family:var(--mono);font-size:10.5px;font-weight:700;color:#666;letter-spacing:.06em;text-transform:uppercase}
+
+  .srow{display:flex;gap:12px;align-items:center;padding:12px;border:2px solid #000;border-radius:12px;margin-bottom:8px;background:#fff;cursor:pointer;text-decoration:none;color:#000}
+  .srow.critical{background:#fff0f0;border-color:var(--red);box-shadow:3px 3px 0 0 var(--red)}
+  .srow.ok{opacity:.7}
+  .srow .ic{flex:0 0 38px;height:38px;border-radius:50%;border:2px solid #000;display:grid;place-items:center;font-size:18px;background:#fff}
+  .srow.critical .ic{background:var(--red);color:#fff}
+  .srow.ok .ic{background:var(--green);color:#fff}
+  .srow .body{flex:1;min-width:0}
+  .srow .nm{font-weight:900;font-size:13.5px;margin:0 0 2px}
+  .srow .stat{font-family:var(--mono);font-size:11px;font-weight:800;color:#666;letter-spacing:.04em;display:flex;gap:8px;align-items:center}
+  .srow.critical .stat{color:var(--red)}
+  .srow.critical .stat b{color:var(--red)}
+  .srow.ok .stat{color:var(--green)}
+  .srow .right{flex:0 0 auto;text-align:right}
+  .srow .days{font-family:var(--mono);font-weight:900;font-size:16px;color:#000;line-height:1}
+  .srow.critical .days{color:var(--red)}
+  .srow.ok .days{color:var(--green)}
+  .srow .dlbl{font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.1em;color:#666;text-transform:uppercase;margin-top:2px}
+
+  /* big urgent CTA */
+  .urgent{margin:8px 18px 16px;background:var(--red);color:#fff;border:3px solid #000;border-radius:14px;padding:14px;text-align:center;box-shadow:5px 5px 0 0 #000}
+  .urgent .lbl{font-family:var(--mono);font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px;color:#ffe5e5}
+  .urgent h4{margin:0 0 6px;font-weight:900;font-size:16px}
+  .urgent p{margin:0 0 12px;font-size:12.5px;color:#ffe5e5;line-height:1.45}
+  .urgent a{display:block;background:#fff;color:var(--red);padding:13px;border-radius:10px;font-weight:900;font-size:14.5px;text-decoration:none;border:2.5px solid #000}
+
+  /* mock test schedule */
+  .mock{margin:0 18px 18px;background:#fff;border:2.5px solid #000;border-radius:14px;padding:14px;box-shadow:4px 4px 0 0 #000}
+  .mock .pill{display:inline-block;background:#000;color:var(--yellow);font-family:var(--mono);font-size:10px;font-weight:900;letter-spacing:.1em;padding:3px 8px;border-radius:99px;margin-bottom:8px}
+  .mock h4{margin:0 0 4px;font-size:14.5px;font-weight:900}
+  .mock p{margin:0 0 12px;font-size:12px;color:#555;line-height:1.5}
+  .mock .sched{display:flex;gap:6px;margin-bottom:12px}
+  .mock .day{flex:1;text-align:center;padding:8px 4px;border:1.5px solid #000;border-radius:8px;font-family:var(--mono)}
+  .mock .day .d{font-size:10px;font-weight:800;color:#666;letter-spacing:.08em;text-transform:uppercase}
+  .mock .day .n{font-size:15px;font-weight:900;margin-top:2px}
+  .mock .day.next{background:var(--yellow)}
+  .mock .day.exam{background:#000;color:#fff}
+  .mock .day.exam .d,.mock .day.exam .n{color:#fff}
+  .mock a{display:flex;justify-content:space-between;align-items:center;background:#000;color:#fff;padding:11px 14px;border-radius:10px;font-weight:900;font-size:13.5px;text-decoration:none}
+
+  .anno{max-width:440px;margin:14px auto 0;font-family:var(--mono);font-size:10.5px;color:#ccc;line-height:1.6;background:#000;border:2px dashed var(--yellow);padding:10px 12px;border-radius:8px}
+  .anno b{color:var(--yellow)}
+</style>
+</head>
+<body>
+  <p class="meta">Practice V5 · Exam countdown urgency</p>
+  <p class="lead"><b>Philosophy:</b> Days-to-exam dominates. Every skill shown as "X days of practice needed". Best for students with booked exam dates. Higher-stakes framing.</p>
+
+  <div class="phone">
+    <div class="nav">
+      <div class="logo"><span class="b">EP</span><span class="n">นับถอยหลังสอบ</span></div>
+      <span class="me">น้องเนย</span>
+    </div>
+
+    <div class="cd">
+      <p class="lbl">เหลือเวลาก่อนสอบ</p>
+      <p class="big">21</p>
+      <p class="unit">วัน</p>
+      <p class="date">สอบวันที่ <b>30 มิถุนายน 2569</b></p>
+      <div class="cd-bar"><span></span></div>
+      <div class="meta-row"><span>ฝึกแล้ว 9 วัน</span><span>30% ของแผน</span></div>
+    </div>
+
+    <div class="status">
+      <span class="ic">⏰</span>
+      <p class="t">ตามแผน ถ้าฝึกวันละ <i>15 นาที</i> ทุกวัน <b>คุณจะถึงเป้า 115 ก่อนวันสอบ 2 วัน</b></p>
+    </div>
+
+    <div class="urgent">
+      <p class="lbl">⚡ ภารกิจวันนี้</p>
+      <h4>ฝึกอ่าน + เติมคำ (15 นาที)</h4>
+      <p>ทักษะอ่อนสุด · ถ้าข้ามวันนี้ จะไม่ทันเป้า</p>
+      <a href="#">เริ่มฝึกตอนนี้ →</a>
+    </div>
+
+    <div class="skill-list">
+      <h3>ทักษะที่ต้องเร่ง <small>ก่อนสอบ</small></h3>
+
+      <a class="srow critical" href="#">
+        <div class="ic">📖</div>
+        <div class="body"><p class="nm">อ่าน + เติมคำ</p><p class="stat">42% · ต้องฝึก <b>8 ครั้ง</b></p></div>
+        <div class="right"><p class="days">8</p><p class="dlbl">วัน</p></div>
+      </a>
+
+      <a class="srow" href="#">
+        <div class="ic">🎤</div>
+        <div class="body"><p class="nm">พูดอธิบาย</p><p class="stat">60% · ต้องฝึก 5 ครั้ง</p></div>
+        <div class="right"><p class="days">5</p><p class="dlbl">วัน</p></div>
+      </a>
+
+      <a class="srow" href="#">
+        <div class="ic">✍️</div>
+        <div class="body"><p class="nm">เขียน</p><p class="stat">72% · ต้องฝึก 3 ครั้ง</p></div>
+        <div class="right"><p class="days">3</p><p class="dlbl">วัน</p></div>
+      </a>
+
+      <a class="srow ok" href="#">
+        <div class="ic">✓</div>
+        <div class="body"><p class="nm">ฟัง</p><p class="stat">88% · พร้อมแล้ว</p></div>
+        <div class="right"><p class="days">✓</p><p class="dlbl">OK</p></div>
+      </a>
+    </div>
+
+    <div class="mock">
+      <span class="pill">📅 ตารางสอบจำลอง</span>
+      <h4>Mock Test 3 ครั้งก่อนสอบจริง</h4>
+      <p>ทำสัปดาห์ละครั้ง · จะรู้คะแนนคาดการณ์</p>
+      <div class="sched">
+        <div class="day next"><p class="d">เสาร์</p><p class="n">14/6</p></div>
+        <div class="day"><p class="d">เสาร์</p><p class="n">21/6</p></div>
+        <div class="day"><p class="d">เสาร์</p><p class="n">28/6</p></div>
+        <div class="day exam"><p class="d">สอบ</p><p class="n">30/6</p></div>
+      </div>
+      <a href="#"><span>จอง Mock เสาร์นี้</span><span>→</span></a>
+    </div>
+  </div>
+
+  <div class="anno"><b>// psych levers:</b> Deadline urgency (Parkinson + loss aversion), implementation intention ("X days needed"), critical-skill spotlight (red = focus here), commitment device (mock test schedule pre-booked), dark color palette signals stakes.</div>
+</body>
+</html>

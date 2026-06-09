@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mock Test — full-page polished revisions</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Inter','Sarabun',system-ui,sans-serif;background:#f3f1ec;color:#1a1a1a;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    padding:40px 20px 100px;
+  }
+  .page-wrap{max-width:1280px;margin:0 auto}
+  h1.title{margin:0 0 6px;font-family:'Fraunces',serif;font-size:26px;font-weight:600;letter-spacing:-.01em}
+  .deck{margin:0 0 28px;color:#666;font-size:14px;max-width:60ch;line-height:1.6}
+  .nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:48px}
+  .nav a{
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;text-decoration:none;color:#222;
+    background:#fff;border:1px solid #ddd;padding:7px 12px;border-radius:4px;
+  }
+  .nav a:hover{background:#222;color:#fff;border-color:#222}
+  .opt{margin-bottom:80px}
+  .opt-label{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:#999;margin:0 0 6px;font-weight:600;
+  }
+  .opt-name{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin:0 0 6px}
+  .opt-note{font-size:13px;line-height:1.65;color:#666;margin:0 0 18px;max-width:64ch}
+
+  /* ============================================================
+     OPTION 1 — STRIPE PRESS EDITORIAL
+     Quiet serif/sans hybrid. Info presented as a real intro essay,
+     data shown as a calm restrained table. One accent: deep ink.
+     ============================================================ */
+  .v1{background:#fffefa;border-radius:2px;padding:0;overflow:hidden;border:1px solid #ece8dc}
+  .v1-mast{
+    display:grid;grid-template-columns:1fr auto;gap:24px;align-items:flex-end;
+    padding:36px 44px 28px;border-bottom:1px solid #ece8dc;
+  }
+  .v1-mast .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#7a6b4a;font-weight:600}
+  .v1-mast h2{font-family:'Fraunces',serif;font-weight:700;font-size:42px;letter-spacing:-.02em;line-height:1.05;margin:6px 0 0;color:#161616}
+  .v1-mast h2 em{font-style:italic;color:#5a4220}
+  .v1-mast .lede{margin:14px 0 0;font-size:14.5px;line-height:1.7;color:#4a4337;max-width:58ch}
+  .v1-credits{text-align:right;border-left:1px solid #ece8dc;padding-left:24px}
+  .v1-credits .l{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7a6b4a;font-weight:600}
+  .v1-credits .n{font-family:'Fraunces',serif;font-size:56px;font-weight:600;line-height:.95;margin:8px 0 4px;color:#161616}
+  .v1-credits .n small{font-size:24px;color:#9a8a68;font-weight:400}
+  .v1-credits .r{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9a8a68;font-weight:500}
+
+  .v1-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:0}
+  @media (max-width:880px){.v1-grid{grid-template-columns:1fr}}
+  .v1-essay{padding:32px 44px 36px;border-right:1px solid #ece8dc;background:#fffefa}
+  .v1-essay h3{font-family:'Fraunces',serif;font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#7a6b4a;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid #ece8dc}
+  .v1-essay article{margin-bottom:22px}
+  .v1-essay article h4{font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:#161616;margin:0 0 6px;letter-spacing:-.005em}
+  .v1-essay article h4 .num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#bca675;font-weight:600;letter-spacing:.1em;display:inline-block;margin-right:8px;vertical-align:1px}
+  .v1-essay article p{margin:0;font-size:14px;line-height:1.85;color:#3a3528}
+  .v1-essay article p b{color:#161616;font-weight:600}
+  .v1-essay .pull{margin:10px 0 0;padding:10px 14px;background:#fdf6e3;border-left:2px solid #c8814a;font-size:13.5px;line-height:1.7;color:#5a4220}
+  .v1-side{padding:32px 36px;background:#f7f4ec}
+  .v1-side h3{font-family:'Fraunces',serif;font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#7a6b4a;margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid #ddd5c1}
+  .v1-best{display:flex;align-items:baseline;gap:6px;margin:0 0 10px}
+  .v1-best .v{font-family:'Fraunces',serif;font-size:64px;font-weight:600;line-height:.95;color:#161616}
+  .v1-best .of{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7a6b4a;letter-spacing:.1em}
+  .v1-best-sub{font-size:12px;color:#7a6b4a;margin:0 0 16px}
+  .v1-subscores{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#ddd5c1;border:1px solid #ddd5c1;margin-bottom:24px}
+  .v1-subscores div{background:#fffefa;padding:10px 12px}
+  .v1-subscores .lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7a6b4a}
+  .v1-subscores .val{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:#161616;margin-top:2px}
+  .v1-history{margin-top:8px}
+  .v1-history table{width:100%;border-collapse:collapse;font-size:13px}
+  .v1-history th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#7a6b4a;font-weight:600;padding:6px 6px;border-bottom:1px solid #ddd5c1}
+  .v1-history td{padding:8px 6px;border-bottom:1px solid #ece8dc;color:#3a3528}
+  .v1-history td.score{font-family:'Fraunces',serif;font-size:16px;color:#161616;font-weight:600;text-align:right}
+  .v1-archive{margin-top:22px;border-top:1px solid #ddd5c1;padding-top:18px}
+  .v1-archive .month{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #ece8dc;cursor:pointer}
+  .v1-archive .month span:first-child{font-family:'Fraunces',serif;font-size:14px;font-weight:600;color:#161616}
+  .v1-archive .month span:last-child{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7a6b4a}
+  .v1-archive .month.active{background:#fdf6e3;margin:0 -10px;padding:8px 10px}
+  .v1-archive .sets{padding:8px 0 4px}
+  .v1-archive .set{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;color:#3a3528;cursor:pointer;border-bottom:1px dashed #ece8dc}
+  .v1-archive .set:hover{color:#c8814a}
+  .v1-archive .set .go{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a6b4a}
+
+  /* ============================================================
+     OPTION 2 — JAPANESE MINIMAL / MUJI
+     Off-white background, hairline borders, single warm accent (vermillion).
+     Information is dense but spacious. Plenty of negative space.
+     ============================================================ */
+  .v2{background:#fbfaf7;padding:0;border:1px solid #e5e2d8;border-radius:0}
+  .v2-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding:30px 36px 22px;border-bottom:1px solid #e5e2d8}
+  .v2-hd .crumb{font-size:11.5px;color:#999;margin:0 0 8px;letter-spacing:.02em}
+  .v2-hd h2{margin:0;font-family:'Fraunces',serif;font-size:32px;font-weight:500;letter-spacing:-.015em;color:#1a1a1a;line-height:1.15}
+  .v2-hd .jp{margin:6px 0 0;font-size:13.5px;color:#777}
+  .v2-hd .credits{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:120px}
+  .v2-hd .credits .lbl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#999}
+  .v2-hd .credits .n{font-family:'Fraunces',serif;font-size:38px;font-weight:500;line-height:1;color:#c83c2c}
+  .v2-hd .credits .of{font-size:11.5px;color:#999}
+
+  .v2-body{display:grid;grid-template-columns:1.4fr 1fr;gap:0}
+  @media (max-width:880px){.v2-body{grid-template-columns:1fr}}
+
+  .v2-info{padding:28px 36px;border-right:1px solid #e5e2d8}
+  .v2-info .ix-hd{display:flex;align-items:center;gap:10px;margin:0 0 18px}
+  .v2-info .ix-hd .num{width:1px;height:14px;background:#c83c2c;display:inline-block}
+  .v2-info .ix-hd span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#999;font-weight:500}
+  .v2-info ol{list-style:none;padding:0;margin:0;counter-reset:v2}
+  .v2-info ol li{counter-increment:v2;padding:22px 0;border-top:1px solid #e5e2d8;display:grid;grid-template-columns:36px 1fr;gap:14px}
+  .v2-info ol li:first-child{border-top:none;padding-top:6px}
+  .v2-info ol li::before{
+    content:'0' counter(v2);
+    font-family:'Fraunces',serif;font-size:14px;font-weight:500;color:#c83c2c;padding-top:4px;
+  }
+  .v2-info ol li h4{margin:0 0 6px;font-size:14.5px;font-weight:600;color:#1a1a1a}
+  .v2-info ol li p{margin:0;font-size:13.5px;line-height:1.85;color:#444}
+  .v2-info ol li p b{color:#1a1a1a;font-weight:600}
+  .v2-info ol li p .em{color:#c83c2c;font-weight:600}
+
+  .v2-data{padding:28px 36px;background:#fbfaf7}
+  .v2-data .sec{margin-bottom:26px}
+  .v2-data .sec .ix-hd{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+  .v2-data .sec .ix-hd .num{width:1px;height:14px;background:#c83c2c}
+  .v2-data .sec .ix-hd span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#999;font-weight:500}
+  .v2-data .best{display:flex;align-items:baseline;gap:8px;margin:0 0 6px}
+  .v2-data .best .v{font-family:'Fraunces',serif;font-size:54px;font-weight:500;line-height:.95;color:#1a1a1a}
+  .v2-data .best .of{font-size:12px;color:#888}
+  .v2-data .sub-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;border-top:1px solid #e5e2d8;border-bottom:1px solid #e5e2d8;margin-top:14px}
+  .v2-data .sub-row > div{padding:10px 12px;border-right:1px solid #e5e2d8}
+  .v2-data .sub-row > div:last-child{border-right:none}
+  .v2-data .sub-row .lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#999;font-weight:500}
+  .v2-data .sub-row .val{font-family:'Fraunces',serif;font-size:20px;font-weight:500;color:#1a1a1a;margin-top:2px}
+  .v2-hist table{width:100%;border-collapse:collapse;font-size:13px}
+  .v2-hist th{text-align:left;font-weight:500;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#999;padding:8px 4px;border-bottom:1px solid #e5e2d8}
+  .v2-hist td{padding:10px 4px;border-bottom:1px solid #efece4;color:#444}
+  .v2-hist td.score{font-family:'Fraunces',serif;font-size:15px;color:#1a1a1a;font-weight:500;text-align:right}
+  .v2-arch .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #efece4;cursor:pointer}
+  .v2-arch .row:hover{color:#c83c2c}
+  .v2-arch .row .nm{font-size:13.5px;color:#1a1a1a}
+  .v2-arch .row .meta{font-size:11px;color:#888}
+
+  /* ============================================================
+     OPTION 3 — APPLE HEALTH / restrained dashboard
+     White cards, system-style. Info collapses into a "Learn"
+     sheet at top. Real data emphasis. Soft shadows, no gradients.
+     ============================================================ */
+  .v3{background:#f2f1f6;padding:24px;border-radius:18px}
+  .v3-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+  .v3-hd h2{font-family:'Inter',sans-serif;margin:0;font-size:28px;font-weight:700;letter-spacing:-.02em;color:#1a1a1a}
+  .v3-hd .sub{margin:4px 0 0;font-size:13.5px;color:#6b6b75}
+  .v3-credits{background:#fff;border-radius:14px;padding:14px 18px;text-align:right;min-width:160px;box-shadow:0 1px 0 rgba(0,0,0,.04),0 8px 24px -16px rgba(0,0,0,.12)}
+  .v3-credits .lbl{font-size:11px;color:#8a8a93;font-weight:600;letter-spacing:.02em}
+  .v3-credits .n{font-size:30px;font-weight:700;color:#1a1a1a;line-height:1.1;margin-top:2px}
+  .v3-credits .r{font-size:11px;color:#8a8a93}
+
+  .v3-learn{background:#fff;border-radius:14px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.04),0 8px 24px -16px rgba(0,0,0,.12)}
+  .v3-learn summary{cursor:pointer;list-style:none;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .v3-learn summary::-webkit-details-marker{display:none}
+  .v3-learn[open] summary{border-bottom:1px solid #ececef}
+  .v3-learn summary h3{margin:0;font-size:15.5px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:10px}
+  .v3-learn summary h3 .ic{width:30px;height:30px;border-radius:8px;background:#e9f2ff;color:#0a6cff;display:grid;place-items:center;font-size:15px;font-weight:700}
+  .v3-learn summary .hint{font-size:12.5px;color:#8a8a93}
+  .v3-learn .content{padding:18px 20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:720px){.v3-learn .content{grid-template-columns:1fr}}
+  .v3-learn .item{padding:14px 16px;background:#f7f7fa;border-radius:10px}
+  .v3-learn .item .it-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .v3-learn .item .it-ic{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-size:13px}
+  .v3-learn .item.i1 .it-ic{background:#dbeafe;color:#1d4ed8}
+  .v3-learn .item.i2 .it-ic{background:#fef3c7;color:#a16207}
+  .v3-learn .item.i3 .it-ic{background:#dcfce7;color:#15803d}
+  .v3-learn .item.i4 .it-ic{background:#f3e8ff;color:#6b21a8}
+  .v3-learn .item h4{margin:0;font-size:13.5px;font-weight:600;color:#1a1a1a}
+  .v3-learn .item p{margin:4px 0 0;font-size:13px;line-height:1.65;color:#4a4a52}
+  .v3-learn .item p b{color:#1a1a1a;font-weight:600}
+  .v3-learn .item p .warn{color:#c2410c;font-weight:600}
+
+  .v3-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
+  @media (max-width:880px){.v3-grid{grid-template-columns:1fr}}
+  .v3-card{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 1px 0 rgba(0,0,0,.04),0 8px 24px -16px rgba(0,0,0,.12)}
+  .v3-card h3{margin:0 0 14px;font-size:13.5px;font-weight:600;color:#1a1a1a;display:flex;justify-content:space-between;align-items:center}
+  .v3-card h3 .meta{font-size:11px;color:#8a8a93;font-weight:500}
+  .v3-best{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+  .v3-best .vbox{padding:10px 16px;background:linear-gradient(135deg,#e9f2ff,#f3e8ff);border-radius:12px;min-width:120px;text-align:center}
+  .v3-best .vbox .l{font-size:10.5px;color:#3a3a52;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+  .v3-best .vbox .v{font-size:42px;font-weight:700;color:#1a1a1a;line-height:1;margin-top:2px}
+  .v3-best .subs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+  .v3-best .subs > div{padding:8px;border-radius:8px;background:#f7f7fa;text-align:center}
+  .v3-best .subs .l{font-size:10px;color:#8a8a93;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+  .v3-best .subs .v{font-size:18px;color:#0a6cff;font-weight:700;margin-top:2px}
+  .v3-hist{margin-top:16px}
+  .v3-hist .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #f0f0f3;font-size:13px}
+  .v3-hist .row:first-of-type{border-top:none}
+  .v3-hist .row .when{color:#8a8a93;font-size:12px}
+  .v3-hist .row .score{font-weight:700;color:#1a1a1a;font-size:15px}
+  .v3-arch .month{font-size:11px;color:#8a8a93;letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px;font-weight:600}
+  .v3-arch .month:first-of-type{margin-top:0}
+  .v3-arch .set{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#f7f7fa;border-radius:10px;margin-bottom:6px;font-size:13.5px;color:#1a1a1a;cursor:pointer}
+  .v3-arch .set:hover{background:#eef2ff}
+  .v3-arch .set .ar{color:#8a8a93}
+
+  /* ============================================================
+     OPTION 4 — FT / NEWSPAPER EDITORIAL
+     Multi-column newspaper layout. Big serif headline.
+     Info is a "leader" piece. Data as a stock-page-like table.
+     One accent: warm coral on cream stock.
+     ============================================================ */
+  .v4{background:#fbf3e6;padding:0;border:1px solid #e0d6bd}
+  .v4-mast{padding:24px 36px 16px;border-bottom:3px double #c8b890;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+  .v4-mast .left .nameplate{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#9a8862;font-weight:600}
+  .v4-mast .left h2{font-family:'Fraunces',serif;font-weight:800;font-size:54px;line-height:1;margin:6px 0 0;color:#1a1a1a;letter-spacing:-.02em}
+  .v4-mast .left h2 em{font-style:italic;font-weight:600;color:#c8511e}
+  .v4-mast .meta{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#9a8862;line-height:1.7}
+  .v4-mast .meta b{color:#1a1a1a;font-weight:600}
+
+  .v4-row1{display:grid;grid-template-columns:2fr 1fr 1fr;gap:0;border-bottom:1px solid #d6c89e}
+  @media (max-width:920px){.v4-row1{grid-template-columns:1fr}}
+  .v4-leader{padding:24px 32px;border-right:1px solid #d6c89e}
+  .v4-leader .kicker{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c8511e;font-weight:600;margin:0 0 6px}
+  .v4-leader h3{font-family:'Fraunces',serif;font-size:24px;font-weight:700;margin:0 0 12px;line-height:1.2;letter-spacing:-.01em}
+  .v4-leader .essay{column-count:2;column-gap:24px;column-rule:1px solid #e0d6bd;font-size:13.5px;line-height:1.75;color:#2a2418}
+  @media (max-width:680px){.v4-leader .essay{column-count:1}}
+  .v4-leader .essay p{margin:0 0 12px}
+  .v4-leader .essay p:first-child::first-letter{font-family:'Fraunces',serif;font-size:46px;font-weight:700;float:left;line-height:.9;padding:4px 8px 0 0;color:#c8511e}
+  .v4-leader .essay h5{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:#1a1a1a;margin:4px 0 4px;break-after:avoid}
+  .v4-leader .essay b{color:#1a1a1a;font-weight:600}
+  .v4-leader .essay .alert{background:#fff4e3;border-left:2px solid #c8511e;padding:8px 12px;font-size:13px;margin:8px 0 12px;break-inside:avoid}
+
+  .v4-credits{padding:24px 26px;border-right:1px solid #d6c89e;background:#fbf3e6}
+  .v4-credits .lbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#9a8862;font-weight:600;margin:0 0 6px}
+  .v4-credits .n{font-family:'Fraunces',serif;font-size:64px;font-weight:600;line-height:.95;color:#1a1a1a}
+  .v4-credits .n small{font-size:24px;color:#9a8862}
+  .v4-credits .sub{font-size:11.5px;color:#7a6b4a;margin-top:6px;border-top:1px solid #d6c89e;padding-top:8px}
+
+  .v4-best{padding:24px 26px}
+  .v4-best .lbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#9a8862;font-weight:600;margin:0 0 6px}
+  .v4-best .v{font-family:'Fraunces',serif;font-size:54px;font-weight:600;line-height:.95;color:#1a1a1a}
+  .v4-best .subs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;font-size:12px}
+  .v4-best .subs div{display:flex;justify-content:space-between;border-bottom:1px dotted #c8b890;padding:3px 0}
+  .v4-best .subs div b{font-family:'Fraunces',serif;font-weight:600;color:#1a1a1a}
+  .v4-best .subs div span:first-child{color:#7a6b4a;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+
+  .v4-row2{display:grid;grid-template-columns:1.4fr 1fr;gap:0}
+  @media (max-width:880px){.v4-row2{grid-template-columns:1fr}}
+  .v4-table{padding:22px 32px;border-right:1px solid #d6c89e}
+  .v4-table h3{font-family:'Fraunces',serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#1a1a1a;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #d6c89e}
+  .v4-table table{width:100%;border-collapse:collapse;font-size:13px}
+  .v4-table th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#9a8862;font-weight:600;padding:6px 4px;border-bottom:1px solid #d6c89e}
+  .v4-table td{padding:8px 4px;border-bottom:1px solid #e8dec1;color:#2a2418}
+  .v4-table td.s{font-family:'Fraunces',serif;font-weight:600;font-size:15px;text-align:right;color:#1a1a1a}
+  .v4-table td.s.hi{color:#c8511e}
+  .v4-table td.act{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#c8511e}
+  .v4-archive{padding:22px 28px}
+  .v4-archive h3{font-family:'Fraunces',serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#1a1a1a;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #d6c89e}
+  .v4-archive .month{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#9a8862;margin:14px 0 6px;font-weight:600}
+  .v4-archive .month:first-of-type{margin-top:0}
+  .v4-archive .set{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;color:#2a2418;border-bottom:1px dotted #c8b890;cursor:pointer}
+  .v4-archive .set:hover{color:#c8511e}
+  .v4-archive .set .ar{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#9a8862}
+
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <h1 class="title">Mock Test page — 4 polished, integrated directions</h1>
+  <p class="deck">Each option below is the <b>full page</b> — hero, credits, info content, Personal Best, Attempt History, Monthly Archive — composed together in one considered design system. Pick a direction; final implementation gets pixel-tuned.</p>
+
+  <div class="nav">
+    <a href="#v1">① Stripe Press editorial</a>
+    <a href="#v2">② Japanese minimal (Muji)</a>
+    <a href="#v3">③ Apple Health restrained</a>
+    <a href="#v4">④ FT / newspaper editorial</a>
+  </div>
+
+  <!-- ============================ OPTION 1 ============================ -->
+  <div class="opt" id="v1">
+    <p class="opt-label">Option 1</p>
+    <h2 class="opt-name">Stripe Press editorial</h2>
+    <p class="opt-note">Quiet, considered, paper-stock cream background, Fraunces serif + IBM Plex Mono. The info content is the <i>main</i> body of the page — written like an editor's note — and the dashboard data lives in a calm right-rail. Reads like a well-laid-out book chapter, not an app screen.</p>
+
+    <section class="v1">
+      <header class="v1-mast">
+        <div>
+          <p class="eyebrow">Mock Test · Practice Center</p>
+          <h2>Practice with intention.<br>Don't sprint. <em>Diagnose.</em></h2>
+          <p class="lede">A short note on how this page works — what's behind the sets, how scoring adapts, and why this is practice, not the real exam. Worth two minutes before you start.</p>
+        </div>
+        <div class="v1-credits">
+          <p class="l">Mock Credits</p>
+          <p class="n">5<small> / 6</small></p>
+          <p class="r">Renews · Feb 1, 2026</p>
+        </div>
+      </header>
+
+      <div class="v1-grid">
+        <div class="v1-essay">
+          <h3>How this page works</h3>
+
+          <article>
+            <h4><span class="num">01</span>เกี่ยวกับชุดข้อสอบ</h4>
+            <p>ข้อสอบ Mock Test จะมีการอัปโหลดชุดใหม่<b>ทุกเดือน</b> เริ่มตั้งแต่มกราคม 2026 ซึ่งข้อสอบแต่ละชุดนำมาจากข้อสอบ Duolingo English Test จริงที่ใช้สอบในช่วงเดือนนั้น ๆ ในแต่ละเดือนจะมีให้เลือกทำทั้งหมด <b>6 ชุด</b> ตรงกับโควต้าที่ได้รับ จะเลือกเริ่มจากชุดที่ 1, 3 หรือ 5 ก็ได้ตามสะดวก ไม่มีลำดับบังคับ</p>
+          </article>
+
+          <article>
+            <h4><span class="num">02</span>สิ่งที่ต้องรู้ก่อนเริ่ม</h4>
+            <p>ข้อสอบแต่ละชุดใช้เวลาประมาณ <b>1 ชั่วโมง – 1 ชั่วโมง 15 นาที</b> ดังนั้นควรจัดสรรเวลาให้พร้อมก่อนเริ่ม</p>
+            <div class="pull">หากทำค้างไว้กลางคันแล้วออกจากระบบ <b>ระบบจะนับว่าใช้โควต้าชุดนั้นไปแล้ว</b></div>
+            <p style="margin-top:10px">ตัวเลขของแต่ละชุด เช่น 1, 2, 3 <b>ไม่ได้บ่งบอกถึงระดับความยาก</b> ทุกชุดยากเท่ากัน เพราะเป็นแบบ Adaptive — ระบบจะปรับยากขึ้นตามที่เราตอบถูก เจอข้อตอบไม่ได้ไม่ต้องตกใจ นั่นคือเป้าหมายของระบบในการหาขีดจำกัดของเรา</p>
+          </article>
+
+          <article>
+            <h4><span class="num">03</span>นี่คือการฝึก ไม่ใช่สอบจริง</h4>
+            <p>ระหว่างทำ Mock Test ไม่ต้องกังวลเรื่องการตั้งกล้อง เปิดอินเทอร์เน็ตค้นข้อมูลได้ ไม่มีการตรวจจับหรือบันทึก แต่ในการสอบจริง สิ่งเหล่านี้สำคัญมาก โดยเฉพาะการตั้งกล้องและสภาพแวดล้อมที่ Duolingo กำหนดไว้อย่างเข้มงวด ควรศึกษากฎของ Duolingo ก่อนสอบจริง</p>
+          </article>
+
+          <article>
+            <h4><span class="num">04</span>Feedback &amp; แจ้งปัญหา</h4>
+            <p>หลังจากทำแต่ละชุดเสร็จ จะได้รับ <b>Feedback แบบเฉพาะบุคคล</b> บันทึกเก็บไว้เพื่อติดตามพัฒนาการของตัวเองได้ — หากพบปัญหาระหว่างทำ แจ้งที่ <b>languageplan.consulting@gmail.com</b></p>
+          </article>
+        </div>
+
+        <aside class="v1-side">
+          <h3>Personal Best</h3>
+          <div class="v1-best"><span class="v">115</span><span class="of">/ 160</span></div>
+          <p class="v1-best-sub">From Mock Set 02 · Dec 28, 2025</p>
+          <div class="v1-subscores">
+            <div><div class="lbl">Literacy</div><div class="val">120</div></div>
+            <div><div class="lbl">Comprehension</div><div class="val">110</div></div>
+            <div><div class="lbl">Production</div><div class="val">115</div></div>
+            <div><div class="lbl">Conversation</div><div class="val">115</div></div>
+          </div>
+
+          <h3>Recent attempts</h3>
+          <div class="v1-history">
+            <table>
+              <thead><tr><th>Date</th><th>Set</th><th style="text-align:right">Score</th></tr></thead>
+              <tbody>
+                <tr><td>Dec 28</td><td>Mock 02</td><td class="score">115</td></tr>
+                <tr><td>Dec 24</td><td>Mock 01</td><td class="score">108</td></tr>
+                <tr><td>Dec 19</td><td>Trial 03</td><td class="score">102</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="v1-archive">
+            <h3 style="margin-top:0;padding-top:0;border:none">Monthly archive</h3>
+            <div class="month active"><span>January 2026</span><span>6 sets</span></div>
+            <div class="sets">
+              <div class="set"><span>Mock Set 01</span><span class="go">Start →</span></div>
+              <div class="set"><span>Mock Set 02</span><span class="go">Start →</span></div>
+              <div class="set"><span>Mock Set 03</span><span class="go">Start →</span></div>
+            </div>
+            <div class="month"><span>December 2025</span><span>6 sets</span></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================ OPTION 2 ============================ -->
+  <div class="opt" id="v2">
+    <p class="opt-label">Option 2</p>
+    <h2 class="opt-name">Japanese minimal (Muji-ish)</h2>
+    <p class="opt-note">Monochrome with one warm vermillion accent. Hairline borders, very generous whitespace, no shadows, no rounded card-soup. The info appears as a numbered "table of contents" on the left, data on the right. Calm and deliberate — looks designed, not generated.</p>
+
+    <section class="v2">
+      <header class="v2-hd">
+        <div>
+          <p class="crumb">← Practice / Mock Center</p>
+          <h2>Mock Test Center</h2>
+          <p class="jp">ศูนย์จำลองการสอบ — 20 ขั้นตอน · 1h 0m – 1h 15m</p>
+        </div>
+        <div class="credits">
+          <span class="lbl">Credits</span>
+          <span class="n">5</span>
+          <span class="of">of 6 · resets Feb 1</span>
+        </div>
+      </header>
+
+      <div class="v2-body">
+        <div class="v2-info">
+          <div class="ix-hd"><span class="num"></span><span>วิธีใช้ Mock Test</span></div>
+          <ol>
+            <li>
+              <div>
+                <h4>เกี่ยวกับชุดข้อสอบ</h4>
+                <p>อัปโหลดชุดใหม่<b>ทุกเดือน</b>ตั้งแต่ ม.ค. 2026 จากข้อสอบ DET จริงในเดือนนั้น ๆ เดือนละ <b>6 ชุด</b>ตรงกับโควต้า เลือกเริ่มจากชุดไหนก็ได้ ไม่มีลำดับบังคับ</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h4>ก่อนเริ่มทำ</h4>
+                <p>ใช้เวลา <b>1 ชม. – 1 ชม. 15 นาที</b> ต่อชุด ควรจัดเวลาให้พร้อม <span class="em">ถ้าออกระบบกลางคัน นับว่าใช้โควต้าแล้ว</span></p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h4>ทุกชุดยากเท่ากัน (Adaptive)</h4>
+                <p>ตัวเลขชุดไม่ใช่ระดับความยาก ระบบปรับยากขึ้นตามที่เราตอบถูก เจอข้อตอบไม่ได้ <b>ไม่ต้องตกใจ</b> — นั่นคือระบบกำลังหาขีดจำกัดของเรา</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h4>นี่คือการฝึก ไม่ใช่สอบจริง</h4>
+                <p>ไม่ต้องตั้งกล้อง เปิดอินเทอร์เน็ตค้นได้ ไม่มีการตรวจจับ — แต่<b>สอบจริง</b> Duolingo เข้มมากเรื่องกล้องและสภาพแวดล้อม ควรอ่านกฎก่อนสอบจริง</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h4>Feedback &amp; แจ้งปัญหา</h4>
+                <p>หลังจบได้ Feedback เฉพาะบุคคล บันทึกเก็บได้ติดตามพัฒนาการ — ปัญหาแจ้งที่ <b>languageplan.consulting@gmail.com</b></p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="v2-data">
+          <div class="sec">
+            <div class="ix-hd"><span class="num"></span><span>Personal Best</span></div>
+            <div class="best"><span class="v">115</span><span class="of">/ 160 · Mock 02 · Dec 28</span></div>
+            <div class="sub-row">
+              <div><div class="lbl">Lit</div><div class="val">120</div></div>
+              <div><div class="lbl">Comp</div><div class="val">110</div></div>
+              <div><div class="lbl">Prod</div><div class="val">115</div></div>
+              <div><div class="lbl">Conv</div><div class="val">115</div></div>
+            </div>
+          </div>
+
+          <div class="sec v2-hist">
+            <div class="ix-hd"><span class="num"></span><span>Recent attempts</span></div>
+            <table>
+              <thead><tr><th>Date</th><th>Set</th><th style="text-align:right">Score</th></tr></thead>
+              <tbody>
+                <tr><td>Dec 28</td><td>Mock 02</td><td class="score">115</td></tr>
+                <tr><td>Dec 24</td><td>Mock 01</td><td class="score">108</td></tr>
+                <tr><td>Dec 19</td><td>Trial 03</td><td class="score">102</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sec v2-arch">
+            <div class="ix-hd"><span class="num"></span><span>Sets · January 2026</span></div>
+            <div class="row"><span class="nm">Mock Set 01</span><span class="meta">→</span></div>
+            <div class="row"><span class="nm">Mock Set 02</span><span class="meta">→</span></div>
+            <div class="row"><span class="nm">Mock Set 03</span><span class="meta">→</span></div>
+            <div class="row"><span class="nm">Mock Set 04</span><span class="meta">→</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================ OPTION 3 ============================ -->
+  <div class="opt" id="v3">
+    <p class="opt-label">Option 3</p>
+    <h2 class="opt-name">Apple Health — restrained dashboard</h2>
+    <p class="opt-note">Real product surface, not editorial. Soft platform-grey background, white cards with subtle shadows, Inter type. The info is a <b>collapsible "Learn"</b> card at the top — returning users dismiss it once, new users see it expanded by default. Feels like a real app screen.</p>
+
+    <section class="v3">
+      <header class="v3-hd">
+        <div>
+          <h2>Mock Test</h2>
+          <p class="sub">20-step simulation · ~1h 0m – 1h 15m per set</p>
+        </div>
+        <div class="v3-credits">
+          <div class="lbl">Mock Credits</div>
+          <div class="n">5 / 6</div>
+          <div class="r">Renews Feb 1</div>
+        </div>
+      </header>
+
+      <details class="v3-learn" open>
+        <summary>
+          <h3><span class="ic">i</span> How Mock Tests work</h3>
+          <span class="hint">Tap to collapse · จะแสดงครั้งแรก</span>
+        </summary>
+        <div class="content">
+          <div class="item i1">
+            <div class="it-hd"><div class="it-ic">📚</div></div>
+            <h4>เกี่ยวกับชุดข้อสอบ</h4>
+            <p>อัปโหลดชุดใหม่ทุกเดือนตั้งแต่ ม.ค. 2026 จากข้อสอบ DET จริงในเดือนนั้น ๆ — <b>เดือนละ 6 ชุด</b>ตรงกับโควต้า เลือกเริ่มจากชุดไหนก็ได้</p>
+          </div>
+          <div class="item i2">
+            <div class="it-hd"><div class="it-ic">⏱</div></div>
+            <h4>ก่อนเริ่มทำ</h4>
+            <p><b>1 ชั่วโมง – 1 ชั่วโมง 15 นาที</b> ต่อชุด · <span class="warn">ออกระบบกลางคัน = ใช้โควต้าแล้ว</span> · ตัวเลขชุดไม่ใช่ระดับความยาก ทุกชุด Adaptive เหมือนกัน</p>
+          </div>
+          <div class="item i3">
+            <div class="it-hd"><div class="it-ic">🌱</div></div>
+            <h4>นี่คือการฝึก ไม่ใช่สอบจริง</h4>
+            <p>ไม่ต้องตั้งกล้อง เปิดเน็ตค้นได้ ไม่มีบันทึก — แต่ในสอบจริง Duolingo เข้มมาก ควรอ่านกฎก่อนสอบจริง</p>
+          </div>
+          <div class="item i4">
+            <div class="it-hd"><div class="it-ic">💬</div></div>
+            <h4>Feedback &amp; ปัญหา</h4>
+            <p>ได้ Feedback เฉพาะบุคคลหลังจบแต่ละชุด บันทึกเก็บได้ติดตามพัฒนาการ — ปัญหาแจ้งที่ <b>languageplan.consulting@gmail.com</b></p>
+          </div>
+        </div>
+      </details>
+
+      <div class="v3-grid">
+        <div class="v3-card">
+          <h3>Personal Best <span class="meta">Updated Dec 28</span></h3>
+          <div class="v3-best">
+            <div class="vbox"><div class="l">High Score</div><div class="v">115</div></div>
+            <div class="subs">
+              <div><div class="l">Lit</div><div class="v">120</div></div>
+              <div><div class="l">Comp</div><div class="v">110</div></div>
+              <div><div class="l">Prod</div><div class="v">115</div></div>
+              <div><div class="l">Conv</div><div class="v">115</div></div>
+            </div>
+          </div>
+          <h3 style="margin-top:22px">Recent attempts <span class="meta">3 / 50</span></h3>
+          <div class="v3-hist">
+            <div class="row"><div><b>Mock Set 02</b><br><span class="when">Dec 28, 2025</span></div><div class="score">115</div></div>
+            <div class="row"><div><b>Mock Set 01</b><br><span class="when">Dec 24, 2025</span></div><div class="score">108</div></div>
+            <div class="row"><div><b>Trial Set 03</b><br><span class="when">Dec 19, 2025</span></div><div class="score">102</div></div>
+          </div>
+        </div>
+        <div class="v3-card v3-arch">
+          <h3>Sets <span class="meta">Pick to start</span></h3>
+          <div class="month">January 2026</div>
+          <div class="set"><span>Mock Set 01</span><span class="ar">→</span></div>
+          <div class="set"><span>Mock Set 02</span><span class="ar">→</span></div>
+          <div class="set"><span>Mock Set 03</span><span class="ar">→</span></div>
+          <div class="month">December 2025</div>
+          <div class="set"><span>Mock Set 01</span><span class="ar">→</span></div>
+          <div class="set"><span>Mock Set 02</span><span class="ar">→</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================ OPTION 4 ============================ -->
+  <div class="opt" id="v4">
+    <p class="opt-label">Option 4</p>
+    <h2 class="opt-name">FT / newspaper editorial</h2>
+    <p class="opt-note">Cream stock, double-rule masthead, multi-column "leader" article for the info content, dashboard data presented as stock-page tables. Confident, premium, looks like a Financial Times feature — definitely doesn't look AI-generated.</p>
+
+    <section class="v4">
+      <header class="v4-mast">
+        <div class="left">
+          <div class="nameplate">English Plan · The Mock Test Quarterly · Vol. III</div>
+          <h2>Mock Test <em>Center</em></h2>
+        </div>
+        <div class="meta">
+          Mock Credits<br>
+          <b>5 / 6</b> remaining<br>
+          Renews <b>Feb 1</b>
+        </div>
+      </header>
+
+      <div class="v4-row1">
+        <article class="v4-leader">
+          <p class="kicker">A note from English Plan · Read before you begin</p>
+          <h3>วิธีใช้ Mock Test และสิ่งที่ควรรู้ก่อนเริ่มทำ</h3>
+          <div class="essay">
+            <p>ข้อสอบ Mock Test จะมีการอัปโหลดชุดใหม่<b>ทุกเดือน</b> เริ่มตั้งแต่มกราคม 2026 ซึ่งข้อสอบแต่ละชุดนำมาจากข้อสอบ Duolingo English Test จริงที่ใช้สอบในเดือนนั้น ๆ ในแต่ละเดือนจะมีให้เลือกทำ <b>6 ชุด</b> ตรงกับโควต้าที่ได้รับ จะเลือกเริ่มจากชุดที่ 1, 3 หรือ 5 ก็ได้ ไม่มีลำดับบังคับ</p>
+
+            <h5>ก่อนเริ่มทำ</h5>
+            <p>ข้อสอบแต่ละชุดใช้เวลาประมาณ <b>1 ชั่วโมง – 1 ชั่วโมง 15 นาที</b> ควรจัดสรรเวลาให้พร้อมก่อนเริ่ม</p>
+            <div class="alert">หากทำค้างไว้กลางคันแล้วออกจากระบบ <b>ระบบจะนับว่าใช้โควต้าชุดนั้นไปแล้ว</b></div>
+            <p>ตัวเลขของแต่ละชุดไม่ได้บ่งบอกระดับความยาก ทุกชุดยากเท่ากันเพราะเป็นแบบ Adaptive — ระบบจะปรับยากขึ้นตามที่เราตอบถูก เจอข้อตอบไม่ได้ไม่ต้องตกใจ นั่นคือเป้าหมายของระบบในการหาขีดจำกัดของเรา</p>
+
+            <h5>ฝึก ไม่ใช่สอบจริง</h5>
+            <p>ระหว่าง Mock Test ไม่ต้องกังวลเรื่องการตั้งกล้อง เปิดอินเทอร์เน็ตค้นได้ ไม่มีการตรวจจับหรือบันทึก แต่ใน<b>สอบจริง</b> Duolingo เข้มงวดมากเรื่องกล้องและสภาพแวดล้อม ควรอ่านกฎของ Duolingo ก่อนสอบจริง</p>
+
+            <h5>Feedback</h5>
+            <p>หลังจบแต่ละชุดได้ Feedback แบบเฉพาะบุคคล บันทึกเก็บได้ติดตามพัฒนาการ — ปัญหาแจ้งที่ <b>languageplan.consulting@gmail.com</b></p>
+          </div>
+        </article>
+
+        <div class="v4-credits">
+          <p class="lbl">Mock Credits Today</p>
+          <p class="n">5<small>/6</small></p>
+          <p class="sub">เลือกเริ่มจากชุดไหนก็ได้ ไม่มีลำดับบังคับ</p>
+        </div>
+
+        <div class="v4-best">
+          <p class="lbl">Personal Best</p>
+          <p class="v">115</p>
+          <div class="subs">
+            <div><span>Lit</span><b>120</b></div>
+            <div><span>Comp</span><b>110</b></div>
+            <div><span>Prod</span><b>115</b></div>
+            <div><span>Conv</span><b>115</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="v4-row2">
+        <div class="v4-table">
+          <h3>Recent Attempts · Last 5</h3>
+          <table>
+            <thead><tr><th>Date</th><th>Set</th><th style="text-align:right">Score</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Dec 28, 2025</td><td>Mock Set 02 (Dec)</td><td class="s hi">115</td><td class="act">View Report ↗</td></tr>
+              <tr><td>Dec 24, 2025</td><td>Mock Set 01 (Dec)</td><td class="s">108</td><td class="act">View Report ↗</td></tr>
+              <tr><td>Dec 19, 2025</td><td>Trial Set 03</td><td class="s">102</td><td class="act">View Report ↗</td></tr>
+              <tr><td>Dec 14, 2025</td><td>Trial Set 02</td><td class="s">98</td><td class="act">View Report ↗</td></tr>
+              <tr><td>Dec 10, 2025</td><td>Trial Set 01</td><td class="s">94</td><td class="act">View Report ↗</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="v4-archive">
+          <h3>Monthly Archive</h3>
+          <div class="month">January 2026 · current</div>
+          <div class="set"><span>Mock Set 01</span><span class="ar">START →</span></div>
+          <div class="set"><span>Mock Set 02</span><span class="ar">START →</span></div>
+          <div class="set"><span>Mock Set 03</span><span class="ar">START →</span></div>
+          <div class="month">December 2025</div>
+          <div class="set"><span>Mock Set 01</span><span class="ar">REVIEW →</span></div>
+          <div class="set"><span>Mock Set 02</span><span class="ar">REVIEW →</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</div>
+</body>
+</html>

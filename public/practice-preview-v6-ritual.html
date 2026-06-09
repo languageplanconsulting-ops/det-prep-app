@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Practice V6 — คุณครูประจำตัว · the daily ritual</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Sarabun:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1410;
+    --ink-soft:#5a5046;
+    --blue:#1c4ed8;
+    --blue-soft:#e8eeff;
+    --yellow:#ffcc00;
+    --yellow-soft:#fff4cc;
+    --cream:#fffaf0;
+    --cream-2:#fdf6e8;
+    --green:#16a34a;
+    --green-soft:#e6f7ec;
+    --warm:#fef3e8;
+    --line:#e8ddc4;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Sarabun',system-ui,sans-serif;background:#efe9d8;color:var(--ink);
+    padding:20px 14px 80px;-webkit-font-smoothing:antialiased;line-height:1.5;
+  }
+
+  /* preview meta */
+  .pmeta{max-width:1100px;margin:0 auto 18px}
+  .pmeta .tag{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--blue);margin:0 0 6px}
+  .pmeta h1{margin:0 0 6px;font-size:20px;font-weight:900;letter-spacing:-.005em}
+  .pmeta p{margin:0;font-size:13px;color:#3a352c;line-height:1.65;max-width:80ch}
+  .pmeta b{color:#000}
+
+  /* viewport switch */
+  .switch{max-width:1100px;margin:0 auto 18px;display:flex;gap:8px;align-items:center}
+  .switch span{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#666}
+  .switch button{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid #000;background:#fff;padding:6px 12px;cursor:pointer;border-radius:6px}
+  .switch button.on{background:var(--yellow)}
+
+  .page{max-width:1100px;margin:0 auto;background:var(--cream);border-radius:24px;padding:0;overflow:hidden;border:1.5px solid var(--line);box-shadow:0 24px 60px -20px rgba(60,40,0,.18)}
+  .page.mobile{max-width:430px}
+
+  /* ====== GREETING BAR — identical every visit (mere-exposure → safety) ====== */
+  .greet{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:var(--cream);border-bottom:1px solid var(--line)}
+  .greet .who{display:flex;align-items:center;gap:12px}
+  .greet .av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),#ffa500);display:grid;place-items:center;font-weight:900;font-size:17px;color:#3a2e15;border:1.5px solid rgba(0,0,0,.1)}
+  .greet .who p{margin:0}
+  .greet .hi{font-size:15px;font-weight:800;letter-spacing:-.005em}
+  .greet .meta{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:1px;display:flex;align-items:center;gap:6px}
+  .greet .meta .streak{display:inline-flex;align-items:center;gap:3px;background:var(--warm);padding:1px 7px;border-radius:99px;font-family:var(--mono);font-weight:800;font-size:11px;color:#a85b00;border:1px solid #f3d6a8}
+  .greet .right{display:flex;align-items:center;gap:8px}
+  .greet .right .ico{width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid var(--line);display:grid;place-items:center;font-size:14px;cursor:pointer}
+
+  /* ====== TODAY CARD — the entire above-fold experience ====== */
+  .today-wrap{padding:24px 22px 18px;background:linear-gradient(180deg,var(--cream),var(--cream-2));position:relative}
+
+  /* contextual whisper (gives the why before the what) */
+  .whisper{font-size:13px;color:var(--ink-soft);margin:0 0 12px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .whisper b{color:var(--blue);font-weight:800}
+
+  /* THE card — the only loud element on the page */
+  .today{background:#fff;border:3px solid #000;border-radius:18px;padding:24px;box-shadow:0 8px 0 0 #000,0 16px 32px -8px rgba(0,0,0,.12);position:relative;overflow:hidden}
+  .today:before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,var(--yellow),#ffa500,var(--yellow))}
+
+  .today .label{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin:0 0 10px}
+  .today h1{margin:0 0 12px;font-size:28px;font-weight:900;letter-spacing:-.01em;line-height:1.2}
+  .today h1 em{font-style:normal;background:var(--yellow);padding:0 6px;display:inline-block;transform:rotate(-.5deg)}
+
+  .reason{display:flex;gap:10px;background:var(--green-soft);border:1px solid #b8e6c8;border-radius:12px;padding:12px 14px;margin:0 0 18px}
+  .reason .ic{font-size:18px;line-height:1}
+  .reason .t{font-size:13px;color:#1f5a32;line-height:1.55;font-weight:600;margin:0;flex:1}
+  .reason .t b{color:#0e3d1d;font-weight:800}
+
+  /* meta strip — pre-decided, no choices */
+  .meta-strip{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--cream-2);border:1.5px solid var(--line);border-radius:99px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--ink)}
+  .chip .ic{font-size:14px}
+  .chip.mono{font-family:var(--mono);font-weight:800;letter-spacing:.02em}
+
+  /* the ONE button — bottom-of-card, thumb zone on mobile */
+  .start{display:flex;justify-content:space-between;align-items:center;background:#000;color:#fff;padding:18px 22px;border-radius:14px;font-weight:900;font-size:17px;text-decoration:none;border:2px solid #000;box-shadow:0 6px 0 0 var(--yellow);transition:transform .12s,box-shadow .12s}
+  .start:hover{transform:translateY(2px);box-shadow:0 4px 0 0 var(--yellow)}
+  .start .arr{font-size:22px;font-weight:900}
+  .start small{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;color:#ccc;margin-top:2px}
+
+  /* escape valve — control = safety (trauma-informed) */
+  .escape{display:flex;justify-content:center;gap:14px;margin-top:14px;font-size:12px;color:var(--ink-soft);font-weight:600}
+  .escape a{color:var(--ink-soft);text-decoration:none;border-bottom:1px dashed #c4b89e;padding-bottom:1px}
+  .escape a:hover{color:var(--blue);border-bottom-color:var(--blue)}
+
+  /* ====== GOAL GRADIENT — distance shrinking ====== */
+  .gradient{margin:24px 22px 0;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:18px}
+  .gradient .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .gradient .lbl{font-size:12.5px;font-weight:800;color:var(--ink)}
+  .gradient .gain{font-family:var(--mono);font-size:11.5px;font-weight:800;color:var(--green);background:var(--green-soft);padding:3px 9px;border-radius:99px;border:1px solid #b8e6c8}
+  .gradient .road{position:relative;margin:4px 0 6px}
+  .gradient .track{height:14px;background:var(--cream-2);border:1.5px solid var(--line);border-radius:99px;overflow:hidden;position:relative}
+  .gradient .fill{height:100%;background:linear-gradient(90deg,var(--blue),#5a8cff);width:64%;border-right:2px solid #000;border-radius:99px}
+  .gradient .me{position:absolute;left:64%;top:-22px;transform:translateX(-50%);font-size:18px;text-align:center}
+  .gradient .me .pin{display:block;font-family:var(--mono);font-size:10px;font-weight:900;background:#000;color:#fff;padding:2px 6px;border-radius:99px;margin-top:-3px;white-space:nowrap}
+  .gradient .marks{display:flex;justify-content:space-between;margin-top:10px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-soft)}
+  .gradient .marks b{display:block;color:var(--ink);font-size:13px;margin-bottom:1px}
+  .gradient .marks .start b{color:#bbb;text-decoration:line-through;font-size:11px}
+  .gradient .marks .now b{color:var(--blue);font-size:16px}
+  .gradient .marks .goal b{color:var(--yellow);background:#000;padding:1px 6px;border-radius:4px;font-size:13px}
+  .gradient .closer{margin:12px 0 0;font-size:13px;color:#1f5a32;font-weight:700;text-align:center;background:var(--green-soft);padding:8px;border-radius:8px;border:1px solid #b8e6c8}
+
+  /* ====== RECENT WINS — peak-end memory shelf ====== */
+  .wins{padding:24px 22px 12px}
+  .wins .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+  .wins .head h3{margin:0;font-size:14px;font-weight:900;display:flex;align-items:center;gap:8px}
+  .wins .head .all{font-size:11.5px;font-weight:700;color:var(--blue);text-decoration:none;border-bottom:1px dashed var(--blue)}
+  .winlist{display:grid;grid-template-columns:1fr;gap:8px}
+  @media(min-width:720px){.winlist{grid-template-columns:repeat(3,1fr)}}
+  .win{display:flex;gap:10px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px}
+  .win .ic{flex:0 0 36px;height:36px;border-radius:50%;background:var(--green-soft);border:1.5px solid #b8e6c8;display:grid;place-items:center;font-size:16px}
+  .win .b{flex:1;min-width:0}
+  .win .t{margin:0 0 1px;font-size:13px;font-weight:800;line-height:1.3}
+  .win .d{margin:0;font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.02em}
+
+  /* ====== SOFT LINKS — opt-in to everything else ====== */
+  .soft-row{padding:18px 22px 24px;display:grid;grid-template-columns:1fr;gap:8px}
+  @media(min-width:560px){.soft-row{grid-template-columns:repeat(3,1fr)}}
+  .soft{display:flex;align-items:center;gap:12px;background:transparent;border:1.5px dashed #c4b89e;border-radius:12px;padding:12px 14px;text-decoration:none;color:var(--ink-soft);font-size:13px;font-weight:700;cursor:pointer}
+  .soft:hover{background:#fff;color:var(--ink);border-style:solid}
+  .soft .ic{font-size:18px}
+  .soft .lbl{flex:1}
+  .soft .ct{font-family:var(--mono);font-size:10.5px;font-weight:800;color:#999;background:#fff;padding:2px 7px;border-radius:99px;border:1px solid var(--line)}
+
+  /* ====== expanded "เลือกฝึกเอง" drawer (collapsed by default; shown open for preview) ====== */
+  .drawer{background:#fff;border-top:2px solid var(--line);padding:22px}
+  .drawer .label{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 4px}
+  .drawer h3{margin:0 0 4px;font-size:18px;font-weight:900}
+  .drawer .lede{font-size:12.5px;color:var(--ink-soft);font-weight:600;margin:0 0 16px}
+  .hubs{display:grid;gap:12px;grid-template-columns:1fr}
+  @media(min-width:720px){.hubs{grid-template-columns:repeat(3,1fr)}}
+  .hub{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px;transition:border-color .12s}
+  .hub:hover{border-color:#000}
+  .hub h4{margin:0 0 2px;font-size:14px;font-weight:900}
+  .hub .sub{margin:0 0 10px;font-size:11px;font-weight:600;color:var(--ink-soft);font-family:var(--mono);letter-spacing:.04em;text-transform:uppercase}
+  .hub ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px}
+  .hub li a{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;text-decoration:none;font-size:12.5px;font-weight:700;color:var(--ink);background:transparent}
+  .hub li a:hover{background:var(--cream-2)}
+  .hub li .prog{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.02em}
+  .hub li.lock a{color:#999;cursor:not-allowed}
+  .hub li.lock .prog{color:var(--blue);background:var(--blue-soft);padding:1px 6px;border-radius:99px;font-size:9.5px;border:1px solid #c8d4f4}
+
+  /* ====== bottom annotation panel ====== */
+  .anno{max-width:1100px;margin:24px auto 0;background:#fff;border:1.5px dashed #000;padding:14px 16px;border-radius:12px}
+  .anno h4{margin:0 0 8px;font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+  .anno ul{margin:0;padding-left:18px;font-size:11.5px;color:#444;line-height:1.7;font-family:var(--mono);font-weight:600}
+  .anno ul li b{color:#000}
+</style>
+</head>
+<body>
+
+<div class="pmeta">
+  <p class="tag">Practice V6 · คุณครูประจำตัว (the daily ritual)</p>
+  <h1>One screen. One decision. Every day the same shape.</h1>
+  <p>Reframes /practice from "supermarket of 13 skills + 7 dashboards" → "warm tutor who tells you what to do today and walks with you". Keeps every existing piece (free alert, plan card, 13 skills, charts, mock test, locks) — but moved out of the way until opted-in.</p>
+</div>
+
+<div class="switch">
+  <span>Viewport:</span>
+  <button class="on" onclick="document.querySelector('.page').classList.remove('mobile');this.classList.add('on');this.nextElementSibling.classList.remove('on')">Desktop</button><button onclick="document.querySelector('.page').classList.add('mobile');this.classList.add('on');this.previousElementSibling.classList.remove('on')">Mobile</button>
+</div>
+
+<div class="page">
+
+  <!-- ===== Greeting bar (identical every visit) ===== -->
+  <div class="greet">
+    <div class="who">
+      <div class="av">น</div>
+      <div>
+        <p class="hi">สวัสดีน้องเนย ☀</p>
+        <p class="meta">วันที่ 9 ของการกลับมา · <span class="streak">🔥 3 วันติดต่อ</span></p>
+      </div>
+    </div>
+    <div class="right">
+      <div class="ico" title="ตั้งค่า">⚙</div>
+      <div class="ico" title="ออก">✕</div>
+    </div>
+  </div>
+
+  <!-- ===== THE TODAY CARD ===== -->
+  <div class="today-wrap">
+    <p class="whisper">💭 <span><b>คุณครู</b> มีอะไรให้ทำ 15 นาทีของวันนี้</span></p>
+
+    <div class="today">
+      <p class="label">บทเรียนวันนี้</p>
+      <h1>วันนี้เราจะฝึก<br><em>เติมคำในประโยค</em></h1>
+
+      <div class="reason">
+        <span class="ic">💡</span>
+        <p class="t">เมื่อวานน้องตอบถูก <b>4 จาก 10 ข้อ</b> · วันนี้เราจะค่อย ๆ ทำให้ถึง 6 จาก 10 — ไม่ต้องรีบ ไม่มีผิดถูก</p>
+      </div>
+
+      <div class="meta-strip">
+        <span class="chip"><span class="ic">⏱</span> <span class="mono">15 นาที</span></span>
+        <span class="chip"><span class="ic">📊</span> ระดับ <b>กลาง</b></span>
+        <span class="chip"><span class="ic">🎯</span> ทักษะ Literacy</span>
+        <span class="chip"><span class="ic">📈</span> +5 คะแนนคาดการณ์</span>
+      </div>
+
+      <a href="#" class="start">
+        <span>เริ่มเลย<small>คุณทำได้แน่นอน · ครูอยู่ด้วยตลอด</small></span>
+        <span class="arr">→</span>
+      </a>
+
+      <div class="escape">
+        <a href="#">วันนี้พอแค่นี้</a>
+        <a href="#">ขอเปลี่ยนเป็นทักษะอื่น</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GOAL GRADIENT — shrinking distance ===== -->
+  <div class="gradient">
+    <div class="top">
+      <span class="lbl">เส้นทางสู่เป้าหมายของน้อง</span>
+      <span class="gain">↑ +12 คะแนนใน 9 วัน</span>
+    </div>
+    <div class="road">
+      <div class="track"><div class="fill"></div></div>
+      <div class="me">🚶<span class="pin">วันนี้ 102</span></div>
+    </div>
+    <div class="marks">
+      <span class="start"><b>60</b>เริ่มต้น</span>
+      <span><b>80</b></span>
+      <span class="now"><b>102</b>ตอนนี้</span>
+      <span class="goal"><b>115</b>เป้าหมาย</span>
+    </div>
+    <p class="closer">เหลืออีกแค่ <b>13 คะแนน</b> · ถ้าฝึกวันละ 15 นาที จะถึงในประมาณ 10 วัน</p>
+  </div>
+
+  <!-- ===== RECENT WINS (peak-end shelf) ===== -->
+  <div class="wins">
+    <div class="head">
+      <h3>🌟 สิ่งที่น้องทำได้แล้ว</h3>
+      <a class="all" href="#">ดูทั้งหมด</a>
+    </div>
+    <div class="winlist">
+      <div class="win">
+        <div class="ic">🎯</div>
+        <div class="b"><p class="t">Dictation 8/10</p><p class="d">เมื่อวาน · +3 คะแนน</p></div>
+      </div>
+      <div class="win">
+        <div class="ic">🔥</div>
+        <div class="b"><p class="t">ฝึก 3 วันติดต่อ</p><p class="d">วันนี้ · เก่งมาก</p></div>
+      </div>
+      <div class="win">
+        <div class="ic">✨</div>
+        <div class="b"><p class="t">Vocabulary ผ่าน</p><p class="d">2 วันก่อน · +4 คะแนน</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SOFT OPT-IN LINKS to everything else ===== -->
+  <div class="soft-row">
+    <a href="#" class="soft"><span class="ic">📚</span><span class="lbl">เลือกฝึกเอง</span><span class="ct">13</span></a>
+    <a href="#" class="soft"><span class="ic">📊</span><span class="lbl">ดูสถิติของน้อง</span><span class="ct">7d</span></a>
+    <a href="#" class="soft"><span class="ic">⚡</span><span class="lbl">ลอง Mock Test</span><span class="ct">VIP</span></a>
+  </div>
+
+  <!-- ===== DRAWER (collapsed by default; shown for preview) — all existing skills accessible ===== -->
+  <div class="drawer">
+    <p class="label">↑ เปิดอยู่ · ปิดได้</p>
+    <h3>ทักษะทั้งหมด</h3>
+    <p class="lede">ถ้าน้องอยากเลือกเองวันนี้ก็ได้ · ระบบจะกลับมาแนะนำให้พรุ่งนี้</p>
+    <div class="hubs">
+
+      <div class="hub">
+        <h4>Starter test</h4>
+        <p class="sub">Free baseline</p>
+        <ul><li><a href="#"><span>Mini diagnosis</span><span class="prog">15–17 min</span></a></li></ul>
+      </div>
+
+      <div class="hub">
+        <h4>Production</h4>
+        <p class="sub">เขียน · พูด</p>
+        <ul>
+          <li><a href="#"><span>Write about photo</span><span class="prog">5 rounds</span></a></li>
+          <li><a href="#"><span>Read, then write</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Speak about photo</span><span class="prog">5 rounds</span></a></li>
+          <li><a href="#"><span>Read, then speak</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Interactive speaking</span><span class="prog">6 turns</span></a></li>
+        </ul>
+      </div>
+
+      <div class="hub">
+        <h4>Comprehension</h4>
+        <p class="sub">อ่าน · คำศัพท์</p>
+        <ul>
+          <li><a href="#"><span>Vocabulary</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Reading</span><span class="prog">0/1</span></a></li>
+        </ul>
+      </div>
+
+      <div class="hub">
+        <h4>Conversation</h4>
+        <p class="sub">ฟัง · ตอบกลับ</p>
+        <ul>
+          <li class="lock"><a href="#"><span>Interactive conversation</span><span class="prog">เปิดเมื่อ Basic</span></a></li>
+          <li><a href="#"><span>Dialogue → summary</span><span class="prog">5 rounds</span></a></li>
+        </ul>
+      </div>
+
+      <div class="hub">
+        <h4>Literacy</h4>
+        <p class="sub">เติมคำ · เขียนตามฟัง</p>
+        <ul>
+          <li><a href="#"><span>Dictation</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Fill in the blank</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Real word</span><span class="prog">0/1</span></a></li>
+        </ul>
+      </div>
+
+      <div class="hub">
+        <h4>Mock test</h4>
+        <p class="sub">สอบจำลอง</p>
+        <ul><li class="lock"><a href="#"><span>Full mock test</span><span class="prog">เปิดเมื่อ VIP</span></a></li></ul>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="anno">
+  <h4>// design decisions traced to evidence</h4>
+  <ul>
+    <li><b>Greeting bar identical every visit</b> — mere-exposure effect → safety; reduces decision fatigue (Baumeister)</li>
+    <li><b>ONE pre-decided task, no choices</b> — Hick's Law + default effect + Fogg BM (motivation is low, so ability bar must be near-zero)</li>
+    <li><b>Reason ("เมื่อวานน้องตอบถูก 4/10") shown before action</b> — algorithmic transparency builds trust (Logg, Bonaccio); also models metacognition</li>
+    <li><b>Cream + soft borders, not brutalist black</b> — color/cortisol research (Mehta &amp; Zhu); trauma-informed safety signals</li>
+    <li><b>"ไม่ต้องรีบ ไม่มีผิดถูก"</b> — anxiety-state reframe (Yerkes-Dodson); pull arousal back to optimal</li>
+    <li><b>Visible escape ("วันนี้พอแค่นี้")</b> — control = safety for shame-state users (trauma-informed UX)</li>
+    <li><b>Goal-gradient shrinking bar with "+12 in 9 days"</b> — Hull goal-gradient + endowed progress (no zero anywhere)</li>
+    <li><b>"Recent wins" before any dashboard</b> — peak-end memory (Kahneman); mastery experiences are #1 self-efficacy source (Bandura)</li>
+    <li><b>Locks reframed "เปิดเมื่อ Basic" not "Locked"</b> — reactance reduction (Brehm); gain framing not loss</li>
+    <li><b>Free-tier alert removed from main flow</b> — restriction language depletes self-efficacy; reframed as "what you have" inside drawer instead</li>
+    <li><b>"คุณทำได้แน่นอน · ครูอยู่ด้วยตลอด" on CTA</b> — verbal persuasion (Bandura #3); presence framing reduces solo-anxiety</li>
+    <li><b>3 soft-link opt-ins, not 13 skill tiles</b> — Cognitive Load Theory; extraneous load → near zero above fold</li>
+    <li><b>Bottom-of-card thumb-zone CTA</b> — Hoober one-handed reach research</li>
+    <li><b>No English headers above the action</b> — L2 readability; remove parse-stalls</li>
+    <li><b>Numbers in mono, Thai labels in Sarabun</b> — readability research: monospace hurts Thai segmentation</li>
+  </ul>
+</div>
+
+</body>
+</html>

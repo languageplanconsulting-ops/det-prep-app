@@ -116,7 +116,7 @@ const READ_AND_WRITE_HREF = "/practice/production/read-and-write";
 
 export default function PracticeHubPage() {
   const router = useRouter();
-  const { effectiveTier } = useEffectiveTier();
+  const { effectiveTier, isAdmin } = useEffectiveTier();
   const vipAiGate = useVipAiFeedbackGate();
   const isVip = effectiveTier === "vip";
   const [readingIntroOpen, setReadingIntroOpen] = useState(false);
@@ -263,6 +263,28 @@ export default function PracticeHubPage() {
         onEnter={() => router.push(FITB_HREF)}
       />
       <PracticePageOverview />
+
+      {isAdmin ? (
+        <div className="rounded-sm border-4 border-black bg-[#fff7d1] p-5 shadow-[6px_6px_0_0_#111]">
+          <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
+            Admin preview · Not visible to users
+          </p>
+          <h2 className="mt-2 text-2xl font-black text-neutral-900">
+            Mini Study Sessions (15-min ADHD-friendly)
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-neutral-800">
+            Three micro-lessons on dictation: FANBOYS &amp; subordinating commas, -ed/-s
+            agreement, and the four comma structures for Write/Speak about Photo. Uses
+            Deepgram TTS with strict 100% match grading.
+          </p>
+          <Link
+            href="/practice/mini-study"
+            className="mt-3 inline-block rounded-[4px] border-4 border-black bg-[#004AAD] px-4 py-2 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+          >
+            Open mini study →
+          </Link>
+        </div>
+      ) : null}
 
       <header className="ep-brutal rounded-sm border-black bg-white p-6">
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">

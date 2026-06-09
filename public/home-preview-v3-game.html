@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home V3 — Game it</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Sarabun:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0a0a; --green:#58cc02; --green-d:#46a302; --blue:#1cb0f6; --yellow:#ffc800;
+    --pink:#ff4b4b; --purple:#ce82ff; --bg:#e6f7ff;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Sarabun',system-ui,sans-serif;background:#cfeefb;color:var(--ink);padding:24px 12px 80px;-webkit-font-smoothing:antialiased}
+  .meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:#1976d2;margin:0 0 6px;text-align:center}
+  .lead{font-size:13px;color:#444;text-align:center;max-width:60ch;margin:0 auto 22px;line-height:1.6}
+  .lead b{color:#000}
+
+  .phone{max-width:420px;margin:0 auto;background:#fff;border:3px solid #000;box-shadow:8px 8px 0 0 #000;border-radius:28px;overflow:hidden}
+
+  /* top stats bar — game HUD */
+  .hud{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fff;border-bottom:2px solid #e5e5e5}
+  .hud .stat{display:flex;align-items:center;gap:5px;font-weight:900;font-size:14px}
+  .hud .stat .ic{font-size:18px}
+  .hud .streak{color:var(--pink)}
+  .hud .gems{color:var(--blue)}
+  .hud .hearts{color:var(--pink)}
+
+  /* mascot hero */
+  .hero{padding:24px 22px 18px;text-align:center;background:linear-gradient(180deg,#e6f7ff 0%,#fff 100%)}
+  .mascot{width:130px;height:130px;margin:0 auto 8px;background:var(--green);border-radius:50%;border:3px solid #000;position:relative;box-shadow:0 6px 0 0 var(--green-d)}
+  .mascot:before{content:'';position:absolute;top:30px;left:24px;width:30px;height:30px;background:#fff;border-radius:50%;border:2px solid #000}
+  .mascot:after{content:'';position:absolute;top:30px;right:24px;width:30px;height:30px;background:#fff;border-radius:50%;border:2px solid #000}
+  .mascot .lp{position:absolute;top:40px;left:34px;width:10px;height:10px;background:#000;border-radius:50%}
+  .mascot .rp{position:absolute;top:40px;right:34px;width:10px;height:10px;background:#000;border-radius:50%}
+  .mascot .beak{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);width:36px;height:20px;background:var(--yellow);border:2px solid #000;border-radius:50%/40%}
+
+  .speech{display:inline-block;background:#fff;border:2.5px solid #e5e5e5;border-radius:14px;padding:10px 14px;font-weight:700;font-size:14px;position:relative;margin-bottom:14px}
+  .speech:after{content:'';position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(45deg);width:14px;height:14px;background:#fff;border-left:2.5px solid #e5e5e5;border-top:2.5px solid #e5e5e5}
+
+  .hero h1{margin:0 0 6px;font-size:24px;font-weight:900;line-height:1.2}
+  .hero .sub{font-size:13.5px;color:#555;margin:0 0 16px;line-height:1.5}
+
+  /* XP bar */
+  .xp{margin:0 22px 18px}
+  .xp .lbl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;font-weight:800;color:#666;margin-bottom:5px;text-transform:uppercase;letter-spacing:.08em}
+  .xp .lbl b{color:var(--green-d)}
+  .xp .bar{height:14px;background:#eee;border:2px solid #000;border-radius:99px;overflow:hidden;position:relative}
+  .xp .bar span{display:block;width:0%;height:100%;background:linear-gradient(90deg,var(--green),#7dd84a);transition:width .8s}
+
+  /* level map */
+  .map{padding:8px 22px 22px;background:#fff;position:relative}
+  .map h3{font-size:14px;font-weight:900;margin:0 0 16px;text-align:center;letter-spacing:.04em;color:#666;text-transform:uppercase;font-family:var(--mono)}
+  .path{display:flex;flex-direction:column;align-items:center;gap:14px;position:relative}
+  .node{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:22px;border:3px solid #000;position:relative;cursor:pointer}
+  .node.cur{background:var(--green);color:#fff;box-shadow:0 6px 0 0 var(--green-d);animation:bob 2s ease-in-out infinite}
+  .node.lock{background:#e8e8e8;color:#aaa;box-shadow:0 4px 0 0 #bbb}
+  .node.boss{background:var(--pink);color:#fff;box-shadow:0 6px 0 0 #c62828}
+  .node .star{position:absolute;top:-6px;right:-6px;font-size:18px}
+  .node-lbl{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.08em;color:#666;margin-top:-6px;text-transform:uppercase}
+  .node-lbl.cur{color:var(--green-d)}
+
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+  /* big start CTA */
+  .start{margin:18px 22px;background:var(--green);color:#fff;text-align:center;padding:18px;border:3px solid #000;border-radius:16px;font-weight:900;font-size:18px;text-decoration:none;display:block;box-shadow:0 6px 0 0 var(--green-d);text-transform:uppercase;letter-spacing:.02em}
+  .start small{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;margin-top:3px;opacity:.9}
+
+  /* daily quest card */
+  .quest{margin:0 22px 18px;background:#fff8e1;border:2.5px solid #000;border-radius:14px;padding:14px;box-shadow:4px 4px 0 0 #000}
+  .quest .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .quest .hd .tt{font-weight:900;font-size:13px;display:flex;align-items:center;gap:6px}
+  .quest .hd .rw{font-family:var(--mono);font-size:11px;font-weight:800;color:var(--blue);background:#e0f4ff;padding:3px 7px;border-radius:99px;border:1.5px solid #000}
+  .quest .t{font-size:13px;font-weight:700;margin:0 0 8px}
+  .quest .bar{height:10px;background:#eee;border:1.5px solid #000;border-radius:99px;overflow:hidden}
+  .quest .bar span{display:block;width:30%;height:100%;background:var(--yellow)}
+
+  /* leaderboard tease */
+  .league{margin:0 22px 22px;background:#fff;border:2.5px solid #000;border-radius:14px;padding:14px;box-shadow:4px 4px 0 0 #000}
+  .league .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .league .hd .tt{font-weight:900;font-size:13px;display:flex;align-items:center;gap:6px}
+  .league .hd .more{font-size:11px;font-weight:700;color:var(--blue);text-decoration:underline}
+  .lrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1.5px solid #eee}
+  .lrow:first-of-type{border-top:0}
+  .lrow .rk{font-family:var(--mono);font-weight:900;font-size:13px;width:22px;color:#999}
+  .lrow .rk.me{color:var(--pink)}
+  .lrow .av{width:32px;height:32px;border-radius:50%;background:#ddd;border:1.5px solid #000;display:grid;place-items:center;font-weight:900;font-size:13px}
+  .lrow .nm{flex:1;font-weight:700;font-size:13px}
+  .lrow .nm.me{color:var(--pink)}
+  .lrow .xp{font-family:var(--mono);font-size:11px;font-weight:800;color:#666}
+
+  /* pricing as unlock */
+  .unlock{margin:0 22px 22px;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;border:2.5px solid #000;border-radius:14px;padding:18px;text-align:center;box-shadow:4px 4px 0 0 #000}
+  .unlock .ico{font-size:32px;margin-bottom:4px}
+  .unlock h4{margin:0 0 6px;font-weight:900;font-size:16px}
+  .unlock p{margin:0 0 12px;font-size:12.5px;opacity:.95;line-height:1.5}
+  .unlock a{display:inline-block;background:var(--yellow);color:#000;padding:10px 18px;border:2px solid #000;border-radius:99px;font-weight:900;font-size:13px;text-decoration:none;box-shadow:0 4px 0 0 #c79c00}
+
+  .anno{max-width:420px;margin:14px auto 0;font-family:var(--mono);font-size:10.5px;color:#555;line-height:1.6;background:#fff;border:2px dashed #000;padding:10px 12px;border-radius:8px}
+  .anno b{color:#1976d2}
+</style>
+</head>
+<body>
+  <p class="meta">Home V3 · Game it (Duolingo-style)</p>
+  <p class="lead"><b>Philosophy:</b> Borrow visual language teens already trust. Reframe prep as a game with levels, XP, streaks, mascot. Reduces test-anxiety via play.</p>
+
+  <div class="phone">
+    <div class="hud">
+      <div class="stat streak"><span class="ic">🔥</span><span>0</span></div>
+      <div class="stat gems"><span class="ic">💎</span><span>0</span></div>
+      <div class="stat hearts"><span class="ic">❤️</span><span>5</span></div>
+    </div>
+
+    <div class="hero">
+      <div class="mascot"><div class="lp"></div><div class="rp"></div><div class="beak"></div></div>
+      <div class="speech">สวัสดี! ผมชื่อช้างน้อย 🐘</div>
+      <h1>เริ่ม Level 1 กันเลย!</h1>
+      <p class="sub">เช็คความพร้อมสอบ DET · เล่นสนุกใน 2 นาที</p>
+    </div>
+
+    <div class="xp">
+      <div class="lbl"><span>XP วันนี้</span><span><b>0</b> / 50</span></div>
+      <div class="bar"><span></span></div>
+    </div>
+
+    <div class="map">
+      <h3>━ เส้นทางของคุณ ━</h3>
+      <div class="path">
+        <div class="node cur">▶<span class="star">⭐</span></div>
+        <p class="node-lbl cur">Level 1 · เช็คความพร้อม</p>
+        <div class="node lock">🔒</div>
+        <p class="node-lbl">Level 2 · ฝึก Listening</p>
+        <div class="node lock">🔒</div>
+        <p class="node-lbl">Level 3 · ฝึก Writing</p>
+        <div class="node boss">👑</div>
+        <p class="node-lbl">BOSS · Mock Test</p>
+      </div>
+    </div>
+
+    <a class="start" href="#">เริ่ม Level 1 →<small>+10 XP · ฟรี</small></a>
+
+    <div class="quest">
+      <div class="hd"><div class="tt">⚡ Quest ของวันนี้</div><div class="rw">+20 💎</div></div>
+      <p class="t">เล่นจบ 3 บทเรียน</p>
+      <div class="bar"><span></span></div>
+    </div>
+
+    <div class="league">
+      <div class="hd"><div class="tt">🏆 ลีกของคุณ · Bronze</div><a class="more" href="#">ดูทั้งหมด</a></div>
+      <div class="lrow"><span class="rk">1</span><div class="av">ก</div><span class="nm">น้องกาย</span><span class="xp">480 XP</span></div>
+      <div class="lrow"><span class="rk">2</span><div class="av">น</div><span class="nm">น้องเนย</span><span class="xp">410 XP</span></div>
+      <div class="lrow"><span class="rk me">28</span><div class="av">?</div><span class="nm me">คุณ</span><span class="xp">0 XP</span></div>
+    </div>
+
+    <div class="unlock">
+      <div class="ico">🔓</div>
+      <h4>ปลดล็อกทุก Level</h4>
+      <p>ไม่จำกัด ❤️ · เพิ่ม Boss Mock Test · เริ่มเพียง ฿399/เดือน</p>
+      <a href="#">ดูแพ็กเกจ →</a>
+    </div>
+  </div>
+
+  <div class="anno"><b>// psych levers:</b> familiarity heuristic (looks like Duolingo), endowed progress (XP bar visible at 0), variable reward (gems/streaks), social comparison (league), reduced threat via mascot + play frame, pricing reframed as "unlock".</div>
+</body>
+</html>

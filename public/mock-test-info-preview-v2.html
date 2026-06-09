@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mock Test info — readable / friendly directions</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Caveat:wght@500;700&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:'Sarabun',system-ui,sans-serif;
+    background:#f6f4ef;color:#222;padding:40px 16px 100px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto}
+  h1.page{margin:0 0 8px;font-size:22px;font-weight:800;color:#111}
+  .sub{color:#666;margin:0 0 22px;font-size:14px}
+  .switcher{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 36px}
+  .switcher a{
+    font-size:13px;text-decoration:none;color:#111;background:#fff;
+    border:1px solid #e2dfd6;padding:8px 14px;border-radius:999px;
+  }
+  .switcher a:hover{background:#fff7d6}
+  .opt{margin-bottom:72px}
+  .opt-label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#888;font-weight:700;margin:0 0 6px}
+  .opt-note{font-size:13.5px;line-height:1.65;color:#555;margin:0 0 18px;max-width:64ch}
+
+  /* ============================================================
+     STYLE A — Friendly chat / messenger from teacher
+     ============================================================ */
+  .a-wrap{background:#fff;border-radius:18px;padding:24px 22px;border:1px solid #ece9e0}
+  .a-head{display:flex;align-items:center;gap:12px;padding-bottom:14px;border-bottom:1px solid #f0eee5;margin-bottom:18px}
+  .a-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#5b9cff,#7d6fff);color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px}
+  .a-name{font-weight:700;font-size:15px;margin:0}
+  .a-role{font-size:12px;color:#888;margin:0}
+  .a-thread{display:flex;flex-direction:column;gap:10px}
+  .a-bubble{background:#f3f1ea;padding:14px 16px;border-radius:16px 16px 16px 4px;font-size:14.5px;line-height:1.75;max-width:88%;color:#222}
+  .a-bubble.first{background:#fff7d6}
+  .a-bubble b{color:#0050c8}
+  .a-bubble .meta{display:block;font-size:11px;color:#999;margin-top:6px}
+  .a-bubble.tip{background:#e7f3ee;border-left:3px solid #2ea27a}
+  .a-bubble.warn{background:#fff1ea;border-left:3px solid #d4623d}
+  .a-bubble.callout{background:#eef3ff;border-left:3px solid #3a72ff}
+  .a-time{font-size:11px;color:#aaa;text-align:center;padding:6px 0 2px}
+
+  /* ============================================================
+     STYLE B — Handwritten notebook (teacher's notes)
+     ============================================================ */
+  .b-wrap{
+    background:
+      linear-gradient(#fffefa,#fffefa),
+      repeating-linear-gradient(0deg, transparent 0, transparent 33px, #d9e9f3 33px, #d9e9f3 34px);
+    background-blend-mode:multiply;
+    border:1px solid #e6e0d0;border-radius:6px;
+    padding:36px 38px 36px 70px;position:relative;
+    box-shadow:0 2px 0 #ebe6d6, 0 18px 40px -28px rgba(0,0,0,.18);
+  }
+  .b-wrap::before{
+    content:'';position:absolute;left:42px;top:0;bottom:0;width:2px;background:#f5b3b3;
+  }
+  .b-title{font-family:'Caveat',cursive;font-size:34px;color:#1c3a8a;margin:0 0 4px;line-height:1.1;font-weight:700}
+  .b-sub{font-family:'Caveat',cursive;font-size:18px;color:#888;margin:0 0 18px}
+  .b-section{margin:18px 0}
+  .b-section h3{font-family:'Caveat',cursive;font-size:24px;color:#c8511e;margin:0 0 4px;font-weight:700}
+  .b-section p{font-size:15px;line-height:1.85;color:#333;margin:0}
+  .b-section p b{background:#fff494;padding:0 3px;border-radius:2px}
+  .b-section p .ul{text-decoration:underline;text-decoration-color:#f5b3b3;text-decoration-thickness:2px;text-underline-offset:3px}
+  .b-arrow{font-family:'Caveat',cursive;color:#c8511e;font-size:18px;margin-left:4px}
+  .b-stamp{position:absolute;right:24px;top:24px;transform:rotate(-6deg);border:2px solid #c8511e;color:#c8511e;font-family:'Caveat',cursive;font-size:13px;font-weight:700;padding:4px 10px;letter-spacing:.04em}
+
+  /* ============================================================
+     STYLE C — Calm pastel cards (Headspace-ish)
+     ============================================================ */
+  .c-wrap{padding:0}
+  .c-hero{
+    background:linear-gradient(135deg,#fce7d2 0%,#fde9ef 60%,#e9e3fb 100%);
+    border-radius:24px;padding:34px 30px;margin-bottom:16px;
+  }
+  .c-eyebrow{font-size:12px;font-weight:600;color:#7a5a47;letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px}
+  .c-hero h2{margin:0;font-size:26px;font-weight:700;color:#2a2118;line-height:1.3}
+  .c-hero p{margin:10px 0 0;font-size:15px;line-height:1.75;color:#5a4738;max-width:46ch}
+  .c-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:640px){.c-cards{grid-template-columns:1fr}}
+  .c-card{background:#fff;border-radius:20px;padding:22px 22px 20px;border:1px solid #eee}
+  .c-card .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;margin-bottom:12px}
+  .c-card.c1 .ic{background:#fef3c7}
+  .c-card.c2 .ic{background:#dbeafe}
+  .c-card.c3 .ic{background:#dcfce7}
+  .c-card.c4 .ic{background:#fce7f3}
+  .c-card h3{margin:0 0 6px;font-size:16px;font-weight:700;color:#1a1a1a}
+  .c-card p{margin:0;font-size:14px;line-height:1.75;color:#4a4a4a}
+  .c-card p b{color:#1a1a1a}
+  .c-card p .warn{color:#b54a2e;font-weight:600}
+
+  /* ============================================================
+     STYLE D — Personal letter from instructor (editorial)
+     ============================================================ */
+  .d-wrap{background:#fffdf8;border:1px solid #e8e2cf;padding:48px 44px 40px;border-radius:4px;box-shadow:0 24px 60px -40px rgba(0,0,0,.18)}
+  .d-top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid #ebe3ce;padding-bottom:18px;margin-bottom:24px}
+  .d-mast{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#1a1a1a;margin:0;line-height:1}
+  .d-mast .small{display:block;font-family:'Sarabun',sans-serif;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#888;margin-bottom:8px}
+  .d-meta{font-size:11.5px;color:#9a8e74;text-align:right;font-style:italic;line-height:1.6}
+  .d-greet{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:#1a1a1a;margin:0 0 14px}
+  .d-body{font-size:15.5px;line-height:1.95;color:#2a2a2a}
+  .d-body p{margin:0 0 18px}
+  .d-body p:first-letter{font-family:'Playfair Display',serif;font-size:42px;float:left;line-height:.95;padding:4px 8px 0 0;color:#1a3a7a;font-weight:700}
+  .d-body h4{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#1a3a7a;margin:28px 0 8px;padding-bottom:6px;border-bottom:1px solid #ebe3ce}
+  .d-body b{color:#1a1a1a}
+  .d-body .warn{background:#fff7ea;padding:14px 16px;border-left:3px solid #c8814a;font-size:14.5px;border-radius:0 4px 4px 0;margin:16px 0}
+  .d-sign{margin-top:32px;padding-top:18px;border-top:1px solid #ebe3ce}
+  .d-sign .sig{font-family:'Caveat',cursive;font-size:32px;color:#1a3a7a;line-height:1;margin:0}
+  .d-sign .who{font-size:13px;color:#666;margin:4px 0 0;font-style:italic}
+
+  /* ============================================================
+     STYLE E — Modern dashboard / Linear-style
+     ============================================================ */
+  .e-wrap{font-family:'Inter','Sarabun',sans-serif;background:#fff;border:1px solid #e7e7e9;border-radius:14px;padding:0;overflow:hidden}
+  .e-head{padding:24px 26px 18px;border-bottom:1px solid #ededef}
+  .e-tag{display:inline-flex;align-items:center;gap:6px;background:#f4f4f5;color:#52525b;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:999px;margin-bottom:10px}
+  .e-tag .dot{width:6px;height:6px;border-radius:50%;background:#3b82f6}
+  .e-head h2{margin:0;font-size:21px;font-weight:700;color:#0a0a0a;letter-spacing:-.01em}
+  .e-head p{margin:8px 0 0;font-size:14px;line-height:1.7;color:#52525b;max-width:60ch}
+  .e-body{padding:6px 0}
+  .e-row{display:grid;grid-template-columns:48px 1fr;gap:16px;padding:18px 26px;border-top:1px solid #f4f4f5;align-items:flex-start}
+  .e-row:first-child{border-top:none}
+  .e-icon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:16px;border:1px solid;}
+  .e-row.r1 .e-icon{background:#eff6ff;border-color:#dbeafe;color:#1d4ed8}
+  .e-row.r2 .e-icon{background:#fef3c7;border-color:#fde68a;color:#92400e}
+  .e-row.r3 .e-icon{background:#ecfdf5;border-color:#a7f3d0;color:#047857}
+  .e-row.r4 .e-icon{background:#faf5ff;border-color:#e9d5ff;color:#6b21a8}
+  .e-row h3{margin:0 0 4px;font-size:14.5px;font-weight:600;color:#0a0a0a;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .e-row h3 .chip{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:6px;background:#fef2f2;color:#991b1b;letter-spacing:.02em}
+  .e-row p{margin:4px 0 0;font-size:13.5px;line-height:1.7;color:#3f3f46}
+  .e-row p b{color:#0a0a0a;font-weight:600}
+  .e-foot{padding:14px 26px;background:#fafafa;border-top:1px solid #ededef;font-size:12.5px;color:#71717a;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .e-foot a{color:#1d4ed8;text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="page">Mock Test info — 5 readable / friendlier directions</h1>
+  <p class="sub">Dropped the brutalist/mono look. Each option below is a full-page treatment of the same content, optimized for calm and readability.</p>
+
+  <div class="switcher">
+    <a href="#a">A · Chat from teacher</a>
+    <a href="#b">B · Handwritten notebook</a>
+    <a href="#c">C · Pastel calm cards</a>
+    <a href="#d">D · Letter from instructor</a>
+    <a href="#e">E · Modern dashboard (Linear)</a>
+  </div>
+
+  <!-- ===================== A ===================== -->
+  <div class="opt" id="a">
+    <div class="opt-label">Option A — Chat thread from your teacher</div>
+    <div class="opt-note">Feels personal and Thai-natural (similar to LINE). Each chunk is a chat bubble; warnings are colored callouts so the eye lands on them. Easy to skim.</div>
+    <div class="a-wrap">
+      <div class="a-head">
+        <div class="a-avatar">EP</div>
+        <div>
+          <p class="a-name">ครู English Plan</p>
+          <p class="a-role">ก่อนเริ่ม Mock Test · อ่านสักนิดนะ</p>
+        </div>
+      </div>
+      <div class="a-time">วันนี้</div>
+      <div class="a-thread">
+        <div class="a-bubble first">
+          สวัสดีครับ ก่อนเริ่มทำ Mock Test ครูอยากให้รู้เรื่องสำคัญ ๆ ก่อนนะ
+          <span class="meta">10:24</span>
+        </div>
+        <div class="a-bubble">
+          <b>📚 เรื่องชุดข้อสอบ</b><br>
+          ข้อสอบ Mock Test จะอัปโหลดชุดใหม่ <b>ทุกเดือน</b> เริ่มตั้งแต่ ม.ค. 2026 — เอามาจากข้อสอบ DET จริงในเดือนนั้น ๆ
+          เดือนละ <b>6 ชุด</b> ตรงกับโควต้าที่ได้รับ จะเลือกเริ่มจากชุด 1, 3 หรือ 5 ก็ได้นะ ไม่มีลำดับบังคับครับ
+          <span class="meta">10:24</span>
+        </div>
+        <div class="a-bubble warn">
+          <b>⏰ ก่อนกดเริ่ม</b><br>
+          ชุดละประมาณ <b>1 ชั่วโมง – 1 ชั่วโมง 15 นาที</b> จัดเวลาให้พร้อมก่อนนะ
+          ถ้าทำค้างไว้แล้วออกระบบ <b>ระบบจะนับว่าใช้โควต้าชุดนั้นไปแล้ว</b>
+          <span class="meta">10:24</span>
+        </div>
+        <div class="a-bubble tip">
+          <b>📊 เรื่องระดับความยาก</b><br>
+          ตัวเลขชุด (1, 2, 3) <b>ไม่ได้บ่งบอกความยาก</b> — ทุกชุดยากเท่ากัน เพราะเป็นแบบ Adaptive
+          ระบบจะปรับยากขึ้นตามที่เราตอบถูก เจอข้อตอบไม่ได้ <b>ไม่ต้องตกใจ</b> นั่นคือเป้าหมายของระบบเอง
+          <span class="meta">10:25</span>
+        </div>
+        <div class="a-bubble callout">
+          <b>🎥 นี่คือการฝึก ไม่ใช่สอบจริง</b><br>
+          ไม่ต้องตั้งกล้อง เปิดเน็ตค้นได้ ไม่มีบันทึก<br>
+          แต่ในสอบจริง Duolingo เข้มมาก ๆ เรื่องกล้องและสภาพแวดล้อม ควรอ่านกฎก่อนสอบจริงนะครับ
+          <span class="meta">10:25</span>
+        </div>
+        <div class="a-bubble">
+          หลังทำเสร็จแต่ละชุด จะได้ <b>Feedback แบบเฉพาะบุคคล</b> เก็บไว้ดูพัฒนาการได้
+          ถ้าเจอปัญหา แจ้งที่ <b>languageplan.consulting@gmail.com</b> นะครับ
+          <span class="meta">10:26</span>
+        </div>
+        <div class="a-bubble">
+          ขอให้สนุกกับการฝึกครับ! 🎯
+          <span class="meta">10:26</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== B ===================== -->
+  <div class="opt" id="b">
+    <div class="opt-label">Option B — Handwritten notebook page</div>
+    <div class="opt-note">Warm, low-pressure, like a friend wrote notes for you. Caveat font for headings + handwritten lined paper feel. Body text stays in proper Sarabun for readability.</div>
+    <div class="b-wrap">
+      <div class="b-stamp">READ ME FIRST</div>
+      <p class="b-title">วิธีใช้ Mock Test</p>
+      <p class="b-sub">notes from your teacher · 📝</p>
+
+      <div class="b-section">
+        <h3>① เรื่องชุดข้อสอบ</h3>
+        <p>อัปโหลดชุดใหม่ <b>ทุกเดือน</b> ตั้งแต่ ม.ค. 2026
+        จาก<span class="ul">ข้อสอบ DET จริงในเดือนนั้น ๆ</span> เดือนละ <b>6 ชุด</b> ตรงกับโควต้า
+        เลือกเริ่มจากชุดไหนก็ได้ <span class="b-arrow">↓ ไม่มีลำดับบังคับ</span></p>
+      </div>
+
+      <div class="b-section">
+        <h3>② ก่อนกดเริ่ม</h3>
+        <p>ใช้เวลา <b>1 ชั่วโมง – 1 ชั่วโมง 15 นาที</b> จัดเวลาให้พร้อมก่อน
+        ถ้าออกระบบกลางคัน <span class="ul">นับว่าใช้โควต้าชุดนั้นไปแล้ว</span>
+        <br><br>
+        ตัวเลขชุด (1, 2, 3) <b>ไม่ใช่ระดับความยาก</b> — ทุกชุดเป็น Adaptive เหมือนกัน
+        ระบบจะยากขึ้นตามที่เราตอบถูก เจอข้อยาก <b>ไม่ต้องตกใจ</b> นั่นคือระบบกำลังหาขีดจำกัดของเรา</p>
+      </div>
+
+      <div class="b-section">
+        <h3>③ นี่คือการฝึก ไม่ใช่สอบจริง</h3>
+        <p>ไม่ต้องตั้งกล้อง เปิดอินเทอร์เน็ตค้นได้ ไม่มีตรวจจับหรือบันทึก
+        <br><br>
+        แต่ในสอบจริง <b>เรื่องพวกนี้สำคัญมาก</b> โดยเฉพาะการตั้งกล้องและสภาพแวดล้อม
+        Duolingo กำหนดไว้เข้มงวด — ควรอ่านกฎก่อนสอบจริงนะ</p>
+      </div>
+
+      <div class="b-section">
+        <h3>④ Feedback</h3>
+        <p>หลังทำแต่ละชุดเสร็จ ได้ <b>Feedback เฉพาะบุคคล</b> บันทึกเก็บได้ ใช้ติดตามพัฒนาการ
+        <br>ปัญหาแจ้งที่ languageplan.consulting@gmail.com</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== C ===================== -->
+  <div class="opt" id="c">
+    <div class="opt-label">Option C — Calm pastel cards (Headspace-style)</div>
+    <div class="opt-note">Lots of whitespace, soft rounded cards, warm gradient hero. Reads like a calm onboarding screen. Each chunk gets its own quiet card with a soft icon tile.</div>
+    <div class="c-wrap">
+      <div class="c-hero">
+        <p class="c-eyebrow">Before you begin</p>
+        <h2>วิธีใช้ Mock Test</h2>
+        <p>4 เรื่องสั้น ๆ ที่อยากให้รู้ก่อนเริ่มทำ — ใช้เวลาอ่านไม่ถึง 2 นาที</p>
+      </div>
+      <div class="c-cards">
+        <div class="c-card c1">
+          <div class="ic">📚</div>
+          <h3>ข้อสอบเดือนละ 6 ชุด</h3>
+          <p>อัปโหลดชุดใหม่ทุกเดือนตั้งแต่ ม.ค. 2026 จากข้อสอบ DET จริงในเดือนนั้น ๆ
+          <b>เลือกเริ่มจากชุดไหนก็ได้</b> ไม่มีลำดับบังคับ</p>
+        </div>
+        <div class="c-card c2">
+          <div class="ic">⏰</div>
+          <h3>1 – 1 ชั่วโมง 15 นาที</h3>
+          <p>จัดเวลาให้พร้อมก่อนเริ่ม
+          <span class="warn">ถ้าออกระบบกลางคัน ระบบจะนับว่าใช้โควต้าไปแล้ว</span></p>
+        </div>
+        <div class="c-card c3">
+          <div class="ic">🌱</div>
+          <h3>ฝึก ไม่ใช่สอบจริง</h3>
+          <p>ไม่ต้องตั้งกล้อง เปิดเน็ตค้นได้ ไม่มีบันทึก
+          แต่สอบจริง Duolingo เข้มมาก <b>อ่านกฎก่อนสอบจริง</b>ด้วยนะ</p>
+        </div>
+        <div class="c-card c4">
+          <div class="ic">💬</div>
+          <h3>Feedback &amp; ปัญหา</h3>
+          <p>หลังจบจะได้ Feedback เฉพาะบุคคล บันทึกติดตามพัฒนาการได้
+          ปัญหาแจ้ง languageplan.consulting@gmail.com</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== D ===================== -->
+  <div class="opt" id="d">
+    <div class="opt-label">Option D — Personal letter from instructor (editorial / serif)</div>
+    <div class="opt-note">Premium, calm, "letter from the founder" feel. Playfair serif for headings + drop cap + handwritten signature at the bottom. Reads slow but feels considered.</div>
+    <div class="d-wrap">
+      <div class="d-top">
+        <h2 class="d-mast"><span class="small">English Plan · Mock Test</span>วิธีใช้ Mock Test</h2>
+        <div class="d-meta">ฉบับที่ 1<br>กรุงเทพ · 2026</div>
+      </div>
+
+      <p class="d-greet">เรียนนักเรียนที่รักทุกคน,</p>
+
+      <div class="d-body">
+        <p>ก่อนเริ่มทำ Mock Test ครูอยากใช้เวลาสัก 1–2 นาทีอธิบายให้ฟังก่อนนะครับว่าระบบนี้ออกแบบมายังไง
+        เพื่อให้นักเรียนใช้ประโยชน์จากมันได้เต็มที่ และไม่เสียโควต้าโดยไม่จำเป็น</p>
+
+        <h4>เกี่ยวกับชุดข้อสอบ</h4>
+        <p>ข้อสอบ Mock Test มีการอัปโหลดชุดใหม่ <b>ทุกเดือน</b> เริ่มตั้งแต่มกราคม 2026
+        ซึ่งข้อสอบแต่ละชุดนำมาจากข้อสอบ Duolingo English Test จริงที่ใช้สอบในช่วงเดือนนั้น ๆ
+        ในแต่ละเดือนจะมีให้เลือกทำ <b>6 ชุด</b> ตรงกับโควต้าที่ได้รับต่อเดือน
+        ไม่ว่าจะเลือกเริ่มจากชุดที่ 1, 3 หรือ 5 ก็ได้ตามสะดวก ไม่มีลำดับบังคับครับ</p>
+
+        <h4>สิ่งที่ต้องรู้ก่อนเริ่ม</h4>
+        <p>ข้อสอบแต่ละชุดใช้เวลาประมาณ <b>1 ชั่วโมง – 1 ชั่วโมง 15 นาที</b> ดังนั้นควรจัดสรรเวลาให้พร้อมก่อนเริ่ม</p>
+
+        <div class="warn">
+          ⚠️ <b>หากทำค้างไว้กลางคันแล้วออกจากระบบ ระบบจะนับว่าใช้โควต้าชุดนั้นไปแล้ว</b>
+        </div>
+
+        <p>ตัวเลขของแต่ละชุด เช่น ชุดที่ 1, 2, 3 <b>ไม่ได้บ่งบอกถึงระดับความยาก</b> ทุกชุดมีความยากเท่ากัน
+        เพราะข้อสอบเป็นแบบ Adaptive ระบบจะปรับความยากขึ้นเรื่อย ๆ ตามผลการตอบของเรา
+        ยิ่งตอบถูกมาก ข้อต่อไปก็จะยากขึ้น เหมือนข้อสอบจริง
+        ดังนั้นถ้าเจอข้อที่ตอบไม่ได้ ไม่ต้องตกใจ — นั่นคือเป้าหมายของระบบที่ต้องการหาขีดจำกัดของเรา</p>
+
+        <h4>ข้อสอบนี้คือการฝึก ไม่ใช่สอบจริง</h4>
+        <p>ระหว่างทำ Mock Test ไม่ต้องกังวลเรื่องการตั้งกล้อง จะเปิดอินเทอร์เน็ตค้นข้อมูลก็ได้
+        เพราะนี่คือการฝึกซ้อม ไม่มีการตรวจจับหรือบันทึก
+        แต่ในการสอบจริง สิ่งเหล่านี้สำคัญมาก โดยเฉพาะการตั้งกล้องและสภาพแวดล้อม
+        ซึ่ง Duolingo กำหนดไว้อย่างเข้มงวด ควรศึกษากฎของ Duolingo ให้ดีก่อนสอบจริงครับ</p>
+
+        <h4>Feedback และการแจ้งปัญหา</h4>
+        <p>หลังจากทำแต่ละชุดเสร็จ จะได้รับ Feedback แบบเฉพาะบุคคล สามารถบันทึกเก็บไว้เพื่อติดตามพัฒนาการได้
+        — หากพบปัญหา แจ้งที่ <b>languageplan.consulting@gmail.com</b> ทีมงานจะรีบตรวจสอบให้ครับ</p>
+      </div>
+
+      <div class="d-sign">
+        <p class="sig">— ทีม English Plan</p>
+        <p class="who">ขอให้สนุกกับการฝึกซ้อมครับ</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== E ===================== -->
+  <div class="opt" id="e">
+    <div class="opt-label">Option E — Modern dashboard (Linear / Stripe-style)</div>
+    <div class="opt-note">Clean, low-key, professional. Inter font, subtle borders, soft rounded chips. Less personality but maximum readability — the warnings still pop through the colored icon tiles.</div>
+    <div class="e-wrap">
+      <div class="e-head">
+        <span class="e-tag"><span class="dot"></span> Before you begin</span>
+        <h2>How Mock Tests work</h2>
+        <p>4 things worth knowing before you start your first set. Read this once and you're set.</p>
+      </div>
+      <div class="e-body">
+        <div class="e-row r1">
+          <div class="e-icon">📚</div>
+          <div>
+            <h3>ชุดข้อสอบ — เดือนละ 6 ชุด</h3>
+            <p>อัปโหลดชุดใหม่ทุกเดือนตั้งแต่ ม.ค. 2026 จากข้อสอบ DET จริงในเดือนนั้น ๆ จำนวนตรงกับโควต้ารายเดือน <b>เลือกเริ่มจากชุดไหนก็ได้</b> ไม่มีลำดับบังคับ</p>
+          </div>
+        </div>
+        <div class="e-row r2">
+          <div class="e-icon">⏱</div>
+          <div>
+            <h3>ก่อนกดเริ่ม <span class="chip">important</span></h3>
+            <p>ใช้เวลา <b>1 ชั่วโมง – 1 ชั่วโมง 15 นาที</b> ต่อชุด จัดเวลาให้พร้อมก่อนเริ่ม — <b>ออกระบบกลางคัน = นับว่าใช้โควต้าแล้ว</b><br><br>
+            ตัวเลขชุดไม่ใช่ระดับความยาก ทุกชุดเป็น Adaptive ระบบจะปรับยากขึ้นตามที่เราตอบถูก เจอข้อยากแปลว่าระบบกำลังหาขีดจำกัด</p>
+          </div>
+        </div>
+        <div class="e-row r3">
+          <div class="e-icon">🌱</div>
+          <div>
+            <h3>นี่คือการฝึก ไม่ใช่สอบจริง</h3>
+            <p>ไม่ต้องตั้งกล้อง เปิดอินเทอร์เน็ตค้นได้ ไม่มีตรวจจับ — แต่ใน<b>สอบจริง</b> Duolingo เข้มมากเรื่องกล้องและสภาพแวดล้อม ควรอ่านกฎก่อนสอบจริง</p>
+          </div>
+        </div>
+        <div class="e-row r4">
+          <div class="e-icon">💬</div>
+          <div>
+            <h3>Feedback &amp; แจ้งปัญหา</h3>
+            <p>หลังจบแต่ละชุดได้ Feedback แบบเฉพาะบุคคล บันทึกเก็บได้ ติดตามพัฒนาการได้ — ปัญหาระหว่างทำ แจ้งที่ <b>languageplan.consulting@gmail.com</b></p>
+          </div>
+        </div>
+      </div>
+      <div class="e-foot">
+        <span>📌 อ่านครั้งเดียวแล้วซ่อนได้</span>
+        <a href="#">Got it — start practicing →</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

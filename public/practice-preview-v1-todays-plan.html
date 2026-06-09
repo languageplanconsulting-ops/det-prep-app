@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Practice V1 — Today's plan (responsive)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Sarabun:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0a0a; --blue:#004aad; --yellow:#ffcc00; --paper:#f4f6fb;
+    --green:#16a34a; --red:#dc2626; --orange:#ea580c; --purple:#7c3aed;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{
+    font-family:'Sarabun',system-ui,sans-serif;background:var(--paper);color:var(--ink);
+    background-image:linear-gradient(rgba(0,74,173,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,74,173,.04) 1px,transparent 1px);
+    background-size:24px 24px;
+    padding:24px 16px 80px;-webkit-font-smoothing:antialiased;
+  }
+
+  /* preview meta header */
+  .pmeta{max-width:1100px;margin:0 auto 22px}
+  .pmeta .tag{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--blue);margin:0 0 6px}
+  .pmeta h1{margin:0 0 6px;font-size:20px;font-weight:900}
+  .pmeta p{margin:0;font-size:13px;color:#444;line-height:1.6;max-width:80ch}
+  .pmeta b{color:#000}
+
+  /* viewport switch */
+  .switch{max-width:1100px;margin:0 auto 18px;display:flex;gap:8px;align-items:center}
+  .switch span{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#666}
+  .switch button{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:2px solid #000;background:#fff;padding:6px 12px;cursor:pointer;box-shadow:2px 2px 0 0 #000}
+  .switch button.on{background:var(--yellow)}
+
+  /* page container */
+  .page{max-width:1100px;margin:0 auto;background:transparent}
+  .page.mobile{max-width:430px;transition:max-width .2s}
+
+  /* ===== shared brutalist primitives ===== */
+  .ep-brutal{background:#fff;border:3px solid #000;box-shadow:5px 5px 0 0 #000;border-radius:2px}
+  .ep-brutal-sm{background:#fff;border:2px solid #000;box-shadow:3px 3px 0 0 #000;border-radius:2px}
+  .ep-stat{font-family:var(--mono);font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+
+  /* ===== NEW HERO: Today's plan (replaces the "Practice hub / Live academic portal" header) ===== */
+  .today{background:#fff;border:3px solid #000;box-shadow:6px 6px 0 0 #000;padding:22px;margin-bottom:18px;border-radius:2px}
+  .today .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:14px;border-bottom:2px dashed #000}
+  .today .eyebrow{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin:0 0 4px}
+  .today h2{margin:0;font-size:26px;font-weight:900;letter-spacing:-.01em;line-height:1.15}
+  .today h2 b{background:var(--yellow);padding:0 6px}
+  .today .sub{margin:6px 0 0;font-size:13px;color:#555;font-weight:600}
+
+  /* compact streak/exam ribbon — top right of today card on desktop, full width on mobile */
+  .ribbon{display:flex;gap:0;border:2px solid #000;background:#000;border-radius:2px;overflow:hidden;min-width:240px}
+  .ribbon .cell{flex:1;padding:8px 10px;color:#fff;text-align:center;border-right:1px solid #333}
+  .ribbon .cell:last-child{border-right:0}
+  .ribbon .l{font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#999}
+  .ribbon .v{font-family:var(--mono);font-size:18px;font-weight:900;margin-top:1px;line-height:1}
+  .ribbon .v .y{color:var(--yellow)}
+
+  /* the 3 tasks (responsive: 1 col mobile, 3 col desktop) */
+  .tasks{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:760px){.tasks{grid-template-columns:repeat(3,1fr)}}
+  .task{display:flex;flex-direction:column;border:2px solid #000;border-radius:2px;background:#fffef0;padding:14px;text-decoration:none;color:#000;box-shadow:3px 3px 0 0 #000;transition:transform .12s,box-shadow .12s;cursor:pointer;position:relative;min-height:140px}
+  .task:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 0 #000}
+  .task .num{position:absolute;top:-12px;left:-12px;width:32px;height:32px;background:var(--yellow);border:2px solid #000;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-weight:900;font-size:14px;box-shadow:2px 2px 0 0 #000}
+  .task .why{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin:0 0 6px}
+  .task .why.weak{color:var(--red)}
+  .task .why.warm{color:var(--orange)}
+  .task .lbl{font-size:15px;font-weight:900;line-height:1.25;margin:0 0 8px}
+  .task .meta{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;font-weight:800;color:#666;letter-spacing:.04em;padding-top:8px;border-top:1.5px dashed #ccc}
+  .task .meta .tag{background:#000;color:#fff;padding:2px 7px;border-radius:99px;font-size:9px}
+  .task.done{opacity:.65;background:#eef9ef}
+  .task.done .num{background:var(--green);color:#fff}
+  .task.done .lbl{text-decoration:line-through}
+
+  .today .footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:2px solid #000}
+  .today .footer .prog{flex:1;min-width:200px}
+  .today .footer .prog-lbl{font-family:var(--mono);font-size:10px;font-weight:800;color:#666;letter-spacing:.1em;text-transform:uppercase;margin:0 0 5px;display:flex;justify-content:space-between}
+  .today .footer .prog-lbl b{color:#000}
+  .today .footer .bar{height:10px;background:#eee;border:1.5px solid #000;border-radius:99px;overflow:hidden}
+  .today .footer .bar span{display:block;height:100%;width:33%;background:linear-gradient(90deg,var(--blue),#5a8cff)}
+  .today .footer .resume{background:#000;color:#fff;border:2px solid #000;padding:11px 18px;font-weight:900;font-size:13.5px;text-decoration:none;border-radius:2px;box-shadow:3px 3px 0 0 var(--yellow);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+
+  /* ===== free-tier banner reframed positive ===== */
+  .free{background:#fff7d1;border:3px solid #000;border-radius:2px;padding:18px;margin-bottom:18px;box-shadow:5px 5px 0 0 #000;display:flex;gap:14px;align-items:flex-start}
+  .free .ic{font-size:32px;line-height:1}
+  .free .body{flex:1}
+  .free .eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin:0 0 4px}
+  .free h3{margin:0 0 6px;font-size:18px;font-weight:900;line-height:1.3}
+  .free p{margin:0;font-size:13px;color:#333;line-height:1.6;font-weight:600}
+  .free .ctr{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+  .free .ctr .item{font-family:var(--mono);font-size:11px;font-weight:800;color:#000;display:flex;align-items:center;gap:4px}
+  .free .ctr .item b{background:#000;color:var(--yellow);padding:1px 6px;border-radius:99px;font-size:11px}
+
+  /* ===== overview moved DOWN and condensed ===== */
+  .overview-toggle{display:flex;justify-content:space-between;align-items:center;background:#fff;border:2px dashed #000;border-radius:2px;padding:12px 16px;cursor:pointer;margin-bottom:14px;font-weight:800;font-size:13px}
+  .overview-toggle .l{display:flex;gap:10px;align-items:center}
+  .overview-toggle .l .ic{font-size:18px}
+  .overview-toggle .chev{font-family:var(--mono);font-size:14px;font-weight:900}
+
+  .overview{display:grid;gap:14px;grid-template-columns:1fr;margin-bottom:18px}
+  @media(min-width:900px){.overview{grid-template-columns:repeat(4,1fr)}}
+  .ov-card{background:#fff;border:2px solid #000;border-radius:2px;padding:14px;box-shadow:3px 3px 0 0 #000}
+  .ov-card .eyebrow{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#666;margin:0 0 6px}
+  .ov-card h4{margin:0 0 8px;font-size:13px;font-weight:900}
+  .ov-card .big{font-family:var(--mono);font-size:24px;font-weight:900;color:var(--blue);line-height:1}
+  .ov-card .sm{font-size:11px;color:#666;font-weight:600;margin-top:2px}
+  .ov-card .row{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;font-weight:700;margin-top:4px}
+  .ov-card .row b{font-family:var(--mono)}
+  .pie{position:relative;width:80px;height:80px;border-radius:50%;background:conic-gradient(var(--yellow) 0 35%,var(--blue) 35% 60%,var(--green) 60% 80%,var(--orange) 80% 100%);margin:8px auto 6px;border:2px solid #000}
+  .pie:after{content:'';position:absolute;inset:18px;background:#fff;border-radius:50%;border:1.5px solid #000}
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px;font-family:var(--mono);font-size:9.5px;font-weight:700}
+  .legend span{display:flex;align-items:center;gap:4px}
+  .legend i{width:8px;height:8px;border:1px solid #000;display:inline-block}
+
+  /* ===== full skill grid moved BELOW today's plan, collapsed by default in mobile ===== */
+  .all-skills h3{font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#666;margin:0 0 12px;text-align:center}
+
+  .hubs{display:grid;gap:14px;grid-template-columns:1fr}
+  @media(min-width:760px){.hubs{grid-template-columns:1fr 1fr}}
+
+  .hub{background:#fff;border:3px solid #000;border-radius:2px;padding:16px;box-shadow:5px 5px 0 0 #000}
+  .hub .eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);margin:0 0 4px}
+  .hub h4{margin:0 0 10px;font-size:18px;font-weight:900;letter-spacing:-.005em}
+  .hub .avg{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;margin-bottom:10px;padding-bottom:8px;border-bottom:1.5px solid #eee}
+  .hub .avg .lbl{font-weight:700;color:#666}
+  .hub .avg .v{font-family:var(--mono);font-weight:800;color:#999}
+  .hub ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+  .hub li a,.hub li button{display:flex;justify-content:space-between;align-items:center;background:#fafafa;border:2px solid #000;border-radius:2px;padding:9px 12px;font-weight:800;font-size:13px;color:#000;text-decoration:none;cursor:pointer;width:100%;text-align:left;font-family:inherit}
+  .hub li a:hover,.hub li button:hover{background:#fff5b8}
+  .hub li .prog{font-family:var(--mono);font-size:10.5px;font-weight:800;color:#666;letter-spacing:.04em}
+  .hub li .locked{background:#f4f4f4;border-style:dashed;border-color:#999;color:#999;cursor:not-allowed}
+  .hub li .locked .prog{color:var(--red)}
+  .hub.mock{background:linear-gradient(135deg,#0a0a0a,#1a1a1a);color:#fff;border-color:#000;box-shadow:5px 5px 0 0 var(--yellow)}
+  .hub.mock .eyebrow{color:var(--yellow)}
+  .hub.mock h4{color:#fff}
+  .hub.mock .avg{border-bottom-color:#333}
+  .hub.mock .avg .lbl{color:#aaa}
+  .hub.mock li a{background:#fff;color:#000}
+
+  /* note panel */
+  .anno{max-width:1100px;margin:24px auto 0;font-family:var(--mono);font-size:11px;color:#555;line-height:1.65;background:#fff;border:2px dashed #000;padding:12px 14px;border-radius:2px}
+  .anno b{color:var(--blue)}
+</style>
+</head>
+<body>
+
+<div class="pmeta">
+  <p class="tag">Practice V1 · Today's plan · Responsive</p>
+  <h1>วันนี้ทำอันนี้ — collapse 13 skills + 7 dashboards into 3 clear tasks</h1>
+  <p><b>What stays:</b> all 13 existing skills, free-tier alert, overview (plan/study time/countdown/pie/chart). <b>What changes:</b> position. Today's 3 recommended tasks float to the top. Overview condenses into a 4-up strip below. Full skill grid still accessible, just no longer the first thing.</p>
+</div>
+
+<div class="switch">
+  <span>Viewport:</span>
+  <button class="on" onclick="document.querySelector('.page').classList.remove('mobile');this.classList.add('on');this.nextElementSibling.classList.remove('on')">Desktop</button><button onclick="document.querySelector('.page').classList.add('mobile');this.classList.add('on');this.previousElementSibling.classList.remove('on')">Mobile</button>
+</div>
+
+<div class="page">
+
+  <!-- ===== HERO: Today's plan ===== -->
+  <section class="today">
+    <div class="hd">
+      <div>
+        <p class="eyebrow">Practice hub · วันที่ 9 ของแผน</p>
+        <h2>วันนี้ทำ <b>3 อย่างนี้</b></h2>
+        <p class="sub">~15 นาที · เลือกให้แล้วตามจุดอ่อนของคุณจาก mock test เมื่อวาน</p>
+      </div>
+      <div class="ribbon">
+        <div class="cell"><p class="l">🔥 ติดต่อ</p><p class="v">3 <span class="y">วัน</span></p></div>
+        <div class="cell"><p class="l">📅 สอบอีก</p><p class="v">21 <span class="y">วัน</span></p></div>
+        <div class="cell"><p class="l">🎯 เป้า</p><p class="v">115</p></div>
+      </div>
+    </div>
+
+    <div class="tasks">
+      <a class="task done" href="#">
+        <span class="num">✓</span>
+        <p class="why">✓ ทำแล้ว · 5 นาที</p>
+        <p class="lbl">Dictation · ง่าย</p>
+        <div class="meta"><span>Literacy</span><span>0/1 → ✓</span></div>
+      </a>
+      <a class="task" href="#">
+        <span class="num">2</span>
+        <p class="why weak">⚠ จุดอ่อนของคุณ</p>
+        <p class="lbl">Fill in the blank<br>(เติมคำ)</p>
+        <div class="meta"><span>Literacy</span><span class="tag">6 นาที</span></div>
+      </a>
+      <a class="task" href="#">
+        <span class="num">3</span>
+        <p class="why warm">+ AI feedback</p>
+        <p class="lbl">Speak about photo<br>(พูดอธิบายรูป)</p>
+        <div class="meta"><span>Production</span><span class="tag">4 นาที</span></div>
+      </a>
+    </div>
+
+    <div class="footer">
+      <div class="prog">
+        <p class="prog-lbl"><span>ความก้าวหน้าวันนี้</span><span><b>1</b> / 3</span></p>
+        <div class="bar"><span></span></div>
+      </div>
+      <a class="resume" href="#">ทำต่อ ข้อ 2 →</a>
+    </div>
+  </section>
+
+  <!-- ===== Free tier alert — kept but reframed as positive count ===== -->
+  <section class="free">
+    <span class="ic">🎁</span>
+    <div class="body">
+      <p class="eyebrow">Free starter access</p>
+      <h3>คุณยังมีสิทธิ์ทดลอง 6 ทักษะ ฟรี ทักษะละ 1 ครั้ง</h3>
+      <p>ลอง Reading, Vocabulary, Dictation, Fill in the Blank, Real Word, Interactive Conversation ได้อย่างละ 1 ครั้ง · พร้อม AI Feedback 1 เครดิตสำหรับงานพูดหรือเขียน 1 งาน</p>
+      <div class="ctr">
+        <span class="item">เหลือ <b>5</b> สิทธิ์ทดลอง</span>
+        <span class="item">AI feedback <b>1</b> เครดิต</span>
+        <span class="item">Mock test <b>0</b> (อัปเกรด)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Overview moved down + condensed into 4 cards (was a giant stack) ===== -->
+  <div class="overview-toggle">
+    <div class="l"><span class="ic">📊</span><span>สถิติของคุณ</span></div>
+    <span class="chev">▾</span>
+  </div>
+  <section class="overview">
+    <div class="ov-card">
+      <p class="eyebrow">Your plan</p>
+      <h4>แพ็กเกจ Free</h4>
+      <div class="row"><span>AI feedback</span><b>1/1</b></div>
+      <div class="row"><span>Mock tests</span><b>0/0</b></div>
+      <div class="row"><span>หมดอายุ</span><b>—</b></div>
+    </div>
+    <div class="ov-card">
+      <p class="eyebrow">Study time</p>
+      <div class="row"><span>วันนี้</span><b style="color:var(--blue);font-size:18px">12m</b></div>
+      <div class="row"><span>สัปดาห์นี้</span><b style="color:var(--blue);font-size:18px">68m</b></div>
+      <div class="row"><span>รวม</span><b style="color:var(--blue);font-size:18px">245m</b></div>
+    </div>
+    <div class="ov-card">
+      <p class="eyebrow">Exam countdown</p>
+      <p class="big">21<span style="font-size:12px;font-weight:700;color:#666;margin-left:6px">วัน</span></p>
+      <p class="sm">สอบ 30 มิ.ย. 2569 · แก้ไข →</p>
+    </div>
+    <div class="ov-card">
+      <p class="eyebrow">Time by skill</p>
+      <div class="pie"></div>
+      <div class="legend">
+        <span><i style="background:var(--yellow)"></i>Literacy</span>
+        <span><i style="background:var(--blue)"></i>Comp</span>
+        <span><i style="background:var(--green)"></i>Conv</span>
+        <span><i style="background:var(--orange)"></i>Prod</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== All skills (current grid, kept identical, just demoted) ===== -->
+  <section class="all-skills">
+    <h3>━ ทักษะทั้งหมด · เลือกฝึกเองได้ ━</h3>
+    <div class="hubs">
+
+      <div class="hub">
+        <p class="eyebrow">Free baseline check</p>
+        <h4>Starter test</h4>
+        <div class="avg"><span class="lbl">Average score</span><span class="v">—</span></div>
+        <ul><li><a href="#"><span>Mini diagnosis</span><span class="prog">15–17 minutes</span></a></li></ul>
+      </div>
+
+      <div class="hub">
+        <p class="eyebrow">Writing &amp; speaking tasks</p>
+        <h4>Production</h4>
+        <div class="avg"><span class="lbl">Average score</span><span class="v">—</span></div>
+        <ul>
+          <li><a href="#"><span>Write about photo</span><span class="prog">5 rounds</span></a></li>
+          <li><a href="#"><span>Read, then write</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Speak about photo</span><span class="prog">5 rounds</span></a></li>
+          <li><a href="#"><span>Read, then speak</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Interactive speaking</span><span class="prog">6 turns / scenario</span></a></li>
+        </ul>
+      </div>
+
+      <div class="hub">
+        <p class="eyebrow">Reading: vocab &amp; passages</p>
+        <h4>Comprehension</h4>
+        <div class="avg"><span class="lbl">Average score</span><span class="v">—</span></div>
+        <ul>
+          <li><a href="#"><span>Vocabulary</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Reading</span><span class="prog">0/1</span></a></li>
+        </ul>
+      </div>
+
+      <div class="hub">
+        <p class="eyebrow">Interactive listening</p>
+        <h4>Conversation</h4>
+        <div class="avg"><span class="lbl">Average score</span><span class="v">—</span></div>
+        <ul>
+          <li><a class="locked" href="#"><span>Interactive conversation</span><span class="prog">🔒 ปลดล็อก: Basic+</span></a></li>
+          <li><a href="#"><span>Dialogue → summary (AI)</span><span class="prog">5 rounds</span></a></li>
+        </ul>
+      </div>
+
+      <div class="hub">
+        <p class="eyebrow">Dictation, FITB, real word</p>
+        <h4>Literacy</h4>
+        <div class="avg"><span class="lbl">Average score</span><span class="v">—</span></div>
+        <ul>
+          <li><a href="#"><span>Dictation</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Fill in the blank</span><span class="prog">0/1</span></a></li>
+          <li><a href="#"><span>Real word</span><span class="prog">0/1</span></a></li>
+        </ul>
+      </div>
+
+      <div class="hub mock">
+        <p class="eyebrow">Full exam simulation</p>
+        <h4>Mock test</h4>
+        <div class="avg"><span class="lbl">Average score</span><span class="v">—</span></div>
+        <ul><li><a href="#"><span>Full mock test</span><span class="prog">VIP only</span></a></li></ul>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<div class="anno"><b>// what changed from current /practice:</b><br>
+1. Removed "Live academic portal" header — replaced with "วันนี้ทำ 3 อย่างนี้" hero showing 3 recommended tasks from the real 13 skills.<br>
+2. Streak / days-to-exam / target-score ribbon up top (replaces buried PracticeExamCountdownPanel).<br>
+3. DashboardHowToUseAnnouncement + DashboardVipAnnouncement removed from hero — should appear as dismissable banners or inside a "info" drawer (announcements aren't actions).<br>
+4. PracticePageOverview's 7-stack condensed to a 4-card strip (Plan, Study time, Countdown, Pie), behind a collapse toggle.<br>
+5. Free-tier alert reframed from restriction ("ได้อย่างละ 1 ครั้ง") to positive count ("คุณยังมีสิทธิ์ทดลอง 6 ทักษะ").<br>
+6. Full skill grid kept identical but demoted below the fold — for users who want to self-direct.<br>
+7. Mock test panel gets reverse-color treatment (yellow shadow on black) — destination, not just another tile.</div>
+
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home V2 — Empathy & Recovery</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Sarabun:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1a1a; --blue:#004aad; --yellow:#ffcc00; --cream:#fdf6e9; --warm:#fff4dc;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Sarabun',system-ui,sans-serif;background:#efe7d4;color:var(--ink);padding:24px 12px 80px;-webkit-font-smoothing:antialiased}
+  .meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--blue);margin:0 0 6px;text-align:center}
+  .lead{font-size:13px;color:#444;text-align:center;max-width:60ch;margin:0 auto 22px;line-height:1.6}
+  .lead b{color:#000}
+
+  .phone{max-width:440px;margin:0 auto;background:var(--cream);border:3px solid #000;box-shadow:8px 8px 0 0 #000;border-radius:28px;overflow:hidden}
+
+  .top{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--cream);border-bottom:1.5px solid #d8c9a4}
+  .logo{display:flex;align-items:center;gap:8px}
+  .logo .box{width:30px;height:30px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:900;font-size:13px;border-radius:8px}
+  .logo .name{font-weight:900;font-size:14px}
+  .top .signin{font-size:12px;font-weight:700;color:#555;text-decoration:underline}
+
+  /* hero — warm, big quote-style */
+  .hero{padding:32px 22px 24px;text-align:left}
+  .hero .greeting{font-size:13px;font-weight:700;color:#7a5b1a;margin:0 0 14px;display:flex;align-items:center;gap:6px}
+  .hero .greeting .dot{width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block}
+  .hero h1{margin:0 0 14px;font-size:30px;font-weight:900;line-height:1.2;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--blue);position:relative}
+  .hero h1 em:after{content:'';position:absolute;left:0;right:0;bottom:2px;height:6px;background:var(--yellow);z-index:-1}
+  .hero .sub{font-size:15px;color:#3a2e15;line-height:1.6;margin:0 0 18px}
+  .hero .stat-line{font-family:var(--mono);font-size:12px;font-weight:800;color:#7a5b1a;margin:0 0 22px;letter-spacing:.02em}
+  .hero .stat-line b{color:#000;font-size:14px}
+
+  .cta-row{display:flex;flex-direction:column;gap:10px}
+  .cta{display:block;background:#000;color:#fff;padding:16px 18px;border-radius:14px;font-weight:800;font-size:16px;text-align:center;text-decoration:none;box-shadow:4px 4px 0 0 var(--blue)}
+  .cta-soft{display:block;background:transparent;color:#000;padding:12px;font-weight:700;font-size:13px;text-align:center;text-decoration:underline}
+
+  /* story card — Bandura, similar others */
+  .story{margin:22px 18px 0;background:#fff;border:2px solid #000;border-radius:18px;padding:18px;box-shadow:5px 5px 0 0 #000}
+  .story .head{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+  .story .av{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#ffb,#fc8);border:2px solid #000;display:grid;place-items:center;font-weight:900;font-size:20px;color:#000}
+  .story .who{flex:1}
+  .story .who .n{font-weight:900;font-size:15px;margin:0}
+  .story .who .role{font-size:11.5px;color:#666;margin:2px 0 0;font-weight:600}
+  .story .quote{font-size:14.5px;line-height:1.6;margin:0 0 14px;color:#222;font-weight:500}
+  .story .quote span{background:var(--yellow);padding:0 4px}
+  .arc{display:flex;gap:0;align-items:center;background:#faf2dc;border:1.5px solid #000;border-radius:10px;padding:10px}
+  .arc .b,.arc .a{flex:1;text-align:center}
+  .arc .lbl{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.1em;color:#666;text-transform:uppercase;margin:0 0 2px}
+  .arc .num{font-family:var(--mono);font-size:22px;font-weight:900;margin:0}
+  .arc .b .num{color:#999;text-decoration:line-through}
+  .arc .a .num{color:var(--blue)}
+  .arc .arr{font-size:18px;font-weight:900;color:#000;padding:0 6px}
+  .arc .wks{font-family:var(--mono);font-size:10px;font-weight:700;color:#666;margin:2px 0 0}
+
+  /* dots — story carousel */
+  .dots{display:flex;justify-content:center;gap:6px;margin:14px 0 0}
+  .dots span{width:8px;height:8px;border:1.5px solid #000;border-radius:50%}
+  .dots span.on{background:#000}
+
+  /* reassure list */
+  .reassure{padding:24px 22px 12px}
+  .reassure h3{font-size:16px;font-weight:900;margin:0 0 14px;letter-spacing:-.005em;display:flex;align-items:center;gap:8px}
+  .reassure h3 .heart{font-size:18px}
+  .rlist{display:flex;flex-direction:column;gap:10px}
+  .ritem{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1.5px solid #000;border-radius:12px;padding:12px 14px}
+  .ritem .ic{flex:0 0 32px;height:32px;border-radius:50%;background:var(--yellow);border:1.5px solid #000;display:grid;place-items:center;font-weight:900;font-size:14px}
+  .ritem .t{font-size:13.5px;font-weight:700;margin:0 0 2px}
+  .ritem .d{font-size:12px;color:#555;margin:0;line-height:1.5}
+
+  /* community count band */
+  .band{margin:18px 18px 0;background:var(--blue);color:#fff;border:2px solid #000;border-radius:14px;padding:18px;text-align:center;box-shadow:4px 4px 0 0 #000}
+  .band .big{font-family:var(--mono);font-size:34px;font-weight:900;margin:0;line-height:1}
+  .band .sm{font-size:12.5px;font-weight:700;margin:6px 0 0;color:#dbe5ff}
+
+  /* footer cta */
+  .foot{padding:28px 22px 24px;text-align:center}
+  .foot p{font-size:14px;font-weight:700;margin:0 0 14px;color:#3a2e15}
+  .foot .cta{margin:0}
+
+  .anno{max-width:440px;margin:14px auto 0;font-family:var(--mono);font-size:10.5px;color:#555;line-height:1.6;background:#fff;border:2px dashed #000;padding:10px 12px;border-radius:8px}
+  .anno b{color:var(--blue)}
+</style>
+</head>
+<body>
+  <p class="meta">Home V2 · Empathy & recovery</p>
+  <p class="lead"><b>Philosophy:</b> Name the elephant. They failed — acknowledge it warmly, then prove peers like them came back. Soft cream palette, rounded edges, story-first.</p>
+
+  <div class="phone">
+    <div class="top">
+      <div class="logo"><span class="box">EP</span><span class="name">English Plan</span></div>
+      <a class="signin" href="#">เข้าสู่ระบบ</a>
+    </div>
+
+    <div class="hero">
+      <p class="greeting"><span class="dot"></span>สวัสดี · เราดีใจที่คุณกลับมา</p>
+      <h1>สอบไม่ผ่าน?<br><em>ไม่เป็นไรเลย</em></h1>
+      <p class="sub">นักเรียนของเรา 73% เคยสอบตกอย่างน้อย 1 ครั้ง<br>แล้วก็กลับมาผ่านได้ ในเฉลี่ย 5 สัปดาห์</p>
+      <p class="stat-line">▸ <b>500+</b> นักเรียนไทย กลับมาผ่านในปีนี้</p>
+      <div class="cta-row">
+        <a class="cta" href="#">ดูแผนของคุณ ฟรี →</a>
+        <a class="cta-soft" href="#">หรือฟังเรื่องของรุ่นพี่ก่อน</a>
+      </div>
+    </div>
+
+    <div class="story">
+      <div class="head">
+        <div class="av">น</div>
+        <div class="who"><p class="n">น้องเนย · กรุงเทพ</p><p class="role">ม.6 · เป้า ม.ขอนแก่น อินเตอร์</p></div>
+      </div>
+      <p class="quote">"เคยสอบตก 3 รอบ ท้อมาก คิดว่าตัวเองไม่เก่งภาษา <span>พอมาฝึกแบบมีคนวางแผนให้ ได้ 120 ใน 6 สัปดาห์ค่ะ</span>"</p>
+      <div class="arc">
+        <div class="b"><p class="lbl">ก่อน</p><p class="num">75</p></div>
+        <div class="arr">→</div>
+        <div class="a"><p class="lbl">หลัง</p><p class="num">120</p><p class="wks">6 สัปดาห์</p></div>
+      </div>
+      <div class="dots"><span class="on"></span><span></span><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="reassure">
+      <h3><span class="heart">💛</span> เราเข้าใจว่าคุณกำลังรู้สึก…</h3>
+      <div class="rlist">
+        <div class="ritem"><div class="ic">😰</div><div><p class="t">"ภาษาอังกฤษไม่ใช่ของเรา"</p><p class="d">ไม่จริง — มีนักเรียนแบบคุณ 500+ คนที่ผ่านแล้ว</p></div></div>
+        <div class="ritem"><div class="ic">💸</div><div><p class="t">"กลัวเสียเงินฟรีอีกรอบ"</p><p class="d">เริ่มฟรี ไม่ต้องใส่บัตร เห็นผลก่อนค่อยจ่าย</p></div></div>
+        <div class="ritem"><div class="ic">🕐</div><div><p class="t">"ไม่มีเวลาเรียน"</p><p class="d">วันละ 15 นาทีก็พอ ฝึกตรงจุดที่อ่อนเท่านั้น</p></div></div>
+      </div>
+    </div>
+
+    <div class="band">
+      <p class="big">500+</p>
+      <p class="sm">นักเรียนไทยกลับมาผ่าน · 2025</p>
+    </div>
+
+    <div class="foot">
+      <p>พร้อมเริ่มใหม่อีกครั้งไหม?</p>
+      <a class="cta" href="#">เริ่มเลย ฟรี →</a>
+    </div>
+  </div>
+
+  <div class="anno"><b>// psych levers:</b> shame-normalization ("73% เคยสอบตก"), Bandura self-efficacy (similar-others story), narrative transportation, reduced threat via warm palette + rounded edges, anxiety-targeted reassure list.</div>
+</body>
+</html>

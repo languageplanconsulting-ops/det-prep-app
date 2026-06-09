@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home V1 — Thai-first, one tap</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Sarabun:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0a0a; --blue:#004aad; --yellow:#ffcc00; --paper:#f4f6fb;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Sarabun',system-ui,sans-serif;background:#e9ecf3;color:var(--ink);padding:24px 12px 80px;-webkit-font-smoothing:antialiased}
+  .meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--blue);margin:0 0 6px;text-align:center}
+  .lead{font-size:13px;color:#444;text-align:center;max-width:60ch;margin:0 auto 22px;line-height:1.6}
+  .lead b{color:#000}
+
+  /* phone frame */
+  .phone{max-width:420px;margin:0 auto;background:#fff;border:3px solid #000;box-shadow:8px 8px 0 0 #000;border-radius:24px;overflow:hidden}
+
+  /* top bar */
+  .top{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:2px solid #000;background:#fff}
+  .logo{display:flex;align-items:center;gap:8px}
+  .logo .box{width:30px;height:30px;background:var(--blue);color:#fff;border:2px solid #000;display:grid;place-items:center;font-weight:900;font-size:14px;border-radius:6px}
+  .logo .name{font-weight:900;font-size:14px;letter-spacing:-.01em}
+  .top .signin{font-size:12px;font-weight:700;color:#333;text-decoration:underline}
+
+  /* hero */
+  .hero{padding:40px 22px 28px;text-align:center;background:#fff}
+  .hero .kicker{font-family:var(--mono);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#666;margin:0 0 14px}
+  .hero h1{margin:0 0 8px;font-size:34px;font-weight:900;line-height:1.1;letter-spacing:-.01em}
+  .hero h1 .y{background:var(--yellow);padding:0 6px;display:inline-block;transform:rotate(-1deg)}
+  .hero .sub{margin:12px auto 22px;font-size:14px;color:#444;line-height:1.55;max-width:30ch}
+
+  /* the one CTA */
+  .cta{display:block;width:100%;background:var(--yellow);border:3px solid #000;box-shadow:5px 5px 0 0 #000;padding:18px;font-weight:900;font-size:20px;text-align:center;text-decoration:none;color:#000;border-radius:14px}
+  .cta-note{font-family:var(--mono);font-size:11px;font-weight:700;color:#666;margin:10px 0 0;text-align:center;letter-spacing:.04em}
+
+  /* inline micro-quiz teaser (Zeigarnik) */
+  .quiz{margin:26px 18px 0;border:2px dashed #000;padding:14px;border-radius:12px;background:#fffef5}
+  .quiz .q-label{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin:0 0 6px}
+  .quiz .q{font-size:15px;font-weight:800;margin:0 0 12px}
+  .quiz .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .quiz .opt{border:2px solid #000;background:#fff;padding:10px;border-radius:10px;font-weight:700;font-size:13px;text-align:center;cursor:pointer}
+  .quiz .opt:hover{background:var(--yellow)}
+  .quiz .progress{margin-top:12px;height:6px;background:#eee;border:1.5px solid #000;border-radius:99px;overflow:hidden}
+  .quiz .progress span{display:block;width:10%;height:100%;background:var(--blue)}
+  .quiz .pmeta{font-family:var(--mono);font-size:10px;font-weight:700;color:#666;margin:6px 0 0;display:flex;justify-content:space-between}
+
+  /* social proof strip */
+  .proof{padding:24px 18px 8px;border-top:2px solid #000;margin-top:24px;background:#f4f6fb}
+  .proof h3{font-size:14px;font-weight:900;margin:0 0 12px;letter-spacing:-.005em}
+  .faces{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .face{border:2px solid #000;background:#fff;padding:10px 8px;border-radius:10px;text-align:center;box-shadow:2px 2px 0 0 #000}
+  .face .av{width:36px;height:36px;border-radius:50%;background:#ddd;border:2px solid #000;margin:0 auto 6px;display:grid;place-items:center;font-weight:900;font-size:13px}
+  .face .nm{font-size:11px;font-weight:700;margin:0}
+  .face .sc{font-family:var(--mono);font-size:11px;color:#666;font-weight:800;margin:2px 0 0}
+  .face .sc b{color:var(--blue)}
+
+  /* how (3 steps, icons heavy) */
+  .how{padding:24px 18px;background:#fff;border-top:2px solid #000}
+  .how h3{font-size:16px;font-weight:900;margin:0 0 14px;letter-spacing:-.005em}
+  .step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+  .step .n{flex:0 0 36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;border:2px solid #000;display:grid;place-items:center;font-weight:900;font-size:15px}
+  .step .t{font-size:14px;font-weight:800;margin:6px 0 2px}
+  .step .d{font-size:12.5px;color:#555;line-height:1.5;margin:0}
+
+  /* compact pricing teaser */
+  .pricing{padding:22px 18px;background:#fffbe6;border-top:2px solid #000}
+  .pricing h3{font-size:14px;font-weight:900;margin:0 0 6px}
+  .pricing p{font-size:12.5px;color:#444;margin:0 0 12px}
+  .ptier{display:flex;justify-content:space-between;align-items:center;background:#fff;border:2px solid #000;padding:12px 14px;border-radius:10px;box-shadow:3px 3px 0 0 #000}
+  .ptier .pn{font-weight:900;font-size:14px}
+  .ptier .pp{font-family:var(--mono);font-weight:800;font-size:13px}
+  .ptier .pp b{font-size:16px;color:var(--blue)}
+  .seemore{display:block;text-align:center;margin-top:10px;font-size:12px;font-weight:700;color:#000;text-decoration:underline}
+
+  /* sticky bottom CTA on real page */
+  .sticky{position:sticky;bottom:0;background:#fff;border-top:3px solid #000;padding:12px 18px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .sticky .l{font-size:12px;font-weight:800}
+  .sticky a{background:var(--yellow);border:2px solid #000;padding:10px 14px;border-radius:8px;font-weight:900;font-size:13px;text-decoration:none;color:#000;box-shadow:3px 3px 0 0 #000}
+
+  /* annotations */
+  .anno{max-width:420px;margin:14px auto 0;font-family:var(--mono);font-size:10.5px;color:#555;line-height:1.6;background:#fff;border:2px dashed #000;padding:10px 12px;border-radius:8px}
+  .anno b{color:var(--blue)}
+</style>
+</head>
+<body>
+  <p class="meta">Home V1 · Thai-first, one tap</p>
+  <p class="lead"><b>Audience:</b> Thai HS student, post-failure, low English literacy, mobile-first.<br><b>Philosophy:</b> Cut from 15 sections to 5. Thai primary, one CTA, micro-quiz pulls them in (Zeigarnik).</p>
+
+  <div class="phone">
+    <div class="top">
+      <div class="logo"><span class="box">EP</span><span class="name">English Plan</span></div>
+      <a class="signin" href="#">เข้าสู่ระบบ</a>
+    </div>
+
+    <div class="hero">
+      <p class="kicker">DET PREP · ไทย 100%</p>
+      <h1>สอบ DET ครั้งหน้า<br><span class="y">ผ่านแน่</span></h1>
+      <p class="sub">ตอบ 1 คำถาม · เรารู้ว่าคุณควรฝึกอะไร · ฟรี ไม่ต้องสมัคร</p>
+      <a class="cta" href="#">เริ่มเลย →</a>
+      <p class="cta-note">⏱ ใช้เวลา 30 วินาที</p>
+    </div>
+
+    <div class="quiz">
+      <p class="q-label">คำถาม 1 / 5</p>
+      <p class="q">คะแนน DET ล่าสุดของคุณเท่าไร?</p>
+      <div class="opts">
+        <div class="opt">ยังไม่เคยสอบ</div>
+        <div class="opt">ต่ำกว่า 90</div>
+        <div class="opt">90 – 110</div>
+        <div class="opt">110 ขึ้นไป</div>
+      </div>
+      <div class="progress"><span></span></div>
+      <p class="pmeta"><span>เริ่มแล้ว</span><span>เหลือ 4 คำถาม</span></p>
+    </div>
+
+    <div class="proof">
+      <h3>นักเรียนของเรา</h3>
+      <div class="faces">
+        <div class="face"><div class="av">น</div><p class="nm">น้องเนย</p><p class="sc">85→<b>115</b></p></div>
+        <div class="face"><div class="av">ก</div><p class="nm">น้องกาย</p><p class="sc">95→<b>125</b></p></div>
+        <div class="face"><div class="av">พ</div><p class="nm">น้องพลอย</p><p class="sc">75→<b>110</b></p></div>
+      </div>
+    </div>
+
+    <div class="how">
+      <h3>3 ขั้นตอน · ง่ายมาก</h3>
+      <div class="step"><div class="n">1</div><div><p class="t">ตอบ 5 คำถาม</p><p class="d">เรารู้จุดอ่อนของคุณใน 30 วิ</p></div></div>
+      <div class="step"><div class="n">2</div><div><p class="t">ฝึกตรงจุด</p><p class="d">บทเรียนสั้น ๆ วันละ 15 นาที</p></div></div>
+      <div class="step"><div class="n">3</div><div><p class="t">สอบผ่าน</p><p class="d">เฉลี่ย 4–6 สัปดาห์ ถึงคะแนนเป้า</p></div></div>
+    </div>
+
+    <div class="pricing">
+      <h3>เริ่มฟรี จ่ายเมื่อพร้อม</h3>
+      <p>ทดลองฟรี ไม่ต้องใส่บัตรเครดิต</p>
+      <div class="ptier"><span class="pn">ฟรี</span><span class="pp"><b>฿0</b></span></div>
+      <a class="seemore" href="#">ดูแพ็กเกจอื่น →</a>
+    </div>
+
+    <div class="sticky">
+      <span class="l">พร้อมเริ่มไหม?</span>
+      <a href="#">เริ่มเลย →</a>
+    </div>
+  </div>
+
+  <div class="anno"><b>// psych levers:</b> Hick's Law (1 CTA), Fogg BM (tiny first action = answer 1 Q), Zeigarnik (open quiz pulls user in), social proof at fold-2, sticky CTA always available.</div>
+</body>
+</html>

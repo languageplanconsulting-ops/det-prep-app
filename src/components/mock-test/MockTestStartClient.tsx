@@ -5,6 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { PaywallUpsellCard } from "@/components/upsell/PaywallUpsellCard";
+import { CadenceTile } from "@/components/mock-test/dashboard/CadenceTile";
+import { HowToUsePanel } from "@/components/mock-test/dashboard/HowToUsePanel";
+import { SetArchive } from "@/components/mock-test/dashboard/SetArchive";
+import type {
+  MockSetGroup,
+  SetAttemptStats,
+} from "@/components/mock-test/dashboard/types";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { MOCK_TEST_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
 import { FIXED_MOCK_ESTIMATED_DURATION_LABEL } from "@/lib/mock-test/fixed-sequence";
@@ -74,11 +81,6 @@ function formatDateTime(value: string | null | undefined): string {
   } catch {
     return "—";
   }
-}
-
-function nextMonthResetLabel(now = new Date()): string {
-  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  return formatDateShort(next.toISOString());
 }
 
 function csvEscape(value: string): string {
@@ -298,7 +300,6 @@ export function MockTestStartClient() {
   const baseLimit = MOCK_TEST_MONTHLY_LIMIT[effectiveTier];
   const limit = isPreviewMode && baseLimit === 0 ? 1 : baseLimit;
   const remainingCount = Math.max(0, limit - used) + mockAddonRemaining;
-  const visibleMockQuota = Math.max(limit, used + remainingCount);
   const tierOk = used < limit;
   const canStart = !!selectedSetId && (adminCanPreview || (hasUser === true && launchLive && tierOk));
   const bestAttempt = useMemo(
@@ -336,6 +337,63 @@ export function MockTestStartClient() {
     }
     return null;
   }, [adminCanPreview, effectiveTier, hasUser, remainingCount, tierOk]);
+
+  /**
+   * Per-set attempt aggregates derived from this user's attempts.
+   * - lastAttempt: most recent (attempts arrive sorted desc, so the first match wins)
+   * - bestAttempt: highest actual_total
+   */
+  const statsBySetId = useMemo<Record<string, SetAttemptStats>>(() => {
+    const out: Record<string, SetAttemptStats> = {};
+    for (const row of attempts) {
+      const cur = out[row.set_id];
+      if (!cur) {
+        out[row.set_id] = { attemptCount: 1, lastAttempt: row, bestAttempt: row };
+      } else {
+        cur.attemptCount += 1;
+        if (new Date(row.created_at).getTime() > new Date(cur.lastAttempt!.created_at).getTime()) {
+          cur.lastAttempt = row;
+        }
+        if (row.actual_total > (cur.bestAttempt?.actual_total ?? -Infinity)) {
+          cur.bestAttempt = row;
+        }
+      }
+    }
+    return out;
+  }, [attempts]);
+
+  /**
+   * Split groupedSets into "current" (the most recent month, or the catch-all
+   * ARCHIVE bucket when set names lack a parseable month) and "past" (the rest).
+   * This is naming-driven, so it works whether the bank has 15 sets or 100+.
+   */
+  const currentGroup: MockSetGroup | null = groupedSets[0] ?? null;
+  const pastGroups: MockSetGroup[] = useMemo(() => groupedSets.slice(1), [groupedSets]);
+
+  /** Which set the page should highlight as "next" — used by SetArchive and the Welcome CTA. */
+  const recommendedSetId: string | null = useMemo(() => {
+    if (!currentGroup) return null;
+    const unattempted = currentGroup.rows.find(
+      (s) => (statsBySetId[s.id]?.attemptCount ?? 0) === 0,
+    );
+    return unattempted?.id ?? currentGroup.rows[0]?.id ?? null;
+  }, [currentGroup, statsBySetId]);
+
+  /**
+   * Only treat as first-time once we know the user is loaded and has zero
+   * attempts. While `hasUser === null` (still loading) we render the calmer
+   * returner panel rather than briefly flashing the yellow welcome banner.
+   */
+  const isFirstTimeUser = hasUser === true && attempts.length === 0;
+  /** Whether the welcome CTA is safe to surface (user can actually start a mock). */
+  const canShowWelcomeCta =
+    isFirstTimeUser && !!recommendedSetId && (adminCanPreview || (launchLive && tierOk));
+
+  /** Trigger the preflight on a specific set id (used by SetArchive + Welcome CTA). */
+  const pickSet = (setId: string) => {
+    setSelectedSetId(setId);
+    setShowPreflight(true);
+  };
 
   useEffect(() => {
     if (!starting) {
@@ -476,23 +534,41 @@ export function MockTestStartClient() {
           </p>
         </div>
 
-        <div className="min-w-[220px] border-4 border-black bg-[#FFD600] p-4 text-center shadow-[8px_8px_0_0_#111]">
-          <p className="font-mono text-[10px] font-black uppercase tracking-widest">
-            สิทธิ์การสอบคงเหลือ
-            <br />
-            (Mock Credits)
-          </p>
-          <p className="mt-2 text-4xl font-black">
-            {tierLoading ? "…" : `${remainingCount} / ${visibleMockQuota}`}
-          </p>
-          <p className="font-mono text-[9px] font-bold opacity-60">
-            {mockAddonRemaining > 0 ? `INCLUDES +${mockAddonRemaining} ADD-ON` : `RENEW: ${nextMonthResetLabel()}`}
-          </p>
-        </div>
+        <CadenceTile
+          used={used}
+          limit={limit}
+          remainingCount={remainingCount}
+          mockAddonRemaining={mockAddonRemaining}
+          lifetimeAttempts={attempts.length}
+          tier={effectiveTier}
+          loading={tierLoading}
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        <div className="space-y-8 lg:col-span-8">
+      <HowToUsePanel
+        firstSetName={
+          canShowWelcomeCta && recommendedSetId
+            ? currentGroup?.rows.find((r) => r.id === recommendedSetId)?.name
+            : undefined
+        }
+        onStartFirst={
+          canShowWelcomeCta && recommendedSetId
+            ? () => pickSet(recommendedSetId)
+            : undefined
+        }
+      />
+
+      <SetArchive
+        currentGroup={currentGroup}
+        pastGroups={pastGroups}
+        statsBySetId={statsBySetId}
+        attemptCount={attempts.length}
+        recommendedSetId={recommendedSetId}
+        onPickSet={pickSet}
+      />
+
+      {!isFirstTimeUser ? (
+        <>
           <section className="overflow-hidden border-4 border-black bg-white shadow-[8px_8px_0_0_#111]">
             <div className="flex items-center justify-between bg-black p-3 text-white">
               <h2 className="text-sm font-black uppercase italic tracking-widest">Personal Best // คะแนนสูงสุดของคุณ</h2>
@@ -602,111 +678,66 @@ export function MockTestStartClient() {
               </table>
             </div>
           </section>
+        </>
+      ) : null}
+
+      {mockBlockedSpec ? <PaywallUpsellCard spec={mockBlockedSpec} compact /> : null}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="border-4 border-black bg-white p-5 shadow-[8px_8px_0_0_#111]">
+          <p className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-[#0055FF]">ACCESS LOGIC</p>
+          <h3 className="mt-2 text-xl font-black">Monthly mock access by plan</h3>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
+            {(["free", "basic", "premium", "vip"] as const).map((tier) => (
+              <div key={tier} className={`border-[3px] border-black p-3 ${tier === effectiveTier ? "bg-[#FFD600]" : "bg-white"}`}>
+                <p className="font-mono text-[9px] font-black uppercase">{tier}</p>
+                <p className="mt-1 text-2xl font-black text-[#0055FF]">{MOCK_TEST_MONTHLY_LIMIT[tier]}</p>
+                <p className="text-[9px] font-bold uppercase">per month</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs font-bold text-neutral-700">
+            Free users cannot start mock tests. Basic gets 2/month, Premium gets 4/month, and VIP gets 6/month.
+          </p>
         </div>
 
-        <div className="space-y-6 lg:col-span-4">
-          <div className="border-4 border-black border-l-[12px] border-l-[#FF5C00] bg-white p-4 shadow-[8px_8px_0_0_#111]">
-            <p className="mb-3 border-b-2 border-black pb-1 text-xs font-black uppercase">Essential Rules</p>
-            <ul className="space-y-2 text-[11px] font-bold leading-tight">
-              <li className="flex gap-2"><span>⏱️</span> {FIXED_MOCK_ESTIMATED_DURATION_LABEL} duration</li>
-              <li className="flex gap-2 text-red-600"><span>⚠️</span> One credit is used when you start</li>
-              <li className="flex gap-2"><span>📊</span> Scores are high-fidelity estimates, not official DET scores</li>
-            </ul>
+        <div className="border-4 border-black bg-[#f0fdf4] p-5 shadow-[8px_8px_0_0_#111]">
+          <p className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-[#16a34a]">UPGRADE INCENTIVE</p>
+          <h3 className="mt-2 text-xl font-black">{marketing.headline}</h3>
+          <p className="mt-3 text-sm font-semibold text-neutral-700">{marketing.body}</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/pricing"
+              className="border-[3px] border-black bg-[#22c55e] px-5 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111]"
+            >
+              {marketing.cta}
+            </Link>
+            <button
+              type="button"
+              onClick={() => recommendedSetId && pickSet(recommendedSetId)}
+              disabled={
+                !recommendedSetId || !canStart || (!adminCanPreview && tierLoading)
+              }
+              className="border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#111] disabled:opacity-45"
+            >
+              Start recommended
+            </button>
           </div>
-
-          <div className="overflow-hidden border-4 border-black bg-white shadow-[8px_8px_0_0_#111]">
-            <div className="bg-black p-3 text-white">
-              <h2 className="text-xs font-black uppercase italic tracking-widest">Monthly Archive // คลังข้อสอบ</h2>
-            </div>
-            <div className="divide-y-2 divide-black">
-              {groupedSets.map((group, idx) => (
-                <details key={group.key} open={idx === 0} className="group">
-                  <summary className={`flex cursor-pointer items-center justify-between p-3 text-xs font-black ${
-                    idx === 0 ? "bg-[#FFD600] hover:bg-yellow-300" : "bg-white hover:bg-gray-100"
-                  }`}>
-                    <span>{group.label}</span>
-                    <span className="border border-black px-1 font-mono text-[9px] group-open:bg-black group-open:text-white">+/-</span>
-                  </summary>
-                  <div className="space-y-2 bg-white p-2">
-                    {group.rows.map((row, setIdx) => (
-                      <button
-                        key={row.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedSetId(row.id);
-                          setShowPreflight(true);
-                        }}
-                        className={`flex w-full items-center justify-between border-2 border-black p-2 text-left hover:bg-blue-50 ${
-                          selectedSetId === row.id ? "bg-blue-50" : "bg-white"
-                        }`}
-                      >
-                        <span className="text-[11px] font-bold italic">{row.name}</span>
-                        <span className={`text-[8px] ${idx === 0 && setIdx === 0 ? "bg-green-100" : "bg-gray-100"} px-2 py-0.5`}>
-                          {idx === 0 && setIdx === 0 ? "New" : "Open"}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </details>
-              ))}
-            </div>
-          </div>
-
-          <div className="border-4 border-black bg-white p-5 shadow-[8px_8px_0_0_#111]">
-            <p className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-[#0055FF]">ACCESS LOGIC</p>
-            <h3 className="mt-2 text-xl font-black">Monthly mock access by plan</h3>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-              {(["free", "basic", "premium", "vip"] as const).map((tier) => (
-                <div key={tier} className={`border-[3px] border-black p-3 ${tier === effectiveTier ? "bg-[#FFD600]" : "bg-white"}`}>
-                  <p className="font-mono text-[9px] font-black uppercase">{tier}</p>
-                  <p className="mt-1 text-2xl font-black text-[#0055FF]">{MOCK_TEST_MONTHLY_LIMIT[tier]}</p>
-                  <p className="text-[9px] font-bold uppercase">per month</p>
-                </div>
-              ))}
-            </div>
-            <p className="mt-4 text-xs font-bold text-neutral-700">
-              Free users cannot start mock tests. Basic gets 2/month, Premium gets 4/month, and VIP gets 6/month.
-            </p>
-          </div>
-
-          <div className="border-4 border-black bg-[#f0fdf4] p-5 shadow-[8px_8px_0_0_#111]">
-            <p className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-[#16a34a]">UPGRADE INCENTIVE</p>
-            <h3 className="mt-2 text-xl font-black">{marketing.headline}</h3>
-            <p className="mt-3 text-sm font-semibold text-neutral-700">{marketing.body}</p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <Link
-                href="/pricing"
-                className="border-[3px] border-black bg-[#22c55e] px-5 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111]"
-              >
-                {marketing.cta}
-              </Link>
-              <button
-                type="button"
-                onClick={() => setShowPreflight(true)}
-                disabled={!canStart || (!adminCanPreview && tierLoading)}
-                className="border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#111] disabled:opacity-45"
-              >
-                Start current plan
-              </button>
-            </div>
-            <p className="mt-3 text-[11px] font-bold text-neutral-600">
-              The more monthly mocks you unlock, the more often you can benchmark, review weak skills, and prove score gains.
-            </p>
-          </div>
-
-          {mockBlockedSpec ? <PaywallUpsellCard spec={mockBlockedSpec} compact /> : null}
-
-          {adminCanPreview ? (
-            <div className="border-4 border-black bg-black p-3 font-mono text-[9px] leading-tight text-[#FFD600] shadow-[8px_8px_0_0_#111]">
-              NEXT_PUBLIC_MOCK_TEST_CLOSED={String(!launchLive)}
-              <br />
-              TOTAL_SETS_AVAILABLE: {sets.length}
-              <br />
-              USER_SESSION: {adminPreviewMode ? "ADMIN_PREVIEW" : "LEARNER_VIEW"}
-            </div>
-          ) : null}
+          <p className="mt-3 text-[11px] font-bold text-neutral-600">
+            The more monthly mocks you unlock, the more often you can benchmark, review weak skills, and prove score gains.
+          </p>
         </div>
       </div>
+
+      {adminCanPreview ? (
+        <div className="border-4 border-black bg-black p-3 font-mono text-[9px] leading-tight text-[#FFD600] shadow-[8px_8px_0_0_#111]">
+          NEXT_PUBLIC_MOCK_TEST_CLOSED={String(!launchLive)}
+          <br />
+          TOTAL_SETS_AVAILABLE: {sets.length}
+          <br />
+          USER_SESSION: {adminPreviewMode ? "ADMIN_PREVIEW" : "LEARNER_VIEW"}
+        </div>
+      ) : null}
 
       <div className="flex flex-col items-center justify-between gap-4 border-t-2 border-dashed border-black pt-4 md:flex-row">
         <p className="font-mono text-[9px] font-black uppercase text-gray-400">

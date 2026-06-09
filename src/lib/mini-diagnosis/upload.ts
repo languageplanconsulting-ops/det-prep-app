@@ -237,15 +237,141 @@ export function buildMiniDiagnosisTemplateJson(): string {
     interactive_listening: [
       {
         content: {
-          instruction: "Listen to the audio. You may play it up to 3 times, then answer the 5 questions.",
-          instruction_th: "ฟังเสียงนี้ได้สูงสุด 3 ครั้ง แล้วตอบคำถาม 5 ข้อ",
-          audio_url: "https://example.com/listening-mini-test.mp3",
-          questions: [
-            { question: "Why did the student visit the office?", options: ["To ask about housing", "To ask about an internship", "To change a class", "To borrow a book"], correctAnswer: "To ask about an internship" },
-            { question: "What support does the office provide?", options: ["Gym membership", "Transport card", "Partner company list", "Dormitory discount"], correctAnswer: "Partner company list" },
-            { question: "What is the student unsure about?", options: ["Salary details", "Application process", "Exam date", "Scholarship deadline"], correctAnswer: "Application process" },
-            { question: "What will the office explain?", options: ["Dress code", "Application steps", "Cafeteria rules", "Parking rules"], correctAnswer: "Application steps" },
-            { question: "What does the student say at the end?", options: ["That would be really helpful.", "I will cancel my application.", "I do not need any support.", "I already know the process."], correctAnswer: "That would be really helpful." },
+          instruction: "You are about to take a short listening test. You will hear three short scenarios. You can press play up to 3 times per scenario, then answer the questions before moving on.",
+          instruction_th: "คุณกำลังจะทำข้อสอบการฟังสั้นๆ จะมีทั้งหมด 3 สถานการณ์ คุณสามารถกดฟังได้ไม่เกิน 3 ครั้งต่อหนึ่งสถานการณ์ จากนั้นตอบคำถามทั้งหมดก่อนไปต่อ",
+          pre_break_seconds: 20,
+          pre_break_message_th: "พักสายตา 20 วินาทีก่อนเริ่มทำข้อสอบการฟัง เตรียมหูฟังและสมาธิให้พร้อม เพราะหลังจากนี้คุณจะได้ฟังบทสนทนาและตอบคำถาม",
+          pre_break_message_en: "Take a 20 second rest before the listening exam begins. Put on your headphones and get ready, because right after this you will listen to short scenarios and answer questions.",
+          max_plays: 3,
+          tts_provider: "deepgram",
+          scenarios: [
+            {
+              id: 1,
+              kind: "mcq",
+              title_en: "Scenario 1",
+              title_th: "สถานการณ์ที่ 1",
+              passage:
+                "Maya went to see Professor Carter because she had not picked up the reading list for next week's class. Her financial aid was late, so she could not buy the books yet. Carter told her she could find the books at the school library and read the first chapter on the class website.",
+              questions: [
+                {
+                  question: "Why did Maya go to see the professor?",
+                  options: [
+                    "To explain that she was not ready",
+                    "To return some borrowed books",
+                    "To ask for money back from the shop",
+                    "To change to a new class",
+                  ],
+                  correctAnswer: "To explain that she was not ready",
+                },
+                {
+                  question: "Why couldn't Maya buy the books?",
+                  options: [
+                    "The shop had no copies",
+                    "Her money came late",
+                    "Her family had a problem",
+                    "Her job took too much time",
+                  ],
+                  correctAnswer: "Her money came late",
+                },
+                {
+                  question: "What did the professor suggest?",
+                  options: [
+                    "Lending his own books to her",
+                    "Moving the class to a later date",
+                    "Borrowing books from the campus shelves and reading the start of the book online",
+                    "Asking the shop to let her pay later",
+                  ],
+                  correctAnswer:
+                    "Borrowing books from the campus shelves and reading the start of the book online",
+                },
+              ],
+            },
+            {
+              id: 2,
+              kind: "fitb",
+              title_en: "Scenario 2",
+              title_th: "สถานการณ์ที่ 2",
+              passage:
+                "Daniel wants to apply for the Asia Pacific exchange programme, and the deadline is in ten days. He has finished the forms, but he still has to write a personal statement that sounds compelling enough to win a place. Professor Hahn has agreed to send a letter of support before the closing date.",
+              sentences: [
+                {
+                  text: "Daniel is writing a [BLANK 1] letter to explain why he should be chosen for the exchange.",
+                  missingWords: [
+                    {
+                      correctWord: "motivation",
+                      prefix_length: 3,
+                      clue: "Personal statement explaining why you want the opportunity.",
+                      explanationThai: "จดหมายแสดงเหตุผลที่อยากเข้าร่วม",
+                    },
+                  ],
+                },
+                {
+                  text: "He has to send everything before the [BLANK 1] in ten days.",
+                  missingWords: [
+                    {
+                      correctWord: "deadline",
+                      prefix_length: 3,
+                      clue: "The final date by which something must be done.",
+                      explanationThai: "วันสุดท้ายที่ต้องส่ง",
+                    },
+                  ],
+                },
+                {
+                  text: "Without Hahn's support, his application may not seem [BLANK 1] enough to beat hundreds of other students.",
+                  missingWords: [
+                    {
+                      correctWord: "compelling",
+                      prefix_length: 3,
+                      clue: "Strong and convincing enough to grab attention (C1).",
+                      explanationThai: "น่าเชื่อถือและโน้มน้าวใจ",
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              id: 3,
+              kind: "fitb_with_summary",
+              title_en: "Scenario 3",
+              title_th: "สถานการณ์ที่ 3",
+              passage:
+                "Priya went to see Professor Idris to ask him to excuse her from two missed lab classes. She had a job interview on one day and a clinic visit on the other, and the teaching assistant never replied to her emails. Idris said he would accept the absences once she sent him the emails, so she only had to do one extra report.",
+              sentences: [
+                {
+                  text: "Priya is asking the professor to [BLANK 1] her absences so they do not hurt her grade.",
+                  missingWords: [
+                    {
+                      correctWord: "excuse",
+                      prefix_length: 3,
+                      clue: "To officially forgive an absence.",
+                      explanationThai: "ยกเว้นการขาดเรียนอย่างเป็นทางการ",
+                    },
+                  ],
+                },
+                {
+                  text: "Once Idris reads the forwarded emails, both absences will be officially [BLANK 1].",
+                  missingWords: [
+                    {
+                      correctWord: "authorised",
+                      prefix_length: 3,
+                      clue: "Given official permission or approval.",
+                      explanationThai: "ได้รับอนุญาตอย่างเป็นทางการ",
+                    },
+                  ],
+                },
+              ],
+              summary: {
+                question: "Which sentence best summarises the conversation?",
+                options: [
+                  "Priya gave good reasons for missing class, and the professor agreed she only needs to do one extra report.",
+                  "Priya is being punished for missing two lab classes even though she had already written to the teaching assistant about her job interview and her clinic visit beforehand.",
+                  "Priya is leaving the course because the professor did not accept her reasons.",
+                  "Idris told Priya that no other absences would be allowed for any reason in the future.",
+                ],
+                correctAnswer:
+                  "Priya gave good reasons for missing class, and the professor agreed she only needs to do one extra report.",
+              },
+            },
           ],
         },
       },
@@ -356,14 +482,76 @@ const MINI_DIAGNOSIS_TASK_TEMPLATES: Record<MiniDiagnosisTaskType, unknown> = {
   },
   interactive_listening: {
     content: {
-      instruction: "Listen to the audio. You may play it up to 3 times, then answer the 5 questions.",
-      instruction_th: "ฟังเสียงนี้ได้สูงสุด 3 ครั้ง แล้วตอบคำถาม 5 ข้อ",
-      script: "Hello, I am visiting the office to ask about internship opportunities and the application process.",
-      questions: [
+      instruction:
+        "You are about to take a short listening test. You will hear three short scenarios. You can press play up to 3 times per scenario, then answer the questions before moving on.",
+      instruction_th:
+        "คุณกำลังจะทำข้อสอบการฟังสั้นๆ จะมีทั้งหมด 3 สถานการณ์ คุณสามารถกดฟังได้ไม่เกิน 3 ครั้งต่อหนึ่งสถานการณ์ จากนั้นตอบคำถามทั้งหมดก่อนไปต่อ",
+      pre_break_seconds: 20,
+      pre_break_message_th:
+        "พักสายตา 20 วินาทีก่อนเริ่มทำข้อสอบการฟัง เตรียมหูฟังและสมาธิให้พร้อม เพราะหลังจากนี้คุณจะได้ฟังบทสนทนาและตอบคำถาม",
+      pre_break_message_en:
+        "Take a 20 second rest before the listening exam begins. Put on your headphones and get ready, because right after this you will listen to short scenarios and answer questions.",
+      max_plays: 3,
+      tts_provider: "deepgram",
+      scenarios: [
         {
-          question: "Why did the student visit the office?",
-          options: ["Choice 1", "Choice 2", "Choice 3", "Choice 4"],
-          correctAnswer: "Choice 1",
+          id: 1,
+          kind: "mcq",
+          title_en: "Scenario 1",
+          title_th: "สถานการณ์ที่ 1",
+          passage: "Replace this with a 3 sentence narration for scenario 1.",
+          questions: [
+            {
+              question: "Question 1 text?",
+              options: ["Option A", "Option B", "Option C", "Option D"],
+              correctAnswer: "Option A",
+            },
+          ],
+        },
+        {
+          id: 2,
+          kind: "fitb",
+          title_en: "Scenario 2",
+          title_th: "สถานการณ์ที่ 2",
+          passage: "Replace this with a 3 sentence narration for scenario 2.",
+          sentences: [
+            {
+              text: "Sentence with a [BLANK 1] to fill in.",
+              missingWords: [
+                {
+                  correctWord: "example",
+                  prefix_length: 3,
+                  clue: "Hint shown to the learner.",
+                  explanationThai: "คำอธิบายภาษาไทย",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 3,
+          kind: "fitb_with_summary",
+          title_en: "Scenario 3",
+          title_th: "สถานการณ์ที่ 3",
+          passage: "Replace this with a 3 sentence narration for scenario 3.",
+          sentences: [
+            {
+              text: "Sentence with a [BLANK 1] to fill in.",
+              missingWords: [
+                {
+                  correctWord: "example",
+                  prefix_length: 3,
+                  clue: "Hint shown to the learner.",
+                  explanationThai: "คำอธิบายภาษาไทย",
+                },
+              ],
+            },
+          ],
+          summary: {
+            question: "Which sentence best summarises the conversation?",
+            options: ["Best option", "Distractor 1", "Distractor 2", "Distractor 3"],
+            correctAnswer: "Best option",
+          },
         },
       ],
     },

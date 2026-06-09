@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Practice V3 — Coach mode</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;800&family=Sarabun:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0a0a0a;--blue:#004aad;--yellow:#ffcc00;--cream:#fff8e1;--mono:'JetBrains Mono',ui-monospace,monospace}
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{font-family:'Sarabun',system-ui,sans-serif;background:#ece4cf;color:var(--ink);padding:24px 12px 80px;-webkit-font-smoothing:antialiased}
+  .meta{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--blue);margin:0 0 6px;text-align:center}
+  .lead{font-size:13px;color:#444;text-align:center;max-width:60ch;margin:0 auto 22px;line-height:1.6}
+  .lead b{color:#000}
+
+  .phone{max-width:440px;margin:0 auto;background:var(--cream);border:3px solid #000;box-shadow:8px 8px 0 0 #000;border-radius:24px;overflow:hidden}
+
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fff;border-bottom:2px solid #000}
+  .logo{display:flex;align-items:center;gap:8px}
+  .logo .b{width:28px;height:28px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:900;font-size:12px;border-radius:6px}
+  .logo .n{font-weight:900;font-size:13px}
+  .nav .me{font-size:11px;font-weight:700;color:#666}
+
+  /* coach intro */
+  .coach-head{display:flex;align-items:center;gap:12px;padding:18px 18px 8px}
+  .avatar{width:52px;height:52px;border-radius:50%;background:var(--yellow);border:2.5px solid #000;display:grid;place-items:center;font-size:24px;box-shadow:3px 3px 0 0 #000}
+  .coach-head .who{flex:1}
+  .coach-head .who h3{margin:0;font-size:15px;font-weight:900}
+  .coach-head .who p{margin:2px 0 0;font-size:11.5px;color:#666;font-weight:600;display:flex;align-items:center;gap:4px}
+  .coach-head .who p .dot{width:7px;height:7px;background:#22c55e;border-radius:50%;display:inline-block}
+
+  /* chat-style bubbles */
+  .chat{padding:8px 18px 4px;display:flex;flex-direction:column;gap:10px}
+  .bubble{max-width:88%;padding:12px 14px;border:2px solid #000;border-radius:16px;font-size:14px;line-height:1.5;font-weight:600;box-shadow:2px 2px 0 0 #000}
+  .bubble.coach{background:#fff;border-bottom-left-radius:4px;align-self:flex-start}
+  .bubble.coach b{color:var(--blue)}
+  .bubble.me{background:var(--blue);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+  .typing{align-self:flex-start;font-family:var(--mono);font-size:10.5px;color:#888;font-weight:700;padding:4px 6px}
+
+  /* answer choices */
+  .choices{padding:6px 18px 14px;display:flex;flex-direction:column;gap:8px}
+  .choice{background:#fff;border:2.5px solid #000;border-radius:14px;padding:12px 14px;font-weight:800;font-size:14px;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer;box-shadow:3px 3px 0 0 #000}
+  .choice:hover{background:var(--yellow)}
+  .choice .em{font-size:18px}
+  .choice .arr{font-size:18px;color:#666;font-weight:900}
+
+  /* assigned task */
+  .assigned{margin:8px 18px 14px;background:#000;color:#fff;border-radius:14px;padding:16px;border:2.5px solid #000;box-shadow:4px 4px 0 0 var(--yellow)}
+  .assigned .tag{display:inline-block;background:var(--yellow);color:#000;font-family:var(--mono);font-size:10px;font-weight:900;letter-spacing:.1em;padding:3px 8px;border-radius:99px;margin-bottom:8px}
+  .assigned h4{margin:0 0 4px;font-weight:900;font-size:16px}
+  .assigned .why{margin:0 0 12px;font-size:12px;color:#ccc;line-height:1.5}
+  .assigned .meta-row{display:flex;gap:14px;font-family:var(--mono);font-size:11px;font-weight:800;color:#bbb;margin-bottom:12px}
+  .assigned .meta-row b{color:#fff}
+  .assigned a{display:flex;justify-content:space-between;align-items:center;background:var(--yellow);color:#000;padding:13px 14px;border-radius:10px;font-weight:900;font-size:14.5px;text-decoration:none;border:2px solid #000}
+
+  /* quick stats footer */
+  .quickstats{display:flex;padding:12px 18px 18px;gap:8px}
+  .qs{flex:1;background:#fff;border:2px solid #000;border-radius:10px;padding:10px;text-align:center}
+  .qs .lbl{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#666}
+  .qs .val{font-family:var(--mono);font-size:18px;font-weight:900;margin-top:2px}
+  .qs .val .y{color:var(--blue)}
+
+  /* see-other-options soft link */
+  .other{padding:0 18px 18px;text-align:center}
+  .other a{font-size:12.5px;font-weight:700;color:#666;text-decoration:underline}
+
+  .anno{max-width:440px;margin:14px auto 0;font-family:var(--mono);font-size:10.5px;color:#555;line-height:1.6;background:#fff;border:2px dashed #000;padding:10px 12px;border-radius:8px}
+  .anno b{color:var(--blue)}
+</style>
+</head>
+<body>
+  <p class="meta">Practice V3 · Coach mode</p>
+  <p class="lead"><b>Philosophy:</b> A friendly Thai coach guides each session. Conversational UI removes "what do I do?" paralysis. Near-zero reading, near-zero decisions.</p>
+
+  <div class="phone">
+    <div class="nav">
+      <div class="logo"><span class="b">EP</span><span class="n">Practice</span></div>
+      <span class="me">น้องเนย</span>
+    </div>
+
+    <div class="coach-head">
+      <div class="avatar">🧑‍🏫</div>
+      <div class="who">
+        <h3>น้องโค้ช</h3>
+        <p><span class="dot"></span>กำลังออนไลน์ · ช่วยวางแผนให้</p>
+      </div>
+    </div>
+
+    <div class="chat">
+      <div class="bubble coach">สวัสดีน้องเนย! วันนี้ <b>วันที่ 3</b> ของการฝึกแล้ว 🔥<br>เก่งมาก ที่กลับมาอีกครั้ง</div>
+      <div class="bubble coach">วันนี้พร้อมฝึกประมาณ <b>15 นาที</b> ไหมคะ?</div>
+    </div>
+
+    <div class="choices">
+      <button class="choice"><span><span class="em">✅</span> &nbsp;พร้อม 15 นาที</span><span class="arr">→</span></button>
+      <button class="choice"><span><span class="em">⏱</span> &nbsp;วันนี้มีเวลา 5 นาที</span><span class="arr">→</span></button>
+      <button class="choice"><span><span class="em">😮‍💨</span> &nbsp;เหนื่อย ขอพรุ่งนี้</span><span class="arr">→</span></button>
+    </div>
+
+    <div class="chat">
+      <div class="bubble me">พร้อม 15 นาที</div>
+      <div class="typing">น้องโค้ชกำลังพิมพ์…</div>
+      <div class="bubble coach">เยี่ยมเลย! 💪 จากการทำเมื่อวาน <b>จุดอ่อนของน้องคือเติมคำในประโยค</b><br>วันนี้โค้ชจัดอันนี้ให้นะ ↓</div>
+    </div>
+
+    <div class="assigned">
+      <span class="tag">📝 ภารกิจวันนี้</span>
+      <h4>เติมคำในประโยค · 5 ข้อ</h4>
+      <p class="why">โค้ชเลือกให้เพราะ: ข้อแบบนี้คุณตอบถูกแค่ 40% เมื่อวาน · ฝึกซ้ำจะดีขึ้นเร็ว</p>
+      <div class="meta-row"><span>⏱ <b>15 นาที</b></span><span>📊 <b>กลาง</b></span><span>🎯 <b>+5 คะแนน</b></span></div>
+      <a href="#"><span>เริ่มเลย</span><span>▶</span></a>
+    </div>
+
+    <div class="quickstats">
+      <div class="qs"><p class="lbl">🔥 ติดต่อ</p><p class="val"><span class="y">3</span> วัน</p></div>
+      <div class="qs"><p class="lbl">📅 สอบอีก</p><p class="val"><span class="y">21</span> วัน</p></div>
+      <div class="qs"><p class="lbl">🎯 คะแนน</p><p class="val"><span class="y">95</span>/115</p></div>
+    </div>
+
+    <div class="other"><a href="#">ขอเลือกฝึกเองดีกว่า →</a></div>
+  </div>
+
+  <div class="anno"><b>// psych levers:</b> Conversational UI (familiar from LINE/messaging), parasocial relationship with coach builds adherence, explicit "why this task" reasoning builds trust, choice scaffolding (3 options, not 13), task framed as "mission" not "exercise".</div>
+</body>
+</html>
