@@ -193,11 +193,35 @@ export function ReadingExam({
           <p className="ep-stat text-xs font-bold uppercase text-neutral-500">{current.label}</p>
           <p className="mt-2 text-base font-bold text-neutral-900">{block.question}</p>
           <ul className="mt-4 space-y-2">
-            {shuffled.map((opt) => {
+            {shuffled.map((opt, oi) => {
               const chosen = answers[current.key];
               const active = chosen === opt;
               const onPick =
                 step === 0 ? () => selectQ1(opt) : () => selectOther(opt);
+              if (soft) {
+                return (
+                  <li key={opt.slice(0, 48) + opt.length}>
+                    <button
+                      type="button"
+                      onClick={onPick}
+                      className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left text-sm font-semibold transition ${
+                        active
+                          ? "border-[#004AAD] bg-[#eef4ff]"
+                          : "border-slate-200 bg-white hover:border-[#004AAD]"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-extrabold ${
+                          active ? "bg-[#004AAD] text-white" : "bg-slate-100 text-[#004AAD]"
+                        }`}
+                      >
+                        {String.fromCharCode(65 + oi)}
+                      </span>
+                      <span>{opt}</span>
+                    </button>
+                  </li>
+                );
+              }
               return (
                 <li key={opt.slice(0, 48) + opt.length}>
                   <button

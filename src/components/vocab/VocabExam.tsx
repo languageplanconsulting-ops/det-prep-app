@@ -126,17 +126,32 @@ export function VocabExam({
           </p>
           <p className="mt-2 text-base font-bold text-neutral-900">{currentBlank.question}</p>
           <ul className="mt-4 space-y-2">
-            {shuffled.map((opt) => (
-              <li key={opt + questionIndex}>
-                <button
-                  type="button"
-                  onClick={() => selectOption(opt)}
-                  className="w-full border-4 border-black bg-white px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition duration-200 ease-out hover:bg-ep-yellow/40 active:translate-y-px active:shadow-[3px_3px_0_0_#000]"
-                >
-                  {opt}
-                </button>
-              </li>
-            ))}
+            {shuffled.map((opt, oi) =>
+              soft ? (
+                <li key={opt + questionIndex}>
+                  <button
+                    type="button"
+                    onClick={() => selectOption(opt)}
+                    className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-left text-sm font-semibold transition hover:border-[#004AAD]"
+                  >
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-xs font-extrabold text-[#004AAD]">
+                      {String.fromCharCode(65 + oi)}
+                    </span>
+                    <span>{opt}</span>
+                  </button>
+                </li>
+              ) : (
+                <li key={opt + questionIndex}>
+                  <button
+                    type="button"
+                    onClick={() => selectOption(opt)}
+                    className="w-full border-4 border-black bg-white px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition duration-200 ease-out hover:bg-ep-yellow/40 active:translate-y-px active:shadow-[3px_3px_0_0_#000]"
+                  >
+                    {opt}
+                  </button>
+                </li>
+              ),
+            )}
           </ul>
         </div>
       </section>
