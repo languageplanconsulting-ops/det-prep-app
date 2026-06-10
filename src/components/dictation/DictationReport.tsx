@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   buildRedeemSlots,
   dictationScoreFromDiff,
@@ -9,6 +11,37 @@ import {
   type CharDisplaySegment,
   type RedeemSlot,
 } from "@/lib/dictation-diff";
+
+/** Word-level diff via LCS — marks which expected words the learner got. */
+function wordLevelDiff(expected: string, user: string): Array<{ word: string; ok: boolean }> {
+  const norm = (w: string) => w.toLowerCase().replace(/[.,!?;:"']/g, "");
+  const e = expected.trim().split(/\s+/).filter(Boolean);
+  const u = user.trim().split(/\s+/).filter(Boolean).map(norm);
+  const eN = e.map(norm);
+  const m = eN.length;
+  const n = u.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = m - 1; i >= 0; i--) {
+    for (let j = n - 1; j >= 0; j--) {
+      dp[i][j] = eN[i] === u[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const matched = new Set<number>();
+  let i = 0;
+  let j = 0;
+  while (i < m && j < n) {
+    if (eN[i] === u[j]) {
+      matched.add(i);
+      i++;
+      j++;
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+      i++;
+    } else {
+      j++;
+    }
+  }
+  return e.map((word, idx) => ({ word, ok: matched.has(idx) }));
+}
 
 function CharLine({ segments }: { segments: CharDisplaySegment[] }) {
   return (
@@ -128,6 +161,9 @@ export function DictationReport({
   onPracticeAgain: () => void;
   onFixSubmit: (merged: string, newScore: number) => void;
 }) {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
+  const [showFix, setShowFix] = useState(false);
   const [redeemDismissed, setRedeemDismissed] = useState(false);
   const [fixValues, setFixValues] = useState<string[]>([]);
 
@@ -139,6 +175,10 @@ export function DictationReport({
 
   const redeem = useMemo(() => buildRedeemSlots(expected, userText), [expected, userText]);
   const inputCount = countInputSlots(redeem.slots);
+
+  const words = useMemo(() => wordLevelDiff(expected, userText), [expected, userText]);
+  const missed = words.filter((w) => !w.ok);
+  const correctWords = words.length - missed.length;
 
   const showRedeem = inputCount > 0 && !redeemDismissed;
 
@@ -172,6 +212,167 @@ export function DictationReport({
     setFixValues(Array.from({ length: inputCount }, () => ""));
     setRedeemDismissed(false);
   };
+
+  if (soft) {
+    // ── Plan A (clear comparison) + optional Plan B (guided fix) — admins only ──
+    return (
+      <div className="min-w-0 max-w-full space-y-4">
+        {/* score */}
+        <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-4">
+              <div className="text-center">
+                <p className="text-4xl font-bold leading-none text-[#004AAD]">{Math.round(score)}</p>
+                <p className="text-xs text-slate-500">/ {maxScore}</p>
+              </div>
+              <div>
+                <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                  {missed.length === 0 ? "เยี่ยมมาก! 🎉" : "ฝึกต่ออีกนิด"}
+                </span>
+                <p className="mt-1 text-xs text-slate-500">
+                  ถูก {correctWords} จาก {words.length} คำ
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onPracticeAgain}
+              className="rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00] hover:opacity-90"
+            >
+              ↻ ลองอีกครั้ง
+            </button>
+          </div>
+        </div>
+
+        {/* correct answer + word diff */}
+        <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+            ✅ เฉลยที่ถูกต้อง
+          </p>
+          <p className="rounded-xl bg-emerald-50 p-4 text-lg leading-8 text-slate-900 ring-1 ring-emerald-200 [overflow-wrap:anywhere]">
+            {expected}
+          </p>
+
+          <p className="mb-2 mt-4 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+            ✏️ เทียบกับที่คุณพิมพ์
+          </p>
+          <p className="rounded-xl bg-white p-4 text-lg leading-9 ring-1 ring-slate-200 [overflow-wrap:anywhere]">
+            {words.map((w, idx) =>
+              w.ok ? (
+                <span key={idx} className="text-slate-900">
+                  {w.word}{" "}
+                </span>
+              ) : (
+                <span key={idx} className="mx-0.5 rounded bg-rose-100 px-1 text-rose-700">
+                  {w.word}{" "}
+                </span>
+              ),
+            )}
+          </p>
+          <p className="mt-1 text-[11px] text-slate-400">สีแดง = คำที่ขาดหรือพิมพ์ผิด</p>
+        </div>
+
+        {/* misses list */}
+        {missed.length > 0 ? (
+          <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+              🎯 จุดที่พลาด ({missed.length})
+            </p>
+            <ul className="space-y-1.5 text-sm">
+              {missed.slice(0, 6).map((w, idx) => (
+                <li key={idx} className="flex gap-2">
+                  <span className="font-bold text-rose-500">✗</span>
+                  <span>
+                    <strong>{w.word}</strong>
+                  </span>
+                </li>
+              ))}
+              {missed.length > 6 ? (
+                <li className="text-xs text-slate-400">…และอีก {missed.length - 6} คำ</li>
+              ) : null}
+            </ul>
+          </div>
+        ) : null}
+
+        <AdminCoachTip>
+          ฟังให้จบประโยคก่อนพิมพ์ · ระวัง <strong>-ed ท้ายคำ</strong> และ <strong>comma</strong> —
+          2 จุดนี้ทำคะแนนหลุดบ่อยสุด
+        </AdminCoachTip>
+
+        {/* actions: retry + optional guided fix (Plan B reuses redeem logic) */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onPracticeAgain}
+            className="rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00] hover:opacity-90"
+          >
+            ↻ ลองอีกครั้ง
+          </button>
+          {inputCount > 0 && !showFix ? (
+            <button
+              type="button"
+              onClick={() => setShowFix(true)}
+              className="rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50"
+            >
+              ✍️ แก้ทีละจุดเพื่อเพิ่มคะแนน
+            </button>
+          ) : null}
+        </div>
+
+        {showFix && inputCount > 0 ? (
+          <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-wide text-[#004AAD]">
+              แก้ทีละจุด
+            </p>
+            <p className="mb-3 text-xs text-slate-500">
+              กล่องเหลือง = จุดที่ต้องแก้ · ป้ายบอกว่าต้องพิมพ์อะไร (คำ / เว้นวรรค / เครื่องหมาย)
+            </p>
+            <div className="max-w-full overflow-x-auto rounded-xl bg-white p-3 ring-1 ring-slate-200">
+              <div className="flex flex-wrap items-end gap-x-1 gap-y-2 font-mono text-base leading-relaxed">
+                {redeem.slots.map((slot, idx) => {
+                  if (slot.type === "locked") {
+                    return (
+                      <span
+                        key={idx}
+                        className="mx-0.5 rounded bg-emerald-100 px-0.5 font-semibold text-emerald-900"
+                      >
+                        {slot.text}
+                      </span>
+                    );
+                  }
+                  const inputPos = inputSlotIndexBefore(redeem.slots, idx);
+                  return (
+                    <RedeemRow
+                      key={idx}
+                      slot={slot}
+                      value={fixValues[inputPos] ?? ""}
+                      onChange={(v) => setFixAt(inputPos, v)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={handleSubmitFix}
+                className="rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00] hover:opacity-90"
+              >
+                ส่งการแก้ไข
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowFix(false)}
+                className="rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50"
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="min-w-0 max-w-full space-y-6">
