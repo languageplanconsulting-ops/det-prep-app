@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
 import {
   loadAllInteractiveSpeakingReports,
@@ -54,6 +56,8 @@ function buildLatestByScenario(): Map<string, InteractiveSpeakingAttemptReport> 
 }
 
 export function InteractiveSpeakingHub() {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const [scenarios, setScenarios] = useState<InteractiveSpeakingScenario[]>([]);
   const [reportTick, setReportTick] = useState(0);
 
@@ -79,6 +83,103 @@ export function InteractiveSpeakingHub() {
   }, []);
 
   const latestByScenario = useMemo(() => buildLatestByScenario(), [reportTick, scenarios]);
+
+  if (soft) {
+    return (
+      <main className="min-h-screen">
+        <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+          <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
+            ← กลับหน้าฝึก
+          </Link>
+          <SoftHubHeader
+            color="violet"
+            icon="🗨️"
+            eyebrow="Production · Interactive speaking"
+            title="การสนทนาแบบโต้ตอบ"
+            subtitle="Interactive speaking"
+            tip={
+              <>
+                เห็นแค่คำถามแรก ที่เหลือระบบถามตามที่คุณพูด ·{" "}
+                <strong>ฟัง 1 ครั้ง → เตรียม 10 วิ → พูด ~35 วิ</strong> · ตอบตรงคำถามแล้วต่อยอด 1 ประโยคครับ
+              </>
+            }
+          />
+          <div className="space-y-3">
+            {scenarios.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+                ยังไม่มี scenario
+              </p>
+            ) : (
+              scenarios.map((s) => {
+                const latest = latestByScenario.get(s.id);
+                const needsRedeem = latest != null && latest.score160 < 160;
+                const practiceHref = `/practice/production/interactive-speaking/${s.id}`;
+                const redeemHref = `${practiceHref}?redeem=1`;
+                const reportHref = latest
+                  ? `/practice/production/interactive-speaking/report/${latest.attemptId}`
+                  : null;
+                return (
+                  <div
+                    key={s.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)] sm:p-5"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-5">
+                      <ScenarioThumb scenario={s} />
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-lg font-bold text-slate-900">{s.titleEn}</h2>
+                        <p className="mt-0.5 text-sm text-slate-500">{s.titleTh}</p>
+                        {latest ? (
+                          <p className="mt-2 text-xs">
+                            <span className="font-bold text-emerald-600">
+                              คะแนนล่าสุด {latest.score160}/160
+                            </span>{" "}
+                            · <span className="text-slate-500">{formatAttemptDate(latest.submittedAt)}</span>
+                          </p>
+                        ) : (
+                          <p className="mt-2 text-xs text-slate-400">ยังไม่เคยทำ</p>
+                        )}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Link
+                            href={practiceHref}
+                            className="rounded-xl bg-[#004AAD] px-4 py-2 text-sm font-bold text-[#FFCC00] hover:opacity-90"
+                          >
+                            ฝึก
+                          </Link>
+                          {reportHref ? (
+                            <Link
+                              href={reportHref}
+                              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50"
+                            >
+                              ดูผล
+                            </Link>
+                          ) : null}
+                          {needsRedeem ? (
+                            <Link
+                              href={redeemHref}
+                              className="rounded-xl bg-[#FFCC00] px-4 py-2 text-sm font-bold text-[#004AAD] hover:opacity-90"
+                            >
+                              ทำใหม่
+                            </Link>
+                          ) : latest ? (
+                            <Link
+                              href={redeemHref}
+                              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50"
+                            >
+                              ทำอีกครั้ง
+                            </Link>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className={`min-h-screen ${LANDING_PAGE_GRID_BG}`}>

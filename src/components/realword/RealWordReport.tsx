@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import {
   REALWORD_DIFFICULTY_LABEL,
@@ -59,6 +60,7 @@ export function RealWordReport({
   hubHref: string;
   onRedeemNow: () => void;
 }) {
+  useRevealSfx();
   const maxScore = REALWORD_MAX_SCORE[difficulty];
   const { R, UR, M } = realWordCounts({ words: wordSet.words, selectedIndices: selected });
   const score = realWordRunScore(UR, M, R, maxScore);

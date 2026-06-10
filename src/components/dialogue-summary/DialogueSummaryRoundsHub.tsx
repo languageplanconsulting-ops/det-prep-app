@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { DIALOGUE_SUMMARY_ROUND_NUMBERS } from "@/lib/dialogue-summary-constants";
 import { getDialogueSummaryRoundStats, loadDialogueSummaryVisibleBank } from "@/lib/dialogue-summary-storage";
 import type { DialogueSummaryRoundNum } from "@/types/dialogue-summary";
@@ -59,6 +60,8 @@ function getStatusMeta(totalSets: number, avgPercent: number | null) {
 }
 
 export function DialogueSummaryRoundsHub() {
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
 
   useEffect(() => {
@@ -72,6 +75,34 @@ export function DialogueSummaryRoundsHub() {
       window.removeEventListener("focus", refresh);
     };
   }, []);
+
+  if (soft) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6">
+        <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
+          ← กลับหน้าฝึก
+        </Link>
+        <SoftHubHeader
+          color="sky"
+          icon="💬"
+          eyebrow="Conversation · Dialogue → summary"
+          title="สรุปบทสนทนา"
+          subtitle="Dialogue to summary"
+          tip={
+            <>
+              อ่านสถานการณ์ + บทสนทนา แล้วสรุปให้ครบ <strong>ปัญหาหลัก · เห็นด้วย/ไม่เห็นด้วย · ผลสรุป</strong> ·
+              เขียนด้วยคำของตัวเองนะครับ อย่าลอกประโยคเดิม
+            </>
+          }
+        />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {DIALOGUE_SUMMARY_ROUND_NUMBERS.map((round) => (
+            <RoundCard key={`${round}-${v}`} round={round} soft />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -148,11 +179,58 @@ export function DialogueSummaryRoundsHub() {
   );
 }
 
-function RoundCard({ round }: { round: DialogueSummaryRoundNum }) {
+function RoundCard({ round, soft = false }: { round: DialogueSummaryRoundNum; soft?: boolean }) {
   const bank = loadDialogueSummaryVisibleBank();
   const totalSets = bank[round].easy.length + bank[round].medium.length + bank[round].hard.length;
   const stats = getDialogueSummaryRoundStats(round);
   const status = getStatusMeta(totalSets, stats.avgPercent);
+
+  if (soft) {
+    const hasAttempts = stats.avgPercent != null;
+    const inner = (
+      <>
+        <div className="mb-3 flex items-center justify-between">
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+              status.disabled
+                ? "bg-slate-100 text-slate-400"
+                : hasAttempts
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {status.disabled ? "เร็วๆ นี้" : hasAttempts ? "ทำแล้ว" : "พร้อมทำ"}
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ {round}</span>
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900">Round {round}</h3>
+        <p className="mt-0.5 text-xs text-slate-500">
+          {totalSets > 0 ? `${totalSets} ชุดในคลังข้อสอบ` : "ยังไม่มีชุดข้อสอบ"}
+        </p>
+        <div className="mt-auto pt-4">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
+          <p className="text-2xl font-bold text-[#004AAD]">
+            {hasAttempts ? `${stats.avgPercent}%` : "—"}
+          </p>
+          <p className="mt-2 text-[11px] text-slate-500">
+            ฝึกล่าสุด: {hasAttempts ? formatShortDate(stats.latestAttemptDate) : "ยังไม่เคยทำ"}
+          </p>
+        </div>
+      </>
+    );
+    return status.disabled ? (
+      <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 opacity-70">
+        {inner}
+      </div>
+    ) : (
+      <Link
+        href={`/practice/listening/dialogue-summary/round/${round}`}
+        className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
+      >
+        {inner}
+      </Link>
+    );
+  }
 
   const cardBody = (
     <>

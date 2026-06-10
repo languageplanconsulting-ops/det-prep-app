@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { VocabExamIntroModal } from "@/components/vocab/VocabExamIntroModal";
 import { VocabularyBuilderAvailabilityBanner } from "@/components/vocab/VocabularyBuilderAvailabilityBanner";
 import { VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
@@ -20,6 +20,8 @@ function formatShortDate(iso: string | null): string {
 }
 
 export function VocabRoundsHub() {
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
 
   useEffect(() => {
@@ -34,6 +36,36 @@ export function VocabRoundsHub() {
     };
   }, []);
 
+  if (soft) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6">
+        <VocabExamIntroModal />
+        <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
+          ← กลับหน้าฝึก
+        </Link>
+        <SoftHubHeader
+          color="emerald"
+          icon="📚"
+          eyebrow="Comprehension · Vocabulary"
+          title="คลังข้อสอบคำศัพท์"
+          subtitle="Vocabulary"
+          tip={
+            <>
+              ฝึกเดาคำจากบริบทจริง — ไม่ต้องท่องทีละคำนะครับ · คลังคำจะค่อยๆ โตขึ้น ·
+              ตอบผิดคำไหน เก็บลง Notebook ไว้ทบทวน
+            </>
+          }
+        />
+        <VocabularyBuilderAvailabilityBanner />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {VOCAB_ROUND_NUMBERS.map((round) => (
+            <RoundCard key={`${round}-${v}`} round={round} soft />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="space-y-10"
@@ -41,10 +73,6 @@ export function VocabRoundsHub() {
         fontFamily: "var(--font-inter), ui-sans-serif, system-ui, 'Anuphan', sans-serif",
       }}
     >
-      <AdminCoachTip>
-        ฝึกเดาคำจากบริบทจริง — ไม่ต้องท่องทีละคำนะครับ · คลังคำของคุณจะค่อยๆ โตขึ้นเรื่อยๆ ·
-        ตอบผิดคำไหน เก็บลง Notebook ไว้ทบทวน
-      </AdminCoachTip>
       <VocabExamIntroModal />
 
       <Link
@@ -130,7 +158,7 @@ export function VocabRoundsHub() {
   );
 }
 
-function RoundCard({ round }: { round: VocabRoundNum }) {
+function RoundCard({ round, soft = false }: { round: VocabRoundNum; soft?: boolean }) {
   const bank = loadVocabVisibleBank();
   const totalSets = bank[round].length;
   const stats = getVocabRoundStats(round);
@@ -139,6 +167,35 @@ function RoundCard({ round }: { round: VocabRoundNum }) {
   const avgLabel = hasAttempts ? `${stats.avgPercent}%` : "—";
   const statusLabel = "Ready";
   const cardClassName = round === 1 || hasAttempts ? "bg-[#ffcc00]" : "bg-white";
+
+  if (soft) {
+    return (
+      <Link
+        href={href}
+        className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+              hasAttempts ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {hasAttempts ? "ทำแล้ว" : "พร้อมทำ"}
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ {round}</span>
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900">Round {round}</h3>
+        <p className="mt-0.5 text-xs text-slate-500">{totalSets} ชุดในคลังข้อสอบ</p>
+        <div className="mt-auto pt-4">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
+          <p className="text-2xl font-bold text-[#004AAD]">{avgLabel}</p>
+          <p className="mt-2 text-[11px] text-slate-500">
+            ฝึกล่าสุด: {hasAttempts ? formatShortDate(stats.latestAttemptDate) : "ยังไม่เคยทำ"}
+          </p>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link

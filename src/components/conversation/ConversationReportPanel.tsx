@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import { CONVERSATION_SCENARIO_Q_COUNT, CONVERSATION_TOTAL_STEPS } from "@/lib/conversation-constants";
 import { conversationExplanationThai } from "@/lib/conversation-report-helpers";
@@ -35,6 +36,7 @@ export function ConversationReportPanel({
   /** Same set URL without redeem — full restart from the beginning */
   restartHref: string;
 }) {
+  useRevealSfx();
   const maxScore = conversationMaxForExam(exam);
   const correct = countConversationCorrect(itemOk);
   const points =

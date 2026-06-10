@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import {
   READING_DIFFICULTY_LABEL,
@@ -42,6 +43,7 @@ export function ReadingReport({
   onRedeem: () => void;
   setListHref: string;
 }) {
+  useRevealSfx();
   const maxScore = READING_DIFFICULTY_MAX[difficulty];
   const correctCount = rows.filter((r) => r.isCorrect).length;
   const score = Math.round((correctCount / 4) * maxScore);

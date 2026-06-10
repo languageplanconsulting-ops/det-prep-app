@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
 import { AiRewardBonusNotice } from "@/components/production/AiRewardBonusNotice";
@@ -98,6 +99,7 @@ export function InteractiveSpeakingReportView({
 }: {
   report: InteractiveSpeakingAttemptReport;
 }) {
+  useRevealSfx();
   const router = useRouter();
   const entrySource = "interactive-speaking" as const;
   const keyLearningItems = report.keyLearningQuotes?.length

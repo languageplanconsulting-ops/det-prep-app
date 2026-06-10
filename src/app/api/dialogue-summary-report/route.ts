@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     if (userId) {
       const credit = await getAiCreditStateForUser(userId, "dialogue_summary");
       if (!credit.allowed) {
-        return NextResponse.json({ error: credit.reason ?? "AI feedback quota reached" }, { status: 402 });
+        return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
       }
     }
     const { report, usage } = await generateDialogueSummaryReportWithGemini({
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
     if (userId) {
       const charged = await chargeAiCreditForUser(userId, "dialogue_summary");
       if (!charged.ok) {
-        return NextResponse.json({ error: "Could not apply AI credit after grading" }, { status: 500 });
+        return NextResponse.json({ error: "Could not apply feedback credit after grading" }, { status: 500 });
       }
     }
     return NextResponse.json(report);

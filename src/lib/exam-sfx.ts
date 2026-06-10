@@ -8,6 +8,15 @@
 const MUTE_KEY = "ep-sfx-muted";
 const MUTE_EVENT = "ep-sfx-mute-change";
 
+/** New sounds play ONLY when enabled (admins). Off for normal users. */
+let _enabled = false;
+export function setSfxEnabled(on: boolean): void {
+  _enabled = on;
+}
+export function isSfxEnabled(): boolean {
+  return _enabled;
+}
+
 let _ctx: AudioContext | null = null;
 
 function getCtx(): AudioContext | null {
@@ -54,7 +63,7 @@ type Note = {
 };
 
 function play(notes: Note[]): void {
-  if (getSfxMuted()) return;
+  if (!_enabled || getSfxMuted()) return;
   const ctx = getCtx();
   if (!ctx) return;
   try {

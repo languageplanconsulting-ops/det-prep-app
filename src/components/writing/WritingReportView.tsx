@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { useMemo } from "react";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
 import { SpeakingVocabularyUpgradePanel } from "@/components/speaking/SpeakingVocabularyUpgradePanel";
@@ -218,6 +219,7 @@ function StudyVocabRow({
 }
 
 export function WritingReportView({ report }: { report: WritingAttemptReport }) {
+  useRevealSfx();
   const router = useRouter();
   const fullReport = useMemo(() => withStudyPackDefaults(report), [report]);
   const topic = useMemo(() => getTopicById(fullReport.topicId), [fullReport.topicId]);

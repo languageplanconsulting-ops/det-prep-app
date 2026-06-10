@@ -2,6 +2,12 @@
 
 import { useEffect } from "react";
 import { IntroModalShell } from "@/components/practice/IntroModalShell";
+import {
+  GUIDE_ACCENT,
+  GuideRevampBody,
+  GuideRevampFooter,
+} from "@/components/practice/GuideRevampContent";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
 export function DictationIntroModal({
   open,
@@ -12,6 +18,9 @@ export function DictationIntroModal({
   onOpenChange: (open: boolean) => void;
   onEnter: () => void;
 }) {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const showRevamp = isAdmin || previewEligible;
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -28,6 +37,53 @@ export function DictationIntroModal({
     onEnter();
     onOpenChange(false);
   };
+
+  if (showRevamp) {
+    return (
+      <IntroModalShell
+        open={open}
+        onDismiss={dismiss}
+        labelledBy="dictation-intro-title"
+        title={
+          <>
+            การเขียนตามคำบอก <br />
+            <span className="font-mono text-xl font-bold not-italic normal-case text-cyan-500">
+              Dictation Practice
+            </span>
+          </>
+        }
+        badge={
+          <span className="rounded-full bg-cyan-50 px-3 py-1 font-mono text-[11px] font-bold text-cyan-600">
+            GUIDE 04
+          </span>
+        }
+        footer={
+          <GuideRevampFooter
+            accent={GUIDE_ACCENT.dictation}
+            primaryLabel="เริ่มแบบฝึกหัด →"
+            onEnter={enter}
+            onDismiss={dismiss}
+          />
+        }
+      >
+        <GuideRevampBody
+          accent={GUIDE_ACCENT.dictation}
+          outcomeTitle="ฟังแล้วเขียนให้ถูกเป๊ะ ดันคะแนน Literacy & Comprehension"
+          outcomeSub="ได้ 100% ไม่ใช่แค่ฟังออก — อยู่ที่การ “ตรวจไวยากรณ์” หลังฟัง"
+          steps={[
+            { n: "1", title: "ฟัง (ที่นี่ฟังกี่รอบก็ได้)", desc: "ในสนามจริงฟังได้แค่ 3 รอบ — ใช้พื้นที่นี้ฝึกให้เต็มที่" },
+            { n: "2", title: "พิมพ์ตามที่ได้ยิน", desc: "เขียนให้ครบทั้งประโยค" },
+            { n: "3", title: "ซ่อมประโยคก่อนส่ง", desc: "เช็กการผันกริยาและเครื่องหมายวรรคตอน — จุดที่ทำให้ได้เต็ม" },
+          ]}
+          mini={{
+            label: "เป็นนักเรียนคอร์ส? ทบทวนเทคนิค Dictation ก่อนเริ่ม",
+            sub: "มินิเซสชันสอนทีละจุด ~15 นาที · ไว้ทบทวนก่อนลงมือ",
+            href: "/practice/mini-study#dictation",
+          }}
+        />
+      </IntroModalShell>
+    );
+  }
 
   return (
     <IntroModalShell

@@ -70,6 +70,18 @@ export default function MiniStudyHubPage() {
     setCompleted(loadCompleted());
   }, []);
 
+  // Deep-link support: exam guides link here with #<category> (e.g. #writing).
+  // Scroll to that category bed once the page has finished loading/painting.
+  useEffect(() => {
+    if (loading) return;
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [loading]);
+
   /** Sessions grouped + ordered by category, then by index. */
   const grouped = useMemo(() => {
     const map = new Map<MiniStudyCategory, MiniStudySession[]>();
@@ -235,7 +247,8 @@ export default function MiniStudyHubPage() {
           return (
             <section
               key={cat}
-              className="rounded-2xl border border-slate-200 bg-white p-5"
+              id={cat}
+              className="scroll-mt-20 rounded-2xl border border-slate-200 bg-white p-5"
             >
               <header className="mb-4 flex items-center gap-3 border-b border-slate-200 pb-3">
                 <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[#004AAD] text-xl text-white">

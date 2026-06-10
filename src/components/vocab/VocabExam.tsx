@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { sfxCorrect, sfxWrong } from "@/lib/exam-sfx";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { shuffleMcOptions } from "@/lib/reading-utils";
 import type { VocabExamResultRow, VocabPassageUnit } from "@/types/vocab";
@@ -43,6 +44,8 @@ export function VocabExam({
 
   const selectOption = (option: string) => {
     const correct = currentBlank.correctAnswer;
+    if (option === correct) sfxCorrect();
+    else sfxWrong();
     setUserPicks((prev) => [...prev, option]);
     setFilledCorrect((prev) => [...prev, correct]);
 

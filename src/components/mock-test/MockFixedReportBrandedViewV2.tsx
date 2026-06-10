@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+import { sfxReveal } from "@/lib/exam-sfx";
 import type { FixedMockScoredRow } from "@/lib/mock-test/fixed-mock-score-buckets";
 
 /**
@@ -146,6 +148,11 @@ export function MockFixedReportBrandedViewV2({
 
   const ringCirc = 2 * Math.PI * 44;
   const ringOffset = ringCirc * (1 - Math.max(0, Math.min(160, total)) / 160);
+
+  // Celebratory chime when the score report reveals (admin + unmuted only).
+  useEffect(() => {
+    sfxReveal();
+  }, []);
 
   // Outcome-first: the 2 weakest skills + a one-tap route to practise each
   // (Cagan/Brown — the results page must answer "what do I do next?").

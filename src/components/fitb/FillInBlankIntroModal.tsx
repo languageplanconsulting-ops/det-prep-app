@@ -2,6 +2,12 @@
 
 import { useEffect } from "react";
 import { IntroModalShell } from "@/components/practice/IntroModalShell";
+import {
+  GUIDE_ACCENT,
+  GuideRevampBody,
+  GuideRevampFooter,
+} from "@/components/practice/GuideRevampContent";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
 /**
  * GUIDE 03 — shown from Practice hub before entering Fill in the blank.
@@ -15,6 +21,9 @@ export function FillInBlankIntroModal({
   onOpenChange: (open: boolean) => void;
   onEnter: () => void;
 }) {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const showRevamp = isAdmin || previewEligible;
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -31,6 +40,53 @@ export function FillInBlankIntroModal({
     onEnter();
     onOpenChange(false);
   };
+
+  if (showRevamp) {
+    return (
+      <IntroModalShell
+        open={open}
+        onDismiss={dismiss}
+        labelledBy="fitb-intro-title"
+        title={
+          <>
+            เติมคำในช่องว่าง <br />
+            <span className="font-mono text-xl font-bold not-italic normal-case text-violet-600">
+              Fill in the Blank
+            </span>
+          </>
+        }
+        badge={
+          <span className="rounded-full bg-violet-50 px-3 py-1 font-mono text-[11px] font-bold text-violet-600">
+            GUIDE 03
+          </span>
+        }
+        footer={
+          <GuideRevampFooter
+            accent={GUIDE_ACCENT.fitb}
+            primaryLabel="เริ่มแบบฝึกหัด →"
+            onEnter={enter}
+            onDismiss={dismiss}
+          />
+        }
+      >
+        <GuideRevampBody
+          accent={GUIDE_ACCENT.fitb}
+          outcomeTitle="เติมคำให้ถูกทั้งความหมายและไวยากรณ์ ดันคะแนน Literacy & Comprehension"
+          outcomeSub="วัดทั้งคำศัพท์ (~70%) และไวยากรณ์ (~30%) ไปพร้อมกัน"
+          steps={[
+            { n: "1", title: "อ่านบริบท", desc: "เดาความหมายของคำจากประโยครอบ ๆ" },
+            { n: "2", title: "เช็กไวยากรณ์", desc: "การผันกริยา กาลเวลา และตำแหน่งของ adverb" },
+            { n: "3", title: "ดูคำเชื่อม (Transitions)", desc: "คำที่บอกทิศทางของเนื้อความให้ต่อเนื่องกัน" },
+          ]}
+          mini={{
+            label: "เป็นนักเรียนคอร์ส? ทบทวนไวยากรณ์ก่อนเริ่ม",
+            sub: "มินิเซสชันสอนทีละจุด ~15 นาที · ไว้ทบทวนก่อนลงมือ",
+            href: "/practice/mini-study#writing",
+          }}
+        />
+      </IntroModalShell>
+    );
+  }
 
   return (
     <IntroModalShell

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { FullReportNotebookButton } from "@/components/writing/FullReportNotebookButton";
 import {
@@ -130,6 +131,7 @@ function PhotoCriterionBlock({
 }
 
 export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptReport }) {
+  useRevealSfx();
   const router = useRouter();
   const nav = photoReportNav(report);
   const submission = (report.punctuatedTranscript ?? report.transcript).trim();

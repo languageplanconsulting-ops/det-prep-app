@@ -3,9 +3,15 @@
 import { useEffect, useMemo } from "react";
 
 import { IntroModalShell } from "@/components/practice/IntroModalShell";
+import {
+  GUIDE_ACCENT,
+  GuideRevampBody,
+  GuideRevampFooter,
+} from "@/components/practice/GuideRevampContent";
 import { PaywallUpsellCard } from "@/components/upsell/PaywallUpsellCard";
 import { buildPaywallSpec } from "@/lib/paywall-upsell";
 import { getNextLocalMondayLabels } from "@/lib/vip-ai-feedback-quota";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
 export function ReadWriteIntroModal({
   open,
@@ -26,6 +32,11 @@ export function ReadWriteIntroModal({
   sessionCost: number;
   canStart: boolean;
 }) {
+  // Admin / preview-eligible users see the revamped "V4" guide first. Real users
+  // keep the existing guide until we roll it out. Mirrors IntroModalShell's `soft` gate.
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const showRevamp = isAdmin || previewEligible;
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -45,6 +56,76 @@ export function ReadWriteIntroModal({
     onOpenChange(false);
   };
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // REVAMP (admin / preview): shared clean card + outcome copy + mini-session link
+  // ──────────────────────────────────────────────────────────────────────────
+  if (showRevamp) {
+    return (
+      <IntroModalShell
+        open={open}
+        onDismiss={dismiss}
+        labelledBy="read-write-intro-title"
+        title={
+          <>
+            อ่านและเขียน <br />
+            <span className="font-mono text-xl font-bold not-italic normal-case text-emerald-500">
+              Read &amp; Write
+            </span>
+          </>
+        }
+        badge={
+          <span className="rounded-full bg-emerald-50 px-3 py-1 font-mono text-[11px] font-bold text-emerald-600">
+            GUIDE 07
+          </span>
+        }
+        footer={
+          <GuideRevampFooter
+            accent={GUIDE_ACCENT.readWrite}
+            primaryLabel="เริ่มก้าวแรก →"
+            onEnter={enter}
+            onDismiss={dismiss}
+            canStart={canStart}
+          />
+        }
+      >
+        <GuideRevampBody
+          accent={GUIDE_ACCENT.readWrite}
+          outcomeTitle="ฝึกเขียนเพื่อดันคะแนนกลุ่ม Production & Literacy"
+          outcomeSub="2 กลุ่มที่คนไทยมักได้น้อยสุด — แต่ขยับได้ไวสุดถ้าเขียนสม่ำเสมอ"
+          steps={[
+            { n: "1", title: "อ่าน & เขียนตอบ", desc: "อ่านบทความสั้น ๆ แล้วเขียนตอบเป็นภาษาอังกฤษ เหมือนข้อสอบจริง" },
+            { n: "2", title: "รับรายงานใน ~10 วินาที", desc: "เห็นจุดที่ไวยากรณ์พลาด คำที่ควรใช้แทน และคะแนนของงานชิ้นนี้" },
+            { n: "3", title: "เก็บคำศัพท์ไปใช้รอบหน้า", desc: "กด Add to Notebook แล้วใช้คำที่แนะนำครั้งถัดไป นี่คือจุดที่คะแนนเริ่มขยับ" },
+          ]}
+          mechanics={{
+            title: "ก่อนเริ่ม รู้ไว้ 2 อย่าง",
+            showCredits,
+            remaining,
+            limit,
+            resetLabel: resetLabels.th,
+            canStart,
+            bullets: [
+              <>
+                ระบบหักโควต้า <strong>เฉพาะตอนกด “ส่งตรวจ”</strong> (ครั้งละ {sessionCost}) — เปิดดูเฉย ๆ ไม่เสีย
+              </>,
+              <>
+                <strong>ปิดหน้าก่อนส่ง งานที่เขียนจะหาย</strong> (โควต้าไม่หาย) เขียนให้จบก่อนค่อยส่ง
+              </>,
+            ],
+          }}
+          mini={{
+            label: "เป็นนักเรียนคอร์ส? ทบทวนเทคนิคเขียนก่อนเริ่ม",
+            sub: "มินิเซสชันสอนทีละจุด ~15 นาที · ไว้ทบทวนก่อนลงมือ",
+            href: "/practice/mini-study#writing",
+          }}
+        />
+      </IntroModalShell>
+    );
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // LEGACY (real users): unchanged guide
+  // ──────────────────────────────────────────────────────────────────────────
   return (
     <IntroModalShell
       open={open}
@@ -149,7 +230,7 @@ export function ReadWriteIntroModal({
             </div>
             {showCredits && !canStart ? (
               <div className="mt-4">
-                <PaywallUpsellCard spec={buildPaywallSpec("vip", "ai_limit")} compact />
+                <PaywallUpsellCard spec={buildPaywallSpec("vip", "feedback_limit")} compact />
               </div>
             ) : null}
           </div>

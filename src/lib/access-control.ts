@@ -213,7 +213,7 @@ export function canUseAI(
       return {
         allowed: false,
         remaining: 0,
-        reason: "Free plan includes 1 lifetime AI credit; it has already been used.",
+        reason: "Free plan includes 1 lifetime feedback credit; it has already been used.",
       };
     }
     return {
@@ -229,7 +229,7 @@ export function canUseAI(
     return {
       allowed: false,
       remaining: 0,
-      reason: "Monthly AI credits are used up. They reset next month or upgrade for more.",
+      reason: "Monthly feedback credits are used up. They reset next month or upgrade for more.",
     };
   }
   return {
@@ -312,7 +312,7 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     color: "#737373",
     highlightsEn: [
       "1 starter test for each non-mock exam lane",
-      "1 personalized feedback credit (choose 1 AI task to try once)",
+      "1 personalized feedback credit (choose 1 feedback task to try once)",
       "Read & Write / Read & Speak / Interactive Speaking / Write or Speak About Photo: choose any one",
       "0 Mock Tests",
       "Streaks & XP",
@@ -327,7 +327,7 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     color: "#0ea5e9",
     highlightsEn: [
       "Read + Vocab 15, Literacy 20, Conversation 10 / month",
-      "12 AI credits/month (all 5 AI types)",
+      "12 feedback credits/month (all 5 feedback types)",
       "2 Mock Tests / month",
       "Basic charts",
       "3 streak freezes / month",
@@ -341,7 +341,7 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     color: "#8b5cf6",
     highlightsEn: [
       "Read + Vocab 30, Literacy 50, Conversation 20 / month",
-      "30 AI credits/month",
+      "30 feedback credits/month",
       "4 Mock Tests / month",
       "Full analytics charts",
       "3 streak freezes / month",
@@ -355,7 +355,7 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     color: "#eab308",
     highlightsEn: [
       "Unlimited practice sets across all four skills",
-      "60 AI credits/month",
+      "60 feedback credits/month",
       "6 Mock Tests / month",
       "Full analytics + PDF export",
       "Notebook PDF export",

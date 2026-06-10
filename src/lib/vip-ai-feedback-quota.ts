@@ -198,7 +198,7 @@ export function thExhaustedQuotaMessage(args?: Partial<AiQuotaMessageArgs>): str
   const weeklyMode = Boolean(args?.weeklyRenewsAt);
   const monthlyExtra = Math.max(0, Number(args?.extraRemaining ?? 0));
   return [
-    "AI credit ของคุณไม่พอสำหรับการส่งตรวจครั้งนี้",
+    "เครดิตตรวจงานของคุณไม่พอสำหรับการส่งตรวจครั้งนี้",
     weeklyMode
       ? `• เหลือรายสัปดาห์ตอนนี้: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`
       : `• เหลือรวมตอนนี้: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`,
@@ -206,7 +206,7 @@ export function thExhaustedQuotaMessage(args?: Partial<AiQuotaMessageArgs>): str
     args?.weeklyRenewsAt ? `• รีเซ็ตรอบสัปดาห์: ${formatDateTimeShort(args.weeklyRenewsAt, "th-TH")}` : null,
     args?.monthlyRenewsAt ? `• รอบแพ็กเกจ/รายเดือนถึง: ${formatDateTimeShort(args.monthlyRenewsAt, "th-TH")}` : null,
     "",
-    "You do not have enough AI credit for this submit.",
+    "You do not have enough feedback credit for this submit.",
     weeklyMode
       ? `• Weekly left now: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`
       : `• Left now: ${Math.max(0, Number(args?.remaining ?? 0))}/${Math.max(0, Number(args?.limit ?? VIP_AI_FEEDBACK_WEEKLY_LIMIT))}`,
@@ -226,7 +226,7 @@ export function thConfirmBeforeAiSubmit(args: AiQuotaMessageArgs): string {
   const extraRemaining = Math.max(0, Number(args.extraRemaining ?? 0));
   const weeklyMode = Boolean(args.weeklyRenewsAt);
   return [
-    `การส่งตรวจครั้งนี้จะใช้ AI credit ${Math.max(1, Number(args.cost ?? 1))} ครั้ง`,
+    `การส่งตรวจครั้งนี้จะใช้เครดิตตรวจงาน ${Math.max(1, Number(args.cost ?? 1))} ครั้ง`,
     "",
     "สรุปสิทธิ์ของคุณตอนนี้",
     weeklyMode ? `• เหลือรายสัปดาห์ตอนนี้: ${remaining}/${limit}` : `• เหลือรวมตอนนี้: ${remaining}/${limit}`,
@@ -238,7 +238,7 @@ export function thConfirmBeforeAiSubmit(args: AiQuotaMessageArgs): string {
       ? `• เครดิตเพิ่มหมดอายุเร็วสุด: ${formatDateTimeShort(args.extraExpiresAt, "th-TH")}`
       : null,
     "",
-    `This submit will use ${Math.max(1, Number(args.cost ?? 1))} AI credit.`,
+    `This submit will use ${Math.max(1, Number(args.cost ?? 1))} feedback credit.`,
     "",
     "Your credit summary right now",
     weeklyMode ? `• Weekly left now: ${remaining}/${limit}` : `• Left now: ${remaining}/${limit}`,
@@ -257,7 +257,7 @@ export function thConfirmBeforeAiSubmit(args: AiQuotaMessageArgs): string {
 }
 
 export const TH_QUOTA_BANNER_LINE = (remaining: number, limit: number) =>
-  `สัปดาห์นี้เหลือสิทธิ์ AI feedback อีก ${remaining} ครั้ง จาก ${limit} ครั้ง (สำหรับสมาชิก VIP)`;
+  `สัปดาห์นี้เหลือสิทธิ์ตรวจงานอีก ${remaining} ครั้ง จาก ${limit} ครั้ง (สำหรับสมาชิก VIP)`;
 
 export const TH_QUOTA_NO_ROLLOVER =
   "โควต้าไม่สะสม: ถ้าไม่ใช้ครบในสัปดาห์นี้ สิทธิ์ที่เหลือจะไม่ย้ายไปสัปดาห์ถัดไป และจะรีเซ็ตใหม่ทุกวันจันทร์ตามเวลาเครื่องของคุณ";
@@ -266,7 +266,7 @@ export const TH_QUOTA_COVERED_PARTS_TH =
   "นับรวม: เขียนเกี่ยวกับรูป · อ่านแล้วเขียน · อ่านแล้วพูด · พูดเกี่ยวกับรูป · สรุปบทสนทนา · พูดโต้ตอบ (นับ 1 ครั้งต่อ 1 session)";
 
 export function thInteractiveSpeakingInsufficientCredits(need: number, have: number): string {
-  return `สมาชิก VIP: พูดโต้ตอบใช้สิทธิ์ AI ${need} ครั้งต่อรอบ แต่ตอนนี้เหลืออีก ${have} ครั้ง—รอรอบถัดไปหรือเติมเครดิตเพิ่มก่อน`;
+  return `สมาชิก VIP: พูดโต้ตอบใช้สิทธิ์ตรวจงาน ${need} ครั้งต่อรอบ แต่ตอนนี้เหลืออีก ${have} ครั้ง—รอรอบถัดไปหรือเติมเครดิตเพิ่มก่อน`;
 }
 
 /** Shown once when starting interactive speaking (VIP). */
@@ -291,7 +291,7 @@ export function thInteractiveSpeakingStartConfirm(args: AiQuotaMessageArgs): str
       : null,
     "",
     "You can start now. No credit is used yet.",
-    `The ${Math.max(1, Number(args.cost ?? 1))} AI credit will be counted only when you finish and submit for feedback.`,
+    `The ${Math.max(1, Number(args.cost ?? 1))} feedback credit will be counted only when you finish and submit for feedback.`,
     "",
     "Your credit summary right now",
     weeklyMode ? `• Weekly left now: ${remaining}/${limit}` : `• Left now: ${remaining}/${limit}`,

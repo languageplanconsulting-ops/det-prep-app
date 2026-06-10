@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
 import { AiRewardBonusNotice } from "@/components/production/AiRewardBonusNotice";
@@ -119,6 +120,7 @@ function SpeakingCriterionBlock({
 }
 
 export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }) {
+  useRevealSfx();
   const router = useRouter();
   const submission = (report.punctuatedTranscript ?? report.transcript).trim();
   const speakRound = report.speakingRound ?? 1;

@@ -170,8 +170,8 @@ function buildRedeemRewardBonus(args: {
     scoreGain,
     previousScore160,
     currentScore160,
-    messageEn: `Nice improvement. You beat your redeemed score by ${scoreGain} points, so you earned 1 free AI credit to use within 7 days.`,
-    messageTh: `พัฒนาขึ้นดีมาก คุณทำคะแนนเพิ่มจากรอบ Redeem ${scoreGain} คะแนน จึงได้รับ AI credit ฟรี 1 ครั้ง ใช้ได้ภายใน 7 วัน`,
+    messageEn: `Nice improvement. You beat your redeemed score by ${scoreGain} points, so you earned 1 free feedback credit to use within 7 days.`,
+    messageTh: `พัฒนาขึ้นดีมาก คุณทำคะแนนเพิ่มจากรอบ Redeem ${scoreGain} คะแนน จึงได้รับเครดิตตรวจงานฟรี 1 ครั้ง ใช้ได้ภายใน 7 วัน`,
   };
 }
 
@@ -625,8 +625,8 @@ export async function getAiCreditStateForUser(
       allowed: false,
       reason:
         weekly.mode === "monthly_override"
-          ? "AI feedback quota reached for this monthly/package cycle."
-          : "AI feedback quota reached for this week. It resets next week unless you have extra credits.",
+          ? "Feedback quota reached for this monthly/package cycle."
+          : "Feedback quota reached for this week. It resets next week unless you have extra credits.",
       tier,
       planRemaining: 0,
       addonRemaining: 0,
@@ -647,7 +647,7 @@ export async function getAiCreditStateForUser(
 
   return {
     allowed: false,
-    reason: "AI feedback quota reached. Upgrade or buy a feedback add-on.",
+    reason: "Feedback quota reached. Upgrade or buy a feedback add-on.",
     tier,
     planRemaining: 0,
     addonRemaining: 0,
@@ -883,7 +883,7 @@ export async function reserveInteractiveSpeakingCreditForAttempt(args: {
   if (!credit.allowed) {
     return {
       ok: false,
-      reason: credit.reason ?? "AI feedback quota reached",
+      reason: credit.reason ?? "Feedback quota reached",
       source: null,
     };
   }

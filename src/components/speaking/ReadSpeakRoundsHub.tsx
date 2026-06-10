@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { SPEAKING_ROUND_NUMBERS } from "@/lib/speaking-constants";
 import { countSpeakingVisibleTopicsInRound } from "@/lib/speaking-storage";
 import type { SpeakingRoundNum } from "@/types/speaking";
 
 export function ReadSpeakRoundsHub() {
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
 
   useEffect(() => {
@@ -20,6 +23,34 @@ export function ReadSpeakRoundsHub() {
       window.removeEventListener("focus", refresh);
     };
   }, []);
+
+  if (soft) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6 py-2">
+        <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
+          ← กลับหน้าฝึก
+        </Link>
+        <SoftHubHeader
+          color="violet"
+          icon="📑"
+          eyebrow="Production · Read, then speak"
+          title="อ่านแล้วพูด"
+          subtitle="Read, then speak"
+          tip={
+            <>
+              อ่านบทความสั้น แล้วพูดตอบด้วยคำของคุณเอง · เริ่มที่ชุด 1 ได้เลย ·
+              ระบบ <strong>ตรวจและให้คะแนนทันที</strong> พร้อมคำแนะนำภาษาไทยครับ
+            </>
+          }
+        />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {SPEAKING_ROUND_NUMBERS.map((round) => (
+            <RoundCard key={`${round}-${v}`} round={round} soft />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-4 py-8">
@@ -46,9 +77,39 @@ export function ReadSpeakRoundsHub() {
   );
 }
 
-function RoundCard({ round }: { round: SpeakingRoundNum }) {
+function RoundCard({ round, soft = false }: { round: SpeakingRoundNum; soft?: boolean }) {
   const n = countSpeakingVisibleTopicsInRound(round);
   const empty = n === 0;
+  if (soft) {
+    const inner = (
+      <>
+        <div className="mb-3 flex items-center justify-between">
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+              empty ? "bg-slate-100 text-slate-400" : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {empty ? "เร็วๆ นี้" : "พร้อมทำ"}
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ {round}</span>
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900">Round {round}</h3>
+        <p className="mt-1 text-sm text-slate-500">{empty ? "ยังไม่มีหัวข้อ" : `${n} หัวข้อให้เลือก`}</p>
+      </>
+    );
+    return empty ? (
+      <div className="flex min-h-[120px] flex-col rounded-2xl border border-slate-200 bg-white p-5 opacity-70">
+        {inner}
+      </div>
+    ) : (
+      <Link
+        href={`/practice/production/read-and-speak/round/${round}`}
+        className="flex min-h-[120px] flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
+      >
+        {inner}
+      </Link>
+    );
+  }
   return (
     <Link
       href={`/practice/production/read-and-speak/round/${round}`}

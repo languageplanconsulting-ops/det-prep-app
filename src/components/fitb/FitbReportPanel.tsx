@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { playNotebookSavedSound } from "@/lib/notebook-save-feedback";
 import { FITB_DIFFICULTY_LABEL, fitbMaxScore } from "@/lib/fitb-constants";
 import { FITB_CLUE_SCORE_FACTOR } from "@/lib/fitb-scoring";
@@ -41,6 +42,7 @@ export function FitbReportPanel({
   detScore: number;
   onRedeemNow: () => void;
 }) {
+  useRevealSfx();
   const redeemRef = useRef<HTMLButtonElement>(null);
   const [wordToast, setWordToast] = useState(false);
   const [dismissed, setDismissed] = useState<Set<number>>(() => new Set());

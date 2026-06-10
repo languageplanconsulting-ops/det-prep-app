@@ -642,8 +642,10 @@ button.ep-interactive:hover {
   transform: none !important;
 }
 
-/* Drop the monospace "stat" treatment — reads as brutalist/technical */
-.admin-soft .ep-stat {
+/* Drop the monospace treatment (ep-stat + Tailwind font-mono) — reads as
+   brutalist/technical. Softens every guide modal + hub label at once. */
+.admin-soft .ep-stat,
+.admin-soft .font-mono {
   font-family: var(--font-inter), ui-sans-serif, system-ui, "Anuphan", sans-serif !important;
   letter-spacing: 0.02em !important;
 }

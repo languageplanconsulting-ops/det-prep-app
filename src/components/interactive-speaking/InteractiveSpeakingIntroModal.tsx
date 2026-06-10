@@ -3,9 +3,15 @@
 import { useEffect, useMemo } from "react";
 
 import { IntroModalShell } from "@/components/practice/IntroModalShell";
+import {
+  GUIDE_ACCENT,
+  GuideRevampBody,
+  GuideRevampFooter,
+} from "@/components/practice/GuideRevampContent";
 import { PaywallUpsellCard } from "@/components/upsell/PaywallUpsellCard";
 import { buildPaywallSpec } from "@/lib/paywall-upsell";
 import { getNextLocalMondayLabels } from "@/lib/vip-ai-feedback-quota";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
 export function InteractiveSpeakingIntroModal({
   open,
@@ -26,6 +32,9 @@ export function InteractiveSpeakingIntroModal({
   sessionCost: number;
   canStart: boolean;
 }) {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const showRevamp = isAdmin || previewEligible;
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -44,6 +53,68 @@ export function InteractiveSpeakingIntroModal({
     onEnter();
     onOpenChange(false);
   };
+
+  if (showRevamp) {
+    return (
+      <IntroModalShell
+        open={open}
+        onDismiss={dismiss}
+        labelledBy="interactive-speaking-intro-title"
+        title={
+          <>
+            พูดโต้ตอบอัจฉริยะ <br />
+            <span className="font-mono text-xl font-bold not-italic normal-case text-rose-500">
+              Interactive Speaking
+            </span>
+          </>
+        }
+        badge={
+          <span className="rounded-full bg-rose-50 px-3 py-1 font-mono text-[11px] font-bold text-rose-500">
+            GUIDE 06
+          </span>
+        }
+        footer={
+          <GuideRevampFooter
+            accent={GUIDE_ACCENT.speaking}
+            primaryLabel="เริ่มการสนทนา →"
+            onEnter={enter}
+            onDismiss={dismiss}
+            canStart={canStart}
+          />
+        }
+      >
+        <GuideRevampBody
+          accent={GUIDE_ACCENT.speaking}
+          outcomeTitle="ฝึกพูดโต้ตอบสด ดันคะแนนกลุ่ม Conversation & Production"
+          outcomeSub="ระบบถามต่อเนื่องตามที่คุณพูด 5–6 รอบ แล้วให้ฟีดแบ็กรายบุคคล"
+          steps={[
+            { n: "1", title: "เลือกหัวข้อ & คุยโต้ตอบ", desc: "ระบบฟังคำตอบแล้วถามต่อตามสิ่งที่คุณพูด (5–6 รอบ)" },
+            { n: "2", title: "รับฟีดแบ็กรายบุคคล", desc: "คะแนนประเมิน วิธีอัปคะแนน และศัพท์แนะนำเฉพาะคุณ" },
+            { n: "3", title: "เก็บลง Notebook ไปใช้รอบหน้า", desc: "นำศัพท์ที่แนะนำไปฝึกต่อ คะแนนจะขยับไวขึ้น" },
+          ]}
+          mechanics={{
+            title: "ก่อนเริ่ม รู้ไว้",
+            showCredits,
+            remaining,
+            limit,
+            resetLabel: resetLabels.th,
+            canStart,
+            bullets: [
+              <>
+                เป็นบทสนทนาสด — <strong>กดออกกลางคันจะเสียโควตาทันที</strong> เตรียมตัวให้พร้อมก่อนเริ่ม
+              </>,
+              <>ใช้โควตาสูงสุด {sessionCost} ต่อรอบ</>,
+            ],
+          }}
+          mini={{
+            label: "เป็นนักเรียนคอร์ส? ทบทวนเทคนิคการพูดก่อนเริ่ม",
+            sub: "มินิเซสชันสอนทีละจุด ~15 นาที · ไว้ทบทวนก่อนลงมือ",
+            href: "/practice/mini-study#speaking",
+          }}
+        />
+      </IntroModalShell>
+    );
+  }
 
   return (
     <IntroModalShell
@@ -149,7 +220,7 @@ export function InteractiveSpeakingIntroModal({
             </div>
             {showCredits && !canStart ? (
               <div className="mt-4">
-                <PaywallUpsellCard spec={buildPaywallSpec("vip", "ai_limit")} compact />
+                <PaywallUpsellCard spec={buildPaywallSpec("vip", "feedback_limit")} compact />
               </div>
             ) : null}
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSfxMuted, setSfxMuted, SFX_MUTE_EVENT, sfxTap } from "@/lib/exam-sfx";
+import { getSfxMuted, setSfxEnabled, setSfxMuted, SFX_MUTE_EVENT, sfxTap } from "@/lib/exam-sfx";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
 /**
@@ -24,6 +24,10 @@ export function SoundToggle() {
     window.addEventListener(SFX_MUTE_EVENT, onChange);
     return () => window.removeEventListener(SFX_MUTE_EVENT, onChange);
   }, []);
+
+  useEffect(() => {
+    setSfxEnabled(enabled);
+  }, [enabled]);
 
   useEffect(() => {
     if (!enabled) return;

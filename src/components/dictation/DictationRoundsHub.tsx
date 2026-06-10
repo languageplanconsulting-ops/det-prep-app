@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { DICTATION_ROUND_NUMBERS } from "@/lib/dictation-constants";
 import {
   ensureDictationBankReady,
@@ -23,8 +22,8 @@ function formatShortDate(iso: string | null): string {
 }
 
 export function DictationRoundsHub() {
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
   const [bankReady, setBankReady] = useState(false);
 
