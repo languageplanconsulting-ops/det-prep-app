@@ -10,9 +10,10 @@ import { useEffectiveTier } from "@/hooks/useEffectiveTier";
  * byte-for-byte unchanged. Zero user impact.
  */
 export function NotebookGate() {
-  const { isAdmin } = useEffectiveTier();
+  const { isAdmin, previewEligible } = useEffectiveTier();
 
-  if (isAdmin) {
+  // Admin-only V2 — match the app's admin signal (DB admin OR code/preview admin).
+  if (isAdmin || previewEligible) {
     return <NotebookListV2 />;
   }
 

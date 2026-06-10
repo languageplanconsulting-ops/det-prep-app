@@ -15,17 +15,19 @@ import { useEffectiveTier } from "@/hooks/useEffectiveTier";
  * Runs in an effect (client-only) so there is no SSR/hydration mismatch.
  */
 export function AdminSoftSkin() {
-  const { isAdmin } = useEffectiveTier();
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  // Match the app's admin signal (DB admin OR code/preview admin).
+  const on = isAdmin || previewEligible;
 
   useEffect(() => {
     const root = document.documentElement;
-    if (isAdmin) {
+    if (on) {
       root.classList.add("admin-soft");
     } else {
       root.classList.remove("admin-soft");
     }
     return () => root.classList.remove("admin-soft");
-  }, [isAdmin]);
+  }, [on]);
 
   return null;
 }
