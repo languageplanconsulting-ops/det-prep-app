@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { daysUntil, setExamDate, usePracticeHeroStats } from "@/hooks/usePracticeHeroStats";
 
 /**
  * PracticeHubV2 — soft-modern redesign of the practice hub (Cagan + Krug).
@@ -144,70 +145,140 @@ export function PracticeHubV2({
   onReadWriteIntro,
 }: PracticeHubV2Props) {
   const conversationLocked = !!conversationGate && !conversationGate.allowed;
+  const stats = usePracticeHeroStats();
+  const examDays = daysUntil(stats.examDate);
+  const gapToTarget =
+    stats.lastScore != null && stats.targetScore != null
+      ? stats.targetScore - stats.lastScore
+      : null;
+  const scorePct = stats.lastScore != null ? (stats.lastScore / 160) * 100 : 0;
+  const targetPct = stats.targetScore != null ? (stats.targetScore / 160) * 100 : 0;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      {/* Admin / phase banner so it's never mistaken for the live page */}
+      {/* Admin preview banner (data is now real) */}
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-[#fff7d1] px-3 py-2 text-xs ring-1 ring-[#FFCC00]">
         <span className="rounded bg-[#004AAD] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FFCC00]">
           Admin preview
         </span>
         <span className="font-semibold text-slate-700">
-          Practice hub V2 · ผู้ใช้จริงยังเห็นหน้าเดิม · ข้อมูลในแผงคะแนนยังเป็นตัวอย่าง (ต่อข้อมูลจริงใน Phase 2)
+          Practice hub V2 · ผู้ใช้จริงยังเห็นหน้าเดิม
         </span>
       </div>
 
-      {/* ── OUTCOME HERO (Cagan: outcome-first) — STATIC demo for Phase 1 ── */}
+      {/* ── OUTCOME HERO (Cagan: outcome-first) — real data ── */}
       <div className="relative mb-4 rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-6">
-        <span className="absolute right-3 top-3 rounded bg-slate-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-slate-400">
-          ตัวอย่าง
-        </span>
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              เส้นทางของคุณ
-            </p>
-            <div className="mt-2 flex items-end gap-3">
-              <div>
-                <p className="text-[11px] text-slate-500">คะแนน Mock ล่าสุด</p>
-                <p className="text-4xl font-bold leading-none text-[#004AAD]">105</p>
-              </div>
-              <span className="mb-1 text-2xl text-slate-300">→</span>
-              <div>
-                <p className="text-[11px] text-slate-500">เป้าหมาย</p>
-                <p className="text-4xl font-bold leading-none text-emerald-600">120</p>
-              </div>
-              <span className="mb-1.5 ml-1 inline-block rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-                อีก 15 คะแนน
-              </span>
+        {stats.loading ? (
+          <p className="text-sm text-slate-400">กำลังโหลดคะแนนของคุณ…</p>
+        ) : stats.lastScore == null ? (
+          /* Empty state — no Mock yet (honest, no fake numbers) */
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">เริ่มต้นที่นี่</p>
+              <h2 className="mt-1 text-lg font-bold">ยังไม่มีคะแนน Mock</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                ทำ Full Mock Test ครั้งแรกเพื่อดูคะแนนเริ่มต้น แล้วพี่ดอยจะช่วยวางแผนให้ครับ
+              </p>
             </div>
-            <div className="relative mt-4 h-2.5 max-w-md rounded-full bg-slate-100">
-              <div
-                className="h-full rounded-full bg-[#004AAD]"
-                style={{ width: "65.6%" }}
-              />
-              <div
-                className="absolute -top-1 h-[18px] w-[3px] rounded bg-emerald-600"
-                style={{ left: "75%" }}
-              />
-            </div>
-            <div className="mt-1 flex max-w-md justify-between text-[10px] text-slate-400">
-              <span>0</span>
-              <span className="font-bold text-emerald-600">▲ เป้า 120</span>
-              <span>160</span>
-            </div>
-            <p className="mt-2 text-xs font-semibold text-emerald-600">
-              +12 จาก Mock ครั้งก่อน · มาถูกทางแล้ว 📈
-            </p>
+            <Link
+              href="/mock-test/start"
+              className="rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00] hover:opacity-90"
+            >
+              🏆 ทำ Mock Test →
+            </Link>
           </div>
-          <div className="rounded-xl bg-[#004AAD] px-6 py-4 text-center text-white sm:min-w-[150px]">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">
-              เหลือถึงวันสอบ
-            </p>
-            <p className="mt-1 text-4xl font-bold leading-none text-[#FFCC00]">23</p>
-            <p className="mt-1 text-xs text-white/80">วัน · 3 ก.ค. 2026</p>
+        ) : (
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">เส้นทางของคุณ</p>
+              <div className="mt-2 flex items-end gap-3">
+                <div>
+                  <p className="text-[11px] text-slate-500">คะแนน Mock ล่าสุด</p>
+                  <p className="text-4xl font-bold leading-none text-[#004AAD]">{stats.lastScore}</p>
+                </div>
+                {stats.targetScore != null ? (
+                  <>
+                    <span className="mb-1 text-2xl text-slate-300">→</span>
+                    <div>
+                      <p className="text-[11px] text-slate-500">เป้าหมาย</p>
+                      <p className="text-4xl font-bold leading-none text-emerald-600">
+                        {stats.targetScore}
+                      </p>
+                    </div>
+                    {gapToTarget != null && gapToTarget > 0 ? (
+                      <span className="mb-1.5 ml-1 inline-block rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                        อีก {gapToTarget} คะแนน
+                      </span>
+                    ) : (
+                      <span className="mb-1.5 ml-1 inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
+                        ถึงเป้าแล้ว 🎉
+                      </span>
+                    )}
+                  </>
+                ) : null}
+              </div>
+              <div className="relative mt-4 h-2.5 max-w-md rounded-full bg-slate-100">
+                <div className="h-full rounded-full bg-[#004AAD]" style={{ width: `${scorePct}%` }} />
+                {stats.targetScore != null ? (
+                  <div
+                    className="absolute -top-1 h-[18px] w-[3px] rounded bg-emerald-600"
+                    style={{ left: `${targetPct}%` }}
+                  />
+                ) : null}
+              </div>
+              <div className="mt-1 flex max-w-md justify-between text-[10px] text-slate-400">
+                <span>0</span>
+                {stats.targetScore != null ? (
+                  <span className="font-bold text-emerald-600">▲ เป้า {stats.targetScore}</span>
+                ) : (
+                  <span />
+                )}
+                <span>160</span>
+              </div>
+              {stats.delta != null ? (
+                <p
+                  className={`mt-2 text-xs font-semibold ${
+                    stats.delta >= 0 ? "text-emerald-600" : "text-rose-500"
+                  }`}
+                >
+                  {stats.delta >= 0 ? "+" : ""}
+                  {stats.delta} จาก Mock ครั้งก่อน
+                  {stats.delta >= 0 ? " · มาถูกทางแล้ว 📈" : " · สู้ต่อนะครับ"}
+                </p>
+              ) : (
+                <p className="mt-2 text-xs text-slate-500">ทำ Mock อีกครั้งเพื่อเห็นพัฒนาการ</p>
+              )}
+            </div>
+
+            {/* Countdown — real exam date (user-set) or a prompt to set it */}
+            {examDays != null ? (
+              <div className="rounded-xl bg-[#004AAD] px-6 py-4 text-center text-white sm:min-w-[150px]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">เหลือถึงวันสอบ</p>
+                <p className="mt-1 text-4xl font-bold leading-none text-[#FFCC00]">
+                  {Math.max(0, examDays)}
+                </p>
+                <p className="mt-1 text-xs text-white/80">วัน</p>
+                <button
+                  type="button"
+                  onClick={() => setExamDate(null)}
+                  className="mt-1 text-[10px] text-white/60 underline"
+                >
+                  แก้วันสอบ
+                </button>
+              </div>
+            ) : (
+              <label className="flex cursor-pointer flex-col items-center rounded-xl border border-dashed border-slate-300 px-5 py-4 text-center text-slate-600 hover:border-[#004AAD]">
+                <span className="text-2xl">📅</span>
+                <span className="mt-1 text-xs font-semibold">ตั้งวันสอบ</span>
+                <input
+                  type="date"
+                  className="mt-1 text-[11px]"
+                  onChange={(e) => e.target.value && setExamDate(e.target.value)}
+                />
+              </label>
+            )}
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── Strategy strip (shown once at top) ── */}
@@ -468,7 +539,7 @@ export function PracticeHubV2({
 
         {/* ═══════════ RIGHT SIDEBAR ═══════════ */}
         <aside className="order-1 space-y-4 lg:order-2">
-          {/* compact persistent status (demo) */}
+          {/* compact persistent status (real) */}
           <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
             <div className="flex items-center justify-between">
               <div>
@@ -476,8 +547,14 @@ export function PracticeHubV2({
                   Mock → เป้า
                 </p>
                 <p className="text-lg font-bold text-[#004AAD]">
-                  105 <span className="text-slate-300">→</span>{" "}
-                  <span className="text-emerald-600">120</span>
+                  {stats.lastScore ?? "—"}
+                  {stats.targetScore != null ? (
+                    <>
+                      {" "}
+                      <span className="text-slate-300">→</span>{" "}
+                      <span className="text-emerald-600">{stats.targetScore}</span>
+                    </>
+                  ) : null}
                 </p>
               </div>
               <div className="text-right">
@@ -485,17 +562,26 @@ export function PracticeHubV2({
                   เหลือ
                 </p>
                 <p className="text-lg font-bold text-[#004AAD]">
-                  23 <span className="text-xs font-normal text-slate-500">วัน</span>
+                  {examDays != null ? (
+                    <>
+                      {Math.max(0, examDays)}{" "}
+                      <span className="text-xs font-normal text-slate-500">วัน</span>
+                    </>
+                  ) : (
+                    <span className="text-sm font-normal text-slate-400">ตั้งวันสอบ</span>
+                  )}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* streak (demo) */}
+          {/* streak (real) */}
           <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-500">🔥 ต่อเนื่อง</span>
-              <span className="text-sm font-bold text-amber-600">5 วัน</span>
+              <span className="text-sm font-bold text-amber-600">
+                {stats.streakDays != null ? `${stats.streakDays} วัน` : "—"}
+              </span>
             </div>
           </div>
 
@@ -512,8 +598,16 @@ export function PracticeHubV2({
                 <span className="rounded bg-slate-100 px-1.5 py-0.5">ปี</span>
               </div>
             </div>
-            <p className="text-xl font-bold text-[#004AAD]">2 ชม 40 น</p>
-            <p className="mb-2 text-[10px] text-slate-500">เฉลี่ย 30 น/วัน</p>
+            <p className="text-xl font-bold text-[#004AAD]">
+              {stats.weeklyMinutes == null
+                ? "—"
+                : stats.weeklyMinutes >= 60
+                  ? `${Math.floor(stats.weeklyMinutes / 60)} ชม ${stats.weeklyMinutes % 60} น`
+                  : `${stats.weeklyMinutes} น`}
+            </p>
+            <p className="mb-2 text-[10px] text-slate-500">
+              เฉลี่ย {Math.round((stats.weeklyMinutes ?? 0) / 7)} น/วัน
+            </p>
             <svg viewBox="0 0 280 80" className="h-auto w-full">
               <path
                 d="M 15 60 L 55 30 L 95 50 L 135 20 L 175 40 L 215 15 L 255 25 L 255 75 L 15 75 Z"
