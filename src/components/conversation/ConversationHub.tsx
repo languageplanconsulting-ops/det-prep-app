@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   CONVERSATION_FULL_SCORE,
   CONVERSATION_ROUND_COUNT,
@@ -53,6 +55,8 @@ function formatShortDate(iso: string | null): string {
 }
 
 export function ConversationHub() {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const [bankVersion, setBankVersion] = useState(0);
 
   useEffect(() => {
@@ -66,6 +70,30 @@ export function ConversationHub() {
       window.removeEventListener("focus", bump);
     };
   }, []);
+
+  if (soft) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6">
+        <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
+          ← กลับหน้าฝึก
+        </Link>
+        <SoftHubHeader
+          color="sky"
+          icon="🎧"
+          eyebrow="Conversation · Interactive"
+          title="บทสนทนาโต้ตอบ"
+          subtitle="Interactive Conversation"
+          tip={
+            <>
+              หัวใจคือ <strong>Scenario Memory</strong> — จำให้ได้ว่าเริ่มเรื่องคุยกันเรื่องอะไร ใครคุยกับใคร ·
+              ฟัง 1 ครั้งก่อน แล้วเลือกประโยคตอบที่เหมาะที่สุดครับ
+            </>
+          }
+        />
+        <RoundGrid key={bankVersion} soft />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -149,11 +177,17 @@ export function ConversationHub() {
   );
 }
 
-function RoundGrid() {
+function RoundGrid({ soft = false }: { soft?: boolean }) {
   const bank = loadConversationBank();
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div
+      className={
+        soft
+          ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+          : "grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+      }
+    >
       {Array.from({ length: CONVERSATION_ROUND_COUNT }, (_, i) => i + 1).map((round) => {
         const { done, total } = roundCompletionCount(round);
         const easyN = filterConversationExamsForPractice(bank[round]?.easy).length;
@@ -165,6 +199,73 @@ function RoundGrid() {
         const hasSets = setCount > 0;
         const avgLabel = stats.avgPercent != null ? `${stats.avgPercent}%` : "—";
         const statusLabel = hasSets ? (done > 0 ? "In progress" : "Open") : "Empty";
+
+        if (soft) {
+          const inner = (
+            <>
+              <div className="mb-3 flex items-center justify-between">
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+                    !hasSets
+                      ? "bg-slate-100 text-slate-400"
+                      : done > 0
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {!hasSets ? "เร็วๆ นี้" : done > 0 ? "กำลังทำ" : "พร้อมทำ"}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ {round}</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900">Round {round}</h3>
+              <p className="mt-0.5 text-xs text-slate-500">
+                {hasSets ? `${setCount} ชุดในคลังข้อสอบ` : "ยังไม่มีชุดข้อสอบ"}
+              </p>
+              {hasSets ? (
+                <div className="mt-auto pt-4">
+                  <div className="mb-1 flex justify-between text-[11px] text-slate-500">
+                    <span>ความคืบหน้า</span>
+                    <span>
+                      {done}/{total}
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full rounded-full bg-[#004AAD]"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                    คะแนนเฉลี่ย
+                  </p>
+                  <p className="text-2xl font-bold text-[#004AAD]">{avgLabel}</p>
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    ฝึกล่าสุด:{" "}
+                    {stats.latestAttemptDate ? formatShortDate(stats.latestAttemptDate) : "ยังไม่เคยทำ"}
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-auto pt-4 text-[11px] text-slate-400">รอเปิดเร็วๆ นี้</p>
+              )}
+            </>
+          );
+          return hasSets ? (
+            <Link
+              key={round}
+              href={href}
+              className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
+            >
+              {inner}
+            </Link>
+          ) : (
+            <div
+              key={round}
+              className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 opacity-70"
+            >
+              {inner}
+            </div>
+          );
+        }
 
         const cardBody = (
           <>
