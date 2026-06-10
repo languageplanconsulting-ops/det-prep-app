@@ -641,3 +641,9 @@ button.ep-interactive:hover {
 .admin-soft .hover\:translate-y-px:hover {
   transform: none !important;
 }
+
+/* Drop the monospace "stat" treatment — reads as brutalist/technical */
+.admin-soft .ep-stat {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, "Anuphan", sans-serif !important;
+  letter-spacing: 0.02em !important;
+}
