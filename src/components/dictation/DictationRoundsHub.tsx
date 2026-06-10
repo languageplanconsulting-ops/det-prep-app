@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { DICTATION_ROUND_NUMBERS } from "@/lib/dictation-constants";
 import {
   ensureDictationBankReady,
@@ -22,6 +23,8 @@ function formatShortDate(iso: string | null): string {
 }
 
 export function DictationRoundsHub() {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const [v, setV] = useState(0);
   const [bankReady, setBankReady] = useState(false);
 
@@ -45,6 +48,56 @@ export function DictationRoundsHub() {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <LuxuryLoader label="Loading dictation bank…" />
+      </div>
+    );
+  }
+
+  if (soft) {
+    // ── Soft-modern admin hub (Brown: outcome-first, not intimidating) ──
+    return (
+      <div className="mx-auto max-w-6xl space-y-6">
+        <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
+          ← กลับหน้าฝึก
+        </Link>
+
+        <div className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200 sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-600 text-2xl text-white">
+              🎧
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                Literacy · Dictation
+              </p>
+              <h1 className="text-2xl font-bold sm:text-3xl">
+                เขียนตามคำบอก{" "}
+                <span className="font-semibold text-slate-400">· Listen and type</span>
+              </h1>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
+              D
+            </div>
+            <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+              <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
+              <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
+                <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+              </span>
+              <p className="text-[13px] leading-6 text-slate-800">
+                ฟังประโยคให้จบ (ฟังซ้ำได้) → พิมพ์ตาม → <strong>เช็ก Tense / ตัวสะกด</strong> ให้ดีนะครับ ·
+                พาร์ทนี้คือการ <strong>ซ่อมประโยคให้ถูกไวยากรณ์</strong> หลังได้ยินเสียง — เพิ่มคะแนน Literacy โดยตรง
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {DICTATION_ROUND_NUMBERS.map((round) => (
+            <RoundCard key={`${round}-${v}`} round={round} soft />
+          ))}
+        </div>
       </div>
     );
   }
@@ -138,7 +191,7 @@ export function DictationRoundsHub() {
   );
 }
 
-function RoundCard({ round }: { round: DictationRoundNum }) {
+function RoundCard({ round, soft = false }: { round: DictationRoundNum; soft?: boolean }) {
   const bank = loadDictationBank();
   const totalSets = bank[round].easy.length + bank[round].medium.length + bank[round].hard.length;
   const stats = getDictationRoundStats(round);
@@ -147,6 +200,39 @@ function RoundCard({ round }: { round: DictationRoundNum }) {
   const avgLabel = hasAttempts ? `${stats.avgPercent}%` : "—";
   const statusLabel = hasAttempts ? "Completed" : "Ready";
   const cardClassName = hasAttempts ? "bg-[#ffcc00]" : "bg-white";
+
+  if (soft) {
+    return (
+      <Link
+        href={href}
+        className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+              hasAttempts ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {hasAttempts ? "ทำแล้ว" : "พร้อมทำ"}
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            รอบ {round}
+          </span>
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900">Round {round}</h3>
+        <p className="mt-0.5 text-xs text-slate-500">{totalSets} ชุดในคลังข้อสอบ</p>
+        <div className="mt-auto pt-4">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+            คะแนนเฉลี่ย
+          </p>
+          <p className="text-2xl font-bold text-[#004AAD]">{avgLabel}</p>
+          <p className="mt-2 text-[11px] text-slate-500">
+            ฝึกล่าสุด: {hasAttempts ? formatShortDate(stats.latestAttemptDate) : "ยังไม่เคยทำ"}
+          </p>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link
