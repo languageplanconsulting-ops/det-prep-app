@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { REALWORD_DIFFICULTIES, REALWORD_ROUND_NUMBERS } from "@/lib/realword-constants";
 import { getRealWordRoundStats, loadRealWordVisibleBank } from "@/lib/realword-storage";
 import type { RealWordRoundNum } from "@/types/realword";
@@ -34,6 +35,15 @@ export function RealWordRoundsHub() {
     };
   }, []);
 
+  const recommendedRound: RealWordRoundNum | null = (() => {
+    void v;
+    for (const r of REALWORD_ROUND_NUMBERS) {
+      const s = getRealWordRoundStats(r);
+      if (s.setsAttempted === 0) return r;
+    }
+    return null;
+  })();
+
   if (soft) {
     return (
       <div className="mx-auto max-w-6xl space-y-6">
@@ -55,7 +65,12 @@ export function RealWordRoundsHub() {
         />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {REALWORD_ROUND_NUMBERS.map((round) => (
-            <RoundCard key={`${round}-${v}`} round={round} soft />
+            <RoundCard
+              key={`${round}-${v}`}
+              round={round}
+              soft
+              recommendedRound={recommendedRound}
+            />
           ))}
         </div>
       </div>
@@ -148,11 +163,17 @@ export function RealWordRoundsHub() {
   );
 }
 
-function RoundCard({ round, soft = false }: { round: RealWordRoundNum; soft?: boolean }) {
-  const bank = loadRealWordVisibleBank();
-  let totalSets = 0;
-  for (const d of REALWORD_DIFFICULTIES) totalSets += bank[round][d].length;
+function RoundCard({
+  round,
+  soft = false,
+  recommendedRound,
+}: {
+  round: RealWordRoundNum;
+  soft?: boolean;
+  recommendedRound?: RealWordRoundNum | null;
+}) {
   const stats = getRealWordRoundStats(round);
+  const totalSets = stats.totalSets;
   const href = `/practice/literacy/real-word/round/${round}`;
   const hasAttempts = stats.avgPercent != null;
   const avgLabel = hasAttempts ? `${stats.avgPercent}%` : "—";
@@ -161,30 +182,17 @@ function RoundCard({ round, soft = false }: { round: RealWordRoundNum; soft?: bo
 
   if (soft) {
     return (
-      <Link
+      <EnhancedRoundCard
         href={href}
-        className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <span
-            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
-              hasAttempts ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-            }`}
-          >
-            {hasAttempts ? "ทำแล้ว" : "พร้อมทำ"}
-          </span>
-          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ {round}</span>
-        </div>
-        <h3 className="text-2xl font-bold text-slate-900">Round {round}</h3>
-        <p className="mt-0.5 text-xs text-slate-500">{totalSets} ชุดในคลังข้อสอบ</p>
-        <div className="mt-auto pt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
-          <p className="text-2xl font-bold text-[#004AAD]">{avgLabel}</p>
-          <p className="mt-2 text-[11px] text-slate-500">
-            ฝึกล่าสุด: {hasAttempts ? formatShortDate(stats.latestAttemptDate) : "ยังไม่เคยทำ"}
-          </p>
-        </div>
-      </Link>
+        round={round}
+        totalSets={stats.totalSets}
+        setsAttempted={stats.setsAttempted}
+        avgPercent={stats.avgPercent}
+        latestAttemptDate={stats.latestAttemptDate}
+        byDifficulty={stats.byDifficulty}
+        isRecommended={recommendedRound === round}
+        estMinPerSet={1.5}
+      />
     );
   }
 

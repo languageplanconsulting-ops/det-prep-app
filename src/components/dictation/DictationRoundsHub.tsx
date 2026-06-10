@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { DICTATION_ROUND_NUMBERS } from "@/lib/dictation-constants";
 import {
   ensureDictationBankReady,
   getDictationRoundStats,
-  loadDictationBank,
 } from "@/lib/dictation-storage";
 import type { DictationRoundNum } from "@/types/dictation";
 
@@ -50,6 +50,19 @@ export function DictationRoundsHub() {
       </div>
     );
   }
+
+  // "Start here" recommendation:
+  // - Surface the first round the learner hasn't started yet
+  // - When every round has progress, no recommendation (badge falls back to ทำแล้ว/พร้อมทำ)
+  // Reads stats once; tied to `v` so reload events bust the cache.
+  const recommendedRound: DictationRoundNum | null = (() => {
+    void v;
+    for (const r of DICTATION_ROUND_NUMBERS) {
+      const s = getDictationRoundStats(r);
+      if (s.setsAttempted === 0) return r;
+    }
+    return null;
+  })();
 
   if (soft) {
     // ── Soft-modern admin hub (Brown: outcome-first, not intimidating) ──
@@ -94,7 +107,12 @@ export function DictationRoundsHub() {
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {DICTATION_ROUND_NUMBERS.map((round) => (
-            <RoundCard key={`${round}-${v}`} round={round} soft />
+            <RoundCard
+              key={`${round}-${v}`}
+              round={round}
+              soft
+              recommendedRound={recommendedRound}
+            />
           ))}
         </div>
       </div>
@@ -190,46 +208,37 @@ export function DictationRoundsHub() {
   );
 }
 
-function RoundCard({ round, soft = false }: { round: DictationRoundNum; soft?: boolean }) {
-  const bank = loadDictationBank();
-  const totalSets = bank[round].easy.length + bank[round].medium.length + bank[round].hard.length;
+function RoundCard({
+  round,
+  soft = false,
+  recommendedRound,
+}: {
+  round: DictationRoundNum;
+  soft?: boolean;
+  recommendedRound?: DictationRoundNum | null;
+}) {
   const stats = getDictationRoundStats(round);
   const href = `/practice/literacy/dictation/round/${round}`;
   const hasAttempts = stats.avgPercent != null;
-  const avgLabel = hasAttempts ? `${stats.avgPercent}%` : "—";
   const statusLabel = hasAttempts ? "Completed" : "Ready";
   const cardClassName = hasAttempts ? "bg-[#ffcc00]" : "bg-white";
+  // The brutalist branch still expects totals for its raw text — keep computed.
+  const totalSetsForBrutalist = stats.totalSets;
+  const avgLabel = hasAttempts ? `${stats.avgPercent}%` : "—";
 
   if (soft) {
     return (
-      <Link
+      <EnhancedRoundCard
         href={href}
-        className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <span
-            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
-              hasAttempts ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-            }`}
-          >
-            {hasAttempts ? "ทำแล้ว" : "พร้อมทำ"}
-          </span>
-          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-            รอบ {round}
-          </span>
-        </div>
-        <h3 className="text-2xl font-bold text-slate-900">Round {round}</h3>
-        <p className="mt-0.5 text-xs text-slate-500">{totalSets} ชุดในคลังข้อสอบ</p>
-        <div className="mt-auto pt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-            คะแนนเฉลี่ย
-          </p>
-          <p className="text-2xl font-bold text-[#004AAD]">{avgLabel}</p>
-          <p className="mt-2 text-[11px] text-slate-500">
-            ฝึกล่าสุด: {hasAttempts ? formatShortDate(stats.latestAttemptDate) : "ยังไม่เคยทำ"}
-          </p>
-        </div>
-      </Link>
+        round={round}
+        totalSets={stats.totalSets}
+        setsAttempted={stats.setsAttempted}
+        avgPercent={stats.avgPercent}
+        latestAttemptDate={stats.latestAttemptDate}
+        byDifficulty={stats.byDifficulty}
+        isRecommended={recommendedRound === round}
+        estMinPerSet={2}
+      />
     );
   }
 
@@ -249,8 +258,8 @@ function RoundCard({ round, soft = false }: { round: DictationRoundNum; soft?: b
         Round {round}
       </h3>
       <p className="mb-4 text-[11px] font-black leading-tight">
-        {totalSets} ชุดในคลังข้อสอบ <br />
-        <span className="text-[#004aad]">({totalSets} SET{totalSets === 1 ? "" : "S"} IN BANK)</span>
+        {totalSetsForBrutalist} ชุดในคลังข้อสอบ <br />
+        <span className="text-[#004aad]">({totalSetsForBrutalist} SET{totalSetsForBrutalist === 1 ? "" : "S"} IN BANK)</span>
       </p>
 
       <div className={`mt-auto space-y-3 ${hasAttempts ? "border-t-2 border-black/10 pt-4" : ""}`}>
