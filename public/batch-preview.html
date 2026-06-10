@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Batch preview — starters, sticky CTA, dictation report, mock hero</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#eef1f6;color:#0f172a}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .stage-label{background:#004AAD;color:#FFCC00;padding:8px 16px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:10px}
+  .phone{width:390px;max-width:100%;background:#f7f8fc;border-radius:28px;border:10px solid #111;position:relative;overflow:hidden;height:760px}
+  .phone-scroll{height:100%;overflow-y:auto;padding-bottom:96px}
+  /* sticky CTA inside phone */
+  .sticky-cta{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);border-top:1px solid #e2e8f0;padding:12px 14px;backdrop-filter:blur(4px)}
+  .coach .av{width:44px;height:44px;border-radius:9999px;flex-shrink:0;background:#004AAD;color:#FFCC00;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;border:2.5px solid #FFCC00}
+</style>
+</head>
+<body class="p-6">
+<div class="mx-auto max-w-5xl space-y-8">
+  <header>
+    <p class="text-xs text-[#004AAD] font-bold uppercase tracking-wider">Preview ก่อน approve</p>
+    <h1 class="mt-1 text-2xl font-bold">ของใหม่ที่เพิ่ม (admin only) — ดูก่อนอนุมัติ</h1>
+    <p class="text-sm text-slate-600 mt-1">4 อย่าง: วลีเริ่มประโยค · ปุ่มส่งติดล่าง (มือถือ) · หน้าผล Dictation แบบใหม่ · ปุ่ม "ทำอะไรต่อ" ใน Mock</p>
+  </header>
+
+  <!-- 1. Writing starters -->
+  <section class="space-y-3">
+    <span class="stage-label">1 · วลีเริ่มประโยค (Production exams)</span>
+    <div class="rounded-2xl bg-violet-50 p-4 ring-1 ring-violet-200 max-w-xl">
+      <p class="mb-2 text-[11px] font-bold uppercase tracking-wide text-violet-700">💬 เริ่มเขียนยังไงดี <span class="font-medium normal-case text-violet-500">— ลองหยิบไปใช้ได้นะครับ</span></p>
+      <div class="flex flex-wrap gap-2">
+        <span class="rounded-full bg-white px-3 py-1.5 text-[13px] text-slate-700 ring-1 ring-violet-200">In this photo, I can see…</span>
+        <span class="rounded-full bg-white px-3 py-1.5 text-[13px] text-slate-700 ring-1 ring-violet-200">There are…</span>
+        <span class="rounded-full bg-white px-3 py-1.5 text-[13px] text-slate-700 ring-1 ring-violet-200">It looks like…</span>
+        <span class="rounded-full bg-white px-3 py-1.5 text-[13px] text-slate-700 ring-1 ring-violet-200">In the background,…</span>
+        <span class="rounded-full bg-white px-3 py-1.5 text-[13px] text-slate-700 ring-1 ring-violet-200">The person is …ing…</span>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500">→ แก้ปัญหา "หน้ากระดาษว่างน่ากลัว" (Change by Design) · โผล่บน Write/Speak photo, Read-then-write/speak</p>
+  </section>
+
+  <!-- 2. Sticky CTA (phone) -->
+  <section class="space-y-3">
+    <span class="stage-label">2 · ปุ่ม "ส่งคำตอบ" ติดล่างจอ (มือถือ) — Fitts's Law</span>
+    <div class="flex gap-6 flex-wrap items-start">
+      <div class="phone">
+        <div class="phone-scroll p-4 space-y-3">
+          <div class="rounded-2xl bg-amber-50 ring-1 ring-amber-200 p-4">
+            <p class="text-[10px] font-bold uppercase text-amber-700">Real word · Medium</p>
+            <h2 class="text-base font-bold">แตะคำจริง · เลี่ยงคำลวง</h2>
+            <div class="grid grid-cols-3 gap-2 mt-3">
+              <button class="rounded-xl border border-[#FFCC00] bg-[#FFCC00] text-[#004AAD] py-3.5 text-sm font-bold">apple</button>
+              <button class="rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-bold">flammon</button>
+              <button class="rounded-xl border border-[#FFCC00] bg-[#FFCC00] text-[#004AAD] py-3.5 text-sm font-bold">journey</button>
+              <button class="rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-bold">tristic</button>
+              <button class="rounded-xl border border-[#FFCC00] bg-[#FFCC00] text-[#004AAD] py-3.5 text-sm font-bold">window</button>
+              <button class="rounded-xl border border-slate-200 bg-white py-3.5 text-sm font-bold">blorphic</button>
+            </div>
+            <p class="text-xs text-slate-400 mt-3">↓ ปุ่มส่งจะติดอยู่ล่างจอเสมอ (อยู่ในระยะนิ้วโป้ง)</p>
+          </div>
+        </div>
+        <div class="sticky-cta">
+          <p class="text-center text-xs text-slate-500 mb-2">เลือกแล้ว 3 คำ</p>
+          <button class="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00]">ส่งคำตอบ →</button>
+        </div>
+      </div>
+      <div class="text-sm text-slate-600 max-w-xs space-y-2">
+        <p><strong>บนมือถือ:</strong> ปุ่มหลักติดล่างจอ เต็มความกว้าง ≥48px — อยู่ในระยะนิ้วโป้งเสมอ ไม่ต้องเลื่อนหา</p>
+        <p><strong>บน desktop:</strong> ปุ่มอยู่ในตำแหน่งปกติ (inline)</p>
+        <p class="text-xs text-slate-400">ตอนนี้ใช้กับ Dictation + Real Word แล้ว (เป็นตัวอย่าง) · ที่เหลือจะทยอยใส่</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Dictation Plan A report -->
+  <section class="space-y-3">
+    <span class="stage-label">3 · หน้าผล Dictation แบบใหม่ (เทียบชัด)</span>
+    <div class="rounded-2xl bg-white ring-1 ring-slate-200 p-5 max-w-xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+        <div class="flex items-center gap-4">
+          <div class="text-center"><p class="text-4xl font-bold text-[#004AAD] leading-none">29</p><p class="text-xs text-slate-500">/ 85</p></div>
+          <div><span class="inline-flex rounded-full bg-amber-100 text-amber-700 px-3 py-1 text-xs font-bold">ฝึกต่ออีกนิด</span><p class="text-xs text-slate-500 mt-1">ถูก 4 จาก 12 คำ</p></div>
+        </div>
+        <button class="rounded-xl bg-[#004AAD] text-[#FFCC00] px-5 py-2.5 text-sm font-bold">↻ ลองอีกครั้ง</button>
+      </div>
+      <p class="text-[11px] font-bold uppercase text-slate-500 mb-2">✅ เฉลยที่ถูกต้อง</p>
+      <p class="rounded-xl bg-emerald-50 ring-1 ring-emerald-200 p-4 text-lg leading-8">After he finished his dinner, he washed the dishes and dried them.</p>
+      <p class="text-[11px] font-bold uppercase text-slate-500 mt-4 mb-2">✏️ เทียบกับที่คุณพิมพ์</p>
+      <p class="rounded-xl bg-white ring-1 ring-slate-200 p-4 text-lg leading-9">
+        <span>after he </span><span class="rounded bg-rose-100 text-rose-700 px-1 mx-0.5">finished </span><span>his </span>
+        <span class="rounded bg-rose-100 text-rose-700 px-1 mx-0.5">dinner, </span>
+        <span class="rounded bg-rose-100 text-rose-700 px-1 mx-0.5">he washed the dishes and dried them.</span>
+      </p>
+      <p class="text-[11px] text-slate-400 mt-1">สีแดง = คำที่ขาดหรือพิมพ์ผิด</p>
+      <div class="coach flex items-start gap-3 mt-4">
+        <div class="av">D</div>
+        <div class="relative flex-1 rounded-2xl bg-white px-3.5 py-3 ring-1 ring-[#004AAD]/10" style="border-top-left-radius:4px;box-shadow:0 4px 14px rgba(15,23,42,.06)">
+          <span class="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-1 text-[10px] font-extrabold uppercase text-[#004AAD]">✨ Tips from P'Doy</span>
+          <p class="text-[13px] leading-6 text-slate-800">ฟังให้จบประโยคก่อนพิมพ์ · ระวัง <strong>-ed ท้ายคำ</strong> และ <strong>comma</strong> ครับ</p>
+        </div>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button class="rounded-xl bg-[#004AAD] text-[#FFCC00] px-5 py-2.5 text-sm font-bold">↻ ลองอีกครั้ง</button>
+        <button class="rounded-xl bg-white ring-1 ring-slate-300 text-slate-700 px-5 py-2.5 text-sm font-bold">✍️ แก้ทีละจุดเพื่อเพิ่มคะแนน</button>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500">→ เฉลยเต็มประโยค + เทียบทีละคำ (ไม่ใช่ทีละตัวอักษร) · "แก้ทีละจุด" ยังใช้ระบบ redeem เดิม</p>
+  </section>
+
+  <!-- 4. Mock next-action hero -->
+  <section class="space-y-3">
+    <span class="stage-label">4 · Mock results — ปุ่ม "ทำอะไรต่อ"</span>
+    <div class="rounded-2xl bg-[#004AAD] text-white p-5 max-w-xl">
+      <p class="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">ทำอะไรต่อให้คะแนนขึ้นเร็วสุด</p>
+      <p class="mt-1 text-lg font-bold">จุดอ่อน: <span class="text-[#FFCC00]">Writing และ Listening</span></p>
+      <p class="text-sm text-white/85 mt-1">เก็บ 2 ทักษะนี้ก่อน จะขึ้นถึงเป้าได้เร็วสุด</p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <a class="bg-[#FFCC00] text-[#004AAD] rounded-xl px-4 py-2.5 text-sm font-bold">✍️ ฝึก Writing →</a>
+        <a class="bg-white/15 text-white rounded-xl px-4 py-2.5 text-sm font-bold">👂 ฝึก Listening →</a>
+      </div>
+    </div>
+    <p class="text-xs text-slate-500">→ จับ 2 ทักษะที่คะแนนต่ำสุดอัตโนมัติ แล้วกดเข้าไปฝึกได้เลย (Cagan: ตอบ "พรุ่งนี้ทำอะไร")</p>
+  </section>
+
+  <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 text-xs text-slate-600">
+    <strong class="text-[#004AAD]">หมายเหตุ:</strong> ทุกอย่างนี้ <strong>admin เห็นคนเดียว</strong> · ผู้ใช้จริงยังเห็นของเดิม · ผ่าน bug review แล้ว ไม่มี bug · build เขียว
+  </div>
+</div>
+</body></html>

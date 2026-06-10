@@ -236,8 +236,8 @@ export function MockFixedReportBrandedViewV2({
           จุดอ่อน:{" "}
           {weakest.map((w, i) => (
             <span key={w.href} className="text-[#FFCC00]">
+              {i > 0 ? " และ " : ""}
               {w.label}
-              {i === 0 ? " และ " : ""}
             </span>
           ))}
         </p>
