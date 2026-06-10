@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { FITB_ROUND_NUMBERS } from "@/lib/fitb-constants";
 import { getFitbRoundStats, loadFitbVisibleBank } from "@/lib/fitb-storage";
 import type { FitbRoundNum } from "@/types/fitb";
@@ -17,6 +19,8 @@ function formatShortDate(iso: string | null): string {
 }
 
 export function FitbRoundsHub() {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const [v, setV] = useState(0);
 
   useEffect(() => {
@@ -30,6 +34,34 @@ export function FitbRoundsHub() {
       window.removeEventListener("focus", refresh);
     };
   }, []);
+
+  if (soft) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6">
+        <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
+          ← กลับหน้าฝึก
+        </Link>
+        <SoftHubHeader
+          color="amber"
+          icon="✏️"
+          eyebrow="Literacy · Fill in the blank"
+          title="เติมคำในช่องว่าง"
+          subtitle="Fill in the blank"
+          tip={
+            <>
+              อ่านประโยคให้จบก่อนเดา — ดูว่าคำควรเป็น <strong>tense ไหน รูปไหน</strong> ·
+              คำใบ้มีไว้ช่วยเรียนรู้นะครับ ลองเองก่อนได้คะแนนเต็มช่อง
+            </>
+          }
+        />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {FITB_ROUND_NUMBERS.map((round) => (
+            <RoundCard key={`${round}-${v}`} round={round} soft />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -120,7 +152,7 @@ export function FitbRoundsHub() {
   );
 }
 
-function RoundCard({ round }: { round: FitbRoundNum }) {
+function RoundCard({ round, soft = false }: { round: FitbRoundNum; soft?: boolean }) {
   const bank = loadFitbVisibleBank();
   const totalSets = bank[round].easy.length + bank[round].medium.length + bank[round].hard.length;
   const stats = getFitbRoundStats(round);
@@ -129,6 +161,35 @@ function RoundCard({ round }: { round: FitbRoundNum }) {
   const avgLabel = hasAttempts ? `${stats.avgPercent}%` : "—";
   const statusLabel = round === 1 ? "Active" : "Ready";
   const cardClassName = round === 1 ? "bg-[#ffcc00]" : "bg-white";
+
+  if (soft) {
+    return (
+      <Link
+        href={href}
+        className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+              hasAttempts ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {hasAttempts ? "ทำแล้ว" : "พร้อมทำ"}
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ {round}</span>
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900">Round {round}</h3>
+        <p className="mt-0.5 text-xs text-slate-500">{totalSets} ชุดในคลังข้อสอบ</p>
+        <div className="mt-auto pt-4">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
+          <p className="text-2xl font-bold text-[#004AAD]">{avgLabel}</p>
+          <p className="mt-2 text-[11px] text-slate-500">
+            ฝึกล่าสุด: {hasAttempts ? formatShortDate(stats.latestAttemptDate) : "ยังไม่เคยทำ"}
+          </p>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link
