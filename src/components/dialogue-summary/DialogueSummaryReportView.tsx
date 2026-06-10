@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import {
   buildDialogueSummaryReportNotebookFullBodies,
   buildDialogueSummaryReportNotebookPreview,
@@ -97,6 +98,9 @@ export function DialogueSummaryReportView({
 
   return (
     <div className="relative mx-auto max-w-4xl space-y-8 pb-8">
+      <AdminCoachTip className="relative z-[1]">
+        ดู <strong>feedback ราย criterion</strong> · แก้ไวยากรณ์ที่ระบบชี้ เก็บลง Notebook แล้วลองชุดอื่น
+      </AdminCoachTip>
       <div
         className="pointer-events-none absolute inset-x-0 -top-6 h-56 bg-gradient-to-b from-ep-blue/[0.08] via-transparent to-transparent"
         aria-hidden

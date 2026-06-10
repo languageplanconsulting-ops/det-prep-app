@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import {
   REALWORD_DIFFICULTY_LABEL,
   REALWORD_MAX_SCORE,
@@ -96,6 +97,9 @@ export function RealWordReport({
 
   return (
     <div className="space-y-8">
+      <AdminCoachTip>
+        ดูคำที่ <strong>พลาด</strong> และ <strong>คำลวง</strong> ที่กดผิด · เก็บคำจริงลง Notebook แล้วทำซ้ำให้แม่นขึ้น
+      </AdminCoachTip>
       <section className={`ep-brutal overflow-hidden rounded-sm border-4 border-black p-0 shadow-[5px_5px_0_0_#000] ${tone.panelClass}`}>
         <div className="grid gap-0 lg:grid-cols-[1.35fr_0.95fr]">
           <div className="border-b-4 border-black p-6 lg:border-b-0 lg:border-r-4">

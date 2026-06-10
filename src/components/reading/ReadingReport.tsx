@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import {
   READING_DIFFICULTY_LABEL,
   READING_DIFFICULTY_MAX,
@@ -49,6 +50,9 @@ export function ReadingReport({
 
   return (
     <div className="space-y-8">
+      <AdminCoachTip>
+        อ่าน <strong>เหตุผลข้อที่ผิด</strong> · เก็บคำศัพท์ที่ไฮไลต์ลง Notebook · ทำซ้ำเพื่อพัฒนาคะแนน
+      </AdminCoachTip>
       <header className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-6 shadow-[4px_4px_0_0_#000]">
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">
           Report — R{round} · {READING_DIFFICULTY_LABEL[difficulty]} · Set {setNumber} · Exam {examNumber}

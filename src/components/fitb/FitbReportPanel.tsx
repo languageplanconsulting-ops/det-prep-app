@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import { playNotebookSavedSound } from "@/lib/notebook-save-feedback";
 import { FITB_DIFFICULTY_LABEL, fitbMaxScore } from "@/lib/fitb-constants";
 import { FITB_CLUE_SCORE_FACTOR } from "@/lib/fitb-scoring";
@@ -90,6 +91,9 @@ export function FitbReportPanel({
 
   return (
     <div className="space-y-6 border-t-4 border-black pt-6">
+      <AdminCoachTip>
+        ช่องที่ <strong>ผิด/ใกล้เคียง</strong> — ดูคำที่ถูก เก็บลง Notebook แล้วลองใหม่ · เลี่ยงคำใบ้จะได้คะแนนเต็มช่อง
+      </AdminCoachTip>
       {wordToast ? (
         <div
           className="fixed bottom-6 left-1/2 z-[100] w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 border-4 border-black bg-white px-4 py-3 text-center text-sm font-bold shadow-[4px_4px_0_0_#000]"

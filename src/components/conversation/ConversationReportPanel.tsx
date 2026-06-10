@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import { CONVERSATION_SCENARIO_Q_COUNT, CONVERSATION_TOTAL_STEPS } from "@/lib/conversation-constants";
 import { conversationExplanationThai } from "@/lib/conversation-report-helpers";
 import { conversationScore, countConversationCorrect } from "@/lib/conversation-scoring";
@@ -80,6 +81,9 @@ export function ConversationReportPanel({
 
   return (
     <div className="space-y-8">
+      <AdminCoachTip>
+        ฟัง <strong>ประโยคที่พลาด</strong> ซ้ำ · จำ scenario ให้แม่น แล้วกด &ldquo;แก้เฉพาะข้อผิด&rdquo; เพื่อเก็บคะแนน
+      </AdminCoachTip>
       {mastered ? (
         <div className="ep-luxury-option-in ep-panel-luxury ep-brutal rounded-sm border-4 border-emerald-600 bg-emerald-50 p-6 text-center shadow-[4px_4px_0_0_#000]">
           <p className="ep-stat text-xs font-bold uppercase tracking-[0.3em] text-emerald-800">
