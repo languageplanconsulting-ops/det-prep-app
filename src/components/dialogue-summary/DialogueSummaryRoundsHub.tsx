@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
+import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { DIALOGUE_SUMMARY_ROUND_NUMBERS } from "@/lib/dialogue-summary-constants";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { getDialogueSummaryRoundStats, loadDialogueSummaryVisibleBank } from "@/lib/dialogue-summary-storage";
@@ -94,6 +95,7 @@ export function DialogueSummaryRoundsHub() {
           ← กลับหน้าฝึก
         </Link>
         <HubMomentumStrip />
+        <HubBoostsBadge subscore="comprehension" />
         <SoftHubHeader
           color="sky"
           icon="💬"

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
+import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { READING_DIFFICULTIES, READING_ROUND_NUMBERS } from "@/lib/reading-constants";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { getReadingRoundStats, loadReadingVisibleBank } from "@/lib/reading-storage";
@@ -52,6 +53,7 @@ export function ReadingRoundsHub() {
           ← กลับหน้าฝึก
         </Link>
         <HubMomentumStrip />
+        <HubBoostsBadge subscore="comprehension" />
         <SoftHubHeader
           color="emerald"
           icon="📖"

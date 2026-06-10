@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
+import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { VocabExamIntroModal } from "@/components/vocab/VocabExamIntroModal";
 import { VocabularyBuilderAvailabilityBanner } from "@/components/vocab/VocabularyBuilderAvailabilityBanner";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
@@ -55,6 +56,7 @@ export function VocabRoundsHub() {
           ← กลับหน้าฝึก
         </Link>
         <HubMomentumStrip />
+        <HubBoostsBadge subscore="comprehension" />
         <SoftHubHeader
           color="emerald"
           icon="📚"
