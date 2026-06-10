@@ -109,7 +109,7 @@ export function ReadSpeakSession({
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) {
       setSpeechError(
-        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer in the transcript box and use AI scoring normally.",
+        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer in the transcript box and use instant scoring normally.",
       );
       return;
     }
@@ -165,7 +165,7 @@ export function ReadSpeakSession({
       rec.start();
       setListening(true);
     } catch {
-      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for AI scoring.");
+      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for instant scoring.");
       setListening(false);
     }
   }, []);

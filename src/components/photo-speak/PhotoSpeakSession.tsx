@@ -94,7 +94,7 @@ export function PhotoSpeakSession({ itemId }: { itemId: string }) {
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) {
       setSpeechError(
-        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer and use AI scoring normally.",
+        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer and use instant scoring normally.",
       );
       return;
     }
@@ -154,7 +154,7 @@ export function PhotoSpeakSession({ itemId }: { itemId: string }) {
       rec.start();
       setListening(true);
     } catch {
-      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for AI scoring.");
+      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for instant scoring.");
       setListening(false);
       setSpeakSecondsLeft(0);
     }
@@ -389,8 +389,7 @@ export function PhotoSpeakSession({ itemId }: { itemId: string }) {
           ) : null}
 
           <p className="mt-3 ep-stat text-xs font-bold text-ep-blue">
-            Speech recognition: English (US) only. Chrome/Edge use the internet for live captions — if
-            that fails, use the text box below (no network needed for typing).
+            พูดเป็นภาษาอังกฤษ · live caption ใช้ได้ดีบน Chrome/Edge · ถ้าไม่ขึ้น พิมพ์คำตอบในกล่องด้านล่างได้เลย
           </p>
 
           {speechError ? (
@@ -456,9 +455,7 @@ export function PhotoSpeakSession({ itemId }: { itemId: string }) {
             </button>
           </div>
           <p className="mt-2 text-xs text-neutral-500">
-            <strong>Try again</strong> clears the transcript so you can re-record. AI grading needs{" "}
-            <code className="ep-stat">GEMINI_API_KEY</code> in <code className="ep-stat">.env.local</code> (or your
-            host&apos;s environment).
+            <strong>Try again</strong> จะล้างคำตอบเพื่อให้อัดใหม่ได้
           </p>
         </BrutalPanel>
       ) : null}

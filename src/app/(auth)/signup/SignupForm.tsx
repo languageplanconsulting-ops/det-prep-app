@@ -37,7 +37,7 @@ export function SignupForm({ redirectTo = "/practice" }: { redirectTo?: string }
     const supabase = getBrowserSupabase();
     if (!supabase) {
       setErr(
-        "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local, or ask an admin to save keys under Admin → Supabase.",
+        "ระบบขัดข้องชั่วคราว กรุณาลองใหม่ภายหลัง",
       );
       return;
     }

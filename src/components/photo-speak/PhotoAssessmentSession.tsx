@@ -103,7 +103,7 @@ export function PhotoAssessmentSession({
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) {
       setSpeechError(
-        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer and use AI scoring normally.",
+        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer and use instant scoring normally.",
       );
       return;
     }
@@ -158,7 +158,7 @@ export function PhotoAssessmentSession({
       rec.start();
       setListening(true);
     } catch {
-      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for AI scoring.");
+      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for instant scoring.");
       setListening(false);
     }
   }, [transcript]);

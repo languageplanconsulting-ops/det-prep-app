@@ -28,12 +28,10 @@ export function ReadSpeakRoundsHub() {
       </Link>
       <header className="ep-brutal rounded-sm border-4 border-black bg-white p-6 shadow-[4px_4px_0_0_#000]">
         <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">Read, then speak</p>
-        <h1 className="mt-2 text-3xl font-black">Choose a round</h1>
+        <h1 className="mt-2 text-3xl font-black">เลือกชุดข้อสอบ</h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-600">
-          Admin-uploaded topics appear in <strong>Round 1</strong>. Other rounds are reserved for future content.
-          Live captions use your browser (Chrome/Edge). <strong>Grading</strong> uses Gemini — set{" "}
-          <code className="ep-stat text-xs">GEMINI_API_KEY</code> in{" "}
-          <code className="ep-stat text-xs">.env.local</code> (or your host).
+          อ่านบทความสั้น แล้วพูดตอบด้วยคำของคุณเอง · เริ่มได้ที่ <strong>ชุดที่ 1</strong> ·
+          ระบบจะ <strong>ตรวจและให้คะแนนทันที</strong> พร้อมคำแนะนำเป็นภาษาไทย
         </p>
       </header>
       <section className="space-y-4">

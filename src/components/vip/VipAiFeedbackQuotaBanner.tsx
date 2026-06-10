@@ -35,7 +35,7 @@ export function VipAiFeedbackQuotaBanner() {
           ? "กำลังโหลดโควต้า…"
           : weeklyMode
             ? TH_QUOTA_BANNER_LINE(remaining, limit)
-            : `รอบนี้คุณมี AI credit แบบรายเดือนเหลือ ${remaining} ครั้ง จาก ${limit} ครั้ง`}
+            : `รอบนี้คุณมี feedback credit แบบรายเดือนเหลือ ${remaining} ครั้ง จาก ${limit} ครั้ง`}
       </p>
       <p className="mt-1 text-xs font-semibold text-neutral-800">
         {weeklyMode

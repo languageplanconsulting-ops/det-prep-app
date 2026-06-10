@@ -129,9 +129,9 @@ export function ReadWriteIntroModal({
             <div className="mt-2 flex flex-col items-center justify-between gap-4 md:flex-row">
               <div className="flex-1">
                 <p className="text-sm font-black text-emerald-600">⚠️ หากกดออกกลางคัน รายงานจะไม่ถูกสร้างให้</p>
-                <p className="text-xs font-bold">โควต้า AI สำหรับการตรวจจะใช้ตอนส่งตรวจ กรุณาเขียนให้ครบก่อนกดส่ง</p>
+                <p className="text-xs font-bold">โควต้าการตรวจงานจะใช้ตอนส่งตรวจ กรุณาเขียนให้ครบก่อนกดส่ง</p>
                 <p className="mt-1 font-mono text-[10px] font-bold uppercase text-gray-400">
-                  AI credit is used when you submit for grading.
+                  feedback credit is used when you submit for grading.
                 </p>
               </div>
               <div className="min-w-[140px] border-2 border-black bg-white p-2 text-center">

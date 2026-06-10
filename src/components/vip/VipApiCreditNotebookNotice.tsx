@@ -66,13 +66,13 @@ export function VipApiCreditNotebookNotice() {
         </p>
         <p className="mt-1 text-sm font-extrabold text-neutral-900">
           {weeklyMode
-            ? `เครดิต AI รายสัปดาห์คงเหลือ ${notice.remaining}/${notice.limit} ครั้ง`
-            : `เครดิต AI รายเดือนคงเหลือ ${notice.remaining}/${notice.limit} ครั้ง`}
+            ? `เครดิตตรวจงาน รายสัปดาห์คงเหลือ ${notice.remaining}/${notice.limit} ครั้ง`
+            : `เครดิตตรวจงาน รายเดือนคงเหลือ ${notice.remaining}/${notice.limit} ครั้ง`}
         </p>
         <p className="text-sm font-bold text-neutral-800">
           {weeklyMode
-            ? `Weekly AI credits left: ${notice.remaining}/${notice.limit}`
-            : `Monthly AI credits left: ${notice.remaining}/${notice.limit}`}
+            ? `Weekly feedback credits left: ${notice.remaining}/${notice.limit}`
+            : `Monthly feedback credits left: ${notice.remaining}/${notice.limit}`}
         </p>
         <p className="mt-1 text-xs font-semibold text-neutral-700">
           {weeklyMode

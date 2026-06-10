@@ -52,11 +52,11 @@ function featureCopy(tier: Tier) {
   }
   return {
     persona: "เริ่มต้นใช้งาน (The Starter)",
-    blurb: "ลองได้ทุก lane แบบเริ่มต้น และมี personalized feedback credit 1 ครั้งไว้ทดลองงาน AI หนึ่งชิ้น",
+    blurb: "ลองได้ทุก lane แบบเริ่มต้น และมี personalized feedback credit 1 ครั้งไว้ทดลองงานตรวจคะแนน หนึ่งชิ้น",
     read: "📖 1 Starter Test / Exam Lane",
     feedback: `✍️ ${AI_MONTHLY_LIMIT.free} Personalized Feedback Credit`,
     literacy: "📚 Try each exam lane once",
-    convo: "🎧 RW / RS / IS / Photo tasks: choose 1 AI feedback",
+    convo: "🎧 RW / RS / IS / Photo tasks: choose 1 instant feedback",
     mocks: `📊 ${MOCK_TEST_MONTHLY_LIMIT.free} Mock Tests / Month`,
   };
 }

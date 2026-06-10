@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { LandingPageClient } from "@/components/landing/LandingPageClient";
 
 export const metadata: Metadata = {
-  title: "Duolingo English Test Prep Thailand | Mock Test, AI Feedback, Guide",
+  title: "Duolingo English Test Prep Thailand | Mock Test, Instant Feedback, Guide",
   description:
-    "เตรียมสอบ Duolingo English Test สำหรับคนไทย พร้อม mock test, AI feedback, speaking and writing practice, mini diagnosis และคู่มือ DET แบบครบ",
+    "เตรียมสอบ Duolingo English Test สำหรับคนไทย พร้อม mock test, instant feedback, speaking and writing practice, mini diagnosis และคู่มือ DET แบบครบ",
 };
 
 type HomeProps = {

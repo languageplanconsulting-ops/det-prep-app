@@ -49,16 +49,16 @@ function AiRewardBonusNoticeInner({ reward }: { reward: AiRewardBonus }) {
                 Congratulations!
               </h2>
               <p className="mt-2 text-xl font-black text-neutral-900">
-                ยินดีด้วย คุณได้รับ AI credit เพิ่มฟรี
+                ยินดีด้วย คุณได้รับ feedback credit เพิ่มฟรี
               </p>
 
               <div className="mt-5 border-4 border-black bg-ep-yellow px-5 py-4 shadow-[6px_6px_0_0_#000]">
                 <p className="text-base font-bold text-neutral-950">
-                  You received <span className="ep-stat text-2xl font-black">1 more AI credit</span> this
+                  You received <span className="ep-stat text-2xl font-black">1 more feedback credit</span> this
                   week because your score improved by more than 5 points.
                 </p>
                 <p className="mt-2 text-sm font-medium text-neutral-900">
-                  คุณได้รับ <span className="ep-stat font-black">AI credit ฟรีเพิ่ม 1 ครั้ง</span> ภายในสัปดาห์นี้
+                  คุณได้รับ <span className="ep-stat font-black">feedback credit ฟรีเพิ่ม 1 ครั้ง</span> ภายในสัปดาห์นี้
                   เพราะคะแนนของคุณดีขึ้นมากกว่า 5 คะแนนจากรอบก่อน
                 </p>
               </div>
@@ -104,13 +104,13 @@ function AiRewardBonusNoticeInner({ reward }: { reward: AiRewardBonus }) {
           Reward unlocked / รับรางวัลเพิ่ม
         </p>
         <p className="mt-2 text-sm font-bold text-neutral-900">
-          Congratulations — you received 1 more AI credit this week because your score improved by more than 5 points.
+          Congratulations — you received 1 more feedback credit this week because your score improved by more than 5 points.
         </p>
         <p className="mt-1 text-sm text-neutral-800">
-          ยินดีด้วย คุณได้รับ AI credit เพิ่มฟรี 1 ครั้งในสัปดาห์นี้ เพราะคะแนนของคุณดีขึ้นมากกว่า 5 คะแนน
+          ยินดีด้วย คุณได้รับ feedback credit เพิ่มฟรี 1 ครั้งในสัปดาห์นี้ เพราะคะแนนของคุณดีขึ้นมากกว่า 5 คะแนน
         </p>
         <p className="ep-stat mt-3 text-xs font-bold text-neutral-700">
-          +{reward.creditsGranted} AI credit · expires {expiresLabel}
+          +{reward.creditsGranted} feedback credit · expires {expiresLabel}
         </p>
         <p className="ep-stat mt-1 text-xs font-bold text-neutral-700">
           เดิม {reward.previousScore160}/160 → ตอนนี้ {reward.currentScore160}/160

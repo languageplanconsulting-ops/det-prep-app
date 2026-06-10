@@ -65,7 +65,7 @@ function formatCountdown(seconds: number): string {
 }
 
 function interactiveSpeakingStartCreditConfirm(): string {
-  return "Starting this interactive speaking session will not use a credit yet.\n\nThe AI credit will only be counted when you finish and submit for feedback.\n\nContinue?";
+  return "Starting this interactive speaking session will not use a credit yet.\n\nThe feedback credit will only be counted when you finish and submit for feedback.\n\nContinue?";
 }
 
 /** Short click when the answer window opens (prep → record). */
@@ -424,7 +424,7 @@ export function InteractiveSpeakingSession({
 
       if (!canUploadTranscribe) {
         setSpeechError(
-          "Speech recognition did not start. On iPad/Safari, type your answer in the box below and you can still complete the AI flow normally.",
+          "Speech recognition did not start. On iPad/Safari, type your answer in the box below and you can still complete the scoring normally.",
         );
         setRecLeft(0);
         return;
@@ -906,7 +906,7 @@ export function InteractiveSpeakingSession({
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-black bg-ep-blue text-xs font-black text-white shadow-[3px_3px_0_0_#000]"
                     aria-hidden
                   >
-                    AI
+                    EP
                   </div>
                   <div className="min-w-0 flex-1 space-y-3">
                     {phase === "playing" ? (

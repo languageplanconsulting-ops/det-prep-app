@@ -79,7 +79,7 @@ export function MiniDiagnosisStartClient() {
               </h1>
               <p className="max-w-3xl text-sm font-bold leading-relaxed text-neutral-700">
                 วัดจุดแข็งและจุดอ่อนของคุณแบบเร็วภายในประมาณ {MINI_DIAGNOSIS_DURATION_LABEL}
-                พร้อม 2 งานที่มี AI feedback จริง: เขียนจากภาพ และ read then speak
+                พร้อม 2 งานที่มี instant feedback จริง: เขียนจากภาพ และ read then speak
               </p>
             </div>
             <div className="grid min-w-[220px] gap-3 border-4 border-black bg-[#ffcc00] p-4 text-sm font-black shadow-[6px_6px_0_0_#111111]">
@@ -151,7 +151,7 @@ export function MiniDiagnosisStartClient() {
               <ul className="mt-4 space-y-3 text-sm font-bold text-neutral-700">
                 <li>• คะแนน Reading / Listening / Speaking / Writing แบบย่อ</li>
                 <li>• จุดอ่อนหลักที่ควรแก้ก่อน</li>
-                <li>• คำแนะนำจาก AI สำหรับงาน production 2 ชิ้น</li>
+                <li>• คำแนะนำจากระบบ สำหรับงาน production 2 ชิ้น</li>
                 <li>• ทางต่อยอดไป full mock และแพลนแบบเสียเงิน</li>
               </ul>
             </div>

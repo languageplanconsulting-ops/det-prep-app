@@ -95,7 +95,7 @@ export function GradingProgressLoader({
               {Math.min(97, progress)}%
             </span>
             <span className="ep-stat mt-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-              {premium ? "AI analysis in progress" : "Processing"}
+              {premium ? "Analyzing your answer" : "Processing"}
             </span>
           </div>
         </div>
@@ -146,7 +146,7 @@ export function GradingProgressLoader({
           </p>
           {premium ? (
             <p className="ep-stat text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-              English Plan AI
+              English Plan
             </p>
           ) : null}
         </div>

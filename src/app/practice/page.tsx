@@ -80,7 +80,7 @@ const hubsWithoutMock = [
         skillGate: "conversation" as const,
       },
       {
-        label: "Dialogue → summary (AI)",
+        label: "Dialogue → summary",
         progress: "5 rounds",
         href: "/practice/listening/dialogue-summary",
       },
@@ -192,8 +192,8 @@ export default function PracticeHubPage() {
       if (rem < 1) {
         window.alert(
           vipAiGate.quotaMode === "weekly"
-            ? "AI FEEDBACK: You have no remaining VIP grading credit this week. It resets every Monday."
-            : "AI FEEDBACK: You have no remaining VIP grading credit in this monthly/package cycle right now.",
+            ? "การตรวจงาน: You have no remaining VIP grading credit this week. It resets every Monday."
+            : "การตรวจงาน: You have no remaining VIP grading credit in this monthly/package cycle right now.",
         );
         return;
       }
@@ -329,7 +329,7 @@ export default function PracticeHubPage() {
             คุณสามารถลอง <strong>Reading</strong>, <strong>Vocabulary</strong>, <strong>Dictation</strong>,
             {" "} <strong>Fill in the Blank</strong>, <strong>Real Word</strong>, และ{" "}
             <strong>Interactive Conversation</strong> ได้อย่างละ 1 ครั้งตลอดอายุบัญชี
-            พร้อม <strong>AI Feedback 1 เครดิต</strong> สำหรับเลือกลองงานพูดหรือเขียน 1 งาน
+            พร้อม <strong>Instant Feedback 1 เครดิต</strong> สำหรับเลือกลองงานพูดหรือเขียน 1 งาน
             ส่วน <strong>Full Mock Test</strong> ยังไม่รวมในแพ็กเกจฟรี
           </p>
         </div>

@@ -81,7 +81,7 @@ export function WriteAboutPhotoSession({ itemId }: { itemId: string }) {
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) {
       setSpeechError(
-        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer and use AI scoring normally.",
+        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer and use instant scoring normally.",
       );
       return;
     }
@@ -140,7 +140,7 @@ export function WriteAboutPhotoSession({ itemId }: { itemId: string }) {
       rec.start();
       setListening(true);
     } catch {
-      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for AI scoring.");
+      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for instant scoring.");
       setListening(false);
       setSpeakSecondsLeft(0);
     }
@@ -322,7 +322,7 @@ export function WriteAboutPhotoSession({ itemId }: { itemId: string }) {
             Write / record
           </button>
           <p className="mt-3 text-xs text-neutral-500">
-            Next: live transcription while you speak, or type in the box. Same AI report as Speak
+            Next: live transcription while you speak, or type in the box. Same instant report as Speak
             about photo.
           </p>
         </BrutalPanel>
@@ -364,8 +364,7 @@ export function WriteAboutPhotoSession({ itemId }: { itemId: string }) {
           ) : null}
 
           <p className="mt-3 ep-stat text-xs font-bold text-ep-blue">
-            Speech recognition: English (US). Chrome/Edge use the network for captions — you can
-            also type below.
+            พูดเป็นภาษาอังกฤษ · live caption ใช้ได้ดีบน Chrome/Edge · หรือพิมพ์คำตอบในกล่องด้านล่างได้
           </p>
 
           {speechError ? (
@@ -437,10 +436,6 @@ export function WriteAboutPhotoSession({ itemId }: { itemId: string }) {
               {submitting ? "Grading…" : "Submit"}
             </button>
           </div>
-          <p className="mt-2 text-xs text-neutral-500">
-            AI grading needs <code className="ep-stat">GEMINI_API_KEY</code> in{" "}
-            <code className="ep-stat">.env.local</code> (or your host&apos;s environment).
-          </p>
         </BrutalPanel>
       ) : null}
     </div>

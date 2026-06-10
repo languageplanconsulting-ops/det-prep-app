@@ -151,7 +151,7 @@ export function MockTestSessionClient({ sessionId }: { sessionId: string }) {
     void (async () => {
       if (!supabase) {
         setError(
-          "Supabase is not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to .env.local. / ไม่พบการตั้งค่า Supabase",
+          "ไม่พบการตั้งค่า Supabase",
         );
         setReady(true);
         return;

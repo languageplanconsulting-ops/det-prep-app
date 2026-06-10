@@ -343,7 +343,7 @@ export function LandingPageClient({
             ["1", "Clear free start / เริ่มฟรีชัดเจน"],
             ["Thai", "Feedback in Thai / ฟีดแบ็กภาษาไทย"],
             ["Goal", "Target-score planning / วางแผนตามเป้า"],
-            ["AI", "Personalized notes / ฟีดแบ็กเฉพาะบุคคล"],
+            ["✓", "Personalized notes / ฟีดแบ็กเฉพาะบุคคล"],
           ].map(([n, l]) => (
             <div key={l} className="ep-stat">
               <span className="block text-3xl font-black text-neutral-900">{n}</span>
@@ -370,7 +370,7 @@ export function LandingPageClient({
               {
                 title: "Ready to train seriously / พร้อมฝึกจริงจัง",
                 body:
-                  "Compare Basic, Premium, and VIP if you already know you need more AI feedback, more practice lanes, or mock tests.",
+                  "Compare Basic, Premium, and VIP if you already know you need more instant feedback, more practice lanes, or mock tests.",
                 cta: "See plans",
                 href: "#pricing",
                 tone: "bg-[#e8f1ff]",
@@ -423,11 +423,11 @@ export function LandingPageClient({
               </h2>
               <p className="mt-5 max-w-3xl text-base leading-relaxed text-neutral-700 sm:text-lg">
                 Free users can take one fast diagnostic block to see their current level, weakest skill,
-                and 2 real AI feedback tasks before committing to a full plan.
+                and 2 real instant feedback tasks before committing to a full plan.
                 <br />
                 <br />
                 <span className="font-semibold text-neutral-900">
-                  ผู้ใช้ฟรีสามารถลองทำมินิไดแอกโนซิส 1 ครั้ง เพื่อดูคะแนนโดยรวม จุดอ่อนหลัก และรับ AI feedback จริง 2 งาน
+                  ผู้ใช้ฟรีสามารถลองทำมินิไดแอกโนซิส 1 ครั้ง เพื่อดูคะแนนโดยรวม จุดอ่อนหลัก และรับ instant feedback จริง 2 งาน
                   ก่อนตัดสินใจอัปเกรด
                 </span>
               </p>
@@ -487,7 +487,7 @@ export function LandingPageClient({
               ],
               [
                 "อยากได้ 125+",
-                "ใช้ AI feedback และ mock tests เพื่ออัปเกรดโครงสร้างคำตอบ ความลื่นไหล และความแม่นยำ",
+                "ใช้ instant feedback และ mock tests เพื่ออัปเกรดโครงสร้างคำตอบ ความลื่นไหล และความแม่นยำ",
               ],
               [
                 "นักเรียน Fast Track",
@@ -528,7 +528,7 @@ export function LandingPageClient({
               {
                 n: "03",
                 t: "Train the right skill / ฝึกให้ตรงจุด",
-                d: "Use targeted practice, AI feedback, or mock tests based on your goal. / เลือกฝึกจากเป้าหมายของคุณ ไม่ต้องเดาสุ่ม",
+                d: "Use targeted practice, instant feedback, or mock tests based on your goal. / เลือกฝึกจากเป้าหมายของคุณ ไม่ต้องเดาสุ่ม",
               },
               {
                 n: "04",
@@ -561,7 +561,7 @@ export function LandingPageClient({
               See it in action / ดูการทำงาน
             </p>
             <h2 className="text-3xl font-black sm:text-5xl">
-              AI feedback on every skill / ฟีดแบ็กครบทั้ง 4 ทักษะ
+              instant feedback on every skill / ฟีดแบ็กครบทั้ง 4 ทักษะ
             </h2>
           </header>
           <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -622,7 +622,7 @@ export function LandingPageClient({
           </header>
           <div className="grid gap-8 md:grid-cols-2">
             {[
-              ["📝", "PRODUCTION", "AI feedback on accuracy, range, coherence, and task fit."],
+              ["📝", "PRODUCTION", "instant feedback on accuracy, range, coherence, and task fit."],
               ["📚", "COMPREHENSION", "DET-style reading and vocabulary in context."],
               ["✍️", "LITERACY", "Dictation, spelling, and advanced word work."],
               ["💬", "CONVERSATION", "Interactive listening and summary-style tasks."],
@@ -660,7 +660,7 @@ export function LandingPageClient({
             <h2 className="text-3xl font-black sm:text-5xl">Choose your plan / เลือกแพ็กเกจ</h2>
             <p className="mx-auto mt-5 max-w-3xl text-base font-semibold leading-7 text-neutral-700">
               Most new users should start free first. Come back to this section when you know whether
-              you need more AI feedback, more practice volume, or full mock tests.
+              you need more instant feedback, more practice volume, or full mock tests.
             </p>
           </header>
           {paymentErr ? (
@@ -694,13 +694,13 @@ export function LandingPageClient({
                 name: "BASIC / เบสิก",
                 price: "฿399",
                 summaryRows: [
-                  "12 AI feedbacks / month",
+                  "12 instant feedbacks / month",
                   "Read/Vocab 15 · Literacy 20 · Convo 10",
                   "2 mock tests / month",
                 ],
                 details: [
                   {
-                    title: "AI feedback 12 ครั้ง / เดือน คืออะไร?",
+                    title: "instant feedback 12 ครั้ง / เดือน คืออะไร?",
                     body:
                       "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 12 ครั้งต่อเดือน เลือกใช้กับข้อไหนก็ได้ตามต้องการ",
                   },
@@ -735,13 +735,13 @@ export function LandingPageClient({
                 name: "PREMIUM / พรีเมียม",
                 price: "฿699",
                 summaryRows: [
-                  "30 AI feedbacks / month",
+                  "30 instant feedbacks / month",
                   "Read/Vocab 30 · Literacy 50 · Convo 20",
                   "4 mock tests / month",
                 ],
                 details: [
                   {
-                    title: "AI feedback 30 ครั้ง / เดือน คืออะไร?",
+                    title: "instant feedback 30 ครั้ง / เดือน คืออะไร?",
                     body:
                       "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 30 ครั้งต่อเดือน เลือกใช้กับข้อไหนก็ได้ตามแผนของคุณ",
                   },
@@ -776,13 +776,13 @@ export function LandingPageClient({
                 name: "VIP / วีไอพี",
                 price: "฿999",
                 summaryRows: [
-                  "60 AI feedbacks / month",
+                  "60 instant feedbacks / month",
                   "Unlimited practice lanes",
                   "6 mock tests / month",
                 ],
                 details: [
                   {
-                    title: "AI feedback 60 ครั้ง / เดือน คืออะไร?",
+                    title: "instant feedback 60 ครั้ง / เดือน คืออะไร?",
                     body:
                       "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 60 ครั้งต่อเดือน เลือกใช้ได้ตามต้องการ",
                   },
@@ -933,7 +933,7 @@ export function LandingPageClient({
             {[
               {
                 q: "Different from only doing mock tests? / ต่างจากทำแต่ mock ยังไง?",
-                a: "We train Production, Comprehension, Literacy, and Conversation with targeted practice and AI notes—not only full tests. / เราฝึกแยกทักษะและให้คำแนะนำ ไม่ใช่แค่สอบย่อย",
+                a: "We train Production, Comprehension, Literacy, and Conversation with targeted practice and instant notes—not only full tests. / เราฝึกแยกทักษะและให้คำแนะนำ ไม่ใช่แค่สอบย่อย",
               },
               {
                 q: "How does difficulty adapt? / ระดับความยากปรับยังไง?",
@@ -1013,7 +1013,7 @@ export function LandingPageClient({
             <div>
               <h3 className="text-2xl font-black">ENGLISH PLAN</h3>
               <p className="mt-2 text-sm text-white/70">
-                Duolingo English Test prep with AI feedback across all scored skills.
+                Duolingo English Test prep with instant feedback across all scored skills.
               </p>
             </div>
           </div>

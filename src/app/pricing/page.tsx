@@ -26,7 +26,7 @@ const PLAN_CARDS: Array<{
     price: "ฟรี",
     headlineTh: "ลองระบบก่อน เริ่มฝึกแบบค่อยเป็นค่อยไป",
     headlineEn: "Explore the platform before committing.",
-    ai: "AI Feedback 1 ครั้งตลอดอายุการใช้งาน",
+    ai: "Instant Feedback 1 ครั้งตลอดอายุการใช้งาน",
     mocks: "Mock Test 0 ครั้ง / เดือน",
     examAccess:
       "Reading, Vocabulary, Dictation, Fill in the Blank, Real Word และ Interactive Conversation ฟรีอย่างละ 1 ครั้ง",
@@ -36,7 +36,7 @@ const PLAN_CARDS: Array<{
     price: "฿399 / 30 วัน",
     headlineTh: "เหมาะสำหรับคนที่เริ่มจริงจังและอยากวัดจุดอ่อน",
     headlineEn: "Best for steady learners starting serious prep.",
-    ai: "AI Feedback 12 ครั้ง / 30 วัน",
+    ai: "Instant Feedback 12 ครั้ง / 30 วัน",
     mocks: "Mock Test 2 ครั้ง / 30 วัน",
     examAccess: "Comprehension 15 · Vocabulary 15 · Literacy 20 · Conversation 10 / 30 วัน",
   },
@@ -45,7 +45,7 @@ const PLAN_CARDS: Array<{
     price: "฿699 / 30 วัน",
     headlineTh: "เหมาะสำหรับคนที่ต้องการอัปคะแนนแบบต่อเนื่อง",
     headlineEn: "Best for frequent scoring, reports, and mock practice.",
-    ai: "AI Feedback 30 ครั้ง / 30 วัน",
+    ai: "Instant Feedback 30 ครั้ง / 30 วัน",
     mocks: "Mock Test 4 ครั้ง / 30 วัน",
     examAccess: "Comprehension 30 · Vocabulary 30 · Literacy 50 · Conversation 20 / 30 วัน",
     recommended: true,
@@ -55,7 +55,7 @@ const PLAN_CARDS: Array<{
     price: "฿999 / 30 วัน",
     headlineTh: "สำหรับผู้เตรียมสอบจริงจังที่ต้องการความยืดหยุ่นสูงสุด",
     headlineEn: "Best for the most intensive, least-interrupted prep.",
-    ai: "AI Feedback 60 ครั้ง / 30 วัน",
+    ai: "Instant Feedback 60 ครั้ง / 30 วัน",
     mocks: "Mock Test 6 ครั้ง / 30 วัน",
     examAccess: "Practice lanes ไม่จำกัด + priority-style prep feel",
   },
@@ -241,7 +241,7 @@ function PricingPageContent() {
                   แนะนำให้ขยับเป็น {recommendation === "vip" ? "VIP" : "Premium"}
                 </h2>
                 <p className="mt-2 text-sm font-semibold text-neutral-700">
-                  ถ้าคุณใช้ Mock Test หรือ AI Feedback บ่อย การอัปเกรดมักคุ้มกว่าการซื้อ add-on ซ้ำหลายครั้ง
+                  ถ้าคุณใช้ Mock Test หรือ Instant Feedback บ่อย การอัปเกรดมักคุ้มกว่าการซื้อ add-on ซ้ำหลายครั้ง
                 </p>
                 <p className="mt-1 text-xs text-neutral-500">
                   Upgrading is usually better value than repeated one-off top-ups for active learners.
@@ -410,7 +410,7 @@ function PricingPageContent() {
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-neutral-700">
                   For first-time buyers, we create your learner account before checkout so your plan,
-                  mock-test credits, and AI feedback can be attached correctly right after payment.
+                  mock-test credits, and instant feedback can be attached correctly right after payment.
                 </p>
               </div>
               <div className="flex flex-col gap-2 sm:min-w-[18rem]">
@@ -464,7 +464,7 @@ function PricingPageContent() {
 
                 <div className="mt-5 space-y-3 border-t-2 border-dashed border-black pt-4">
                   <div className="border-2 border-black bg-neutral-50 p-3">
-                    <p className="font-mono text-[10px] font-black uppercase text-neutral-500">AI Feedback</p>
+                    <p className="font-mono text-[10px] font-black uppercase text-neutral-500">Instant Feedback</p>
                     <p className="mt-1 text-sm font-black">{plan.ai}</p>
                   </div>
                   <div className="border-2 border-black bg-neutral-50 p-3">
@@ -541,7 +541,7 @@ function PricingPageContent() {
                 Add-on Store / ซื้อสิทธิ์เพิ่ม
               </p>
               <h2 className="mt-2 text-3xl font-black uppercase italic tracking-tighter">
-                เพิ่ม Mock หรือ AI Feedback ได้
+                เพิ่ม Mock หรือ Instant Feedback ได้
                 <br />
                 <span className="not-italic text-[#004aad]">Top up when you hit a quota</span>
               </h2>
@@ -567,7 +567,7 @@ function PricingPageContent() {
                   Pay by card or QR PromptPay
                 </h3>
                 <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-neutral-700">
-                  When you open checkout for a mock-test or AI-feedback add-on, Stripe can show both card and QR PromptPay
+                  When you open checkout for a mock-test or feedback add-on, Stripe can show both card and QR PromptPay
                   on the same professional payment page, depending on your setup and customer eligibility.
                 </p>
               </div>

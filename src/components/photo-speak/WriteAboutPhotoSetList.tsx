@@ -52,15 +52,11 @@ export function WriteAboutPhotoSetList() {
         <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">
           Write about photo
         </p>
-        <h1 className="mt-2 text-3xl font-black">Choose a photo</h1>
+        <h1 className="mt-2 text-3xl font-black">เลือกภาพ</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Quick mode: all uploaded photos are shown below (with round labels), so you can practise now
-          without entering round pages. Admins upload image URLs and context in{" "}
-          <Link href="/admin" className="font-bold text-ep-blue underline">
-            Admin
-          </Link>
-          . Thumbnails stay blurred until you open an item. After you submit, cards show your latest score;
-          open <strong>Redeem</strong> to review your report if you are not at 160/160.
+          ดูภาพแล้วเขียนบรรยายเป็นภาษาอังกฤษ · เลือกภาพด้านล่างเพื่อเริ่มได้เลย ·
+          ภาพจะเบลอจนกว่าคุณจะกดเริ่ม · พอส่งแล้วการ์ดจะแสดงคะแนนล่าสุด —
+          กด <strong>ดูผล</strong> เพื่อทบทวนรายงานถ้ายังไม่ถึง 160/160
         </p>
       </header>
       {items.length === 0 ? (

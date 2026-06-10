@@ -116,7 +116,7 @@ export function DashboardPlanCard() {
           <dd className="ep-stat">{durationText}</dd>
         </div>
         <div className="flex justify-between gap-2 border-b border-neutral-200 pb-2">
-          <dt className="text-neutral-600">AI feedback</dt>
+          <dt className="text-neutral-600">instant feedback</dt>
           <dd className="ep-stat">
             {aiRemaining == null || aiLimit == null ? "…" : `${aiRemaining} / ${aiLimit}`}
           </dd>

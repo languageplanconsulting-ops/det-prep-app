@@ -207,7 +207,7 @@ function Card5() {
         What&apos;s included in your EnglishPlan package
       </h2>
       <ul className="list-disc space-y-1 pl-5 text-neutral-800">
-        <li>Adaptive AI scoring</li>
+        <li>Adaptive instant scoring</li>
         <li>240+ practice questions</li>
         <li>Personal notebook</li>
         <li>Score tracking</li>

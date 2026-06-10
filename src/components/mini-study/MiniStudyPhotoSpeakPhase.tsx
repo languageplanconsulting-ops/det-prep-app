@@ -73,7 +73,7 @@ export function MiniStudyPhotoSpeakPhase({ session }: Props) {
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) {
       setSpeechError(
-        "Live speech-to-text may be limited in this browser. You can still type your answer below and submit for AI scoring.",
+        "Live speech-to-text may be limited in this browser. You can still type your answer below and submit for instant scoring.",
       );
       return;
     }

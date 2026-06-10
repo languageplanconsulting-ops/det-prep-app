@@ -29,12 +29,12 @@ export default function ForgotPasswordPage() {
     const supabase = getBrowserSupabase();
     if (!supabase) {
       setErr(
-        "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local, or ask an admin to save keys under Admin → Supabase.",
+        "ระบบขัดข้องชั่วคราว กรุณาลองใหม่ภายหลัง",
       );
       return;
     }
     if (!appUrl) {
-      setErr("Set NEXT_PUBLIC_APP_URL in .env.local");
+      setErr("กรุณาลองใหม่ภายหลัง");
       return;
     }
     setBusy(true);

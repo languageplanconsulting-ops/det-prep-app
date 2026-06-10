@@ -351,10 +351,6 @@ export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryEx
               </span>
             </span>
           </button>
-          <p className="mt-4 text-center text-xs text-neutral-500">
-            Need AI grading? Ask your teacher or set <code className="ep-stat text-[11px]">GEMINI_API_KEY</code> in{" "}
-            <code className="ep-stat text-[11px]">.env.local</code> for local development.
-          </p>
         </div>
       </section>
     </div>

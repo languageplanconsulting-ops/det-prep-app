@@ -531,7 +531,7 @@ export function MockInteractiveSpeakingSession({
             Interactive Speaking
           </h3>
           <p className="text-xs text-neutral-600 leading-relaxed">
-            You'll have <strong>{MOCK_IS_TURN_COUNT} turns</strong>. Each turn the AI will
+            You'll have <strong>{MOCK_IS_TURN_COUNT} turns</strong>. Each turn the system will
             read the question aloud → you get {PREP_SECONDS}s to think → then speak
             (up to {MAX_SPEAK_SECONDS}s). Your live transcript is shown below the mic.
           </p>
@@ -579,7 +579,7 @@ export function MockInteractiveSpeakingSession({
           <div className="flex items-center gap-2">
             <div className="h-2.5 w-2.5 rounded-full bg-[#FFCC00] animate-pulse" />
             <p className="text-sm font-black text-[#FFCC00]">
-              AI is reading the question aloud…
+              Now reading the question aloud…
             </p>
           </div>
           <p className="text-xs text-white/70">

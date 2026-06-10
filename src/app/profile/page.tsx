@@ -376,16 +376,16 @@ export default function ProfilePage() {
       },
       {
         id: "ai",
-        label: "AI Feedback / รายงานตรวจโดย AI",
-        category: "AI Credits / เครดิต AI",
+        label: "Instant Feedback / รายงานตรวจให้คะแนน",
+        category: "Feedback Credits / เครดิตตรวจงาน",
         remaining: aiRemaining,
         limit: aiLimit,
         used: aiUsed,
         unit: "เครดิต / เดือน",
         note:
           aiAddonRemaining > 0
-            ? `รวมเครดิต AI เพิ่มอีก ${aiAddonRemaining} เครดิตจาก add-on ของคุณ`
-            : "ใช้ร่วมกันสำหรับข้อสอบพูดและเขียนที่มีรายงานตรวจโดย AI",
+            ? `รวมเครดิตตรวจงาน เพิ่มอีก ${aiAddonRemaining} เครดิตจาก add-on ของคุณ`
+            : "ใช้ร่วมกันสำหรับข้อสอบพูดและเขียนที่มีรายงานตรวจให้คะแนน",
       },
     ];
 
@@ -425,7 +425,7 @@ export default function ProfilePage() {
     {
       label: "รายการที่ตรวจสอบได้",
       value: String(examCredits.length),
-      note: "สิทธิ์ฝึกทำข้อสอบ + AI + Mock Test",
+      note: "สิทธิ์ฝึกทำข้อสอบ + ตรวจงาน + Mock Test",
     },
   ];
 
@@ -445,7 +445,7 @@ export default function ProfilePage() {
           แพลนและสิทธิ์ใช้งาน
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-neutral-700 md:text-base">
-          หน้านี้สรุปให้คุณเห็นว่า ตอนนี้คุณอยู่แพลนอะไร แพลนหมดอายุเมื่อไร และยังเหลือสิทธิ์ฝึกทำข้อสอบหรือเครดิต AI
+          หน้านี้สรุปให้คุณเห็นว่า ตอนนี้คุณอยู่แพลนอะไร แพลนหมดอายุเมื่อไร และยังเหลือสิทธิ์ฝึกทำข้อสอบหรือเครดิตตรวจงาน
           สำหรับแต่ละประเภทอีกเท่าไร
         </p>
 

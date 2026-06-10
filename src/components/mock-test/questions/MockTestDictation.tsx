@@ -106,7 +106,7 @@ export function MockTestDictation({
           setError(
             e instanceof Error
               ? e.message
-              : "Could not synthesize audio. Set DEEPGRAM_API_KEY, INWORLD_API_KEY, or GEMINI_API_KEY, or add audio_url.",
+              : "Could not synthesize audio. กรุณาลองใหม่อีกครั้ง",
           );
         }
       }
