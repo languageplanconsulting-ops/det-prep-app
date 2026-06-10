@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -255,6 +256,18 @@ export function ReadWriteSession({
           </div>
         </div>
       ) : null}
+
+      <AdminWritingStarters
+        title="🧱 โครงเรียงความ + วลีเริ่ม"
+        starters={[
+          "I believe that…",
+          "There are two main reasons…",
+          "Firstly,…",
+          "For example,…",
+          "In conclusion,…",
+        ]}
+      />
+
       <header className="ep-brutal rounded-sm border-black bg-white p-6">
         <h1 className="text-2xl font-black">{topic.titleEn}</h1>
         <p className="text-neutral-600">{topic.titleTh}</p>

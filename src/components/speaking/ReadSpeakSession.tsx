@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QuestionThumbnailDisplay } from "@/components/speaking/QuestionThumbnailDisplay";
+import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
@@ -304,6 +305,17 @@ export function ReadSpeakSession({
           </div>
         </div>
       ) : null}
+
+      <AdminWritingStarters
+        title="🧱 โครงพูด + วลีเริ่ม"
+        starters={[
+          "In my opinion,…",
+          "I prefer … because…",
+          "One reason is…",
+          "For instance,…",
+          "Overall,…",
+        ]}
+      />
 
       <header className="ep-brutal rounded-sm border-black bg-white p-6">
         <h1 className="text-2xl font-black">{topic.titleEn}</h1>

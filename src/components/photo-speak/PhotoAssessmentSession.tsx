@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
@@ -331,6 +332,17 @@ export function PhotoAssessmentSession({
             </div>
           </div>
         ) : null}
+
+        <AdminWritingStarters
+          title={mode === "speak" ? "💬 เริ่มพูดยังไงดี" : "💬 เริ่มเขียนยังไงดี"}
+          starters={[
+            "In this photo, I can see…",
+            "There are…",
+            "It looks like…",
+            "In the background,…",
+            "The person is …ing…",
+          ]}
+        />
 
         <header className="ep-brutal rounded-sm border-black bg-white p-6">
           <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">

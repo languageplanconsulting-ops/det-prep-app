@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import { VocabExamIntroModal } from "@/components/vocab/VocabExamIntroModal";
 import { VocabularyBuilderAvailabilityBanner } from "@/components/vocab/VocabularyBuilderAvailabilityBanner";
 import { VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
@@ -40,6 +41,10 @@ export function VocabRoundsHub() {
         fontFamily: "var(--font-inter), ui-sans-serif, system-ui, 'Anuphan', sans-serif",
       }}
     >
+      <AdminCoachTip>
+        ฝึกเดาคำจากบริบทจริง — ไม่ต้องท่องทีละคำนะครับ · คลังคำของคุณจะค่อยๆ โตขึ้นเรื่อยๆ ·
+        ตอบผิดคำไหน เก็บลง Notebook ไว้ทบทวน
+      </AdminCoachTip>
       <VocabExamIntroModal />
 
       <Link

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import { READING_DIFFICULTIES, READING_ROUND_NUMBERS } from "@/lib/reading-constants";
 import { getReadingRoundStats, loadReadingVisibleBank } from "@/lib/reading-storage";
 import type { ReadingRoundNum } from "@/types/reading";
@@ -33,6 +34,10 @@ export function ReadingRoundsHub() {
 
   return (
     <div className="space-y-8">
+      <AdminCoachTip>
+        ฝึก <strong>จับใจความ + หา title + main idea</strong> — ทักษะที่ออกสอบ DET บ่อยสุดครับ ·
+        ตอบผิดข้อไหน อ่านเหตุผลให้เข้าใจ แล้วเก็บคำศัพท์ลง Notebook
+      </AdminCoachTip>
       <header className="ep-brutal-reading rounded-sm bg-white p-6">
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">
           Reading skills

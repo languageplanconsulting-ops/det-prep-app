@@ -243,7 +243,7 @@ export function FitbSessionClient({
               </span>
               <p className="text-[13px] leading-6 text-slate-800">
                 อ่านประโยคให้จบก่อนเดา — ดูว่า <strong>คำควรเป็น tense ไหน รูปไหน</strong> ·
-                เลี่ยงคำใบ้ถ้าไม่จำเป็น เพราะหักคะแนน
+                คำใบ้มีไว้ช่วยเรียนรู้นะครับ ลองนึกเองก่อน แล้วค่อยเปิดถ้าติดจริงๆ
               </p>
             </div>
           </div>
