@@ -147,6 +147,26 @@ export function MockFixedReportBrandedViewV2({
   const ringCirc = 2 * Math.PI * 44;
   const ringOffset = ringCirc * (1 - Math.max(0, Math.min(160, total)) / 160);
 
+  // Outcome-first: the 2 weakest skills + a one-tap route to practise each
+  // (Cagan/Brown — the results page must answer "what do I do next?").
+  const SKILL_ROUTE: Record<string, { label: string; emoji: string; href: string }> = {
+    writing: { label: "Writing", emoji: "✍️", href: "/practice/production/write-about-photo" },
+    listening: { label: "Listening", emoji: "👂", href: "/practice/literacy/dictation" },
+    reading: { label: "Reading", emoji: "📖", href: "/practice/comprehension/reading" },
+    speaking: { label: "Speaking", emoji: "🗣️", href: "/practice/production/speak-about-photo" },
+  };
+  const weakest = (
+    [
+      ["writing", writing],
+      ["listening", listening],
+      ["reading", reading],
+      ["speaking", speaking],
+    ] as Array<[string, number]>
+  )
+    .sort((a, b) => a[1] - b[1])
+    .slice(0, 2)
+    .map(([key]) => SKILL_ROUTE[key]);
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-[#fff7d1] px-3 py-2 text-xs ring-1 ring-[#FFCC00]">
@@ -204,6 +224,36 @@ export function MockFixedReportBrandedViewV2({
               ไปฝึกต่อ
             </Link>
           </div>
+        </div>
+      </div>
+
+      {/* Next action — what to do next (outcome-first) */}
+      <div className="mt-4 rounded-2xl bg-[#004AAD] p-5 text-white">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">
+          ทำอะไรต่อให้คะแนนขึ้นเร็วสุด
+        </p>
+        <p className="mt-1 text-lg font-bold">
+          จุดอ่อน:{" "}
+          {weakest.map((w, i) => (
+            <span key={w.href} className="text-[#FFCC00]">
+              {w.label}
+              {i === 0 ? " และ " : ""}
+            </span>
+          ))}
+        </p>
+        <p className="mt-1 text-sm text-white/85">เก็บ 2 ทักษะนี้ก่อน จะขึ้นถึงเป้าได้เร็วสุด</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {weakest.map((w, i) => (
+            <Link
+              key={w.href}
+              href={w.href}
+              className={`rounded-xl px-4 py-2.5 text-sm font-bold ${
+                i === 0 ? "bg-[#FFCC00] text-[#004AAD]" : "bg-white/15 text-white"
+              }`}
+            >
+              {w.emoji} ฝึก {w.label} →
+            </Link>
+          ))}
         </div>
       </div>
 
