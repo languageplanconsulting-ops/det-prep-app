@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FitbReportPanel } from "@/components/fitb/FitbReportPanel";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   assembleFitbAttempt,
   calculateFitbDetScore,
@@ -38,6 +39,9 @@ export function FitbSessionClient({
   setNumber: number;
   startWithRedeem: boolean;
 }) {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
+
   const n = set.missingWords.length;
   const hubHref = `/practice/literacy/fill-in-blank/round/${round}/${difficulty}`;
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -214,6 +218,37 @@ export function FitbSessionClient({
           {set.setId} · {set.cefrLevel} · {n} blank{n === 1 ? "" : "s"}
         </p>
       </div>
+
+      {soft && phase === "quiz" ? (
+        <div className="mb-4 space-y-3">
+          <div className="flex items-center gap-3 rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-600 text-xl text-white">
+              ✏️
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                Fill in the blank · {set.cefrLevel} · {n} ช่อง
+              </p>
+              <h1 className="text-lg font-bold">เติมตัวอักษรที่หาย</h1>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
+              D
+            </div>
+            <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+              <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
+              <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
+                <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+              </span>
+              <p className="text-[13px] leading-6 text-slate-800">
+                อ่านประโยคให้จบก่อนเดา — ดูว่า <strong>คำควรเป็น tense ไหน รูปไหน</strong> ·
+                เลี่ยงคำใบ้ถ้าไม่จำเป็น เพราะหักคะแนน
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {phase === "quiz" ? (
         <>
