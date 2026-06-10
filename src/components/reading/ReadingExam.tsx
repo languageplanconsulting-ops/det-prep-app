@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { shuffleMcOptions, answersMatch } from "@/lib/reading-utils";
 import type {
   ReadingExamResultRow,
@@ -47,6 +48,9 @@ export function ReadingExam({
       return shuffleMcOptions(block.options, block.correctAnswer);
     });
   }, [readingExam]);
+
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
 
   const [step, setStep] = useState(0);
   const [q1Revealed, setQ1Revealed] = useState(false);
@@ -99,6 +103,35 @@ export function ReadingExam({
 
   return (
     <div className="space-y-6">
+      {soft ? (
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-xl text-white">
+              📖
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+                Reading · Set {setNumber} · Exam {examNumber}
+              </p>
+              <h1 className="text-lg font-bold">อ่านแล้วตอบคำถาม</h1>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
+              D
+            </div>
+            <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+              <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
+              <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
+                <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+              </span>
+              <p className="text-[13px] leading-6 text-slate-800">
+                หา title ให้ดู <strong>ใจความรวมทั้งย่อหน้า</strong> ไม่ใช่ประโยคเดียว · คำที่ไฮไลต์เหลืองกดดูคำแปลได้
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <section className="ep-brutal-reading rounded-sm bg-white p-5">
         <h2 className="text-lg font-black uppercase tracking-wide text-ep-blue">
           Passage — Set {setNumber} · Exam {examNumber}
