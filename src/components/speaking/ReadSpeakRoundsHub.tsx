@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { SPEAKING_ROUND_NUMBERS } from "@/lib/speaking-constants";
 import { countSpeakingVisibleTopicsInRound } from "@/lib/speaking-storage";
 import type { SpeakingRoundNum } from "@/types/speaking";
@@ -30,6 +31,7 @@ export function ReadSpeakRoundsHub() {
         <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
           ← กลับหน้าฝึก
         </Link>
+        <HubMomentumStrip />
         <SoftHubHeader
           color="violet"
           icon="📑"

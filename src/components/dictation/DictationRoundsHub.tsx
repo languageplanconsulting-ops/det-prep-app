@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
+import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { DICTATION_ROUND_NUMBERS } from "@/lib/dictation-constants";
 import {
@@ -71,6 +72,7 @@ export function DictationRoundsHub() {
         <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
           ← กลับหน้าฝึก
         </Link>
+        <HubMomentumStrip />
 
         <div className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200 sm:p-6">
           <div className="flex items-center gap-3">

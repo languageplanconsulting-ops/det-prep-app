@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { FITB_ROUND_NUMBERS } from "@/lib/fitb-constants";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { getFitbRoundStats } from "@/lib/fitb-storage";
@@ -51,6 +52,7 @@ export function FitbRoundsHub() {
         <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
           ← กลับหน้าฝึก
         </Link>
+        <HubMomentumStrip />
         <SoftHubHeader
           color="amber"
           icon="✏️"

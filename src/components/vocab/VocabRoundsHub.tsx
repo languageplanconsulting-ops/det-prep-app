@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { VocabExamIntroModal } from "@/components/vocab/VocabExamIntroModal";
 import { VocabularyBuilderAvailabilityBanner } from "@/components/vocab/VocabularyBuilderAvailabilityBanner";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
@@ -53,6 +54,7 @@ export function VocabRoundsHub() {
         <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
           ← กลับหน้าฝึก
         </Link>
+        <HubMomentumStrip />
         <SoftHubHeader
           color="emerald"
           icon="📚"

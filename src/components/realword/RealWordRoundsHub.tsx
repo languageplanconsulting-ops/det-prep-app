@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { REALWORD_DIFFICULTIES, REALWORD_ROUND_NUMBERS } from "@/lib/realword-constants";
 import { getRealWordRoundStats, loadRealWordVisibleBank } from "@/lib/realword-storage";
@@ -50,6 +51,7 @@ export function RealWordRoundsHub() {
         <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
           ← กลับหน้าฝึก
         </Link>
+        <HubMomentumStrip />
         <SoftHubHeader
           color="amber"
           icon="🔤"
