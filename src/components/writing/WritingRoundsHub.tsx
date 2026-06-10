@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { WRITING_ROUND_NUMBERS } from "@/lib/writing-constants";
 import { countWritingTopicsByRound } from "@/lib/writing-storage";
 
 export function WritingRoundsHub() {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const [, setV] = useState(0);
 
   useEffect(() => {
@@ -22,6 +26,70 @@ export function WritingRoundsHub() {
   }, []);
 
   const counts = countWritingTopicsByRound();
+
+  if (soft) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-6 py-2">
+        <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
+          ← กลับหน้าฝึก
+        </Link>
+        <SoftHubHeader
+          color="violet"
+          icon="📝"
+          eyebrow="Production · Read, then write"
+          title="อ่านแล้วเขียน"
+          subtitle="Read & write (essay)"
+          tip={
+            <>
+              เลือกหัวข้อ แล้ว <strong>วางแผน 1-5 นาที → เขียนอย่างน้อย 50 คำ</strong> ·
+              โครง: เลือกข้าง → เหตุผล + ตัวอย่าง → สรุปครับ
+            </>
+          }
+        />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {WRITING_ROUND_NUMBERS.map((r) => {
+            const empty = counts[r] === 0;
+            const inner = (
+              <>
+                <div className="mb-3 flex items-center justify-between">
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+                      empty ? "bg-slate-100 text-slate-400" : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {empty ? "เร็วๆ นี้" : "พร้อมทำ"}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    รอบ {r}
+                  </span>
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900">Round {r}</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  {empty ? "ยังไม่มีหัวข้อ" : `${counts[r]} หัวข้อให้เลือก`}
+                </p>
+              </>
+            );
+            return empty ? (
+              <div
+                key={r}
+                className="flex min-h-[120px] flex-col rounded-2xl border border-slate-200 bg-white p-5 opacity-70"
+              >
+                {inner}
+              </div>
+            ) : (
+              <Link
+                key={r}
+                href={`/practice/production/read-and-write/round/${r}`}
+                className="flex min-h-[120px] flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
+              >
+                {inner}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
