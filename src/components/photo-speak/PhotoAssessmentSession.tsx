@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
+import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
@@ -393,24 +394,45 @@ export function PhotoAssessmentSession({
           />
           <p className="ep-stat mt-2 text-xs text-neutral-500">Word count: {countWords(transcript)}</p>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={submit}
-              disabled={submitting}
-              className="border-2 border-black bg-ep-blue px-4 py-2 text-sm font-black text-white shadow-[2px_2px_0_0_#000] disabled:opacity-60"
-            >
-              I'm happy with it now — Submit
-            </button>
-            <button
-              type="button"
-              onClick={resetAnswer}
-              disabled={submitting}
-              className="border-2 border-black bg-white px-4 py-2 text-sm font-black"
-            >
-              I want to try again
-            </button>
-          </div>
+          {soft ? (
+            <StickyExamCTA>
+              <button
+                type="button"
+                onClick={submit}
+                disabled={submitting}
+                className="flex-1 rounded-xl bg-[#004AAD] px-4 py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90 disabled:opacity-50"
+              >
+                {submitting ? "กำลังตรวจ…" : "ส่งคำตอบ →"}
+              </button>
+              <button
+                type="button"
+                onClick={resetAnswer}
+                disabled={submitting}
+                className="rounded-xl bg-white px-4 py-3.5 text-sm font-bold text-slate-600 ring-1 ring-slate-300 disabled:opacity-50"
+              >
+                เริ่มใหม่
+              </button>
+            </StickyExamCTA>
+          ) : (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={submit}
+                disabled={submitting}
+                className="border-2 border-black bg-ep-blue px-4 py-2 text-sm font-black text-white shadow-[2px_2px_0_0_#000] disabled:opacity-60"
+              >
+                I&apos;m happy with it now — Submit
+              </button>
+              <button
+                type="button"
+                onClick={resetAnswer}
+                disabled={submitting}
+                className="border-2 border-black bg-white px-4 py-2 text-sm font-black"
+              >
+                I want to try again
+              </button>
+            </div>
+          )}
 
           {submitError ? <p className="mt-3 text-sm font-bold text-red-700">{submitError}</p> : null}
         </BrutalPanel>

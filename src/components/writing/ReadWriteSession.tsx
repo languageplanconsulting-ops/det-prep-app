@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
+import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -419,15 +420,29 @@ export function ReadWriteSession({
               </span>
               {wc < 50 ? <span className="text-neutral-500"> · need 50+</span> : null}
             </p>
-            <button
-              type="button"
-              disabled={!canSubmit || submitting}
-              onClick={submitWithGemini}
-              className="border-2 border-black bg-ep-blue px-6 py-3 text-sm font-black text-white shadow-[4px_4px_0_0_#000] disabled:opacity-40"
-            >
-              {submitting ? "Grading…" : "Submit"}
-            </button>
+            {!soft ? (
+              <button
+                type="button"
+                disabled={!canSubmit || submitting}
+                onClick={submitWithGemini}
+                className="border-2 border-black bg-ep-blue px-6 py-3 text-sm font-black text-white shadow-[4px_4px_0_0_#000] disabled:opacity-40"
+              >
+                {submitting ? "Grading…" : "Submit"}
+              </button>
+            ) : null}
           </div>
+          {soft ? (
+            <StickyExamCTA>
+              <button
+                type="button"
+                disabled={!canSubmit || submitting}
+                onClick={submitWithGemini}
+                className="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90 disabled:opacity-50"
+              >
+                {submitting ? "กำลังตรวจ…" : "ส่งคำตอบ →"}
+              </button>
+            </StickyExamCTA>
+          ) : null}
           {submitError ? (
             <div className="mt-4 rounded-sm border-2 border-red-600 bg-red-50 p-3 text-sm">
               <p className="font-bold text-red-900">{submitError}</p>

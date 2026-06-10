@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { DialogueSummaryReportView } from "@/components/dialogue-summary/DialogueSummaryReportView";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
+import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import {
@@ -338,19 +339,32 @@ export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryEx
           <div className="mt-4">
             <VipAiFeedbackQuotaBanner />
           </div>
-          <button
-            type="button"
-            onClick={() => void submit()}
-            disabled={!meetsMin}
-            className="group mt-6 w-full rounded-sm border-4 border-black bg-ep-blue py-4 text-base font-black uppercase tracking-[0.15em] text-white shadow-[5px_5px_0_0_#000] transition-all hover:-translate-y-0.5 hover:bg-[#003d94] hover:shadow-[6px_6px_0_0_#000] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-[5px_5px_0_0_#000]"
-          >
-            <span className="inline-flex items-center justify-center gap-2">
-              Submit for grading
-              <span className="text-lg transition-transform group-hover:translate-x-0.5" aria-hidden>
-                →
+          {soft ? (
+            <StickyExamCTA>
+              <button
+                type="button"
+                onClick={() => void submit()}
+                disabled={!meetsMin}
+                className="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                ส่งให้ตรวจ — ตรวจให้ทันที →
+              </button>
+            </StickyExamCTA>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void submit()}
+              disabled={!meetsMin}
+              className="group mt-6 w-full rounded-sm border-4 border-black bg-ep-blue py-4 text-base font-black uppercase tracking-[0.15em] text-white shadow-[5px_5px_0_0_#000] transition-all hover:-translate-y-0.5 hover:bg-[#003d94] hover:shadow-[6px_6px_0_0_#000] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-[5px_5px_0_0_#000]"
+            >
+              <span className="inline-flex items-center justify-center gap-2">
+                Submit for grading
+                <span className="text-lg transition-transform group-hover:translate-x-0.5" aria-hidden>
+                  →
+                </span>
               </span>
-            </span>
-          </button>
+            </button>
+          )}
         </div>
       </section>
     </div>

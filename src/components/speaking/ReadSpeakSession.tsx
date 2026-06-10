@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QuestionThumbnailDisplay } from "@/components/speaking/QuestionThumbnailDisplay";
 import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
+import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
@@ -474,16 +475,29 @@ export function ReadSpeakSession({
           <div className="mt-4 space-y-3">
             <VipAiFeedbackQuotaBanner />
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={!canSubmit || submitting}
-              onClick={submitWithGemini}
-              className="border-2 border-black bg-ep-yellow px-4 py-2 text-sm font-black disabled:opacity-40"
-            >
-              {submitting ? "Grading…" : "Submit"}
-            </button>
-          </div>
+          {soft ? (
+            <StickyExamCTA>
+              <button
+                type="button"
+                disabled={!canSubmit || submitting}
+                onClick={submitWithGemini}
+                className="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90 disabled:opacity-50"
+              >
+                {submitting ? "กำลังตรวจ…" : "ส่งคำตอบ →"}
+              </button>
+            </StickyExamCTA>
+          ) : (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={!canSubmit || submitting}
+                onClick={submitWithGemini}
+                className="border-2 border-black bg-ep-yellow px-4 py-2 text-sm font-black disabled:opacity-40"
+              >
+                {submitting ? "Grading…" : "Submit"}
+              </button>
+            </div>
+          )}
         </BrutalPanel>
       ) : null}
     </div>
