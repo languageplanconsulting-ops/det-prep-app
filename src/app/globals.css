@@ -647,3 +647,73 @@ button.ep-interactive:hover {
   font-family: var(--font-inter), ui-sans-serif, system-ui, "Anuphan", sans-serif !important;
   letter-spacing: 0.02em !important;
 }
+
+/* ============================================================================
+   MICROINTERACTIONS (admin-gated, motion-safe)
+   GPU-only (transform/opacity). All wrapped in prefers-reduced-motion so
+   reduced-motion users get instant state changes. Pairs with exam-sfx sounds.
+   ============================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  /* Smooth hover/press feel on every interactive element (admin preview) */
+  .admin-soft button,
+  .admin-soft a,
+  .admin-soft [role="button"] {
+    transition:
+      transform 0.12s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.14s ease,
+      background-color 0.14s ease,
+      border-color 0.14s ease;
+  }
+  /* Tap "squash" — the core Duolingo-style press feedback */
+  .admin-soft button:active,
+  .admin-soft [role="button"]:active {
+    transform: scale(0.97);
+  }
+
+  /* Reusable motion utilities (add the class on a state change) */
+  .ep-pop {
+    animation: ep-pop 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes ep-pop {
+    0% {
+      transform: scale(0.96);
+    }
+    60% {
+      transform: scale(1.03);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .ep-shake {
+    animation: ep-shake 0.26s ease-in-out;
+  }
+  @keyframes ep-shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-4px);
+    }
+    75% {
+      transform: translateX(4px);
+    }
+  }
+
+  .ep-pulse-ok {
+    animation: ep-pulse-ok 0.26s ease-out;
+  }
+  @keyframes ep-pulse-ok {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.04);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+}
