@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ConversationReportPanel } from "@/components/conversation/ConversationReportPanel";
 import { ConversationSpeakerButton } from "@/components/conversation/ConversationSpeakerButton";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { CONVERSATION_SCENARIO_Q_COUNT, CONVERSATION_TOTAL_STEPS } from "@/lib/conversation-constants";
 import {
   CONVERSATION_ALL_STEP_INDICES,
@@ -42,6 +43,9 @@ export function ConversationSessionClient({
   setNumber: number;
   startWithRedeem?: boolean;
 }) {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
+
   const roundSetsHref = `/practice/listening/interactive/${round}`;
   const restartHref = `/practice/listening/interactive/${round}/${difficulty}/${setNumber}`;
   const maxScore = conversationMaxForExam(exam);
@@ -355,6 +359,23 @@ export function ConversationSessionClient({
 
   return (
     <div className="flex min-h-[min(100vh,960px)] flex-col">
+      {soft && phase === "session" ? (
+        <div className="mb-4 flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
+            D
+          </div>
+          <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+            <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
+            <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
+              <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+            </span>
+            <p className="text-[13px] leading-6 text-slate-800">
+              หัวใจคือ <strong>Scenario Memory</strong> — จำให้ได้ว่าเริ่มเรื่องคุยกันเรื่องอะไร ใครคุยกับใคร ·
+              ฟัง 1 ครั้งก่อน เปิด transcript เฉพาะตอนอยากอ่านตาม
+            </p>
+          </div>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-start justify-between gap-3 pb-4">
         <Link
           href={roundSetsHref}

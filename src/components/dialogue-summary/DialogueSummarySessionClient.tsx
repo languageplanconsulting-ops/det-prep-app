@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { DialogueSummaryReportView } from "@/components/dialogue-summary/DialogueSummaryReportView";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import {
   DIALOGUE_SUMMARY_DIFFICULTY_LABEL,
@@ -33,6 +34,8 @@ function speakerBubbleClass(index: number): string {
 }
 
 export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryExam }) {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const vipGate = useVipAiFeedbackGate();
   const [summary, setSummary] = useState("");
   const [phase, setPhase] = useState<"write" | "loading" | "report">("write");
@@ -129,6 +132,23 @@ export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryEx
 
   return (
     <div className="relative mx-auto max-w-4xl space-y-10 pb-16">
+      {soft ? (
+        <div className="relative z-[1] flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
+            D
+          </div>
+          <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+            <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
+            <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
+              <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+            </span>
+            <p className="text-[13px] leading-6 text-slate-800">
+              สรุปให้ครบ 3 อย่าง: <strong>ปัญหาหลัก · เห็นด้วย/ไม่เห็นด้วยเรื่องอะไร · ผลสรุป</strong> ·
+              เขียนด้วยคำของตัวเอง อย่าลอกประโยคเดิม
+            </p>
+          </div>
+        </div>
+      ) : null}
       <div
         className="pointer-events-none absolute inset-x-0 -top-8 h-72 bg-gradient-to-b from-ep-blue/[0.07] via-transparent to-transparent"
         aria-hidden
