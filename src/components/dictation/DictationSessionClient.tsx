@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DictationReport } from "@/components/dictation/DictationReport";
+import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { getDictationAudioDataUrlByItemId } from "@/lib/dictation-audio-indexeddb";
 import { dictationScoreFromDiff, diffDictationChars } from "@/lib/dictation-diff";
@@ -333,13 +334,15 @@ export function DictationSessionClient({
             className="w-full resize-y rounded-2xl border border-slate-200 bg-white p-4 text-base leading-relaxed outline-none focus:border-[#004AAD]"
             style={{ fontFamily: "var(--font-jetbrains), ui-monospace, monospace" }}
           />
-          <button
-            type="button"
-            onClick={submitPractice}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00] hover:opacity-90"
-          >
-            ส่งคำตอบ →
-          </button>
+          <StickyExamCTA>
+            <button
+              type="button"
+              onClick={submitPractice}
+              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#004AAD] px-6 py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90"
+            >
+              ส่งคำตอบ →
+            </button>
+          </StickyExamCTA>
 
           {/* coach tip */}
           <div className="mt-5 flex items-start gap-3">

@@ -1,5 +1,6 @@
 "use client";
 
+import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { playBlinkBeep } from "@/lib/play-blink-beep";
 import type { RealWordSet } from "@/types/realword";
@@ -70,13 +71,15 @@ export function RealWordGame({
             })}
           </div>
 
-          <button
-            type="button"
-            onClick={submit}
-            className="mt-4 w-full rounded-xl bg-[#004AAD] py-3 text-center text-sm font-bold text-[#FFCC00] hover:opacity-90"
-          >
-            ส่งคำตอบ →
-          </button>
+          <StickyExamCTA hint={`เลือกแล้ว ${selected.size} คำ`}>
+            <button
+              type="button"
+              onClick={submit}
+              className="w-full rounded-xl bg-[#004AAD] py-3.5 text-center text-base font-bold text-[#FFCC00] hover:opacity-90"
+            >
+              ส่งคำตอบ →
+            </button>
+          </StickyExamCTA>
 
           <div className="mt-5 flex items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
