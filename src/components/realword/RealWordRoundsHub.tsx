@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { REALWORD_DIFFICULTIES, REALWORD_ROUND_NUMBERS } from "@/lib/realword-constants";
 import { getRealWordRoundStats, loadRealWordVisibleBank } from "@/lib/realword-storage";
 import type { RealWordRoundNum } from "@/types/realword";
@@ -19,8 +18,8 @@ function formatShortDate(iso: string | null): string {
 }
 
 export function RealWordRoundsHub() {
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
 
   useEffect(() => {

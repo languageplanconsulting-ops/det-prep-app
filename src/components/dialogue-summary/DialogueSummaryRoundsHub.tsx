@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { DIALOGUE_SUMMARY_ROUND_NUMBERS } from "@/lib/dialogue-summary-constants";
 import { getDialogueSummaryRoundStats, loadDialogueSummaryVisibleBank } from "@/lib/dialogue-summary-storage";
 import type { DialogueSummaryRoundNum } from "@/types/dialogue-summary";
@@ -61,8 +60,8 @@ function getStatusMeta(totalSets: number, avgPercent: number | null) {
 }
 
 export function DialogueSummaryRoundsHub() {
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
 
   useEffect(() => {

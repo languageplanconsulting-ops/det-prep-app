@@ -2,6 +2,11 @@
 
 import { useCallback, useLayoutEffect, useState } from "react";
 import { IntroModalShell } from "@/components/practice/IntroModalShell";
+import {
+  GUIDE_ACCENT,
+  GuideRevampBody,
+  GuideRevampFooter,
+} from "@/components/practice/GuideRevampContent";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
 const STORAGE_KEY = "ep-vocab-master-intro-dismissed-v1";
@@ -42,6 +47,54 @@ export function VocabExamIntroModal() {
   }, [forceShowEveryVisit]);
 
   if (!open) return null;
+
+  if (forceShowEveryVisit) {
+    return (
+      <IntroModalShell
+        open={open}
+        onDismiss={dismiss}
+        labelledBy="vocab-intro-title"
+        backgroundColor="#e5e7eb"
+        title={
+          <>
+            Master Vocab <br />
+            <span className="font-mono text-xl font-bold not-italic normal-case text-[#0055FF]">
+              เก่งศัพท์ ไม่ต้องท่อง
+            </span>
+          </>
+        }
+        badge={
+          <span className="rounded-full bg-blue-50 px-3 py-1 font-mono text-[11px] font-bold text-[#0055FF]">
+            GUIDE 01
+          </span>
+        }
+        footer={
+          <GuideRevampFooter
+            accent={GUIDE_ACCENT.vocab}
+            primaryLabel="เริ่มเลย →"
+            onEnter={dismiss}
+            onDismiss={dismiss}
+          />
+        }
+      >
+        <GuideRevampBody
+          accent={GUIDE_ACCENT.vocab}
+          outcomeTitle="สะสมคลังศัพท์จากบริบท ดันคะแนน Comprehension & Literacy"
+          outcomeSub="พาร์ตการอ่าน — ยิ่งคลังศัพท์แน่น คะแนนกลุ่มนี้ยิ่งขยับ"
+          steps={[
+            { n: "1", title: "เลือกระดับแล้วลองทำ", desc: "Easy / Medium / Hard — เริ่มจากที่ถนัดก่อนได้" },
+            { n: "2", title: "เจอคำที่ไม่รู้?", desc: "กด Add to Notebook ทันที ไม่ต้องนั่งท่องทีหลัง" },
+            { n: "3", title: "ทบทวนเมื่อไหร่ก็ได้", desc: "เปิด Notebook อ่านคำที่เก็บไว้ก่อนสอบ" },
+          ]}
+          mini={{
+            label: "เป็นนักเรียนคอร์ส? ทบทวนเทคนิคการอ่านก่อนเริ่ม",
+            sub: "มินิเซสชันสอนทีละจุด ~15 นาที · ไว้ทบทวนก่อนลงมือ",
+            href: "/practice/mini-study#reading",
+          }}
+        />
+      </IntroModalShell>
+    );
+  }
 
   return (
     <IntroModalShell

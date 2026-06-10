@@ -14,8 +14,8 @@ export type AddOnSku =
 export type PaywallContext =
   | "mock_limit"
   | "mock_near_limit"
-  | "ai_limit"
-  | "ai_near_limit"
+  | "feedback_limit"
+  | "feedback_near_limit"
   | "renewal_7d"
   | "renewal_3d"
   | "expired"
@@ -72,24 +72,24 @@ export const ADD_ON_CATALOG: Record<
   feedback_1: {
     kind: "feedback",
     priceThb: 59,
-    labelTh: "เครดิต AI Feedback 1 ครั้ง",
-    labelEn: "1 AI Feedback credit",
+    labelTh: "เครดิตตรวจงาน 1 ครั้ง",
+    labelEn: "1 Feedback credit",
     shortTh: "เหมาะสำหรับปลดล็อกรายงานครั้งถัดไป",
     shortEn: "Good for one more report",
   },
   feedback_3: {
     kind: "feedback",
     priceThb: 149,
-    labelTh: "เครดิต AI Feedback 3 ครั้ง",
-    labelEn: "3 AI Feedback credits",
+    labelTh: "เครดิตตรวจงาน 3 ครั้ง",
+    labelEn: "3 Feedback credits",
     shortTh: "เหมาะกับการฝึกต่อเนื่องระยะสั้น",
     shortEn: "Good for short practice bursts",
   },
   feedback_5: {
     kind: "feedback",
     priceThb: 229,
-    labelTh: "เครดิต AI Feedback 5 ครั้ง",
-    labelEn: "5 AI Feedback credits",
+    labelTh: "เครดิตตรวจงาน 5 ครั้ง",
+    labelEn: "5 Feedback credits",
     shortTh: "คุ้มขึ้นสำหรับผู้ใช้บ่อย",
     shortEn: "Best for heavier usage",
   },
@@ -120,12 +120,12 @@ export function buildPaywallSpec(
           "Upgrade now to avoid interruptions, or prepare an extra mock add-on if you need more this cycle.",
         actions: mockActions(tier, true),
       };
-    case "ai_limit":
+    case "feedback_limit":
       return aiLimitSpec(tier);
-    case "ai_near_limit":
+    case "feedback_near_limit":
       return {
-        titleTh: `เครดิต AI ของคุณใกล้หมดแล้ว`,
-        titleEn: "Your AI credits are running low",
+        titleTh: `เครดิตตรวจงานของคุณใกล้หมดแล้ว`,
+        titleEn: "Your feedback credits are running low",
         bodyTh:
           "คุณยังฝึกต่อได้ แต่หากต้องการคะแนนและรายงานต่อเนื่อง แนะนำให้อัปเกรดหรือซื้อเครดิตเพิ่มตั้งแต่ตอนนี้",
         bodyEn:
@@ -137,9 +137,9 @@ export function buildPaywallSpec(
         titleTh: "สมาชิกของคุณจะหมดอายุในอีก 7 วัน",
         titleEn: "Your plan expires in 7 days",
         bodyTh:
-          "เลือกแพลนรอบถัดไปตอนนี้เพื่อไม่ให้โควต้าฝึกและรายงาน AI สะดุดในช่วงใกล้สอบ",
+          "เลือกแพลนรอบถัดไปตอนนี้เพื่อไม่ให้โควต้าฝึกและรายงานวิเคราะห์สะดุดในช่วงใกล้สอบ",
         bodyEn:
-          "Choose your next plan now to avoid interruptions to your practice and AI reports.",
+          "Choose your next plan now to avoid interruptions to your practice and feedback reports.",
         actions: renewalActions(tier),
       };
     case "renewal_3d":
@@ -167,9 +167,9 @@ export function buildPaywallSpec(
         titleTh: "พร้อมปลดล็อกแพ็กเกจเพิ่มแล้ว",
         titleEn: "Ready to unlock more access",
         bodyTh:
-          "จากรูปแบบการใช้งานของคุณ แนะนำให้อัปเกรดเพื่อปลดล็อก Mock Test และรับเครดิต AI มากพอสำหรับการฝึกต่อเนื่อง",
+          "จากรูปแบบการใช้งานของคุณ แนะนำให้อัปเกรดเพื่อปลดล็อก Mock Test และรับเครดิตตรวจงานมากพอสำหรับการฝึกต่อเนื่อง",
         bodyEn:
-          "Based on your usage, upgrading will unlock Mock Tests and enough AI credits for consistent preparation.",
+          "Based on your usage, upgrading will unlock Mock Tests and enough feedback credits for consistent preparation.",
         actions: [
           {
             kind: "upgrade",
@@ -214,9 +214,9 @@ export function buildPaywallSpec(
         titleTh: "คุณกำลังเตรียมสอบอย่างจริงจัง",
         titleEn: "You are preparing at a serious level",
         bodyTh:
-          "VIP จะเหมาะกว่า หากคุณต้องการฝึกต่อเนื่องโดยไม่สะดุดและมีโควต้า Mock / AI มากที่สุด",
+          "VIP จะเหมาะกว่า หากคุณต้องการฝึกต่อเนื่องโดยไม่สะดุดและมีโควต้า Mock / ตรวจงานมากที่สุด",
         bodyEn:
-          "VIP is a better fit if you want the least interrupted preparation with the strongest mock and AI quota.",
+          "VIP is a better fit if you want the least interrupted preparation with the strongest mock and feedback quota.",
         actions: [
           {
             kind: "upgrade",
@@ -279,12 +279,12 @@ function mockLimitSpec(tier: Tier): PaywallSpec {
 function aiLimitSpec(tier: Tier): PaywallSpec {
   if (tier === "free") {
     return {
-      titleTh: "เครดิต AI Feedback ของคุณหมดแล้ว",
-      titleEn: "You have run out of AI feedback credits",
+      titleTh: "เครดิตตรวจงานของคุณหมดแล้ว",
+      titleEn: "You have run out of feedback credits",
       bodyTh:
         "คุณยังฝึกต่อได้ แต่ถ้าต้องการคะแนนและรายงานวิเคราะห์ ต้องอัปเกรดหรือซื้อเครดิตเพิ่ม",
       bodyEn:
-        "You can keep practicing, but scoring and reports require more AI credits.",
+        "You can keep practicing, but scoring and reports require more feedback credits.",
       noteTh: "เครดิต add-on จะหมดอายุพร้อมรอบบิลปัจจุบัน",
       noteEn: "Add-on credits expire with the current billing cycle.",
       actions: aiActions(tier, false),
@@ -292,8 +292,8 @@ function aiLimitSpec(tier: Tier): PaywallSpec {
   }
 
   return {
-    titleTh: "เครดิต AI Feedback ของคุณหมดแล้ว",
-    titleEn: "You have run out of AI feedback credits",
+    titleTh: "เครดิตตรวจงานของคุณหมดแล้ว",
+    titleEn: "You have run out of feedback credits",
     bodyTh:
       "หากต้องการตรวจงานและสร้างรายงานต่อเนื่อง แนะนำให้อัปเกรดแพลนหรือซื้อเครดิตเพิ่ม",
     bodyEn:

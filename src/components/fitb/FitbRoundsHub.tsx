@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { FITB_ROUND_NUMBERS } from "@/lib/fitb-constants";
 import { getFitbRoundStats, loadFitbVisibleBank } from "@/lib/fitb-storage";
 import type { FitbRoundNum } from "@/types/fitb";
@@ -19,8 +18,8 @@ function formatShortDate(iso: string | null): string {
 }
 
 export function FitbRoundsHub() {
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
 
   useEffect(() => {

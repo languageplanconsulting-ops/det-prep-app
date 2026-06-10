@@ -85,7 +85,7 @@ export async function POST(req: Request) {
         originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
       const credit = await getAiCreditStateForUser(userId, feedbackSurface);
       if (!credit.allowed) {
-        return NextResponse.json({ error: credit.reason ?? "AI feedback quota reached" }, { status: 402 });
+        return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
       }
     }
     const { report, usage } = await generatePhotoSpeakReportWithGemini({
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
         originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
       const charged = await chargeAiCreditForUser(userId, feedbackSurface);
       if (!charged.ok) {
-        return NextResponse.json({ error: "Could not apply AI credit after grading" }, { status: 500 });
+        return NextResponse.json({ error: "Could not apply feedback credit after grading" }, { status: 500 });
       }
       const rewardBonus = await maybeGrantRedeemImprovementReward({
         userId,

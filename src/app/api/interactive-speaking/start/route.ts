@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     });
     if (!reserved.ok) {
       const status = reserved.reason?.includes("quota") ? 402 : 500;
-      return NextResponse.json({ error: reserved.reason ?? "Could not reserve AI credit" }, { status });
+      return NextResponse.json({ error: reserved.reason ?? "Could not reserve feedback credit" }, { status });
     }
 
     return NextResponse.json({

@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { SPEAKING_ROUND_NUMBERS } from "@/lib/speaking-constants";
 import { countSpeakingVisibleTopicsInRound } from "@/lib/speaking-storage";
 import type { SpeakingRoundNum } from "@/types/speaking";
 
 export function ReadSpeakRoundsHub() {
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
 
   useEffect(() => {

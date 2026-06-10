@@ -2,6 +2,12 @@
 
 import { useEffect } from "react";
 import { IntroModalShell } from "@/components/practice/IntroModalShell";
+import {
+  GUIDE_ACCENT,
+  GuideRevampBody,
+  GuideRevampFooter,
+} from "@/components/practice/GuideRevampContent";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
 /**
  * Full-screen intro when entering Reading skills from the practice hub.
@@ -16,6 +22,9 @@ export function ReadingSkillsIntroModal({
   onOpenChange: (open: boolean) => void;
   onEnter: () => void;
 }) {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const showRevamp = isAdmin || previewEligible;
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -33,6 +42,53 @@ export function ReadingSkillsIntroModal({
     onEnter();
     onOpenChange(false);
   };
+
+  if (showRevamp) {
+    return (
+      <IntroModalShell
+        open={open}
+        onDismiss={dismiss}
+        labelledBy="reading-intro-title"
+        title={
+          <>
+            ทักษะการอ่านวิเคราะห์ <br />
+            <span className="font-mono text-xl font-bold not-italic normal-case text-[#FF5C00]">
+              Reading Skills
+            </span>
+          </>
+        }
+        badge={
+          <span className="rounded-full bg-orange-50 px-3 py-1 font-mono text-[11px] font-bold text-[#FF5C00]">
+            GUIDE 02
+          </span>
+        }
+        footer={
+          <GuideRevampFooter
+            accent={GUIDE_ACCENT.reading}
+            primaryLabel="เริ่มแบบฝึกหัด →"
+            onEnter={enter}
+            onDismiss={dismiss}
+          />
+        }
+      >
+        <GuideRevampBody
+          accent={GUIDE_ACCENT.reading}
+          outcomeTitle="ฝึกอ่านจับโครงสร้าง ดันคะแนน Comprehension & Literacy"
+          outcomeSub="ไม่ใช่ข้อสอบคำศัพท์ — วัดว่าคุณจับ “ตรรกะ” ของเรื่องได้ไหม"
+          steps={[
+            { n: "1", title: "จับความเชื่อมโยง (Cohesion)", desc: "ดูว่าแต่ละย่อหน้าต่อกันอย่างไร" },
+            { n: "2", title: "หาใจความสำคัญ (Main Idea)", desc: "เลือกชื่อเรื่องและแก่นของเรื่องให้ตรง" },
+            { n: "3", title: "กวาดหาข้อมูล (Scanning)", desc: "หาเฉพาะจุดที่โจทย์ถาม ไม่ต้องอ่านทุกคำ" },
+          ]}
+          mini={{
+            label: "เป็นนักเรียนคอร์ส? ทบทวนเทคนิคการอ่านก่อนเริ่ม",
+            sub: "มินิเซสชันสอนทีละจุด ~15 นาที · ไว้ทบทวนก่อนลงมือ",
+            href: "/practice/mini-study#reading",
+          }}
+        />
+      </IntroModalShell>
+    );
+  }
 
   return (
     <IntroModalShell

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { VocabExamIntroModal } from "@/components/vocab/VocabExamIntroModal";
 import { VocabularyBuilderAvailabilityBanner } from "@/components/vocab/VocabularyBuilderAvailabilityBanner";
 import { VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
@@ -21,8 +20,8 @@ function formatShortDate(iso: string | null): string {
 }
 
 export function VocabRoundsHub() {
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
 
   useEffect(() => {

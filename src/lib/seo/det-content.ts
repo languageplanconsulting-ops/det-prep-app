@@ -324,7 +324,7 @@ export const DET_PAGES: Record<DetPageSlug, DetPageContent> = {
   },
   "mock-test": {
     slug: "mock-test",
-    title: "Mock Test Duolingo English Test พร้อม AI Feedback",
+    title: "Mock Test Duolingo English Test พร้อมฟีดแบ็กทันที",
     description:
       "ฝึกทำ mock test แบบ DET พร้อม feedback รายข้อ ช่วยดู pacing, จุดอ่อน และความพร้อมก่อนสอบจริง",
     h1: "Mock Test สำหรับ Duolingo English Test",

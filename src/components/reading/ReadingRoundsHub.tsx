@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { READING_DIFFICULTIES, READING_ROUND_NUMBERS } from "@/lib/reading-constants";
 import { getReadingRoundStats, loadReadingVisibleBank } from "@/lib/reading-storage";
 import type { ReadingRoundNum } from "@/types/reading";
@@ -19,8 +18,8 @@ function formatShortDate(iso: string | null): string {
 }
 
 export function ReadingRoundsHub() {
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  // soft Brown UI promoted to default for all users (was admin-only)
+  const soft = true;
   const [v, setV] = useState(0);
 
   useEffect(() => {

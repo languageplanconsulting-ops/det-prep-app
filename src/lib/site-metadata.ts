@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const SITE_NAME = "English Plan";
 export const SITE_TITLE = "Duolingo English Test Prep Thailand";
 export const SITE_DESCRIPTION =
-  "English Plan helps Thai learners prepare for the Duolingo English Test with mock tests, AI feedback, speaking and writing practice, and Thai-first guidance.";
+  "English Plan helps Thai learners prepare for the Duolingo English Test with mock tests, instant feedback, speaking and writing practice, and Thai-first guidance.";
 
 function isLoopbackHostname(hostname: string): boolean {
   return (
