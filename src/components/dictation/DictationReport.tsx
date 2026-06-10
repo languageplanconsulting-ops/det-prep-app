@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { sfxReveal } from "@/lib/exam-sfx";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   buildRedeemSlots,
@@ -166,6 +167,10 @@ export function DictationReport({
   const [showFix, setShowFix] = useState(false);
   const [redeemDismissed, setRedeemDismissed] = useState(false);
   const [fixValues, setFixValues] = useState<string[]>([]);
+
+  useEffect(() => {
+    sfxReveal();
+  }, []);
 
   const charDiff = useMemo(() => diffDictationChars(expected, userText), [expected, userText]);
   const score = useMemo(
