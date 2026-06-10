@@ -5,6 +5,7 @@ import {
   sendVIPGrantEmail,
   sendVIPRevokeEmail,
 } from "@/lib/notifications";
+import { hasValidPlanExpiry } from "@/lib/plan-status";
 import { provisionCourseStudentAuth } from "@/lib/vip-auth-provision";
 
 export function normalizeEmail(email: string): string {
@@ -246,7 +247,7 @@ export async function grantVIPOnSignup(
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("stripe_subscription_id, tier")
+    .select("stripe_subscription_id, tier, tier_expires_at, vip_granted_by_course")
     .eq("id", userId)
     .maybeSingle();
 
@@ -285,7 +286,22 @@ export async function grantVIPOnSignup(
     return;
   }
 
-  if (!profile?.stripe_subscription_id) {
+  // No active course grant. ONLY revert users whose VIP actually came from a course
+  // grant (vip_granted_by_course === true) and who have no other valid access. Never
+  // touch Stripe payers or still-valid paid plans here: one-time monthly plans store
+  // stripe_subscription_id = null but keep a future tier_expires_at, and runtime expiry
+  // is already enforced by resolveEffectiveTierFromProfile. The old code force-wrote
+  // tier:"free" on every login for anyone without a Stripe subscription id, which wiped
+  // valid monthly customers mid-cycle.
+  const cameFromCourseGrant = profile?.vip_granted_by_course === true;
+  const stillValidPaidPlan = hasValidPlanExpiry(
+    profile?.tier_expires_at as string | null | undefined,
+  );
+  if (
+    cameFromCourseGrant &&
+    !stillValidPaidPlan &&
+    !profile?.stripe_subscription_id
+  ) {
     const { error } = await supabase
       .from("profiles")
       .update({

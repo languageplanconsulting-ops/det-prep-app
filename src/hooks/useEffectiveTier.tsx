@@ -36,6 +36,8 @@ export type EffectiveTierState = {
   loading: boolean;
   vipGrantedByCourse: boolean;
   hasStripeSubscription: boolean;
+  /** Raw `profiles.tier_expires_at` for the signed-in user (ISO), or null for none/lifetime. */
+  planExpiresAt: string | null;
 };
 
 const EffectiveTierContext = createContext<EffectiveTierState | null>(null);
@@ -50,6 +52,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
   const [previewTier, setPreviewTierState] = useState<Tier | null>(null);
   const [vipGrantedByCourse, setVipGrantedByCourse] = useState(false);
   const [hasStripeSubscription, setHasStripeSubscription] = useState(false);
+  const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null);
 
   const fetchPreviewEligible = useCallback(async () => {
     try {
@@ -69,6 +72,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       setIsAdmin(false);
       setVipGrantedByCourse(false);
       setHasStripeSubscription(false);
+      setPlanExpiresAt(null);
       setLoading(false);
       void fetchPreviewEligible();
       return;
@@ -82,6 +86,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       setIsAdmin(false);
       setVipGrantedByCourse(false);
       setHasStripeSubscription(false);
+      setPlanExpiresAt(null);
       setLoading(false);
       void fetchPreviewEligible();
       return;
@@ -118,6 +123,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       }),
     );
     setIsAdmin(data?.role === "admin");
+    setPlanExpiresAt((data?.tier_expires_at as string | null | undefined) ?? null);
     setVipGrantedByCourse(data?.vip_granted_by_course === true);
     setHasStripeSubscription(
       !!data?.stripe_subscription_id ||
@@ -178,6 +184,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       loading,
       vipGrantedByCourse,
       hasStripeSubscription,
+      planExpiresAt,
     };
   }, [
     realTier,
@@ -187,6 +194,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
     previewTier,
     vipGrantedByCourse,
     hasStripeSubscription,
+    planExpiresAt,
   ]);
 
   return (

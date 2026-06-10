@@ -7,7 +7,9 @@ import { ContentBankHydrator } from "@/components/content/ContentBankHydrator";
 import { MainNav } from "@/components/layout/MainNav";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { PlanExpiryNotice } from "@/components/billing/PlanExpiryNotice";
 import { BugReportWidget } from "@/components/support/BugReportWidget";
+import { SoundToggle } from "@/components/ui/SoundToggle";
 import { VipApiCreditNotebookNotice } from "@/components/vip/VipApiCreditNotebookNotice";
 import { EffectiveTierProvider } from "@/hooks/useEffectiveTier";
 import { buildDefaultMetadata } from "@/lib/site-metadata";
@@ -45,7 +47,9 @@ export default function RootLayout({
           <MainNav />
           <LoginWelcomeModal />
           <VipApiCreditNotebookNotice />
+          <PlanExpiryNotice />
           <BugReportWidget />
+          <SoundToggle />
           <PageTransition>{children}</PageTransition>
         </EffectiveTierProvider>
       </body>
