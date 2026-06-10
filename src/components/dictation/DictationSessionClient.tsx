@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DictationReport } from "@/components/dictation/DictationReport";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { getDictationAudioDataUrlByItemId } from "@/lib/dictation-audio-indexeddb";
 import { dictationScoreFromDiff, diffDictationChars } from "@/lib/dictation-diff";
 import { dictationMaxForDifficulty, saveDictationAttempt } from "@/lib/dictation-storage";
@@ -19,6 +20,9 @@ export function DictationSessionClient({
   difficulty: DictationDifficulty;
   setNumber: number;
 }) {
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
+
   const [phase, setPhase] = useState<"practice" | "report">("practice");
   const [userText, setUserText] = useState("");
   const [reportKey, setReportKey] = useState(0);
@@ -257,6 +261,103 @@ export function DictationSessionClient({
           onPracticeAgain={practiceAgain}
           onFixSubmit={handleFixSubmit}
         />
+      </div>
+    );
+  }
+
+  if (soft) {
+    // ── Soft-modern admin rebuild — same handlers/state, new presentation ──
+    return (
+      <div className="mx-auto max-w-2xl space-y-4">
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <Link href={setsHref} className="font-semibold hover:text-[#004AAD]">
+            ← ชุดข้อสอบ
+          </Link>
+          <span>·</span>
+          <Link href={hubHref} className="hover:text-[#004AAD]">
+            ทุกรอบ
+          </Link>
+        </div>
+
+        <div className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200 sm:p-6">
+          <header className="mb-4 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-600 text-xl text-white">
+                🎧
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                  Dictation · รอบ {round} · {difficulty}
+                </p>
+                <h1 className="text-lg font-bold">Set {setNumber}</h1>
+              </div>
+            </div>
+            <span className="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-amber-700">
+              ฟังแล้วพิมพ์
+            </span>
+          </header>
+
+          {/* audio */}
+          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl bg-white p-4 ring-1 ring-slate-200">
+            <button
+              type="button"
+              onClick={togglePlay}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00] hover:opacity-90"
+            >
+              {playing ? "⏸ หยุด" : "▶ เล่นเสียง"}
+            </button>
+            <button
+              type="button"
+              onClick={replayFive}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#FFCC00] px-5 py-2.5 text-sm font-extrabold text-[#004AAD] hover:opacity-90"
+            >
+              ↻ ฟังซ้ำ
+            </button>
+            <span className="ml-auto text-xs text-slate-500">
+              ฟังกี่ครั้งก็ได้ · ยังไม่มีคำใบ้จนกว่าจะส่ง
+            </span>
+          </div>
+          {audioErr ? <p className="mb-3 text-sm font-semibold text-rose-600">{audioErr}</p> : null}
+
+          {/* input */}
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+            พิมพ์ประโยคที่ได้ยิน
+          </p>
+          <textarea
+            id="dictation-input"
+            value={userText}
+            onChange={(e) => setUserText(e.target.value)}
+            rows={5}
+            spellCheck={false}
+            placeholder="พิมพ์ทั้งประโยคที่นี่…"
+            className="w-full resize-y rounded-2xl border border-slate-200 bg-white p-4 text-base leading-relaxed outline-none focus:border-[#004AAD]"
+            style={{ fontFamily: "var(--font-jetbrains), ui-monospace, monospace" }}
+          />
+          <button
+            type="button"
+            onClick={submitPractice}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00] hover:opacity-90"
+          >
+            ส่งคำตอบ →
+          </button>
+
+          {/* coach tip */}
+          <div className="mt-5 flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
+              D
+            </div>
+            <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+              <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
+              <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
+                <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+              </span>
+              <p className="text-[13px] leading-6 text-slate-800">
+                ตัวพิมพ์ใหญ่/จุด ไม่นับ แต่ <strong>comma ต้องตรง</strong> · ระวัง{" "}
+                <strong>-ed, -s ท้ายคำ</strong> ที่สุด — จุดนี้แหละที่ทำคะแนนหลุด
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
