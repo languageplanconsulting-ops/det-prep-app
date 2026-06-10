@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Dictation hub — soft redesign preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f7f8fc;color:#0f172a}
+  .coach .av{width:44px;height:44px;border-radius:9999px;flex-shrink:0;background:#004AAD;color:#FFCC00;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;border:2.5px solid #FFCC00;box-shadow:0 3px 8px rgba(0,74,173,.18)}
+  .coach .bub{flex:1;position:relative;background:#fff;padding:11px 14px 12px;border-radius:14px;border-top-left-radius:4px;box-shadow:0 4px 14px rgba(15,23,42,.06);border:1px solid rgba(0,74,173,.08)}
+  .coach .bub::before{content:"";position:absolute;top:14px;left:-7px;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-right:7px solid #fff}
+  .coach .lbl{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:#004AAD;background:#FFCC00;padding:5px 11px;border-radius:9999px;margin-bottom:8px}
+  .rcard{display:flex;flex-direction:column;border-radius:16px;border:1px solid #e2e8f0;background:#fff;padding:20px;transition:all .14s}
+  .rcard:hover{border-color:#004AAD;box-shadow:0 8px 22px rgba(0,74,173,.08)}
+</style>
+</head>
+<body>
+<nav class="bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+  <span class="font-bold text-[#004AAD]">English Plan</span>
+  <span class="text-sm text-amber-700 font-semibold">🎧 Dictation hub</span>
+  <span class="ml-auto text-xs bg-[#004AAD] text-[#FFCC00] px-2.5 py-1 rounded-md font-semibold">Preview · หน้าเลือกรอบแบบใหม่</span>
+</nav>
+
+<main class="mx-auto max-w-6xl px-6 py-6 space-y-6">
+  <a class="text-sm font-semibold text-[#004AAD] hover:underline">← กลับหน้าฝึก</a>
+
+  <!-- amber header + coach tip -->
+  <div class="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200 sm:p-6">
+    <div class="flex items-center gap-3">
+      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-600 text-2xl text-white">🎧</div>
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-wider text-amber-700">Literacy · Dictation</p>
+        <h1 class="text-2xl font-bold sm:text-3xl">เขียนตามคำบอก <span class="font-semibold text-slate-400">· Listen and type</span></h1>
+      </div>
+    </div>
+    <div class="mt-4 flex items-start gap-3 coach">
+      <div class="av">D</div>
+      <div class="bub">
+        <span class="lbl"><span style="font-size:11px;line-height:1">✨</span>Tips from P'Doy</span>
+        <p class="text-[13px] leading-6 text-slate-800">ฟังประโยคให้จบ (ฟังซ้ำได้) → พิมพ์ตาม → <strong>เช็ก Tense / ตัวสะกด</strong> ให้ดีนะครับ · พาร์ทนี้คือการ <strong>ซ่อมประโยคให้ถูกไวยากรณ์</strong> หลังได้ยินเสียง — เพิ่มคะแนน Literacy โดยตรง</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- round cards -->
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <!-- Round 1 — done -->
+    <a class="rcard">
+      <div class="mb-3 flex items-center justify-between">
+        <span class="rounded-full bg-emerald-100 text-emerald-700 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">ทำแล้ว</span>
+        <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ 1</span>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900">Round 1</h3>
+      <p class="mt-0.5 text-xs text-slate-500">120 ชุดในคลังข้อสอบ</p>
+      <div class="mt-auto pt-4">
+        <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
+        <p class="text-2xl font-bold text-[#004AAD]">78%</p>
+        <p class="mt-2 text-[11px] text-slate-500">ฝึกล่าสุด: 10 มิ.ย. 2026</p>
+      </div>
+    </a>
+    <!-- Rounds 2-5 — ready -->
+    <a class="rcard">
+      <div class="mb-3 flex items-center justify-between">
+        <span class="rounded-full bg-slate-100 text-slate-500 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">พร้อมทำ</span>
+        <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ 2</span>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900">Round 2</h3>
+      <p class="mt-0.5 text-xs text-slate-500">120 ชุดในคลังข้อสอบ</p>
+      <div class="mt-auto pt-4">
+        <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
+        <p class="text-2xl font-bold text-[#004AAD]">—</p>
+        <p class="mt-2 text-[11px] text-slate-500">ฝึกล่าสุด: ยังไม่เคยทำ</p>
+      </div>
+    </a>
+    <a class="rcard">
+      <div class="mb-3 flex items-center justify-between">
+        <span class="rounded-full bg-slate-100 text-slate-500 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">พร้อมทำ</span>
+        <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ 3</span>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900">Round 3</h3>
+      <p class="mt-0.5 text-xs text-slate-500">120 ชุดในคลังข้อสอบ</p>
+      <div class="mt-auto pt-4">
+        <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
+        <p class="text-2xl font-bold text-[#004AAD]">—</p>
+        <p class="mt-2 text-[11px] text-slate-500">ฝึกล่าสุด: ยังไม่เคยทำ</p>
+      </div>
+    </a>
+    <a class="rcard">
+      <div class="mb-3 flex items-center justify-between">
+        <span class="rounded-full bg-slate-100 text-slate-500 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">พร้อมทำ</span>
+        <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ 4</span>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900">Round 4</h3>
+      <p class="mt-0.5 text-xs text-slate-500">120 ชุดในคลังข้อสอบ</p>
+      <div class="mt-auto pt-4">
+        <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
+        <p class="text-2xl font-bold text-[#004AAD]">—</p>
+        <p class="mt-2 text-[11px] text-slate-500">ฝึกล่าสุด: ยังไม่เคยทำ</p>
+      </div>
+    </a>
+    <a class="rcard">
+      <div class="mb-3 flex items-center justify-between">
+        <span class="rounded-full bg-slate-100 text-slate-500 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">พร้อมทำ</span>
+        <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ 5</span>
+      </div>
+      <h3 class="text-2xl font-bold text-slate-900">Round 5</h3>
+      <p class="mt-0.5 text-xs text-slate-500">120 ชุดในคลังข้อสอบ</p>
+      <div class="mt-auto pt-4">
+        <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
+        <p class="text-2xl font-bold text-[#004AAD]">—</p>
+        <p class="mt-2 text-[11px] text-slate-500">ฝึกล่าสุด: ยังไม่เคยทำ</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="rounded-xl bg-white ring-1 ring-slate-200 p-4 text-xs text-slate-600 leading-6">
+    <strong class="text-[#004AAD]">เทียบกับของเดิม:</strong> เดิมเป็น dotted-grid + ขอบดำหนา + ตัวหนังสือ monospace ("STRATEGY", "ROUND 01", "BOOSTS LITERACY") · ใหม่ = การ์ดนุ่ม Literacy สีเหลืองอำพัน · กลยุทธ์ย้ายไปอยู่ในบับเบิล Tips from P'Doy · การ์ดรอบสะอาด อ่านง่าย
+  </div>
+</main>
+</body></html>
