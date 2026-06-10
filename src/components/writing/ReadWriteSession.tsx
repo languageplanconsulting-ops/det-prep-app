@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { pullContentBankSnapshotFromSupabase } from "@/lib/content-bank-sync";
@@ -36,6 +37,8 @@ export function ReadWriteSession({
   startWithRedeem?: boolean;
 }) {
   const router = useRouter();
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const vipGate = useVipAiFeedbackGate();
   const [mounted, setMounted] = useState(false);
   const [hydratingTopic, setHydratingTopic] = useState(true);
@@ -236,6 +239,22 @@ export function ReadWriteSession({
       >
         ← Topics
       </Link>
+      {soft ? (
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
+            D
+          </div>
+          <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+            <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
+            <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
+              <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+            </span>
+            <p className="text-[13px] leading-6 text-slate-800">
+              วางแผน 1-5 นาที แล้ว <strong>เขียนอย่างน้อย 50 คำ</strong> · โครง: เลือกข้าง → เหตุผล + ตัวอย่าง → สรุป
+            </p>
+          </div>
+        </div>
+      ) : null}
       <header className="ep-brutal rounded-sm border-black bg-white p-6">
         <h1 className="text-2xl font-black">{topic.titleEn}</h1>
         <p className="text-neutral-600">{topic.titleTh}</p>

@@ -7,6 +7,7 @@ import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import {
   emitVipApiCreditNotice,
@@ -175,6 +176,8 @@ export function InteractiveSpeakingSession({
   startWithRedeem?: boolean;
 }) {
   const router = useRouter();
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const vipGate = useVipAiFeedbackGate();
   const lastAttempt = useMemo(
     () => getLatestInteractiveSpeakingReportForScenario(scenario.id),
@@ -818,6 +821,23 @@ export function InteractiveSpeakingSession({
           >
             ← Scenarios
           </Link>
+          {soft ? (
+            <div className="mb-6 flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
+                D
+              </div>
+              <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+                <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
+                <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
+                  <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+                </span>
+                <p className="text-[13px] leading-6 text-slate-800">
+                  เห็นแค่คำถามแรก ที่เหลือระบบถามตามที่คุณพูด · <strong>ฟัง 1 ครั้ง → เตรียม 10 วิ → พูด ~35 วิ</strong> ·
+                  ตอบตรงคำถาม แล้วต่อยอด 1 ประโยค
+                </p>
+              </div>
+            </div>
+          ) : null}
 
           <div className="border-4 border-black bg-white p-6 shadow-[12px_12px_0_0_#000] sm:p-8">
             <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">

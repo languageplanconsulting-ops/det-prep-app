@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
@@ -56,6 +57,8 @@ export function PhotoAssessmentSession({
   startWithRedeem?: boolean;
 }) {
   const router = useRouter();
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const item = useMemo(() => findWriteAboutPhotoItem(itemId), [itemId]);
   const round = item ? getWriteAboutPhotoRoundNumberForItem(item.id) : undefined;
   const latestProgress = useMemo(
@@ -309,6 +312,25 @@ export function PhotoAssessmentSession({
         >
           {mode === "speak" ? "← Speak about photo" : "← Write about photo"}
         </Link>
+
+        {soft ? (
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
+              D
+            </div>
+            <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+              <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
+              <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
+                <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+              </span>
+              <p className="text-[13px] leading-6 text-slate-800">
+                {mode === "speak"
+                  ? "เตรียมประโยคในหัวก่อนกดอัด: In this photo I can see… · There are… · It looks like… จะพูดลื่นกว่ามาก"
+                  : "เขียนให้ครบ ใคร ทำอะไร ที่ไหน แล้วเพิ่มรายละเอียด สี/จำนวน/อารมณ์ ก็ได้ครบ 15 คำง่ายๆ"}
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         <header className="ep-brutal rounded-sm border-black bg-white p-6">
           <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">
