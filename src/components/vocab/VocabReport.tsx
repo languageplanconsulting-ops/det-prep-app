@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import {
   VOCAB_SESSION_LABEL,
   VOCAB_SESSION_MAX,
@@ -40,6 +41,7 @@ export function VocabReport({
   setListHref: string;
   bankHref: string;
 }) {
+  useRevealSfx();
   const maxScore = VOCAB_SESSION_MAX[sessionLevel];
   const correctCount = rows.filter((r) => r.isCorrect).length;
   const score = Math.round((correctCount / 6) * maxScore);

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import {
   buildDialogueSummaryReportNotebookFullBodies,
@@ -81,6 +82,7 @@ export function DialogueSummaryReportView({
   listHref: string;
   roundHref: string;
 }) {
+  useRevealSfx();
   const router = useRouter();
 
   const scorePct = Math.min(100, Math.round((report.score160 / 160) * 100));
