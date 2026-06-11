@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<!--
+  FLOW V1 · GENTLE — "Don't Make Me Think" (Steve Krug) + The Mom Test
+  Guiding principle: Radical clarity + minimal friction + honesty.
+  At every step the user instantly understands where they are, what just happened,
+  and the ONE next thing to do — plain language, no jargon, no pressure.
+  Rough edges fixed:
+  1. No forced login wall before seeing value (Screen 1)
+  2. Welcome clearly lists free allowance and that feedback credit choice is binding (Screen 3)
+  3. "Unlock mock" no longer dumps to generic pricing — gives calm contextual step (Screen 5)
+  4. Blocks reframed as natural "you finished your free try" moments, not punishment (Screen 6)
+  5. PromptPay async anxiety resolved with explicit "processing" waiting state (Screen 8)
+-->
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow V1 · Gentle — English Plan</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-yellow': '#FFCC00',
+        }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    line-height: 1.7;
+    background: #f8fafc;
+    color: #1e293b;
+  }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .phone-frame {
+    width: 100%;
+    max-width: 390px;
+    min-height: 720px;
+    background: #ffffff;
+    border-radius: 2rem;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    overflow: hidden;
+    position: relative;
+  }
+  .phone-status-bar {
+    background: #fff;
+    padding: 10px 20px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .screen-card {
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 0;
+    overflow: hidden;
+  }
+  .screen-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+  }
+  .screen-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    background: #004AAD;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .screen-meta h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 2px 0;
+    line-height: 1.4;
+  }
+  .screen-meta p {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .fix-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    font-weight: 500;
+    margin-top: 4px;
+  }
+  .btn-primary {
+    display: block;
+    width: 100%;
+    background: #004AAD;
+    color: white;
+    text-align: center;
+    padding: 13px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+  }
+  .btn-secondary {
+    display: block;
+    width: 100%;
+    background: transparent;
+    color: #004AAD;
+    text-align: center;
+    padding: 11px 16px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1.5px solid #004AAD;
+    text-decoration: none;
+  }
+  .btn-ghost {
+    display: block;
+    width: 100%;
+    background: transparent;
+    color: #94a3b8;
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 9999px;
+  }
+  .tag-blue { background: #eff6ff; color: #1d4ed8; }
+  .tag-green { background: #f0fdf4; color: #15803d; }
+  .tag-yellow { background: #fefce8; color: #a16207; }
+  .tag-gray { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+  .skill-bar-bg { background: #f1f5f9; border-radius: 999px; height: 8px; }
+  .skill-bar-fill { border-radius: 999px; height: 8px; }
+  .card-inset {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .divider { height: 1px; background: #f1f5f9; margin: 14px 0; }
+  .pricing-col {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 14px;
+    border: 1.5px solid transparent;
+    transition: border-color 0.15s;
+    flex: 1;
+    min-width: 0;
+  }
+  .pricing-col.popular {
+    background: #eff6ff;
+    border-color: #004AAD;
+  }
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+    color: #94a3b8;
+    font-size: 12px;
+    gap: 2px;
+  }
+  .connector-line {
+    width: 2px;
+    height: 28px;
+    background: linear-gradient(to bottom, #e2e8f0, #cbd5e1);
+    border-radius: 1px;
+  }
+
+  /* top ribbon */
+  .ribbon {
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    font-size: 13px;
+  }
+  .ribbon a { color: #004AAD; text-decoration: none; font-weight: 500; }
+  .ribbon a:hover { text-decoration: underline; }
+  .ribbon-label {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 13px;
+  }
+  .ribbon-dot { color: #cbd5e1; }
+
+  /* page inner */
+  .phone-inner {
+    padding: 20px 20px 28px;
+  }
+  .app-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .app-logo {
+    font-weight: 700;
+    font-size: 16px;
+    color: #004AAD;
+    letter-spacing: -0.3px;
+  }
+  .lang-tag {
+    font-size: 11px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+
+  /* free allowance row */
+  .allowance-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+    color: #334155;
+  }
+  .allowance-row:last-child { border-bottom: none; }
+  .allowance-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+  .allowance-info { flex: 1; }
+  .allowance-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 2px 7px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .allowance-badge.used {
+    background: #fef2f2;
+    color: #dc2626;
+    text-decoration: line-through;
+  }
+  .allowance-badge.avail {
+    background: #f0fdf4;
+    color: #15803d;
+  }
+
+  /* score ring */
+  .score-ring {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 6px solid #004AAD;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    background: #fff;
+  }
+  .score-ring .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 22px;
+    color: #004AAD;
+    line-height: 1;
+  }
+  .score-ring .denom {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1;
+  }
+
+  /* QR placeholder */
+  .qr-box {
+    width: 160px;
+    height: 160px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: center;
+    padding: 12px;
+  }
+  /* QR pattern sim */
+  .qr-inner {
+    display: grid;
+    grid-template-columns: repeat(7, 12px);
+    grid-template-rows: repeat(7, 12px);
+    gap: 2px;
+  }
+  .qr-cell { border-radius: 2px; }
+  .qr-dark { background: #1e293b; }
+  .qr-light { background: #f8fafc; }
+  .qr-wrap {
+    width: 160px;
+    height: 160px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 16px;
+  }
+
+  /* spinner */
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #004AAD;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* success check */
+  .success-circle {
+    width: 72px;
+    height: 72px;
+    background: #004AAD;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 32px;
+    color: white;
+  }
+
+  /* lock overlay */
+  .lock-overlay {
+    background: rgba(248,250,252,0.85);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+    font-size: 13px;
+    color: #64748b;
+    border: 1px dashed #e2e8f0;
+  }
+
+  /* practice lane */
+  .lane-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    background: #f8fafc;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+  }
+  .lane-row.done { opacity: 0.6; }
+  .lane-icon { font-size: 20px; width: 28px; text-align: center; }
+  .lane-info { flex: 1; }
+  .lane-info .lane-name { font-size: 13px; font-weight: 600; color: #1e293b; }
+  .lane-info .lane-sub { font-size: 11px; color: #94a3b8; }
+  .lane-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .lane-badge.avail { background: #eff6ff; color: #1d4ed8; }
+  .lane-badge.used { background: #fef2f2; color: #dc2626; }
+</style>
+</head>
+<body>
+
+<!-- TOP RIBBON -->
+<div class="ribbon">
+  <a href="/flow-revamp-index.html">← Flow hub</a>
+  <span class="ribbon-dot">·</span>
+  <span class="ribbon-label">Flow V1 · Gentle</span>
+  <span class="tag tag-blue" style="margin-left:auto;">8 หน้าจอ</span>
+</div>
+
+<!-- PAGE HEADER -->
+<div style="max-width:900px;margin:0 auto;padding:40px 24px 16px;">
+  <div style="margin-bottom:6px;">
+    <span class="tag tag-blue" style="font-size:12px;">Flow Storyboard</span>
+  </div>
+  <h1 style="font-size:26px;font-weight:700;color:#1e293b;margin:0 0 8px;line-height:1.3;">Flow V1 · Gentle</h1>
+  <p style="font-size:14px;color:#64748b;margin:0;max-width:560px;">ผู้ใช้ใหม่ (ฟรี) เห็นอะไรตั้งแต่จุดแรกจนอัปเกรดสำเร็จ — ทุกขั้นตอนชัดเจน ไม่กดดัน ไม่ซับซ้อน</p>
+</div>
+
+<!-- SCREEN GRID -->
+<div style="max-width:900px;margin:0 auto;padding:0 24px 80px;">
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:32px;align-items:start;">
+
+    <!-- ===== SCREEN 1 ===== -->
+    <div class="screen-card" style="padding:20px;">
+      <div class="screen-header">
+        <div class="screen-number">1</div>
+        <div class="screen-meta">
+          <h3>ลองฟรี — เช็กระดับก่อนเริ่ม</h3>
+          <p>หลักการ: แสดงคุณค่าก่อน ขอข้อมูลทีหลัง</p>
+          <div class="fix-badge">✦ FIX: ไม่มีกำแพง login ก่อนเห็นของ</div>
+        </div>
+      </div>
+      <div class="phone-frame">
+        <div class="phone-status-bar">
+          <span class="font-mono">9:41</span>
+          <span>●●●●</span>
+        </div>
+        <div class="phone-inner">
+          <div class="app-bar">
+            <div class="app-logo">English Plan</div>
+            <span class="lang-tag">🇹🇭 ไทย</span>
+          </div>
+
+          <!-- hero -->
+          <div style="text-align:center;padding:10px 0 20px;">
+            <div style="font-size:48px;margin-bottom:10px;">📊</div>
+            <div style="font-size:20px;font-weight:700;color:#1e293b;line-height:1.3;margin-bottom:8px;">เช็กระดับ DET<br>ของคุณฟรี ~15 นาที</div>
+            <div style="font-size:13px;color:#64748b;line-height:1.6;">วินิจฉัยจุดอ่อน-จุดแข็งใน 4 ทักษะ<br>ด้วยฐานข้อมูล 6 ปีของ English Plan</div>
+          </div>
+
+          <!-- what's inside -->
+          <div class="card-inset" style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:10px;letter-spacing:0.05em;text-transform:uppercase;">ที่ได้รับฟรีวันนี้</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span>✅</span><span>ข้อสอบจำลองสั้น 4 ทักษะ</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span>✅</span><span>คะแนนพร้อมวิเคราะห์จุดอ่อน</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span>✅</span><span>ลองฝึกแต่ละทักษะ 1 ครั้ง</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span>✅</span><span>ฟีดแบ็กตรวจงาน 1 เครดิต</span>
+              </div>
+            </div>
+          </div>
+
+          <a class="btn-primary">เริ่มเช็กระดับฟรี</a>
+          <div style="text-align:center;margin-top:10px;font-size:12px;color:#94a3b8;">จะบันทึกผลให้เมื่อเข้าสู่ระบบ — ไม่บังคับทำตอนนี้</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 2 ===== -->
+    <div class="screen-card" style="padding:20px;">
+      <div class="screen-header">
+        <div class="screen-number">2</div>
+        <div class="screen-meta">
+          <h3>เข้าสู่ระบบ / สมัคร</h3>
+          <p>หลักการ: ขั้นตอนสั้น + บอกเหตุผล ("เก็บผลให้คุณ")</p>
+          <div class="fix-badge">✦ FIX: login รู้สึกเบา ไม่ใช่กำแพง</div>
+        </div>
+      </div>
+      <div class="phone-frame">
+        <div class="phone-status-bar">
+          <span class="font-mono">9:42</span>
+          <span>●●●●</span>
+        </div>
+        <div class="phone-inner">
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:20px;font-weight:700;color:#1e293b;margin-bottom:6px;">เก็บผลลัพธ์ของคุณ</div>
+            <div style="font-size:13px;color:#64748b;line-height:1.6;">ผลการวินิจฉัยจะถูกบันทึกไว้ให้<br>เพื่อดูความคืบหน้าได้ตลอด</div>
+          </div>
+
+          <!-- Google button -->
+          <button style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:500;color:#1e293b;cursor:pointer;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            เข้าสู่ระบบด้วย Google
+          </button>
+
+          <div style="display:flex;align-items:center;gap:8px;margin:4px 0 12px;">
+            <div style="flex:1;height:1px;background:#f1f5f9;"></div>
+            <span style="font-size:12px;color:#94a3b8;">หรือ</span>
+            <div style="flex:1;height:1px;background:#f1f5f9;"></div>
+          </div>
+
+          <!-- email field -->
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;font-weight:600;color:#64748b;display:block;margin-bottom:5px;">อีเมล</label>
+            <div style="border:1.5px solid #e2e8f0;border-radius:10px;padding:11px 14px;font-size:14px;color:#94a3b8;background:#f8fafc;">yourname@email.com</div>
+          </div>
+          <a class="btn-primary" style="margin-bottom:8px;">ส่ง OTP เข้าอีเมล</a>
+
+          <div style="background:#f0fdf4;border-radius:10px;padding:10px 14px;font-size:12px;color:#166534;display:flex;gap:8px;align-items:flex-start;margin-top:10px;">
+            <span style="flex-shrink:0;">💡</span>
+            <span>ใช้อีเมลเดิมตอนสมัคร ไม่ต้องยืนยันอีเมลซ้ำ — เข้าได้เลย</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 3 ===== -->
+    <div class="screen-card" style="padding:20px;">
+      <div class="screen-header">
+        <div class="screen-number">3</div>
+        <div class="screen-meta">
+          <h3>ยินดีต้อนรับ — สิทธิ์ฟรีของคุณ</h3>
+          <p>หลักการ: ชัดเจนว่ามีอะไรบ้าง + เครดิตเลือกได้ 1 งานเท่านั้น (binding)</p>
+          <div class="fix-badge">✦ FIX: บอกว่าการเลือก feedback credit ผูกพันทันที</div>
+        </div>
+      </div>
+      <div class="phone-frame">
+        <div class="phone-status-bar">
+          <span class="font-mono">9:43</span>
+          <span>●●●●</span>
+        </div>
+        <div class="phone-inner">
+          <div class="app-bar">
+            <div class="app-logo">English Plan</div>
+            <div style="font-size:11px;background:#f0fdf4;color:#15803d;padding:3px 8px;border-radius:999px;font-weight:500;">ฟรี</div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <div style="font-size:19px;font-weight:700;color:#1e293b;margin-bottom:4px;">ยินดีต้อนรับ, คุณกุ้ง 👋</div>
+            <div style="font-size:13px;color:#64748b;">นี่คือสิทธิ์ทั้งหมดที่คุณได้รับฟรี</div>
+          </div>
+
+          <!-- practice lanes allowance -->
+          <div style="background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+            <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:10px;letter-spacing:0.04em;">ลองข้อสอบได้ทักษะละ 1 ครั้ง</div>
+            <div class="allowance-row"><span class="allowance-icon">📖</span><span class="allowance-info">Reading</span><span class="allowance-badge avail">0/1</span></div>
+            <div class="allowance-row"><span class="allowance-icon">📝</span><span class="allowance-info">Vocabulary</span><span class="allowance-badge avail">0/1</span></div>
+            <div class="allowance-row"><span class="allowance-icon">🎧</span><span class="allowance-info">Dictation</span><span class="allowance-badge avail">0/1</span></div>
+            <div class="allowance-row"><span class="allowance-icon">✏️</span><span class="allowance-info">Fill in the blank</span><span class="allowance-badge avail">0/1</span></div>
+            <div class="allowance-row"><span class="allowance-icon">🔤</span><span class="allowance-info">Real word</span><span class="allowance-badge avail">0/1</span></div>
+            <div class="allowance-row" style="border-bottom:none;"><span class="allowance-icon">🎙️</span><span class="allowance-info">Interactive conversation</span><span class="allowance-badge avail">0/1</span></div>
+          </div>
+
+          <!-- feedback credit -->
+          <div style="background:#eff6ff;border-radius:12px;padding:12px 14px;border:1.5px solid #bfdbfe;margin-bottom:14px;">
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <span style="font-size:18px;">💬</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:#1e40af;margin-bottom:3px;">ฟีดแบ็กตรวจงาน 1 เครดิต</div>
+                <div style="font-size:12px;color:#1d4ed8;line-height:1.5;">เลือกส่ง 1 งาน (พูดหรือเขียน) เพื่อรับฟีดแบ็กละเอียด</div>
+                <div style="margin-top:6px;font-size:11px;background:#dbeafe;color:#1e40af;padding:4px 8px;border-radius:6px;display:inline-block;font-weight:500;">⚠️ เลือกได้ 1 งานเท่านั้น — เปลี่ยนไม่ได้หลังส่ง</div>
+              </div>
+            </div>
+          </div>
+
+          <a class="btn-primary">เข้าหน้าฝึก →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 4 ===== -->
+    <div class="screen-card" style="padding:20px;">
+      <div class="screen-header">
+        <div class="screen-number">4</div>
+        <div class="screen-meta">
+          <h3>คลังฝึก — มุมมองฟรี</h3>
+          <p>หลักการ: แสดงสิ่งที่ทำได้ก่อน ล็อกแบบสงบ ไม่กดดัน</p>
+          <div class="fix-badge">✦ FIX: Mock Test แสดงสถานะชัดโดยไม่ aggressive</div>
+        </div>
+      </div>
+      <div class="phone-frame">
+        <div class="phone-status-bar">
+          <span class="font-mono">9:45</span>
+          <span>●●●●</span>
+        </div>
+        <div class="phone-inner">
+          <div class="app-bar">
+            <div class="app-logo">English Plan</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="font-size:11px;background:#f0fdf4;color:#15803d;padding:3px 8px;border-radius:999px;font-weight:500;">ฟรี</div>
+            </div>
+          </div>
+
+          <div style="font-size:17px;font-weight:700;color:#1e293b;margin-bottom:14px;">ฝึกวันนี้</div>
+
+          <!-- practice lanes -->
+          <div class="lane-row">
+            <span class="lane-icon">📖</span>
+            <div class="lane-info">
+              <div class="lane-name">Reading</div>
+              <div class="lane-sub">Literacy · Fill in the blank</div>
+            </div>
+            <span class="lane-badge avail">0/1</span>
+          </div>
+          <div class="lane-row">
+            <span class="lane-icon">📝</span>
+            <div class="lane-info">
+              <div class="lane-name">Vocabulary</div>
+              <div class="lane-sub">Real word · Spelling</div>
+            </div>
+            <span class="lane-badge avail">0/1</span>
+          </div>
+          <div class="lane-row">
+            <span class="lane-icon">🎧</span>
+            <div class="lane-info">
+              <div class="lane-name">Dictation</div>
+              <div class="lane-sub">Listen & type</div>
+            </div>
+            <span class="lane-badge avail">0/1</span>
+          </div>
+          <div class="lane-row">
+            <span class="lane-icon">✏️</span>
+            <div class="lane-info">
+              <div class="lane-name">Fill in the blank</div>
+              <div class="lane-sub">Sentence context</div>
+            </div>
+            <span class="lane-badge avail">0/1</span>
+          </div>
+          <div class="lane-row">
+            <span class="lane-icon">🎙️</span>
+            <div class="lane-info">
+              <div class="lane-name">Interactive conversation</div>
+              <div class="lane-sub">Speaking prompt</div>
+            </div>
+            <span class="lane-badge avail">0/1</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- mock test — calm lock -->
+          <div class="lock-overlay">
+            <div style="font-size:20px;margin-bottom:6px;">🔒</div>
+            <div style="font-weight:600;font-size:13px;color:#475569;margin-bottom:3px;">Full Mock Test</div>
+            <div style="font-size:12px;color:#94a3b8;line-height:1.5;">ไม่รวมในสิทธิ์ฟรี<br>อัปเกรดเพื่อลอง</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 5 ===== -->
+    <div class="screen-card" style="padding:20px;">
+      <div class="screen-header">
+        <div class="screen-number">5</div>
+        <div class="screen-meta">
+          <h3>ผลวินิจฉัย</h3>
+          <p>หลักการ: สรุปชัด + "ทำอะไรต่อ" เป็นภาษาธรรมดา ไม่โยนไปหน้า pricing ทันที</p>
+          <div class="fix-badge">✦ FIX: ขั้นตอนต่อไปชัดเจน ไม่ดรอปลง pricing page เปล่าๆ</div>
+        </div>
+      </div>
+      <div class="phone-frame">
+        <div class="phone-status-bar">
+          <span class="font-mono">10:01</span>
+          <span>●●●●</span>
+        </div>
+        <div class="phone-inner">
+          <div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:14px;">ผลวินิจฉัยของคุณ</div>
+
+          <!-- score -->
+          <div class="score-ring" style="margin-bottom:4px;">
+            <div class="num">112</div>
+            <div class="denom">/160</div>
+          </div>
+          <div style="text-align:center;font-size:12px;color:#64748b;margin-bottom:18px;">คะแนนประมาณการ DET</div>
+
+          <!-- 4 skills -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+            <!-- reading -->
+            <div style="background:#f8fafc;border-radius:10px;padding:10px 12px;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:2px;">Reading</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#1e293b;margin-bottom:6px;">82<span style="font-size:11px;font-weight:400;color:#94a3b8;">/100</span></div>
+              <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:82%;background:#004AAD;"></div></div>
+            </div>
+            <!-- listening -->
+            <div style="background:#fef2f2;border-radius:10px;padding:10px 12px;border:1px solid #fecaca;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:2px;">Listening 🔴</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#dc2626;margin-bottom:6px;">54<span style="font-size:11px;font-weight:400;color:#94a3b8;">/100</span></div>
+              <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:54%;background:#dc2626;"></div></div>
+            </div>
+            <!-- speaking -->
+            <div style="background:#fef2f2;border-radius:10px;padding:10px 12px;border:1px solid #fecaca;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:2px;">Speaking 🔴</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#dc2626;margin-bottom:6px;">61<span style="font-size:11px;font-weight:400;color:#94a3b8;">/100</span></div>
+              <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:61%;background:#dc2626;"></div></div>
+            </div>
+            <!-- writing -->
+            <div style="background:#f8fafc;border-radius:10px;padding:10px 12px;">
+              <div style="font-size:11px;color:#64748b;margin-bottom:2px;">Writing</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#1e293b;margin-bottom:6px;">79<span style="font-size:11px;font-weight:400;color:#94a3b8;">/100</span></div>
+              <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:79%;background:#004AAD;"></div></div>
+            </div>
+          </div>
+
+          <!-- next step — contextual, not generic -->
+          <div style="background:#eff6ff;border-radius:12px;padding:12px 14px;margin-bottom:14px;border:1px solid #bfdbfe;">
+            <div style="font-size:13px;font-weight:600;color:#1e40af;margin-bottom:4px;">สิ่งที่ควรฝึกต่อ</div>
+            <div style="font-size:12px;color:#1d4ed8;line-height:1.6;">
+              Listening และ Speaking ยังต่ำกว่าเป้า<br>
+              แนะนำฝึก Dictation + Conversation อย่างน้อย 3 ครั้ง/สัปดาห์ เพื่อเพิ่ม ~15-20 คะแนน
+            </div>
+          </div>
+
+          <!-- contextual upgrade nudge -->
+          <div style="background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:12px;border:1px dashed #e2e8f0;">
+            <div style="font-size:12px;color:#64748b;margin-bottom:8px;">อยากฝึก Dictation เพิ่มอีก? สิทธิ์ฟรีใช้ครบแล้ว</div>
+            <a class="btn-secondary" style="font-size:13px;padding:9px;">ดูแพ็กเกจฝึกต่อ →</a>
+          </div>
+
+          <a class="btn-ghost" style="font-size:13px;">ฝึกทักษะอื่นในสิทธิ์ฟรีก่อน</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 6 ===== -->
+    <div class="screen-card" style="padding:20px;">
+      <div class="screen-header">
+        <div class="screen-number">6</div>
+        <div class="screen-meta">
+          <h3>ใช้สิทธิ์ฟรีครบแล้ว (THE BLOCK)</h3>
+          <p>หลักการ: reframe "บล็อก" เป็น "จบรอบฟรี" — ไม่กดดัน ไม่สร้างความรู้สึกถูกลงโทษ</p>
+          <div class="fix-badge">✦ FIX: ไม่มี fake urgency, ไม่มี guilt trip</div>
+        </div>
+      </div>
+      <div class="phone-frame">
+        <div class="phone-status-bar">
+          <span class="font-mono">10:18</span>
+          <span>●●●●</span>
+        </div>
+        <div class="phone-inner">
+          <div class="app-bar">
+            <div class="app-logo">English Plan</div>
+          </div>
+
+          <!-- gentle illustration -->
+          <div style="text-align:center;padding:16px 0 20px;">
+            <div style="font-size:52px;margin-bottom:10px;">🎉</div>
+            <div style="font-size:18px;font-weight:700;color:#1e293b;line-height:1.3;margin-bottom:8px;">
+              คุณใช้สิทธิ์ลองฟรี<br>ของ Dictation ครบแล้ว
+            </div>
+            <div style="font-size:13px;color:#64748b;line-height:1.7;max-width:280px;margin:0 auto;">
+              เยี่ยมมาก — คุณทำ Dictation ครบ 1 รอบแล้ว<br>
+              อยากฝึกต่อแบบไม่จำกัดไหม?
+            </div>
+          </div>
+
+          <!-- what you did -->
+          <div class="card-inset" style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:8px;">รอบฟรีที่เพิ่งทำ</div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#334155;margin-bottom:4px;">
+              <span>Dictation</span>
+              <span class="font-mono" style="color:#004AAD;font-weight:600;">✓ เสร็จแล้ว</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:#334155;">
+              <span>คะแนนรอบนี้</span>
+              <span class="font-mono" style="font-weight:600;">14 / 20</span>
+            </div>
+          </div>
+
+          <!-- upgrade highlight -->
+          <div style="background:#eff6ff;border-radius:12px;padding:14px;border:1px solid #bfdbfe;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:600;color:#1e40af;margin-bottom:6px;">Basic · ฿399/เดือน</div>
+            <div style="font-size:12px;color:#1d4ed8;margin-bottom:10px;line-height:1.6;">Dictation ไม่จำกัด + ฟีดแบ็ก 12 ครั้ง + Mock Test 2 ชุด</div>
+            <a class="btn-primary" style="font-size:14px;">ดูแพ็กเกจ</a>
+          </div>
+
+          <a class="btn-ghost">ไว้ก่อน — กลับหน้าหลัก</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 7 ===== -->
+    <div class="screen-card" style="padding:20px;">
+      <div class="screen-header">
+        <div class="screen-number">7</div>
+        <div class="screen-meta">
+          <h3>เลือกแพ็กเกจ</h3>
+          <p>หลักการ: scannable + honest (ไม่มี fake countdown/recurring billing)</p>
+          <div class="fix-badge">✦ ชัดเจน: จ่ายครั้งเดียว ไม่ตัดเงินอัตโนมัติ</div>
+        </div>
+      </div>
+      <div class="phone-frame">
+        <div class="phone-status-bar">
+          <span class="font-mono">10:20</span>
+          <span>●●●●</span>
+        </div>
+        <div class="phone-inner">
+          <div style="font-size:17px;font-weight:700;color:#1e293b;margin-bottom:4px;">เลือกแพ็กเกจ</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:16px;">จ่ายครั้งเดียว · ใช้ได้ 30 วัน · <strong style="color:#15803d;">ไม่ตัดเงินอัตโนมัติ</strong></div>
+
+          <!-- free tier -->
+          <div style="background:#f8fafc;border-radius:12px;padding:12px 14px;border:1.5px solid #e2e8f0;margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div style="font-weight:600;font-size:14px;color:#64748b;">ฟรี</div>
+              <div class="font-mono" style="font-size:16px;font-weight:700;color:#64748b;">฿0</div>
+            </div>
+            <div style="font-size:12px;color:#94a3b8;line-height:1.5;">ลองทักษะละ 1 ครั้ง · ฟีดแบ็ก 1 ครั้ง</div>
+          </div>
+
+          <!-- basic -->
+          <div style="background:#f8fafc;border-radius:12px;padding:12px 14px;border:1.5px solid #e2e8f0;margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div style="font-weight:600;font-size:14px;">Basic</div>
+              <div class="font-mono" style="font-size:16px;font-weight:700;color:#004AAD;">฿399</div>
+            </div>
+            <div style="font-size:12px;color:#64748b;line-height:1.6;">ฝึกไม่จำกัด · ฟีดแบ็ก 12 ครั้ง · Mock Test 2 ชุด</div>
+          </div>
+
+          <!-- premium — popular -->
+          <div style="background:#eff6ff;border-radius:12px;padding:12px 14px;border:2px solid #004AAD;margin-bottom:8px;position:relative;">
+            <div style="position:absolute;top:-10px;right:12px;background:#FFCC00;color:#1e293b;font-size:11px;font-weight:700;padding:2px 10px;border-radius:999px;">ยอดนิยม</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div style="font-weight:700;font-size:14px;color:#004AAD;">Premium</div>
+              <div class="font-mono" style="font-size:16px;font-weight:700;color:#004AAD;">฿699</div>
+            </div>
+            <div style="font-size:12px;color:#1d4ed8;line-height:1.6;">ฝึกไม่จำกัด · ฟีดแบ็ก 30 ครั้ง · Mock Test 4 ชุด</div>
+            <a class="btn-primary" style="margin-top:10px;font-size:14px;">เลือก Premium</a>
+          </div>
+
+          <!-- VIP -->
+          <div style="background:#1e293b;border-radius:12px;padding:12px 14px;border:1.5px solid #334155;margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div style="font-weight:700;font-size:14px;color:#FFCC00;">VIP</div>
+              <div class="font-mono" style="font-size:16px;font-weight:700;color:#FFCC00;">฿999</div>
+            </div>
+            <div style="font-size:12px;color:#94a3b8;line-height:1.6;">ฝึกไม่จำกัด · ฟีดแบ็ก 60 ครั้ง · Mock Test 6 ชุด · ทุกอย่างไม่จำกัด</div>
+          </div>
+
+          <div style="text-align:center;font-size:11px;color:#94a3b8;">ทุกแพ็กเกจ: ใช้ได้ 30 วันหลังชำระ · ไม่ต่ออายุอัตโนมัติ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 8 ===== -->
+    <div class="screen-card" style="padding:20px;">
+      <div class="screen-header">
+        <div class="screen-number">8</div>
+        <div class="screen-meta">
+          <h3>PromptPay → กำลังยืนยัน → สำเร็จ</h3>
+          <p>หลักการ: แสดง 3 state ชัดเจน — ลดความวิตกกังวลระหว่างรอการยืนยัน async</p>
+          <div class="fix-badge">✦ FIX: "กำลังรอยืนยัน" — ไม่ให้ผู้ใช้กังวลว่าเงินหายหรือเปล่า</div>
+        </div>
+      </div>
+
+      <!-- 8a: QR -->
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:0.05em;text-transform:uppercase;padding-left:4px;">8a — แสดง QR</div>
+        <div class="phone-frame" style="min-height:auto;">
+          <div class="phone-status-bar">
+            <span class="font-mono">10:21</span><span>●●●●</span>
+          </div>
+          <div class="phone-inner" style="padding:16px 20px 22px;">
+            <div style="text-align:center;margin-bottom:14px;">
+              <div style="font-size:15px;font-weight:700;color:#1e293b;margin-bottom:4px;">สแกนจ่ายผ่าน PromptPay</div>
+              <div style="font-size:13px;color:#64748b;">Premium 30 วัน · <span class="font-mono" style="color:#004AAD;font-weight:700;">฿699</span></div>
+            </div>
+            <!-- QR visual sim -->
+            <div class="qr-wrap">
+              <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- QR corner markers -->
+                <rect x="4" y="4" width="36" height="36" rx="4" fill="#1e293b"/>
+                <rect x="8" y="8" width="28" height="28" rx="2" fill="#fff"/>
+                <rect x="12" y="12" width="20" height="20" rx="1" fill="#1e293b"/>
+                <rect x="80" y="4" width="36" height="36" rx="4" fill="#1e293b"/>
+                <rect x="84" y="8" width="28" height="28" rx="2" fill="#fff"/>
+                <rect x="88" y="12" width="20" height="20" rx="1" fill="#1e293b"/>
+                <rect x="4" y="80" width="36" height="36" rx="4" fill="#1e293b"/>
+                <rect x="8" y="84" width="28" height="28" rx="2" fill="#fff"/>
+                <rect x="12" y="88" width="20" height="20" rx="1" fill="#1e293b"/>
+                <!-- QR data dots (simulated) -->
+                <rect x="44" y="4" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="56" y="4" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="44" y="16" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="44" y="28" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="56" y="28" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="68" y="16" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="4" y="44" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="16" y="44" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="28" y="44" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="44" y="44" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="56" y="44" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="68" y="44" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="80" y="44" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="108" y="44" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="4" y="56" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="28" y="56" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="44" y="56" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="68" y="56" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="92" y="56" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="108" y="56" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="4" y="68" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="16" y="68" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="44" y="68" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="56" y="68" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="80" y="68" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="108" y="68" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="44" y="80" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="68" y="80" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="80" y="80" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="56" y="92" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="68" y="92" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="92" y="92" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="56" y="108" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="80" y="108" width="8" height="8" rx="1" fill="#1e293b"/>
+                <rect x="108" y="108" width="8" height="8" rx="1" fill="#1e293b"/>
+              </svg>
+            </div>
+            <div style="text-align:center;font-size:12px;color:#64748b;margin-bottom:12px;line-height:1.6;">
+              เปิดแอปธนาคาร → สแกน QR → ยืนยันยอด <span class="font-mono" style="font-weight:600;color:#1e293b;">฿699</span><br>แล้วกลับมาหน้านี้
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:10px 12px;font-size:12px;color:#64748b;text-align:center;">
+              QR หมดอายุใน <span class="font-mono" style="font-weight:600;color:#dc2626;">14:32</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8b: processing -->
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:0.05em;text-transform:uppercase;padding-left:4px;">8b — รอยืนยัน (ลด anxiety)</div>
+        <div class="phone-frame" style="min-height:auto;">
+          <div class="phone-status-bar">
+            <span class="font-mono">10:22</span><span>●●●●</span>
+          </div>
+          <div class="phone-inner" style="padding:32px 20px 32px;text-align:center;">
+            <div class="spinner"></div>
+            <div style="font-size:17px;font-weight:700;color:#1e293b;margin-bottom:8px;">กำลังยืนยันการชำระเงิน…</div>
+            <div style="font-size:13px;color:#64748b;line-height:1.7;margin-bottom:20px;">
+              ระบบกำลังรับข้อมูลจากธนาคาร<br>
+              <strong>ไม่ต้องปิดหน้านี้</strong> — จะแจ้งให้ทันทีเมื่อสำเร็จ
+            </div>
+            <div style="background:#f0fdf4;border-radius:12px;padding:12px 14px;text-align:left;">
+              <div style="font-size:12px;color:#166534;display:flex;align-items:flex-start;gap:8px;">
+                <span style="flex-shrink:0;">✅</span>
+                <span>หากไม่ได้รับการยืนยันใน 5 นาที แตะ "ติดต่อทีมงาน" — เงินไม่หายแน่นอน</span>
+              </div>
+            </div>
+            <div style="margin-top:16px;">
+              <a class="btn-ghost" style="font-size:12px;">ติดต่อทีมงาน</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8c: success -->
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:0.05em;text-transform:uppercase;padding-left:4px;">8c — ชำระสำเร็จ</div>
+        <div class="phone-frame" style="min-height:auto;">
+          <div class="phone-status-bar">
+            <span class="font-mono">10:22</span><span>●●●●</span>
+          </div>
+          <div class="phone-inner" style="padding:28px 20px 28px;text-align:center;">
+            <div class="success-circle">✓</div>
+            <div style="font-size:19px;font-weight:700;color:#1e293b;margin-bottom:6px;">ชำระเงินสำเร็จ ✓</div>
+            <div style="font-size:13px;color:#64748b;margin-bottom:20px;line-height:1.6;">
+              เปิดสิทธิ์ Premium แล้ว<br>
+              ใช้ได้ถึง <span class="font-mono" style="font-weight:600;color:#004AAD;">11 ก.ค. 2569</span>
+            </div>
+            <!-- what's unlocked -->
+            <div style="background:#f0fdf4;border-radius:12px;padding:12px 14px;text-align:left;margin-bottom:16px;">
+              <div style="font-size:12px;font-weight:600;color:#166534;margin-bottom:8px;">สิทธิ์ที่ได้รับแล้ว</div>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#166534;"><span>✅</span><span>ฝึกทุกทักษะไม่จำกัด</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#166534;"><span>✅</span><span>ฟีดแบ็กตรวจงาน 30 ครั้ง</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#166534;"><span>✅</span><span>Mock Test 4 ชุด</span></div>
+              </div>
+            </div>
+            <a class="btn-primary">เริ่มฝึกต่อ →</a>
+            <div style="margin-top:10px;font-size:11px;color:#94a3b8;">ใบเสร็จส่งไปที่ yourname@email.com แล้ว</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- end screen 8 -->
+
+  </div>
+  <!-- end grid -->
+
+  <!-- FLOW SUMMARY FOOTER -->
+  <div style="margin-top:48px;background:#fff;border-radius:1.5rem;padding:28px 28px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:12px;">สิ่งที่ Flow V1 · Gentle แก้ไข</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
+      <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;font-size:12px;color:#475569;line-height:1.6;">
+        <div style="font-weight:600;color:#1e293b;margin-bottom:4px;">🚪 ไม่มีกำแพง Login</div>
+        ผู้ใช้เห็นคุณค่าและ scope ก่อน แล้วค่อยเข้าสู่ระบบ
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;font-size:12px;color:#475569;line-height:1.6;">
+        <div style="font-weight:600;color:#1e293b;margin-bottom:4px;">📋 Feedback credit ชัดเจน</div>
+        บอกทันทีว่าเลือกได้ 1 งาน เปลี่ยนไม่ได้หลังส่ง
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;font-size:12px;color:#475569;line-height:1.6;">
+        <div style="font-weight:600;color:#1e293b;margin-bottom:4px;">📊 Upgrade contextual</div>
+        ไม่ดรอปไป pricing page เปล่าๆ — บอกเหตุผล + บริบท
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;font-size:12px;color:#475569;line-height:1.6;">
+        <div style="font-weight:600;color:#1e293b;margin-bottom:4px;">🎉 Block = จบรอบฟรี</div>
+        reframe ด้วยภาษา positive ไม่มี guilt ไม่มี fake urgency
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;font-size:12px;color:#475569;line-height:1.6;">
+        <div style="font-weight:600;color:#1e293b;margin-bottom:4px;">⏳ PromptPay async</div>
+        แสดง "กำลังยืนยัน" state พร้อม safety net ให้ชัดเจน
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;font-size:12px;color:#475569;line-height:1.6;">
+        <div style="font-weight:600;color:#1e293b;margin-bottom:4px;">💳 No dark patterns</div>
+        "ไม่ตัดเงินอัตโนมัติ" เขียนชัดๆ ทุก pricing surface
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- end page -->
+
+</body>
+</html>

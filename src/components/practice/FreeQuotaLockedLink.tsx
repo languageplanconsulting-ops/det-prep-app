@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 
+import { AdminFreeQuotaLockedLink } from "@/components/practice/AdminFreeQuotaLockedLink";
 import { PaywallUpsellCard } from "@/components/upsell/PaywallUpsellCard";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { getNonApiReminderSnapshot, type NonApiReminderExam } from "@/lib/non-api-practice-usage";
@@ -20,7 +21,7 @@ export function FreeQuotaLockedLink({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const { effectiveTier, loading } = useEffectiveTier();
+  const { effectiveTier, loading, isAdmin, previewEligible } = useEffectiveTier();
   const [open, setOpen] = useState(false);
 
   const snapshot = useMemo(() => {
@@ -29,6 +30,16 @@ export function FreeQuotaLockedLink({
   }, [effectiveTier, exam, loading]);
 
   const isLocked = snapshot != null && snapshot.remaining <= 0;
+
+  // Admin-only preview of the new "Show the value" block. Real users keep the
+  // current modal until it's approved.
+  if (isAdmin || previewEligible) {
+    return (
+      <AdminFreeQuotaLockedLink href={href} exam={exam} className={className}>
+        {children}
+      </AdminFreeQuotaLockedLink>
+    );
+  }
 
   const onOpen = () => {
     if (loading) return;

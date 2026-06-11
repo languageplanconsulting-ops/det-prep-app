@@ -1,0 +1,925 @@
+"use client";
+
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+
+import { useBillingActions } from "@/hooks/useBillingActions";
+
+function cn(...parts: (string | false | undefined)[]) {
+  return parts.filter(Boolean).join(" ");
+}
+
+type ExamGroup = {
+  title: string;
+  th: string;
+  icon: string;
+  count: string;
+  cardBg: string;
+  cardBorder: string;
+  tileBg: string;
+  accent: string;
+  problem: string;
+  items: [string, string, string][];
+  pill: string;
+  pillCls: string;
+};
+
+const EXAM_GROUPS: ExamGroup[] = [
+  {
+    title: "Production",
+    th: "เขียน–พูด",
+    icon: "✍️",
+    count: "5 แบบ",
+    cardBg: "bg-[#f4f8ff]",
+    cardBorder: "border-[#dbe7ff]",
+    tileBg: "bg-ep-blue",
+    accent: "text-ep-blue",
+    problem: "ส่วนที่คนไทยกลัวสุด เพราะไม่รู้ว่าผิดตรงไหน",
+    items: [
+      ["🖼️", "เขียนจากภาพ", "เขียนบรรยายภาพ"],
+      ["📝", "อ่านแล้วเขียน", "เขียนเรียงความตอบ"],
+      ["🗣️", "พูดจากภาพ", "พูดเพื่ออธิบายภาพ"],
+      ["🎙️", "อ่านแล้วพูด", "พูดตอบจากบทความ"],
+      ["💬", "พูดแบบโต้ตอบ", "ตอบคำถามสดต่อเนื่อง"],
+    ],
+    pill: "✦ ตรวจให้เป็นภาษาไทย: ไวยากรณ์ · คำศัพท์ · ความลื่นไหล · การตอบตรงโจทย์",
+    pillCls: "text-ep-blue border-[#dbe7ff]",
+  },
+  {
+    title: "Comprehension",
+    th: "การอ่าน",
+    icon: "📖",
+    count: "2 แบบ",
+    cardBg: "bg-[#fffbf0]",
+    cardBorder: "border-amber-200/70",
+    tileBg: "bg-amber-400",
+    accent: "text-amber-600",
+    problem: "อ่านไม่ทัน หรือจับใจความไม่ได้",
+    items: [
+      ["🔤", "ศัพท์ (Vocabulary)", "เติมคำในบทความ"],
+      ["📚", "การอ่าน (Reading)", "ตอบคำถามจับใจความ"],
+    ],
+    pill: "✦ รู้คะแนนทันที · มี 3 ระดับความยาก",
+    pillCls: "text-amber-700 border-amber-200",
+  },
+  {
+    title: "Literacy",
+    th: "สะกด–ฟังจับคำ",
+    icon: "🔡",
+    count: "3 แบบ",
+    cardBg: "bg-[#f0fbf5]",
+    cardBorder: "border-emerald-200/70",
+    tileBg: "bg-emerald-500",
+    accent: "text-emerald-600",
+    problem: "คะแนนพื้นฐานที่หล่นง่าย — เก็บคืนได้เร็ว",
+    items: [
+      ["⌨️", "ฟังแล้วพิมพ์ (Dictation)", "พิมพ์ตามเสียง"],
+      ["✏️", "เติมคำในช่องว่าง", "เติมให้ถูกบริบท"],
+      ["✅", "คำจริง (Real word)", "คำไหนเป็นคำจริง"],
+    ],
+    pill: "✦ รู้ผลทันทีทุกข้อ",
+    pillCls: "text-emerald-700 border-emerald-200",
+  },
+  {
+    title: "Conversation",
+    th: "ฟังสนทนา",
+    icon: "🎧",
+    count: "2 แบบ",
+    cardBg: "bg-[#f7f5ff]",
+    cardBorder: "border-violet-200/70",
+    tileBg: "bg-violet-500",
+    accent: "text-violet-600",
+    problem: "ฝรั่งคุยเร็ว ๆ แล้วตามไม่ทัน",
+    items: [
+      ["🎧", "การสนทนาแบบโต้ตอบ", "ฟังแล้วตอบคำถาม"],
+      ["📋", "สรุปการสนทนา", "ฟังแล้วเขียนสรุป"],
+    ],
+    pill: "✦ สถานการณ์จริงแบบในมหาลัย",
+    pillCls: "text-violet-700 border-violet-200",
+  },
+];
+
+const TOOLS: { icon: string; title: string; what: string; benefit: string; highlight?: boolean }[] = [
+  {
+    icon: "🎯",
+    title: "เช็กระดับฟรี (Mini Diagnosis)",
+    what: "ตอบไม่กี่ข้อ ใช้เวลาไม่กี่นาที",
+    benefit: "รู้ทันทีว่าตอนนี้อยู่ระดับไหน และทักษะไหนที่ต้องเก็บก่อน — ไม่ต้องเดาเอง",
+  },
+  {
+    icon: "📝",
+    title: "ข้อสอบเสมือนจริง (Mock Test)",
+    what: "20 ข้อ ~1 ชั่วโมง เหมือนสอบจริง · ให้คะแนน 0–160 แยกราย 4 ทักษะ",
+    benefit:
+      "เห็นชัด ๆ ว่า 2 ทักษะไหนกำลังฉุดคะแนนของคุณอยู่ — จุดที่คนคะแนนน้อยส่วนใหญ่มองไม่เห็น แล้วลุยเก็บก่อน",
+    highlight: true,
+  },
+  {
+    icon: "🔍",
+    title: "ฟีดแบ็กรายข้อ เป็นภาษาไทย",
+    what: "ตรวจคำตอบเขียน/พูด ให้คะแนนแยก ไวยากรณ์ · คำศัพท์ · ความลื่นไหล · การตอบตรงโจทย์ + โน้ตอธิบาย",
+    benefit: "รู้ว่าต้องแก้ ประโยคไหน คำไหน ไม่ใช่แค่ “ต้องพัฒนา grammar” ลอย ๆ",
+  },
+  {
+    icon: "💡",
+    title: "เทคนิคสั้น ๆ เพื่อเพิ่มคะแนน",
+    what: "บทเรียนสั้น ๆ (เช่น เรื่อง comma, การเติม -ed / -s) + เทคนิคจำง่าย",
+    benefit: "เก็บคะแนนที่หล่นง่าย ๆ คืนมาได้เร็ว โดยไม่ต้องเดาเองว่ากฎไหนสำคัญ",
+  },
+];
+
+const PRICING = [
+  {
+    tier: "free" as const,
+    name: "ฟรี",
+    price: "฿0",
+    note: "ตลอดไป",
+    rows: ["เช็กระดับ (Mini Diagnosis) 1 ครั้ง", "ทดลองแต่ละทักษะ 1 ครั้ง", "ฟีดแบ็กรายข้อ 1 เครดิต"],
+    featured: false,
+  },
+  {
+    tier: "basic" as const,
+    name: "Basic",
+    price: "฿399",
+    note: "/ 30 วัน",
+    rows: ["ฟีดแบ็ก 12 ครั้ง/เดือน", "Mock test 2 ครั้ง"],
+    featured: false,
+  },
+  {
+    tier: "premium" as const,
+    name: "Premium",
+    price: "฿699",
+    note: "/ 30 วัน",
+    rows: ["ฟีดแบ็ก 30 ครั้ง/เดือน", "Mock test 4 ครั้ง", "เทคนิคสั้น ๆ เพิ่มคะแนน"],
+    featured: true,
+  },
+  {
+    tier: "vip" as const,
+    name: "VIP",
+    price: "฿999",
+    note: "/ 30 วัน",
+    rows: ["ฟีดแบ็ก 60 ครั้ง/เดือน", "Mock test 6 ครั้ง", "ฝึกทุก Lane ไม่จำกัด"],
+    featured: false,
+  },
+];
+
+export function AdminLandingPageClient({
+  initialFastTrackOpen = false,
+}: {
+  initialFastTrackOpen?: boolean;
+}) {
+  const [fastTrackOpen, setFastTrackOpen] = useState(initialFastTrackOpen);
+  const [ftEmail, setFtEmail] = useState("");
+  const [ftName, setFtName] = useState("");
+  const [ftLoading, setFtLoading] = useState(false);
+  const [ftMsg, setFtMsg] = useState<string | null>(null);
+  const [ftLinkedEmail, setFtLinkedEmail] = useState<string | null>(null);
+  const [ftErr, setFtErr] = useState<string | null>(null);
+  const [stickyOn, setStickyOn] = useState(false);
+  const [paymentErr, setPaymentErr] = useState<string | null>(null);
+  const { user, loading: billingLoading, startUpgradePromptPay } = useBillingActions();
+
+  useEffect(() => {
+    if (initialFastTrackOpen) {
+      setFastTrackOpen(true);
+    }
+  }, [initialFastTrackOpen]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (typeof window === "undefined" || window.innerWidth > 640) {
+        setStickyOn(false);
+        return;
+      }
+      const pricing = document.getElementById("pricing");
+      const footer = document.querySelector("footer");
+      if (!pricing || !footer) return;
+      const pricingTop = pricing.offsetTop;
+      const footerTop = footer.offsetTop;
+      const scrollPos = window.scrollY + window.innerHeight;
+      setStickyOn(window.scrollY > 800 && scrollPos < pricingTop && scrollPos < footerTop);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  const submitFastTrack = useCallback(async () => {
+    setFtLoading(true);
+    setFtErr(null);
+    setFtMsg(null);
+    setFtLinkedEmail(null);
+    try {
+      const res = await fetch("/api/enrollment/fast-track-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: ftEmail.trim(),
+          fullName: ftName.trim() || null,
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        message?: string;
+        error?: string;
+        alreadyPending?: boolean;
+      };
+      if (!res.ok) {
+        setFtErr(data.error ?? "Something went wrong.");
+        return;
+      }
+      if (ftEmail.trim().includes("@")) {
+        setFtLinkedEmail(ftEmail.trim().toLowerCase());
+      }
+      setFtMsg(
+        data.message ??
+          "Request received. After we verify your course enrollment, you will get an email from English Plan with VIP access and your password.",
+      );
+    } catch {
+      setFtErr("Network error. Try again.");
+    } finally {
+      setFtLoading(false);
+    }
+  }, [ftEmail, ftName]);
+
+  const openLandingPromptPay = useCallback(
+    async (tier: "basic" | "premium" | "vip") => {
+      try {
+        setPaymentErr(null);
+        await startUpgradePromptPay(tier);
+      } catch (error) {
+        setPaymentErr(
+          error instanceof Error
+            ? error.message
+            : "เปิดหน้าชำระเงิน QR ไม่สำเร็จ กรุณาลองอีกครั้ง",
+        );
+        const pricing = document.getElementById("pricing");
+        pricing?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    },
+    [startUpgradePromptPay],
+  );
+
+  return (
+    <div className="min-h-screen bg-white text-gray-900 [font-feature-settings:'liga'] [scroll-behavior:smooth]">
+      {/* NAV */}
+      <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur">
+        <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
+          <Link href="/" className="flex min-w-0 items-center gap-2.5 no-underline">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-ep-blue">
+              <span className="font-mono text-xs font-bold text-white">EP</span>
+            </div>
+            <span className="hidden text-sm font-semibold leading-none text-ep-blue sm:block">
+              ENGLISH PLAN
+            </span>
+          </Link>
+          <div className="hidden items-center gap-6 text-sm text-gray-500 md:flex">
+            <a href="#tools" className="transition-colors hover:text-ep-blue">มีอะไรให้ใช้</a>
+            <a href="#feedback" className="transition-colors hover:text-ep-blue">ฟีดแบ็ก</a>
+            <a href="#mock" className="transition-colors hover:text-ep-blue">Mock test</a>
+            <a href="#exams" className="transition-colors hover:text-ep-blue">ข้อสอบ</a>
+            <a href="#pricing" className="transition-colors hover:text-ep-blue">แผน</a>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/login"
+              className="hidden px-3 py-2 text-sm text-gray-500 transition-colors hover:text-ep-blue sm:block"
+            >
+              เข้าสู่ระบบ
+            </Link>
+            <Link
+              href="/mini-diagnosis/start"
+              className="flex min-h-[44px] items-center rounded-lg bg-ep-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-800"
+            >
+              เริ่มฟรี
+            </Link>
+          </div>
+        </nav>
+      </header>
+
+      {/* HERO */}
+      <section className="mx-auto max-w-3xl px-5 pb-12 pt-16 text-center">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-ep-blue">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-ep-blue" />
+          ติว Duolingo English Test (DET) · สำหรับคนไทย
+        </div>
+        <h1 className="mb-5 text-3xl font-bold leading-tight text-gray-900 sm:text-4xl lg:text-5xl">
+          รู้ว่า<span className="text-ep-blue">อ่อนตรงไหน</span>
+          <br />
+          คะแนนถึงจะขึ้น
+        </h1>
+        <p className="mx-auto mb-8 max-w-2xl text-base text-gray-600 sm:text-lg">
+          English Plan คือที่ติว DET สำหรับคนไทย — มีข้อสอบครบทุกแบบเหมือนที่ออกสอบจริง,
+          ข้อสอบเสมือนจริง (Mock test) ที่บอกจุดอ่อนของคุณ และฟีดแบ็กรายข้อที่บอกตรง ๆ ว่าต้องแก้
+          <b className="text-gray-800">ประโยคไหน คำไหน</b>
+        </p>
+        <div className="mb-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link
+            href="/mini-diagnosis/start"
+            className="flex min-h-[56px] w-full items-center justify-center gap-2 rounded-xl bg-ep-blue px-8 py-4 text-base font-bold text-white shadow-md transition-all hover:bg-blue-800 hover:shadow-lg sm:w-auto"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            เช็กระดับของคุณฟรี — เริ่มเลย
+          </Link>
+        </div>
+        <p className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-400">
+          <span className="flex items-center gap-1">
+            <svg className="h-3.5 w-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+            ฟรี — ไม่ต้องใส่บัตรเครดิต
+          </span>
+          <span className="text-gray-200">·</span>
+          <span className="flex items-center gap-1">
+            <svg className="h-3.5 w-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+            เห็นจุดอ่อนก่อนค่อยตัดสินใจ
+          </span>
+        </p>
+      </section>
+
+      {/* PROBLEM REFRAME */}
+      <section className="mx-auto max-w-2xl px-5 pb-14">
+        <div className="rounded-2xl bg-gray-50 p-6 text-center sm:p-8">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400">
+            ทำไมฝึกแล้วคะแนนไม่ขึ้นสักที?
+          </p>
+          <p className="text-lg leading-relaxed text-gray-800 sm:text-xl">
+            ส่วนใหญ่ไม่ใช่เพราะ<span className="text-gray-400 line-through">ไม่ขยัน</span> — แต่เพราะ
+            <b className="text-ep-blue">ไม่รู้ว่าตัวเองอ่อนตรงไหน</b> เลยฝึกมั่ว ๆ เสียเวลากับสิ่งที่ทำได้อยู่แล้ว
+          </p>
+          <p className="mt-4 text-sm text-gray-500">
+            English Plan เริ่มจากการหาจุดอ่อนให้เจอก่อน แล้วค่อยฝึกเฉพาะจุดนั้น
+          </p>
+        </div>
+      </section>
+
+      {/* TOOLS */}
+      <section id="tools" className="bg-blue-50 px-5 py-16">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="mb-2 text-center text-xl font-bold text-gray-900 sm:text-2xl">
+            ในแอปมีอะไรให้ใช้บ้าง
+          </h2>
+          <p className="mb-10 text-center text-sm text-gray-500">
+            แต่ละอย่างมีหน้าที่ชัดเจน — ทำงานต่อกันเป็นระบบเดียว
+          </p>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {TOOLS.map((t) => (
+              <div
+                key={t.title}
+                className={cn(
+                  "flex gap-4 rounded-2xl bg-white p-6",
+                  t.highlight && "ring-2 ring-ep-yellow/70",
+                )}
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-2xl">
+                  {t.icon}
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">{t.title}</h3>
+                  <p className="mb-2 mt-1.5 text-sm text-gray-500">{t.what}</p>
+                  <p className="text-sm text-gray-700">
+                    <b className="text-ep-blue">ได้อะไร:</b> {t.benefit}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FEEDBACK EXAMPLE */}
+      <section id="feedback" className="mx-auto max-w-3xl px-5 py-16">
+        <div className="mb-8 text-center">
+          <h2 className="mb-2 text-xl font-bold text-gray-900 sm:text-2xl">ฟีดแบ็กหน้าตาเป็นแบบนี้</h2>
+          <p className="mx-auto max-w-xl text-sm text-gray-500">
+            ตรวจเทียบกับฐานข้อมูลคำตอบที่ English Plan เก็บมา 6 ปี — ไม่ใช่แค่บอกถูก/ผิด แต่บอกว่า
+            <b className="text-gray-700">แก้ยังไงให้คะแนนขึ้น</b>
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="border-b border-gray-100 bg-gray-50 px-5 py-4">
+            <div className="mb-3 flex items-center gap-2">
+              <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
+              <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+              <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
+              <span className="ml-2 font-mono text-xs text-gray-400">production · speaking-response</span>
+            </div>
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-gray-400">คำถาม</p>
+            <p className="text-sm italic leading-relaxed text-gray-600">
+              &quot;Describe a habit that helps you stay productive. Give details.&quot;
+            </p>
+          </div>
+          <div className="border-b border-gray-100 px-5 py-4">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-gray-400">คำตอบของนักเรียน</p>
+            <p className="text-sm leading-relaxed text-gray-700">
+              I always wake up early in the morning. I make a list of things to do. This habit{" "}
+              <span className="cursor-default border-b border-yellow-400 bg-yellow-100" title="tense ควรเป็น helps ไม่ใช่ helped">helped</span>{" "}
+              me finish my work on time every day. Also, I drink coffee{" "}
+              <span className="cursor-default border-b border-blue-300 bg-blue-50" title="ลองใช้ 'which boosts my focus' เพื่อ flow ดีขึ้น">because it is good for concentrate.</span>
+            </p>
+            <p className="mt-2 text-[10px] text-gray-400">เส้นใต้ = จุดที่ระบบแนะนำ (แตะ/วางเมาส์เพื่อดู)</p>
+          </div>
+          <div className="px-5 py-5">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">ผลตรวจ</p>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-gray-400">Band โดยประมาณ</span>
+                <span className="font-mono text-lg font-bold text-ep-blue">120–130</span>
+              </div>
+            </div>
+            <div className="mb-5 space-y-3">
+              {([
+                ["Grammar", "92", "bg-ep-blue", "text-gray-800", "92%"],
+                ["Vocabulary", "88", "bg-ep-blue", "text-gray-800", "88%"],
+                ["Flow & Coherence", "79", "bg-amber-500", "text-amber-600", "79%"],
+                ["Task Response", "90", "bg-ep-blue", "text-gray-800", "90%"],
+              ] as const).map(([label, score, barColor, scoreColor, width]) => (
+                <div key={label}>
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-xs text-gray-600">{label}</span>
+                    <span className={cn("font-mono text-sm font-semibold", scoreColor)}>
+                      {score}<span className="font-normal text-gray-400">/100</span>
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
+                    <div className={cn("h-full rounded-full", barColor)} style={{ width }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ep-blue">
+                  <span className="font-mono text-[10px] font-bold text-white">EP</span>
+                </div>
+                <div>
+                  <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-blue-600">
+                    โน้ตจาก English Plan (ภาษาไทย)
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-800">
+                    ประโยคที่ 3 ใช้ <span className="font-mono font-medium text-ep-blue">helped</span> ซึ่ง tense ไม่ถูก — ควรเปลี่ยนเป็น <span className="font-mono font-medium text-green-700">helps</span> เพราะพูดถึงนิสัยที่ทำอยู่ตลอด ไม่ใช่เหตุการณ์ในอดีต แก้จุดนี้แล้วคะแนน Flow จะขึ้นทันที นอกจากนี้ลองใช้ connector อย่าง <span className="font-mono font-medium text-ep-blue">as a result</span> หรือ <span className="font-mono font-medium text-ep-blue">which helps me</span> เพื่อให้ประโยคไหลเชื่อมกันมากขึ้น
+                  </p>
+                </div>
+              </div>
+            </div>
+            <p className="mt-3 text-center text-xs text-gray-400">💡 ระบบจะแนะแบบฝึกเพิ่มเฉพาะ Flow ให้คุณต่อทันที</p>
+          </div>
+        </div>
+      </section>
+
+      {/* MOCK SPOTLIGHT */}
+      <section id="mock" className="bg-gray-900 px-5 py-16 text-white">
+        <div className="mx-auto grid max-w-4xl items-center gap-10 lg:grid-cols-2">
+          <div>
+            <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-widest text-ep-yellow">
+              Mock Test
+            </span>
+            <h2 className="mb-4 text-2xl font-bold leading-tight sm:text-3xl">
+              สอบเสมือนจริง 1 ครั้ง
+              <br />
+              เห็นจุดอ่อนชัดกว่าฝึกเดา ๆ เป็นเดือน
+            </h2>
+            <p className="mb-5 text-sm leading-relaxed text-gray-300">
+              ข้อสอบเต็มรูปแบบ 20 ข้อ ~1 ชั่วโมง เหมือนสอบจริง จบแล้วได้คะแนนแยกราย 4 ทักษะ พร้อมบอกว่า{" "}
+              <b className="text-white">2 ทักษะไหนที่ต้องเก็บก่อน</b> เพื่อให้ถึงเป้าได้เร็วที่สุด
+            </p>
+            <p className="text-xs text-gray-400">
+              คนคะแนนน้อยส่วนใหญ่ไม่ได้อ่อนทุกอย่าง — แค่ไม่รู้ว่าอ่อนตรงไหน Mock test ทำให้เห็น
+            </p>
+          </div>
+          <div className="rounded-2xl bg-white p-5 text-gray-900 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">ผลสอบของคุณ</span>
+              <span className="font-mono text-sm font-bold text-ep-blue">รวม 108 / 160</span>
+            </div>
+            <div className="space-y-3">
+              {([
+                ["✍️ Writing", "85", true, "53%"],
+                ["🗣️ Speaking", "95", true, "59%"],
+                ["📖 Reading", "120", false, "75%"],
+                ["🎧 Listening", "130", false, "81%"],
+              ] as const).map(([label, score, weak, width]) => (
+                <div key={label}>
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className={cn("text-xs", weak ? "font-medium text-gray-700" : "text-gray-600")}>
+                      {label}
+                      {weak && <span className="ml-1 text-[10px] font-bold text-red-600">จุดอ่อน</span>}
+                    </span>
+                    <span className={cn("font-mono text-xs font-semibold", weak ? "text-red-600" : "text-gray-700")}>
+                      {score}
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                    <div className={cn("h-full rounded-full", weak ? "bg-red-400" : "bg-ep-blue")} style={{ width }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 rounded-xl border border-ep-yellow/60 bg-yellow-50 px-4 py-3">
+              <p className="text-xs text-gray-800">
+                <b>เก็บ 2 ทักษะนี้ก่อน</b> (Writing + Speaking) จะขึ้นถึงเป้าได้เร็วที่สุด →
+              </p>
+            </div>
+            <p className="mt-2 text-center text-[10px] text-gray-400">
+              ตัวอย่างหน้าผลสอบ · คะแนนเป็นการประมาณเพื่อการฝึก
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ALL EXAM TYPES */}
+      <section id="exams" className="mx-auto max-w-5xl px-5 py-16">
+        <div className="mb-10 text-center">
+          <h2 className="mb-2 text-xl font-bold text-gray-900 sm:text-2xl">
+            ข้อสอบในระบบ — ครบทุกแบบที่ DET ออกจริง
+          </h2>
+          <p className="mx-auto max-w-2xl text-sm text-gray-500">
+            แบ่งตาม 4 ทักษะที่ DET วัด · แต่ละแบบมีไว้แก้ปัญหาคนละอย่าง — เลือกฝึกเฉพาะแบบที่คุณอ่อนได้ ไม่ต้องทำทั้งหมด
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          {EXAM_GROUPS.map((g) => (
+            <div key={g.title} className={cn("rounded-3xl border p-5 sm:p-6", g.cardBg, g.cardBorder)}>
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl text-2xl shadow-sm", g.tileBg)}>
+                    {g.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-bold leading-tight text-gray-900">{g.title}</h3>
+                    <p className={cn("text-xs font-semibold", g.accent)}>{g.th}</p>
+                  </div>
+                </div>
+                <span className="whitespace-nowrap rounded-full border border-gray-200 bg-white px-2.5 py-1 font-mono text-[11px] font-bold text-gray-500">
+                  {g.count}
+                </span>
+              </div>
+              <p className="mb-4 text-xs leading-relaxed text-gray-500">{g.problem}</p>
+              <div className="space-y-2">
+                {g.items.map(([icon, name, desc]) => (
+                  <div key={name} className="flex items-center gap-3 rounded-xl bg-white/70 px-3 py-2.5">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-base shadow-sm">
+                      {icon}
+                    </span>
+                    <div className="min-w-0 text-sm">
+                      <span className="font-semibold text-gray-800">{name}</span>{" "}
+                      <span className="text-gray-400">· {desc}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className={cn("mt-4 inline-flex items-center gap-1.5 rounded-full border bg-white px-3 py-1.5 text-[11px] font-semibold", g.pillCls)}>
+                {g.pill}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 rounded-3xl bg-gradient-to-r from-ep-blue to-blue-700 p-6 text-white sm:p-7">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 text-lg">📝</span>
+              <div>
+                <p className="text-sm font-bold">Mock test</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-blue-100">
+                  รวมทุกแบบข้างบนเป็นข้อสอบเต็มเหมือนสอบจริง เพื่อให้เห็นจุดอ่อน
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ep-yellow text-lg text-gray-900">🎯</span>
+              <div>
+                <p className="text-sm font-bold">เช็กระดับฟรี</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-blue-100">
+                  ตัวอย่างย่อ ให้ลองหลายแบบก่อนตัดสินใจ — ระบบชี้ให้ว่าควรเริ่มจากแบบไหน
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SOCIAL PROOF — illustrative scenarios (NOT fabricated reviews) until real ones are added */}
+      <section className="mx-auto max-w-4xl px-5 pb-16">
+        <p className="mb-5 text-center text-sm font-semibold text-gray-500">
+          ตัวอย่างสถานการณ์ที่เจอบ่อย <span className="text-gray-400">(ยังไม่ใช่รีวิวจริง — รอใส่รีวิวจากนักเรียนจริง)</span>
+        </p>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="rounded-2xl bg-gray-50 p-6">
+            <span className="inline-block rounded-full bg-gray-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-500">
+              ตัวอย่าง · Example
+            </span>
+            <p className="mb-4 mt-3 text-sm leading-relaxed text-gray-700">
+              &quot;หลายคนเดาว่าตัวเองอ่อน Speaking แต่พอทำ Mock test จริง ๆ จุดอ่อนคือ Writing — พอเก็บให้ตรงจุดก่อน คะแนนขยับเร็วกว่าฝึกมั่ว ๆ&quot;
+            </p>
+            <p className="text-xs text-gray-400">รูปแบบผลที่มักเกิดขึ้นเมื่อเริ่มจากการหาจุดอ่อน</p>
+          </div>
+          <div className="rounded-2xl bg-gray-50 p-6">
+            <span className="inline-block rounded-full bg-gray-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-500">
+              ตัวอย่าง · Example
+            </span>
+            <p className="mb-4 mt-3 text-sm leading-relaxed text-gray-700">
+              &quot;ฟีดแบ็กบอกตรงว่าประโยคไหนผิด ไม่ใช่แค่ &lsquo;ต้องพัฒนา grammar&rsquo; ลอย ๆ — และโน้ตเป็นภาษาไทย ทำให้ไม่เครียด&quot;
+            </p>
+            <p className="text-xs text-gray-400">สิ่งที่ฟีดแบ็กรายข้อตั้งใจช่วยแก้</p>
+          </div>
+        </div>
+        <p className="mt-4 text-center text-[11px] text-gray-400">
+          * เป็นตัวอย่างเพื่ออธิบายคุณค่า ไม่ใช่รีวิวจากบุคคลจริง — ใส่รีวิว/คะแนนจริงก่อนเปิดให้ผู้ใช้ทั่วไป
+        </p>
+      </section>
+
+      {/* COURSE → VIP (opens the real Fast Track modal) */}
+      <section className="mx-auto max-w-3xl px-5 pb-16">
+        <div className="rounded-2xl border-2 border-ep-yellow/70 bg-yellow-50 p-6 text-center sm:p-8">
+          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-ep-yellow">
+            <svg className="h-6 w-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h2 className="mb-2 text-xl font-bold text-gray-900 sm:text-2xl">
+            เรียนคอร์ส Duolingo Fast Track อยู่หรือเปล่า?
+          </h2>
+          <p className="mx-auto mb-5 max-w-xl text-sm leading-relaxed text-gray-600">
+            นักเรียนในคอร์สติวรับสิทธิ์ <b className="text-gray-900">VIP เต็มรูปแบบ 6 เดือนฟรี</b> — ฝึกได้ไม่จำกัด,
+            ฟีดแบ็ก 60 ครั้ง/เดือน, Mock test 6 ครั้ง/เดือน และเทคนิคสั้น ๆ เพิ่มคะแนนทั้งหมด แค่ยืนยันอีเมลที่ลงเรียนไว้
+          </p>
+          <button
+            type="button"
+            onClick={() => setFastTrackOpen(true)}
+            className="inline-flex min-h-[48px] items-center gap-2 rounded-xl bg-gray-900 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-gray-800"
+          >
+            เปิดสิทธิ์ VIP สำหรับนักเรียนคอร์ส →
+          </button>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section id="pricing" className="bg-gray-50 px-5 py-16">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-2 text-center text-xl font-bold text-gray-900 sm:text-2xl">เริ่มฟรี — อัปเกรดเมื่อพร้อม</h2>
+          <p className="mb-10 text-center text-sm text-gray-500">
+            ไม่มีการตัดเงินอัตโนมัติ · ทุกแผนคือการซื้อ 30 วัน ไม่ใช่ subscription
+          </p>
+
+          {paymentErr ? (
+            <div className="mx-auto mb-8 max-w-2xl rounded-2xl border-2 border-red-200 bg-red-50 p-4 text-left">
+              <p className="text-base font-bold text-red-700">เปิดหน้าชำระเงิน QR ไม่สำเร็จ</p>
+              <p className="mt-1 text-sm font-medium text-gray-700">{paymentErr}</p>
+            </div>
+          ) : null}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {PRICING.map((p) => (
+              <div
+                key={p.tier}
+                className={cn(
+                  "relative flex flex-col rounded-2xl border bg-white p-5",
+                  p.tier === "free" && "border-2 border-ep-blue",
+                  p.featured && "border-2 border-ep-yellow",
+                  !p.featured && p.tier !== "free" && "border-gray-200",
+                )}
+              >
+                {p.featured ? (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-ep-yellow px-3 py-1 text-xs font-bold text-gray-900">
+                    ยอดนิยม
+                  </div>
+                ) : null}
+                <div className={cn("mb-1", p.featured && "mt-1", p.tier === "free" ? "font-bold text-gray-900" : "font-semibold text-gray-700")}>
+                  {p.name}
+                </div>
+                <div className={cn("mb-1 font-mono font-bold", p.tier === "free" ? "text-3xl text-ep-blue" : "text-2xl text-gray-800")}>
+                  {p.price}
+                </div>
+                <div className="mb-4 text-xs text-gray-400">{p.note}</div>
+                <ul className="mb-5 flex-1 space-y-2 text-xs text-gray-600">
+                  {p.rows.map((r) => (
+                    <li key={r} className="flex gap-2">
+                      <span className="text-green-500">✓</span>
+                      {r}
+                    </li>
+                  ))}
+                </ul>
+
+                {p.tier === "free" ? (
+                  <Link
+                    href="/mini-diagnosis/start"
+                    className="flex min-h-[44px] w-full items-center justify-center rounded-xl bg-ep-blue px-4 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-blue-800"
+                  >
+                    เริ่มเลย ฟรี
+                  </Link>
+                ) : (
+                  <div className="space-y-2">
+                    {user ? (
+                      <button
+                        type="button"
+                        disabled={billingLoading}
+                        onClick={() => void openLandingPromptPay(p.tier)}
+                        className={cn(
+                          "flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-bold transition-colors disabled:opacity-50",
+                          p.featured
+                            ? "bg-ep-yellow text-gray-900 hover:bg-yellow-400"
+                            : "bg-gray-900 text-white hover:bg-gray-800",
+                        )}
+                      >
+                        ชำระด้วย QR พร้อมเพย์
+                      </button>
+                    ) : (
+                      <Link
+                        href={`/signup?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`}
+                        className={cn(
+                          "flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-bold transition-colors",
+                          p.featured
+                            ? "bg-ep-yellow text-gray-900 hover:bg-yellow-400"
+                            : "bg-gray-900 text-white hover:bg-gray-800",
+                        )}
+                      >
+                        สมัครก่อนเพื่อจ่าย QR
+                      </Link>
+                    )}
+                    <Link
+                      href={
+                        user
+                          ? `/pricing?plan=${p.tier}`
+                          : `/signup?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`
+                      }
+                      className="flex min-h-[40px] w-full items-center justify-center rounded-xl border border-gray-300 px-4 py-2 text-center text-xs font-semibold text-gray-600 transition-colors hover:border-ep-blue hover:text-ep-blue"
+                    >
+                      ดูตัวเลือกการชำระเงินทั้งหมด
+                    </Link>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-6 text-center text-xs text-gray-400">
+            ไม่แน่ใจ?{" "}
+            <Link href="/mini-diagnosis/start" className="font-semibold text-ep-blue hover:underline">
+              ลองเช็กระดับฟรีก่อนเลย
+            </Link>{" "}
+            — ไม่ต้องใส่บัตร เห็นจุดอ่อนก่อนค่อยตัดสินใจ
+          </p>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="px-5 py-16 text-center">
+        <div className="mx-auto max-w-xl">
+          <h2 className="mb-3 text-xl font-bold text-gray-900 sm:text-2xl">เริ่มจากรู้ว่าตัวเองอ่อนตรงไหน</h2>
+          <p className="mb-6 text-sm text-gray-500">ฟรี · ไม่ต้องใส่บัตร · ไม่มีอะไรต้องเสีย</p>
+          <Link
+            href="/mini-diagnosis/start"
+            className="inline-flex min-h-[56px] items-center gap-2 rounded-xl bg-ep-blue px-10 py-4 text-base font-bold text-white shadow-md transition-all hover:bg-blue-800 hover:shadow-lg"
+          >
+            เช็กระดับของคุณฟรี
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-gray-100 bg-white px-5 py-8">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-ep-blue">
+              <span className="font-mono text-xs font-bold text-white">EP</span>
+            </div>
+            <span className="text-xs text-gray-400">ENGLISH PLAN · ติว DET สำหรับคนไทย</span>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-gray-400">
+            <Link href="/about" className="transition-colors hover:text-ep-blue">เกี่ยวกับเรา</Link>
+            <span className="text-gray-200">|</span>
+            <Link href="/login" className="transition-colors hover:text-ep-blue">เข้าสู่ระบบ</Link>
+            <span className="text-gray-200">|</span>
+            <button
+              type="button"
+              onClick={() => setFastTrackOpen(true)}
+              className="transition-colors hover:text-ep-blue"
+            >
+              นักเรียนคอร์ส
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      {/* STICKY MOBILE CTA */}
+      {stickyOn ? (
+        <div className="fixed bottom-0 left-0 right-0 z-[999] border-t border-gray-200 bg-white px-4 py-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] sm:hidden">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
+            <span className="text-sm font-semibold text-gray-700">เช็กระดับฟรี · ไม่ต้องใส่บัตร</span>
+            <Link
+              href="/mini-diagnosis/start"
+              className="shrink-0 rounded-lg bg-ep-blue px-4 py-2 text-sm font-bold text-white"
+            >
+              เริ่ม
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
+      {/* FAST TRACK MODAL — identical logic to the live landing page */}
+      {fastTrackOpen ? (
+        <div
+          className="fixed inset-0 z-[2000] flex items-end justify-center bg-black/50 p-4 sm:items-center"
+          role="dialog"
+          aria-modal
+          aria-labelledby="fast-track-title"
+        >
+          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <h2 id="fast-track-title" className="text-xl font-bold text-gray-900">
+                Duolingo Fast Track course / นักเรียนคอร์ส Fast Track
+              </h2>
+              <button
+                type="button"
+                className="rounded-lg border border-gray-200 px-2 py-1 text-sm font-bold text-gray-600 hover:bg-gray-100"
+                onClick={() => {
+                  setFastTrackOpen(false);
+                  setFtErr(null);
+                  setFtMsg(null);
+                  setFtLinkedEmail(null);
+                }}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="mt-3 text-sm text-gray-600">
+              If you are a student from the <strong>Duolingo Fast Track</strong> course, type the email you
+              will use to sign in. We will email our team to verify your enrollment. After approval, you will
+              receive an email from <strong>English Plan</strong> with <strong>VIP access for 6 months</strong>{" "}
+              (counted from the date you submit this form) and your <strong>personal password</strong>.
+            </p>
+            <p className="mt-2 text-sm text-gray-600">
+              หากคุณเป็นนักเรียนจากคอร์ส <strong>Duolingo Fast Track</strong> ให้ใส่อีเมลที่จะใช้ล็อกอิน
+              เราจะส่งเรื่องให้ทีมตรวจสอบ หลังอนุมัติ คุณจะได้รับอีเมลจาก <strong>English Plan</strong> พร้อมสิทธิ์{" "}
+              <strong>VIP 6 เดือน</strong> (นับจากวันที่ส่งคำขอ) และ<strong>รหัสผ่านส่วนตัว</strong>
+            </p>
+            <label className="mt-6 block text-xs font-bold uppercase tracking-wide text-gray-700">
+              Email
+              <input
+                type="email"
+                autoComplete="email"
+                value={ftEmail}
+                onChange={(e) => setFtEmail(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm"
+              />
+            </label>
+            <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-gray-700">
+              Full name / ชื่อ-นามสกุล
+              <input
+                type="text"
+                autoComplete="name"
+                value={ftName}
+                onChange={(e) => setFtName(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm"
+              />
+            </label>
+            {ftErr ? <p className="mt-4 text-sm font-bold text-red-700">{ftErr}</p> : null}
+            {ftMsg ? (
+              <div className="mt-4 rounded-lg border-2 border-green-800/30 bg-green-50 p-3">
+                <p className="text-sm font-bold text-green-900">{ftMsg}</p>
+                {ftLinkedEmail ? (
+                  <p className="mt-2 text-sm text-green-900">
+                    <span className="font-bold uppercase tracking-wide text-green-800">
+                      Linked email / อีเมลที่ผูกไว้
+                    </span>
+                    <br />
+                    <span className="break-all font-mono text-base font-black text-gray-900">{ftLinkedEmail}</span>
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+            <button
+              type="button"
+              disabled={ftLoading || !ftEmail.trim().includes("@")}
+              onClick={() => void submitFastTrack()}
+              className="mt-6 w-full rounded-xl bg-ep-blue py-4 text-sm font-bold uppercase text-white hover:bg-blue-800 disabled:opacity-50"
+            >
+              {ftLoading ? "…" : "Send request / ส่งคำขอ"}
+            </button>
+            {!ftMsg ? (
+              <p className="mt-4 text-center text-xs text-gray-500">
+                After you receive our approval email, use{" "}
+                <Link href="/login" className="font-bold text-ep-blue underline">
+                  Sign in
+                </Link>{" "}
+                with Google or email + password. / หลังได้รับอีเมลอนุมัติแล้วค่อยเข้า Sign in
+              </p>
+            ) : (
+              <p className="mt-4 text-center text-xs text-gray-500">
+                Watch your inbox for an email from English Plan. / รออีเมลจาก English Plan
+              </p>
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}

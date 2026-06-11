@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<!--
+  GUIDING PRINCIPLE — V3 "Momentum / Goal-Gradient"
+  =========================================================
+  Design from the learner's perspective (Tim Brown "Change by Design" empathy).
+  Every screen reinforces progress toward their chosen DET target score and
+  the effort already invested — so continuing feels like keeping momentum,
+  not starting a transaction.
+
+  ROUGH EDGES FIXED:
+  1. Login wall → "บันทึกเส้นทางของคุณ" framing (purposeful, not forced)
+  2. Diagnosis result → contextual "แผนถัดไป" instead of raw pricing dump
+  3. Upgrade block → empathy-first momentum frame, not guilt/dark pattern
+  4. PromptPay async anxiety → explicit reassurance state + visual spinner
+  5. Free allowance → shown as "first steps on the path", not a limitation list
+-->
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flow V3 · Momentum — English Plan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ep-blue': '#004AAD',
+            'ep-yellow': '#FFCC00',
+          },
+          fontFamily: {
+            sans: ['IBM Plex Sans Thai', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'IBM Plex Sans Thai', sans-serif; line-height: 1.7; }
+    .phone-frame {
+      width: 100%;
+      max-width: 390px;
+      min-height: 780px;
+      background: #fff;
+      border-radius: 36px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06), 0 20px 60px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05);
+      overflow: hidden;
+      position: relative;
+    }
+    .phone-notch {
+      width: 120px;
+      height: 28px;
+      background: #111;
+      border-radius: 0 0 20px 20px;
+      margin: 0 auto;
+    }
+    .step-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+    .progress-dot { transition: all 0.2s; }
+    .screen-card {
+      break-inside: avoid;
+    }
+    /* Subtle gradient for premium cards */
+    .premium-glow {
+      background: linear-gradient(135deg, #004AAD08 0%, #FFCC0010 100%);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+  <!-- Preview ribbon -->
+  <div class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between">
+      <a href="/flow-revamp-index.html" class="flex items-center gap-2 text-ep-blue text-sm font-medium hover:opacity-70 transition-opacity">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Flow hub
+      </a>
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-xs font-bold text-ep-blue bg-blue-50 px-2.5 py-1 rounded-full">Flow V3 · Momentum</span>
+        <span class="text-xs text-gray-400 hidden sm:block">Goal-gradient empathy design</span>
+      </div>
+      <div class="text-xs text-gray-400 font-mono">8 screens</div>
+    </div>
+  </div>
+
+  <!-- Page header -->
+  <div class="max-w-5xl mx-auto px-4 pt-10 pb-6 text-center">
+    <p class="step-badge text-ep-blue uppercase tracking-widest mb-2">Design Proposal · English Plan</p>
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Flow V3 — Momentum</h1>
+    <p class="text-gray-500 text-sm max-w-xl mx-auto">เส้นทางผู้เรียนใหม่ (FREE) ตั้งแต่แตะแอปครั้งแรก จนถึงชำระเงินสำเร็จ — ทุกหน้าจอออกแบบให้รู้สึกว่ากำลัง "ไปถึงเป้าหมาย" ไม่ใช่ "ถูกขายของ"</p>
+  </div>
+
+  <!-- Screen grid -->
+  <div class="max-w-5xl mx-auto px-4 pb-20">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+
+      <!-- ═══════════════════════════════════════════════════
+           SCREEN 1 — ตั้งเป้าหมาย + ลองฟรี
+      ═══════════════════════════════════════════════════ -->
+      <div class="screen-card flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <span class="step-badge bg-ep-blue text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">1</span>
+          <div>
+            <h2 class="font-semibold text-gray-800 text-sm leading-tight">ตั้งเป้าหมาย + ลองฟรี</h2>
+            <p class="text-xs text-gray-400 mt-0.5">First touch — เลือก target band ก่อนเจอ login wall</p>
+          </div>
+        </div>
+        <div class="phone-frame mx-auto">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6">
+            <!-- Logo -->
+            <div class="flex items-center gap-2 mb-6">
+              <div class="w-8 h-8 rounded-xl bg-ep-blue flex items-center justify-center">
+                <span class="text-white font-bold text-xs">EP</span>
+              </div>
+              <span class="font-semibold text-gray-800 text-sm">English Plan</span>
+            </div>
+
+            <!-- Hero copy -->
+            <div class="mb-5">
+              <p class="text-xs text-ep-blue font-semibold uppercase tracking-wider mb-1">ก้าวแรกสู่เป้าหมายคุณ</p>
+              <h3 class="text-xl font-bold text-gray-900 leading-tight mb-1">คุณอยากได้คะแนน<br/>DET เท่าไหร่?</h3>
+              <p class="text-xs text-gray-400">เลือกเป้าหมาย แล้วเราจะสร้างเส้นทางให้คุณ</p>
+            </div>
+
+            <!-- Band selector -->
+            <div class="space-y-2.5 mb-5">
+              <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-ep-blue/40 transition-colors">
+                <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0"></div>
+                <div>
+                  <p class="font-semibold text-sm text-gray-800">105–115</p>
+                  <p class="text-xs text-gray-400">สำหรับมหาวิทยาลัยทั่วไป</p>
+                </div>
+              </label>
+              <label class="flex items-center gap-3 p-3 border-2 border-ep-blue rounded-xl cursor-pointer bg-blue-50">
+                <div class="w-5 h-5 rounded-full border-2 border-ep-blue bg-ep-blue flex-shrink-0 flex items-center justify-center">
+                  <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                </div>
+                <div>
+                  <p class="font-semibold text-sm text-ep-blue">116–124</p>
+                  <p class="text-xs text-blue-400">มหาวิทยาลัยชั้นนำ / ทุน</p>
+                </div>
+                <span class="ml-auto text-xs bg-ep-blue text-white px-2 py-0.5 rounded-full font-medium">เลือกแล้ว</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-ep-blue/40 transition-colors">
+                <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0"></div>
+                <div>
+                  <p class="font-semibold text-sm text-gray-800">125+</p>
+                  <p class="text-xs text-gray-400">Top programs / ทุนเต็มจำนวน</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Framing text -->
+            <div class="bg-blue-50 rounded-xl p-3 mb-4 flex gap-2.5">
+              <span class="text-lg">🗺️</span>
+              <div>
+                <p class="text-xs font-semibold text-ep-blue">ก้าวที่ 1 — วินิจฉัยจุดเริ่มต้นของคุณ</p>
+                <p class="text-xs text-blue-600 mt-0.5">ทดสอบฟรี 6 ทักษะ เพื่อดูว่าห่างจากเป้าหมายแค่ไหน</p>
+              </div>
+            </div>
+
+            <!-- CTA — purposeful, not a gate -->
+            <button class="w-full bg-ep-blue text-white font-semibold py-3.5 rounded-xl text-sm hover:bg-blue-800 transition-colors shadow-sm">
+              เริ่มวินิจฉัยฟรี →
+            </button>
+            <p class="text-center text-xs text-gray-400 mt-2">ไม่ต้องสมัครก่อน — บันทึกผลทีหลังได้</p>
+          </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <p class="text-xs text-amber-700"><span class="font-semibold">UX principle:</span> Goal-framing ก่อน login — ผู้ใช้รู้สึกว่า "ฉันกำลังเริ่มเส้นทาง" ไม่ใช่ "ถูกบังคับสมัคร"</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════
+           SCREEN 2 — เข้าสู่ระบบ / สมัคร
+      ═══════════════════════════════════════════════════ -->
+      <div class="screen-card flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <span class="step-badge bg-ep-blue text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">2</span>
+          <div>
+            <h2 class="font-semibold text-gray-800 text-sm leading-tight">เข้าสู่ระบบ / สมัครสมาชิก</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Login framed as "บันทึกเส้นทางของคุณ"</p>
+          </div>
+        </div>
+        <div class="phone-frame mx-auto">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6">
+            <!-- Progress context bar -->
+            <div class="flex items-center gap-2 mb-5 bg-blue-50 rounded-xl px-3 py-2">
+              <span class="text-sm">🗺️</span>
+              <div class="flex-1">
+                <p class="text-xs font-medium text-ep-blue">เป้าหมาย: 116–124</p>
+                <div class="flex gap-1 mt-1">
+                  <div class="h-1.5 rounded-full bg-ep-blue w-6"></div>
+                  <div class="h-1.5 rounded-full bg-blue-200 w-6"></div>
+                  <div class="h-1.5 rounded-full bg-blue-200 w-6"></div>
+                  <div class="h-1.5 rounded-full bg-blue-200 w-6"></div>
+                </div>
+              </div>
+              <span class="text-xs text-blue-400 font-mono">ก้าว 1/4</span>
+            </div>
+
+            <p class="text-xs text-ep-blue font-semibold uppercase tracking-wider mb-1">บันทึกเส้นทางของคุณ</p>
+            <h3 class="text-xl font-bold text-gray-900 leading-tight mb-1">เข้าสู่ระบบ</h3>
+            <p class="text-xs text-gray-400 mb-5">เพื่อให้เราบันทึกผลวินิจฉัยและความก้าวหน้าของคุณได้</p>
+
+            <!-- Google SSO -->
+            <button class="w-full flex items-center justify-center gap-2.5 border-2 border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-700 mb-3 hover:bg-gray-50 transition-colors">
+              <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              ดำเนินการต่อด้วย Google
+            </button>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-2 mb-3">
+              <div class="flex-1 h-px bg-gray-200"></div>
+              <span class="text-xs text-gray-400">หรือ</span>
+              <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <!-- Email -->
+            <div class="space-y-2.5 mb-4">
+              <input type="email" placeholder="อีเมล" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-ep-blue/60 focus:ring-2 focus:ring-ep-blue/10 transition" />
+              <input type="password" placeholder="รหัสผ่าน" class="w-full border border-gray-200 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-ep-blue/60 focus:ring-2 focus:ring-ep-blue/10 transition" />
+            </div>
+
+            <button class="w-full bg-ep-blue text-white font-semibold py-3.5 rounded-xl text-sm mb-3 shadow-sm">
+              เข้าสู่ระบบ & บันทึกเส้นทาง
+            </button>
+
+            <p class="text-center text-xs text-gray-400">ยังไม่มีบัญชี? <a href="#" class="text-ep-blue font-medium">สมัครฟรี</a></p>
+
+            <!-- Reassurance -->
+            <div class="mt-4 flex items-start gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+              <span class="text-base">🔒</span>
+              <p class="text-xs text-gray-400">ข้อมูลของคุณปลอดภัย ไม่มีการเรียกเก็บเงินอัตโนมัติ</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <p class="text-xs text-amber-700"><span class="font-semibold">UX principle:</span> Journey progress bar ติดมาจากหน้า 1 — login รู้สึกเป็นส่วนหนึ่งของเส้นทาง ไม่ใช่การหยุดชะงัก</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════
+           SCREEN 3 — ยินดีต้อนรับ / จุดเริ่มต้น
+      ═══════════════════════════════════════════════════ -->
+      <div class="screen-card flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <span class="step-badge bg-ep-blue text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">3</span>
+          <div>
+            <h2 class="font-semibold text-gray-800 text-sm leading-tight">ยินดีต้อนรับ — จุดเริ่มต้นเส้นทาง</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Free allowance เป็น "ก้าวแรกบนเส้นทาง" ไม่ใช่ลิสต์ข้อจำกัด</p>
+          </div>
+        </div>
+        <div class="phone-frame mx-auto">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6">
+            <!-- Journey progress -->
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex gap-1.5">
+                <div class="w-6 h-1.5 rounded-full bg-ep-blue"></div>
+                <div class="w-6 h-1.5 rounded-full bg-ep-blue"></div>
+                <div class="w-6 h-1.5 rounded-full bg-ep-yellow"></div>
+                <div class="w-6 h-1.5 rounded-full bg-gray-200"></div>
+              </div>
+              <span class="text-xs font-mono text-gray-400">ก้าวที่ 1 จาก 4</span>
+            </div>
+
+            <!-- Welcome -->
+            <div class="text-center mb-5">
+              <div class="text-3xl mb-2">👋</div>
+              <h3 class="text-lg font-bold text-gray-900 leading-tight">สวัสดี, มินตรา!</h3>
+              <p class="text-xs text-gray-400 mt-1">เป้าหมายของคุณ: <span class="text-ep-blue font-semibold">DET 116–124</span></p>
+            </div>
+
+            <!-- Free path items -->
+            <div class="bg-blue-50 rounded-2xl p-3.5 mb-4">
+              <p class="text-xs font-semibold text-ep-blue mb-2.5 flex items-center gap-1.5">
+                <span>🗺️</span> ก้าวแรกบนเส้นทางของคุณ
+              </p>
+              <div class="space-y-2">
+                <!-- 6 skills -->
+                <div class="flex items-center gap-2.5 bg-white rounded-xl px-2.5 py-2">
+                  <span class="text-sm">📖</span>
+                  <span class="text-xs font-medium text-gray-700 flex-1">Reading</span>
+                  <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-mono">ฟรี 1 ครั้ง</span>
+                </div>
+                <div class="flex items-center gap-2.5 bg-white rounded-xl px-2.5 py-2">
+                  <span class="text-sm">📝</span>
+                  <span class="text-xs font-medium text-gray-700 flex-1">Vocabulary</span>
+                  <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-mono">ฟรี 1 ครั้ง</span>
+                </div>
+                <div class="flex items-center gap-2.5 bg-white rounded-xl px-2.5 py-2">
+                  <span class="text-sm">🎧</span>
+                  <span class="text-xs font-medium text-gray-700 flex-1">Dictation</span>
+                  <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-mono">ฟรี 1 ครั้ง</span>
+                </div>
+                <div class="flex items-center gap-2.5 bg-white rounded-xl px-2.5 py-2">
+                  <span class="text-sm">🔤</span>
+                  <span class="text-xs font-medium text-gray-700 flex-1">Fill in the Blank</span>
+                  <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-mono">ฟรี 1 ครั้ง</span>
+                </div>
+                <div class="flex items-center gap-2.5 bg-white rounded-xl px-2.5 py-2">
+                  <span class="text-sm">🔊</span>
+                  <span class="text-xs font-medium text-gray-700 flex-1">Real Word</span>
+                  <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-mono">ฟรี 1 ครั้ง</span>
+                </div>
+                <div class="flex items-center gap-2.5 bg-white rounded-xl px-2.5 py-2">
+                  <span class="text-sm">💬</span>
+                  <span class="text-xs font-medium text-gray-700 flex-1">Interactive Conv.</span>
+                  <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-mono">ฟรี 1 ครั้ง</span>
+                </div>
+                <!-- Feedback credit -->
+                <div class="flex items-center gap-2.5 bg-ep-yellow/20 border border-ep-yellow/50 rounded-xl px-2.5 py-2">
+                  <span class="text-sm">⚡</span>
+                  <span class="text-xs font-medium text-gray-700 flex-1">ฟีดแบ็กจากฐานข้อมูล 6 ปี</span>
+                  <span class="text-xs text-gray-600 bg-ep-yellow/40 px-2 py-0.5 rounded-full font-mono font-semibold">1 เครดิต</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Feedback pick prompt -->
+            <div class="border border-gray-200 rounded-xl p-3 mb-4">
+              <p class="text-xs font-semibold text-gray-700 mb-1">🎯 เลือก 1 ทักษะที่อยากได้ฟีดแบ็กก่อน</p>
+              <p class="text-xs text-gray-400 mb-2">เครดิตนี้จะใช้สำหรับทักษะที่คุณเลือก</p>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button class="text-xs py-1.5 px-2 rounded-lg border border-ep-blue/30 bg-blue-50 text-ep-blue font-medium">Writing</button>
+                <button class="text-xs py-1.5 px-2 rounded-lg border border-gray-200 text-gray-500">Speaking</button>
+                <button class="text-xs py-1.5 px-2 rounded-lg border border-gray-200 text-gray-500">Reading</button>
+                <button class="text-xs py-1.5 px-2 rounded-lg border border-gray-200 text-gray-500">Dictation</button>
+              </div>
+            </div>
+
+            <button class="w-full bg-ep-blue text-white font-semibold py-3.5 rounded-xl text-sm shadow-sm">
+              เริ่มก้าวแรก — วินิจฉัยทักษะ →
+            </button>
+          </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <p class="text-xs text-amber-700"><span class="font-semibold">UX principle:</span> Free items เป็น "ก้าวแรกบนเส้นทาง" — ผู้ใช้รู้สึกได้รับ ไม่ใช่ถูกจำกัด + ยืนยันการเลือกฟีดแบ็กก่อนเพื่อลด confusion</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════
+           SCREEN 4 — คลังฝึก (Practice Hub, Free)
+      ═══════════════════════════════════════════════════ -->
+      <div class="screen-card flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <span class="step-badge bg-ep-blue text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">4</span>
+          <div>
+            <h2 class="font-semibold text-gray-800 text-sm leading-tight">คลังฝึก (Practice Hub, Free)</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Progress toward goal; locked = "ปลายทาง" ไม่ใช่ขวากหนาม</p>
+          </div>
+        </div>
+        <div class="phone-frame mx-auto">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6">
+
+            <!-- Top bar -->
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="text-xs text-gray-400">เป้าหมาย: <span class="text-ep-blue font-semibold">DET 116–124</span></p>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <div class="h-1.5 w-32 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-1.5 bg-ep-blue rounded-full" style="width:12%"></div>
+                  </div>
+                  <span class="text-xs text-gray-400 font-mono">ก้าว 1/6</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-gray-400">คะแนนปัจจุบัน</p>
+                <p class="text-lg font-bold font-mono text-ep-blue">—</p>
+              </div>
+            </div>
+
+            <!-- Section: ก้าวแรกของคุณ -->
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">ก้าวแรกของคุณ</p>
+            <div class="grid grid-cols-2 gap-2 mb-4">
+              <!-- Reading -->
+              <div class="bg-white border border-gray-200 rounded-xl p-3 hover:border-ep-blue/30 transition-colors">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="text-base">📖</span>
+                  <span class="text-xs font-semibold text-gray-700">Reading</span>
+                </div>
+                <div class="h-1 bg-gray-100 rounded-full mb-1.5">
+                  <div class="h-1 bg-ep-blue rounded-full" style="width:0%"></div>
+                </div>
+                <p class="text-xs text-gray-400 font-mono">0/1 ครั้ง</p>
+              </div>
+              <!-- Vocabulary -->
+              <div class="bg-white border border-gray-200 rounded-xl p-3">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="text-base">📝</span>
+                  <span class="text-xs font-semibold text-gray-700">Vocabulary</span>
+                </div>
+                <div class="h-1 bg-gray-100 rounded-full mb-1.5">
+                  <div class="h-1 bg-ep-blue rounded-full" style="width:0%"></div>
+                </div>
+                <p class="text-xs text-gray-400 font-mono">0/1 ครั้ง</p>
+              </div>
+              <!-- Dictation -->
+              <div class="bg-white border border-gray-200 rounded-xl p-3">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="text-base">🎧</span>
+                  <span class="text-xs font-semibold text-gray-700">Dictation</span>
+                </div>
+                <div class="h-1 bg-gray-100 rounded-full mb-1.5">
+                  <div class="h-1 bg-ep-blue rounded-full" style="width:0%"></div>
+                </div>
+                <p class="text-xs text-gray-400 font-mono">0/1 ครั้ง</p>
+              </div>
+              <!-- FITB -->
+              <div class="bg-white border border-gray-200 rounded-xl p-3">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <span class="text-base">🔤</span>
+                  <span class="text-xs font-semibold text-gray-700">Fill in Blank</span>
+                </div>
+                <div class="h-1 bg-gray-100 rounded-full mb-1.5">
+                  <div class="h-1 bg-ep-blue rounded-full" style="width:0%"></div>
+                </div>
+                <p class="text-xs text-gray-400 font-mono">0/1 ครั้ง</p>
+              </div>
+            </div>
+
+            <!-- Section: ปลายทาง (locked, framed as destination) -->
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">ปลายทาง — ปลดล็อกเมื่อพร้อม</p>
+            <div class="space-y-2">
+              <div class="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-2.5 opacity-60">
+                <span class="text-base">🏆</span>
+                <div class="flex-1">
+                  <p class="text-xs font-semibold text-gray-600">Mock Test เต็มรูปแบบ</p>
+                  <p class="text-xs text-gray-400">จำลองสอบจริง · เหมือน DET 100%</p>
+                </div>
+                <span class="text-gray-300 text-sm">🔓</span>
+              </div>
+              <div class="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-2.5 opacity-60">
+                <span class="text-base">⚡</span>
+                <div class="flex-1">
+                  <p class="text-xs font-semibold text-gray-600">ฟีดแบ็กไม่จำกัด</p>
+                  <p class="text-xs text-gray-400">วิเคราะห์จุดอ่อนทุกครั้งที่ฝึก</p>
+                </div>
+                <span class="text-gray-300 text-sm">🔓</span>
+              </div>
+            </div>
+
+            <!-- Nudge -->
+            <div class="mt-4 bg-ep-blue rounded-xl px-3.5 py-3 flex items-center gap-2.5">
+              <span class="text-xl">🚀</span>
+              <div class="flex-1">
+                <p class="text-xs font-semibold text-white">เริ่มก้าวแรกก่อน</p>
+                <p class="text-xs text-blue-200">ทำ Reading เพื่อดูจุดเริ่มต้นของคุณ</p>
+              </div>
+              <svg class="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <p class="text-xs text-amber-700"><span class="font-semibold">UX principle:</span> Locked items เป็น "ปลายทาง" ที่ชวน ไม่ใช่ wall ที่กีดขวาง — progress bar ยืนยันว่าคุณกำลังเดินหน้า</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════
+           SCREEN 5 — ผลวินิจฉัย
+      ═══════════════════════════════════════════════════ -->
+      <div class="screen-card flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <span class="step-badge bg-ep-blue text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">5</span>
+          <div>
+            <h2 class="font-semibold text-gray-800 text-sm leading-tight">ผลวินิจฉัย</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Score + GAP to goal + แผนถัดไป — ไม่ใช่ pricing dump</p>
+          </div>
+        </div>
+        <div class="phone-frame mx-auto">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6">
+
+            <!-- Journey steps -->
+            <div class="flex items-center gap-1.5 mb-4">
+              <div class="flex items-center gap-1">
+                <div class="w-5 h-5 rounded-full bg-ep-blue flex items-center justify-center"><svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></div>
+                <p class="text-xs text-gray-400">ตั้งเป้า</p>
+              </div>
+              <div class="flex-1 h-px bg-ep-blue/20"></div>
+              <div class="flex items-center gap-1">
+                <div class="w-5 h-5 rounded-full bg-ep-blue flex items-center justify-center"><svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg></div>
+                <p class="text-xs text-gray-400">วินิจฉัย</p>
+              </div>
+              <div class="flex-1 h-px bg-gray-200"></div>
+              <div class="flex items-center gap-1">
+                <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"><span class="text-xs text-gray-400 font-mono">3</span></div>
+                <p class="text-xs text-gray-400">ฝึก</p>
+              </div>
+            </div>
+
+            <!-- Score hero -->
+            <div class="text-center bg-gradient-to-b from-blue-50 to-white rounded-2xl py-5 mb-4">
+              <p class="text-xs text-gray-400 mb-1">คะแนนวินิจฉัยของคุณ</p>
+              <p class="text-5xl font-bold font-mono text-ep-blue">104</p>
+              <p class="text-xs text-gray-400 mt-1">จาก 160 คะแนน</p>
+
+              <!-- GAP bar -->
+              <div class="mx-4 mt-3">
+                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                  <span>ตอนนี้ 104</span>
+                  <span>เป้าหมาย 116</span>
+                </div>
+                <div class="h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div class="h-2.5 bg-ep-blue rounded-full" style="width:65%"></div>
+                </div>
+                <p class="text-xs text-ep-blue font-semibold mt-1">ห่างจากเป้าหมาย +12 คะแนน</p>
+              </div>
+            </div>
+
+            <!-- 4-skill breakdown -->
+            <p class="text-xs font-semibold text-gray-600 mb-2">ผลรายทักษะ</p>
+            <div class="space-y-1.5 mb-4">
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-600 w-20 flex-shrink-0">Reading</span>
+                <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-2 bg-green-400 rounded-full" style="width:72%"></div>
+                </div>
+                <span class="text-xs font-mono text-gray-500 w-8 text-right">72%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-600 w-20 flex-shrink-0">Vocabulary</span>
+                <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-2 bg-yellow-400 rounded-full" style="width:58%"></div>
+                </div>
+                <span class="text-xs font-mono text-gray-500 w-8 text-right">58%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-red-400 w-20 flex-shrink-0 font-semibold">Writing ⚠️</span>
+                <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-2 bg-red-400 rounded-full" style="width:41%"></div>
+                </div>
+                <span class="text-xs font-mono text-red-400 w-8 text-right font-semibold">41%</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-red-400 w-20 flex-shrink-0 font-semibold">Dictation ⚠️</span>
+                <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-2 bg-red-400 rounded-full" style="width:44%"></div>
+                </div>
+                <span class="text-xs font-mono text-red-400 w-8 text-right font-semibold">44%</span>
+              </div>
+            </div>
+
+            <!-- แผนถัดไป — contextual, not pricing -->
+            <div class="bg-blue-50 rounded-xl p-3 mb-3">
+              <p class="text-xs font-semibold text-ep-blue mb-1.5">📋 แผนถัดไปสำหรับคุณ</p>
+              <div class="space-y-1.5">
+                <div class="flex items-start gap-2 text-xs text-gray-700">
+                  <span class="text-ep-blue font-bold mt-0.5 flex-shrink-0">1.</span>
+                  ฝึก Writing อีก 2–3 ครั้ง + รับฟีดแบ็กจากฐานข้อมูล 6 ปีของ English Plan
+                </div>
+                <div class="flex items-start gap-2 text-xs text-gray-700">
+                  <span class="text-ep-blue font-bold mt-0.5 flex-shrink-0">2.</span>
+                  ทำ Dictation ชุดมาตรฐาน เน้น Band 116+
+                </div>
+                <div class="flex items-start gap-2 text-xs text-gray-700">
+                  <span class="text-ep-blue font-bold mt-0.5 flex-shrink-0">3.</span>
+                  Mock Test เต็มรูปแบบ เพื่อวัดความพร้อม
+                </div>
+              </div>
+            </div>
+
+            <button class="w-full bg-ep-blue text-white font-semibold py-3.5 rounded-xl text-sm shadow-sm">
+              เริ่มฝึก Writing เลย →
+            </button>
+          </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <p class="text-xs text-amber-700"><span class="font-semibold">UX principle:</span> "แผนถัดไป" บอกเส้นทางก่อน pricing — ผู้ใช้เข้าใจ WHY ของการอัปเกรดก่อนเห็น HOW MUCH</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════
+           SCREEN 6 — อย่าหยุดตอนกำลังไปได้ดี (The Block)
+      ═══════════════════════════════════════════════════ -->
+      <div class="screen-card flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <span class="step-badge bg-ep-blue text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">6</span>
+          <div>
+            <h2 class="font-semibold text-gray-800 text-sm leading-tight">อย่าหยุดตอนกำลังไปได้ดี</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Momentum upgrade prompt — empathy ก่อน, ไม่มี guilt trip</p>
+          </div>
+        </div>
+        <div class="phone-frame mx-auto">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6">
+
+            <!-- Momentum header -->
+            <div class="text-center mb-4">
+              <div class="text-3xl mb-2">🌊</div>
+              <h3 class="text-lg font-bold text-gray-900 leading-tight">คุณกำลังไปได้ดีมาก!</h3>
+              <p class="text-xs text-gray-400 mt-1">ทำมาแล้ว 3 จาก 6 ทักษะ</p>
+            </div>
+
+            <!-- Progress so far -->
+            <div class="bg-blue-50 rounded-xl p-3 mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <p class="text-xs font-semibold text-ep-blue">ความก้าวหน้าของคุณ</p>
+                <span class="text-xs font-mono text-ep-blue">104 → 116?</span>
+              </div>
+              <div class="h-2.5 bg-blue-200 rounded-full overflow-hidden mb-1.5">
+                <div class="h-2.5 bg-ep-blue rounded-full" style="width:65%"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-400">
+                <span>เริ่มต้น</span>
+                <span class="text-ep-blue font-semibold">ตอนนี้ 65%</span>
+                <span>เป้า 116</span>
+              </div>
+            </div>
+
+            <!-- Contextual hook -->
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-4">
+              <p class="text-xs font-semibold text-orange-700 mb-1">💡 เพิ่งค้นพบ</p>
+              <p class="text-sm font-medium text-gray-800 leading-relaxed">คุณเพิ่งรู้ว่าจุดอ่อนคือ <span class="text-red-600 font-bold">Writing</span> — ฝึกต่อเลยไหม ก่อนจะลืม?</p>
+              <p class="text-xs text-gray-500 mt-1.5">ฐานข้อมูล 6 ปีของ English Plan แสดงว่าคนที่ฝึกซ้ำใน 24 ชั่วโมงหลังวินิจฉัย พัฒนาเร็วกว่า 2× </p>
+            </div>
+
+            <!-- What they get -->
+            <div class="space-y-1.5 mb-5">
+              <div class="flex items-center gap-2.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-ep-blue flex-shrink-0"></div>
+                <p class="text-xs text-gray-700">ฝึก Writing + Dictation ได้ไม่จำกัดครั้ง</p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-ep-blue flex-shrink-0"></div>
+                <p class="text-xs text-gray-700">ฟีดแบ็กทุกครั้งจากฐานข้อมูล 6 ปี</p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-ep-blue flex-shrink-0"></div>
+                <p class="text-xs text-gray-700">Mock Test ที่จำลองข้อสอบจริง</p>
+              </div>
+            </div>
+
+            <!-- Primary CTA — ONE clear action -->
+            <button class="w-full bg-ep-blue text-white font-semibold py-3.5 rounded-xl text-sm mb-2.5 shadow-sm">
+              ฝึกต่อแบบไม่จำกัด → ดูแพ็กเกจ
+            </button>
+            <button class="w-full text-gray-400 text-sm py-2.5 hover:text-gray-600 transition-colors">
+              ไว้ก่อน ดูผลต่อ
+            </button>
+
+            <!-- Honest note -->
+            <p class="text-center text-xs text-gray-400 mt-1">ไม่ตัดเงินอัตโนมัติ · ใช้ได้ 30 วัน · ยกเลิกได้ตลอด</p>
+          </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <p class="text-xs text-amber-700"><span class="font-semibold">UX principle:</span> Momentum + contextual insight ก่อน CTA — ไม่มี FOMO/guilt; secondary "ไว้ก่อน" ชัดเจน, ไม่ซ่อน</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════
+           SCREEN 7 — เลือกแพ็กเกจ (Pricing)
+      ═══════════════════════════════════════════════════ -->
+      <div class="screen-card flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <span class="step-badge bg-ep-blue text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">7</span>
+          <div>
+            <h2 class="font-semibold text-gray-800 text-sm leading-tight">เลือกแพ็กเกจ</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Tied to user goal — แนะนำตรงๆ ไม่มี pressure</p>
+          </div>
+        </div>
+        <div class="phone-frame mx-auto">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6">
+
+            <!-- Header -->
+            <div class="mb-4">
+              <p class="text-xs text-ep-blue font-semibold uppercase tracking-wider mb-0.5">เพื่อไปให้ถึง 116–124</p>
+              <h3 class="text-lg font-bold text-gray-900">เลือกแพ็กเกจที่เหมาะกับคุณ</h3>
+              <p class="text-xs text-gray-400 mt-0.5">ใช้ได้ 30 วัน · ไม่ตัดเงินอัตโนมัติ</p>
+            </div>
+
+            <!-- Plans -->
+            <div class="space-y-2.5">
+              <!-- Free -->
+              <div class="border border-gray-200 rounded-xl p-3">
+                <div class="flex justify-between items-start mb-1">
+                  <p class="text-sm font-semibold text-gray-700">Free</p>
+                  <p class="font-bold text-gray-800">฿0</p>
+                </div>
+                <div class="text-xs text-gray-400 space-y-0.5">
+                  <p>· ทดลองทุกทักษะ อย่างละ 1 ครั้ง</p>
+                  <p>· ฟีดแบ็ก 1 เครดิต</p>
+                </div>
+                <p class="text-xs text-gray-400 mt-1.5 italic">คุณอยู่ที่นี่แล้ว</p>
+              </div>
+
+              <!-- Basic -->
+              <div class="border border-gray-200 rounded-xl p-3">
+                <div class="flex justify-between items-start mb-1">
+                  <p class="text-sm font-semibold text-gray-700">Basic</p>
+                  <p class="font-bold text-gray-800">฿399 <span class="text-xs font-normal text-gray-400">/30 วัน</span></p>
+                </div>
+                <div class="text-xs text-gray-500 space-y-0.5">
+                  <p>· ฟีดแบ็ก 12 เครดิต</p>
+                  <p>· Mock Test 2 ครั้ง</p>
+                </div>
+                <p class="text-xs text-gray-400 mt-1.5">เหมาะถ้ายังสำรวจทักษะ</p>
+              </div>
+
+              <!-- Premium — highlighted + recommendation -->
+              <div class="border-2 border-ep-blue rounded-xl p-3 bg-blue-50 relative">
+                <div class="absolute -top-2.5 left-3">
+                  <span class="bg-ep-blue text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">⭐ แนะนำสำหรับคุณ</span>
+                </div>
+                <div class="flex justify-between items-start mb-1 mt-1">
+                  <p class="text-sm font-bold text-ep-blue">Premium</p>
+                  <p class="font-bold text-ep-blue">฿699 <span class="text-xs font-normal text-blue-400">/30 วัน</span></p>
+                </div>
+                <div class="text-xs text-blue-700 space-y-0.5">
+                  <p>· ฟีดแบ็ก 30 เครดิต</p>
+                  <p>· Mock Test 4 ครั้ง</p>
+                  <p>· เข้าถึงฝึกทุกทักษะไม่จำกัด</p>
+                </div>
+                <p class="text-xs text-ep-blue font-semibold mt-1.5">✓ เพียงพอสำหรับเป้าหมาย 116–124</p>
+                <button class="w-full mt-2.5 bg-ep-blue text-white font-semibold py-2.5 rounded-lg text-xs shadow-sm">
+                  เลือก Premium — ฝึกต่อเลย
+                </button>
+              </div>
+
+              <!-- VIP -->
+              <div class="border border-gray-200 rounded-xl p-3 premium-glow">
+                <div class="flex justify-between items-start mb-1">
+                  <div class="flex items-center gap-1.5">
+                    <p class="text-sm font-semibold text-gray-700">VIP</p>
+                    <span class="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">สำหรับเป้าหมาย 125+</span>
+                  </div>
+                  <p class="font-bold text-gray-800">฿999 <span class="text-xs font-normal text-gray-400">/30 วัน</span></p>
+                </div>
+                <div class="text-xs text-gray-500 space-y-0.5">
+                  <p>· ฟีดแบ็ก 60 เครดิต</p>
+                  <p>· Mock Test 6 ครั้ง</p>
+                  <p>· ฝึกทุกทักษะไม่จำกัดสมบูรณ์แบบ</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Honest footer -->
+            <div class="mt-3 flex items-center gap-2 text-xs text-gray-400">
+              <span>🔒</span>
+              <span>ชำระครั้งเดียว ไม่ต่ออายุอัตโนมัติ ไม่มีค่าใช้จ่ายซ่อนเร้น</span>
+            </div>
+          </div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <p class="text-xs text-amber-700"><span class="font-semibold">UX principle:</span> แนะนำตามเป้าหมายที่ผู้ใช้ตั้งเองในหน้า 1 — ไม่มี "ยอดนิยม" สุ่มสี่สุ่มห้า, มี context "เพียงพอสำหรับ…" ตรงๆ</p>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════
+           SCREEN 8 — ชำระ PromptPay → ยืนยัน → สำเร็จ
+      ═══════════════════════════════════════════════════ -->
+      <div class="screen-card flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <span class="step-badge bg-ep-blue text-white w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0">8</span>
+          <div>
+            <h2 class="font-semibold text-gray-800 text-sm leading-tight">ชำระ PromptPay → ยืนยัน → สำเร็จ</h2>
+            <p class="text-xs text-gray-400 mt-0.5">3 states — QR, reassuring wait, success path</p>
+          </div>
+        </div>
+
+        <!-- 8A: QR Payment -->
+        <div class="phone-frame mx-auto">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6">
+            <div class="flex items-center gap-2 mb-4">
+              <button class="text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <p class="text-sm font-semibold text-gray-700">ชำระเงิน — Premium ฿699</p>
+            </div>
+
+            <!-- Order summary -->
+            <div class="bg-blue-50 rounded-xl p-3 mb-4">
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-600">English Plan Premium</span>
+                <span class="font-semibold text-gray-800">฿699</span>
+              </div>
+              <div class="flex justify-between text-xs text-gray-400">
+                <span>ใช้ได้ 30 วัน · ไม่ต่ออายุอัตโนมัติ</span>
+              </div>
+            </div>
+
+            <!-- QR -->
+            <div class="text-center mb-4">
+              <p class="text-xs text-gray-500 mb-3">สแกน QR ด้วยแอปธนาคาร หรือ PromptPay</p>
+              <!-- Mock QR -->
+              <div class="w-44 h-44 mx-auto bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center">
+                <div class="grid grid-cols-7 gap-0.5 w-36 h-36">
+                  <!-- Simulated QR pattern -->
+                  <div class="col-span-3 row-span-3 border-4 border-gray-800 rounded-sm"></div>
+                  <div class="col-start-5 col-span-3 row-span-3 border-4 border-gray-800 rounded-sm"></div>
+                  <div class="col-span-7 row-span-1"></div>
+                  <div class="col-span-3 col-start-1 row-span-3 border-4 border-gray-800 rounded-sm"></div>
+                  <div class="col-start-3 col-span-2 row-span-2 bg-gray-800 rounded-sm opacity-60"></div>
+                  <div class="col-span-2 col-start-6 row-span-2 bg-gray-800 rounded-sm opacity-40"></div>
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 mt-2 font-mono">฿699.00 · EP2406-8821</p>
+            </div>
+
+            <!-- Timer -->
+            <div class="flex items-center justify-center gap-2 text-xs text-gray-400 mb-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              QR หมดอายุใน <span class="font-mono font-semibold text-gray-600">14:32</span>
+            </div>
+
+            <button class="w-full border border-gray-200 text-gray-600 text-sm py-2.5 rounded-xl">
+              คัดลอกเลขบัญชีแทน
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub-label -->
+        <div class="text-center">
+          <span class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded-full">8A — QR Payment</span>
+        </div>
+
+        <!-- 8B: Waiting state -->
+        <div class="phone-frame mx-auto mt-2">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6 flex flex-col items-center justify-center" style="min-height:600px">
+
+            <!-- Spinner -->
+            <div class="relative w-20 h-20 mb-6">
+              <svg class="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="#E5E7EB" stroke-width="6"/>
+                <circle cx="40" cy="40" r="34" fill="none" stroke="#004AAD" stroke-width="6" stroke-dasharray="213" stroke-dashoffset="53" stroke-linecap="round"/>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-2xl">⏳</span>
+              </div>
+            </div>
+
+            <h3 class="text-lg font-bold text-gray-900 text-center mb-2">กำลังยืนยันการชำระเงิน</h3>
+            <p class="text-sm text-gray-500 text-center mb-6 leading-relaxed">ไม่ต้องปิดหน้านี้ เรากำลังตรวจสอบอยู่<br/>ใช้เวลาไม่นาน ปกติไม่เกิน 1–2 นาที</p>
+
+            <!-- Reassurance steps -->
+            <div class="w-full bg-blue-50 rounded-xl p-3.5 mb-4 space-y-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-5 h-5 rounded-full bg-ep-blue flex-shrink-0 flex items-center justify-center">
+                  <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                </div>
+                <p class="text-xs text-gray-600">รับคำสั่งชำระเงินแล้ว</p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-5 h-5 rounded-full border-2 border-ep-blue flex-shrink-0 flex items-center justify-center">
+                  <div class="w-2 h-2 rounded-full bg-ep-blue animate-pulse"></div>
+                </div>
+                <p class="text-xs text-ep-blue font-medium">กำลังยืนยันกับธนาคาร…</p>
+              </div>
+              <div class="flex items-center gap-2.5 opacity-40">
+                <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0"></div>
+                <p class="text-xs text-gray-400">เปิดใช้งานแพ็กเกจ Premium</p>
+              </div>
+            </div>
+
+            <p class="text-xs text-gray-400 text-center">ถ้ารอเกิน 5 นาที <a href="#" class="text-ep-blue font-medium underline">ติดต่อเรา</a></p>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <span class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded-full">8B — Reassuring Wait State</span>
+        </div>
+
+        <!-- 8C: Success -->
+        <div class="phone-frame mx-auto mt-2">
+          <div class="phone-notch"></div>
+          <div class="px-5 pt-4 pb-6">
+
+            <!-- Success header -->
+            <div class="text-center py-6">
+              <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+                <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-1">เส้นทางของคุณพร้อมแล้ว!</h3>
+              <p class="text-xs text-gray-400">Premium · ใช้ได้ถึง 11 ก.ค. 2569</p>
+            </div>
+
+            <!-- What's unlocked -->
+            <div class="bg-blue-50 rounded-xl p-3.5 mb-4">
+              <p class="text-xs font-semibold text-ep-blue mb-2">สิ่งที่ปลดล็อกแล้ว</p>
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-2 text-xs text-gray-700">
+                  <span class="text-green-500">✓</span> ฟีดแบ็ก 30 เครดิต (เหลือ 29)
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-700">
+                  <span class="text-green-500">✓</span> Mock Test 4 ครั้ง
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-700">
+                  <span class="text-green-500">✓</span> ฝึกทุกทักษะไม่จำกัด
+                </div>
+              </div>
+            </div>
+
+            <!-- Next step on journey -->
+            <div class="bg-ep-blue rounded-xl p-3.5 mb-3 text-white">
+              <p class="text-xs font-semibold text-blue-200 mb-1">ก้าวถัดไปบนเส้นทางคุณ</p>
+              <p class="text-sm font-bold mb-2">ฝึก Writing — จุดอ่อนหลักของคุณ</p>
+              <p class="text-xs text-blue-200">ฝึกตอนนี้ ความจำยังใหม่ — พัฒนาเร็วกว่า 2×</p>
+            </div>
+
+            <button class="w-full bg-ep-blue text-white font-semibold py-3.5 rounded-xl text-sm shadow-sm">
+              ไปต่อกันเลย — ฝึก Writing →
+            </button>
+            <button class="w-full text-gray-400 text-sm py-2.5 mt-1">
+              กลับหน้าหลักก่อน
+            </button>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <span class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded-full">8C — Success & Next Step</span>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+          <p class="text-xs text-amber-700"><span class="font-semibold">UX principle:</span> State 8B แก้ async PromptPay anxiety ด้วย progress steps ที่ชัด + "ไม่ต้องปิดหน้า"; 8C กลับสู่ journey frame ทันที ไม่ใช่แค่ "ชำระสำเร็จ"</p>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+  </div>
+
+  <!-- Footer -->
+  <div class="border-t border-gray-200 bg-white mt-4">
+    <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="text-xs text-gray-400 font-mono">flow-v3-momentum.html · English Plan Design Preview</p>
+      <div class="flex gap-3 flex-wrap justify-center">
+        <a href="/flow-revamp-index.html" class="text-xs text-ep-blue hover:underline">← Flow hub</a>
+        <span class="text-xs text-gray-300">·</span>
+        <span class="text-xs text-gray-400">ไม่ใช่โค้ด Production — Proposal เท่านั้น</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

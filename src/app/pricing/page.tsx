@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
+import { AdminPricingContent } from "@/components/pricing/AdminPricingContent";
 import { useBillingActions } from "@/hooks/useBillingActions";
 import { getPackageSummary } from "@/lib/package-copy";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
@@ -654,6 +655,17 @@ function PricingPageContent() {
   );
 }
 
+// Admin-only preview of the new "Show the value" pricing page. Real users keep
+// the current page until it's approved. Client-side gate (this is a client page);
+// non-admins always get the original PricingPageContent.
+function PricingRouter() {
+  const { isAdmin, previewEligible, loading } = useEffectiveTier();
+  if (!loading && (isAdmin || previewEligible)) {
+    return <AdminPricingContent />;
+  }
+  return <PricingPageContent />;
+}
+
 export default function PricingPage() {
   return (
     <Suspense
@@ -677,7 +689,7 @@ export default function PricingPage() {
         </main>
       }
     >
-      <PricingPageContent />
+      <PricingRouter />
     </Suspense>
   );
 }
