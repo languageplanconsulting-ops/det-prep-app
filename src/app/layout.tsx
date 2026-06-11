@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { LoginWelcomeModal } from "@/components/auth/LoginWelcomeModal";
+import { RevampAnnouncementModal } from "@/components/announcements/RevampAnnouncementModal";
 import { AdminSoftSkin } from "@/components/admin/AdminSoftSkin";
 import { PreviewBanner } from "@/components/admin/PreviewBanner";
 import { ContentBankHydrator } from "@/components/content/ContentBankHydrator";
@@ -46,6 +47,7 @@ export default function RootLayout({
           <PreviewBanner />
           <MainNav />
           <LoginWelcomeModal />
+          <RevampAnnouncementModal />
           <VipApiCreditNotebookNotice />
           <PlanExpiryNotice />
           <BugReportWidget />

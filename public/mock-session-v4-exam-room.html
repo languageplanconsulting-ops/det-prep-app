@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mock session V4 · Exam Room (mobile)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#e9edf4;color:#0f172a}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  textarea{font-family:inherit}
+  .phone{background:#fff;border-radius:30px;box-shadow:0 20px 50px rgba(15,23,42,.18);overflow:hidden}
+  .dot{width:7px;height:7px;border-radius:9999px}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="bg-ep-blue text-ep-yellow px-4 py-2 text-[11px] font-bold tracking-wide flex items-center gap-3 flex-wrap">
+  <span>V4 · EXAM ROOM (mobile-first)</span>
+  <span class="text-white/80 font-medium">นำด้วย Fitts + Krug — แท่ง action ติดล่าง นิ้วโป้งถึง, จอโฟกัสข้อเดียว</span>
+  <a href="/mock-session-index.html" class="ml-auto bg-white/15 px-2.5 py-1 rounded-md text-white">← ทั้ง 4 แบบ</a>
+</div>
+
+<div class="py-8 px-4 flex justify-center">
+<div class="phone w-full max-w-[390px] flex flex-col" style="height:760px">
+
+  <!-- compact status strip -->
+  <div class="px-4 pt-4 pb-3 border-b border-slate-100">
+    <div class="flex items-center gap-2">
+      <span class="font-bold text-ep-blue text-[13px]">English&nbsp;Plan</span>
+      <span class="ml-auto inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-700 bg-slate-100 rounded-full px-2.5 py-1">
+        ⏱ <span class="mono">01:48</span>
+      </span>
+      <button class="text-slate-300 hover:text-slate-500 text-lg leading-none px-1">⋯</button>
+    </div>
+    <!-- segmented progress dots -->
+    <div class="mt-3 flex items-center gap-1.5">
+      <span class="text-[11px] font-bold text-slate-500 mono mr-1">7/20</span>
+      <div class="flex gap-[3px] flex-1">
+        <div class="dot bg-ep-blue flex-1 rounded-full h-1.5"></div>
+        <div class="dot bg-ep-blue flex-1 rounded-full h-1.5"></div>
+        <div class="dot bg-ep-blue flex-1 rounded-full h-1.5"></div>
+        <div class="dot bg-ep-blue flex-1 rounded-full h-1.5"></div>
+        <div class="dot bg-ep-blue flex-1 rounded-full h-1.5"></div>
+        <div class="dot bg-ep-blue flex-1 rounded-full h-1.5"></div>
+        <div class="bg-ep-yellow flex-1 rounded-full h-1.5"></div>
+        <div class="bg-slate-200 flex-[13] rounded-full h-1.5"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- scrollable focus zone -->
+  <div class="flex-1 overflow-y-auto px-4 py-4">
+    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-ep-blue">อ่านแล้วเขียน</p>
+    <h1 class="mt-1 text-[17px] font-bold leading-snug">เขียนตอบให้ตรงประเด็น อย่างน้อย 1 ย่อหน้า</h1>
+
+    <div class="mt-3 rounded-2xl bg-slate-50 border border-slate-100 p-3.5 text-[14px] leading-7 text-slate-800">
+      Some people prefer to study in the morning, while others focus better at night.
+      <span class="font-semibold">Which do you prefer, and why?</span> Give two reasons and an example.
+    </div>
+
+    <textarea rows="6" class="mt-3 w-full resize-none rounded-2xl border border-slate-200 p-3.5 text-[14px] leading-7 outline-none focus:border-ep-blue placeholder:text-slate-300" placeholder="พิมพ์คำตอบที่นี่…">I prefer to study at night because the house is quiet and</textarea>
+
+    <p class="mt-2 text-[12px] text-slate-400 flex items-center gap-1.5">
+      <span class="text-emerald-500">✓</span> บันทึกอัตโนมัติแล้ว — ไม่หายแน่นอน
+    </p>
+  </div>
+
+  <!-- sticky bottom action (thumb zone) -->
+  <div class="px-4 py-3 border-t border-slate-100 bg-white">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-[12px] text-slate-400"><span class="mono text-slate-600">14</span> คำ · แนะนำ 40–80</span>
+      <span class="text-[12px] text-emerald-600 font-semibold">ตามจังหวะ 👍</span>
+    </div>
+    <button class="w-full bg-ep-blue text-ep-yellow font-bold text-base py-3.5 rounded-2xl shadow-sm active:brightness-110 transition flex items-center justify-center gap-2">
+      ส่งคำตอบ <span class="opacity-80">→</span> ข้อ 8
+    </button>
+  </div>
+
+</div>
+</div>
+
+<section class="mx-auto max-w-[640px] px-4 py-6 text-[12px] text-slate-500 leading-6">
+  <p class="font-bold text-slate-700 mb-1">ทำไมแบบนี้</p>
+  <p>คนไทยทำ DET บนมือถือเยอะ. <b>Fitts</b> — ปุ่ม “ส่งคำตอบ” เต็มความกว้าง อยู่ในเขตนิ้วโป้ง ส่งได้โดยไม่ขยับมือ. <b>Krug</b> — จอเดียว = ข้อเดียว, ไม่มี sidebar/สถิติมากวน. status strip บางที่สุด (เวลา + จุด 20 ข้อ). เหมือนห้องสอบจริงแต่ผ่อนคลายกว่า (มุมโค้ง สีนุ่ม คำว่า “บันทึกแล้ว/ตามจังหวะ”).</p>
+</section>
+
+</body>
+</html>

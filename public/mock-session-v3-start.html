@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mock start V3 · Coach Companion</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f5f7fb;color:#0f172a}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  .card{background:#fff;border:1px solid #e7e9f0;border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="bg-ep-blue text-ep-yellow px-4 py-2 text-[11px] font-bold tracking-wide flex items-center gap-3 flex-wrap">
+  <span>V3 · ก่อนเริ่มสอบ · COACH COMPANION</span>
+  <span class="text-white/80 font-medium">พี่ดอยทักทาย ลดความกังวล ก่อนกดเริ่ม</span>
+  <a href="/mock-session-index.html" class="ml-auto bg-white/15 px-2.5 py-1 rounded-md text-white">← ทั้ง 4 แบบ</a>
+</div>
+
+<header class="bg-white border-b border-slate-200">
+  <div class="mx-auto max-w-xl px-4 py-3 flex items-center gap-2">
+    <a class="text-[12px] font-semibold text-slate-400 hover:text-slate-600">← กลับไปฝึก</a>
+    <span class="ml-auto font-bold text-ep-blue text-sm">English&nbsp;Plan</span>
+  </div>
+</header>
+
+<main class="mx-auto max-w-xl px-4 py-7">
+
+  <!-- P'Doy welcome (empathy first) -->
+  <div class="card p-5">
+    <div class="flex items-start gap-3">
+      <div class="w-12 h-12 rounded-full bg-ep-yellow grid place-items-center text-2xl shrink-0">🧑‍🏫</div>
+      <div>
+        <p class="text-sm font-bold">พี่ดอย</p>
+        <p class="text-[12px] text-slate-400">ครูสอน DET ตั้งแต่ปี 2020 · ดูแลมา 1,000+ คน</p>
+      </div>
+    </div>
+    <div class="mt-3 rounded-2xl rounded-tl-sm bg-slate-50 border border-slate-100 p-4 text-[14px] leading-7 text-slate-700">
+      “พร้อมซ้อมรึยังครับ 😄 อันนี้คือ <b>การซ้อม ไม่ใช่สอบจริง</b> — ไม่มีใครเห็น พลาดได้เต็มที่ ยิ่งซ้อมยิ่งชิน
+      ทำไปเรื่อย ๆ <b>~1 ชั่วโมง</b> เดี๋ยวพี่ให้ฟีดแบ็กทีละข้อ บอกตรง ๆ ว่าจุดไหนพัฒนาได้ครับ”
+    </div>
+  </div>
+
+  <!-- what you'll get (concrete, The Mom Test honesty) -->
+  <div class="mt-3 grid grid-cols-3 gap-2">
+    <div class="card p-3 text-center"><p class="text-xl">🧩</p><p class="mt-1 text-[12px] font-semibold">20 ข้อ</p><p class="text-[11px] text-slate-400">ครบทุกทักษะ</p></div>
+    <div class="card p-3 text-center"><p class="text-xl">🎯</p><p class="mt-1 text-[12px] font-semibold">คะแนน 0–160</p><p class="text-[11px] text-slate-400">+ 2 จุดที่อ่อนสุด</p></div>
+    <div class="card p-3 text-center"><p class="text-xl">💬</p><p class="mt-1 text-[12px] font-semibold">ฟีดแบ็ก</p><p class="text-[11px] text-slate-400">ทีละข้อ ภาษาไทย</p></div>
+  </div>
+
+  <!-- set + your record, warm -->
+  <div class="mt-3 card p-4 flex items-center justify-between">
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">ชุดวันนี้</p>
+      <p class="mt-0.5 text-sm font-bold">June 2026 · Set A</p>
+      <p class="text-[12px] text-emerald-600">ครั้งก่อนคุณได้ 105 — รอบนี้ลองแตะ 110 ดูนะ 💪</p>
+    </div>
+    <button class="text-[12px] font-semibold text-ep-blue hover:underline shrink-0">เปลี่ยนชุด</button>
+  </div>
+
+  <!-- honest credit, in coach voice -->
+  <div class="mt-3 rounded-2xl bg-amber-50 ring-1 ring-amber-200 px-4 py-3 text-[13px] text-amber-900 leading-6">
+    บอกไว้ก่อนนะครับ — กดเริ่มแล้ว <b>ใช้ 1 เครดิต</b> (เหลือ <span class="mono">2</span>/3 เดือนนี้) ออกกลางคันไม่คืน เพราะงั้นหาเวลาว่าง ~1 ชม. ก่อนเริ่มนะ
+  </div>
+
+  <button class="mt-5 w-full bg-ep-blue text-ep-yellow font-bold text-base py-3.5 rounded-xl shadow-sm hover:brightness-110 transition">
+    พร้อมแล้ว เริ่มซ้อมเลย →
+  </button>
+  <p class="mt-2 text-center text-[12px] text-slate-400">ไม่ต้องเครียดนะครับ ค่อย ๆ ทำ</p>
+
+</main>
+
+<section class="mx-auto max-w-xl px-4 py-8 text-[12px] text-slate-500 leading-6 border-t border-slate-200">
+  <p class="font-bold text-slate-700 mb-1">ทำไมแบบนี้</p>
+  <p><b>Change by Design (เห็นใจ)</b> — เปิดด้วยพี่ดอย (คนจริง, authority-via-substance ตาม about page) ลดความกังวลก่อนสอบ. <b>The Mom Test</b> — บอกตรง ๆ ว่าจะได้อะไร (20 ข้อ, 0–160, จุดอ่อน 2 อย่าง, ฟีดแบ็กไทยทีละข้อ) ไม่ขายฝัน. เครดิตแจ้งด้วยน้ำเสียงพี่ดอย ไม่ขู่. เสียงนี้ = โค้ช (ครับ/นะครับ) ไม่ใช่เสียงทีมขาย.</p>
+</section>
+
+</body>
+</html>

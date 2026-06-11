@@ -318,22 +318,46 @@ export function countDialogueSummarySetsInBank(): number {
 export function getDialogueSummaryRoundStats(round: DialogueSummaryRoundNum): {
   avgPercent: number | null;
   latestAttemptDate: string | null;
+  totalSets: number;
+  setsAttempted: number;
+  byDifficulty: {
+    easy: { done: number; total: number };
+    medium: { done: number; total: number };
+    hard: { done: number; total: number };
+  };
 } {
   const bank = loadDialogueSummaryVisibleBank();
   const progMap = loadDialogueSummaryProgressMap();
   const percents: number[] = [];
   let latest: string | null = null;
+  const byDifficulty = {
+    easy: { done: 0, total: 0 },
+    medium: { done: 0, total: 0 },
+    hard: { done: 0, total: 0 },
+  };
   for (const d of DIALOGUE_SUMMARY_DIFFICULTIES) {
     for (const item of bank[round][d]) {
+      const tier = d as keyof typeof byDifficulty;
+      if (tier in byDifficulty) byDifficulty[tier].total += 1;
       const k = progressKey(round, d, item.setNumber);
       const p = progMap[k];
       if (p) {
+        if (tier in byDifficulty) byDifficulty[tier].done += 1;
         percents.push((p.bestScore160 / 160) * 100);
         if (!latest || p.updatedAt > latest) latest = p.updatedAt;
       }
     }
   }
-  if (percents.length === 0) return { avgPercent: null, latestAttemptDate: null };
+  const totalSets = byDifficulty.easy.total + byDifficulty.medium.total + byDifficulty.hard.total;
+  const setsAttempted = byDifficulty.easy.done + byDifficulty.medium.done + byDifficulty.hard.done;
+  if (percents.length === 0)
+    return { avgPercent: null, latestAttemptDate: null, totalSets, setsAttempted, byDifficulty };
   const avg = percents.reduce((a, b) => a + b, 0) / percents.length;
-  return { avgPercent: Math.round(avg * 10) / 10, latestAttemptDate: latest };
+  return {
+    avgPercent: Math.round(avg * 10) / 10,
+    latestAttemptDate: latest,
+    totalSets,
+    setsAttempted,
+    byDifficulty,
+  };
 }

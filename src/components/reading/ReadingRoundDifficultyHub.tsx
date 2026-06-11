@@ -2,16 +2,20 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SoftDifficultyHub, softBandStat } from "@/components/practice/SoftDifficultyHub";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   READING_DIFFICULTIES,
   READING_DIFFICULTY_LABEL,
   READING_DIFFICULTY_MAX,
 } from "@/lib/reading-constants";
-import { loadReadingVisibleBank } from "@/lib/reading-storage";
+import { getReadingSetBestAcrossExams, loadReadingVisibleBank } from "@/lib/reading-storage";
 import type { ReadingRoundNum } from "@/types/reading";
 
 export function ReadingRoundDifficultyHub({ round }: { round: ReadingRoundNum }) {
   const [v, setV] = useState(0);
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);
@@ -24,6 +28,36 @@ export function ReadingRoundDifficultyHub({ round }: { round: ReadingRoundNum })
   }, []);
 
   const bank = loadReadingVisibleBank();
+
+  if (soft) {
+    const bands = READING_DIFFICULTIES.map((d) => {
+      const rows = bank[round][d];
+      const stat = softBandStat(
+        rows.map((r) => r.setNumber),
+        (n) => {
+          const set = rows.find((r) => r.setNumber === n);
+          const examCount = set?.exams.length ?? 0;
+          const p = getReadingSetBestAcrossExams(round, d, n, examCount);
+          return p ? { bestScore: p.bestScore, maxScore: p.maxScore } : null;
+        },
+      );
+      return {
+        key: d,
+        label: READING_DIFFICULTY_LABEL[d],
+        ...stat,
+        maxScore: READING_DIFFICULTY_MAX[d],
+        href: `/practice/comprehension/reading/round/${round}/${d}`,
+      };
+    });
+    return (
+      <SoftDifficultyHub
+        round={round}
+        bands={bands}
+        backHref="/practice/comprehension/reading"
+        subtitle="อ่านแล้วตอบคำถาม · ดันความแม่นเฉลี่ยให้ถึง 95% แล้วไต่ระดับถัดไป"
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">

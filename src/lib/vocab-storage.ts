@@ -397,24 +397,48 @@ export function countVocabSetsInBank(): number {
 export function getVocabRoundStats(round: VocabRoundNum): {
   avgPercent: number | null;
   latestAttemptDate: string | null;
+  totalSets: number;
+  setsAttempted: number;
+  byDifficulty: {
+    easy: { done: number; total: number };
+    medium: { done: number; total: number };
+    hard: { done: number; total: number };
+  };
 } {
   const bank = loadVocabVisibleBank();
   const progMap = readVocabProgressMap();
   const percents: number[] = [];
   let latest: string | null = null;
+  const byDifficulty = {
+    easy: { done: 0, total: 0 },
+    medium: { done: 0, total: 0 },
+    hard: { done: 0, total: 0 },
+  };
   for (const set of bank[round]) {
     for (const p of set.passages) {
+      const tier = p.contentLevel as keyof typeof byDifficulty;
+      if (tier in byDifficulty) byDifficulty[tier].total += 1;
       const k = progressKey(round, p.contentLevel, set.setNumber, p.passageNumber);
       const pr = progMap[k];
       if (pr) {
+        if (tier in byDifficulty) byDifficulty[tier].done += 1;
         percents.push(pr.maxScore > 0 ? (pr.bestScore / pr.maxScore) * 100 : 0);
         if (!latest || pr.updatedAt > latest) latest = pr.updatedAt;
       }
     }
   }
-  if (percents.length === 0) return { avgPercent: null, latestAttemptDate: null };
+  const totalSets = byDifficulty.easy.total + byDifficulty.medium.total + byDifficulty.hard.total;
+  const setsAttempted = byDifficulty.easy.done + byDifficulty.medium.done + byDifficulty.hard.done;
+  if (percents.length === 0)
+    return { avgPercent: null, latestAttemptDate: null, totalSets, setsAttempted, byDifficulty };
   const avg = percents.reduce((a, b) => a + b, 0) / percents.length;
-  return { avgPercent: Math.round(avg * 10) / 10, latestAttemptDate: latest };
+  return {
+    avgPercent: Math.round(avg * 10) / 10,
+    latestAttemptDate: latest,
+    totalSets,
+    setsAttempted,
+    byDifficulty,
+  };
 }
 
 export function getVocabPassageFromSet(

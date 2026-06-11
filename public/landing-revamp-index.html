@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Landing page revamp — 5 versions to preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  body{font-family:'IBM Plex Sans Thai',system-ui,sans-serif;background:#f4f6fb;color:#0f172a;
+    background-image:linear-gradient(rgba(0,74,173,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,74,173,.04) 1px,transparent 1px);background-size:24px 24px;}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .card:hover{transform:translate(-2px,-2px);box-shadow:10px 10px 0 0 #000;}
+</style>
+</head>
+<body class="min-h-screen">
+<main class="mx-auto max-w-5xl px-5 py-12 sm:py-16">
+
+  <header class="mb-10">
+    <p class="mono text-xs font-extrabold uppercase tracking-[0.2em] text-ep-blue">Preview · ก่อน implement ให้ users จริง</p>
+    <h1 class="mt-2 text-3xl font-bold leading-tight sm:text-4xl">หน้า Landing ใหม่ — 5 แนวทาง</h1>
+    <p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
+      แต่ละเวอร์ชันออกแบบจากหลัก UX/UI psychology คนละข้อ แต่ทุกเวอร์ชันยึดหลักเดียวกัน:
+      <b class="text-slate-900">ปุ่มหลักชัดเจนปุ่มเดียว</b> · <b class="text-slate-900">ภาษาไทยนำ</b> ·
+      <b class="text-slate-900">ลดความกังวลของผู้เรียน</b> · <b class="text-slate-900">ไม่ขายของ — เริ่มจากคุณค่าและการแก้ปัญหา</b> ·
+      ออกแบบ mobile-first. ทั้งหมดยังเป็น preview เท่านั้น — ผู้ใช้จริงยังเห็นหน้าเดิม จนกว่าคุณจะเลือก.
+    </p>
+  </header>
+
+  <!-- Research basis -->
+  <section class="mb-10 border-4 border-black bg-white p-5 shadow-[8px_8px_0_0_#000] sm:p-6">
+    <h2 class="mono text-xs font-extrabold uppercase tracking-widest text-ep-blue">หลักการที่ใช้ / Research applied</h2>
+    <ul class="mt-4 grid gap-3 text-sm leading-relaxed text-slate-700 sm:grid-cols-2">
+      <li><b>Don't Make Me Think (Krug):</b> หน้าเดิมมีปุ่มแข่งกัน 7+ ปุ่มใน hero (ผิดหลัก Hick's Law) — ทุกเวอร์ชันใหม่เหลือปุ่มหลักเดียว</li>
+      <li><b>Feeling understood &gt; features:</b> เปิดด้วย "ปัญหาจริง" ของผู้เรียนไทย ไม่ใช่ลิสต์ฟีเจอร์</li>
+      <li><b>ESL psychology (self-efficacy + anxiety):</b> ตัวบล็อกใหญ่สุดคือความกังวลเรื่องพูด/เขียน — เน้น ฟรี · ส่วนตัว · ไม่ตัดสิน · เริ่มทีละนิด · เห็นชัดว่าต้องแก้อะไร</li>
+      <li><b>Thai localization:</b> mobile-first, ใช้ไอคอน/ภาพนำ (ภาษาไทยไม่มีเว้นวรรค), PromptPay, ครูคนจริง, รีวิวคนไทย before→after</li>
+      <li><b>Value-first, ไม่ salesy:</b> ดันดีไซน์ "เช็กระดับฟรี" ขึ้นก่อน — ราคาอยู่ท้าย ๆ และเบา</li>
+      <li><b>Fogg / goal-gradient:</b> ก้าวแรกเล็กมาก + เห็นเส้นทางสู่เป้าหมายชัด</li>
+    </ul>
+  </section>
+
+  <!-- Featured: refined pick -->
+  <a href="/landing-clarity-pro.html" class="card mb-5 block border-4 border-ep-blue bg-white p-6 shadow-[8px_8px_0_0_#004AAD] transition">
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="mono flex h-10 items-center justify-center border-[3px] border-black bg-ep-yellow px-2 text-sm font-extrabold text-black">★ ล่าสุด</span>
+      <h3 class="text-lg font-bold">Calm Clarity — refined (เวอร์ชันที่คุณเลือก + ปรับตาม feedback)</h3>
+    </div>
+    <p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">
+      ต่อยอดจาก Calm Clarity: บอกชัดว่านี่คืออะไร + ประโยชน์ของแต่ละอย่าง (เช็กระดับ · <b>Mock test ที่โชว์จุดอ่อน</b> · ฟีดแบ็กรายข้อแบบ V3 · มินิเลสซัน) ·
+      <b>รายการข้อสอบครบทุกแบบ</b> อธิบายตรง ๆ ว่าแต่ละแบบแก้ปัญหาอะไร · ตัดคำว่า "AI" ออก · ไม่มีส่วนโปรโมตตัวผู้สอน (ลดความกดดัน) · มีส่วนคอร์ส → VIP 6 เดือน.
+    </p>
+    <p class="mono mt-4 text-xs font-bold uppercase tracking-wider text-ep-blue">หลัก: Clarity + Gen-Z authenticity + selling-as-a-real-teacher →</p>
+  </a>
+
+  <h2 class="mb-4 mono text-xs font-bold uppercase tracking-widest text-slate-500">5 แนวทางแรก (สำหรับเทียบ)</h2>
+
+  <!-- The 5 versions -->
+  <section class="grid gap-5 sm:grid-cols-2">
+
+    <a href="/landing-v1-clarity.html" class="card block border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#000] transition">
+      <div class="flex items-center gap-3">
+        <span class="mono flex h-10 w-10 items-center justify-center border-[3px] border-black bg-ep-blue text-sm font-extrabold text-white">V1</span>
+        <h3 class="text-lg font-bold">Calm Clarity</h3>
+      </div>
+      <p class="mt-3 text-sm leading-relaxed text-slate-600">หัวข้อเดียว ปุ่มเดียว เว้นที่ว่างเยอะ — ลดภาระการคิด (cognitive fluency) ให้รู้สึก "โล่ง ไม่กดดัน". ก้าวแรกเล็กที่สุดเท่าที่จะเป็นไปได้.</p>
+      <p class="mono mt-4 text-xs font-bold uppercase tracking-wider text-ep-blue">หลัก: Don't Make Me Think + Fogg →</p>
+    </a>
+
+    <a href="/landing-v2-empathy.html" class="card block border-4 border-black bg-[#fdf6e9] p-6 shadow-[6px_6px_0_0_#000] transition">
+      <div class="flex items-center gap-3">
+        <span class="mono flex h-10 w-10 items-center justify-center border-[3px] border-black bg-ep-blue text-sm font-extrabold text-white">V2</span>
+        <h3 class="text-lg font-bold">Empathy-first / เข้าใจหัวอกเด็กไทย</h3>
+      </div>
+      <p class="mt-3 text-sm leading-relaxed text-slate-600">เปิดด้วยความรู้สึกจริง: "อ่านพอได้ ฟังพอรู้เรื่อง แต่พอต้องพูด/เขียนคือตัน". สะท้อน → ปลอบ → ชวนเริ่มทีละนิด. โทนพี่เลี้ยงใจดี ไม่ใช่นักขาย.</p>
+      <p class="mono mt-4 text-xs font-bold uppercase tracking-wider text-ep-blue">หลัก: Emotional resonance →</p>
+    </a>
+
+    <a href="/landing-v3-proof.html" class="card block border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#000] transition">
+      <div class="flex items-center gap-3">
+        <span class="mono flex h-10 w-10 items-center justify-center border-[3px] border-black bg-ep-blue text-sm font-extrabold text-white">V3</span>
+        <h3 class="text-lg font-bold">Proof & Self-Efficacy / เห็นผลก่อนจ่าย</h3>
+      </div>
+      <p class="mt-3 text-sm leading-relaxed text-slate-600">โชว์ feedback จริงกลางหน้า — คะแนน Grammar/Flow + โน้ตภาษาไทยบอกว่าต้องแก้อะไร. "ลองดูก่อนว่ามันช่วยยังไง แล้วค่อยตัดสินใจ".</p>
+      <p class="mono mt-4 text-xs font-bold uppercase tracking-wider text-ep-blue">หลัก: Show-don't-tell + confidence →</p>
+    </a>
+
+    <a href="/landing-v4-path.html" class="card block border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#000] transition">
+      <div class="flex items-center gap-3">
+        <span class="mono flex h-10 w-10 items-center justify-center border-[3px] border-black bg-ep-yellow text-sm font-extrabold text-black">V4</span>
+        <h3 class="text-lg font-bold">The Path / เส้นทางสู่เป้าหมาย</h3>
+      </div>
+      <p class="mt-3 text-sm leading-relaxed text-slate-600">เลือกเป้าคะแนน (105–115 / 116–124 / 125+) แล้วเห็น roadmap เป็นขั้น ๆ จากเช็กระดับ → ฝึกตรงจุด → mock → ถึงเป้า. เปลี่ยน "ภูเขา" ให้เป็นก้าวเล็ก ๆ.</p>
+      <p class="mono mt-4 text-xs font-bold uppercase tracking-wider text-ep-blue">หลัก: Goal-gradient →</p>
+    </a>
+
+    <a href="/landing-v5-thai-mobile.html" class="card block border-4 border-black bg-white p-6 shadow-[6px_6px_0_0_#000] transition sm:col-span-2">
+      <div class="flex items-center gap-3">
+        <span class="mono flex h-10 w-10 items-center justify-center border-[3px] border-black bg-ep-blue text-sm font-extrabold text-white">V5</span>
+        <h3 class="text-lg font-bold">Thai-first Mobile</h3>
+      </div>
+      <p class="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">ออกแบบจากพฤติกรรมคนไทยจริง: มือถือก่อน, ไอคอนนำ, บรรทัดสั้น, ปุ่มใหญ่ติดล่างจอแบบแอป, ครู "พี่ดอย" ทักทายลดความเกร็ง, จ่ายผ่าน PromptPay. <b>ลองเปิดบนมือถือ (หรือย่อจอ) จะเห็นชัดสุด.</b></p>
+      <p class="mono mt-4 text-xs font-bold uppercase tracking-wider text-ep-blue">หลัก: Thai localization + mobile-first →</p>
+    </a>
+
+  </section>
+
+  <footer class="mt-12 border-t border-slate-300 pt-6 text-center">
+    <p class="text-sm text-slate-500">เลือกตัวที่ชอบที่สุด (หรือผสมจุดเด่นหลายตัว) แล้วบอกผม เดี๋ยวเอาไปทำเป็นหน้า landing จริงใน <span class="mono">LandingPageClient.tsx</span></p>
+  </footer>
+
+</main>
+</body>
+</html>

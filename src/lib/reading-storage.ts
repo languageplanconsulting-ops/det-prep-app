@@ -426,26 +426,52 @@ export function countReadingSetsInBank(): number {
 export function getReadingRoundStats(round: ReadingRoundNum): {
   avgPercent: number | null;
   latestAttemptDate: string | null;
+  totalSets: number;
+  setsAttempted: number;
+  byDifficulty: {
+    easy: { done: number; total: number };
+    medium: { done: number; total: number };
+    hard: { done: number; total: number };
+  };
 } {
   const bank = loadReadingVisibleBank();
   const progMap = readReadingProgressMap();
   const percents: number[] = [];
   let latest: string | null = null;
+  const byDifficulty = {
+    easy: { done: 0, total: 0 },
+    medium: { done: 0, total: 0 },
+    hard: { done: 0, total: 0 },
+  };
   for (const d of READING_DIFFICULTIES) {
     for (const set of bank[round][d]) {
+      // Count each exam-unit as a "set" for hub progress so the ring
+      // matches what the learner sees inside the round page.
       for (let e = 1; e <= set.exams.length; e++) {
+        const tier = d as keyof typeof byDifficulty;
+        if (tier in byDifficulty) byDifficulty[tier].total += 1;
         const k = progressExamKey(round, d, set.setNumber, e);
         const p = progMap[k];
         if (p) {
+          if (tier in byDifficulty) byDifficulty[tier].done += 1;
           percents.push(p.maxScore > 0 ? (p.bestScore / p.maxScore) * 100 : 0);
           if (!latest || p.updatedAt > latest) latest = p.updatedAt;
         }
       }
     }
   }
-  if (percents.length === 0) return { avgPercent: null, latestAttemptDate: null };
+  const totalSets = byDifficulty.easy.total + byDifficulty.medium.total + byDifficulty.hard.total;
+  const setsAttempted = byDifficulty.easy.done + byDifficulty.medium.done + byDifficulty.hard.done;
+  if (percents.length === 0)
+    return { avgPercent: null, latestAttemptDate: null, totalSets, setsAttempted, byDifficulty };
   const avg = percents.reduce((a, b) => a + b, 0) / percents.length;
-  return { avgPercent: Math.round(avg * 10) / 10, latestAttemptDate: latest };
+  return {
+    avgPercent: Math.round(avg * 10) / 10,
+    latestAttemptDate: latest,
+    totalSets,
+    setsAttempted,
+    byDifficulty,
+  };
 }
 
 export function getReadingExamFromSet(

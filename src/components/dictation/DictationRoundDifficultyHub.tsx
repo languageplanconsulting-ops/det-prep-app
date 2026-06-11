@@ -3,17 +3,25 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
+import { SoftDifficultyHub, softBandStat } from "@/components/practice/SoftDifficultyHub";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   DICTATION_DIFFICULTIES,
   DICTATION_DIFFICULTY_LABEL,
   DICTATION_MAX_SCORE,
 } from "@/lib/dictation-constants";
-import { ensureDictationBankReady, loadDictationBank } from "@/lib/dictation-storage";
+import {
+  ensureDictationBankReady,
+  getDictationProgress,
+  loadDictationBank,
+} from "@/lib/dictation-storage";
 import type { DictationRoundNum } from "@/types/dictation";
 
 export function DictationRoundDifficultyHub({ round }: { round: DictationRoundNum }) {
   const [v, setV] = useState(0);
   const [bankReady, setBankReady] = useState(false);
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
 
   useEffect(() => {
     void ensureDictationBankReady().then(() => setBankReady(true));
@@ -38,6 +46,34 @@ export function DictationRoundDifficultyHub({ round }: { round: DictationRoundNu
   }
 
   const bank = loadDictationBank();
+
+  if (soft) {
+    const bands = DICTATION_DIFFICULTIES.map((d) => {
+      const rows = bank[round][d];
+      const stat = softBandStat(
+        rows.map((r) => r.setNumber),
+        (n) => {
+          const p = getDictationProgress(round, d, n);
+          return p ? { bestScore: p.bestScore, maxScore: p.maxScore } : null;
+        },
+      );
+      return {
+        key: d,
+        label: DICTATION_DIFFICULTY_LABEL[d],
+        ...stat,
+        maxScore: DICTATION_MAX_SCORE[d],
+        href: `/practice/literacy/dictation/round/${round}/${d}`,
+      };
+    });
+    return (
+      <SoftDifficultyHub
+        round={round}
+        bands={bands}
+        backHref="/practice/literacy/dictation"
+        subtitle="ฟังเสียงแล้วพิมพ์ทั้งประโยค · ดันความแม่นเฉลี่ยให้ถึง 95% แล้วไต่ระดับถัดไป"
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">

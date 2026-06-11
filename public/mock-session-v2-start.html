@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mock start V2 · Progress Journey (50+ ชุด)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f5f7fb;color:#0f172a}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  .card{background:#fff;border:1px solid #e7e9f0;border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  .pick{background:#fff;border:1px solid #e7e9f0;border-radius:16px;transition:.15s}
+  .pick:hover{box-shadow:0 8px 22px rgba(15,23,42,.08);transform:translateY(-2px)}
+  .chip{font-size:12px;font-weight:600;padding:6px 12px;border-radius:9999px;border:1px solid #e2e8f0;background:#fff;color:#475569}
+  .chip-on{background:#004AAD;color:#fff;border-color:#004AAD}
+  details>summary{list-style:none}
+  details>summary::-webkit-details-marker{display:none}
+</style>
+</head>
+<body class="min-h-screen pb-24">
+
+<div class="bg-ep-blue text-ep-yellow px-4 py-2 text-[11px] font-bold tracking-wide flex items-center gap-3 flex-wrap">
+  <span>V2 · ก่อนเริ่มสอบ · PROGRESS JOURNEY (รองรับ 50+ ชุด)</span>
+  <span class="text-white/80 font-medium">มี intro ชัด · ระบบแนะนำ 3 ชุด · คลังเลือกเองค้นได้</span>
+  <a href="/mock-session-index.html" class="ml-auto bg-white/15 px-2.5 py-1 rounded-md text-white">← ทั้ง 4 แบบ</a>
+</div>
+
+<!-- top bar with credits -->
+<header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
+  <div class="mx-auto max-w-4xl px-4 py-2.5 flex items-center gap-3">
+    <a class="text-[12px] font-semibold text-slate-400 hover:text-slate-600">← กลับไปฝึก</a>
+    <span class="font-bold text-ep-blue text-sm">English&nbsp;Plan · Mock</span>
+    <div class="ml-auto flex items-center gap-2">
+      <span class="text-[12px] font-semibold text-slate-600 bg-slate-100 rounded-full px-3 py-1">
+        เครดิตเดือนนี้ <b class="mono text-ep-blue">2</b>/3
+      </span>
+      <span class="hidden sm:inline text-[11px] text-slate-400">refresh ใน 12 วัน</span>
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-4xl px-4 py-6">
+
+  <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-ep-blue">จำลองสอบ DET เต็มชุด</p>
+  <h1 class="mt-1.5 text-[26px] font-bold leading-tight">เลือกชุดที่จะซ้อม แล้วเริ่มเส้นทาง 20 ข้อ</h1>
+  <p class="mt-1.5 text-sm text-slate-500">ตอนนี้มี <b class="text-slate-700">54 ชุด</b> · อัปเดตทุกเดือน — ไม่รู้จะเริ่มชุดไหน ปล่อยให้ระบบเลือกให้ได้เลย</p>
+
+  <!-- ░░ CLEAR INTRO (อ่านก่อนเริ่ม) — condensed from the real 4-chunk panel ░░ -->
+  <details open class="card mt-5 overflow-hidden">
+    <summary class="cursor-pointer flex items-center gap-2 px-5 py-3.5 border-b border-slate-100">
+      <span class="grid place-items-center w-6 h-6 rounded-full bg-ep-yellow text-[13px] font-bold">i</span>
+      <span class="font-bold text-[15px]">อ่านก่อนเริ่ม · ใช้เวลาไม่ถึง 2 นาที</span>
+      <span class="ml-auto text-[12px] text-slate-400">ย่อ/ขยาย</span>
+    </summary>
+    <div class="grid sm:grid-cols-2 gap-px bg-slate-100">
+      <div class="bg-white p-4">
+        <p class="text-[13px] font-bold flex items-center gap-2"><span class="text-ep-blue">①</span> เกี่ยวกับชุดข้อสอบ</p>
+        <p class="mt-1 text-[13px] leading-6 text-slate-600">อัปโหลดชุดใหม่<b>ทุกเดือน</b>ตั้งแต่ ม.ค. 2026 จากข้อสอบ DET จริงของเดือนนั้น · <b>เลือกเริ่มชุดไหนก็ได้ ไม่มีลำดับบังคับ</b></p>
+      </div>
+      <div class="bg-white p-4">
+        <p class="text-[13px] font-bold flex items-center gap-2"><span class="text-ep-blue">②</span> ก่อนเริ่มทำ</p>
+        <p class="mt-1 text-[13px] leading-6 text-slate-600"><b>1 ชม. – 1 ชม. 15 นาที</b>/ชุด · <span class="text-rose-600 font-semibold">ออกกลางคัน = นับว่าใช้โควตาแล้ว</span> · ตัวเลขชุด<b>ไม่ใช่</b>ระดับความยาก ทุกชุดเป็น Adaptive</p>
+      </div>
+      <div class="bg-white p-4">
+        <p class="text-[13px] font-bold flex items-center gap-2"><span class="text-ep-blue">③</span> นี่คือการ<b>ซ้อม</b> ไม่ใช่สอบจริง</p>
+        <p class="mt-1 text-[13px] leading-6 text-slate-600">ไม่ต้องตั้งกล้อง เปิดเน็ตค้นได้ ไม่มีบันทึก — <b>แต่สอบจริง</b> Duolingo เข้มเรื่องกล้องและสภาพแวดล้อมมาก ควรอ่านกฎก่อน</p>
+      </div>
+      <div class="bg-white p-4">
+        <p class="text-[13px] font-bold flex items-center gap-2"><span class="text-ep-blue">④</span> ฟีดแบ็ก &amp; แจ้งปัญหา</p>
+        <p class="mt-1 text-[13px] leading-6 text-slate-600">จบแต่ละชุดได้ฟีดแบ็กเฉพาะบุคคล เก็บไว้ติดตามพัฒนาการได้ · ปัญหาแจ้ง <b>languageplan.consulting@gmail.com</b></p>
+      </div>
+    </div>
+  </details>
+
+  <!-- ░░ YOUR JOURNEY SNAPSHOT (Nodder/Gluttony — progress not scarcity) ░░ -->
+  <div class="mt-4 card p-4 flex flex-wrap items-center gap-4">
+    <div class="flex items-end gap-1 h-10">
+      <div class="w-3.5 bg-slate-200 rounded-t" style="height:46%"></div>
+      <div class="w-3.5 bg-slate-200 rounded-t" style="height:58%"></div>
+      <div class="w-3.5 bg-slate-300 rounded-t" style="height:72%"></div>
+      <div class="w-3.5 bg-ep-blue rounded-t" style="height:92%"></div>
+    </div>
+    <div class="min-w-0">
+      <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">เส้นทางของคุณจนถึงตอนนี้</p>
+      <p class="text-sm text-slate-700">ซ้อมมาแล้ว <b class="mono text-ep-blue">4</b> ชุด · ดีสุด <b class="mono text-ep-blue">105</b> · พัฒนาขึ้น <b class="text-emerald-600">+12</b> ตั้งแต่ครั้งแรก</p>
+    </div>
+    <span class="ml-auto text-[12px] text-slate-400">ทำครบ 4 ทักษะทุกชุด</span>
+  </div>
+
+  <!-- ░░ SYSTEM PICKS — the answer to "50+ sets, which one?" (Hick) ░░ -->
+  <section class="mt-6">
+    <div class="flex items-baseline justify-between gap-2">
+      <h2 class="text-base font-bold flex items-center gap-2"><span class="text-ep-blue">★</span> เริ่มตรงนี้ · ระบบเลือกให้แล้ว</h2>
+      <span class="text-[11px] text-slate-400">เลือกตามคะแนน + จังหวะของคุณ</span>
+    </div>
+
+    <div class="mt-3 grid gap-3 md:grid-cols-3">
+      <!-- continue (recommended) -->
+      <button class="pick p-4 text-left ring-2 ring-ep-blue/30 relative">
+        <span class="absolute -top-2.5 left-3 text-[10px] font-bold bg-ep-blue text-white rounded-full px-2 py-0.5">แนะนำ</span>
+        <span class="inline-block text-[10px] font-bold text-ep-blue bg-ep-blue/10 rounded px-2 py-0.5">ทำต่อเดือนนี้</span>
+        <p class="mt-2 font-bold leading-tight">June 2026 · Set C</p>
+        <p class="mt-1 text-[12px] text-slate-500 leading-5">ชุดใหม่ล่าสุดที่ยังไม่เคยทำ — รักษาจังหวะให้ครบโควตาเดือนนี้</p>
+        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 pt-2">
+          <span>~1 ชม. · 20 ข้อ</span><span class="text-rose-500 font-semibold">ใช้ 1 เครดิต</span>
+        </div>
+      </button>
+      <!-- weakness -->
+      <button class="pick p-4 text-left">
+        <span class="inline-block text-[10px] font-bold text-orange-600 bg-orange-50 rounded px-2 py-0.5">ยกจุดอ่อน</span>
+        <p class="mt-2 font-bold leading-tight">Mar 2026 · Set B</p>
+        <p class="mt-1 text-[12px] text-slate-500 leading-5">เคยได้ <b>92</b> (ต่ำสุดของคุณ) — ทำซ้ำเพื่อยกคะแนนชุดที่อ่อนสุด</p>
+        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 pt-2">
+          <span>~1 ชม. · 20 ข้อ</span><span class="text-rose-500 font-semibold">ใช้ 1 เครดิต</span>
+        </div>
+      </button>
+      <!-- best -->
+      <button class="pick p-4 text-left">
+        <span class="inline-block text-[10px] font-bold text-emerald-700 bg-emerald-50 rounded px-2 py-0.5">ทำซ้ำชุดเก่ง</span>
+        <p class="mt-2 font-bold leading-tight">Feb 2026 · Set A</p>
+        <p class="mt-1 text-[12px] text-slate-500 leading-5">ชุดที่ทำได้ดีสุด <b>105</b> — ทำซ้ำเช็กว่ารักษาฟอร์มได้ไหม</p>
+        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 pt-2">
+          <span>~1 ชม. · 20 ข้อ</span><span class="text-rose-500 font-semibold">ใช้ 1 เครดิต</span>
+        </div>
+      </button>
+    </div>
+    <p class="mt-2 text-[12px] text-slate-400">กดเริ่มชุดไหนก็ใช้ <b>1 เครดิต</b> ทันที · ออกกลางคันไม่คืน — เผื่อเวลา ~1 ชม. ก่อนนะ</p>
+  </section>
+
+  <!-- ░░ BROWSE ALL — power users, 50+ sets ░░ -->
+  <section class="mt-7">
+    <div class="flex items-baseline justify-between gap-2">
+      <h2 class="text-base font-bold">หรือเลือกเองจากคลัง · 54 ชุด</h2>
+      <span class="text-[11px] text-slate-400 mono">6 เดือน</span>
+    </div>
+
+    <!-- search + filter -->
+    <div class="mt-3 flex flex-col sm:flex-row gap-2">
+      <div class="flex items-center gap-2 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2">
+        <span class="text-slate-400">🔎</span>
+        <input class="flex-1 text-sm outline-none placeholder:text-slate-300" placeholder="ค้นหาเดือน / ชื่อชุด เช่น “June” หรือ “Set A”"/>
+      </div>
+      <div class="flex gap-2">
+        <button class="chip chip-on">ทั้งหมด</button>
+        <button class="chip">ยังไม่ทำ</button>
+        <button class="chip">ทำแล้ว</button>
+      </div>
+    </div>
+
+    <!-- this month -->
+    <div class="mt-3 card overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-2.5 border-b border-slate-100">
+        <p class="text-sm font-bold">📚 June 2026 · เดือนล่าสุด</p>
+        <span class="text-[11px] text-slate-400 mono">1/9 ทำแล้ว</span>
+      </div>
+      <div class="p-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- next/new -->
+        <button class="pick p-3 text-left ring-2 ring-ep-blue/30 relative">
+          <span class="absolute -top-2.5 left-3 text-[10px] font-bold bg-ep-blue text-white rounded-full px-2 py-0.5">เริ่มที่นี่</span>
+          <div class="flex items-center justify-between"><span class="font-semibold text-sm">June · Set C</span><span class="text-[10px] font-bold bg-ep-yellow rounded px-1.5 py-0.5">ใหม่</span></div>
+          <p class="mt-1 text-[12px] text-slate-400">ยังไม่เคยทำ</p>
+          <p class="mt-2 text-[11px] text-rose-500 font-semibold border-t border-slate-100 pt-1.5">~1 ชม. · ใช้ 1 เครดิต</p>
+        </button>
+        <button class="pick p-3 text-left">
+          <div class="flex items-center justify-between"><span class="font-semibold text-sm">June · Set B</span><span class="text-[10px] font-bold bg-ep-yellow rounded px-1.5 py-0.5">ใหม่</span></div>
+          <p class="mt-1 text-[12px] text-slate-400">ยังไม่เคยทำ</p>
+          <p class="mt-2 text-[11px] text-rose-500 font-semibold border-t border-slate-100 pt-1.5">~1 ชม. · ใช้ 1 เครดิต</p>
+        </button>
+        <button class="pick p-3 text-left bg-slate-50/60">
+          <div class="flex items-center justify-between"><span class="font-semibold text-sm">June · Set A</span><span class="text-[10px] font-bold bg-emerald-500 text-white rounded px-1.5 py-0.5">✓ ทำแล้ว</span></div>
+          <p class="mt-1 text-[12px] text-slate-500">คะแนน <b class="text-slate-800">98</b> · 03/06</p>
+          <p class="mt-2 text-[11px] text-slate-400 border-t border-slate-100 pt-1.5">~1 ชม. · ทำซ้ำได้</p>
+        </button>
+      </div>
+    </div>
+
+    <!-- past months accordion -->
+    <div class="mt-3 card overflow-hidden">
+      <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
+        <p class="text-sm font-bold text-slate-600">📦 เดือนก่อนหน้า</p>
+        <span class="text-[11px] text-slate-400 mono">5 เดือน · 45 ชุด</span>
+      </div>
+
+      <details open class="border-b border-slate-100">
+        <summary class="cursor-pointer grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 hover:bg-slate-50">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="text-sm font-bold w-28 shrink-0">May 2026</span>
+            <div class="h-1.5 flex-1 rounded-full bg-slate-200 max-w-[160px]"><div class="h-full rounded-full bg-emerald-500" style="width:33%"></div></div>
+            <span class="text-[11px] text-slate-400 mono">3/9</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-[12px] text-slate-400">avg <b class="text-ep-blue">101</b></span>
+            <span class="text-slate-300 text-xs">▾</span>
+          </div>
+        </summary>
+        <div class="px-3 pb-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 bg-slate-50/40">
+          <button class="pick p-3 text-left bg-slate-50/60"><div class="flex items-center justify-between"><span class="font-semibold text-sm">May · Set A</span><span class="text-[10px] font-bold bg-emerald-500 text-white rounded px-1.5 py-0.5">✓</span></div><p class="mt-1 text-[12px] text-slate-500">คะแนน <b class="text-slate-800">105</b> · 28/05</p></button>
+          <button class="pick p-3 text-left"><div class="flex items-center justify-between"><span class="font-semibold text-sm">May · Set D</span><span class="text-[10px] font-bold bg-ep-yellow rounded px-1.5 py-0.5">ใหม่</span></div><p class="mt-1 text-[12px] text-slate-400">ยังไม่เคยทำ</p></button>
+          <button class="pick p-3 text-left"><div class="flex items-center justify-between"><span class="font-semibold text-sm">May · Set E</span><span class="text-[10px] font-bold bg-ep-yellow rounded px-1.5 py-0.5">ใหม่</span></div><p class="mt-1 text-[12px] text-slate-400">ยังไม่เคยทำ</p></button>
+        </div>
+      </details>
+
+      <details class="border-b border-slate-100">
+        <summary class="cursor-pointer grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 hover:bg-slate-50">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="text-sm font-bold w-28 shrink-0">Apr 2026</span>
+            <div class="h-1.5 flex-1 rounded-full bg-slate-200 max-w-[160px]"><div class="h-full rounded-full bg-emerald-500" style="width:22%"></div></div>
+            <span class="text-[11px] text-slate-400 mono">2/9</span>
+          </div>
+          <div class="flex items-center gap-3"><span class="text-[12px] text-slate-400">avg <b class="text-ep-blue">96</b></span><span class="text-slate-300 text-xs">▾</span></div>
+        </summary>
+      </details>
+      <details class="border-b border-slate-100">
+        <summary class="cursor-pointer grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-3 hover:bg-slate-50">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="text-sm font-bold w-28 shrink-0">Mar 2026</span>
+            <div class="h-1.5 flex-1 rounded-full bg-slate-200 max-w-[160px]"><div class="h-full rounded-full bg-emerald-500" style="width:44%"></div></div>
+            <span class="text-[11px] text-slate-400 mono">4/9</span>
+          </div>
+          <div class="flex items-center gap-3"><span class="text-[12px] text-slate-400">avg <b class="text-ep-blue">94</b></span><span class="text-slate-300 text-xs">▾</span></div>
+        </summary>
+      </details>
+
+      <button class="w-full text-center text-[13px] font-semibold text-ep-blue py-3 hover:bg-slate-50">▾ โหลดอีก 2 เดือน · 18 ชุด</button>
+    </div>
+  </section>
+
+  <!-- rationale -->
+  <section class="mt-8 pt-6 border-t border-slate-200 text-[12px] text-slate-500 leading-6">
+    <p class="font-bold text-slate-700 mb-1">ทำไมแบบนี้ (รองรับ 50+ ชุด)</p>
+    <p><b>Hick</b> — 54 ชุดเลือกยาก เลยนำด้วย “ระบบเลือกให้ 3 ชุด” (ทำต่อ / ยกจุดอ่อน / ทำซ้ำชุดเก่ง) — โครงเดียวกับ <code>SetArchive</code> จริง. คนที่อยากเลือกเองค่อยลงไป<b>คลัง</b> (ค้นหา + กรอง + เดือนล่าสุดเป็นกริด + เดือนเก่าเป็น accordion โชว์ความคืบหน้า/ค่าเฉลี่ย — เหมือนของจริงแต่ soft). <b>Krug/Change by Design</b> — intro 4 ข้อ (คัดจาก <code>HowToUsePanel</code> จริง: อัปเดตทุกเดือน·เลือกชุดไหนก็ได้ / เวลา+ออกกลางคันใช้โควตา+ตัวเลข≠ความยาก / ซ้อมไม่ใช่สอบจริง / ฟีดแบ็ก) เปิดค้างไว้บนสุด ลดความสับสน. <b>Nodder</b> — snapshot “ซ้อมมา 4 · +12” นำหน้าเครดิต. credit แจ้งตรงทุกปุ่ม ไม่ขู่.</p>
+  </section>
+
+</main>
+
+<!-- sticky escape-hatch: never stuck choosing (Hick/Fitts) -->
+<div class="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-slate-200">
+  <div class="mx-auto max-w-4xl px-4 py-3 flex items-center gap-3">
+    <span class="text-[12px] text-slate-500 hidden sm:block">ยังไม่รู้จะเลือกชุดไหน?</span>
+    <button class="ml-auto bg-ep-blue text-ep-yellow font-bold text-[15px] px-6 py-3 rounded-xl shadow-sm hover:brightness-110 transition flex items-center gap-2">
+      เริ่มชุดที่แนะนำ · June Set C <span>→</span>
+    </button>
+  </div>
+</div>
+
+</body>
+</html>

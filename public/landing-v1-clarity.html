@@ -1,0 +1,412 @@
+<!--
+  V1 · Calm Clarity — ENGLISH PLAN landing page
+  Guiding principle: Cognitive fluency & radical simplicity (Don't Make Me Think + Fogg tiny-step).
+  The real landing page suffers from Hick's Law overload (7+ competing CTAs). This version is the antidote:
+  one headline, one promise, one CTA above the fold, generous whitespace, calm Thai-forward copy.
+  The tiny diagnosis preview reduces perceived effort to near-zero, making the first step feel effortless.
+-->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Plan — เตรียม DET ได้ทันที ฟรี ไม่ต้องใส่บัตรเครดิต</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ep-blue': '#004AAD',
+            'ep-yellow': '#FFCC00',
+          },
+          fontFamily: {
+            sans: ['"IBM Plex Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          lineHeight: {
+            relaxed: '1.7',
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      line-height: 1.7;
+      color: #111827;
+    }
+    .stat-num {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Smooth scroll */
+    html { scroll-behavior: smooth; }
+    /* Button focus ring */
+    .btn-primary:focus-visible {
+      outline: 3px solid #FFCC00;
+      outline-offset: 3px;
+    }
+    /* Subtle fade-in for hero */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.6s ease both; }
+    .fade-up-2 { animation: fadeUp 0.6s 0.15s ease both; }
+    .fade-up-3 { animation: fadeUp 0.6s 0.3s ease both; }
+    .fade-up-4 { animation: fadeUp 0.6s 0.45s ease both; }
+    /* Sample question card shimmer border */
+    .sample-card {
+      border: 1.5px solid #e5e7eb;
+      transition: border-color 0.2s;
+    }
+    .sample-card:hover { border-color: #004AAD; }
+  </style>
+</head>
+<body class="bg-white antialiased">
+
+  <!-- ─── PREVIEW RIBBON ──────────────────────────────────────────────── -->
+  <div class="bg-gray-100 border-b border-gray-200 text-center py-1.5 px-4 text-xs text-gray-500 flex items-center justify-center gap-3">
+    <a href="/landing-revamp-index.html" class="hover:text-ep-blue transition-colors">← Preview hub</a>
+    <span class="text-gray-300">|</span>
+    <span class="font-mono text-gray-400">V1 · Calm Clarity</span>
+  </div>
+
+  <!-- ─── STICKY NAV ──────────────────────────────────────────────────── -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100">
+    <nav class="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 bg-ep-blue rounded-md flex items-center justify-center flex-shrink-0">
+          <span class="text-white font-bold text-xs tracking-tight" style="font-family:'JetBrains Mono',monospace">EP</span>
+        </div>
+        <span class="font-semibold text-ep-blue text-sm leading-none hidden sm:block">ENGLISH PLAN</span>
+      </a>
+      <!-- Nav links (desktop) -->
+      <div class="hidden md:flex items-center gap-6 text-sm text-gray-500">
+        <a href="#how" class="hover:text-ep-blue transition-colors">วิธีเริ่ม</a>
+        <a href="#proof" class="hover:text-ep-blue transition-colors">ผลลัพธ์จริง</a>
+        <a href="#pricing" class="hover:text-ep-blue transition-colors">แผน</a>
+      </div>
+      <!-- CTA cluster -->
+      <div class="flex items-center gap-2">
+        <a href="/login" class="text-sm text-gray-500 hover:text-ep-blue transition-colors px-3 py-2 hidden sm:block">เข้าสู่ระบบ</a>
+        <a href="/mini-diagnosis/start"
+           class="btn-primary bg-ep-blue text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors min-h-[44px] flex items-center">
+          เริ่มฟรี
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ─── HERO ────────────────────────────────────────────────────────── -->
+  <section class="max-w-3xl mx-auto px-5 pt-16 pb-14 text-center">
+
+    <!-- Eyebrow badge -->
+    <div class="fade-up inline-flex items-center gap-2 bg-blue-50 text-ep-blue text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
+      <span class="w-1.5 h-1.5 rounded-full bg-ep-blue inline-block"></span>
+      สำหรับคนไทยที่เตรียมสอบ Duolingo English Test
+    </div>
+
+    <!-- Main headline -->
+    <h1 class="fade-up-2 text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-5">
+      รู้จุดอ่อนของคุณ<br class="sm:hidden"/>
+      <span class="text-ep-blue">ใน 3 นาที</span><br/>
+      <span class="text-2xl sm:text-3xl lg:text-4xl font-medium text-gray-600">แล้วค่อยฝึกตรงจุด</span>
+    </h1>
+
+    <!-- Sub-headline -->
+    <p class="fade-up-3 text-base sm:text-lg text-gray-500 mb-8 max-w-xl mx-auto">
+      วินิจฉัยทักษะภาษาอังกฤษฟรี รับ AI feedback เป็นภาษาไทย<br class="hidden sm:block"/>
+      ไม่ต้องเดาว่าต้องฝึกอะไร — ระบบบอกตรงๆ
+    </p>
+
+    <!-- PRIMARY CTA -->
+    <div class="fade-up-4 flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+      <a href="/mini-diagnosis/start"
+         class="btn-primary w-full sm:w-auto bg-ep-blue text-white font-bold text-base px-8 py-4 rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg min-h-[56px] flex items-center justify-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        วินิจฉัยทักษะฟรี — เริ่มเลย
+      </a>
+    </div>
+
+    <!-- Micro-reassurance -->
+    <p class="fade-up-4 text-xs text-gray-400 flex items-center justify-center gap-3 flex-wrap">
+      <span class="flex items-center gap-1">
+        <svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        ฟรี 100%
+      </span>
+      <span class="text-gray-200">·</span>
+      <span class="flex items-center gap-1">
+        <svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        ไม่ต้องใส่บัตรเครดิต
+      </span>
+      <span class="text-gray-200">·</span>
+      <span class="flex items-center gap-1">
+        <svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        3 นาที
+      </span>
+      <span class="text-gray-200">·</span>
+      <span class="flex items-center gap-1">
+        <svg class="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        ไม่มีใครตัดสิน
+      </span>
+    </p>
+  </section>
+
+  <!-- ─── SAMPLE QUESTION TASTE ───────────────────────────────────────── -->
+  <section class="max-w-2xl mx-auto px-5 pb-16">
+    <div class="sample-card bg-gray-50 rounded-2xl p-6 sm:p-8">
+      <!-- Label -->
+      <div class="flex items-center gap-2 mb-4">
+        <span class="text-xs font-semibold text-gray-400 uppercase tracking-widest">ตัวอย่างคำถามใน Mini Diagnosis</span>
+        <span class="ml-auto text-xs font-mono text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded">1 / 2</span>
+      </div>
+      <!-- Question -->
+      <p class="text-sm font-semibold text-gray-500 mb-3">อ่านประโยคนี้แล้วเลือกคำที่ใส่ได้ถูกต้อง</p>
+      <p class="text-base sm:text-lg text-gray-800 mb-5">
+        She has been studying English _____ three years.
+      </p>
+      <!-- Answer choices -->
+      <div class="grid grid-cols-2 gap-2.5 mb-5">
+        <button class="text-sm text-left px-4 py-3 rounded-xl border-2 border-gray-200 bg-white hover:border-ep-blue hover:bg-blue-50 transition-all min-h-[44px]">A. for</button>
+        <button class="text-sm text-left px-4 py-3 rounded-xl border-2 border-gray-200 bg-white hover:border-ep-blue hover:bg-blue-50 transition-all min-h-[44px]">B. since</button>
+        <button class="text-sm text-left px-4 py-3 rounded-xl border-2 border-gray-200 bg-white hover:border-ep-blue hover:bg-blue-50 transition-all min-h-[44px]">C. during</button>
+        <button class="text-sm text-left px-4 py-3 rounded-xl border-2 border-gray-200 bg-white hover:border-ep-blue hover:bg-blue-50 transition-all min-h-[44px]">D. while</button>
+      </div>
+      <!-- CTA within card -->
+      <a href="/mini-diagnosis/start"
+         class="block text-center w-full bg-ep-yellow text-gray-900 font-bold text-sm px-5 py-3.5 rounded-xl hover:bg-yellow-400 transition-colors min-h-[48px] flex items-center justify-center gap-2">
+        ทำ Mini Diagnosis จริงๆ ต่อเลย →
+      </a>
+      <p class="text-center text-xs text-gray-400 mt-2">มีแค่ 2 คำถาม · ใช้เวลา ~3 นาที · เห็นผลทันที</p>
+    </div>
+  </section>
+
+  <!-- ─── 3-STEP STRIP ─────────────────────────────────────────────────── -->
+  <section id="how" class="bg-blue-50 py-14 px-5">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-xl sm:text-2xl font-bold text-center text-gray-900 mb-2">ใน 3 นาที คุณจะได้อะไร?</h2>
+      <p class="text-center text-gray-500 text-sm mb-10">แค่ทำ Mini Diagnosis — ระบบจะทำทุกอย่างแทนคุณ</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <!-- Step 1 -->
+        <div class="bg-white rounded-2xl p-6 flex flex-col items-start gap-3 shadow-sm">
+          <div class="w-10 h-10 rounded-full bg-ep-blue flex items-center justify-center flex-shrink-0">
+            <span class="stat-num text-white font-bold text-sm">1</span>
+          </div>
+          <h3 class="font-bold text-gray-900 text-base">ทำ 2 คำถามสั้นๆ</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">ไม่ตัดสิน ไม่จับเวลากดดัน แค่ตอบตามจริง ระบบจะวิเคราะห์ระดับคุณ</p>
+        </div>
+        <!-- Step 2 -->
+        <div class="bg-white rounded-2xl p-6 flex flex-col items-start gap-3 shadow-sm">
+          <div class="w-10 h-10 rounded-full bg-ep-blue flex items-center justify-center flex-shrink-0">
+            <span class="stat-num text-white font-bold text-sm">2</span>
+          </div>
+          <h3 class="font-bold text-gray-900 text-base">เห็นระดับ + จุดอ่อนทันที</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">รู้เลยว่าตอนนี้อยู่ Band ไหน และทักษะไหน (เขียน/พูด/อ่าน/ฟัง) ที่ต้องฝึกก่อน</p>
+        </div>
+        <!-- Step 3 -->
+        <div class="bg-white rounded-2xl p-6 flex flex-col items-start gap-3 shadow-sm">
+          <div class="w-10 h-10 rounded-full bg-ep-blue flex items-center justify-center flex-shrink-0">
+            <span class="stat-num text-white font-bold text-sm">3</span>
+          </div>
+          <h3 class="font-bold text-gray-900 text-base">ได้แผนฝึกเป็นภาษาไทย</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">AI อธิบายเป็นภาษาไทยว่าต้องแก้ตรงไหน และแนะนำขั้นตอนต่อไปให้เลย</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SOCIAL PROOF ─────────────────────────────────────────────────── -->
+  <section id="proof" class="max-w-4xl mx-auto px-5 py-16">
+
+    <!-- Stats row -->
+    <div class="flex flex-wrap justify-center gap-8 sm:gap-16 mb-14">
+      <div class="text-center">
+        <div class="stat-num text-3xl font-bold text-ep-blue">1,000+</div>
+        <div class="text-xs text-gray-500 mt-1">นักเรียนไทยที่ผ่านมาแล้ว</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-num text-3xl font-bold text-ep-blue">600+</div>
+        <div class="text-xs text-gray-500 mt-1">แบบฝึกหัดในระบบ</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-num text-3xl font-bold text-ep-blue">4</div>
+        <div class="text-xs text-gray-500 mt-1">ทักษะครบ (เขียน พูด อ่าน ฟัง)</div>
+      </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <!-- Quote 1 -->
+      <div class="bg-gray-50 rounded-2xl p-6">
+        <div class="flex items-center gap-1 mb-3">
+          <span class="text-ep-yellow text-base">★★★★★</span>
+        </div>
+        <p class="text-sm text-gray-700 leading-relaxed mb-4">
+          "ก่อนทำ Mini Diagnosis เดาว่าตัวเองอ่อนเรื่อง Speaking แต่จริงๆ คือ Literacy ต่างหาก พอรู้แล้วฝึกตรงจุด คะแนนจาก 95 ขึ้น 120 ภายใน 6 สัปดาห์"
+        </p>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-ep-blue font-bold text-xs flex-shrink-0">พ</div>
+          <div>
+            <div class="text-xs font-semibold text-gray-800">พิมพ์ชนก</div>
+            <div class="text-xs text-gray-400">นักศึกษาปี 3 · 95 → 120</div>
+          </div>
+        </div>
+      </div>
+      <!-- Quote 2 -->
+      <div class="bg-gray-50 rounded-2xl p-6">
+        <div class="flex items-center gap-1 mb-3">
+          <span class="text-ep-yellow text-base">★★★★★</span>
+        </div>
+        <p class="text-sm text-gray-700 leading-relaxed mb-4">
+          "กลัวมากว่าต้องพูดภาษาอังกฤษ แต่ feedback ที่ได้เป็นภาษาไทย ทำให้ไม่รู้สึกอาย ฝึกในมือถือตอนนั่งรถกลับบ้านได้เลย"
+        </p>
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-ep-blue font-bold text-xs flex-shrink-0">ว</div>
+          <div>
+            <div class="text-xs font-semibold text-gray-800">วรากร</div>
+            <div class="text-xs text-gray-400">พนักงานออฟฟิศ · 105 → 125</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fast Track mention -->
+    <div class="mt-6 border border-ep-yellow/60 bg-yellow-50 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div class="w-10 h-10 bg-ep-yellow rounded-xl flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <div class="font-bold text-sm text-gray-900 mb-0.5">Duolingo Fast Track — คอร์สเตรียมสอบแบบ Cohort</div>
+        <p class="text-xs text-gray-500">ฝึกพร้อมกลุ่มคนไทย มีโค้ชคอยดูแล รับ VIP 6 เดือน <a href="/?fastTrack=1" class="text-ep-blue font-semibold hover:underline">ดูรายละเอียด →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PRICING (quiet, free-first) ─────────────────────────────────── -->
+  <section id="pricing" class="bg-gray-50 py-14 px-5">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-xl sm:text-2xl font-bold text-center text-gray-900 mb-2">เริ่มฟรี — อัปเกรดเมื่อพร้อม</h2>
+      <p class="text-center text-gray-500 text-sm mb-10">ไม่มีการเรียกเก็บอัตโนมัติ · ทุกแผนคือการซื้อ 30 วัน ไม่ใช่ subscription</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- Free -->
+        <div class="bg-white rounded-2xl border-2 border-ep-blue p-5 flex flex-col">
+          <div class="font-bold text-gray-900 mb-1">ฟรี</div>
+          <div class="stat-num text-3xl font-bold text-ep-blue mb-1">฿0</div>
+          <div class="text-xs text-gray-400 mb-4">ตลอดไป</div>
+          <ul class="text-xs text-gray-600 space-y-2 flex-1 mb-5">
+            <li class="flex gap-2"><span class="text-green-500 flex-shrink-0">✓</span>Mini Diagnosis 1 ครั้ง</li>
+            <li class="flex gap-2"><span class="text-green-500 flex-shrink-0">✓</span>ทดลองแต่ละทักษะ 1 ครั้ง</li>
+            <li class="flex gap-2"><span class="text-green-500 flex-shrink-0">✓</span>AI feedback 1 เครดิต</li>
+          </ul>
+          <a href="/mini-diagnosis/start"
+             class="block text-center bg-ep-blue text-white font-bold text-sm px-4 py-3 rounded-xl hover:bg-blue-700 transition-colors min-h-[44px] flex items-center justify-center">
+            เริ่มเลย ฟรี
+          </a>
+        </div>
+
+        <!-- Basic -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col opacity-90">
+          <div class="font-semibold text-gray-700 mb-1">Basic</div>
+          <div class="stat-num text-2xl font-bold text-gray-800 mb-1">฿399</div>
+          <div class="text-xs text-gray-400 mb-4">/ 30 วัน</div>
+          <ul class="text-xs text-gray-500 space-y-2 flex-1 mb-5">
+            <li class="flex gap-2"><span class="text-gray-400 flex-shrink-0">✓</span>AI feedback 12 เครดิต/เดือน</li>
+            <li class="flex gap-2"><span class="text-gray-400 flex-shrink-0">✓</span>Mock test 2 ครั้ง</li>
+          </ul>
+          <a href="/signup?next=%2Fpractice"
+             class="block text-center border border-gray-300 text-gray-600 font-semibold text-sm px-4 py-3 rounded-xl hover:border-ep-blue hover:text-ep-blue transition-colors min-h-[44px] flex items-center justify-center">
+            เลือก Basic
+          </a>
+        </div>
+
+        <!-- Premium — popular -->
+        <div class="bg-white rounded-2xl border-2 border-ep-yellow p-5 flex flex-col relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-ep-yellow text-gray-900 text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">ยอดนิยม</div>
+          <div class="font-semibold text-gray-700 mb-1 mt-1">Premium</div>
+          <div class="stat-num text-2xl font-bold text-gray-800 mb-1">฿699</div>
+          <div class="text-xs text-gray-400 mb-4">/ 30 วัน</div>
+          <ul class="text-xs text-gray-600 space-y-2 flex-1 mb-5">
+            <li class="flex gap-2"><span class="text-green-500 flex-shrink-0">✓</span>AI feedback 30 เครดิต/เดือน</li>
+            <li class="flex gap-2"><span class="text-green-500 flex-shrink-0">✓</span>Mock test 4 ครั้ง</li>
+          </ul>
+          <a href="/signup?next=%2Fpractice"
+             class="block text-center bg-ep-yellow text-gray-900 font-bold text-sm px-4 py-3 rounded-xl hover:bg-yellow-400 transition-colors min-h-[44px] flex items-center justify-center">
+            เลือก Premium
+          </a>
+        </div>
+
+        <!-- VIP -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col opacity-90">
+          <div class="font-semibold text-gray-700 mb-1">VIP</div>
+          <div class="stat-num text-2xl font-bold text-gray-800 mb-1">฿999</div>
+          <div class="text-xs text-gray-400 mb-4">/ 30 วัน</div>
+          <ul class="text-xs text-gray-500 space-y-2 flex-1 mb-5">
+            <li class="flex gap-2"><span class="text-gray-400 flex-shrink-0">✓</span>AI feedback 60 เครดิต/เดือน</li>
+            <li class="flex gap-2"><span class="text-gray-400 flex-shrink-0">✓</span>Mock test 6 ครั้ง</li>
+            <li class="flex gap-2"><span class="text-gray-400 flex-shrink-0">✓</span>ทุก Lane ไม่จำกัด</li>
+          </ul>
+          <a href="/signup?next=%2Fpractice"
+             class="block text-center border border-gray-300 text-gray-600 font-semibold text-sm px-4 py-3 rounded-xl hover:border-ep-blue hover:text-ep-blue transition-colors min-h-[44px] flex items-center justify-center">
+            เลือก VIP
+          </a>
+        </div>
+
+      </div>
+
+      <p class="text-center text-xs text-gray-400 mt-6">
+        ไม่แน่ใจ? <a href="/mini-diagnosis/start" class="text-ep-blue hover:underline font-semibold">ลองฟรีก่อนเลย</a> — ไม่ต้องสมัครสมาชิก ไม่ต้องใส่ข้อมูลอะไร
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── FINAL CTA STRIP ───────────────────────────────────────────────── -->
+  <section class="py-14 px-5 text-center">
+    <div class="max-w-xl mx-auto">
+      <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">พร้อมรู้จุดอ่อนของคุณไหม?</h2>
+      <p class="text-gray-500 text-sm mb-6">3 นาที ฟรี ไม่มีอะไรต้องเสีย</p>
+      <a href="/mini-diagnosis/start"
+         class="btn-primary inline-flex items-center gap-2 bg-ep-blue text-white font-bold text-base px-10 py-4 rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg min-h-[56px]">
+        เริ่ม Mini Diagnosis ฟรี
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
+  <footer class="border-t border-gray-100 bg-white py-8 px-5">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <!-- Logo + tagline -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 bg-ep-blue rounded-md flex items-center justify-center flex-shrink-0">
+          <span class="text-white font-bold text-xs" style="font-family:'JetBrains Mono',monospace">EP</span>
+        </div>
+        <span class="text-xs text-gray-400">ENGLISH PLAN · เตรียม DET สำหรับคนไทย</span>
+      </div>
+      <!-- Links -->
+      <div class="flex items-center gap-4 text-xs text-gray-400">
+        <a href="/login" class="hover:text-ep-blue transition-colors">เข้าสู่ระบบ</a>
+        <span class="text-gray-200">|</span>
+        <a href="/signup?next=%2Fpractice" class="hover:text-ep-blue transition-colors">สมัครสมาชิก</a>
+        <span class="text-gray-200">|</span>
+        <a href="/?fastTrack=1" class="hover:text-ep-blue transition-colors">Fast Track</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

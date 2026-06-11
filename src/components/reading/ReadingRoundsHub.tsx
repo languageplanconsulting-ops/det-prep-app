@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
+import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { READING_DIFFICULTIES, READING_ROUND_NUMBERS } from "@/lib/reading-constants";
+import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { getReadingRoundStats, loadReadingVisibleBank } from "@/lib/reading-storage";
 import type { ReadingRoundNum } from "@/types/reading";
 
@@ -34,12 +37,23 @@ export function ReadingRoundsHub() {
     };
   }, []);
 
+  const recommendedRound: ReadingRoundNum | null = (() => {
+    void v;
+    for (const r of READING_ROUND_NUMBERS) {
+      const s = getReadingRoundStats(r);
+      if (s.setsAttempted === 0) return r;
+    }
+    return null;
+  })();
+
   if (soft) {
     return (
       <div className="mx-auto max-w-6xl space-y-6">
         <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
           ← กลับหน้าฝึก
         </Link>
+        <HubMomentumStrip />
+        <HubBoostsBadge subscore="comprehension" />
         <SoftHubHeader
           color="emerald"
           icon="📖"
@@ -55,7 +69,12 @@ export function ReadingRoundsHub() {
         />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {READING_ROUND_NUMBERS.map((round) => (
-            <RoundCard key={`${round}-${v}`} round={round} soft />
+            <RoundCard
+              key={`${round}-${v}`}
+              round={round}
+              soft
+              recommendedRound={recommendedRound}
+            />
           ))}
         </div>
       </div>
@@ -87,7 +106,15 @@ export function ReadingRoundsHub() {
   );
 }
 
-function RoundCard({ round, soft = false }: { round: ReadingRoundNum; soft?: boolean }) {
+function RoundCard({
+  round,
+  soft = false,
+  recommendedRound,
+}: {
+  round: ReadingRoundNum;
+  soft?: boolean;
+  recommendedRound?: ReadingRoundNum | null;
+}) {
   const bank = loadReadingVisibleBank();
   let totalSets = 0;
   for (const d of READING_DIFFICULTIES) {
@@ -98,34 +125,17 @@ function RoundCard({ round, soft = false }: { round: ReadingRoundNum; soft?: boo
 
   if (soft) {
     return (
-      <Link
+      <EnhancedRoundCard
         href={`/practice/comprehension/reading/round/${round}`}
-        className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-[#004AAD] hover:shadow-[0_8px_22px_rgba(0,74,173,0.08)]"
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <span
-            className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
-              hasAttempts ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-            }`}
-          >
-            {hasAttempts ? "ทำแล้ว" : "พร้อมทำ"}
-          </span>
-          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ {round}</span>
-        </div>
-        <h3 className="text-2xl font-bold text-slate-900">Round {round}</h3>
-        <p className="mt-0.5 text-xs text-slate-500">
-          {totalSets > 0 ? `${totalSets} ชุดในคลังข้อสอบ` : "เร็วๆ นี้"}
-        </p>
-        <div className="mt-auto pt-4">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">คะแนนเฉลี่ย</p>
-          <p className="text-2xl font-bold text-[#004AAD]">
-            {hasAttempts ? `${stats.avgPercent}%` : "—"}
-          </p>
-          <p className="mt-2 text-[11px] text-slate-500">
-            ฝึกล่าสุด: {hasAttempts ? formatShortDate(stats.latestAttemptDate) : "ยังไม่เคยทำ"}
-          </p>
-        </div>
-      </Link>
+        round={round}
+        totalSets={stats.totalSets}
+        setsAttempted={stats.setsAttempted}
+        avgPercent={stats.avgPercent}
+        latestAttemptDate={stats.latestAttemptDate}
+        byDifficulty={stats.byDifficulty}
+        isRecommended={recommendedRound === round}
+        estMinPerSet={4}
+      />
     );
   }
 

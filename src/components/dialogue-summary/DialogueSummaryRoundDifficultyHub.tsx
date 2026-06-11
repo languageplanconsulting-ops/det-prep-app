@@ -2,16 +2,23 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SoftDifficultyHub, softBandStat } from "@/components/practice/SoftDifficultyHub";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   DIALOGUE_SUMMARY_DIFFICULTIES,
   DIALOGUE_SUMMARY_DIFFICULTY_LABEL,
   DIALOGUE_SUMMARY_MAX_SCORE,
 } from "@/lib/dialogue-summary-constants";
-import { loadDialogueSummaryVisibleBank } from "@/lib/dialogue-summary-storage";
+import {
+  getDialogueSummaryProgress,
+  loadDialogueSummaryVisibleBank,
+} from "@/lib/dialogue-summary-storage";
 import type { DialogueSummaryRoundNum } from "@/types/dialogue-summary";
 
 export function DialogueSummaryRoundDifficultyHub({ round }: { round: DialogueSummaryRoundNum }) {
   const [v, setV] = useState(0);
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);
@@ -24,6 +31,34 @@ export function DialogueSummaryRoundDifficultyHub({ round }: { round: DialogueSu
   }, []);
 
   const bank = loadDialogueSummaryVisibleBank();
+
+  if (soft) {
+    const bands = DIALOGUE_SUMMARY_DIFFICULTIES.map((d) => {
+      const rows = bank[round][d];
+      const stat = softBandStat(
+        rows.map((r) => r.setNumber),
+        (n) => {
+          const p = getDialogueSummaryProgress(round, d, n);
+          return p ? { bestScore: p.bestScore160, maxScore: 160 } : null;
+        },
+      );
+      return {
+        key: d,
+        label: DIALOGUE_SUMMARY_DIFFICULTY_LABEL[d],
+        ...stat,
+        maxScore: DIALOGUE_SUMMARY_MAX_SCORE,
+        href: `/practice/listening/dialogue-summary/round/${round}/${d}`,
+      };
+    });
+    return (
+      <SoftDifficultyHub
+        round={round}
+        bands={bands}
+        backHref="/practice/listening/dialogue-summary"
+        subtitle="ฟังบทสนทนาแล้วสรุป · ดันความแม่นเฉลี่ยให้ถึง 95% แล้วไต่ระดับถัดไป"
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">

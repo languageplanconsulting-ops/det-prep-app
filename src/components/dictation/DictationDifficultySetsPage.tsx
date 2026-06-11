@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DictationSetGrid } from "@/components/dictation/DictationSetGrid";
+import { DictationSetGridSoft } from "@/components/dictation/DictationSetGridSoft";
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { DICTATION_DIFFICULTY_LABEL } from "@/lib/dictation-constants";
 import type { DictationDifficulty, DictationRoundNum } from "@/types/dictation";
 
@@ -15,6 +17,10 @@ export function DictationDifficultySetsPage({
   difficulty: DictationDifficulty;
 }) {
   const [bankVersion, setBankVersion] = useState(0);
+  // Admin / preview accounts see the new "Continue + Board" mastery picker;
+  // real users keep the original grid byte-for-byte until launch.
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
 
   useEffect(() => {
     const onStorage = () => setBankVersion((n) => n + 1);
@@ -25,6 +31,30 @@ export function DictationDifficultySetsPage({
       window.removeEventListener("ep-dictation-storage", onStorage);
     };
   }, []);
+
+  if (soft) {
+    return (
+      <div className="space-y-5" id="sets">
+        <div className="flex flex-wrap gap-2 text-[12px] font-semibold text-[#004AAD]">
+          <Link href={`/practice/literacy/dictation/round/${round}`} className="hover:underline">
+            ← เลือกระดับ
+          </Link>
+          <span className="text-slate-300">·</span>
+          <Link href="/practice/literacy/dictation" className="hover:underline">
+            Round {round}
+          </Link>
+          <span className="text-slate-300">·</span>
+          <Link href="/practice" className="hover:underline">
+            Practice hub
+          </Link>
+        </div>
+
+        <NonApiExamQuotaReminder exam="dictation" />
+
+        <DictationSetGridSoft round={round} difficulty={difficulty} bankVersion={bankVersion} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8" id="sets">

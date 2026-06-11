@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mock start V4 · Exam Room (mobile)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#e9edf4;color:#0f172a}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  .phone{background:#fff;border-radius:30px;box-shadow:0 20px 50px rgba(15,23,42,.18);overflow:hidden}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="bg-ep-blue text-ep-yellow px-4 py-2 text-[11px] font-bold tracking-wide flex items-center gap-3 flex-wrap">
+  <span>V4 · ก่อนเริ่มสอบ · EXAM ROOM (mobile)</span>
+  <span class="text-white/80 font-medium">หน้าก่อนเริ่มบนมือถือ — ปุ่มเริ่มติดล่างในเขตนิ้วโป้ง</span>
+  <a href="/mock-session-index.html" class="ml-auto bg-white/15 px-2.5 py-1 rounded-md text-white">← ทั้ง 4 แบบ</a>
+</div>
+
+<div class="py-8 px-4 flex justify-center">
+<div class="phone w-full max-w-[390px] flex flex-col" style="height:760px">
+
+  <div class="px-4 pt-4 pb-3 border-b border-slate-100 flex items-center gap-2">
+    <a class="text-slate-400 text-lg leading-none">←</a>
+    <span class="font-bold text-ep-blue text-[13px]">English&nbsp;Plan</span>
+    <span class="ml-auto text-[11px] font-semibold text-slate-500 bg-slate-100 rounded-full px-2.5 py-1">เหลือ <span class="mono">2</span>/3 เครดิต</span>
+  </div>
+
+  <div class="flex-1 overflow-y-auto px-4 py-5">
+    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-ep-blue">จำลองสอบเต็มชุด</p>
+    <h1 class="mt-1 text-[22px] font-bold leading-snug">พร้อมซ้อม DET เต็มชุดไหม?</h1>
+    <p class="mt-1.5 text-[13px] text-slate-500">20 ข้อ · ~1 ชั่วโมง · ได้คะแนน 0–160 + จุดที่อ่อนสุด 2 อย่าง</p>
+
+    <!-- set card -->
+    <div class="mt-4 rounded-2xl border border-slate-200 p-4">
+      <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">ชุดที่จะทำ</p>
+      <div class="mt-1 flex items-center justify-between">
+        <p class="text-base font-bold">June 2026 · Set A</p>
+        <button class="text-[12px] font-semibold text-ep-blue">เปลี่ยน</button>
+      </div>
+      <p class="text-[12px] text-emerald-600 mt-0.5">ครั้งก่อนได้ 105 · ลองแตะ 110 รอบนี้</p>
+    </div>
+
+    <!-- quick facts -->
+    <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+      <div class="rounded-xl bg-slate-50 p-3"><p class="text-lg">🧩</p><p class="text-[11px] font-semibold mt-0.5">20 ข้อ</p></div>
+      <div class="rounded-xl bg-slate-50 p-3"><p class="text-lg">⏱</p><p class="text-[11px] font-semibold mt-0.5">~1 ชม.</p></div>
+      <div class="rounded-xl bg-slate-50 p-3"><p class="text-lg">💬</p><p class="text-[11px] font-semibold mt-0.5">ฟีดแบ็ก</p></div>
+    </div>
+
+    <!-- honest credit note -->
+    <div class="mt-3 rounded-2xl bg-amber-50 ring-1 ring-amber-200 px-3.5 py-3 text-[12px] text-amber-900 leading-6">
+      กดเริ่ม = ใช้ <b>1 เครดิต</b> ทันที · ออกกลางคันไม่คืน — เผื่อเวลาให้ครบก่อนนะ
+    </div>
+  </div>
+
+  <!-- sticky bottom start (thumb zone) -->
+  <div class="px-4 py-3 border-t border-slate-100 bg-white">
+    <button class="w-full bg-ep-blue text-ep-yellow font-bold text-base py-3.5 rounded-2xl shadow-sm active:brightness-110 transition flex items-center justify-center gap-2">
+      เริ่มสอบ <span class="opacity-80">→</span>
+    </button>
+    <p class="mt-1.5 text-center text-[11px] text-slate-400">หาที่เงียบ ~1 ชม. แล้วลุยเลย</p>
+  </div>
+
+</div>
+</div>
+
+<section class="mx-auto max-w-[640px] px-4 py-6 text-[12px] text-slate-500 leading-6">
+  <p class="font-bold text-slate-700 mb-1">ทำไมแบบนี้</p>
+  <p><b>Fitts</b> — ปุ่ม “เริ่มสอบ” เต็มกว้าง ติดล่าง นิ้วโป้งถึง. <b>Krug</b> — หน้าเดียวจบ: ชุดอะไร · ใช้เวลาเท่าไหร่ · ได้อะไร · กี่เครดิต. เครดิตคงเหลือโชว์มุมบนเบา ๆ ไม่ขู่. เหมาะกับคนไทยที่ทำ DET บนมือถือเป็นหลัก.</p>
+</section>
+
+</body>
+</html>
