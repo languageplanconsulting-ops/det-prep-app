@@ -10,7 +10,7 @@ import { countWritingTopicsByRound } from "@/lib/writing-storage";
 
 export function WritingRoundsHub() {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const [, setV] = useState(0);
 
   useEffect(() => {

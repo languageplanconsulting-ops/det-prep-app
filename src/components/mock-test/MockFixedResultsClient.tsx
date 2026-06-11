@@ -47,7 +47,7 @@ function avg(list: number[]): number {
 export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const showV2 = isAdmin || previewEligible;
+  const showV2 = true;
   const [row, setRow] = useState<FixedResult | null>(null);
   const [stepItems, setStepItems] = useState<FixedStepItem[]>([]);
   const [dashboardSavedAt, setDashboardSavedAt] = useState<string | null>(null);

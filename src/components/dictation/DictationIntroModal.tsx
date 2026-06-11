@@ -19,7 +19,7 @@ export function DictationIntroModal({
   onEnter: () => void;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const showRevamp = isAdmin || previewEligible;
+  const showRevamp = true;
 
   useEffect(() => {
     if (!open) return;

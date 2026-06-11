@@ -24,7 +24,7 @@ export function VocabExam({
   const blankCount = passage.blanks.length;
 
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   const [questionIndex, setQuestionIndex] = useState(0);
   /** Correct words revealed in the passage (always the right word, even if MC wrong). */

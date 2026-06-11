@@ -37,7 +37,7 @@ function formatWhen(iso: string | null): string {
 
 export function SpeakAboutPhotoSetList() {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const [counts, setCounts] = useState<Record<WriteAboutPhotoRoundNum, number>>({
     1: 0,
     2: 0,

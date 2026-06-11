@@ -50,7 +50,7 @@ export function ReadingExam({
   }, [readingExam]);
 
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   const [step, setStep] = useState(0);
   const [q1Revealed, setQ1Revealed] = useState(false);

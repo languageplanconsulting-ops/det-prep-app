@@ -22,7 +22,7 @@ export function DictationSessionClient({
   setNumber: number;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   const [phase, setPhase] = useState<"practice" | "report">("practice");
   const [userText, setUserText] = useState("");

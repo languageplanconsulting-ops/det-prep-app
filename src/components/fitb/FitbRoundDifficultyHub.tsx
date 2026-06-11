@@ -15,7 +15,7 @@ import type { FitbRoundNum } from "@/types/fitb";
 export function FitbRoundDifficultyHub({ round }: { round: FitbRoundNum }) {
   const [v, setV] = useState(0);
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);

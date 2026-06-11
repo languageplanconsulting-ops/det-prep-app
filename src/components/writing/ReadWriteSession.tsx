@@ -40,7 +40,7 @@ export function ReadWriteSession({
 }) {
   const router = useRouter();
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const vipGate = useVipAiFeedbackGate();
   const [mounted, setMounted] = useState(false);
   const [hydratingTopic, setHydratingTopic] = useState(true);

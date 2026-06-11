@@ -33,7 +33,7 @@ export function RealWordDifficultySetsPage({
 }) {
   const [bankVersion, setBankVersion] = useState(0);
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   useEffect(() => {
     const onStorage = () => setBankVersion((n) => n + 1);

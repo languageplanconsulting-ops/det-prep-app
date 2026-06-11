@@ -43,7 +43,7 @@ export function ReadSpeakSession({
 }) {
   const router = useRouter();
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const vipGate = useVipAiFeedbackGate();
   const topic = useMemo(() => getSpeakingVisibleTopicById(topicId, round), [topicId, round]);
   const roundBase = `/practice/production/read-and-speak/round/${round}`;

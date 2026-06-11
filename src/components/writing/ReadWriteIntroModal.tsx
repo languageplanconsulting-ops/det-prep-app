@@ -35,7 +35,7 @@ export function ReadWriteIntroModal({
   // Admin / preview-eligible users see the revamped "V4" guide first. Real users
   // keep the existing guide until we roll it out. Mirrors IntroModalShell's `soft` gate.
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const showRevamp = isAdmin || previewEligible;
+  const showRevamp = true;
 
   useEffect(() => {
     if (!open) return;

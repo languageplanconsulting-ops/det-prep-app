@@ -18,7 +18,7 @@ const STORAGE_KEY = "ep-vocab-master-intro-dismissed-v1";
 export function VocabExamIntroModal() {
   const [open, setOpen] = useState(true);
   const { isAdmin, previewEligible, loading } = useEffectiveTier();
-  const forceShowEveryVisit = isAdmin || previewEligible;
+  const forceShowEveryVisit = true;
 
   useLayoutEffect(() => {
     if (loading) return;

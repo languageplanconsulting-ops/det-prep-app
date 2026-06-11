@@ -33,7 +33,7 @@ export function InteractiveSpeakingIntroModal({
   canStart: boolean;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const showRevamp = isAdmin || previewEligible;
+  const showRevamp = true;
 
   useEffect(() => {
     if (!open) return;

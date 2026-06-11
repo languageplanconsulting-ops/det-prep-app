@@ -40,7 +40,7 @@ export function FitbSessionClient({
   startWithRedeem: boolean;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   const n = set.missingWords.length;
   const hubHref = `/practice/literacy/fill-in-blank/round/${round}/${difficulty}`;

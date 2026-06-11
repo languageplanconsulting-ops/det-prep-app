@@ -20,7 +20,7 @@ export function DictationDifficultySetsPage({
   // Admin / preview accounts see the new "Continue + Board" mastery picker;
   // real users keep the original grid byte-for-byte until launch.
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   useEffect(() => {
     const onStorage = () => setBankVersion((n) => n + 1);

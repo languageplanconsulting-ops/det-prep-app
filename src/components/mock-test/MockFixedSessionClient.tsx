@@ -91,7 +91,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   // Admin / preview-eligible users see the soft "Progress Journey" layout;
   // everyone else keeps the original brutalist layout byte-for-byte.
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   const answeredCount = session?.responses?.length ?? 0;
   const adminPreviewMode = session?.targets?.adminPreviewMode === true;

@@ -57,7 +57,7 @@ function buildLatestByScenario(): Map<string, InteractiveSpeakingAttemptReport> 
 
 export function InteractiveSpeakingHub() {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const [scenarios, setScenarios] = useState<InteractiveSpeakingScenario[]>([]);
   const [reportTick, setReportTick] = useState(0);
 

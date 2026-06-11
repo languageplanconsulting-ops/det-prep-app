@@ -177,7 +177,7 @@ export function InteractiveSpeakingSession({
 }) {
   const router = useRouter();
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const vipGate = useVipAiFeedbackGate();
   const lastAttempt = useMemo(
     () => getLatestInteractiveSpeakingReportForScenario(scenario.id),
