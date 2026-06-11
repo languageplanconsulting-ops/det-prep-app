@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
+import { SoftSetPicker, softPct, type SoftSetItem } from "@/components/practice/SoftSetPicker";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { READING_DIFFICULTY_LABEL, READING_DIFFICULTY_MAX } from "@/lib/reading-constants";
 import { getReadingExamProgress, loadReadingVisibleBank } from "@/lib/reading-storage";
 import type { ReadingDifficulty, ReadingRoundNum } from "@/types/reading";
@@ -16,6 +18,8 @@ export function ReadingDifficultySetsPage({
   difficulty: ReadingDifficulty;
 }) {
   const [bankVersion, setBankVersion] = useState(0);
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
 
   useEffect(() => {
     const onStorage = () => setBankVersion((n) => n + 1);
@@ -26,6 +30,32 @@ export function ReadingDifficultySetsPage({
       window.removeEventListener("ep-reading-storage", onStorage);
     };
   }, []);
+
+  if (soft) {
+    void bankVersion;
+    const sets = loadReadingVisibleBank()[round][difficulty];
+    const items: SoftSetItem[] = sets
+      .flatMap((set) => set.exams.map((_exam, index) => ({ setNumber: set.setNumber, examNumber: index + 1 })))
+      .map((it, idx) => ({
+        key: `${it.setNumber}-${it.examNumber}`,
+        label: `ข้อ ${idx + 1}`,
+        href: `/practice/comprehension/reading/round/${round}/${difficulty}/${it.setNumber}/${it.examNumber}`,
+        pct: softPct(getReadingExamProgress(round, difficulty, it.setNumber, it.examNumber)),
+      }));
+    return (
+      <SoftSetPicker
+        round={round}
+        difficultyLabel={READING_DIFFICULTY_LABEL[difficulty]}
+        title="การอ่าน"
+        noun="ข้อ"
+        items={items}
+        lockExam="reading"
+        changeDifficultyHref={`/practice/comprehension/reading/round/${round}`}
+        allRoundsHref="/practice/comprehension/reading"
+        notice={<NonApiExamQuotaReminder exam="reading" />}
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">
