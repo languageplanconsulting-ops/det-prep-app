@@ -1,0 +1,688 @@
+<!--
+  V2 · Empathy-first landing page for ENGLISH PLAN (DET prep, Thai learners)
+  UX principle: Mirror the learner's lived anxiety first — feeling "understood" removes
+  resistance far more powerfully than any feature list. The narrative arc is:
+  MIRROR pain → REFRAME (not your fault) → REASSURE (safe, private, Thai feedback)
+  → INVITE the single tiny first step (free diagnosis, no card required).
+-->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>English Plan — เข้าใจหัวอก แล้วก้าวต่อด้วยกัน</title>
+<meta name="description" content="แพลตฟอร์มเตรียม DET สำหรับคนไทย ฝึกครบ 4 ทักษะ รับ feedback ภาษาไทย เริ่มฟรี ไม่ต้องใช้บัตรเครดิต" />
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet" />
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-yellow': '#FFCC00',
+          'ep-cream': '#FDF6EC',
+          'ep-warm': '#FFF4DC',
+          'ep-sand': '#F5E9D0',
+          'ep-brown': '#7A5B1A',
+          'ep-ink': '#1A1A1A',
+        },
+        fontFamily: {
+          'body': ['"IBM Plex Sans Thai"', 'system-ui', 'sans-serif'],
+          'mono': ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        },
+        lineHeight: {
+          'thai': '1.75',
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'IBM Plex Sans Thai', system-ui, sans-serif;
+    background-color: #FDF6EC;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+    line-height: 1.75;
+  }
+
+  /* Preview ribbon */
+  .preview-ribbon {
+    background: #1A1A1A;
+    color: #FFCC00;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-align: center;
+    padding: 8px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .preview-ribbon a {
+    color: #FFCC00;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Smooth transitions */
+  a { transition: opacity 0.15s ease, transform 0.15s ease; }
+  a:hover { opacity: 0.85; }
+
+  /* Yellow highlight underline effect */
+  .hl {
+    position: relative;
+    display: inline;
+    white-space: nowrap;
+  }
+  .hl::after {
+    content: '';
+    position: absolute;
+    left: -2px; right: -2px;
+    bottom: 2px;
+    height: 10px;
+    background: #FFCC00;
+    z-index: -1;
+    border-radius: 2px;
+  }
+
+  /* Warm card shadow */
+  .card-warm {
+    background: #FFFFFF;
+    border: 1.5px solid #E8D5B0;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0, 74, 173, 0.06), 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  /* Divider wave */
+  .wave-divider svg { display: block; width: 100%; }
+
+  /* Feeling pill */
+  .feeling-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFF4DC;
+    border: 1.5px solid #E8D5B0;
+    border-radius: 100px;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #3D2E0E;
+    line-height: 1.5;
+  }
+
+  /* Pricing card highlight */
+  .pricing-popular {
+    position: relative;
+    border: 2px solid #004AAD !important;
+  }
+
+  /* Tap target minimum */
+  .btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+
+  /* Smooth scroll offset for anchors */
+  [id] { scroll-margin-top: 80px; }
+</style>
+</head>
+
+<body class="bg-ep-cream">
+
+  <!-- ░░ PREVIEW RIBBON ░░ -->
+  <div class="preview-ribbon" role="banner" aria-label="Preview navigation">
+    <a href="/landing-revamp-index.html" aria-label="กลับไปหน้า Preview hub">← Preview hub</a>
+    <span class="mx-3 opacity-40">|</span>
+    <span>V2 · Empathy-first</span>
+  </div>
+
+  <!-- ░░ NAV ░░ -->
+  <header class="sticky top-8 z-50 bg-ep-cream/90 backdrop-blur-md border-b border-ep-sand">
+    <nav class="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between" role="navigation" aria-label="เมนูหลัก">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2.5 no-underline" aria-label="English Plan หน้าแรก">
+        <div class="w-9 h-9 bg-ep-blue rounded-xl flex items-center justify-center flex-shrink-0" aria-hidden="true">
+          <span class="text-white font-bold text-sm tracking-tight" style="font-family:'JetBrains Mono',monospace">EP</span>
+        </div>
+        <span class="font-semibold text-ep-ink text-base leading-tight" style="letter-spacing:-0.01em">
+          ENGLISH PLAN
+        </span>
+      </a>
+
+      <!-- Nav links (desktop) -->
+      <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+        <a href="#about" class="hover:text-ep-blue">เกี่ยวกับเรา</a>
+        <a href="#how-it-works" class="hover:text-ep-blue">วิธีการ</a>
+        <a href="#pricing" class="hover:text-ep-blue">แพลน</a>
+      </div>
+
+      <!-- Auth links -->
+      <div class="flex items-center gap-3">
+        <a href="/login" class="hidden sm:block text-sm font-medium text-gray-600 hover:text-ep-blue px-3 py-2 rounded-lg hover:bg-ep-warm transition-colors">
+          เข้าสู่ระบบ
+        </a>
+        <a href="/mini-diagnosis/start"
+           class="btn bg-ep-blue text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-blue-800 transition-colors shadow-sm">
+          เริ่มฟรี →
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ░░ SECTION 1: EMPATHY HERO ░░ -->
+    <section class="bg-ep-cream pt-12 pb-0 px-5" aria-labelledby="hero-heading">
+      <div class="max-w-2xl mx-auto text-center">
+
+        <!-- Warm greeting badge -->
+        <div class="inline-flex items-center gap-2 bg-ep-warm border border-ep-sand rounded-full px-4 py-2 mb-8">
+          <span class="text-lg" aria-hidden="true">🤍</span>
+          <span class="text-sm font-medium text-ep-brown">สำหรับคนไทยที่เข้าใจความรู้สึกนี้ดี</span>
+        </div>
+
+        <!-- Main headline — mirrors the pain -->
+        <h1 id="hero-heading" class="text-3xl sm:text-4xl lg:text-5xl font-bold text-ep-ink leading-tight mb-6" style="letter-spacing:-0.02em; line-height:1.35">
+          เรียนมาตั้งนาน<br class="sm:hidden" />
+          อ่านพอได้ ฟังพอรู้เรื่อง<br />
+          แต่พอต้องพูดหรือ<br class="sm:hidden" />เขียนจริง ๆ<br />
+          <span class="hl text-ep-blue">คือตันไปหมด</span>
+        </h1>
+
+        <!-- Gentle reframe -->
+        <p class="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-xl mx-auto mb-4" style="line-height:1.8">
+          ถ้าคุณรู้สึกแบบนี้ — คุณไม่ได้เป็นคนเดียว<br />
+          และมันไม่ใช่ความผิดของคุณเลย
+        </p>
+        <p class="text-base text-gray-500 leading-relaxed max-w-lg mx-auto mb-10" style="line-height:1.8">
+          ระบบการศึกษาสอนให้เราท่อง แต่ไม่ได้สอนให้กล้าใช้จริง
+          ที่นี่เราจะฝึกด้วยกัน — ส่วนตัว ไม่มีใครตัดสิน
+          และ feedback ทุกอย่างเป็น<strong class="text-ep-ink font-semibold">ภาษาไทย</strong>
+        </p>
+
+        <!-- Primary CTA — single, soft, inviting -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+          <a href="/mini-diagnosis/start"
+             class="btn w-full sm:w-auto bg-ep-blue text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-lg hover:bg-blue-800 transition-all duration-200 hover:scale-105"
+             aria-label="เริ่มวิเคราะห์จุดอ่อนฟรี ไม่ต้องใช้บัตรเครดิต">
+            ✦ วิเคราะห์จุดอ่อนฟรี — ไม่ต้องใช้บัตร
+          </a>
+        </div>
+
+        <p class="text-sm text-gray-400 font-medium">
+          ใช้เวลาแค่ 3–5 นาที · ดูผลได้ทันที · ไม่มีค่าใช้จ่าย
+        </p>
+
+      </div>
+
+      <!-- Hero illustration — soft visual with emotion -->
+      <div class="max-w-3xl mx-auto mt-12 px-0">
+        <div class="relative rounded-3xl overflow-hidden" style="background: linear-gradient(160deg, #EEF4FF 0%, #FFF4DC 60%, #FDF6EC 100%); padding: 40px 30px 0; border: 1.5px solid #D5E3F8;">
+
+          <!-- Floating comfort pills -->
+          <div class="flex flex-wrap justify-center gap-3 mb-8">
+            <div class="feeling-pill">
+              <span aria-hidden="true">🔒</span>
+              <span>ส่วนตัว 100%</span>
+            </div>
+            <div class="feeling-pill">
+              <span aria-hidden="true">🇹🇭</span>
+              <span>Feedback ภาษาไทย</span>
+            </div>
+            <div class="feeling-pill">
+              <span aria-hidden="true">💙</span>
+              <span>ไม่มีการตัดสิน</span>
+            </div>
+            <div class="feeling-pill">
+              <span aria-hidden="true">✨</span>
+              <span>เริ่มฟรีก่อนได้เลย</span>
+            </div>
+          </div>
+
+          <!-- Mock feedback UI card -->
+          <div class="max-w-md mx-auto card-warm p-5 mb-0">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 bg-ep-blue rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-white text-xs font-bold" style="font-family:'JetBrains Mono',monospace">AI</span>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-ep-brown uppercase tracking-wide mb-0.5">Feedback จาก English Plan AI</p>
+                <p class="text-xs text-gray-400">Production · Writing response</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-700 leading-relaxed mb-3" style="line-height:1.8">
+              "คำตอบของคุณดีมากนะคะ โครงสร้างชัดเจน ความคิดหลักมา
+              ครบ แต่มีจุดหนึ่งที่อาจทำให้ได้คะแนนสูงขึ้นได้ คือ..."
+            </p>
+            <div class="flex items-center gap-2">
+              <div class="h-2 flex-1 bg-ep-sand rounded-full overflow-hidden">
+                <div class="h-full bg-ep-blue rounded-full" style="width:72%"></div>
+              </div>
+              <span class="font-mono text-xs font-bold text-ep-blue" style="font-family:'JetBrains Mono',monospace">72/100</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ░░ SECTION 2: YOU'RE NOT ALONE ░░ -->
+    <section class="bg-ep-cream pt-20 pb-16 px-5" id="about" aria-labelledby="alone-heading">
+      <div class="max-w-2xl mx-auto">
+
+        <div class="text-center mb-12">
+          <p class="text-xs font-bold tracking-widest text-ep-brown uppercase mb-3" style="font-family:'JetBrains Mono',monospace">คุณไม่ได้เป็นคนเดียว</p>
+          <h2 id="alone-heading" class="text-2xl sm:text-3xl font-bold text-ep-ink leading-snug" style="line-height:1.4">
+            นี่คือสิ่งที่คนไทยหลายพันคน<br />รู้สึกอยู่ทุกวัน
+          </h2>
+        </div>
+
+        <!-- Relatable struggles grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <div class="card-warm p-5">
+            <div class="text-2xl mb-3" aria-hidden="true">😰</div>
+            <p class="font-semibold text-ep-ink mb-1">กลัวพูดผิดต่อหน้าคนอื่น</p>
+            <p class="text-sm text-gray-500 leading-relaxed">คิดไว้ในหัว แต่พอต้องพูดออกมาจริง ๆ คำหาย ปากไม่ยอมขยับ</p>
+          </div>
+
+          <div class="card-warm p-5">
+            <div class="text-2xl mb-3" aria-hidden="true">✍️</div>
+            <p class="font-semibold text-ep-ink mb-1">เขียนแล้วลบ แล้วก็เขียนใหม่</p>
+            <p class="text-sm text-gray-500 leading-relaxed">ไม่รู้ว่า grammar ถูกไหม ส่งไปแล้วก็ยังกังวลอยู่</p>
+          </div>
+
+          <div class="card-warm p-5">
+            <div class="text-2xl mb-3" aria-hidden="true">📖</div>
+            <p class="font-semibold text-ep-ink mb-1">อ่านรู้เรื่อง แต่เขียนไม่ออก</p>
+            <p class="text-sm text-gray-500 leading-relaxed">รู้สึกว่าฝึกมานานแล้ว แต่ทำไมยังแปลงเป็นคำพูดหรือตัวอักษรไม่ได้</p>
+          </div>
+
+          <div class="card-warm p-5">
+            <div class="text-2xl mb-3" aria-hidden="true">⏰</div>
+            <p class="font-semibold text-ep-ink mb-1">ไม่รู้จะเริ่มตรงไหนดี</p>
+            <p class="text-sm text-gray-500 leading-relaxed">เปิด YouTube บ้าง แอปบ้าง แต่สุดท้ายก็หยุดเพราะไม่รู้ว่าตัวเองขาดอะไร</p>
+          </div>
+
+          <div class="card-warm p-5 sm:col-span-2">
+            <div class="text-2xl mb-3" aria-hidden="true">🎯</div>
+            <p class="font-semibold text-ep-ink mb-1">อยากสอบ DET แต่กลัวพาร์ทพูดและเขียน</p>
+            <p class="text-sm text-gray-500 leading-relaxed">ได้ยินว่า DET มีให้พูดและเขียนแบบ free-form แล้วรู้สึกหนักใจ ไม่รู้ว่าเขาต้องการอะไรกันแน่</p>
+          </div>
+
+        </div>
+
+        <!-- Reframe paragraph -->
+        <div class="mt-10 p-6 rounded-2xl text-center" style="background: linear-gradient(135deg, #EEF4FF, #FFF8E1);">
+          <p class="text-base text-gray-700 leading-relaxed max-w-lg mx-auto" style="line-height:1.85">
+            ถ้าคุณพยักหน้าให้กับข้อใดข้อหนึ่ง — แสดงว่าคุณไม่ได้ขาด "ความสามารถ"
+            คุณแค่ยังไม่เคยได้รับ<strong class="text-ep-ink">การฝึกที่ถูกวิธี</strong>และ<strong class="text-ep-ink">ที่ปลอดภัยพอ</strong>
+            ให้คุณกล้าลองผิดลองถูก
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ░░ SECTION 3: BEFORE → AFTER STORY ░░ -->
+    <section class="bg-white py-16 px-5" aria-labelledby="story-heading">
+      <div class="max-w-2xl mx-auto">
+
+        <div class="text-center mb-10">
+          <p class="text-xs font-bold tracking-widest text-ep-brown uppercase mb-3" style="font-family:'JetBrains Mono',monospace">เรื่องจริงจากนักเรียน</p>
+          <h2 id="story-heading" class="text-2xl sm:text-3xl font-bold text-ep-ink" style="line-height:1.4">
+            จากคนที่กลัวพาร์ทพูด<br />สู่คนที่ผ่าน DET ได้
+          </h2>
+        </div>
+
+        <!-- Story card — believable, human, not over-polished -->
+        <div class="card-warm p-6 sm:p-8 max-w-xl mx-auto">
+
+          <!-- Avatar + name -->
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center text-2xl font-bold border-2 border-ep-sand" style="background: linear-gradient(135deg, #FFE082, #FFB74D);" aria-hidden="true">
+              น
+            </div>
+            <div>
+              <p class="font-bold text-ep-ink text-base mb-0.5">น้องนภา</p>
+              <p class="text-sm text-gray-500">นักศึกษาปี 3 · คณะวิทยาศาสตร์ มหาวิทยาลัยในต่างจังหวัด</p>
+            </div>
+            <div class="ml-auto text-right flex-shrink-0">
+              <p class="text-xs text-gray-400 mb-0.5">DET Score</p>
+              <p class="font-mono font-bold text-ep-blue text-xl" style="font-family:'JetBrains Mono',monospace">120</p>
+            </div>
+          </div>
+
+          <!-- Before state -->
+          <div class="mb-5 p-4 rounded-xl bg-red-50 border border-red-100">
+            <p class="text-xs font-bold text-red-400 uppercase tracking-wide mb-2" style="font-family:'JetBrains Mono',monospace">ก่อนมาที่นี่</p>
+            <p class="text-sm text-gray-700 leading-relaxed" style="line-height:1.8">
+              "กลัวมากเลย โดยเฉพาะพาร์ทที่ต้องพูดและเขียน
+              อยู่ดี ๆ ก็ต้องตอบ ไม่รู้ว่าเขาต้องการอะไร
+              ลองทำ mock แล้วได้แค่ 95 คะแนน หมดหวังไปเลย"
+            </p>
+          </div>
+
+          <!-- What changed -->
+          <div class="mb-5 p-4 rounded-xl bg-blue-50 border border-blue-100">
+            <p class="text-xs font-bold text-ep-blue uppercase tracking-wide mb-2" style="font-family:'JetBrains Mono',monospace">สิ่งที่เปลี่ยนไป</p>
+            <p class="text-sm text-gray-700 leading-relaxed" style="line-height:1.8">
+              "ฝึก speaking กับ writing ทุกวัน feedback เป็นภาษาไทย
+              เลยเข้าใจว่าตัวเองพลาดตรงไหน ไม่ต้องเดา
+              สำคัญกว่านั้น คือรู้สึกปลอดภัยที่จะลองผิดลองถูก"
+            </p>
+          </div>
+
+          <!-- After state -->
+          <div class="p-4 rounded-xl bg-green-50 border border-green-100">
+            <p class="text-xs font-bold text-green-500 uppercase tracking-wide mb-2" style="font-family:'JetBrains Mono',monospace">ผลลัพธ์</p>
+            <p class="text-sm text-gray-700 leading-relaxed" style="line-height:1.8">
+              "ได้ 120 ในการสอบครั้งที่สอง สมัครแล้วก็รอผลอยู่เลย
+              ขอบคุณที่ทำให้รู้สึกว่าการฝึกไม่ต้องน่ากลัว"
+            </p>
+          </div>
+
+          <p class="text-xs text-gray-400 text-center mt-4 italic">* ตัวละครสมมติจากประสบการณ์จริงของนักเรียน เพื่อรักษาความเป็นส่วนตัว</p>
+        </div>
+
+        <!-- Stats row -->
+        <div class="grid grid-cols-3 gap-4 mt-10 max-w-lg mx-auto text-center">
+          <div>
+            <p class="font-mono font-bold text-ep-blue text-3xl sm:text-4xl" style="font-family:'JetBrains Mono',monospace">1K+</p>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1 leading-tight">นักเรียนไทย<br />ที่ผ่านมาแล้ว</p>
+          </div>
+          <div>
+            <p class="font-mono font-bold text-ep-blue text-3xl sm:text-4xl" style="font-family:'JetBrains Mono',monospace">600+</p>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1 leading-tight">แบบฝึกหัด<br />ในระบบ</p>
+          </div>
+          <div>
+            <p class="font-mono font-bold text-ep-blue text-3xl sm:text-4xl" style="font-family:'JetBrains Mono',monospace">4</p>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1 leading-tight">ทักษะ<br />ครบทุกด้าน</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ░░ SECTION 4: HOW WE MAKE IT FEEL SAFE ░░ -->
+    <section class="py-16 px-5" id="how-it-works" aria-labelledby="safe-heading" style="background: linear-gradient(180deg, #F0F6FF 0%, #FDF6EC 100%);">
+      <div class="max-w-2xl mx-auto">
+
+        <div class="text-center mb-12">
+          <p class="text-xs font-bold tracking-widest text-ep-brown uppercase mb-3" style="font-family:'JetBrains Mono',monospace">ทำไมที่นี่ถึงรู้สึกต่างออกไป</p>
+          <h2 id="safe-heading" class="text-2xl sm:text-3xl font-bold text-ep-ink" style="line-height:1.4">
+            เราออกแบบมาเพื่อให้คุณ<br /><span class="hl text-ep-blue">กล้าลองจริง ๆ</span>
+          </h2>
+        </div>
+
+        <div class="space-y-5">
+
+          <div class="card-warm p-6 flex gap-5 items-start">
+            <div class="w-12 h-12 rounded-2xl bg-ep-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+              <span class="text-white text-xl">🔒</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-ep-ink text-base mb-1.5">ส่วนตัวอย่างแท้จริง</h3>
+              <p class="text-sm text-gray-600 leading-relaxed" style="line-height:1.8">
+                คำตอบของคุณเป็นของคุณคนเดียว ไม่มีใครในโลกได้เห็น ไม่มีการแชร์ ไม่มีการเปรียบเทียบ คุณฝึกกับ AI ในพื้นที่ปลอดภัย
+              </p>
+            </div>
+          </div>
+
+          <div class="card-warm p-6 flex gap-5 items-start">
+            <div class="w-12 h-12 rounded-2xl bg-ep-yellow flex items-center justify-center flex-shrink-0" aria-hidden="true">
+              <span class="text-ep-ink text-xl">🇹🇭</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-ep-ink text-base mb-1.5">Feedback ภาษาไทยทั้งหมด</h3>
+              <p class="text-sm text-gray-600 leading-relaxed" style="line-height:1.8">
+                คุณไม่ต้องแปล feedback อีกต่อไป AI อธิบายว่าคุณพลาดตรงไหนและต้องแก้ยังไง เป็นภาษาไทยที่เข้าใจง่าย
+              </p>
+            </div>
+          </div>
+
+          <div class="card-warm p-6 flex gap-5 items-start">
+            <div class="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+              <span class="text-green-600 text-xl">🌱</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-ep-ink text-base mb-1.5">เริ่มจากก้าวเล็ก ๆ ก็พอ</h3>
+              <p class="text-sm text-gray-600 leading-relaxed" style="line-height:1.8">
+                ทำ mini-diagnosis 3–5 นาที แล้วคุณจะรู้ทันทีว่าตัวเองขาดอะไร ไม่ต้องเดาอีกต่อไป ไม่ต้องลงทุนก่อน
+              </p>
+            </div>
+          </div>
+
+          <div class="card-warm p-6 flex gap-5 items-start">
+            <div class="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+              <span class="text-purple-600 text-xl">💬</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-ep-ink text-base mb-1.5">ฝึกครบ 4 ทักษะที่ DET ต้องการ</h3>
+              <p class="text-sm text-gray-600 leading-relaxed" style="line-height:1.8">
+                Production (เขียน+พูด) · Comprehension (อ่าน+คำศัพท์) · Literacy (dictation) · Conversation (ฟัง+โต้ตอบ) — ครบทุกสิ่งในที่เดียว
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ░░ SECTION 5: FAST TRACK COHORT MENTION ░░ -->
+    <section class="py-12 px-5 bg-ep-blue" aria-labelledby="fasttrack-heading">
+      <div class="max-w-2xl mx-auto text-center">
+        <p class="text-ep-yellow text-xs font-bold tracking-widest uppercase mb-3" style="font-family:'JetBrains Mono',monospace">สำหรับคนที่ต้องการ structure</p>
+        <h2 id="fasttrack-heading" class="text-white text-2xl sm:text-3xl font-bold mb-4" style="line-height:1.4">
+          Duolingo Fast Track Course
+        </h2>
+        <p class="text-blue-200 text-base leading-relaxed max-w-lg mx-auto mb-8" style="line-height:1.8">
+          โปรแกรมคอร์สแบบ cohort สำหรับคนที่ต้องการเส้นทางที่ชัดเจน
+          มีตารางเรียน มีเพื่อนร่วมทาง และได้ VIP 6 เดือนตลอดหลักสูตร
+        </p>
+        <a href="/?fastTrack=1"
+           class="btn inline-flex bg-ep-yellow text-ep-ink font-bold text-base px-8 py-4 rounded-2xl hover:opacity-90 transition-all hover:scale-105">
+          ดูรายละเอียด Fast Track →
+        </a>
+      </div>
+    </section>
+
+    <!-- ░░ SECTION 6: PRICING — LOW-KEY ░░ -->
+    <section class="py-16 px-5 bg-ep-cream" id="pricing" aria-labelledby="pricing-heading">
+      <div class="max-w-3xl mx-auto">
+
+        <div class="text-center mb-12">
+          <p class="text-xs font-bold tracking-widest text-ep-brown uppercase mb-3" style="font-family:'JetBrains Mono',monospace">เริ่มฟรีก่อน</p>
+          <h2 id="pricing-heading" class="text-2xl sm:text-3xl font-bold text-ep-ink mb-4" style="line-height:1.4">
+            ค่อยอัปเกรด<br class="sm:hidden" />ถ้าจำเป็น
+          </h2>
+          <p class="text-gray-500 text-base max-w-md mx-auto" style="line-height:1.8">
+            ไม่มีแรงกดดัน ไม่มีการผูกมัด
+            ลองฟรีก่อน แล้วตัดสินใจเองว่าต้องการอะไรเพิ่ม
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+          <!-- Free -->
+          <div class="card-warm p-5 flex flex-col">
+            <div class="mb-4">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2" style="font-family:'JetBrains Mono',monospace">Free</p>
+              <div class="flex items-baseline gap-1">
+                <span class="font-mono font-bold text-3xl text-ep-ink" style="font-family:'JetBrains Mono',monospace">฿0</span>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">ตลอดไป</p>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-600 flex-1 mb-5">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>Mini-diagnosis ฟรี</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>ดูผลวิเคราะห์ทันที</li>
+              <li class="flex items-start gap-2"><span class="text-gray-300 mt-0.5 flex-shrink-0">–</span><span class="text-gray-400">ฝึกเต็มรูปแบบ</span></li>
+            </ul>
+            <a href="/mini-diagnosis/start" class="btn w-full text-center bg-ep-ink text-white text-sm font-semibold rounded-xl py-3 hover:opacity-90 transition">
+              เริ่มฟรีเลย
+            </a>
+          </div>
+
+          <!-- Basic -->
+          <div class="card-warm p-5 flex flex-col">
+            <div class="mb-4">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2" style="font-family:'JetBrains Mono',monospace">Basic</p>
+              <div class="flex items-baseline gap-1">
+                <span class="font-mono font-bold text-3xl text-ep-ink" style="font-family:'JetBrains Mono',monospace">฿399</span>
+                <span class="text-sm text-gray-400">/เดือน</span>
+              </div>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-600 flex-1 mb-5">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>12 AI feedbacks/เดือน</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>2 Mock tests/เดือน</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>Feedback ภาษาไทย</li>
+            </ul>
+            <a href="/signup?next=%2Fpractice" class="btn w-full text-center border-2 border-ep-ink text-ep-ink text-sm font-semibold rounded-xl py-3 hover:bg-ep-warm transition">
+              เลือก Basic
+            </a>
+          </div>
+
+          <!-- Premium — popular -->
+          <div class="card-warm p-5 flex flex-col pricing-popular relative">
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span class="bg-ep-blue text-white text-xs font-bold px-3 py-1 rounded-full tracking-wide" style="font-family:'JetBrains Mono',monospace">ยอดนิยม</span>
+            </div>
+            <div class="mb-4 mt-2">
+              <p class="text-xs font-bold text-ep-blue uppercase tracking-wide mb-2" style="font-family:'JetBrains Mono',monospace">Premium</p>
+              <div class="flex items-baseline gap-1">
+                <span class="font-mono font-bold text-3xl text-ep-blue" style="font-family:'JetBrains Mono',monospace">฿699</span>
+                <span class="text-sm text-gray-400">/เดือน</span>
+              </div>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-600 flex-1 mb-5">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>30 AI feedbacks/เดือน</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>4 Mock tests/เดือน</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>ทุกทักษะ ไม่จำกัด</li>
+            </ul>
+            <a href="/signup?next=%2Fpractice" class="btn w-full text-center bg-ep-blue text-white text-sm font-semibold rounded-xl py-3 hover:bg-blue-800 transition">
+              เลือก Premium
+            </a>
+          </div>
+
+          <!-- VIP -->
+          <div class="card-warm p-5 flex flex-col" style="background: linear-gradient(135deg, #FFF8DC, #FFFBEE);">
+            <div class="mb-4">
+              <p class="text-xs font-bold text-ep-brown uppercase tracking-wide mb-2" style="font-family:'JetBrains Mono',monospace">VIP</p>
+              <div class="flex items-baseline gap-1">
+                <span class="font-mono font-bold text-3xl text-ep-ink" style="font-family:'JetBrains Mono',monospace">฿999</span>
+                <span class="text-sm text-gray-400">/30 วัน</span>
+              </div>
+              <p class="text-xs text-ep-brown mt-1 font-medium">จ่ายครั้งเดียว ไม่ต่ออัตโนมัติ</p>
+            </div>
+            <ul class="space-y-2 text-sm text-gray-600 flex-1 mb-5">
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>60 AI feedbacks/เดือน</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>6 Mock tests</li>
+              <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>Unlimited lanes</li>
+            </ul>
+            <a href="/signup?next=%2Fpractice" class="btn w-full text-center border-2 border-ep-brown text-ep-brown text-sm font-semibold rounded-xl py-3 hover:bg-ep-warm transition">
+              เลือก VIP
+            </a>
+          </div>
+
+        </div>
+
+        <p class="text-center text-sm text-gray-400 mt-6">
+          ทุกแผนไม่มีการต่ออัตโนมัติ · ยกเลิกได้ตลอด · ไม่ต้องใส่บัตรในขั้นตอน Free
+        </p>
+
+      </div>
+    </section>
+
+    <!-- ░░ SECTION 7: WARM CLOSING CTA ░░ -->
+    <section class="py-20 px-5 bg-ep-cream" aria-labelledby="closing-heading">
+      <div class="max-w-xl mx-auto text-center">
+
+        <div class="mb-8">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-ep-blue mb-6" aria-hidden="true">
+            <span class="text-white font-bold text-2xl" style="font-family:'JetBrains Mono',monospace">EP</span>
+          </div>
+          <h2 id="closing-heading" class="text-2xl sm:text-3xl font-bold text-ep-ink mb-5" style="line-height:1.4">
+            ก้าวแรกเล็กที่สุดก็พอแล้ว
+          </h2>
+          <p class="text-gray-600 text-base leading-relaxed max-w-md mx-auto mb-2" style="line-height:1.85">
+            คุณไม่ต้องเตรียมตัวก่อน ไม่ต้องฝึกอะไรก่อน
+            แค่มาลอง mini-diagnosis 3 นาที
+            แล้วเราจะบอกคุณเองว่าควรเริ่มตรงไหน
+          </p>
+          <p class="text-gray-400 text-sm">ฟรี · ไม่มีบัตร · ไม่มีการตัดสิน</p>
+        </div>
+
+        <a href="/mini-diagnosis/start"
+           class="btn inline-flex w-full sm:w-auto bg-ep-blue text-white font-bold text-lg px-10 py-5 rounded-2xl shadow-lg hover:bg-blue-800 transition-all duration-200 hover:scale-105 mb-4">
+          ✦ วิเคราะห์จุดอ่อนของฉัน — ฟรี
+        </a>
+
+        <div class="flex items-center justify-center gap-3 mt-4">
+          <a href="/signup?next=%2Fpractice" class="text-sm font-medium text-gray-500 hover:text-ep-blue underline underline-offset-2">
+            สร้างบัญชีฟรี
+          </a>
+          <span class="text-gray-300">·</span>
+          <a href="/login" class="text-sm font-medium text-gray-500 hover:text-ep-blue underline underline-offset-2">
+            เข้าสู่ระบบ
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ░░ FOOTER ░░ -->
+  <footer class="bg-ep-ink text-gray-400 py-12 px-5" role="contentinfo">
+    <div class="max-w-4xl mx-auto">
+
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 mb-8">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-ep-blue rounded-xl flex items-center justify-center flex-shrink-0" aria-hidden="true">
+            <span class="text-white font-bold text-sm" style="font-family:'JetBrains Mono',monospace">EP</span>
+          </div>
+          <div>
+            <p class="text-white font-bold text-sm tracking-tight">ENGLISH PLAN</p>
+            <p class="text-xs text-gray-500 mt-0.5">DET Prep สำหรับคนไทย</p>
+          </div>
+        </div>
+
+        <!-- Footer links -->
+        <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm" aria-label="Footer navigation">
+          <a href="/mini-diagnosis/start" class="hover:text-white transition-colors">เริ่มฟรี</a>
+          <a href="#pricing" class="hover:text-white transition-colors">แพลนราคา</a>
+          <a href="/?fastTrack=1" class="hover:text-white transition-colors">Fast Track</a>
+          <a href="/login" class="hover:text-white transition-colors">เข้าสู่ระบบ</a>
+          <a href="/signup?next=%2Fpractice" class="hover:text-white transition-colors">สมัครสมาชิก</a>
+        </nav>
+      </div>
+
+      <div class="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <p class="text-xs text-gray-600">
+          © 2025 English Plan · เพื่อคนไทยที่อยากพัฒนาภาษาอังกฤษ
+        </p>
+        <p class="text-xs text-gray-700 font-mono" style="font-family:'JetBrains Mono',monospace">
+          Landing V2 · Empathy-first
+        </p>
+      </div>
+
+    </div>
+  </footer>
+
+</body>
+</html>

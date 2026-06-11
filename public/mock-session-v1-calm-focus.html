@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mock session V1 · Calm Focus</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f5f7fb;color:#0f172a}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  .card{background:#fff;border:1px solid #e7e9f0;border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  textarea{font-family:inherit}
+  .seg{height:6px;border-radius:9999px;flex:1}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- meta banner (outside the screen) -->
+<div class="bg-ep-blue text-ep-yellow px-4 py-2 text-[11px] font-bold tracking-wide flex items-center gap-3 flex-wrap">
+  <span>V1 · CALM FOCUS</span>
+  <span class="text-white/80 font-medium">นำด้วยหลัก Krug “Don’t Make Me Think” — ตัด chrome ทิ้ง เหลือสิ่งที่ต้องคิดอย่างเดียว</span>
+  <a href="/mock-session-index.html" class="ml-auto bg-white/15 px-2.5 py-1 rounded-md text-white">← ทั้ง 4 แบบ</a>
+</div>
+
+<!-- ░░ slim top bar : the only chrome ░░ -->
+<header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200">
+  <div class="mx-auto max-w-2xl px-4 py-2.5 flex items-center gap-3">
+    <span class="font-bold text-ep-blue text-sm shrink-0">English&nbsp;Plan</span>
+    <span class="text-[11px] font-semibold text-slate-500 shrink-0">ข้อ <span class="mono text-slate-900">7</span>/20</span>
+    <!-- 20 quiet ticks = where am I, no math required -->
+    <div class="flex gap-[3px] flex-1 min-w-0">
+      <div class="seg bg-ep-blue"></div><div class="seg bg-ep-blue"></div><div class="seg bg-ep-blue"></div>
+      <div class="seg bg-ep-blue"></div><div class="seg bg-ep-blue"></div><div class="seg bg-ep-blue"></div>
+      <div class="seg bg-ep-yellow ring-2 ring-ep-yellow/40"></div>
+      <div class="seg bg-slate-200"></div><div class="seg bg-slate-200"></div><div class="seg bg-slate-200"></div>
+      <div class="seg bg-slate-200"></div><div class="seg bg-slate-200"></div><div class="seg bg-slate-200"></div>
+      <div class="seg bg-slate-200"></div><div class="seg bg-slate-200"></div><div class="seg bg-slate-200"></div>
+      <div class="seg bg-slate-200"></div><div class="seg bg-slate-200"></div><div class="seg bg-slate-200"></div>
+      <div class="seg bg-slate-200"></div>
+    </div>
+    <span class="mono text-sm font-bold text-slate-800 shrink-0">01:48</span>
+    <button class="shrink-0 text-slate-400 hover:text-slate-600 text-lg leading-none px-1" title="ตัวเลือก">⋯</button>
+  </div>
+</header>
+
+<main class="mx-auto max-w-2xl px-4 pt-7 pb-28">
+
+  <!-- one quiet kicker line: what is this, what to do -->
+  <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-ep-blue">อ่านแล้วเขียน · Read &amp; write</p>
+  <h1 class="mt-1.5 text-[22px] font-bold leading-snug">เขียนตอบคำถามให้ตรงประเด็น อย่างน้อย 1 ย่อหน้า</h1>
+  <p class="mt-1 text-sm text-slate-500">อ่านโจทย์รอบเดียว แล้วเริ่มเขียน — ตอบคร่าว ๆ ก็ยังดีกว่าไม่ตอบ</p>
+
+  <!-- prompt -->
+  <div class="card p-5 mt-5">
+    <p class="text-[15px] leading-7 text-slate-800">
+      Some people prefer to study in the morning, while others focus better at night.
+      <span class="font-semibold">Which do you prefer, and why?</span>
+      Give at least two reasons and an example from your own experience.
+    </p>
+  </div>
+
+  <!-- answer -->
+  <div class="card p-2 mt-3">
+    <textarea rows="7" class="w-full resize-none rounded-xl p-3 text-[15px] leading-7 outline-none placeholder:text-slate-300" placeholder="พิมพ์คำตอบที่นี่…">I prefer to study at night because the house is quiet and</textarea>
+    <div class="flex items-center justify-between px-2 pb-1 pt-0.5">
+      <span class="text-xs text-slate-400"><span class="mono text-slate-600">14</span> คำ · แนะนำ 40–80 คำ</span>
+      <span class="text-xs text-emerald-600 font-semibold">✓ บันทึกอัตโนมัติ</span>
+    </div>
+  </div>
+
+</main>
+
+<!-- ░░ one primary action, full width, thumb-reachable (Fitts) ░░ -->
+<div class="fixed bottom-0 inset-x-0 z-20 bg-white/95 backdrop-blur border-t border-slate-200">
+  <div class="mx-auto max-w-2xl px-4 py-3 flex items-center gap-3">
+    <span class="text-xs text-slate-400 hidden sm:block">กด <kbd class="mono px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-[11px]">↵</kbd> เพื่อส่ง</span>
+    <button class="ml-auto bg-ep-blue text-ep-yellow font-bold text-[15px] px-7 py-3 rounded-xl shadow-sm hover:brightness-110 transition flex items-center gap-2">
+      ส่งคำตอบ ไปข้อต่อไป <span>→</span>
+    </button>
+  </div>
+</div>
+
+<!-- design rationale (meta, outside screen) -->
+<section class="mx-auto max-w-2xl px-4 py-8 mt-4 text-[12px] text-slate-500 leading-6 border-t border-slate-200">
+  <p class="font-bold text-slate-700 mb-1">ทำไมแบบนี้</p>
+  <p><b>Krug</b> — หน้าจอเดิมมี 4 กล่องสถิติ + sidebar “Focus guide” + “Session controls” แย่งสมาธิตอนกำลังสอบ. แบบนี้เหลือ: ฉันอยู่ข้อไหน · เหลือเวลาเท่าไหร่ · จะทำอะไร — สามอย่าง จบ.
+  <b>Fitts</b> — ปุ่มส่งใหญ่ ติดล่าง นิ้วโป้งถึง. <b>Hick</b> — มี action เดียวบนจอ. ตัวเลือก/ออก ซ่อนใน ⋯.</p>
+</section>
+
+</body>
+</html>

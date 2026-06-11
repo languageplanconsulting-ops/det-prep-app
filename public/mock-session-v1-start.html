@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mock start V1 · Calm Focus</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f5f7fb;color:#0f172a}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  .card{background:#fff;border:1px solid #e7e9f0;border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="bg-ep-blue text-ep-yellow px-4 py-2 text-[11px] font-bold tracking-wide flex items-center gap-3 flex-wrap">
+  <span>V1 · ก่อนเริ่มสอบ · CALM FOCUS</span>
+  <span class="text-white/80 font-medium">หน้าก่อนกดเริ่ม — เลือกชุด ยืนยันเครดิต แล้วเริ่ม</span>
+  <a href="/mock-session-index.html" class="ml-auto bg-white/15 px-2.5 py-1 rounded-md text-white">← ทั้ง 4 แบบ</a>
+</div>
+
+<header class="bg-white border-b border-slate-200">
+  <div class="mx-auto max-w-xl px-4 py-3 flex items-center gap-2">
+    <a class="text-[12px] font-semibold text-slate-400 hover:text-slate-600">← กลับไปฝึก</a>
+    <span class="ml-auto font-bold text-ep-blue text-sm">English&nbsp;Plan</span>
+  </div>
+</header>
+
+<main class="mx-auto max-w-xl px-4 py-7">
+
+  <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-ep-blue">จำลองสอบเต็มชุด · Mock test</p>
+  <h1 class="mt-1.5 text-[26px] font-bold leading-tight">ซ้อมสอบ DET เต็มรูปแบบ</h1>
+  <p class="mt-1.5 text-sm text-slate-500">20 ข้อ · ประมาณ 1 ชั่วโมง · ได้คะแนน 0–160 ทั้ง 4 ทักษะ + จุดที่อ่อนสุด 2 อย่าง</p>
+
+  <!-- the set, decided for you (Hick: don't make them choose from a wall) -->
+  <div class="card p-5 mt-5">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">ชุดที่แนะนำให้คุณ</p>
+        <p class="mt-1 text-lg font-bold">June 2026 · Set A</p>
+        <p class="text-[12px] text-slate-400">ยังไม่เคยทำ · ชุดล่าสุด</p>
+      </div>
+      <button class="text-[12px] font-semibold text-ep-blue hover:underline shrink-0">เปลี่ยนชุด</button>
+    </div>
+  </div>
+
+  <!-- progress, not scarcity (Nodder/Gluttony) -->
+  <div class="mt-3 flex items-center gap-3 rounded-2xl bg-white border border-slate-200 px-4 py-3">
+    <div class="flex items-end gap-1 h-9">
+      <div class="w-3 bg-slate-200 rounded-t" style="height:48%"></div>
+      <div class="w-3 bg-slate-200 rounded-t" style="height:60%"></div>
+      <div class="w-3 bg-slate-300 rounded-t" style="height:74%"></div>
+      <div class="w-3 bg-ep-blue rounded-t" style="height:92%"></div>
+    </div>
+    <p class="text-[13px] text-slate-600">ทำมาแล้ว <b class="text-ep-blue mono">4</b> ครั้ง · ดีสุด <b class="text-ep-blue mono">105</b> · พัฒนาขึ้น <b class="text-emerald-600">+12</b></p>
+  </div>
+
+  <!-- honest credit note — clear, not a scary brutalist box (Evil by Design: ethical loss-aversion) -->
+  <div class="mt-3 rounded-2xl bg-amber-50 ring-1 ring-amber-200 px-4 py-3 text-[13px] text-amber-900 leading-6">
+    กดเริ่ม = ใช้ <b>1 เครดิตเดือนนี้</b> ทันที · ออกกลางคันไม่คืนเครดิต — เผื่อเวลาให้ครบ ~1 ชม. ก่อนเริ่มนะ
+    <div class="mt-1 text-[11px] text-amber-700/80">เหลือเดือนนี้ <span class="mono">2</span>/3 ครั้ง</div>
+  </div>
+
+  <!-- optional targets, folded away by default (Krug: don't force a decision) -->
+  <details class="mt-3 card px-4 py-3">
+    <summary class="cursor-pointer text-[13px] font-semibold text-slate-600 list-none flex items-center justify-between">
+      <span>🎯 ตั้งเป้าคะแนน (ไม่บังคับ)</span><span class="text-slate-300">＋</span>
+    </summary>
+    <div class="mt-3 grid grid-cols-2 gap-2">
+      <input placeholder="เป้ารวม เช่น 125" class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-ep-blue"/>
+      <input placeholder="การอ่าน" class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-ep-blue"/>
+      <input placeholder="การเขียน" class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-ep-blue"/>
+      <input placeholder="การพูด/ฟัง" class="rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-ep-blue"/>
+    </div>
+  </details>
+
+  <!-- one primary action -->
+  <button class="mt-5 w-full bg-ep-blue text-ep-yellow font-bold text-base py-3.5 rounded-xl shadow-sm hover:brightness-110 transition flex items-center justify-center gap-2">
+    เริ่มสอบ · June 2026 Set A <span>→</span>
+  </button>
+  <p class="mt-2 text-center text-[12px] text-slate-400">หาเวลาที่ไม่มีใครรบกวน ~1 ชม. แล้วลุยเลย</p>
+
+</main>
+
+<section class="mx-auto max-w-xl px-4 py-8 text-[12px] text-slate-500 leading-6 border-t border-slate-200">
+  <p class="font-bold text-slate-700 mb-1">ทำไมแบบนี้</p>
+  <p>หน้าจริงมี dashboard ยาว (Personal Best + History table + Access logic + preflight modal เต็มจอ). <b>Hick</b> — เลือกชุดให้เลย 1 ชุด, เปลี่ยนได้ถ้าอยาก. <b>Krug</b> — เป้าหมายพับเก็บ ไม่บังคับกรอก. <b>Nodder</b> — โชว์ “ทำมา 4 · +12” เป็นกำลังใจ. แจ้งเครดิตตรง ๆ แต่ไม่ขู่ด้วยกรอบดำ ⚠️.</p>
+</section>
+
+</body>
+</html>

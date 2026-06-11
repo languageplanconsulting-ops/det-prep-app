@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mock session V2 · Progress Journey</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;background:#f5f7fb;color:#0f172a}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  .card{background:#fff;border:1px solid #e7e9f0;border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  textarea{font-family:inherit}
+  .node{width:26px;height:26px;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="bg-ep-blue text-ep-yellow px-4 py-2 text-[11px] font-bold tracking-wide flex items-center gap-3 flex-wrap">
+  <span>V2 · PROGRESS JOURNEY</span>
+  <span class="text-white/80 font-medium">นำด้วย Tidwell (Sequence Map) + Nodder (เปลี่ยน “เครดิตหมด” เป็น “ความก้าวหน้า”)</span>
+  <a href="/mock-session-index.html" class="ml-auto bg-white/15 px-2.5 py-1 rounded-md text-white">← ทั้ง 4 แบบ</a>
+</div>
+
+<!-- thin timer ribbon -->
+<header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200">
+  <div class="mx-auto max-w-5xl px-4 py-2.5 flex items-center gap-3">
+    <span class="font-bold text-ep-blue text-sm">English&nbsp;Plan</span>
+    <span class="text-[11px] font-semibold text-slate-500">Mock เต็มชุด</span>
+    <div class="ml-auto flex items-center gap-2">
+      <span class="text-[11px] font-semibold text-slate-400">เวลาในข้อนี้</span>
+      <span class="mono text-base font-bold text-slate-800">01:48</span>
+      <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">ตามจังหวะ</span>
+    </div>
+  </div>
+  <div class="h-1 w-full bg-slate-100"><div class="h-full bg-ep-blue" style="width:64%"></div></div>
+</header>
+
+<div class="mx-auto max-w-5xl px-4 py-6 grid gap-6 lg:grid-cols-[230px_minmax(0,1fr)]">
+
+  <!-- ░░ left: the journey rail ░░ -->
+  <aside class="lg:sticky lg:top-24 lg:self-start">
+    <div class="card p-4">
+      <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">เส้นทางของคุณ</p>
+      <p class="mt-1 text-sm font-semibold">ทำแล้ว <span class="mono text-ep-blue">6</span> · เหลือ <span class="mono">13</span></p>
+
+      <div class="mt-4 space-y-4">
+        <!-- block: Reading (done) -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">📖 การอ่าน</p>
+          <div class="flex items-center gap-2 text-slate-400"><span class="node bg-emerald-500 text-white">✓</span><span class="text-[13px]">อ่าน 4 ข้อ</span></div>
+        </div>
+        <!-- block: Writing (current) -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-ep-blue mb-1.5">✍️ การเขียน</p>
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2 text-slate-400"><span class="node bg-emerald-500 text-white">✓</span><span class="text-[13px]">เติมคำ</span></div>
+            <div class="flex items-center gap-2 text-slate-400"><span class="node bg-emerald-500 text-white">✓</span><span class="text-[13px]">เขียนจากภาพ</span></div>
+            <div class="flex items-center gap-2.5 -mx-2 px-2 py-1.5 rounded-xl bg-ep-yellow/15 ring-1 ring-ep-yellow/50">
+              <span class="node bg-ep-blue text-ep-yellow animate-pulse">7</span>
+              <span class="text-[13px] font-bold text-slate-900">อ่านแล้วเขียน</span>
+            </div>
+          </div>
+        </div>
+        <!-- block: Listening (locked) -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">👂 การฟัง</p>
+          <div class="flex items-center gap-2 text-slate-300"><span class="node bg-slate-100 text-slate-300">8</span><span class="text-[13px]">ฟังแล้วพิมพ์ +3 ข้อ</span></div>
+        </div>
+        <!-- block: Speaking (locked) -->
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">🗣️ การพูด</p>
+          <div class="flex items-center gap-2 text-slate-300"><span class="node bg-slate-100 text-slate-300">17</span><span class="text-[13px]">พูดโต้ตอบ +3 ข้อ</span></div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-100">
+        <p class="text-[12px] text-slate-500">เหลืออีก ~<span class="mono">38</span> นาที</p>
+        <p class="text-[11px] text-emerald-600 font-semibold mt-0.5">📈 ทำต่อไปเรื่อย ๆ คุณมาได้ครึ่งทางแล้ว</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ░░ right: the task ░░ -->
+  <main class="min-w-0">
+    <div class="card overflow-hidden">
+      <div class="px-5 pt-4 pb-3 border-b border-slate-100">
+        <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-ep-blue">ข้อ 7 · อ่านแล้วเขียน</p>
+        <h1 class="mt-1 text-lg font-bold">เขียนตอบให้ตรงประเด็น อย่างน้อย 1 ย่อหน้า</h1>
+        <p class="mt-0.5 text-[13px] text-slate-500">อ่านโจทย์รอบเดียว แล้วเริ่มเขียนได้เลย</p>
+      </div>
+      <div class="p-5">
+        <div class="rounded-xl bg-slate-50 border border-slate-100 p-4 text-[15px] leading-7 text-slate-800">
+          Some people prefer to study in the morning, while others focus better at night.
+          <span class="font-semibold">Which do you prefer, and why?</span> Give at least two reasons and an example.
+        </div>
+        <textarea rows="6" class="mt-3 w-full resize-none rounded-xl border border-slate-200 p-3 text-[15px] leading-7 outline-none focus:border-ep-blue placeholder:text-slate-300" placeholder="พิมพ์คำตอบที่นี่…">I prefer to study at night because the house is quiet and</textarea>
+        <div class="mt-2 flex items-center justify-between">
+          <span class="text-xs text-slate-400"><span class="mono text-slate-600">14</span> คำ · แนะนำ 40–80</span>
+          <span class="text-xs text-emerald-600 font-semibold">✓ บันทึกอัตโนมัติ</span>
+        </div>
+      </div>
+      <div class="px-5 py-3.5 border-t border-slate-100 flex items-center gap-3 bg-slate-50/60">
+        <button class="text-xs font-semibold text-slate-400 hover:text-slate-600">ออกจากการซ้อม</button>
+        <button class="ml-auto bg-ep-blue text-ep-yellow font-bold text-[15px] px-7 py-2.5 rounded-xl shadow-sm hover:brightness-110 transition">ส่ง → ข้อ 8</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<section class="mx-auto max-w-5xl px-4 py-8 text-[12px] text-slate-500 leading-6 border-t border-slate-200">
+  <p class="font-bold text-slate-700 mb-1">ทำไมแบบนี้</p>
+  <p><b>Tidwell (Sequence Map)</b> — rail ซ้ายตอบ “ฉันอยู่ตรงไหน / เหลืออีกแค่ไหน” ตลอดเวลา ลดความล้าจากความไม่รู้จุดจบ. จัดกลุ่มเป็นทักษะ (Gestalt). <b>Nodder/Gluttony</b> — โชว์ “ทำแล้ว 6 · มาได้ครึ่งทาง” เป็นความภูมิใจ ไม่ใช่ “เครดิตเหลือ 2” แบบความกลัว. ข้อข้างหน้า lock ไว้ไม่ให้กังวลล่วงหน้า.</p>
+</section>
+
+</body>
+</html>

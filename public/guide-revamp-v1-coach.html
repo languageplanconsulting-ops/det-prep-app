@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Guide revamp v1 · Coach</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;color:#0f172a}
+  .mono{font-family:"JetBrains Mono",monospace}
+  /* dimmed practice page behind the modal */
+  .backdrop{background:#0f172a;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:22px 22px}
+  .coach{width:48px;height:48px;border-radius:9999px;flex-shrink:0;background:#004AAD;color:#FFCC00;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;border:3px solid #FFCC00;box-shadow:0 4px 12px rgba(0,74,173,.25)}
+  .bub{position:relative;background:#eff6ff;border:1px solid #dbeafe;border-radius:16px;border-top-left-radius:5px;padding:14px 16px}
+  .bub::before{content:"";position:absolute;top:16px;left:-8px;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-right:8px solid #eff6ff}
+  .step-n{width:30px;height:30px;border-radius:9999px;background:#10b981;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+</style>
+</head>
+<body class="backdrop min-h-screen">
+<div class="px-4 py-3 text-center text-[11px] text-white/40 mono">GUIDE REVAMP · V1 “พี่ดอยโค้ช” — <a href="/guide-revamp-index.html" class="underline">เทียบทั้ง 3 สไตล์</a></div>
+
+<div class="grid min-h-[90vh] place-items-center p-4">
+  <div class="w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-[0_24px_70px_rgba(15,23,42,.45)]">
+
+    <!-- header -->
+    <div class="flex items-start justify-between gap-3 border-b border-slate-100 px-6 pt-6 pb-4">
+      <div>
+        <h1 class="text-2xl font-bold leading-tight">อ่านและเขียน</h1>
+        <p class="mt-0.5 text-sm font-semibold text-emerald-600">Read &amp; Write</p>
+      </div>
+      <span class="mono rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-600">GUIDE 07</span>
+    </div>
+
+    <div class="max-h-[64vh] space-y-5 overflow-y-auto px-6 py-6 bg-[#fbfdff]">
+
+      <!-- coach intro: human, empathetic, specific (Change by Design / Mom Test) -->
+      <div class="flex gap-3">
+        <div class="coach">ดอย</div>
+        <div class="bub">
+          <p class="text-[15px] leading-relaxed">อ่านบทความสั้น ๆ 1 เรื่อง แล้ว<strong>เขียนตอบเป็นภาษาอังกฤษ</strong>เหมือนข้อสอบ DET จริงครับ —
+          ไม่ต้องกลัวผิด เขียนเท่าที่ทำได้ก่อน เดี๋ยวพี่ช่วยดูให้ทีหลัง</p>
+        </div>
+      </div>
+
+      <!-- 2 concrete steps -->
+      <div class="space-y-3">
+        <div class="flex items-start gap-3 rounded-2xl bg-white p-4 ring-1 ring-slate-100">
+          <span class="step-n">1</span>
+          <div>
+            <p class="font-bold">เขียนตอบหัวข้อที่ให้</p>
+            <p class="mt-0.5 text-sm text-slate-600">มีเวลาเหมือนสนามจริง พิมพ์ให้ครบประโยค ไม่ต้องสวย ขอแค่สื่อความได้</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 rounded-2xl bg-white p-4 ring-1 ring-slate-100">
+          <span class="step-n">2</span>
+          <div>
+            <p class="font-bold">กดส่ง แล้วได้รายงานใน ~10 วินาที</p>
+            <p class="mt-0.5 text-sm text-slate-600">บอกตรงจุดที่ไวยากรณ์พลาด · คำที่ควรใช้แทน · คะแนนโดยประมาณของงานชิ้นนี้</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- honest warning + credits (loss aversion, told straight) -->
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+        <div class="flex items-start gap-2">
+          <span class="text-lg leading-none">⚠️</span>
+          <div class="flex-1">
+            <p class="text-sm font-bold text-amber-900">ปิดหน้าก่อนกดส่ง = งานที่เขียนหาย</p>
+            <p class="mt-0.5 text-sm text-amber-800">แต่สบายใจได้ — <strong>โควต้ายังอยู่ครบ</strong> ระบบจะหักก็ต่อเมื่อกด “ส่งตรวจ” เท่านั้น เขียนให้จบก่อนค่อยส่งนะครับ</p>
+          </div>
+        </div>
+        <div class="mt-3 flex items-center justify-between rounded-xl bg-white px-4 py-3 ring-1 ring-amber-100">
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">โควต้าตรวจงานคงเหลือ</p>
+            <p class="mono text-xl font-bold text-emerald-600">8 <span class="text-slate-300">/ 10</span></p>
+          </div>
+          <p class="text-right text-[11px] text-slate-400">ใช้ 1 ครั้ง / งาน<br>รีเซ็ตทุกวันจันทร์</p>
+        </div>
+      </div>
+
+      <!-- why it matters: outcome + honest social proof (Evil by Design · Pride) -->
+      <div class="rounded-2xl bg-[#004AAD] p-4 text-white">
+        <p class="text-sm leading-relaxed">หมวดนี้ดันคะแนนกลุ่ม <strong class="text-[#FFCC00]">Production &amp; Literacy</strong> โดยตรง —
+        2 กลุ่มที่คนไทยมักได้คะแนนน้อยที่สุด ยิ่งเขียนบ่อย คะแนนรวมยิ่งขยับไว</p>
+        <p class="mt-2 text-xs text-white/70">📈 สัปดาห์นี้เพื่อน ๆ ฝึกเขียนไปแล้ว 1,820 ครั้ง</p>
+      </div>
+
+      <!-- pro tip -->
+      <p class="text-center text-xs text-slate-500">💡 เคล็ดลับ: กด <span class="font-semibold text-emerald-600">Add to Notebook</span> เก็บคำที่รายงานแนะนำ ไปใช้รอบหน้า คะแนนขยับไวขึ้น</p>
+    </div>
+
+    <!-- footer: one clear CTA (Sloth · path of least resistance) -->
+    <div class="space-y-2 border-t border-slate-100 px-6 py-5">
+      <button class="w-full rounded-2xl bg-emerald-500 py-4 text-lg font-bold text-white shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-600">เริ่มเขียนเลย →</button>
+      <button class="w-full py-1 text-center text-sm font-semibold text-slate-400 hover:text-slate-600">ไว้ก่อน</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

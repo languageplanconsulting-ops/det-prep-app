@@ -1,0 +1,702 @@
+<!--
+  V3 · Proof & Self-Efficacy
+  Guiding principle: Show the AI feedback actually working — in Thai, scored, specific — BEFORE any purchase ask.
+  Rationale: Thai learners are anxious and skeptical. Seeing a credible, detailed feedback card (in their own language)
+  lowers the barrier to trying, builds self-efficacy, and converts curiosity into a free diagnosis attempt.
+  The feedback mockup is the hero. Price is an afterthought.
+-->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ENGLISH PLAN — เห็นผลก่อนจ่าย · DET Prep สำหรับคนไทย</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ep-blue': '#004AAD',
+            'ep-yellow': '#FFCC00',
+          },
+          fontFamily: {
+            sans: ['"IBM Plex Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'IBM Plex Sans Thai', sans-serif; line-height: 1.65; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Score bar animation */
+    @keyframes fillBar {
+      from { width: 0%; }
+      to { width: var(--target-width); }
+    }
+    .score-bar-fill {
+      animation: fillBar 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      animation-delay: 0.4s;
+      width: 0%;
+    }
+
+    /* Fade-in for sections */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.7s ease forwards; }
+
+    /* Subtle grain on hero */
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #004AAD; border-radius: 3px; }
+
+    /* Feedback card glow */
+    .feedback-card-glow {
+      box-shadow: 0 0 0 1px rgba(0,74,173,0.12), 0 8px 32px rgba(0,74,173,0.14), 0 32px 64px rgba(0,0,0,0.08);
+    }
+
+    /* Pricing card border */
+    .popular-card {
+      position: relative;
+    }
+    .popular-card::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #004AAD, #FFCC00);
+      z-index: -1;
+    }
+
+    /* Thai text rendering */
+    .th { font-feature-settings: "kern" 1, "liga" 1; }
+  </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+  <!-- ░░ PREVIEW RIBBON ░░ -->
+  <div class="bg-gray-900 text-gray-300 text-xs py-1.5 px-4 flex items-center justify-between sticky top-0 z-50">
+    <a href="/landing-revamp-index.html" class="hover:text-white transition-colors flex items-center gap-1.5">
+      <span>←</span>
+      <span>Preview hub</span>
+    </a>
+    <span class="mono text-gray-500">V3 · Proof &amp; Self-Efficacy</span>
+    <span class="text-gray-600 text-[10px] hidden sm:block">ENGLISH PLAN — landing preview</span>
+  </div>
+
+  <!-- ░░ NAV ░░ -->
+  <nav class="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-8 z-40">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <!-- Brand -->
+      <a href="/" class="flex items-center gap-2.5 no-underline">
+        <div class="w-8 h-8 bg-ep-blue flex items-center justify-center rounded-sm flex-shrink-0">
+          <span class="mono font-bold text-ep-yellow text-sm leading-none">EP</span>
+        </div>
+        <span class="font-semibold text-gray-900 text-sm tracking-wide">ENGLISH PLAN</span>
+      </a>
+      <!-- Nav links -->
+      <div class="hidden md:flex items-center gap-6 text-sm text-gray-600">
+        <a href="#how-it-works" class="hover:text-ep-blue transition-colors">วิธีใช้งาน</a>
+        <a href="#skills" class="hover:text-ep-blue transition-colors">4 ทักษะ</a>
+        <a href="#pricing" class="hover:text-ep-blue transition-colors">ราคา</a>
+      </div>
+      <!-- Auth -->
+      <div class="flex items-center gap-2">
+        <a href="/login" class="text-sm text-gray-600 hover:text-gray-900 transition-colors px-3 py-2 hidden sm:block">เข้าสู่ระบบ</a>
+        <a href="/mini-diagnosis/start"
+           class="bg-ep-blue text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-blue-800 transition-colors whitespace-nowrap">
+          ลองฟรี
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ░░ HERO ░░ -->
+  <section class="hero-bg relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 pt-12 pb-16 sm:pt-20 sm:pb-24">
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
+
+      <!-- Headline block -->
+      <div class="max-w-xl mb-10 sm:mb-12 fade-up">
+        <div class="inline-flex items-center gap-2 bg-ep-yellow/20 border border-ep-yellow/40 rounded-full px-3 py-1 mb-5">
+          <span class="w-2 h-2 bg-ep-blue rounded-full flex-shrink-0"></span>
+          <span class="text-xs font-medium text-ep-blue th">DET Prep · เฉพาะคนไทย</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight th mb-4">
+          ดู feedback จริงก่อน<br/>
+          <span class="text-ep-blue">แล้วค่อยตัดสินใจ</span>
+        </h1>
+        <p class="text-gray-600 text-base sm:text-lg th leading-relaxed mb-2">
+          ตอบคำถาม 1 ข้อ — ระบบวิเคราะห์คำตอบทันที และบอก<em class="not-italic font-medium text-gray-800">เป็นภาษาไทย</em>ว่าต้องแก้ตรงไหน
+        </p>
+        <p class="text-gray-500 text-sm th">ไม่ต้องใส่บัตรเครดิต · รู้ระดับทันที</p>
+
+        <div class="mt-7 flex flex-wrap items-center gap-3">
+          <a href="/mini-diagnosis/start"
+             class="bg-ep-blue text-white font-semibold px-7 py-3.5 rounded-lg hover:bg-blue-800 transition-all duration-200 text-base shadow-md shadow-blue-900/20 active:scale-95 min-h-[44px] flex items-center th">
+            ลองรับ feedback จริงฟรี →
+          </a>
+          <span class="text-gray-400 text-sm th hidden sm:block">ใช้เวลา ~3 นาที</span>
+        </div>
+      </div>
+
+      <!-- ── THE FEEDBACK DEMO CARD (HERO CENTERPIECE) ── -->
+      <div class="max-w-2xl mx-auto lg:mx-0 lg:max-w-none lg:w-full">
+        <div class="feedback-card-glow bg-white rounded-2xl overflow-hidden border border-gray-100">
+
+          <!-- Card header: student answer -->
+          <div class="bg-gray-50 border-b border-gray-100 px-5 py-4">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+              <span class="ml-2 text-xs text-gray-400 mono">production · speaking-response</span>
+            </div>
+            <p class="text-[11px] text-gray-400 uppercase tracking-wider font-medium mb-2">คำถาม</p>
+            <p class="text-sm text-gray-600 italic th leading-relaxed">
+              "Describe a habit that helps you stay productive. Give details."
+            </p>
+          </div>
+
+          <!-- Student answer -->
+          <div class="px-5 py-4 border-b border-gray-100">
+            <p class="text-[11px] text-gray-400 uppercase tracking-wider font-medium mb-2">คำตอบของนักเรียน</p>
+            <p class="text-sm text-gray-700 leading-relaxed">
+              I always wake up early in the morning. I make a list of things to do. This habit <span class="bg-yellow-100 border-b border-yellow-400 cursor-default" title="tense ควรเป็น helps ไม่ใช่ helped">helped</span> me finish my work on time every day. Also, I drink coffee <span class="bg-blue-50 border-b border-blue-300 cursor-default" title="ลองใช้ 'which boosts my focus' เพื่อ flow ดีขึ้น">because it is good for concentrate.</span>
+            </p>
+            <p class="text-[10px] text-gray-400 mt-2 th">밑줄 = จุดที่ระบบแนะนำ (hover ดูได้)</p>
+          </div>
+
+          <!-- AI Scores -->
+          <div class="px-5 py-5">
+            <div class="flex items-center justify-between mb-4">
+              <p class="text-[11px] text-gray-400 uppercase tracking-wider font-medium">AI Feedback</p>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-gray-400 th">Band โดยประมาณ</span>
+                <span class="mono font-bold text-ep-blue text-lg">120–130</span>
+              </div>
+            </div>
+
+            <!-- Score rows -->
+            <div class="space-y-3 mb-5">
+
+              <!-- Grammar -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-600 th">Grammar</span>
+                  <span class="mono text-sm font-semibold text-gray-800">92<span class="text-gray-400 font-normal">/100</span></span>
+                </div>
+                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="score-bar-fill h-full bg-ep-blue rounded-full" style="--target-width: 92%;"></div>
+                </div>
+              </div>
+
+              <!-- Vocabulary -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-600 th">Vocabulary</span>
+                  <span class="mono text-sm font-semibold text-gray-800">88<span class="text-gray-400 font-normal">/100</span></span>
+                </div>
+                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="score-bar-fill h-full bg-ep-blue rounded-full" style="--target-width: 88%;"></div>
+                </div>
+              </div>
+
+              <!-- Flow -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-600 th">Flow &amp; Coherence</span>
+                  <span class="mono text-sm font-semibold text-gray-800">79<span class="text-gray-400 font-normal">/100</span></span>
+                </div>
+                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="score-bar-fill h-full bg-amber-500 rounded-full" style="--target-width: 79%;"></div>
+                </div>
+              </div>
+
+              <!-- Task Response -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs text-gray-600 th">Task Response</span>
+                  <span class="mono text-sm font-semibold text-gray-800">90<span class="text-gray-400 font-normal">/100</span></span>
+                </div>
+                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="score-bar-fill h-full bg-ep-blue rounded-full" style="--target-width: 90%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Thai feedback note — THE STAR -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-4">
+              <div class="flex items-start gap-3">
+                <div class="w-7 h-7 bg-ep-blue rounded-full flex-shrink-0 flex items-center justify-center mt-0.5">
+                  <span class="text-white text-xs font-bold">AI</span>
+                </div>
+                <div>
+                  <p class="text-[11px] text-blue-600 font-semibold uppercase tracking-wider mb-1.5">โน้ตจาก AI (ภาษาไทย)</p>
+                  <p class="text-sm text-gray-800 th leading-relaxed">
+                    ประโยคที่ 3 ใช้ <span class="mono font-medium text-ep-blue">helped</span> ซึ่ง tense ไม่ถูก — ควรเปลี่ยนเป็น <span class="mono font-medium text-green-700">helps</span> เพราะพูดถึงนิสัยที่ทำอยู่ตลอด ไม่ใช่เหตุการณ์ในอดีต แก้จุดนี้แล้วคะแนน Flow จะขึ้นทันที นอกจากนี้ลองใช้ connector อย่าง <span class="mono font-medium text-ep-blue">as a result</span> หรือ <span class="mono font-medium text-ep-blue">which helps me</span> เพื่อให้ประโยคไหลเชื่อมกันมากขึ้น
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini action hint -->
+            <p class="text-center text-xs text-gray-400 mt-3 th">
+              💡 ระบบจะสร้างแบบฝึกเพิ่มเฉพาะ Flow สำหรับคุณโดยอัตโนมัติ
+            </p>
+          </div>
+        </div>
+
+        <!-- Social proof under card -->
+        <div class="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-gray-400 th">
+          <span>นักเรียนไทย 1,000+ คน</span>
+          <span class="hidden sm:inline">·</span>
+          <span>แบบฝึก 600+ ข้อ</span>
+          <span class="hidden sm:inline">·</span>
+          <span>4 ทักษะหลัก</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ░░ HOW THE FEEDBACK WORKS — 3 Steps ░░ -->
+  <section id="how-it-works" class="py-16 sm:py-20 bg-white">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 th">feedback ทำงานยังไง?</h2>
+        <p class="text-gray-500 mt-2 th text-sm">3 ขั้นตอน ใช้เวลาไม่ถึง 5 นาที</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+
+        <!-- Step 1 -->
+        <div class="relative">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 bg-ep-blue text-ep-yellow mono font-bold text-lg flex items-center justify-center rounded-lg">1</div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 th mb-1">ตอบคำถาม</h3>
+              <p class="text-sm text-gray-500 th leading-relaxed">เขียนหรือพูดตอบคำถาม DET จริง — ความยาวปกติ ไม่ต้องเตรียมอะไร</p>
+            </div>
+          </div>
+          <!-- Arrow -->
+          <div class="hidden sm:block absolute top-5 -right-4 text-gray-200 text-2xl">→</div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="relative">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 bg-ep-blue text-ep-yellow mono font-bold text-lg flex items-center justify-center rounded-lg">2</div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 th mb-1">รับคะแนน + โน้ตภาษาไทย</h3>
+              <p class="text-sm text-gray-500 th leading-relaxed">AI ให้คะแนน 4 มิติ พร้อมอธิบายเป็นภาษาไทยว่าต้องแก้จุดไหน และ Band โดยประมาณ</p>
+            </div>
+          </div>
+          <!-- Arrow -->
+          <div class="hidden sm:block absolute top-5 -right-4 text-gray-200 text-2xl">→</div>
+        </div>
+
+        <!-- Step 3 -->
+        <div>
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 bg-ep-blue text-ep-yellow mono font-bold text-lg flex items-center justify-center rounded-lg">3</div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 th mb-1">ฝึกซ้ำจุดอ่อน</h3>
+              <p class="text-sm text-gray-500 th leading-relaxed">ระบบสร้างแบบฝึกเพิ่มเฉพาะทักษะที่ต้องการพัฒนา — ไม่ต้องเดาเองว่าจะฝึกอะไร</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CTA under steps -->
+      <div class="text-center mt-10">
+        <a href="/mini-diagnosis/start"
+           class="inline-flex items-center gap-2 bg-white border-2 border-ep-blue text-ep-blue font-semibold px-7 py-3 rounded-lg hover:bg-ep-blue hover:text-white transition-all duration-200 text-sm th min-h-[44px]">
+          เริ่มรับ feedback ฟรีตอนนี้
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ BEFORE → AFTER PROOF ░░ -->
+  <section class="py-16 sm:py-20 bg-slate-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 th">จากนักเรียนจริง</h2>
+        <p class="text-gray-500 mt-2 th text-sm">ผลลัพธ์จากการฝึกด้วย feedback เป็นรายบุคคล</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+        <!-- Testimonial 1 -->
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-ep-yellow rounded-full flex items-center justify-center font-bold text-ep-blue text-sm flex-shrink-0">ต</div>
+            <div>
+              <p class="font-semibold text-gray-900 th text-sm">ต้น</p>
+              <p class="text-xs text-gray-400 th">นักศึกษา ปี 3</p>
+            </div>
+            <div class="ml-auto text-right">
+              <div class="flex items-center gap-1 justify-end">
+                <span class="mono text-sm text-gray-400 line-through">100</span>
+                <span class="text-gray-300 text-xs">→</span>
+                <span class="mono font-bold text-ep-blue text-base">125</span>
+              </div>
+              <p class="text-[10px] text-gray-400 th">Band est.</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-600 th leading-relaxed italic">
+            "ก่อนหน้านี้ไม่รู้เลยว่า Flow คืออะไร พอ AI อธิบายเป็นภาษาไทยว่าประโยคไม่เชื่อมกัน มันเข้าใจทันทีเลย"
+          </p>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-ep-blue text-sm flex-shrink-0">ป</div>
+            <div>
+              <p class="font-semibold text-gray-900 th text-sm">ปลา</p>
+              <p class="text-xs text-gray-400 th">จบ ม.ปลาย · เตรียมเรียนต่อ</p>
+            </div>
+            <div class="ml-auto text-right">
+              <div class="flex items-center gap-1 justify-end">
+                <span class="mono text-sm text-gray-400 line-through">95</span>
+                <span class="text-gray-300 text-xs">→</span>
+                <span class="mono font-bold text-ep-blue text-base">120</span>
+              </div>
+              <p class="text-[10px] text-gray-400 th">Band est.</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-600 th leading-relaxed italic">
+            "ชอบที่ระบบบอกชัดเจนว่าต้องแก้ประโยคไหน ไม่ใช่แค่บอกว่า 'ต้องพัฒนา Grammar' แบบกว้างๆ"
+          </p>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700 text-sm flex-shrink-0">ก</div>
+            <div>
+              <p class="font-semibold text-gray-900 th text-sm">กิ๊ก</p>
+              <p class="text-xs text-gray-400 th">พนักงานออฟฟิศ · ฝึกช่วงเย็น</p>
+            </div>
+            <div class="ml-auto text-right">
+              <div class="flex items-center gap-1 justify-end">
+                <span class="mono text-sm text-gray-400 line-through">110</span>
+                <span class="text-gray-300 text-xs">→</span>
+                <span class="mono font-bold text-ep-blue text-base">130</span>
+              </div>
+              <p class="text-[10px] text-gray-400 th">Band est.</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-600 th leading-relaxed italic">
+            "ฝึกทุกวัน 20 นาที feedback ภาษาไทยช่วยมากจริงๆ เพราะไม่ต้องเสียเวลาตีความคำแนะนำภาษาอังกฤษ"
+          </p>
+        </div>
+
+      </div>
+
+      <p class="text-center text-xs text-gray-400 mt-5 th">Band estimates คือประมาณการจากแบบฝึกในระบบ ไม่ใช่คะแนน DET จริง</p>
+    </div>
+  </section>
+
+  <!-- ░░ 4 SKILLS ░░ -->
+  <section id="skills" class="py-16 sm:py-20 bg-white">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 th">4 ทักษะ · feedback ต่างกันยังไง?</h2>
+        <p class="text-gray-500 mt-2 th text-sm">แต่ละทักษะมีมิติการวิเคราะห์ที่เฉพาะเจาะจง</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+        <!-- Production -->
+        <div class="border border-gray-100 rounded-xl p-5 hover:border-ep-blue/30 hover:shadow-sm transition-all">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-ep-blue/10 rounded-lg flex items-center justify-center text-ep-blue text-base">✍️</div>
+            <h3 class="font-semibold text-gray-900 th">Production</h3>
+            <span class="ml-auto text-xs text-gray-400 th">เขียน + พูด</span>
+          </div>
+          <p class="text-sm text-gray-500 th leading-relaxed mb-3">ตอบคำถามแบบ open-ended เหมือนในสอบ DET จริง</p>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-2 font-medium">feedback ที่ได้</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Grammar</span>
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Vocabulary</span>
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Flow</span>
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Task Response</span>
+              <span class="text-xs bg-ep-yellow/30 text-yellow-800 px-2 py-0.5 rounded-full th">โน้ตภาษาไทย</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comprehension -->
+        <div class="border border-gray-100 rounded-xl p-5 hover:border-ep-blue/30 hover:shadow-sm transition-all">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-ep-blue/10 rounded-lg flex items-center justify-center text-ep-blue text-base">📖</div>
+            <h3 class="font-semibold text-gray-900 th">Comprehension</h3>
+            <span class="ml-auto text-xs text-gray-400 th">อ่าน + คำศัพท์</span>
+          </div>
+          <p class="text-sm text-gray-500 th leading-relaxed mb-3">เข้าใจบทความและคำศัพท์ในบริบทจริง</p>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-2 font-medium">feedback ที่ได้</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Inference skill</span>
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Vocabulary range</span>
+              <span class="text-xs bg-ep-yellow/30 text-yellow-800 px-2 py-0.5 rounded-full th">คำอธิบายไทย</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Literacy -->
+        <div class="border border-gray-100 rounded-xl p-5 hover:border-ep-blue/30 hover:shadow-sm transition-all">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-ep-blue/10 rounded-lg flex items-center justify-center text-ep-blue text-base">🎧</div>
+            <h3 class="font-semibold text-gray-900 th">Literacy</h3>
+            <span class="ml-auto text-xs text-gray-400 th">คำสะกด + Dictation</span>
+          </div>
+          <p class="text-sm text-gray-500 th leading-relaxed mb-3">ฟังและพิมพ์ประโยค — ทักษะที่หลายคนมองข้าม</p>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-2 font-medium">feedback ที่ได้</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Spelling accuracy</span>
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Phoneme patterns</span>
+              <span class="text-xs bg-ep-yellow/30 text-yellow-800 px-2 py-0.5 rounded-full th">จุดผิดบ่อย</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversation -->
+        <div class="border border-gray-100 rounded-xl p-5 hover:border-ep-blue/30 hover:shadow-sm transition-all">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-ep-blue/10 rounded-lg flex items-center justify-center text-ep-blue text-base">💬</div>
+            <h3 class="font-semibold text-gray-900 th">Conversation</h3>
+            <span class="ml-auto text-xs text-gray-400 th">ฟัง + โต้ตอบ</span>
+          </div>
+          <p class="text-sm text-gray-500 th leading-relaxed mb-3">ตอบสนองต่อบทสนทนาแบบ interactive</p>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-2 font-medium">feedback ที่ได้</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Relevance</span>
+              <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full th">Natural response</span>
+              <span class="text-xs bg-ep-yellow/30 text-yellow-800 px-2 py-0.5 rounded-full th">วิธีตอบที่ฟังดูเป็นธรรมชาติ</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ PRICING ░░ -->
+  <section id="pricing" class="py-16 sm:py-20 bg-slate-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-4">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 th">ราคา</h2>
+        <p class="text-gray-500 mt-2 th text-sm font-medium">feedback ครั้งแรกฟรี — อัปเกรดเมื่ออยากได้มากขึ้น</p>
+      </div>
+
+      <!-- Fast Track notice -->
+      <div class="mb-8 text-center">
+        <a href="/?fastTrack=1" class="inline-flex items-center gap-2 bg-ep-yellow/20 border border-ep-yellow/50 rounded-full px-4 py-2 text-sm text-gray-700 hover:bg-ep-yellow/30 transition-colors th">
+          <span class="text-ep-blue font-semibold">Duolingo Fast Track</span>
+          <span class="text-gray-400">·</span>
+          <span>Cohort ได้ VIP 6 เดือนทันที →</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- Free -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <p class="font-semibold text-gray-900 th mb-1">Free</p>
+          <div class="mb-3">
+            <span class="mono font-bold text-2xl text-gray-900">฿0</span>
+          </div>
+          <ul class="text-sm text-gray-500 th space-y-1.5 mb-5">
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>Mini-diagnosis ฟรี</li>
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>3 feedbacks/เดือน</li>
+            <li class="flex items-start gap-2"><span class="text-gray-300 mt-0.5 flex-shrink-0">–</span>Mock test</li>
+          </ul>
+          <a href="/signup?next=%2Fpractice"
+             class="block text-center border border-gray-200 text-gray-600 text-sm py-2 rounded-lg hover:border-gray-400 transition-colors th min-h-[44px] flex items-center justify-center">
+            เริ่มฟรี
+          </a>
+        </div>
+
+        <!-- Basic -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <p class="font-semibold text-gray-900 th mb-1">Basic</p>
+          <div class="mb-3">
+            <span class="mono font-bold text-2xl text-gray-900">฿399</span>
+            <span class="text-gray-400 text-sm th">/เดือน</span>
+          </div>
+          <ul class="text-sm text-gray-500 th space-y-1.5 mb-5">
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>12 feedbacks/เดือน</li>
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>Mock test 2 ครั้ง</li>
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>ทุกทักษะ</li>
+          </ul>
+          <a href="/signup?next=%2Fpractice"
+             class="block text-center border border-gray-200 text-gray-600 text-sm py-2 rounded-lg hover:border-gray-400 transition-colors th min-h-[44px] flex items-center justify-center">
+            เลือก Basic
+          </a>
+        </div>
+
+        <!-- Premium — popular -->
+        <div class="popular-card bg-white rounded-xl p-5 relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="bg-ep-blue text-ep-yellow text-[10px] font-bold px-3 py-0.5 rounded-full th mono">ยอดนิยม</span>
+          </div>
+          <p class="font-semibold text-gray-900 th mb-1 mt-2">Premium</p>
+          <div class="mb-3">
+            <span class="mono font-bold text-2xl text-ep-blue">฿699</span>
+            <span class="text-gray-400 text-sm th">/เดือน</span>
+          </div>
+          <ul class="text-sm text-gray-500 th space-y-1.5 mb-5">
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>30 feedbacks/เดือน</li>
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>Mock test 4 ครั้ง</li>
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>ทุกทักษะ</li>
+          </ul>
+          <a href="/signup?next=%2Fpractice"
+             class="block text-center bg-ep-blue text-white text-sm font-medium py-2 rounded-lg hover:bg-blue-800 transition-colors th min-h-[44px] flex items-center justify-center">
+            เลือก Premium
+          </a>
+        </div>
+
+        <!-- VIP -->
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <p class="font-semibold text-gray-900 th mb-1">VIP</p>
+          <div class="mb-3">
+            <span class="mono font-bold text-2xl text-gray-900">฿999</span>
+            <span class="text-gray-400 text-sm th"> (30 วัน)</span>
+          </div>
+          <ul class="text-sm text-gray-500 th space-y-1.5 mb-5">
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>60 feedbacks/เดือน</li>
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>Mock test 6 ครั้ง</li>
+            <li class="flex items-start gap-2"><span class="text-green-500 mt-0.5 flex-shrink-0">✓</span>Unlimited lanes</li>
+          </ul>
+          <a href="/signup?next=%2Fpractice"
+             class="block text-center border border-gray-200 text-gray-600 text-sm py-2 rounded-lg hover:border-gray-400 transition-colors th min-h-[44px] flex items-center justify-center">
+            เลือก VIP
+          </a>
+        </div>
+
+      </div>
+
+      <p class="text-center text-xs text-gray-400 mt-6 th">ไม่มีสัญญาผูกมัด · ยกเลิกได้ทุกเมื่อ · VIP คือ one-time 30 วัน</p>
+    </div>
+  </section>
+
+  <!-- ░░ CLOSING CTA ░░ -->
+  <section class="py-16 sm:py-24 bg-ep-blue relative overflow-hidden">
+    <!-- Decorative -->
+    <div class="absolute inset-0 opacity-5">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-ep-yellow rounded-full translate-x-1/3 -translate-y-1/3"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full -translate-x-1/3 translate-y-1/3"></div>
+    </div>
+    <div class="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 text-center">
+      <h2 class="text-2xl sm:text-3xl font-bold text-white th leading-tight mb-4">
+        ลองดูก่อนว่ามันช่วยยังไง<br/>
+        <span class="text-ep-yellow">แล้วค่อยตัดสินใจ</span>
+      </h2>
+      <p class="text-blue-200 th mb-8 text-sm sm:text-base leading-relaxed">
+        Mini-diagnosis ใช้เวลา ~3 นาที รู้ระดับ + จุดอ่อนทันที ไม่ต้องสมัครก่อน ไม่มีค่าใช้จ่าย
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="/mini-diagnosis/start"
+           class="bg-ep-yellow text-ep-blue font-bold px-8 py-4 rounded-xl hover:bg-yellow-300 transition-all duration-200 text-base th shadow-lg active:scale-95 min-h-[52px] flex items-center w-full sm:w-auto justify-center">
+          รับ feedback ฟรีตอนนี้
+        </a>
+        <a href="/signup?next=%2Fpractice"
+           class="bg-transparent border-2 border-white/30 text-white font-medium px-6 py-3.5 rounded-xl hover:border-white/70 transition-colors text-sm th min-h-[52px] flex items-center w-full sm:w-auto justify-center">
+          สร้างบัญชีฟรี
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ░░ FOOTER ░░ -->
+  <footer class="bg-gray-900 text-gray-400 py-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+
+        <!-- Brand -->
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-ep-blue flex items-center justify-center rounded-sm">
+            <span class="mono font-bold text-ep-yellow text-sm leading-none">EP</span>
+          </div>
+          <div>
+            <p class="font-semibold text-white text-sm">ENGLISH PLAN</p>
+            <p class="text-xs text-gray-500 th">DET Prep สำหรับคนไทย</p>
+          </div>
+        </div>
+
+        <!-- Links -->
+        <div class="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <a href="/mini-diagnosis/start" class="hover:text-white transition-colors th">Mini-diagnosis</a>
+          <a href="/login" class="hover:text-white transition-colors th">เข้าสู่ระบบ</a>
+          <a href="#pricing" class="hover:text-white transition-colors th">ราคา</a>
+          <a href="/?fastTrack=1" class="hover:text-white transition-colors th">Fast Track</a>
+        </div>
+
+      </div>
+      <div class="border-t border-gray-800 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-600">
+        <p class="th">© 2025 ENGLISH PLAN · สงวนลิขสิทธิ์</p>
+        <p class="th">Band estimates คือประมาณการเพื่อการฝึก ไม่ใช่คะแนน DET อย่างเป็นทางการ</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Intersection Observer for score bar trigger -->
+  <script>
+    // Re-trigger score bar animation when card enters viewport
+    const fills = document.querySelectorAll('.score-bar-fill');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Reset and re-animate
+          entry.target.style.animationName = 'none';
+          entry.target.offsetHeight; // reflow
+          entry.target.style.animationName = '';
+        }
+      });
+    }, { threshold: 0.3 });
+    fills.forEach(el => observer.observe(el));
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
