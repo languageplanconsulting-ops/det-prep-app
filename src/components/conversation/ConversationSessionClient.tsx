@@ -44,7 +44,7 @@ export function ConversationSessionClient({
   startWithRedeem?: boolean;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   const roundSetsHref = `/practice/listening/interactive/${round}`;
   const restartHref = `/practice/listening/interactive/${round}/${difficulty}/${setNumber}`;

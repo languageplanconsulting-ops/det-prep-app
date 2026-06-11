@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { DIALOGUE_SUMMARY_ROUND_NUMBERS } from "@/lib/dialogue-summary-constants";
@@ -109,6 +110,7 @@ export function DialogueSummaryRoundsHub() {
             </>
           }
         />
+        <RoundsExplainer />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {DIALOGUE_SUMMARY_ROUND_NUMBERS.map((round) => (
             <RoundCard

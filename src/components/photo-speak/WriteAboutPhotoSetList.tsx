@@ -18,7 +18,7 @@ type CardItem = {
 
 export function WriteAboutPhotoSetList() {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const [items, setItems] = useState<CardItem[]>([]);
 
   useEffect(() => {

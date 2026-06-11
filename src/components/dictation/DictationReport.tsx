@@ -163,7 +163,7 @@ export function DictationReport({
   onFixSubmit: (merged: string, newScore: number) => void;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const [showFix, setShowFix] = useState(false);
   const [redeemDismissed, setRedeemDismissed] = useState(false);
   const [fixValues, setFixValues] = useState<string[]>([]);

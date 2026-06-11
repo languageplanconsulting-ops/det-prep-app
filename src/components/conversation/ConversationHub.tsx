@@ -56,7 +56,7 @@ function formatShortDate(iso: string | null): string {
 
 export function ConversationHub() {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const [bankVersion, setBankVersion] = useState(0);
 
   useEffect(() => {

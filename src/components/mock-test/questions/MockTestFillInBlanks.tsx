@@ -13,6 +13,32 @@ type Props = {
   onSubmit: (answer: string | { answers: string[] }) => void;
 };
 
+/** A given/prefix letter — solid filled tile (not editable). */
+function GivenTile({ ch }: { ch: string }) {
+  return (
+    <span className="inline-flex h-9 min-w-[1.85rem] items-center justify-center rounded-md bg-[#e9eef5] px-1 font-mono text-lg font-bold leading-none text-[#475569]">
+      {ch}
+    </span>
+  );
+}
+
+/** A letter slot the user fills — bordered when filled, dashed when empty. */
+function SlotTile({ ch }: { ch?: string }) {
+  const filled = !!ch;
+  return (
+    <span
+      className={`inline-flex h-9 min-w-[1.85rem] items-center justify-center rounded-md px-1 font-mono text-lg font-bold leading-none ${
+        filled
+          ? "border-2 border-[#004AAD] bg-white text-[#0f172a]"
+          : "border-2 border-dashed border-[#cbd5e1] bg-[#f8fafc] text-[#cbd5e1]"
+      }`}
+      aria-hidden="true"
+    >
+      {filled ? ch : "_"}
+    </span>
+  );
+}
+
 /**
  * MC fill-in-the-blank: legacy full `sentence`, or prefix mode
  * (`blank_prefix` 1–6 chars + optional `sentence_before` / `sentence_after` / `blank_hint`).
@@ -51,17 +77,22 @@ export function MockTestFillInBlanks({ content, onSubmit, submitting = false }: 
   const legacySentence = String(content.sentence ?? "");
 
   const gapLetters = prefixMode && prefix ? fitbMaxGapLetters(opts, prefix) : 0;
-  const underscoreRun = prefixMode && prefix ? "_".repeat(gapLetters) : "";
 
   return (
     <div className="space-y-4">
       <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
       <p className="text-xs text-neutral-600">{String(content.instruction ?? "")}</p>
       {prefixMode && prefix ? (
-        <p className="rounded-[4px] border-4 border-black bg-white p-4 text-base font-medium leading-relaxed">
+        <p className="rounded-[4px] border-4 border-black bg-white p-4 text-base font-medium leading-loose">
           <span>{before}</span>
-          <span className="font-black tracking-tight text-[#004AAD]">{prefix}</span>
-          <span className="font-mono tracking-widest">{underscoreRun}</span>
+          <span className="mx-0.5 inline-flex flex-wrap items-center gap-1 align-middle">
+            {prefix.split("").map((ch, k) => (
+              <GivenTile key={`p${k}`} ch={ch} />
+            ))}
+            {Array.from({ length: gapLetters }, (_, k) => (
+              <SlotTile key={`g${k}`} />
+            ))}
+          </span>
           <span>{after}</span>
           {hint ? (
             <span className="ml-1 text-sm font-normal text-neutral-600"> {hint}</span>
@@ -152,7 +183,6 @@ function MockTestFillInBlanksPracticeLike({
           const prefix = fitbExpectedPrefix(mw);
           const remLen = fitbRemainderLength(mw);
           const typed = inputs[b] ?? "";
-          const underscoreRun = "_".repeat(Math.max(1, remLen));
           if (remLen === 0) {
             return (
               <span key={idx} className="mx-0.5 font-black text-[#004AAD]">
@@ -161,9 +191,11 @@ function MockTestFillInBlanksPracticeLike({
             );
           }
           return (
-            <span key={idx} className="mx-0.5 inline-flex flex-wrap items-center gap-1 align-baseline">
-              <span className="font-black tracking-tight text-[#004AAD]">{prefix}</span>
-              <span className="relative inline-flex items-center">
+            <span key={idx} className="mx-0.5 inline-flex flex-wrap items-center gap-1 align-middle">
+              {prefix.split("").map((ch, k) => (
+                <GivenTile key={`p${k}`} ch={ch} />
+              ))}
+              <span className="relative inline-flex items-center gap-1">
                 <input
                   type="text"
                   autoComplete="off"
@@ -175,16 +207,12 @@ function MockTestFillInBlanksPracticeLike({
                   }}
                   maxLength={remLen}
                   onChange={(e) => updateInput(b, e.target.value)}
-                  className="absolute left-0 top-0 h-full w-full opacity-0"
-                  style={{ width: `${Math.min(Math.max(remLen + 1, 3), 18)}ch` }}
+                  className="absolute left-0 top-0 z-10 h-full w-full cursor-text opacity-0"
                   aria-label={`Blank ${b + 1}`}
                 />
-                <span
-                  className="rounded-sm bg-[#dbffd8] px-0.5 font-mono tracking-widest text-[#0f7a16]"
-                  aria-hidden="true"
-                >
-                  {typed ? typed.padEnd(remLen, "_") : underscoreRun}
-                </span>
+                {Array.from({ length: remLen }, (_, k) => (
+                  <SlotTile key={`s${k}`} ch={typed[k]} />
+                ))}
               </span>
             </span>
           );

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
+import { SoftSetPicker, softPct, type SoftSetItem } from "@/components/practice/SoftSetPicker";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   REALWORD_DIFFICULTY_LABEL,
   REALWORD_MAX_SCORE,
@@ -30,6 +32,8 @@ export function RealWordDifficultySetsPage({
   difficulty: RealWordDifficulty;
 }) {
   const [bankVersion, setBankVersion] = useState(0);
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = true;
 
   useEffect(() => {
     const onStorage = () => setBankVersion((n) => n + 1);
@@ -40,6 +44,29 @@ export function RealWordDifficultySetsPage({
       window.removeEventListener("ep-realword-storage", onStorage);
     };
   }, []);
+
+  if (soft) {
+    void bankVersion;
+    const items: SoftSetItem[] = loadRealWordVisibleBank()[round][difficulty].map((ws) => ({
+      key: String(ws.setNumber),
+      label: `ชุด ${ws.setNumber}`,
+      href: `/practice/literacy/real-word/round/${round}/${difficulty}/${ws.setNumber}`,
+      pct: softPct(getRealWordProgress(round, difficulty, ws.setNumber)),
+    }));
+    return (
+      <SoftSetPicker
+        round={round}
+        difficultyLabel={REALWORD_DIFFICULTY_LABEL[difficulty]}
+        title="คำศัพท์อังกฤษจริง"
+        noun="ชุด"
+        items={items}
+        lockExam="realword"
+        changeDifficultyHref={`/practice/literacy/real-word/round/${round}`}
+        allRoundsHref="/practice/literacy/real-word"
+        notice={<NonApiExamQuotaReminder exam="realword" />}
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">

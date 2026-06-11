@@ -17,7 +17,7 @@ export function RealWordGame({
   onSubmit: () => void;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   const toggle = (i: number) => {
     playBlinkBeep();

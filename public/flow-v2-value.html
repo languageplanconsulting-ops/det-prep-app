@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<!--
+  GUIDING PRINCIPLE: "Show the value before asking for commitment."
+  At every gate, make value VISIBLE — locked preview + progress + peer proof + concrete "what you get".
+  ROUGH EDGES FIXED:
+  1. Login forced before user sees anything → show mini-diagnosis preview first (Screen 1)
+  2. Post-diagnosis dumps to raw pricing → contextual next step with skill highlight (Screen 5)
+  3. Upgrade block is just a wall → show what unlocks + locked peek + one honest peer quote (Screen 6)
+  4. PromptPay QR leaves user anxious about confirmation → reassuring "กำลังยืนยัน" state (Screen 8b)
+  Patterns used: Progressive disclosure, Preview row, Comparison table, Loading feedback, Success summary (Tidwell "Designing Interfaces")
+-->
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flow V2 · Show the Value — English Plan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ep-blue': '#004AAD',
+            'ep-yellow': '#FFCC00',
+          },
+          fontFamily: {
+            sans: ['"IBM Plex Sans Thai"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'IBM Plex Sans Thai', sans-serif; line-height: 1.7; }
+    .phone-frame {
+      width: 390px;
+      min-height: 720px;
+      background: white;
+      border-radius: 44px;
+      box-shadow: 0 0 0 2px #d1d5db, 0 20px 60px rgba(0,0,0,0.12);
+      overflow: hidden;
+      position: relative;
+    }
+    .phone-notch {
+      width: 120px;
+      height: 28px;
+      background: #1f2937;
+      border-radius: 0 0 20px 20px;
+      margin: 0 auto;
+    }
+    .status-bar {
+      background: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 20px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .locked-blur {
+      filter: blur(4px);
+      user-select: none;
+      pointer-events: none;
+    }
+    .badge-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+    .screen-card {
+      break-inside: avoid;
+    }
+    @media (max-width: 900px) {
+      .screens-grid { grid-template-columns: 1fr !important; }
+    }
+    .skill-bar {
+      height: 8px;
+      border-radius: 99px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+    .skill-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+    .peer-quote {
+      border-left: 3px solid #004AAD;
+      background: #eff6ff;
+    }
+    .locked-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      backdrop-filter: blur(2px);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Preview ribbon -->
+  <div class="bg-ep-blue text-white text-sm flex items-center gap-3 px-5 py-2.5 sticky top-0 z-50 shadow-md">
+    <a href="/flow-revamp-index.html" class="flex items-center gap-1.5 hover:opacity-80 transition-opacity font-medium">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      Flow hub
+    </a>
+    <span class="text-blue-300">·</span>
+    <span class="font-semibold tracking-wide">Flow V2 · Show the value</span>
+    <span class="ml-auto text-blue-200 text-xs font-mono">8 screens · Designing Interfaces patterns + ethical persuasion</span>
+  </div>
+
+  <!-- Header -->
+  <div class="max-w-6xl mx-auto px-6 pt-10 pb-6 text-center">
+    <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-4 py-1.5 text-ep-blue text-sm font-semibold mb-4">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+      Concept Proposal · ไม่ใช่ Production Code
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Flow V2 — Show the value</h1>
+    <p class="text-gray-500 max-w-xl mx-auto text-sm">แสดงคุณค่าก่อนขอ commitment · Locked preview แทนการบล็อก · Ethical nudge ไม่ใช้ Dark pattern</p>
+  </div>
+
+  <!-- Screens grid -->
+  <div class="screens-grid max-w-6xl mx-auto px-6 pb-16 grid grid-cols-2 gap-10" style="grid-template-columns: repeat(2, 1fr);">
+
+    <!-- ===== SCREEN 1: ลองฟรี / First touch ===== -->
+    <div class="screen-card flex flex-col items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="badge-num w-8 h-8 rounded-full bg-ep-blue text-white text-sm flex items-center justify-center">1</span>
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">ลองฟรี (First touch)</div>
+          <div class="text-xs text-gray-400 font-mono">mini-diagnosis start</div>
+        </div>
+      </div>
+      <div class="phone-frame mx-auto">
+        <div class="phone-notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="px-5 py-4">
+          <!-- App bar -->
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-ep-blue flex items-center justify-center">
+                <span class="text-white font-bold text-xs">EP</span>
+              </div>
+              <span class="text-ep-blue font-bold text-base">English Plan</span>
+            </div>
+            <span class="text-xs text-gray-400">เข้าสู่ระบบ</span>
+          </div>
+          <!-- Hero mini -->
+          <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-4 text-white mb-4">
+            <div class="text-xs font-semibold text-blue-200 mb-1">วินิจฉัยคะแนน DET ฟรี</div>
+            <div class="text-lg font-bold leading-tight mb-2">รู้จุดอ่อนของคุณ<br/>ก่อนสมัครสอบจริง</div>
+            <div class="text-xs text-blue-200">10 นาที · ไม่ต้องสมัครสมาชิกก่อน</div>
+          </div>
+          <!-- PREVIEW OF RESULT — value visible before login -->
+          <div class="bg-blue-50 rounded-xl p-3 mb-4 border border-blue-100">
+            <div class="flex items-center gap-2 mb-2">
+              <svg class="w-4 h-4 text-ep-blue" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              <span class="text-xs font-semibold text-ep-blue">ตัวอย่างผลวินิจฉัย</span>
+            </div>
+            <div class="text-center text-3xl font-bold text-ep-blue font-mono mb-1">105<span class="text-sm text-gray-400">/160</span></div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <div class="bg-white rounded-lg p-2 text-center">
+                <div class="text-xs text-gray-500">Reading</div>
+                <div class="text-sm font-bold text-gray-800">110</div>
+              </div>
+              <div class="bg-white rounded-lg p-2 text-center">
+                <div class="text-xs text-gray-500">Vocab</div>
+                <div class="text-sm font-bold text-gray-800">98</div>
+              </div>
+              <div class="bg-white rounded-lg p-2 text-center border border-amber-200">
+                <div class="text-xs text-amber-600">⚠ Dictation</div>
+                <div class="text-sm font-bold text-amber-700">82</div>
+              </div>
+              <div class="bg-white rounded-lg p-2 text-center border border-amber-200">
+                <div class="text-xs text-amber-600">⚠ Writing</div>
+                <div class="text-sm font-bold text-amber-700">79</div>
+              </div>
+            </div>
+            <div class="text-center text-xs text-gray-400 mt-2 italic">ตัวอย่างจากผู้ใช้อื่น — ผลของคุณจะต่างกัน</div>
+          </div>
+          <button class="w-full bg-ep-blue text-white rounded-xl py-3 font-semibold text-sm shadow-sm">
+            เริ่มวินิจฉัยฟรี →
+          </button>
+          <p class="text-center text-xs text-gray-400 mt-2">บันทึกผลได้หลังทำเสร็จ · ไม่บังคับสมัคร</p>
+        </div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800 max-w-sm text-center">
+        <strong>แก้ปัญหา:</strong> วันนี้ผู้ใช้ต้อง login ก่อนเห็นอะไร → ตอนนี้เห็น value ก่อน แล้วค่อย login เพื่อบันทึกผล
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 2: เข้าสู่ระบบ / สมัคร ===== -->
+    <div class="screen-card flex flex-col items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="badge-num w-8 h-8 rounded-full bg-ep-blue text-white text-sm flex items-center justify-center">2</span>
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">เข้าสู่ระบบ / สมัคร</div>
+          <div class="text-xs text-gray-400 font-mono">login gate — only AFTER seeing value</div>
+        </div>
+      </div>
+      <div class="phone-frame mx-auto">
+        <div class="phone-notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="px-5 py-6">
+          <!-- Context reminder — why they're here -->
+          <div class="bg-blue-50 rounded-xl p-3 mb-5 text-center">
+            <span class="text-xs text-ep-blue font-medium">บันทึกผลวินิจฉัยของคุณไว้ใช้ทีหลัง</span>
+          </div>
+          <h2 class="text-xl font-bold text-gray-900 mb-1 text-center">เข้าสู่ระบบ</h2>
+          <p class="text-center text-sm text-gray-500 mb-6">หรือสร้างบัญชีฟรี ไม่ต้องใช้บัตรเครดิต</p>
+          <!-- Google SSO — prominent -->
+          <button class="w-full flex items-center justify-center gap-3 border border-gray-200 rounded-xl py-3 mb-3 bg-white text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+            <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            ดำเนินการด้วย Google
+          </button>
+          <div class="flex items-center gap-2 mb-3">
+            <div class="flex-1 h-px bg-gray-200"></div>
+            <span class="text-xs text-gray-400">หรือ</span>
+            <div class="flex-1 h-px bg-gray-200"></div>
+          </div>
+          <!-- Email form -->
+          <input class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm mb-2.5 focus:outline-none focus:border-ep-blue" placeholder="อีเมล" type="email" />
+          <input class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm mb-4 focus:outline-none focus:border-ep-blue" placeholder="รหัสผ่าน" type="password" />
+          <button class="w-full bg-ep-blue text-white rounded-xl py-3 font-semibold text-sm shadow-sm mb-3">
+            เข้าสู่ระบบ / สมัคร
+          </button>
+          <!-- Reassurance -->
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+              <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              ไม่มีโฆษณา
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+              <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              ไม่ตัดเงินอัตโนมัติ
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+              <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              ใช้ฟรีได้เสมอ
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+              <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              ข้อมูลปลอดภัย
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 text-xs text-ep-blue max-w-sm text-center">
+        <strong>Pattern:</strong> Login ปรากฏหลัง user เห็น value แล้ว → conversion rate สูงกว่า gated landing
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 3: ยินดีต้อนรับ — สิทธิ์ฟรี ===== -->
+    <div class="screen-card flex flex-col items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="badge-num w-8 h-8 rounded-full bg-ep-blue text-white text-sm flex items-center justify-center">3</span>
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">ยินดีต้อนรับ — สิทธิ์ฟรี</div>
+          <div class="text-xs text-gray-400 font-mono">free allowance onboarding</div>
+        </div>
+      </div>
+      <div class="phone-frame mx-auto">
+        <div class="phone-notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="px-5 py-4">
+          <div class="text-center mb-4">
+            <div class="w-14 h-14 bg-ep-yellow rounded-2xl mx-auto flex items-center justify-center mb-2 shadow-sm">
+              <span class="text-2xl">🎉</span>
+            </div>
+            <h2 class="text-lg font-bold text-gray-900">ยินดีต้อนรับ, น้ำ!</h2>
+            <p class="text-sm text-gray-500">นี่คือสิทธิ์ฟรีของคุณ</p>
+          </div>
+          <!-- Free allowance list — concrete, not vague -->
+          <div class="bg-gray-50 rounded-2xl p-4 mb-4">
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">ลองฟรีอย่างละ 1 ครั้ง</div>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span class="text-xs">📖</span>
+                </div>
+                <span class="text-sm text-gray-700">Reading</span>
+                <span class="ml-auto text-xs font-mono text-ep-blue bg-blue-50 px-2 py-0.5 rounded-full">1 ครั้ง</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span class="text-xs">📝</span>
+                </div>
+                <span class="text-sm text-gray-700">Vocabulary</span>
+                <span class="ml-auto text-xs font-mono text-ep-blue bg-blue-50 px-2 py-0.5 rounded-full">1 ครั้ง</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span class="text-xs">🎧</span>
+                </div>
+                <span class="text-sm text-gray-700">Dictation</span>
+                <span class="ml-auto text-xs font-mono text-ep-blue bg-blue-50 px-2 py-0.5 rounded-full">1 ครั้ง</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span class="text-xs">✏️</span>
+                </div>
+                <span class="text-sm text-gray-700">Fill in the blank</span>
+                <span class="ml-auto text-xs font-mono text-ep-blue bg-blue-50 px-2 py-0.5 rounded-full">1 ครั้ง</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span class="text-xs">🔤</span>
+                </div>
+                <span class="text-sm text-gray-700">Real word</span>
+                <span class="ml-auto text-xs font-mono text-ep-blue bg-blue-50 px-2 py-0.5 rounded-full">1 ครั้ง</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span class="text-xs">🗣</span>
+                </div>
+                <span class="text-sm text-gray-700">Interactive conversation</span>
+                <span class="ml-auto text-xs font-mono text-ep-blue bg-blue-50 px-2 py-0.5 rounded-full">1 ครั้ง</span>
+              </div>
+            </div>
+          </div>
+          <!-- 1 feedback credit — real choice -->
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-sm">💬</span>
+              <span class="text-sm font-semibold text-amber-800">ฟีดแบ็กตรวจงาน 1 เครดิต</span>
+            </div>
+            <p class="text-xs text-amber-700 mb-2">เลือก 1 งานที่ต้องการฟีดแบ็กได้เลย (เลือกได้ทีหลังในคลัง)</p>
+            <div class="flex gap-2">
+              <button class="flex-1 bg-amber-400 text-white rounded-lg py-1.5 text-xs font-semibold">เลือกตอนนี้</button>
+              <button class="flex-1 border border-amber-300 text-amber-700 rounded-lg py-1.5 text-xs">เลือกทีหลัง</button>
+            </div>
+          </div>
+          <button class="w-full bg-ep-blue text-white rounded-xl py-3 font-semibold text-sm">
+            เริ่มฝึกเลย →
+          </button>
+        </div>
+      </div>
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 text-xs text-emerald-800 max-w-sm text-center">
+        <strong>Pattern (Tidwell):</strong> "What you get" checklist — concrete allowance ดีกว่า "ลองฟรีได้บางส่วน"
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 4: คลังฝึก (Practice Hub) ===== -->
+    <div class="screen-card flex flex-col items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="badge-num w-8 h-8 rounded-full bg-ep-blue text-white text-sm flex items-center justify-center">4</span>
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">คลังฝึก (ฟรี)</div>
+          <div class="text-xs text-gray-400 font-mono">practice hub · locked preview</div>
+        </div>
+      </div>
+      <div class="phone-frame mx-auto">
+        <div class="phone-notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="px-5 py-4">
+          <h2 class="text-lg font-bold text-gray-900 mb-1">คลังฝึก</h2>
+          <p class="text-sm text-gray-500 mb-4">ฝึกทักษะก่อนสอบ DET จริง</p>
+          <!-- Progress bar -->
+          <div class="bg-blue-50 rounded-xl p-3 mb-4 flex items-center gap-3">
+            <div class="flex-1">
+              <div class="flex justify-between text-xs text-gray-500 mb-1">
+                <span>ความคืบหน้าฟรี</span>
+                <span class="font-mono">1/6 ทักษะ</span>
+              </div>
+              <div class="skill-bar">
+                <div class="skill-fill bg-ep-blue" style="width:16%"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Practice lanes -->
+          <div class="space-y-2.5">
+            <!-- Dictation — available -->
+            <div class="bg-white border border-gray-100 rounded-xl p-3 shadow-sm flex items-center gap-3">
+              <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-lg">🎧</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-sm text-gray-900">Dictation</div>
+                <div class="text-xs text-gray-500">ชุดที่ 1 จาก 12</div>
+              </div>
+              <span class="text-xs text-ep-blue font-mono bg-blue-50 px-2 py-0.5 rounded-full">0/1 ฟรี</span>
+            </div>
+            <!-- Reading — used -->
+            <div class="bg-gray-50 border border-gray-100 rounded-xl p-3 flex items-center gap-3 opacity-70">
+              <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-lg">📖</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-sm text-gray-700">Reading</div>
+                <div class="text-xs text-gray-400">ใช้สิทธิ์ฟรีแล้ว</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <span class="text-xs text-gray-400 font-mono">เสร็จ</span>
+              </div>
+            </div>
+            <!-- Writing — locked, but visible peek -->
+            <div class="relative rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+              <div class="bg-white p-3 flex items-center gap-3 locked-blur select-none">
+                <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span class="text-lg">✏️</span>
+                </div>
+                <div class="flex-1">
+                  <div class="font-semibold text-sm text-gray-900">Writing (Photo)</div>
+                  <div class="text-xs text-gray-500">3 ชุด · Beginner → Advanced</div>
+                </div>
+              </div>
+              <div class="locked-overlay">
+                <div class="text-center">
+                  <div class="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center mx-auto mb-1">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  </div>
+                  <div class="text-xs font-semibold text-gray-700">ปลดล็อกด้วยแพ็กเกจ</div>
+                </div>
+              </div>
+            </div>
+            <!-- Mock test — locked, peek -->
+            <div class="relative rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+              <div class="bg-white p-3 flex items-center gap-3 locked-blur select-none">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span class="text-lg">📊</span>
+                </div>
+                <div class="flex-1">
+                  <div class="font-semibold text-sm text-gray-900">Mock Test ครบรูปแบบ</div>
+                  <div class="text-xs text-gray-500">6 ชุด · เหมือนสอบจริงทุกอย่าง</div>
+                </div>
+              </div>
+              <div class="locked-overlay">
+                <div class="text-center">
+                  <div class="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center mx-auto mb-1">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  </div>
+                  <div class="text-xs font-semibold text-gray-700">ปลดล็อกด้วยแพ็กเกจ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 text-xs text-ep-blue max-w-sm text-center">
+        <strong>แก้ปัญหา:</strong> locked item ยังคง "เห็น" ว่ามีอยู่ (blurred peek) → user รู้ว่าปลดล็อกได้อะไร แทนที่จะเห็นแค่ slot ว่าง
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 5: ผลวินิจฉัย ===== -->
+    <div class="screen-card flex flex-col items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="badge-num w-8 h-8 rounded-full bg-ep-blue text-white text-sm flex items-center justify-center">5</span>
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">ผลวินิจฉัย</div>
+          <div class="text-xs text-gray-400 font-mono">diagnosis result · contextual next step</div>
+        </div>
+      </div>
+      <div class="phone-frame mx-auto">
+        <div class="phone-notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="px-5 py-4">
+          <div class="text-center mb-4">
+            <div class="text-3xl font-bold text-ep-blue font-mono">108<span class="text-lg text-gray-400">/160</span></div>
+            <div class="text-xs text-gray-500">คะแนนวินิจฉัยของคุณ</div>
+          </div>
+          <!-- 4 skills -->
+          <div class="space-y-2.5 mb-4">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-700 font-medium">📖 Reading</span>
+                <span class="font-mono text-gray-800">118</span>
+              </div>
+              <div class="skill-bar"><div class="skill-fill bg-ep-blue" style="width:74%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-700 font-medium">📝 Vocabulary</span>
+                <span class="font-mono text-gray-800">112</span>
+              </div>
+              <div class="skill-bar"><div class="skill-fill bg-violet-400" style="width:70%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-amber-700 font-semibold">⚠ Dictation</span>
+                <span class="font-mono text-amber-700">84</span>
+              </div>
+              <div class="skill-bar"><div class="skill-fill bg-amber-400" style="width:52%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-amber-700 font-semibold">⚠ Writing</span>
+                <span class="font-mono text-amber-700">78</span>
+              </div>
+              <div class="skill-bar"><div class="skill-fill bg-amber-400" style="width:49%"></div></div>
+            </div>
+          </div>
+          <!-- Weak skill callout -->
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+            <div class="text-xs font-semibold text-amber-800 mb-1">จุดที่ต้องเพิ่มคะแนน</div>
+            <p class="text-xs text-amber-700">Dictation และ Writing ต่ำกว่าเป้า 120 อยู่ ~35 คะแนน — ฝึก 2 ทักษะนี้จะเพิ่มคะแนนรวมได้เร็วที่สุด</p>
+          </div>
+          <!-- Peek of detailed feedback — locked -->
+          <div class="mb-4">
+            <div class="text-xs font-semibold text-gray-700 mb-2">ตัวอย่างฟีดแบ็กรายข้อที่คุณจะได้รับ</div>
+            <div class="relative rounded-xl overflow-hidden border border-gray-100">
+              <div class="bg-gray-50 p-3 space-y-1.5 locked-blur select-none" aria-hidden="true">
+                <div class="h-3 bg-gray-300 rounded w-3/4"></div>
+                <div class="h-3 bg-gray-200 rounded w-full"></div>
+                <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+                <div class="flex gap-1 mt-2">
+                  <div class="h-5 bg-emerald-200 rounded-full w-16"></div>
+                  <div class="h-5 bg-amber-200 rounded-full w-20"></div>
+                </div>
+                <div class="h-3 bg-gray-200 rounded w-4/5"></div>
+                <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+              </div>
+              <div class="locked-overlay">
+                <div class="text-center px-4">
+                  <div class="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center mx-auto mb-1.5">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  </div>
+                  <div class="text-xs font-semibold text-gray-700">ฟีดแบ็กรายข้อ</div>
+                  <div class="text-xs text-gray-500">ปลดล็อกด้วยแพ็กเกจ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Contextual CTA — NOT raw pricing dump -->
+          <button class="w-full bg-ep-blue text-white rounded-xl py-3 font-semibold text-sm mb-2">
+            ฝึก Dictation & Writing ต่อ →
+          </button>
+          <button class="w-full border border-gray-200 text-gray-600 rounded-xl py-2.5 text-sm">
+            ดูคลังทั้งหมด
+          </button>
+        </div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800 max-w-sm text-center">
+        <strong>แก้ปัญหา:</strong> หลังวินิจฉัย → CTA บอก "ฝึกทักษะอ่อนเลย" ไม่ใช่ dump ไปหน้า pricing ทันที
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 6: ปลดล็อก (THE block) ===== -->
+    <div class="screen-card flex flex-col items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="badge-num w-8 h-8 rounded-full bg-ep-blue text-white text-sm flex items-center justify-center">6</span>
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">ปลดล็อกการฝึกแบบเต็ม</div>
+          <div class="text-xs text-gray-400 font-mono">upgrade gate · show value first</div>
+        </div>
+      </div>
+      <div class="phone-frame mx-auto">
+        <div class="phone-notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="px-5 py-5">
+          <!-- Context: what they tried to do -->
+          <div class="bg-gray-50 rounded-xl p-3 mb-4 flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="text-sm">🎧</span>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-gray-700">Dictation — ชุดที่ 2</div>
+              <div class="text-xs text-gray-500">ใช้สิทธิ์ฟรี 1 ครั้งไปแล้ว</div>
+            </div>
+          </div>
+          <h2 class="text-lg font-bold text-gray-900 mb-1">อยากฝึกต่อไหม?</h2>
+          <p class="text-sm text-gray-500 mb-4">ปลดล็อกการฝึกแบบเต็มเพื่อ</p>
+          <!-- What you unlock -->
+          <div class="bg-blue-50 rounded-xl p-3 mb-4">
+            <div class="text-xs font-semibold text-ep-blue mb-2.5">สิ่งที่คุณจะปลดล็อก</div>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-ep-blue flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <span class="text-xs text-gray-700">Dictation ทุกชุด (1–12, Beginner→Advanced)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-ep-blue flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <span class="text-xs text-gray-700">Writing & Speaking ทุกโหมด</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-ep-blue flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <span class="text-xs text-gray-700">ฟีดแบ็กรายข้อจากฐานข้อมูล 6 ปีของ English Plan</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-ep-blue flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <span class="text-xs text-gray-700">Mock Test เต็มรูปแบบ (สอบจำลองครบ)</span>
+              </div>
+            </div>
+          </div>
+          <!-- Blurred peek of more sets -->
+          <div class="relative rounded-xl overflow-hidden border border-gray-100 mb-4">
+            <div class="p-3 space-y-2 locked-blur select-none" aria-hidden="true">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-emerald-100 rounded-lg"></div>
+                <div class="space-y-1 flex-1"><div class="h-2.5 bg-gray-300 rounded w-1/2"></div><div class="h-2 bg-gray-200 rounded w-1/3"></div></div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-violet-100 rounded-lg"></div>
+                <div class="space-y-1 flex-1"><div class="h-2.5 bg-gray-300 rounded w-2/3"></div><div class="h-2 bg-gray-200 rounded w-1/4"></div></div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-amber-100 rounded-lg"></div>
+                <div class="space-y-1 flex-1"><div class="h-2.5 bg-gray-300 rounded w-1/2"></div><div class="h-2 bg-gray-200 rounded w-2/5"></div></div>
+              </div>
+            </div>
+            <div class="locked-overlay">
+              <div class="text-xs font-medium text-gray-600">+38 ชุดฝึกเพิ่มเติม</div>
+            </div>
+          </div>
+          <!-- Peer social proof — 1 quote, believable -->
+          <div class="peer-quote rounded-xl p-3 mb-4">
+            <p class="text-xs text-gray-700 italic mb-1.5">"เริ่มจาก 85 ฝึก Dictation ทุกวัน 3 อาทิตย์ ขึ้นเป็น 120 เลย ช่วยได้จริง"</p>
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center text-xs">พ</div>
+              <span class="text-xs text-gray-500">พิมพ์ชนก, นศ. ม.จุฬา · ธ.ค. 2567</span>
+            </div>
+          </div>
+          <!-- CTA -->
+          <button class="w-full bg-ep-blue text-white rounded-xl py-3 font-semibold text-sm shadow-sm mb-2">
+            ดูแพ็กเกจ →
+          </button>
+          <button class="w-full text-gray-400 text-sm py-2">ยังไม่ตอนนี้</button>
+        </div>
+      </div>
+      <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 text-xs text-ep-blue max-w-sm text-center">
+        <strong>Ethical nudge:</strong> แสดงคุณค่าจริง + peer proof ที่น่าเชื่อถือ · ไม่มี fake urgency · มี dismiss ง่าย
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 7: เลือกแพ็กเกจ ===== -->
+    <div class="screen-card flex flex-col items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="badge-num w-8 h-8 rounded-full bg-ep-blue text-white text-sm flex items-center justify-center">7</span>
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">เลือกแพ็กเกจ</div>
+          <div class="text-xs text-gray-400 font-mono">pricing · comparison table pattern</div>
+        </div>
+      </div>
+      <div class="phone-frame mx-auto">
+        <div class="phone-notch"></div>
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+        <div class="px-5 py-4">
+          <h2 class="text-lg font-bold text-gray-900 mb-0.5">เลือกแพ็กเกจ</h2>
+          <p class="text-xs text-gray-500 mb-4">ชำระครั้งเดียว 30 วัน · ไม่ตัดเงินอัตโนมัติ</p>
+          <!-- Plans -->
+          <div class="space-y-2.5">
+            <!-- Free -->
+            <div class="border border-gray-200 rounded-xl p-3 bg-white">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-semibold text-sm text-gray-700">ฟรี</span>
+                <span class="font-bold text-gray-900 font-mono">฿0</span>
+              </div>
+              <div class="text-xs text-gray-500">ลองทุกทักษะอย่างละ 1 ครั้ง · ฟีดแบ็ก 1 เครดิต</div>
+            </div>
+            <!-- Basic -->
+            <div class="border border-gray-200 rounded-xl p-3 bg-white">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-semibold text-sm text-gray-700">Basic</span>
+                <span class="font-bold text-gray-900 font-mono">฿399</span>
+              </div>
+              <div class="text-xs text-gray-500">ฟีดแบ็ก 12 เครดิต · Mock 2 ชุด · ฝึกทุกทักษะ</div>
+            </div>
+            <!-- Premium — recommended -->
+            <div class="border-2 border-ep-blue rounded-xl p-3 bg-blue-50 relative">
+              <div class="absolute -top-2.5 right-4 bg-ep-blue text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">ยอดนิยม</div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-sm text-ep-blue">Premium</span>
+                <span class="font-bold text-ep-blue font-mono">฿699</span>
+              </div>
+              <div class="text-xs text-gray-600 mb-2">ฟีดแบ็ก 30 เครดิต · Mock 4 ชุด · ฝึกทุกทักษะ</div>
+              <div class="grid grid-cols-2 gap-1">
+                <div class="flex items-center gap-1 text-xs text-ep-blue">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  ฟีดแบ็กรายข้อ
+                </div>
+                <div class="flex items-center gap-1 text-xs text-ep-blue">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mock ครบรูปแบบ
+                </div>
+                <div class="flex items-center gap-1 text-xs text-ep-blue">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Dictation ทุกชุด
+                </div>
+                <div class="flex items-center gap-1 text-xs text-ep-blue">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Writing & Speaking
+                </div>
+              </div>
+            </div>
+            <!-- VIP -->
+            <div class="border border-gray-200 rounded-xl p-3 bg-white">
+              <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-semibold text-sm text-gray-700">VIP</span>
+                  <span class="bg-amber-100 text-amber-700 text-xs px-1.5 py-0.5 rounded-full font-medium">ครบสุด</span>
+                </div>
+                <span class="font-bold text-gray-900 font-mono">฿999</span>
+              </div>
+              <div class="text-xs text-gray-500">ฟีดแบ็ก 60 เครดิต · Mock 6 ชุด · ฝึกไม่จำกัด</div>
+            </div>
+          </div>
+          <!-- Reassurance footer -->
+          <div class="mt-4 flex items-center justify-center gap-3 text-xs text-gray-400">
+            <span>ชำระครั้งเดียว</span>
+            <span>·</span>
+            <span>ไม่ต่ออัตโนมัติ</span>
+            <span>·</span>
+            <span>PromptPay / บัตร</span>
+          </div>
+          <button class="w-full bg-ep-blue text-white rounded-xl py-3 font-semibold text-sm mt-3 shadow-sm">
+            เลือก Premium →
+          </button>
+        </div>
+      </div>
+      <div class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-2.5 text-xs text-ep-blue max-w-sm text-center">
+        <strong>Pattern (Tidwell):</strong> Comparison table — "ยอดนิยม" badge แสดงด้วย value ชัดเจน ไม่ใช้ pressure · honest 1-time pricing
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 8: PromptPay flow (3-state) ===== -->
+    <div class="screen-card flex flex-col items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="badge-num w-8 h-8 rounded-full bg-ep-blue text-white text-sm flex items-center justify-center">8</span>
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">PromptPay → ยืนยัน → สำเร็จ</div>
+          <div class="text-xs text-gray-400 font-mono">3-state payment flow · async anxiety fix</div>
+        </div>
+      </div>
+      <!-- 3 sub-screens side by side inside a wider container -->
+      <div class="flex gap-4 flex-wrap justify-center">
+
+        <!-- 8a: QR -->
+        <div class="flex flex-col items-center gap-2">
+          <div class="text-xs font-mono text-gray-400">8a · QR</div>
+          <div style="width:200px; min-height:420px;" class="bg-white rounded-3xl shadow-md overflow-hidden border border-gray-100">
+            <div class="bg-ep-blue px-4 py-3 text-white">
+              <div class="text-xs font-semibold">Premium · ฿699</div>
+            </div>
+            <div class="px-4 py-3 text-center">
+              <div class="text-xs text-gray-500 mb-2">สแกน QR ด้วย Mobile Banking</div>
+              <!-- Mock QR -->
+              <div class="w-32 h-32 mx-auto bg-white border-2 border-gray-900 rounded-lg p-2 mb-2 grid grid-cols-7 gap-0.5">
+                <div class="col-span-3 row-span-3 bg-gray-900 rounded-sm"></div>
+                <div class="bg-white"></div>
+                <div class="col-span-3 row-span-3 bg-gray-900 rounded-sm"></div>
+                <div class="bg-gray-900"></div>
+                <div class="bg-white"></div>
+                <div class="bg-gray-900"></div>
+                <div class="bg-white"></div>
+                <div class="bg-gray-900"></div>
+                <div class="bg-white"></div>
+                <div class="bg-gray-900"></div>
+                <div class="bg-white"></div>
+                <div class="bg-gray-900"></div>
+                <div class="bg-white"></div>
+                <div class="bg-gray-900"></div>
+                <div class="col-span-3 row-span-3 bg-gray-900 rounded-sm"></div>
+                <div class="bg-gray-900"></div>
+                <div class="bg-white"></div>
+                <div class="bg-gray-900"></div>
+                <div class="bg-white"></div>
+                <div class="bg-gray-900"></div>
+                <div class="bg-gray-900"></div>
+                <div class="bg-white"></div>
+              </div>
+              <div class="text-xs font-bold text-gray-800 font-mono mb-0.5">฿699.00</div>
+              <div class="text-xs text-gray-400">English Plan · Premium</div>
+              <div class="mt-3 text-xs text-gray-500 bg-blue-50 rounded-lg p-2">หลังสแกนและยืนยันในแอปธนาคาร รอสักครู่ — ระบบจะตรวจสอบอัตโนมัติ</div>
+              <div class="mt-2 text-xs text-gray-400 font-mono">หมดอายุใน 14:52</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8b: Verifying — reassuring -->
+        <div class="flex flex-col items-center gap-2">
+          <div class="text-xs font-mono text-gray-400">8b · กำลังยืนยัน</div>
+          <div style="width:200px; min-height:420px;" class="bg-white rounded-3xl shadow-md overflow-hidden border border-gray-100">
+            <div class="bg-amber-400 px-4 py-3">
+              <div class="text-xs font-semibold text-amber-900">กำลังตรวจสอบ…</div>
+            </div>
+            <div class="px-4 py-6 text-center">
+              <!-- Spinner -->
+              <div class="w-16 h-16 mx-auto mb-4 relative">
+                <div class="w-16 h-16 rounded-full border-4 border-blue-100 border-t-ep-blue animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="text-xl">💳</span>
+                </div>
+              </div>
+              <div class="text-sm font-semibold text-gray-800 mb-1">กำลังยืนยันการชำระ</div>
+              <p class="text-xs text-gray-500 mb-4">ไม่ต้องปิดหน้านี้<br/>อาจใช้เวลา 10–30 วินาที</p>
+              <!-- Progress dots -->
+              <div class="flex justify-center gap-1.5 mb-4">
+                <div class="w-2 h-2 rounded-full bg-ep-blue"></div>
+                <div class="w-2 h-2 rounded-full bg-blue-200"></div>
+                <div class="w-2 h-2 rounded-full bg-blue-200"></div>
+              </div>
+              <div class="bg-blue-50 rounded-xl p-3 text-left space-y-1.5">
+                <div class="flex items-center gap-2 text-xs text-emerald-700">
+                  <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  ตรวจสอบ QR สแกนแล้ว
+                </div>
+                <div class="flex items-center gap-2 text-xs text-amber-700">
+                  <div class="w-3.5 h-3.5 rounded-full border-2 border-amber-400 border-t-transparent animate-spin flex-shrink-0"></div>
+                  รอยืนยันจากธนาคาร…
+                </div>
+                <div class="flex items-center gap-2 text-xs text-gray-400">
+                  <div class="w-3.5 h-3.5 rounded-full border-2 border-gray-200 flex-shrink-0"></div>
+                  ปลดล็อกแพ็กเกจ
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 mt-3">หากเกิน 2 นาทีแล้วยังไม่ยืนยัน ติดต่อทีมผ่าน Line</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8c: Success -->
+        <div class="flex flex-col items-center gap-2">
+          <div class="text-xs font-mono text-gray-400">8c · สำเร็จ</div>
+          <div style="width:200px; min-height:420px;" class="bg-white rounded-3xl shadow-md overflow-hidden border border-gray-100">
+            <div class="bg-emerald-500 px-4 py-3">
+              <div class="text-xs font-semibold text-white">ชำระเงินสำเร็จ ✓</div>
+            </div>
+            <div class="px-4 py-4 text-center">
+              <div class="w-14 h-14 bg-emerald-100 rounded-2xl mx-auto mb-3 flex items-center justify-center">
+                <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              </div>
+              <div class="text-sm font-bold text-gray-900 mb-0.5">ยินดีด้วย!</div>
+              <div class="text-xs text-gray-500 mb-3">Premium พร้อมใช้งานแล้ว 30 วัน</div>
+              <!-- What just unlocked — show the value they bought -->
+              <div class="bg-emerald-50 rounded-xl p-2.5 text-left mb-3 space-y-1.5">
+                <div class="text-xs font-semibold text-emerald-800 mb-1">สิ่งที่ปลดล็อกแล้ว</div>
+                <div class="flex items-center gap-1.5 text-xs text-emerald-700">
+                  <svg class="w-3 h-3 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  ฟีดแบ็ก 30 เครดิต
+                </div>
+                <div class="flex items-center gap-1.5 text-xs text-emerald-700">
+                  <svg class="w-3 h-3 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Mock Test 4 ชุด
+                </div>
+                <div class="flex items-center gap-1.5 text-xs text-emerald-700">
+                  <svg class="w-3 h-3 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  ฝึกทุกทักษะไม่จำกัด
+                </div>
+                <div class="flex items-center gap-1.5 text-xs text-emerald-700">
+                  <svg class="w-3 h-3 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Dictation ทุกชุด 1–12
+                </div>
+                <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                  <svg class="w-3 h-3 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <span>หมดอายุ 11 ก.ค. 2569</span>
+                </div>
+              </div>
+              <button class="w-full bg-ep-blue text-white rounded-xl py-2.5 text-xs font-semibold">
+                เริ่มฝึก Dictation →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800 max-w-xl text-center">
+        <strong>แก้ปัญหา 8b:</strong> async PromptPay → progress steps + "ไม่ต้องปิดหน้า" ลด anxiety ระหว่างรอยืนยัน · <strong>8c:</strong> success screen แสดง "สิ่งที่ปลดล็อกแล้ว" ชัดเจน
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Design principle summary -->
+  <div class="max-w-4xl mx-auto px-6 pb-16">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h3 class="font-bold text-gray-900 mb-4 text-base">หลักการออกแบบ V2 — สรุป</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-blue-50 rounded-xl p-4">
+          <div class="font-semibold text-ep-blue text-sm mb-2">Tidwell patterns ที่ใช้</div>
+          <ul class="text-xs text-gray-600 space-y-1">
+            <li>· <strong>Progressive disclosure</strong> — value ก่อน, login ทีหลัง (Screen 1→2)</li>
+            <li>· <strong>Preview row</strong> — locked item ยังคงเห็นได้ (Screen 4, 5, 6)</li>
+            <li>· <strong>Comparison table</strong> — pricing ชัดเจน ไม่ซ่อนข้อมูล (Screen 7)</li>
+            <li>· <strong>Progress feedback</strong> — async loading states (Screen 8b)</li>
+            <li>· <strong>Success completion</strong> — แสดงสิ่งที่ได้ทันที (Screen 8c)</li>
+          </ul>
+        </div>
+        <div class="bg-emerald-50 rounded-xl p-4">
+          <div class="font-semibold text-emerald-700 text-sm mb-2">Ethical persuasion (ไม่ใช้ Dark pattern)</div>
+          <ul class="text-xs text-gray-600 space-y-1">
+            <li>· ไม่มี fake urgency หรือ fake scarcity</li>
+            <li>· Peer quote ระบุวันที่ที่น่าเชื่อถือ ไม่ขยาย</li>
+            <li>· Pricing โปร่งใส — ชำระครั้งเดียว ไม่ต่ออัตโนมัติ</li>
+            <li>· มี dismiss ง่ายทุก upgrade gate</li>
+            <li>· ไม่ใช้คำว่า "AI" — ใช้ "ฐานข้อมูล 6 ปีของ English Plan"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

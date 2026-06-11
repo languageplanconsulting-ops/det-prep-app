@@ -18,7 +18,7 @@ import type { DialogueSummaryRoundNum } from "@/types/dialogue-summary";
 export function DialogueSummaryRoundDifficultyHub({ round }: { round: DialogueSummaryRoundNum }) {
   const [v, setV] = useState(0);
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);

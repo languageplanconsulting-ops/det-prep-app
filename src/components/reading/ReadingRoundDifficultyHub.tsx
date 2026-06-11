@@ -15,7 +15,7 @@ import type { ReadingRoundNum } from "@/types/reading";
 export function ReadingRoundDifficultyHub({ round }: { round: ReadingRoundNum }) {
   const [v, setV] = useState(0);
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);

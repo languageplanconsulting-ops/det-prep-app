@@ -1,4 +1,4 @@
-import { MiniDiagnosisSessionClient } from "@/components/mini-diagnosis/MiniDiagnosisSessionClient";
+import { AdminMiniDiagnosisSessionClient } from "@/components/mini-diagnosis/AdminMiniDiagnosisSessionClient";
 
 export default async function MiniDiagnosisSessionPage({
   params,
@@ -6,5 +6,5 @@ export default async function MiniDiagnosisSessionPage({
   params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = await params;
-  return <MiniDiagnosisSessionClient sessionId={sessionId} />;
+  return <AdminMiniDiagnosisSessionClient sessionId={sessionId} />;
 }

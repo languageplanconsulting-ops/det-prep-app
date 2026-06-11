@@ -20,7 +20,7 @@ export function DictationDifficultySetsPage({
   // Admin / preview accounts see the new "Continue + Board" mastery picker;
   // real users keep the original grid byte-for-byte until launch.
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   useEffect(() => {
     const onStorage = () => setBankVersion((n) => n + 1);
@@ -34,23 +34,7 @@ export function DictationDifficultySetsPage({
 
   if (soft) {
     return (
-      <div className="space-y-5" id="sets">
-        <div className="flex flex-wrap gap-2 text-[12px] font-semibold text-[#004AAD]">
-          <Link href={`/practice/literacy/dictation/round/${round}`} className="hover:underline">
-            ← เลือกระดับ
-          </Link>
-          <span className="text-slate-300">·</span>
-          <Link href="/practice/literacy/dictation" className="hover:underline">
-            Round {round}
-          </Link>
-          <span className="text-slate-300">·</span>
-          <Link href="/practice" className="hover:underline">
-            Practice hub
-          </Link>
-        </div>
-
-        <NonApiExamQuotaReminder exam="dictation" />
-
+      <div id="sets">
         <DictationSetGridSoft round={round} difficulty={difficulty} bankVersion={bankVersion} />
       </div>
     );

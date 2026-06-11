@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FitbSetGrid } from "@/components/fitb/FitbSetGrid";
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
+import { SoftSetPicker, softPct, type SoftSetItem } from "@/components/practice/SoftSetPicker";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { FITB_DIFFICULTY_LABEL } from "@/lib/fitb-constants";
+import { getFitbProgress, loadFitbVisibleBank } from "@/lib/fitb-storage";
 import type { FitbDifficulty, FitbRoundNum } from "@/types/fitb";
 
 export function FitbDifficultySetsPage({
@@ -15,6 +18,8 @@ export function FitbDifficultySetsPage({
   difficulty: FitbDifficulty;
 }) {
   const [bankVersion, setBankVersion] = useState(0);
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = true;
 
   useEffect(() => {
     const onStorage = () => setBankVersion((n) => n + 1);
@@ -25,6 +30,29 @@ export function FitbDifficultySetsPage({
       window.removeEventListener("ep-fitb-storage", onStorage);
     };
   }, []);
+
+  if (soft) {
+    void bankVersion;
+    const items: SoftSetItem[] = loadFitbVisibleBank()[round][difficulty].map((set) => ({
+      key: String(set.setNumber),
+      label: `ชุด ${set.setNumber}`,
+      href: `/practice/literacy/fill-in-blank/round/${round}/${difficulty}/${set.setNumber}`,
+      pct: softPct(getFitbProgress(round, difficulty, set.setNumber)),
+    }));
+    return (
+      <SoftSetPicker
+        round={round}
+        difficultyLabel={FITB_DIFFICULTY_LABEL[difficulty]}
+        title="เติมคำในช่องว่าง"
+        noun="ชุด"
+        items={items}
+        lockExam="fitb"
+        changeDifficultyHref={`/practice/literacy/fill-in-blank/round/${round}`}
+        allRoundsHref="/practice/literacy/fill-in-blank"
+        notice={<NonApiExamQuotaReminder exam="fitb" />}
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">

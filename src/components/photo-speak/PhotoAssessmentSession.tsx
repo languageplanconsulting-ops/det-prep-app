@@ -60,7 +60,7 @@ export function PhotoAssessmentSession({
 }) {
   const router = useRouter();
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const item = useMemo(() => findWriteAboutPhotoItem(itemId), [itemId]);
   const round = item ? getWriteAboutPhotoRoundNumberForItem(item.id) : undefined;
   const latestProgress = useMemo(

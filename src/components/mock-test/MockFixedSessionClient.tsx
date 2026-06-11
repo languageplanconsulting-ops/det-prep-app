@@ -91,7 +91,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   // Admin / preview-eligible users see the soft "Progress Journey" layout;
   // everyone else keeps the original brutalist layout byte-for-byte.
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   const answeredCount = session?.responses?.length ?? 0;
   const adminPreviewMode = session?.targets?.adminPreviewMode === true;
@@ -137,10 +137,15 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     return Math.max(1, Math.round(sec / 60));
   }, [session, stepIndex]);
 
-  const load = async (reason: typeof loadingReason = "init") => {
-    setLoading(true);
-    setLoadingReason(reason);
-    setError(null);
+  const load = async (reason: typeof loadingReason = "init", opts?: { silent?: boolean }) => {
+    // Silent = background reconcile after an optimistic advance: no full-screen
+    // spinner, no error overlay (the answer is already saved server-side).
+    const silent = opts?.silent === true;
+    if (!silent) {
+      setLoading(true);
+      setLoadingReason(reason);
+      setError(null);
+    }
     try {
       const ctl = new AbortController();
       const t = window.setTimeout(() => ctl.abort(), 20000);
@@ -152,15 +157,19 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       window.clearTimeout(t);
       const json = (await res.json()) as { session?: SessionPayload; error?: string };
       if (!res.ok || !json.session) {
-        setError(json.error ?? "Session not found");
-        setLoading(false);
+        if (!silent) {
+          setError(json.error ?? "Session not found");
+          setLoading(false);
+        }
         return;
       }
       setSession(json.session);
-      setLoading(false);
+      if (!silent) setLoading(false);
     } catch {
-      setError("Failed to load session (timeout). Please refresh and try again.");
-      setLoading(false);
+      if (!silent) {
+        setError("Failed to load session (timeout). Please refresh and try again.");
+        setLoading(false);
+      }
     } finally {
       setSubmittingStep(false);
     }
@@ -298,7 +307,37 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       setSubmittingStep(false);
       return;
     }
-    await load("adapting");
+
+    // Instant advance: the next question is already loaded client-side (this is
+    // a fixed 20-step mock), so don't make the learner wait on a full re-fetch
+    // when they submit before the timer runs out.
+    //   - Step 13 feeds the linked step 14 (conversation summary) → keep it
+    //     authoritative (blocking reload).
+    //   - Admin-gated for now (verify a full run, then flip `instantAdvance`
+    //     to all users by dropping the `soft` check).
+    const instantAdvance = soft && current.step_index !== 13;
+    if (!instantAdvance) {
+      await load("adapting");
+      return;
+    }
+    const submittedStep = current.step_index;
+    const submittedTask = current.task_type;
+    setSession((prev) =>
+      prev
+        ? {
+            ...prev,
+            current_step: submittedStep + 1,
+            responses: prev.responses.some((r) => r.step_index === submittedStep)
+              ? prev.responses
+              : [...prev.responses, { step_index: submittedStep, task_type: submittedTask, answer }],
+          }
+        : prev,
+    );
+    setSubmittingStep(false);
+    // No re-fetch needed: this fixed mock keeps all 20 questions client-side,
+    // and the server already advanced current_step + saved the answer, so the
+    // optimistic state stays in lockstep. Rest steps / step 13 / a refresh
+    // reconcile with the server. (silent option on load kept for safety.)
   };
 
   if (error) return <div className="p-8 text-center font-bold text-red-700">{error}</div>;

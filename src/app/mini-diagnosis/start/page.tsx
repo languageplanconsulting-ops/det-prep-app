@@ -1,5 +1,5 @@
-import { MiniDiagnosisStartClient } from "@/components/mini-diagnosis/MiniDiagnosisStartClient";
+import { AdminMiniDiagnosisStartClient } from "@/components/mini-diagnosis/AdminMiniDiagnosisStartClient";
 
 export default function MiniDiagnosisStartPage() {
-  return <MiniDiagnosisStartClient />;
+  return <AdminMiniDiagnosisStartClient />;
 }

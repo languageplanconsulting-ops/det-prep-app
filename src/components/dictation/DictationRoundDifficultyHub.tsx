@@ -21,7 +21,7 @@ export function DictationRoundDifficultyHub({ round }: { round: DictationRoundNu
   const [v, setV] = useState(0);
   const [bankReady, setBankReady] = useState(false);
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   useEffect(() => {
     void ensureDictationBankReady().then(() => setBankReady(true));

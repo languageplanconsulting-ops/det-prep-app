@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+
 /**
  * EnhancedRoundCard — shared round-card UI for every exam-bank hub.
  *
@@ -153,9 +155,62 @@ export function EnhancedRoundCard(props: EnhancedRoundCardProps) {
     estMinPerSet = 2,
   } = props;
 
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  // V2 "Explained grid": admins/preview see decluttered cards (no difficulty
+  // chips / no date / progress bar) paired with the <RoundsExplainer/> box.
+  const v2 = isAdmin || previewEligible;
+
   const hasAttempts = avgPercent != null;
   const isLocked = !!lockReason;
   const estMin = Math.max(1, Math.round(5 * estMinPerSet));
+  const pct = totalSets > 0 ? Math.min(100, Math.round((setsAttempted / totalSets) * 100)) : 0;
+  const allDone = totalSets > 0 && setsAttempted >= totalSets;
+  const v2Status = isLocked
+    ? { txt: "🔒 ล็อก", cls: "bg-slate-100 text-slate-500" }
+    : allDone
+      ? { txt: "เสร็จแล้ว", cls: "bg-emerald-100 text-emerald-700" }
+      : setsAttempted > 0
+        ? { txt: "กำลังทำ", cls: "bg-blue-100 text-blue-800" }
+        : { txt: "พร้อมทำ", cls: "bg-slate-100 text-slate-500" };
+
+  const simplifiedInner = (
+    <>
+      {isRecommended && !isLocked ? (
+        <span className="absolute -top-2.5 left-3 rounded-full bg-[#FFCC00] px-2 py-0.5 text-[10px] font-extrabold text-[#004AAD]">
+          ⭐ เริ่มที่นี่
+        </span>
+      ) : null}
+      <div className="flex items-center justify-between">
+        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${v2Status.cls}`}>
+          {v2Status.txt}
+        </span>
+        <span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">รอบ {round}</span>
+      </div>
+      <h3 className="mt-2 text-xl font-bold text-slate-900">Round {round}</h3>
+      <div className="mt-2 flex items-center gap-2">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
+          <div
+            className={`h-full rounded-full ${allDone ? "bg-emerald-500" : "bg-[#004AAD]"}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <span className="text-[11px] font-semibold text-slate-500 tabular-nums">
+          {setsAttempted}/{totalSets}
+        </span>
+      </div>
+      <p className="mt-2 text-[12px]">
+        {hasAttempts ? (
+          <span className="text-slate-500">
+            เฉลี่ย <b className="text-[#004AAD]">{avgPercent.toFixed(0)}%</b> · ทำต่อได้
+          </span>
+        ) : isLocked ? (
+          <span className="font-semibold text-slate-500">{lockReason}</span>
+        ) : (
+          <span className="font-bold text-[#004AAD]">▶ เริ่มเพื่อตั้งคะแนนแรก</span>
+        )}
+      </p>
+    </>
+  );
 
   const baseClass =
     "relative flex h-full flex-col rounded-2xl border bg-white p-5 transition";
@@ -247,13 +302,15 @@ export function EnhancedRoundCard(props: EnhancedRoundCardProps) {
     </>
   );
 
+  const body = v2 ? simplifiedInner : inner;
+
   if (isLocked) {
-    return <div className={`${baseClass} ${stateClass}`}>{inner}</div>;
+    return <div className={`${baseClass} ${stateClass}`}>{body}</div>;
   }
 
   return (
     <Link href={href} className={`${baseClass} ${stateClass}`}>
-      {inner}
+      {body}
     </Link>
   );
 }

@@ -1,4 +1,4 @@
-import { SignupForm } from "@/app/(auth)/signup/SignupForm";
+import { AdminSignupForm } from "@/app/(auth)/signup/AdminSignupForm";
 
 export default async function SignupPage({
   searchParams,
@@ -6,5 +6,5 @@ export default async function SignupPage({
   searchParams: Promise<{ redirect?: string; next?: string }>;
 }) {
   const { redirect: redirectTo, next } = await searchParams;
-  return <SignupForm redirectTo={redirectTo ?? next ?? "/practice"} />;
+  return <AdminSignupForm redirectTo={redirectTo ?? next ?? "/practice"} />;
 }

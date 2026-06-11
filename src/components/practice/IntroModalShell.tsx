@@ -30,7 +30,7 @@ export function IntroModalShell({
   // Admin-only soft-modern frame. Code/preview admins included (matches the rest
   // of the app). Real users keep the original brutalist guide modal.
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
 
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);

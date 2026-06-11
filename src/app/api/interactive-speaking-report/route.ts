@@ -12,6 +12,7 @@ import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { getAdminAccess } from "@/lib/admin-auth";
 
 export const maxDuration = 120;
 
@@ -83,7 +84,17 @@ export async function POST(req: Request) {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
     const userId = await getOptionalAuthUserId();
-    if (userId) {
+    // Admins / preview-eligible accounts don't consume real feedback credits.
+    const adminBypass = (await getAdminAccess()).ok;
+    // Honor an existing reservation: if the learner already reserved a credit
+    // for THIS attempt at /start, they're entitled to grade it — never block
+    // them now even if their balance changed mid-exam. Only re-check the
+    // balance when there is no reservation (defensive).
+    const existingLock =
+      userId && !adminBypass
+        ? await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId)
+        : null;
+    if (userId && !adminBypass && !existingLock) {
       const credit = await getAiCreditStateForUser(userId, "interactive_speaking");
       if (!credit.allowed) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
@@ -111,8 +122,8 @@ export async function POST(req: Request) {
         meta: { attemptId, scenarioId },
       });
     }
-    if (userId) {
-      const lock = await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId);
+    if (userId && !adminBypass) {
+      const lock = existingLock;
       if (!lock || lock.status !== "charged") {
         const charged = await chargeAiCreditForUser(userId, "interactive_speaking");
         if (!charged.ok) {

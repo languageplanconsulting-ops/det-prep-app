@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SoftSetPicker, softPct, type SoftSetItem } from "@/components/practice/SoftSetPicker";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   DIALOGUE_SUMMARY_DIFFICULTY_LABEL,
   DIALOGUE_SUMMARY_MAX_SCORE,
@@ -20,6 +22,8 @@ export function DialogueSummaryDifficultySetsPage({
   difficulty: DialogueSummaryDifficulty;
 }) {
   const [bankVersion, setBankVersion] = useState(0);
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = true;
 
   useEffect(() => {
     const onStorage = () => setBankVersion((n) => n + 1);
@@ -30,6 +34,31 @@ export function DialogueSummaryDifficultySetsPage({
       window.removeEventListener("ep-dialogue-summary-storage", onStorage);
     };
   }, []);
+
+  if (soft) {
+    void bankVersion;
+    const items: SoftSetItem[] = loadDialogueSummaryVisibleBank()[round][difficulty].map((ex) => {
+      const p = getDialogueSummaryProgress(round, difficulty, ex.setNumber);
+      return {
+        key: String(ex.setNumber),
+        label: `ชุด ${ex.setNumber}`,
+        href: `/practice/listening/dialogue-summary/round/${round}/${difficulty}/${ex.setNumber}`,
+        pct: softPct(p ? { bestScore: p.bestScore160, maxScore: DIALOGUE_SUMMARY_MAX_SCORE } : null),
+      };
+    });
+    return (
+      <SoftSetPicker
+        round={round}
+        difficultyLabel={DIALOGUE_SUMMARY_DIFFICULTY_LABEL[difficulty]}
+        title="สรุปบทสนทนา"
+        noun="ชุด"
+        items={items}
+        lockExam={null}
+        changeDifficultyHref={`/practice/listening/dialogue-summary/round/${round}`}
+        allRoundsHref="/practice/listening/dialogue-summary"
+      />
+    );
+  }
 
   return (
     <div className="space-y-8" id="sets">

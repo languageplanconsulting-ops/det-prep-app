@@ -36,7 +36,7 @@ function speakerBubbleClass(index: number): string {
 
 export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryExam }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  const soft = true;
   const vipGate = useVipAiFeedbackGate();
   const [summary, setSummary] = useState("");
   const [phase, setPhase] = useState<"write" | "loading" | "report">("write");

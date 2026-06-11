@@ -1,4 +1,4 @@
-import { LoginForm } from "@/app/(auth)/login/LoginForm";
+import { AdminLoginForm } from "@/app/(auth)/login/AdminLoginForm";
 
 export default async function LoginPage({
   searchParams,
@@ -6,5 +6,5 @@ export default async function LoginPage({
   searchParams: Promise<{ redirect?: string; next?: string }>;
 }) {
   const { redirect: redirectTo, next } = await searchParams;
-  return <LoginForm redirectTo={redirectTo ?? next ?? "/practice"} />;
+  return <AdminLoginForm redirectTo={redirectTo ?? next ?? "/practice"} />;
 }
