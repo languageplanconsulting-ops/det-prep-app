@@ -20,7 +20,7 @@ import { useEffectiveTier } from "@/hooks/useEffectiveTier";
  * see nothing. It shows once per user (localStorage-dismissed), and never on
  * the landing / auth pages.
  */
-const SHOW_TO_ALL_USERS = false;
+const SHOW_TO_ALL_USERS = true;
 
 const DISMISS_KEY = "revamp-announcement-dismissed-v2";
 

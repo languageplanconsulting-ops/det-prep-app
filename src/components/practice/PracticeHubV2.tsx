@@ -156,16 +156,6 @@ export function PracticeHubV2({
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      {/* Admin preview banner (data is now real) */}
-      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-[#fff7d1] px-3 py-2 text-xs ring-1 ring-[#FFCC00]">
-        <span className="rounded bg-[#004AAD] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FFCC00]">
-          Admin preview
-        </span>
-        <span className="font-semibold text-slate-700">
-          Practice hub V2 · ผู้ใช้จริงยังเห็นหน้าเดิม
-        </span>
-      </div>
-
       {/* ── OUTCOME HERO (Cagan: outcome-first) — real data ── */}
       <div className="relative mb-4 rounded-2xl bg-white p-5 ring-1 ring-slate-200 sm:p-6">
         {stats.loading ? (

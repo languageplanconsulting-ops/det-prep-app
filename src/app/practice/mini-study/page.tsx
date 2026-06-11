@@ -162,13 +162,6 @@ export default function MiniStudyHubPage() {
       </div>
 
       <main className="mx-auto max-w-3xl space-y-5 px-4 py-6 pb-32">
-        {/* Admin preview banner */}
-        {isAdmin || previewEligible ? (
-          <div className="rounded-xl border border-red-200 bg-white p-3 text-xs text-red-700">
-            <strong>Admin preview:</strong> ฟีเจอร์นี้ยังเป็น preview · ผู้ใช้ทั่วไปยังไม่เห็นทางเข้านี้
-          </div>
-        ) : null}
-
         {/* HERO — พี่ดอย introduces himself */}
         <section className="rounded-2xl bg-[#004AAD] p-5 text-white">
           <div className="flex items-start gap-4">

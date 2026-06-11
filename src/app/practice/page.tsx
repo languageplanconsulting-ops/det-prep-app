@@ -118,7 +118,7 @@ const READ_AND_WRITE_HREF = "/practice/production/read-and-write";
 export default function PracticeHubPage() {
   const router = useRouter();
   const { effectiveTier, isAdmin, previewEligible } = useEffectiveTier();
-  const showMiniStudy = isAdmin || previewEligible;
+  const showMiniStudy = true;
   // V2 redesign is admin-only. Use the same signal as showMiniStudy so BOTH
   // DB-role admins and code/preview admins see it (isAdmin alone misses the latter).
   const showV2 = true;
