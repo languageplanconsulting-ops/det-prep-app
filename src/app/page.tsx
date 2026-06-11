@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 
 import { AdminLandingPageClient } from "@/components/landing/AdminLandingPageClient";
-import { LandingPageClient } from "@/components/landing/LandingPageClient";
-import { getAdminAccess } from "@/lib/admin-auth";
 
 export const metadata: Metadata = {
   title: "Duolingo English Test Prep Thailand | Mock Test, Instant Feedback, Guide",
@@ -20,12 +18,5 @@ export default async function Home({ searchParams }: HomeProps) {
   const initialFastTrackOpen =
     ftRaw === "1" || (Array.isArray(ftRaw) && ftRaw[0] === "1");
 
-  // New "Calm Clarity" landing is admin-only for now — real users keep the
-  // current page until it's approved for everyone.
-  const adminAccess = await getAdminAccess();
-  if (adminAccess.ok) {
-    return <AdminLandingPageClient initialFastTrackOpen={initialFastTrackOpen} />;
-  }
-
-  return <LandingPageClient initialFastTrackOpen={initialFastTrackOpen} />;
+  return <AdminLandingPageClient initialFastTrackOpen={initialFastTrackOpen} />;
 }
