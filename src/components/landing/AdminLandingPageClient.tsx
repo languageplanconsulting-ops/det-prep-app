@@ -151,7 +151,7 @@ const PRICING = [
     name: "Premium",
     price: "฿699",
     note: "/ 30 วัน",
-    rows: ["ฟีดแบ็ก 30 ครั้ง/เดือน", "Mock test 4 ครั้ง", "เทคนิคสั้น ๆ เพิ่มคะแนน"],
+    rows: ["ฟีดแบ็ก 30 ครั้ง/เดือน", "Mock test 4 ครั้ง", "มินิเลสซัน + เทคนิค (บทมาตรฐาน)"],
     featured: true,
   },
   {
@@ -159,7 +159,7 @@ const PRICING = [
     name: "VIP",
     price: "฿999",
     note: "/ 30 วัน",
-    rows: ["ฟีดแบ็ก 60 ครั้ง/เดือน", "Mock test 6 ครั้ง", "ฝึกทุก Lane ไม่จำกัด"],
+    rows: ["ฟีดแบ็ก 60 ครั้ง/เดือน", "Mock test 6 ครั้ง", "ฝึกทุก Lane ไม่จำกัด", "มินิเลสซันครบทุกบท (รวมบทขั้นสูง)"],
     featured: false,
   },
 ];
@@ -293,7 +293,7 @@ export function AdminLandingPageClient({
               เข้าสู่ระบบ
             </Link>
             <Link
-              href="/mini-diagnosis/start"
+              href="/explore"
               className="flex min-h-[44px] items-center rounded-lg bg-ep-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-800"
             >
               เริ่มฟรี
@@ -320,7 +320,7 @@ export function AdminLandingPageClient({
         </p>
         <div className="mb-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
-            href="/mini-diagnosis/start"
+            href="/explore"
             className="flex min-h-[56px] w-full items-center justify-center gap-2 rounded-xl bg-ep-blue px-8 py-4 text-base font-bold text-white shadow-md transition-all hover:bg-blue-800 hover:shadow-lg sm:w-auto"
           >
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -644,7 +644,7 @@ export function AdminLandingPageClient({
 
                 {p.tier === "free" ? (
                   <Link
-                    href="/mini-diagnosis/start"
+                    href="/explore"
                     className="flex min-h-[44px] w-full items-center justify-center rounded-xl bg-ep-blue px-4 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-blue-800"
                   >
                     เริ่มเลย ฟรี
@@ -694,7 +694,13 @@ export function AdminLandingPageClient({
             ))}
           </div>
 
-          <p className="mt-6 text-center text-xs text-gray-400">
+          <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-center text-xs leading-relaxed text-gray-500">
+            <span className="font-semibold text-gray-700">มินิเลสซัน (บทเรียนสั้น ๆ + เทคนิค) เปิดให้ใคร?</span>{" "}
+            Free &amp; Basic ยังไม่รวม · <b className="text-gray-700">Premium</b> เข้าถึงบทมาตรฐาน ·{" "}
+            <b className="text-gray-700">VIP</b> เข้าถึงครบทุกบท รวมบทขั้นสูง
+          </div>
+
+          <p className="mt-3 text-center text-xs text-gray-400">
             ไม่แน่ใจ?{" "}
             <Link href="/mini-diagnosis/start" className="font-semibold text-ep-blue hover:underline">
               ลองเช็กระดับฟรีก่อนเลย
@@ -710,7 +716,7 @@ export function AdminLandingPageClient({
           <h2 className="mb-3 text-xl font-bold text-gray-900 sm:text-2xl">เริ่มจากรู้ว่าตัวเองอ่อนตรงไหน</h2>
           <p className="mb-6 text-sm text-gray-500">ฟรี · ไม่ต้องใส่บัตร · ไม่มีอะไรต้องเสีย</p>
           <Link
-            href="/mini-diagnosis/start"
+            href="/explore"
             className="inline-flex min-h-[56px] items-center gap-2 rounded-xl bg-ep-blue px-10 py-4 text-base font-bold text-white shadow-md transition-all hover:bg-blue-800 hover:shadow-lg"
           >
             เช็กระดับของคุณฟรี
@@ -752,7 +758,7 @@ export function AdminLandingPageClient({
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
             <span className="text-sm font-semibold text-gray-700">เช็กระดับฟรี · ไม่ต้องใส่บัตร</span>
             <Link
-              href="/mini-diagnosis/start"
+              href="/explore"
               className="shrink-0 rounded-lg bg-ep-blue px-4 py-2 text-sm font-bold text-white"
             >
               เริ่ม
