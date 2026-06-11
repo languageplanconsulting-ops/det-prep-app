@@ -539,7 +539,7 @@ export function AdminPricingContent() {
                           ? "กำลังเปิดหน้าชำระเงิน..."
                           : user
                             ? "จ่ายด้วย QR PromptPay"
-                            : "ไปสมัครเพื่อจ่าย QR · Sign up for QR checkout"}
+                            : "สมัครแล้วจ่ายด้วย QR · Sign up to pay by QR"}
                       </button>
                       <p className="text-[11px] leading-relaxed text-gray-400">
                         {user

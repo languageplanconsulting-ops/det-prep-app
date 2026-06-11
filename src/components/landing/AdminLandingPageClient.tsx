@@ -737,7 +737,7 @@ export function AdminLandingPageClient({
                             : "bg-gray-900 text-white hover:bg-gray-800",
                         )}
                       >
-                        สมัครก่อนเพื่อจ่าย QR
+                        สมัครแล้วชำระด้วย QR พร้อมเพย์
                       </Link>
                     )}
                     <Link
