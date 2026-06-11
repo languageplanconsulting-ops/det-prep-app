@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { reserveInteractiveSpeakingCreditForAttempt } from "@/lib/addon-credits";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { getAdminAccess } from "@/lib/admin-auth";
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -26,7 +27,8 @@ export async function POST(req: Request) {
 
   try {
     const userId = await getOptionalAuthUserId();
-    if (!userId) {
+    // Admins / preview-eligible accounts don't reserve real feedback credits.
+    if (!userId || (await getAdminAccess()).ok) {
       return NextResponse.json({ ok: true, charged: false, source: null, alreadyReserved: false });
     }
 

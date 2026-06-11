@@ -575,21 +575,29 @@ export function InteractiveSpeakingSession({
     }
     setPhase("loading-q");
     try {
-      const res = await fetch("/api/interactive-speaking/start", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          attemptId,
-          scenarioId: scenario.id,
-        }),
-      });
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        alreadyReserved?: boolean;
-      };
-      if (!res.ok) {
-        throw new Error(typeof data.error === "string" ? data.error : "Could not start interactive speaking.");
+      // Admin / preview-as-VIP accounts don't consume real feedback credits, so
+      // skip the server-side credit reservation. Otherwise it tries to reserve
+      // against their real (non-VIP) plan, fails, and shows a misleading
+      // "must be VIP" / quota error that blocks the preview.
+      if (!vipGate.hasBypassAccess) {
+        const res = await fetch("/api/interactive-speaking/start", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            attemptId,
+            scenarioId: scenario.id,
+          }),
+        });
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          alreadyReserved?: boolean;
+        };
+        if (!res.ok) {
+          throw new Error(
+            typeof data.error === "string" ? data.error : "Could not start interactive speaking.",
+          );
+        }
       }
       setTurn(1);
       setCompleted([]);
