@@ -86,7 +86,15 @@ export async function POST(req: Request) {
     const userId = await getOptionalAuthUserId();
     // Admins / preview-eligible accounts don't consume real feedback credits.
     const adminBypass = (await getAdminAccess()).ok;
-    if (userId && !adminBypass) {
+    // Honor an existing reservation: if the learner already reserved a credit
+    // for THIS attempt at /start, they're entitled to grade it — never block
+    // them now even if their balance changed mid-exam. Only re-check the
+    // balance when there is no reservation (defensive).
+    const existingLock =
+      userId && !adminBypass
+        ? await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId)
+        : null;
+    if (userId && !adminBypass && !existingLock) {
       const credit = await getAiCreditStateForUser(userId, "interactive_speaking");
       if (!credit.allowed) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
@@ -115,7 +123,7 @@ export async function POST(req: Request) {
       });
     }
     if (userId && !adminBypass) {
-      const lock = await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId);
+      const lock = existingLock;
       if (!lock || lock.status !== "charged") {
         const charged = await chargeAiCreditForUser(userId, "interactive_speaking");
         if (!charged.ok) {

@@ -10,6 +10,7 @@ import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { getAdminAccess } from "@/lib/admin-auth";
 
 export const maxDuration = 120;
 
@@ -80,7 +81,9 @@ export async function POST(req: Request) {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
     const userId = await getOptionalAuthUserId();
-    if (userId) {
+    // Admins / preview-eligible accounts don't consume real feedback credits.
+    const adminBypass = (await getAdminAccess()).ok;
+    if (userId && !adminBypass) {
       const feedbackSurface =
         originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
       const credit = await getAiCreditStateForUser(userId, feedbackSurface);
@@ -115,7 +118,7 @@ export async function POST(req: Request) {
         meta: { attemptId, itemId },
       });
     }
-    if (userId) {
+    if (userId && !adminBypass) {
       const feedbackSurface =
         originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
       const charged = await chargeAiCreditForUser(userId, feedbackSurface);

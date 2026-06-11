@@ -10,6 +10,7 @@ import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { getAdminAccess } from "@/lib/admin-auth";
 import type { WritingTopic } from "@/types/writing";
 
 export const maxDuration = 120;
@@ -77,7 +78,9 @@ export async function POST(req: Request) {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
     const userId = await getOptionalAuthUserId();
-    if (userId) {
+    // Admins / preview-eligible accounts don't consume real feedback credits.
+    const adminBypass = (await getAdminAccess()).ok;
+    if (userId && !adminBypass) {
       const credit = await getAiCreditStateForUser(userId, "read_then_write");
       if (!credit.allowed) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
@@ -104,7 +107,7 @@ export async function POST(req: Request) {
         meta: { attemptId },
       });
     }
-    if (userId) {
+    if (userId && !adminBypass) {
       const charged = await chargeAiCreditForUser(userId, "read_then_write");
       if (!charged.ok) {
         return NextResponse.json({ error: "Could not apply feedback credit after grading" }, { status: 500 });
