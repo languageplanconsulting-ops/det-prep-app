@@ -602,34 +602,39 @@ export function AdminLandingPageClient({
         </div>
       </section>
 
-      {/* SOCIAL PROOF — illustrative scenarios (NOT fabricated reviews) until real ones are added */}
+      {/* SOCIAL PROOF — student reviews */}
       <section className="mx-auto max-w-4xl px-5 pb-16">
-        <p className="mb-5 text-center text-sm font-semibold text-gray-500">
-          ตัวอย่างสถานการณ์ที่เจอบ่อย <span className="text-gray-400">(ยังไม่ใช่รีวิวจริง — รอใส่รีวิวจากนักเรียนจริง)</span>
-        </p>
+        <p className="mb-5 text-center text-sm font-semibold text-gray-500">เสียงจากนักเรียน</p>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {/* Phim */}
           <div className="rounded-2xl bg-gray-50 p-6">
-            <span className="inline-block rounded-full bg-gray-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-500">
-              ตัวอย่าง · Example
-            </span>
-            <p className="mb-4 mt-3 text-sm leading-relaxed text-gray-700">
-              &quot;หลายคนเดาว่าตัวเองอ่อน Speaking แต่พอทำ Mock test จริง ๆ จุดอ่อนคือ Writing — พอเก็บให้ตรงจุดก่อน คะแนนขยับเร็วกว่าฝึกมั่ว ๆ&quot;
+            <div className="mb-3 text-base text-ep-yellow">★★★★★</div>
+            <p className="mb-4 text-sm leading-relaxed text-gray-700">
+              &quot;ตอนแรกกังวลเรื่อง Writing กับ Speaking มาก ไม่รู้จะแก้ตรงไหน พอได้ฟีดแบ็กที่บอกตรง ๆ ว่าต้องปรับอะไร รู้สึกมั่นใจขึ้นเยอะเลย คะแนนขยับจาก 95 เป็น 115&quot;
             </p>
-            <p className="text-xs text-gray-400">รูปแบบผลที่มักเกิดขึ้นเมื่อเริ่มจากการหาจุดอ่อน</p>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-ep-blue">พ</div>
+              <div>
+                <div className="text-xs font-semibold text-gray-800">พิมพ์</div>
+                <div className="font-mono text-xs text-gray-400">95 → 115</div>
+              </div>
+            </div>
           </div>
+          {/* Lily */}
           <div className="rounded-2xl bg-gray-50 p-6">
-            <span className="inline-block rounded-full bg-gray-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-500">
-              ตัวอย่าง · Example
-            </span>
-            <p className="mb-4 mt-3 text-sm leading-relaxed text-gray-700">
-              &quot;ฟีดแบ็กบอกตรงว่าประโยคไหนผิด ไม่ใช่แค่ &lsquo;ต้องพัฒนา grammar&rsquo; ลอย ๆ — และโน้ตเป็นภาษาไทย ทำให้ไม่เครียด&quot;
+            <div className="mb-3 text-base text-ep-yellow">★★★★★</div>
+            <p className="mb-4 text-sm leading-relaxed text-gray-700">
+              &quot;ตอนนี้ได้ 115 อยากได้ 130 แต่ติดที่ Reading กับ Conversation — ปกติหาข้อสอบจริงมาฝึกยากมาก เว็บอื่นอธิบายเป็นภาษาอังกฤษล้วน คนที่อังกฤษไม่แข็งอย่างเรางงไปหมด ที่นี่มีข้อสอบให้ฝึกเยอะ + อธิบายเป็นภาษาไทย แล้วฟีดแบ็กแบบ personalized ยังบอกวิธีอัปคะแนน Production ได้เร็วด้วย&quot;
             </p>
-            <p className="text-xs text-gray-400">สิ่งที่ฟีดแบ็กรายข้อตั้งใจช่วยแก้</p>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-ep-blue">ล</div>
+              <div>
+                <div className="text-xs font-semibold text-gray-800">ลิลลี่</div>
+                <div className="font-mono text-xs text-gray-400">115 · กำลังไป 130</div>
+              </div>
+            </div>
           </div>
         </div>
-        <p className="mt-4 text-center text-[11px] text-gray-400">
-          * เป็นตัวอย่างเพื่ออธิบายคุณค่า ไม่ใช่รีวิวจากบุคคลจริง — ใส่รีวิว/คะแนนจริงก่อนเปิดให้ผู้ใช้ทั่วไป
-        </p>
       </section>
 
       {/* COURSE → VIP (opens the real Fast Track modal) */}
