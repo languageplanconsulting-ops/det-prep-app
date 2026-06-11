@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
 import { fetchSubscriptionList } from "@/lib/admin-subscription-data";
-import { repairMissingTierExpiries } from "@/lib/repair-missing-expiry";
+import {
+  repairDowngradedPaidUsers,
+  repairMissingTierExpiries,
+} from "@/lib/repair-missing-expiry";
 
 export async function GET(request: Request) {
   const auth = await getAdminAccess();
@@ -15,6 +18,9 @@ export async function GET(request: Request) {
   // nothing is broken. Failures are logged but never block the read.
   try {
     await repairMissingTierExpiries({ adminId: auth.adminUserId });
+    // Mirror case: restore Stripe payers wrongly knocked to free while a paid
+    // window is still open (old login-downgrade casualties). Idempotent.
+    await repairDowngradedPaidUsers({ adminId: auth.adminUserId });
   } catch (e) {
     console.error("[admin/subscriptions] auto-repair failed", e);
   }
