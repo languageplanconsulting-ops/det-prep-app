@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { QuestionRouter } from "@/components/mock-test/questions/QuestionRouter";
 import { MockTestTimerBar } from "@/components/mock-test/MockTestTimerBar";
 import { usePhaseTimer } from "@/hooks/usePhaseTimer";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { mt } from "@/lib/mock-test/mock-test-styles";
 import type { MockQuestionRow } from "@/lib/mock-test/types";
 
@@ -55,6 +56,22 @@ function taskMeta(taskType: string | undefined) {
   );
 }
 
+/** Soft (admin) journey-rail icon per task type. Steps interleave skills, so we
+ *  render them in true step order — not fabricated contiguous skill blocks. */
+const TASK_ICON: Record<string, string> = {
+  fill_in_blanks: "📝",
+  write_about_photo: "✍️",
+  dictation: "🎧",
+  speak_about_photo: "🗣️",
+  vocabulary_reading: "📖",
+  read_and_write: "✍️",
+  read_then_speak: "🗣️",
+  interactive_conversation_mcq: "💬",
+  conversation_summary: "🧾",
+  interactive_speaking: "🎙️",
+  real_english_word: "🔤",
+};
+
 export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const [session, setSession] = useState<SessionPayload | null>(null);
@@ -71,6 +88,10 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   const [dictationTimerStarted, setDictationTimerStarted] = useState(true);
   const [speakPhotoTimerStarted, setSpeakPhotoTimerStarted] = useState(true);
   const timer = usePhaseTimer();
+  // Admin / preview-eligible users see the soft "Progress Journey" layout;
+  // everyone else keeps the original brutalist layout byte-for-byte.
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
 
   const answeredCount = session?.responses?.length ?? 0;
   const adminPreviewMode = session?.targets?.adminPreviewMode === true;
@@ -97,6 +118,24 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       | undefined;
     return prev ?? null;
   }, [session]);
+
+  // Soft journey rail: all 20 steps in true order, with done/current/locked state.
+  const railSteps = useMemo(() => {
+    const items = (session?.mock_fixed_set_items ?? []).slice().sort((a, b) => a.step_index - b.step_index);
+    return items.map((it) => ({
+      stepIndex: it.step_index,
+      icon: TASK_ICON[it.task_type] ?? "•",
+      label: TASK_LABELS[it.task_type]?.th ?? "แบบฝึก",
+      state:
+        it.step_index < stepIndex ? "done" : it.step_index === stepIndex ? "current" : "locked",
+    }));
+  }, [session, stepIndex]);
+
+  const minutesLeft = useMemo(() => {
+    const items = (session?.mock_fixed_set_items ?? []).filter((it) => it.step_index >= stepIndex);
+    const sec = items.reduce((s, it) => s + (it.time_limit_sec || 0) + (it.rest_after_step_sec || 0), 0);
+    return Math.max(1, Math.round(sec / 60));
+  }, [session, stepIndex]);
 
   const load = async (reason: typeof loadingReason = "init") => {
     setLoading(true);
@@ -264,7 +303,23 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
 
   if (error) return <div className="p-8 text-center font-bold text-red-700">{error}</div>;
   if (loading || !session || !question)
-    return (
+    return soft ? (
+      <div className="p-10 text-center">
+        <div className="mx-auto flex w-fit items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#004AAD] border-t-transparent" />
+          <div className="text-left">
+            <div className="font-bold text-slate-900">
+              {loadingReason === "adapting"
+                ? "กำลังเตรียมข้อต่อไป…"
+                : loadingReason === "rest"
+                  ? "กำลังพักสั้น ๆ…"
+                  : "กำลังโหลด…"}
+            </div>
+            <div className="mt-0.5 text-xs font-semibold text-slate-400">รอสักครู่</div>
+          </div>
+        </div>
+      </div>
+    ) : (
       <div className="p-10 text-center">
         <div className="mx-auto flex w-fit items-center gap-3 rounded-[4px] border-4 border-black bg-white px-5 py-4">
           <div className="h-5 w-5 animate-spin rounded-full border-4 border-black border-t-transparent" />
@@ -290,6 +345,48 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   }
 
   if (resting) {
+    if (soft) {
+      return (
+        <div className="mx-auto max-w-2xl px-4 py-10">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#004AAD]">พักสั้น ๆ</p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900">พัก 45 วินาที</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+              หยุดพักสายตา ผ่อนมือ หายใจเข้าลึก ๆ แล้วค่อยไปต่อข้อถัดไปนะ
+            </p>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-[#004AAD] transition-[width] duration-1000 ease-linear"
+                  style={{ width: `${Math.round(Math.max(0, Math.min(1, timer.progress)) * 100)}%` }}
+                />
+              </div>
+              <span
+                className="text-sm font-bold tabular-nums text-slate-700"
+                style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+              >
+                {timer.formattedTime}
+              </span>
+            </div>
+            <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+              <span className="rounded-xl bg-[#eaf1ff] px-3 py-2 text-xs font-semibold text-[#004AAD]">
+                ต่อไป: {currentMeta.th}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setResting(false);
+                  void load();
+                }}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                ข้ามการพัก
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
         <div className={`${mt.border} ${mt.shadow} ${mt.gridBg} bg-[#fffdf2] p-6 text-center sm:p-8`}>
@@ -348,6 +445,192 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
             >
               Back to separate preview setup
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (soft) {
+    const timerColor = timer.isCritical ? "#ef4444" : timer.isWarning ? "#FFCC00" : "#004AAD";
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-5">
+        <div className="sticky top-3 z-20">
+          <div className="rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-bold text-[#004AAD]">English&nbsp;Plan</span>
+              <span className="truncate text-[12px] font-semibold text-slate-500">
+                {session.mock_fixed_sets?.user_title ?? session.mock_fixed_sets?.name ?? "Mock"}
+              </span>
+              <span className="ml-auto shrink-0 text-[12px] font-semibold text-slate-500">
+                ข้อ{" "}
+                <b className="text-slate-900" style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
+                  {stepIndex}
+                </b>
+                /{STEP_COUNT}
+              </span>
+            </div>
+            {skipTimerMode ? (
+              <div className="mt-2 rounded-xl bg-[#eaf1ff] px-3 py-1.5 text-[12px] font-semibold text-[#004AAD]">
+                {fastPassPreviewMode
+                  ? "Fast pass preview · ระบบจะข้ามแต่ละข้อให้อัตโนมัติ"
+                  : "Admin preview · ไม่จับเวลาและไม่มีช่วงพัก"}
+              </div>
+            ) : (
+              <div className="mt-2 flex items-center gap-3">
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
+                  <div
+                    className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${
+                      timer.isCritical || timer.isWarning ? "animate-pulse" : ""
+                    }`}
+                    style={{
+                      width: `${Math.round(Math.max(0, Math.min(1, timer.progress)) * 100)}%`,
+                      backgroundColor: timerColor,
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-sm font-bold tabular-nums"
+                  style={{
+                    fontFamily: "var(--font-jetbrains), monospace",
+                    color: timer.isCritical ? "#ef4444" : timer.isWarning ? "#a16207" : "#334155",
+                  }}
+                >
+                  {timer.formattedTime}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-[230px_minmax(0,1fr)]">
+          {/* Journey rail — all 20 steps in true order */}
+          <aside className="hidden lg:block lg:sticky lg:top-28 lg:self-start">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">เส้นทางของคุณ</p>
+              <p className="mt-1 text-sm font-semibold text-slate-700">
+                ทำแล้ว <span className="text-[#004AAD]">{answeredCount}</span> · เหลือ {stepsLeft}
+              </p>
+              <ol className="mt-3 space-y-1">
+                {railSteps.map((s) => (
+                  <li
+                    key={s.stepIndex}
+                    className={`flex items-center gap-2 rounded-lg px-2 py-1 ${
+                      s.state === "current" ? "bg-[#FFCC00]/15 ring-1 ring-[#FFCC00]/50" : ""
+                    }`}
+                  >
+                    <span
+                      className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-bold ${
+                        s.state === "done"
+                          ? "bg-emerald-500 text-white"
+                          : s.state === "current"
+                            ? "animate-pulse bg-[#004AAD] text-[#FFCC00]"
+                            : "bg-slate-100 text-slate-300"
+                      }`}
+                    >
+                      {s.state === "done" ? "✓" : s.stepIndex}
+                    </span>
+                    <span
+                      className={`truncate text-[11px] ${
+                        s.state === "current"
+                          ? "font-bold text-slate-900"
+                          : s.state === "done"
+                            ? "text-slate-400"
+                            : "text-slate-300"
+                      }`}
+                    >
+                      {s.icon} {s.label}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-3 border-t border-slate-100 pt-2 text-[12px] text-slate-500">
+                เหลืออีก ~{minutesLeft} นาที · 📈 ทำต่อไปเรื่อย ๆ นะ
+              </div>
+            </div>
+          </aside>
+
+          {/* Task */}
+          <div className="space-y-4">
+            {error ? (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
+                {error}
+              </div>
+            ) : null}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-5 pt-4 pb-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#004AAD]">
+                  ข้อ {stepIndex} · {currentMeta.th}
+                </p>
+                <h1 className="mt-1 text-lg font-bold text-slate-900">{questionCardTitle}</h1>
+                <p className="mt-0.5 text-[13px] text-slate-500">{currentMeta.hint}</p>
+              </div>
+              <div className="p-5">
+                <QuestionRouter
+                  key={question.id}
+                  question={question}
+                  submitting={submittingStep}
+                  onSpeakPhotoReady={() => {
+                    if (skipTimerMode) return;
+                    if (current?.task_type !== "speak_about_photo") return;
+                    if (speakPhotoTimerStarted) return;
+                    setSpeakPhotoTimerStarted(true);
+                    timer.resumeTimer();
+                  }}
+                  onDictationAudioFinished={() => {
+                    if (skipTimerMode) return;
+                    if (current?.task_type !== "dictation") return;
+                    if (dictationTimerStarted) return;
+                    setDictationTimerStarted(true);
+                    timer.resumeTimer();
+                  }}
+                  onSubmit={submit}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              {adminPreviewMode ? (
+                <span className="rounded-lg bg-[#eaf1ff] px-3 py-1.5 text-[12px] font-semibold text-[#004AAD]">
+                  Preview ใช้สูตรคะแนนเดียวกับผู้เรียน · ข้อที่ admin ข้ามนับเป็น 0
+                </span>
+              ) : null}
+              {fastPassPreviewMode ? (
+                <span className="rounded-lg bg-amber-50 px-3 py-1.5 text-[12px] font-semibold text-amber-900">
+                  Auto-advancing ทุก {Math.round(FAST_PASS_DWELL_MS / 1000)} วิ
+                </span>
+              ) : null}
+              {adminPreviewMode ? (
+                <button
+                  type="button"
+                  disabled={fastPassPreviewMode}
+                  onClick={() => void submit({ skippedByAdmin: true })}
+                  className="rounded-lg bg-amber-100 px-3 py-1.5 text-[12px] font-semibold text-amber-900 disabled:opacity-50"
+                >
+                  {fastPassPreviewMode ? "Admin: auto-skip active" : "Admin: ข้ามข้อนี้"}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={async () => {
+                  const res = await fetch(`/api/mock-test/fixed/session/${sessionId}`, {
+                    method: "PATCH",
+                    cache: "no-store",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: "cancelled", cancelled_at: new Date().toISOString() }),
+                  });
+                  if (!res.ok) {
+                    const json = (await res.json().catch(() => ({}))) as { error?: string };
+                    setError(json.error ?? "Could not cancel this session.");
+                    return;
+                  }
+                  router.push("/mock-test/start");
+                }}
+                className="ml-auto text-[12px] font-semibold text-rose-600 hover:text-rose-700"
+              >
+                ออกจากการซ้อม
+              </button>
+            </div>
           </div>
         </div>
       </div>
