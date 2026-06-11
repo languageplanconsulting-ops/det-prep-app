@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { FeedbackShowcase } from "@/components/landing/FeedbackShowcase";
 import { useBillingActions } from "@/hooks/useBillingActions";
 
 function cn(...parts: (string | false | undefined)[]) {
@@ -400,75 +401,7 @@ export function AdminLandingPageClient({
             <b className="text-gray-700">แก้ยังไงให้คะแนนขึ้น</b>
           </p>
         </div>
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-100 bg-gray-50 px-5 py-4">
-            <div className="mb-3 flex items-center gap-2">
-              <div className="h-2.5 w-2.5 rounded-full bg-red-400" />
-              <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-              <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
-              <span className="ml-2 font-mono text-xs text-gray-400">production · speaking-response</span>
-            </div>
-            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-gray-400">คำถาม</p>
-            <p className="text-sm italic leading-relaxed text-gray-600">
-              &quot;Describe a habit that helps you stay productive. Give details.&quot;
-            </p>
-          </div>
-          <div className="border-b border-gray-100 px-5 py-4">
-            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-gray-400">คำตอบของนักเรียน</p>
-            <p className="text-sm leading-relaxed text-gray-700">
-              I always wake up early in the morning. I make a list of things to do. This habit{" "}
-              <span className="cursor-default border-b border-yellow-400 bg-yellow-100" title="tense ควรเป็น helps ไม่ใช่ helped">helped</span>{" "}
-              me finish my work on time every day. Also, I drink coffee{" "}
-              <span className="cursor-default border-b border-blue-300 bg-blue-50" title="ลองใช้ 'which boosts my focus' เพื่อ flow ดีขึ้น">because it is good for concentrate.</span>
-            </p>
-            <p className="mt-2 text-[10px] text-gray-400">เส้นใต้ = จุดที่ระบบแนะนำ (แตะ/วางเมาส์เพื่อดู)</p>
-          </div>
-          <div className="px-5 py-5">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">ผลตรวจ</p>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-gray-400">Band โดยประมาณ</span>
-                <span className="font-mono text-lg font-bold text-ep-blue">120–130</span>
-              </div>
-            </div>
-            <div className="mb-5 space-y-3">
-              {([
-                ["Grammar", "92", "bg-ep-blue", "text-gray-800", "92%"],
-                ["Vocabulary", "88", "bg-ep-blue", "text-gray-800", "88%"],
-                ["Flow & Coherence", "79", "bg-amber-500", "text-amber-600", "79%"],
-                ["Task Response", "90", "bg-ep-blue", "text-gray-800", "90%"],
-              ] as const).map(([label, score, barColor, scoreColor, width]) => (
-                <div key={label}>
-                  <div className="mb-1 flex items-center justify-between">
-                    <span className="text-xs text-gray-600">{label}</span>
-                    <span className={cn("font-mono text-sm font-semibold", scoreColor)}>
-                      {score}<span className="font-normal text-gray-400">/100</span>
-                    </span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
-                    <div className={cn("h-full rounded-full", barColor)} style={{ width }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-4">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ep-blue">
-                  <span className="font-mono text-[10px] font-bold text-white">EP</span>
-                </div>
-                <div>
-                  <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-blue-600">
-                    โน้ตจาก English Plan (ภาษาไทย)
-                  </p>
-                  <p className="text-sm leading-relaxed text-gray-800">
-                    ประโยคที่ 3 ใช้ <span className="font-mono font-medium text-ep-blue">helped</span> ซึ่ง tense ไม่ถูก — ควรเปลี่ยนเป็น <span className="font-mono font-medium text-green-700">helps</span> เพราะพูดถึงนิสัยที่ทำอยู่ตลอด ไม่ใช่เหตุการณ์ในอดีต แก้จุดนี้แล้วคะแนน Flow จะขึ้นทันที นอกจากนี้ลองใช้ connector อย่าง <span className="font-mono font-medium text-ep-blue">as a result</span> หรือ <span className="font-mono font-medium text-ep-blue">which helps me</span> เพื่อให้ประโยคไหลเชื่อมกันมากขึ้น
-                  </p>
-                </div>
-              </div>
-            </div>
-            <p className="mt-3 text-center text-xs text-gray-400">💡 ระบบจะแนะแบบฝึกเพิ่มเฉพาะ Flow ให้คุณต่อทันที</p>
-          </div>
-        </div>
+        <FeedbackShowcase />
       </section>
 
       {/* MOCK SPOTLIGHT */}
