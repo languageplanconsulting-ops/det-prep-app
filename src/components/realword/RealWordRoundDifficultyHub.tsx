@@ -2,16 +2,20 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SoftDifficultyHub, softBandStat } from "@/components/practice/SoftDifficultyHub";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   REALWORD_DIFFICULTIES,
   REALWORD_DIFFICULTY_LABEL,
   REALWORD_MAX_SCORE,
 } from "@/lib/realword-constants";
-import { loadRealWordVisibleBank } from "@/lib/realword-storage";
+import { getRealWordProgress, loadRealWordVisibleBank } from "@/lib/realword-storage";
 import type { RealWordRoundNum } from "@/types/realword";
 
 export function RealWordRoundDifficultyHub({ round }: { round: RealWordRoundNum }) {
   const [v, setV] = useState(0);
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);
@@ -24,6 +28,34 @@ export function RealWordRoundDifficultyHub({ round }: { round: RealWordRoundNum 
   }, []);
 
   const bank = loadRealWordVisibleBank();
+
+  if (soft) {
+    const bands = REALWORD_DIFFICULTIES.map((d) => {
+      const rows = bank[round][d];
+      const stat = softBandStat(
+        rows.map((r) => r.setNumber),
+        (n) => {
+          const p = getRealWordProgress(round, d, n);
+          return p ? { bestScore: p.bestScore, maxScore: p.maxScore } : null;
+        },
+      );
+      return {
+        key: d,
+        label: REALWORD_DIFFICULTY_LABEL[d],
+        ...stat,
+        maxScore: REALWORD_MAX_SCORE[d],
+        href: `/practice/literacy/real-word/round/${round}/${d}`,
+      };
+    });
+    return (
+      <SoftDifficultyHub
+        round={round}
+        bands={bands}
+        backHref="/practice/literacy/real-word"
+        subtitle="แยกคำอังกฤษจริง · ดันความแม่นเฉลี่ยให้ถึง 95% แล้วไต่ระดับถัดไป"
+      />
+    );
+  }
 
   return (
     <div className="space-y-8">
