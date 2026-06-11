@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
+import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { FITB_ROUND_NUMBERS } from "@/lib/fitb-constants";
@@ -68,6 +69,7 @@ export function FitbRoundsHub() {
             </>
           }
         />
+        <RoundsExplainer />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {FITB_ROUND_NUMBERS.map((round) => (
             <RoundCard

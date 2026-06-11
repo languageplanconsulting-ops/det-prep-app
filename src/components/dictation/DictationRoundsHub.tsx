@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
+import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
@@ -109,6 +110,7 @@ export function DictationRoundsHub() {
           </div>
         </div>
 
+        <RoundsExplainer />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {DICTATION_ROUND_NUMBERS.map((round) => (
             <RoundCard
