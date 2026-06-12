@@ -314,7 +314,7 @@ export function PracticeHubV2({
             <div className="grid gap-2 sm:grid-cols-2">
               <ToolRow
                 title="📸 Write about photo"
-                sub="เขียนบรรยายภาพ · 50 คำ"
+                sub="เขียนบรรยายภาพ · 1 นาที"
                 href="/practice/production/write-about-photo"
               />
               <ToolRow
@@ -324,7 +324,7 @@ export function PracticeHubV2({
               />
               <ToolRow
                 title="🎤 Speak about photo"
-                sub="พูดบรรยายภาพ · 30 วินาที"
+                sub="พูดบรรยายภาพ · 1 นาที"
                 href="/practice/production/speak-about-photo"
               />
               <ToolRow

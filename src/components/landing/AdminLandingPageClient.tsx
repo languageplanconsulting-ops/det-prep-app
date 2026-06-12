@@ -123,7 +123,7 @@ const TOOLS: { icon: string; title: string; what: string; benefit: string; highl
   },
   {
     icon: "💡",
-    title: "เทคนิคสั้น ๆ เพื่อเพิ่มคะแนน",
+    title: "เทคนิคเพิ่มคะแนนสั้นๆ",
     what: "บทเรียนสั้น ๆ (เช่น เรื่อง comma, การเติม -ed / -s) + เทคนิคจำง่าย",
     benefit: "เก็บคะแนนที่หล่นง่าย ๆ คืนมาได้เร็ว โดยไม่ต้องเดาเองว่ากฎไหนสำคัญ",
   },

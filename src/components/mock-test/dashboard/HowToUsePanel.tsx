@@ -16,7 +16,7 @@ const CHUNKS: Array<{ n: number; title: string; body: React.ReactNode }> = [
     title: "ก่อนเริ่มทำ",
     body: (
       <>
-        ใช้เวลา <b>1 ชม. – 1 ชม. 15 นาที</b> ต่อชุด · จัดเวลาให้พร้อมก่อน{" "}
+        ใช้เวลา <b>ประมาณ 1 ชั่วโมง</b> ต่อชุด · จัดเวลาให้พร้อมก่อน{" "}
         <span className="font-bold text-red-700">
           ออกระบบกลางคัน = นับว่าใช้โควต้าแล้ว
         </span>

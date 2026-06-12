@@ -105,7 +105,7 @@ function SetCard({
       </div>
       <div className="mt-1.5">{lastScoreLine(stats)}</div>
       <div className="mt-2 flex items-center justify-between border-t border-dashed border-black/70 pt-1.5 font-mono text-[10px] font-bold text-neutral-600">
-        <span>~1h 0m – 1h 15m</span>
+        <span>~1 hour</span>
         {done ? (
           <span className="text-neutral-400 line-through">used</span>
         ) : (
@@ -163,7 +163,7 @@ function PickUpNextRow({
                 {p.rationale}
               </span>
               <span className="mt-auto flex items-center justify-between border-t border-dashed border-black/60 pt-1.5 font-mono text-[10px] font-bold text-neutral-600">
-                <span>~1h 0m – 1h 15m</span>
+                <span>~1 hour</span>
                 <span className="font-black text-[#c1121f]">uses 1 credit</span>
               </span>
             </button>
