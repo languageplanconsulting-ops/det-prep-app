@@ -3,13 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { QuestionThumbnailDisplay } from "@/components/speaking/QuestionThumbnailDisplay";
-import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
+import { SpeakingHintPanel } from "@/components/speaking/SpeakingHintPanel";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
-import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
@@ -42,15 +40,14 @@ export function ReadSpeakSession({
   redeemQuestionId?: string | null;
 }) {
   const router = useRouter();
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = true;
+  const { effectiveTier } = useEffectiveTier();
   const vipGate = useVipAiFeedbackGate();
   const topic = useMemo(() => getSpeakingVisibleTopicById(topicId, round), [topicId, round]);
   const roundBase = `/practice/production/read-and-speak/round/${round}`;
   const [prepChoice, setPrepChoice] = useState(3);
   const [phase, setPhase] = useState<
     "prep-pick" | "prep-run" | "pick-question" | "record"
-  >("prep-pick");
+  >("pick-question");
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [selectedQuestion, setSelectedQuestion] = useState<SpeakingQuestion | null>(
     null,
@@ -76,7 +73,7 @@ export function ReadSpeakSession({
   }, [phase]);
 
   useEffect(() => {
-    if (phase === "prep-run" && secondsLeft === 0) setPhase("pick-question");
+    if (phase === "prep-run" && secondsLeft === 0) setPhase("record");
   }, [phase, secondsLeft]);
 
   useEffect(() => {
@@ -185,6 +182,7 @@ export function ReadSpeakSession({
 
   const wc = countWords(transcript);
   const canSubmit = wc >= 15;
+  const stepNum = phase === "pick-question" ? 1 : phase === "record" ? 3 : 2;
 
   const startPrep = () => {
     setSecondsLeft(prepChoice * 60);
@@ -193,7 +191,7 @@ export function ReadSpeakSession({
 
   const selectQuestion = (q: SpeakingQuestion) => {
     setSelectedQuestion(q);
-    setPhase("record");
+    setPhase("prep-pick");
     setTranscript("");
     finalTranscriptRef.current = "";
     stopRecognition();
@@ -289,152 +287,205 @@ export function ReadSpeakSession({
       <Link href={roundBase} className="text-sm font-bold text-ep-blue hover:underline">
         ← Round {round} topics
       </Link>
-      {soft ? (
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
-            D
+      {/* Step indicator */}
+      <div className="flex items-center gap-1">
+        {["อ่านโจทย์", "เตรียมตัว", "พูด & ส่ง"].map((label, i) => {
+          const n = i + 1;
+          const active = n === stepNum;
+          const done = n < stepNum;
+          return (
+            <div key={label} className="flex flex-1 items-center gap-2">
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                  active ? "bg-[#004AAD] text-white" : done ? "bg-[#004AAD]/15 text-[#004AAD]" : "bg-slate-100 text-slate-400"
+                }`}
+              >
+                {done ? "✓" : n}
+              </span>
+              <span className={`whitespace-nowrap text-xs font-semibold ${active ? "text-[#004AAD]" : "text-slate-400"}`}>
+                {label}
+              </span>
+              {n < 3 ? <span className="h-px flex-1 bg-slate-200" /> : null}
+            </div>
+          );
+        })}
+      </div>
+
+      <header className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-ep-blue">อ่านแล้วพูด · Round {round}</p>
+        <h1 className="mt-1 text-xl font-black text-slate-900">{topic.titleEn}</h1>
+        <p className="text-sm text-neutral-500">{topic.titleTh}</p>
+      </header>
+
+      {phase === "prep-pick" && selectedQuestion ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-ep-blue">เตรียมตัว · คำถามของคุณ</p>
+          <div className="mt-2 rounded-xl bg-slate-50 p-3.5">
+            <p className="text-sm font-bold text-slate-900">{selectedQuestion.promptEn}</p>
+            <p className="mt-1 text-sm text-slate-600">{selectedQuestion.promptTh}</p>
           </div>
-          <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
-            <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
-            <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
-              <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
-            </span>
-            <p className="text-[13px] leading-6 text-slate-800">
-              โครงตอบเร็ว: <strong>เลือกข้าง → 2 เหตุผล → ตัวอย่างสั้น → สรุป</strong> ·
-              เตรียมในช่วงจับเวลาให้พอ แล้วพูดตามโครง
-            </p>
+          <p className="mt-4 text-sm font-bold text-slate-700">จับเวลาเตรียมตัว</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {[1, 2, 3].map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setPrepChoice(n)}
+                className={`rounded-xl px-4 py-2 text-sm font-bold transition-colors ${
+                  prepChoice === n ? "bg-[#004AAD] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {n} นาที
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              onClick={startPrep}
+              className="flex-1 rounded-xl bg-[#004AAD] py-3 text-sm font-bold text-white hover:opacity-90"
+            >
+              เริ่มจับเวลา {prepChoice} นาที
+            </button>
+            <button
+              type="button"
+              onClick={() => setPhase("record")}
+              className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50"
+            >
+              ข้ามไปพูดเลย →
+            </button>
           </div>
         </div>
       ) : null}
 
-      <AdminWritingStarters
-        title="🧱 โครงพูด + วลีเริ่ม"
-        starters={[
-          "In my opinion,…",
-          "I prefer … because…",
-          "One reason is…",
-          "For instance,…",
-          "Overall,…",
-        ]}
-      />
-
-      <header className="ep-brutal rounded-sm border-black bg-white p-6">
-        <h1 className="text-2xl font-black">{topic.titleEn}</h1>
-        <p className="text-sm text-neutral-600">{topic.titleTh}</p>
-      </header>
-
-      {phase === "prep-pick" ? (
-        <BrutalPanel title="Preparation time (read the intro)">
-          <p className="mb-3 text-sm text-neutral-700">{topic.promptEn}</p>
-          <p className="mb-4 text-sm text-neutral-600">{topic.promptTh}</p>
-          <label className="block text-sm font-bold">
-            Minutes to prepare (1–5)
-            <select
-              value={prepChoice}
-              onChange={(e) => setPrepChoice(Number(e.target.value))}
-              className="mt-2 w-full border-2 border-black bg-white px-3 py-2 ep-stat text-sm"
-            >
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>
-                  {n} min
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            onClick={startPrep}
-            className="mt-4 w-full border-2 border-black bg-ep-blue py-3 text-sm font-black text-white shadow-[4px_4px_0_0_#000]"
-          >
-            Start timer
-          </button>
-        </BrutalPanel>
-      ) : null}
-
-      {phase === "prep-run" ? (
-        <BrutalPanel title="Preparing">
-          <p className="text-sm text-neutral-700">{topic.promptEn}</p>
-          <p className="ep-stat mt-6 text-center text-6xl font-black text-ep-blue">
-            {Math.floor(secondsLeft / 60)}:
-            {String(secondsLeft % 60).padStart(2, "0")}
+      {phase === "prep-run" && selectedQuestion ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-ep-blue">กำลังเตรียมตัว</p>
+          <p className="mt-2 text-sm font-bold text-slate-800">{selectedQuestion.promptEn}</p>
+          <p className="mt-6 font-mono text-6xl font-black text-[#004AAD]">
+            {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}
           </p>
+          <p className="mt-2 text-xs text-slate-400">โครง: เลือกข้าง → 2 เหตุผล → ตัวอย่างสั้น → สรุป</p>
           <button
             type="button"
-            onClick={() => setPhase("pick-question")}
-            className="mt-4 w-full border-2 border-black bg-white py-2 text-sm font-bold"
+            onClick={() => setPhase("record")}
+            className="mt-5 w-full rounded-xl bg-[#004AAD] py-3 text-sm font-bold text-white hover:opacity-90"
           >
-            Skip to question cards
+            พร้อมพูดแล้ว →
           </button>
-        </BrutalPanel>
+        </div>
       ) : null}
 
       {phase === "pick-question" ? (
-        <BrutalPanel title="Tap a question card">
-          <p className="mb-4 text-sm text-neutral-600">
-            Read the card, take a breath, then on the next screen press{" "}
-            <strong>Start speaking</strong> when you are ready.
-          </p>
-          <div
-            key={questionScoreTick}
-            className="grid grid-cols-2 gap-3 sm:grid-cols-3"
-          >
-            {topic.questions.map((q) => {
-              const latest = getSpeakingQuestionLatestScore(topic.id, q.id);
-              return (
-                <button
-                  key={q.id}
-                  type="button"
-                  onClick={() => selectQuestion(q)}
-                  className="relative flex min-h-[7rem] flex-col items-center justify-center gap-2 border-2 border-black bg-ep-yellow/40 p-3 pb-7 shadow-[3px_3px_0_0_#000] transition hover:bg-ep-yellow"
-                >
-                  <QuestionThumbnailDisplay thumbnail={q.thumbnail} />
-                  <span className="ep-stat text-center text-[10px] font-bold uppercase text-neutral-700">
-                    Open
-                  </span>
-                  {latest ? (
-                    <span
-                      className="absolute bottom-1.5 right-1.5 rounded-sm border-2 border-black bg-white px-1.5 py-0.5 ep-stat text-[10px] font-black leading-none text-ep-blue shadow-[1px_1px_0_0_#000]"
-                      title={`Latest score · report ${latest.attemptId.slice(0, 8)}…`}
-                    >
-                      {latest.score160}
-                    </span>
-                  ) : null}
-                </button>
-              );
-            })}
+        <>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-ep-blue">บทอ่าน / โจทย์</p>
+            <p className="mt-2 text-sm leading-6 text-slate-800">{topic.promptEn}</p>
+            <p className="mt-1 text-sm leading-6 text-slate-500">{topic.promptTh}</p>
           </div>
-        </BrutalPanel>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-bold text-slate-800">เลือกคำถามที่จะตอบ</p>
+            <p className="mt-0.5 text-xs text-slate-400">อ่านคำถาม แล้วแตะเพื่อไปเตรียมตัว</p>
+            <div key={questionScoreTick} className="mt-3 space-y-2">
+              {topic.questions.map((q, i) => {
+                const latest = getSpeakingQuestionLatestScore(topic.id, q.id);
+                return (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => selectQuestion(q)}
+                    className="flex w-full items-start gap-3 rounded-xl border border-slate-200 bg-white p-3.5 text-left transition-all hover:border-[#004AAD] hover:shadow-md"
+                  >
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#004AAD]/10 text-xs font-bold text-[#004AAD]">
+                      {i + 1}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold text-slate-900">{q.promptEn}</span>
+                      <span className="mt-0.5 block text-xs text-slate-500">{q.promptTh}</span>
+                    </span>
+                    {latest ? (
+                      <span className="shrink-0 rounded-lg bg-slate-100 px-2 py-1 font-mono text-[11px] font-bold text-[#004AAD]" title="คะแนนล่าสุด">
+                        {latest.score160}
+                      </span>
+                    ) : (
+                      <span className="shrink-0 text-slate-300">→</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
       ) : null}
 
       {phase === "record" && selectedQuestion ? (
-        <BrutalPanel title="Speak your answer">
-          <div className="mb-4 rounded-sm border-2 border-black bg-white p-3 text-sm">
-            <p className="font-bold text-neutral-900">{selectedQuestion.promptEn}</p>
-            <p className="mt-2 text-neutral-600">{selectedQuestion.promptTh}</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-xl bg-slate-50 p-3.5">
+            <p className="text-sm font-bold text-slate-900">{selectedQuestion.promptEn}</p>
+            <p className="mt-1 text-sm text-slate-600">{selectedQuestion.promptTh}</p>
           </div>
 
-          {speechError ? (
-            <p className="mb-2 text-sm font-bold text-red-700">{speechError}</p>
-          ) : null}
+          {speechError ? <p className="mt-3 text-sm font-semibold text-red-600">{speechError}</p> : null}
 
-          <div className="flex flex-wrap gap-2">
+          <div className="mt-4">
             {!listening ? (
               <button
                 type="button"
                 onClick={startListening}
-                className="border-2 border-black bg-ep-blue px-4 py-3 text-sm font-black text-white shadow-[3px_3px_0_0_#000]"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-white hover:opacity-90"
               >
-                Start speaking (live caption)
+                🎙️ เริ่มพูด (live caption)
               </button>
             ) : (
               <button
                 type="button"
                 onClick={stopRecognition}
-                className="border-2 border-black bg-red-700 px-4 py-3 text-sm font-black text-white shadow-[3px_3px_0_0_#000]"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 py-3.5 text-base font-bold text-white hover:opacity-90"
               >
-                Stop
+                <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
+                ⏺ กำลังฟัง… แตะเพื่อหยุด
               </button>
             )}
+          </div>
+
+          <label className="mt-4 block text-sm font-bold text-slate-700">
+            ข้อความจากเสียงพูด · แก้ไขได้ก่อนส่ง
+            <textarea
+              value={transcript}
+              onChange={(e) => setTranscript(e.target.value)}
+              rows={8}
+              className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 font-mono text-sm focus:border-[#004AAD] focus:outline-none"
+              placeholder="ข้อความจะขึ้นตอนคุณพูด (live caption) หรือพิมพ์/วางเองได้…"
+            />
+          </label>
+          <p className="mt-1 text-[11px] text-slate-400">
+            live caption อาจไม่ครบบน iPad/Safari — พิมพ์/แก้เพิ่มได้
+          </p>
+
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-xs font-semibold">
+              <span className={wc >= 15 ? "text-emerald-600" : "text-slate-500"}>{wc} / 15 คำขั้นต่ำ</span>
+              {wc >= 15 ? (
+                <span className="text-emerald-600">พร้อมส่ง ✓</span>
+              ) : (
+                <span className="text-slate-400">พูด/พิมพ์ต่ออีกนิด</span>
+              )}
+            </div>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className={`h-full rounded-full transition-all ${wc >= 15 ? "bg-emerald-500" : "bg-[#004AAD]"}`}
+                style={{ width: `${Math.min(100, (wc / 15) * 100)}%` }}
+              />
+            </div>
+          </div>
+
+          {submitError ? <p className="mt-2 text-sm font-semibold text-red-600">{submitError}</p> : null}
+
+          <div className="mt-4">
+            <VipAiFeedbackQuotaBanner />
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-4 text-sm">
             <button
               type="button"
               onClick={() => {
@@ -442,64 +493,28 @@ export function ReadSpeakSession({
                 setPhase("pick-question");
                 setSelectedQuestion(null);
               }}
-              className="border-2 border-black bg-white px-4 py-3 text-sm font-bold"
+              className="font-semibold text-slate-500 hover:text-[#004AAD]"
             >
-              Choose another card
+              ← เลือกคำถามอื่น
             </button>
-            <Link
-              href={roundBase}
-              className="inline-flex items-center border-2 border-black bg-neutral-100 px-4 py-3 text-sm font-bold"
-            >
-              All topics in round
+            <Link href={roundBase} className="font-semibold text-slate-500 hover:text-[#004AAD]">
+              หัวข้ออื่นในรอบนี้
             </Link>
           </div>
 
-          <label className="mt-4 block text-sm font-bold">
-            Live transcript (you can edit before submit)
-            <textarea
-              value={transcript}
-              onChange={(e) => setTranscript(e.target.value)}
-              rows={8}
-              className="mt-2 w-full border-2 border-black bg-neutral-50 p-3 ep-stat text-sm"
-              placeholder="Text updates while you speak (browser live caption), or type / paste here…"
-            />
-          </label>
-          <p className="ep-stat mt-2 text-xs text-neutral-500">
-            {wc} words · need at least 15 to submit
-          </p>
-
-          {submitError ? (
-            <p className="mt-2 text-sm font-bold text-red-700">{submitError}</p>
-          ) : null}
-
-          <div className="mt-4 space-y-3">
-            <VipAiFeedbackQuotaBanner />
-          </div>
-          {soft ? (
-            <StickyExamCTA>
-              <button
-                type="button"
-                disabled={!canSubmit || submitting}
-                onClick={submitWithGemini}
-                className="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90 disabled:opacity-50"
-              >
-                {submitting ? "กำลังตรวจ…" : "ส่งคำตอบ →"}
-              </button>
-            </StickyExamCTA>
-          ) : (
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                disabled={!canSubmit || submitting}
-                onClick={submitWithGemini}
-                className="border-2 border-black bg-ep-yellow px-4 py-2 text-sm font-black disabled:opacity-40"
-              >
-                {submitting ? "Grading…" : "Submit"}
-              </button>
-            </div>
-          )}
-        </BrutalPanel>
+          <StickyExamCTA>
+            <button
+              type="button"
+              disabled={!canSubmit || submitting}
+              onClick={submitWithGemini}
+              className="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90 disabled:opacity-50"
+            >
+              {submitting ? "กำลังตรวจ…" : "ส่งคำตอบ →"}
+            </button>
+          </StickyExamCTA>
+        </div>
       ) : null}
+      <SpeakingHintPanel unlocked={effectiveTier === "vip"} />
     </div>
     </StudySessionBoundary>
   );
