@@ -354,9 +354,10 @@ export function PhotoAssessmentSession({
           <p className="text-sm text-neutral-600">{item.titleTh}</p>
         </header>
 
-        {mode !== "speak" ? (
-          <WritePhotoHintPanel unlocked={effectiveTier === "vip"} />
-        ) : null}
+        <WritePhotoHintPanel
+          unlocked={effectiveTier === "vip"}
+          mode={mode === "speak" ? "speak" : "write"}
+        />
 
         <BrutalPanel title="Task">
           {/* eslint-disable-next-line @next/next/no-img-element */}

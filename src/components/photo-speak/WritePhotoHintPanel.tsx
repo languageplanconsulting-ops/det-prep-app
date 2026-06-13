@@ -97,7 +97,13 @@ const BANKS: Bank[] = [
   },
 ];
 
-export function WritePhotoHintPanel({ unlocked }: { unlocked: boolean }) {
+export function WritePhotoHintPanel({
+  unlocked,
+  mode = "write",
+}: {
+  unlocked: boolean;
+  mode?: "write" | "speak";
+}) {
   const [openBank, setOpenBank] = useState<string | null>(null);
 
   if (!unlocked) {
@@ -119,7 +125,7 @@ export function WritePhotoHintPanel({ unlocked }: { unlocked: boolean }) {
           </div>
         </div>
         <p className="mt-3 text-xs leading-6 text-slate-600">
-          ตัวช่วยนี้เป็นสิทธิ์ของนักเรียนคอร์ส Duolingo Fast Track — ได้แพตเทิร์นเขียนครบใน 1 นาที พร้อมคลังคำที่ใช้ได้เกือบทุกภาพ
+          ตัวช่วยนี้เป็นสิทธิ์ของนักเรียนคอร์ส Duolingo Fast Track — ได้แพตเทิร์นคำตอบครบใน 1 นาที พร้อมคลังคำที่ใช้ได้เกือบทุกภาพ
         </p>
         <Link
           href="/pricing"
@@ -140,7 +146,9 @@ export function WritePhotoHintPanel({ unlocked }: { unlocked: boolean }) {
         <p className="text-sm font-bold text-slate-800">แพตเทิร์นคำตอบจากพี่ดอย</p>
       </div>
       <p className="mt-1.5 text-xs leading-6 text-slate-500">
-        เติมช่องว่าง 3 ประโยคนี้ตามภาพ → ได้คำตอบที่มีโครงสร้างครบใน 1 นาที
+        {mode === "speak"
+          ? "พูดตาม 3 ประโยคนี้จากภาพ → ได้คำตอบที่มีโครงสร้างครบใน 1 นาที"
+          : "เติมช่องว่าง 3 ประโยคนี้ตามภาพ → ได้คำตอบที่มีโครงสร้างครบใน 1 นาที"}
       </p>
 
       {/* 3-step scaffold */}
@@ -202,7 +210,7 @@ export function WritePhotoHintPanel({ unlocked }: { unlocked: boolean }) {
       </div>
 
       <p className="mt-3 text-[11px] leading-5 text-slate-400">
-        💡 พี่ดอย: ใส่ 3 ประโยคก่อน แล้วหยิบคำจากคลังมาเติม — ครบโครงเร็ว ไม่ตัน
+        💡 พี่ดอย: {mode === "speak" ? "พูด 3 ประโยคนี้ก่อน แล้วหยิบคำจากคลังมาเสริม" : "ใส่ 3 ประโยคก่อน แล้วหยิบคำจากคลังมาเติม"} — ครบโครงเร็ว ไม่ตัน
       </p>
     </div>
   );
