@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
+import { InteractiveSpeakingHintPanel } from "@/components/interactive-speaking/InteractiveSpeakingHintPanel";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
@@ -176,7 +177,7 @@ export function InteractiveSpeakingSession({
   startWithRedeem?: boolean;
 }) {
   const router = useRouter();
-  const { isAdmin, previewEligible } = useEffectiveTier();
+  const { isAdmin, previewEligible, effectiveTier } = useEffectiveTier();
   const soft = true;
   const vipGate = useVipAiFeedbackGate();
   const lastAttempt = useMemo(
@@ -860,6 +861,10 @@ export function InteractiveSpeakingSession({
               follow-ups) · {INTERACTIVE_SPEAKING_PREP_SECONDS}s prep · max {INTERACTIVE_SPEAKING_MAX_SPEAK_SECONDS}s
               speaking · next question loads automatically
             </p>
+          </div>
+
+          <div className="mt-6">
+            <InteractiveSpeakingHintPanel unlocked={effectiveTier === "vip"} />
           </div>
 
           <div className="mt-8 space-y-6">
