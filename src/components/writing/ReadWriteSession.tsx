@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
+import { EssayHintPanel } from "@/components/writing/EssayHintPanel";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
@@ -39,7 +40,7 @@ export function ReadWriteSession({
   startWithRedeem?: boolean;
 }) {
   const router = useRouter();
-  const { isAdmin, previewEligible } = useEffectiveTier();
+  const { effectiveTier } = useEffectiveTier();
   const soft = true;
   const vipGate = useVipAiFeedbackGate();
   const [mounted, setMounted] = useState(false);
@@ -273,6 +274,8 @@ export function ReadWriteSession({
         <h1 className="text-2xl font-black">{topic.titleEn}</h1>
         <p className="text-neutral-600">{topic.titleTh}</p>
       </header>
+
+      <EssayHintPanel unlocked={effectiveTier === "vip"} />
 
       {hasAttempt && progress ? (
         <BrutalPanel title="Latest score" variant="accent">
