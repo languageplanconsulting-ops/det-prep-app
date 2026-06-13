@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
+import { WritePhotoHintPanel } from "@/components/photo-speak/WritePhotoHintPanel";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -59,7 +60,7 @@ export function PhotoAssessmentSession({
   startWithRedeem?: boolean;
 }) {
   const router = useRouter();
-  const { isAdmin, previewEligible } = useEffectiveTier();
+  const { effectiveTier } = useEffectiveTier();
   const soft = true;
   const item = useMemo(() => findWriteAboutPhotoItem(itemId), [itemId]);
   const round = item ? getWriteAboutPhotoRoundNumberForItem(item.id) : undefined;
@@ -352,6 +353,10 @@ export function PhotoAssessmentSession({
           <h1 className="mt-2 text-2xl font-black">{item.titleEn}</h1>
           <p className="text-sm text-neutral-600">{item.titleTh}</p>
         </header>
+
+        {mode !== "speak" ? (
+          <WritePhotoHintPanel unlocked={effectiveTier === "vip"} />
+        ) : null}
 
         <BrutalPanel title="Task">
           {/* eslint-disable-next-line @next/next/no-img-element */}
