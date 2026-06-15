@@ -163,13 +163,39 @@ export async function PUT(req: Request) {
       report_payload?: unknown;
     };
 
-    let rowQuery = supabase
-      .from("study_sessions")
-      .select("id, started_at, ended_at, duration_seconds")
-      .eq("user_id", user.id);
+    // Normalize the incoming "finish" signals. `completed`/`score` are treated
+    // as MONOTONIC: a real finish can raise them, but an abandon write (the
+    // unmount / start-of-next-session cleanup that sends completed:false) must
+    // never lower a session that was already finished. See useStudyTimer.ts.
+    const incomingCompleted =
+      body.completed === undefined ? undefined : Boolean(body.completed);
+    let incomingScore: number | null = null;
+    if (body.score !== undefined && body.score !== null) {
+      const n = Number(body.score);
+      if (Number.isFinite(n)) incomingScore = Math.round(n);
+    }
+    const isFinish = incomingCompleted === true || incomingScore != null;
+
+    const SELECT = "id, started_at, ended_at, duration_seconds, completed, score";
+    type SessionRow = {
+      id: string;
+      started_at: string;
+      ended_at: string | null;
+      duration_seconds: number | null;
+      completed: boolean | null;
+      score: number | null;
+    };
+
+    let row: SessionRow | null = null;
 
     if (typeof body.sessionId === "string" && body.sessionId) {
-      rowQuery = rowQuery.eq("id", body.sessionId);
+      const { data } = await supabase
+        .from("study_sessions")
+        .select(SELECT)
+        .eq("user_id", user.id)
+        .eq("id", body.sessionId)
+        .maybeSingle();
+      row = (data as SessionRow | null) ?? null;
     } else {
       const exerciseType =
         typeof body.exerciseType === "string" ? body.exerciseType.trim() : "";
@@ -179,25 +205,93 @@ export async function PUT(req: Request) {
           { status: 400 },
         );
       }
-      rowQuery = rowQuery.eq("exercise_type", exerciseType).is("ended_at", null);
-      if (body.setId != null) {
-        const setId =
-          typeof body.setId === "string" ? body.setId : String(body.setId);
-        rowQuery = rowQuery.eq("set_id", setId);
+      const setIdFilter =
+        body.setId != null
+          ? typeof body.setId === "string"
+            ? body.setId
+            : String(body.setId)
+          : null;
+      const baseQuery = () => {
+        let q = supabase
+          .from("study_sessions")
+          .select(SELECT)
+          .eq("user_id", user.id)
+          .eq("exercise_type", exerciseType);
+        if (setIdFilter != null) q = q.eq("set_id", setIdFilter);
+        return q;
+      };
+
+      // Prefer a still-open session for this exercise.
+      const open = await baseQuery()
+        .is("ended_at", null)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      row = (open.data as SessionRow | null) ?? null;
+
+      // If none is open but this is a genuine finish, allow upgrading the most
+      // recent (already-ended) session — it was likely closed early as
+      // "abandoned" by cleanup before this finish landed.
+      if (!row && isFinish) {
+        const recent = await baseQuery()
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        row = (recent.data as SessionRow | null) ?? null;
       }
-      rowQuery = rowQuery.order("created_at", { ascending: false }).limit(1);
     }
 
-    const { data: row, error: fetchErr } = await rowQuery.maybeSingle();
-
-    if (fetchErr || !row) {
+    if (!row) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
+    // Build an upgrade-only patch: only ever raise completed false→true and
+    // fill a null score; carry the latest payloads if provided.
+    const buildUpgrade = (current: SessionRow) => {
+      const patch: {
+        completed?: boolean;
+        score?: number | null;
+        submission_payload?: unknown;
+        report_payload?: unknown;
+      } = {};
+      if (incomingCompleted === true && current.completed !== true) {
+        patch.completed = true;
+      }
+      if (incomingScore != null && current.score == null) {
+        patch.score = incomingScore;
+      }
+      if (body.submission_payload !== undefined) {
+        patch.submission_payload = body.submission_payload;
+      }
+      if (body.report_payload !== undefined) {
+        patch.report_payload = body.report_payload;
+      }
+      return patch;
+    };
+
+    // Already ended (typically by an abandon-cleanup write): only allow a
+    // monotonic upgrade, never a downgrade.
     if (row.ended_at != null) {
+      if (!isFinish) {
+        return NextResponse.json({ ok: true });
+      }
+      const patch = buildUpgrade(row);
+      if (Object.keys(patch).length === 0) {
+        return NextResponse.json({ ok: true });
+      }
+      const { error } = await supabase
+        .from("study_sessions")
+        .update(patch)
+        .eq("id", row.id)
+        .eq("user_id", user.id);
+      if (error) {
+        console.error("[study/session] PUT upgrade", error.message);
+        return NextResponse.json({ error: "Could not update session" }, { status: 500 });
+      }
       return NextResponse.json({ ok: true });
     }
 
+    // First end of an open session.
     const endedAt = new Date().toISOString();
     const startedMs = new Date(row.started_at).getTime();
     const wallSeconds = Math.max(0, Math.floor((Date.now() - startedMs) / 1000));
@@ -207,13 +301,6 @@ export async function PUT(req: Request) {
       duration = Math.max(0, Math.floor(body.duration_seconds));
     } else if (duration === 0 || duration == null) {
       duration = wallSeconds;
-    }
-
-    const completed = Boolean(body.completed);
-    let score: number | null = null;
-    if (body.score !== undefined && body.score !== null) {
-      const n = Number(body.score);
-      if (Number.isFinite(n)) score = Math.round(n);
     }
 
     const updatePayload: {
@@ -226,8 +313,8 @@ export async function PUT(req: Request) {
     } = {
       ended_at: endedAt,
       duration_seconds: duration,
-      completed,
-      score,
+      completed: incomingCompleted === true,
+      score: incomingScore,
     };
 
     if (body.submission_payload !== undefined) {
@@ -237,15 +324,36 @@ export async function PUT(req: Request) {
       updatePayload.report_payload = body.report_payload;
     }
 
-    const { error } = await supabase
+    // Guard against a concurrent writer that ended this row first: only the
+    // write that flips ended_at from null wins here.
+    const { data: ended, error } = await supabase
       .from("study_sessions")
       .update(updatePayload)
       .eq("id", row.id)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .is("ended_at", null)
+      .select("id");
 
     if (error) {
       console.error("[study/session] PUT", error.message);
       return NextResponse.json({ error: "Could not end session" }, { status: 500 });
+    }
+
+    // Lost the race (another write — likely abandon cleanup — ended it first).
+    // If this was the genuine finish, apply it as a monotonic upgrade instead.
+    if ((!ended || ended.length === 0) && isFinish) {
+      const patch = buildUpgrade(row);
+      if (Object.keys(patch).length > 0) {
+        const { error: upErr } = await supabase
+          .from("study_sessions")
+          .update(patch)
+          .eq("id", row.id)
+          .eq("user_id", user.id);
+        if (upErr) {
+          console.error("[study/session] PUT upgrade-after-race", upErr.message);
+          return NextResponse.json({ error: "Could not update session" }, { status: 500 });
+        }
+      }
     }
 
     return NextResponse.json({ ok: true });
