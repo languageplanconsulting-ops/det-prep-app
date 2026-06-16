@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/mini-diagnosis/start",
     "/mock-test/start",
     "/duolingo-english-test",
+    "/duolingo-level-test",
   ];
 
   const staticEntries = staticRoutes.map((route) => ({
