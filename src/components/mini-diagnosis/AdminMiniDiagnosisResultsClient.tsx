@@ -250,29 +250,41 @@ function renderObjectiveReview(taskType: string, answer: unknown, item: StepItem
   );
 }
 
-// ─── Skill score bar helper ───────────────────────────────────────────────────
+// ─── Skill score bar helper (ฟัง / พูด / อ่าน / เขียน, brand style) ────────────
 
-const SKILL_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
-  Reading: { bg: "bg-violet-50", text: "text-violet-700", bar: "bg-violet-400" },
-  Listening: { bg: "bg-sky-50", text: "text-sky-700", bar: "bg-sky-400" },
-  Speaking: { bg: "bg-amber-50", text: "text-amber-700", bar: "bg-amber-400" },
-  Writing: { bg: "bg-emerald-50", text: "text-emerald-700", bar: "bg-emerald-500" },
+const THAI_SKILL: Record<string, { th: string; en: string }> = {
+  Listening: { th: "ฟัง", en: "Listening" },
+  Speaking: { th: "พูด", en: "Speaking" },
+  Reading: { th: "อ่าน", en: "Reading" },
+  Writing: { th: "เขียน", en: "Writing" },
 };
+
+// CEFR band from a 0–160 score, using Duolingo's published mapping.
+function cefrFromTotal(total: number): string {
+  if (total >= 150) return "C2";
+  if (total >= 130) return "C1";
+  if (total >= 110) return "B2";
+  if (total >= 90) return "B1";
+  if (total >= 60) return "A2";
+  return "A1";
+}
 
 function SkillBar({ label, value }: { label: string; value: number }) {
   const pct = Math.min(100, Math.max(0, (value / 160) * 100));
-  const c = SKILL_COLORS[label] ?? { bg: "bg-neutral-50", text: "text-neutral-600", bar: "bg-neutral-400" };
+  const t = THAI_SKILL[label] ?? { th: label, en: label };
   return (
-    <div className={`rounded-2xl ${c.bg} p-5`}>
-      <div className="flex items-end justify-between">
-        <p className={`text-xs font-bold uppercase tracking-widest ${c.text}`}>{label}</p>
-        <p className={`font-mono text-2xl font-bold ${c.text}`}>
+    <div>
+      <div className="flex items-baseline justify-between">
+        <span className="text-base font-black text-neutral-900">
+          {t.th} <span className="text-xs font-bold uppercase text-neutral-400">{t.en}</span>
+        </span>
+        <span className="font-mono text-sm font-black text-[#004AAD]">
           {Math.round(value)}
-          <span className="ml-0.5 text-sm font-normal opacity-60">/160</span>
-        </p>
+          <span className="ml-0.5 text-xs font-bold text-neutral-400">/160</span>
+        </span>
       </div>
-      <div className="mt-3 h-2 w-full rounded-full bg-black/8">
-        <div className={`h-2 rounded-full ${c.bar} transition-all duration-500`} style={{ width: `${pct}%` }} />
+      <div className="mt-1.5 h-3.5 w-full border-2 border-black bg-neutral-100">
+        <div className="h-full bg-[#004AAD] transition-all duration-500" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -508,49 +520,50 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
     );
 
   const skills: Array<{ label: string; value: number }> = [
-    { label: "Reading", value: result.actual_reading },
     { label: "Listening", value: result.actual_listening },
     { label: "Speaking", value: result.actual_speaking },
+    { label: "Reading", value: result.actual_reading },
     { label: "Writing", value: result.actual_writing },
   ];
+  const total = Math.round(result.actual_total ?? 0);
+  const totalPct = Math.min(100, Math.max(0, (total / 160) * 100));
 
   // primary weak skill for the practice CTA anchor
 
   return (
     <main className="min-h-screen bg-neutral-50 px-4 py-10">
-      {/* Admin badge */}
-      <div className="mx-auto mb-6 max-w-4xl">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-700">
-          Admin preview — redesigned results screen
-        </span>
-      </div>
-
       <div className="mx-auto max-w-4xl space-y-6">
         {/* ── Score snapshot ─────────────────────────────────────────────── */}
-        <section className="rounded-3xl bg-white p-8 shadow-md">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex-1">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#004AAD]">
-                Mini diagnosis result
-              </p>
-              <h1 className="mt-2 text-3xl font-bold leading-tight text-neutral-900 md:text-4xl">
-                คะแนนและจุดอ่อน
-                <br />
-                <span className="text-[#004AAD]">Your level snapshot</span>
-              </h1>
-              <p className="mt-3 text-sm text-neutral-500">{result.level_label ?? "Mini diagnosis complete"}</p>
-            </div>
+        <section className="border-4 border-black bg-white p-8 shadow-[10px_10px_0_0_#111]">
+          <p className="font-mono text-[11px] font-black uppercase tracking-[0.22em] text-[#004AAD]">
+            ผลวัดระดับของคุณ · Your level snapshot
+          </p>
 
-            {/* Total score pill */}
-            <div className="flex shrink-0 flex-col items-center justify-center rounded-2xl bg-[#FFCC00] px-10 py-6 shadow-sm">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-600">Total</p>
-              <p className="font-mono text-6xl font-bold text-[#004AAD]">{Math.round(result.actual_total ?? 0)}</p>
-              <p className="mt-0.5 text-xs font-medium text-neutral-600">out of 160</p>
-            </div>
+          <div className="mt-5 flex items-end gap-4">
+            <span className="text-6xl font-black tracking-tight md:text-7xl">≈ {total}</span>
+            <span className="mb-2 border-2 border-black bg-[#FFCC00] px-3 py-1 text-sm font-black uppercase">
+              {cefrFromTotal(total)}
+            </span>
+          </div>
+          <p className="mt-1 text-sm font-bold text-neutral-500">
+            คะแนนประเมิน Duolingo English Test (10–160)
+          </p>
+          {result.level_label ? (
+            <p className="mt-1 text-sm font-black text-[#004AAD]">{result.level_label}</p>
+          ) : null}
+
+          {/* 0–160 gauge */}
+          <div className="mt-4 h-5 w-full max-w-md border-2 border-black bg-neutral-100">
+            <div className="h-full bg-[#004AAD]" style={{ width: `${totalPct}%` }} />
+          </div>
+          <div className="mt-1 flex max-w-md justify-between font-mono text-[10px] font-black text-neutral-500">
+            <span>10</span>
+            <span>85</span>
+            <span>160</span>
           </div>
 
-          {/* Skill bars */}
-          <div className="mt-8 grid gap-3 md:grid-cols-2">
+          {/* Skill bars: ฟัง พูด อ่าน เขียน */}
+          <div className="mt-8 grid gap-x-10 gap-y-5 md:grid-cols-2">
             {skills.map((s) => (
               <SkillBar key={s.label} label={s.label} value={s.value} />
             ))}
