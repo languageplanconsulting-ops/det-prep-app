@@ -7,6 +7,7 @@ import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { InteractiveSpeakingHintPanel } from "@/components/interactive-speaking/InteractiveSpeakingHintPanel";
+import { TeacherSamplePlayer } from "@/components/speaking-samples/TeacherSamplePlayer";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
@@ -886,6 +887,13 @@ export function InteractiveSpeakingSession({
                   Listen to each prompt, take a short breath to think, then answer out loud. Follow-ups are shaped by
                   what you say. If a turn is too short, you can add more on the next step.
                 </p>
+                <TeacherSamplePlayer
+                  target={{
+                    kind: "standalone_interactive_speaking",
+                    ref: scenario.id,
+                    questionType: "interactive_speaking",
+                  }}
+                />
                 <button
                   type="button"
                   onClick={() => void startExam()}

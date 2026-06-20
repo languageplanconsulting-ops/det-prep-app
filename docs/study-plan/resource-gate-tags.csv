@@ -1,0 +1,25 @@
+resource_id,resource_type,title,category,gates,role,notes
+session-1,mini-lesson,Commas: FANBOYS & Subordinating Conjunctions,dictation,G4_punct,teach,comma rules via dictation
+session-2,mini-lesson,"Adding -ed, -s/-es: past, present simple, passive",dictation,"G1_present;G3_past;G5_passive",teach,multi-gate morphology lesson
+session-3,mini-lesson,Four comma structures for Write/Speak about Photo,dictation,G4_punct,teach,comma placement in descriptions
+session-4,mini-lesson,Write about a photo,writing,SP_speak,teach,production patterns (write)
+session-5,mini-lesson,Speak about a photo,speaking,SP_speak,teach,simple-grammar speaking patterns
+session-6,mini-lesson,Interactive Speaking — Format & 4 Patterns,speaking,SP_speak,teach,lecture-only; new DET format
+session-7,mini-lesson,Interactive listening — find the essentials,listening,L_listen,teach,who/why/what extraction
+session-8,mini-lesson,Interactive listening — first 2 turns,listening,L_listen,teach,opener selection
+session-9,mini-lesson,Listen & Respond — choose the best reply,listening,L_listen,teach,turn-by-turn strategy
+session-10,mini-lesson,Summarize the Conversation,writing,"L_listen;SP_speak",teach,listen + produce summary
+session-11,mini-lesson,Writing essay — pick the best essay,writing,R_SKILL,teach,essay structure/pattern recognition
+session-12,mini-lesson,Writing essay — find your grammar mistakes,writing,"G1_present;G3_past;G5_passive;G6_advanced",teach,cloze grammar; gate via item categories
+session-13,mini-lesson,Reading — find the best title,reading,R_SKILL,teach,title/gist
+session-14,mini-lesson,Reading — find the main idea,reading,R_SKILL,teach,main idea
+session-15,mini-lesson,Reading — find the missing paragraph,reading,R_SKILL,teach,coherence/inference
+session-16,mini-lesson,Fill in the Blanks — How to Spot What the Blank Needs,writing,"G1_present;G3_past;G5_passive;G6_advanced",teach,FITB strategy; entry lesson for all grammar gates
+bank-dictation,practice-bank,Dictation bank (R1-5 x easy/med/hard x40),dictation,"G0_structure;G2_lexis;G4_punct",drill,~300-600 items; the dictation reservoir
+bank-fitb,practice-bank,Fill-in-blank bank (R1-5 x difficulty),writing,"G1_present;G3_past;G5_passive;G6_advanced",drill,route by cloze_category -> gate
+bank-vocab,practice-bank,Vocabulary bank (5 rounds),reading,R_VOCAB,drill,word recognition by CEFR
+bank-realword,practice-bank,Real English Word bank,reading,R_VOCAB,probe,misspelling detection (signal-detection scored)
+bank-reading,practice-bank,Reading passage bank (R1-5 x difficulty),reading,R_SKILL,drill,MCQ comprehension skills
+bank-conversation,practice-bank,Interactive conversation MCQ bank,listening,L_listen,drill,scenario + MCQ
+bank-speaking,practice-bank,Speaking topics + interactive speaking bank,speaking,SP_speak,drill,AI-graded
+mock-fixed,assessment,Fixed 20-step mock,mock,"G0_structure;G1_present;G2_lexis;G3_past;G4_punct;G5_passive;G6_advanced;R_VOCAB;R_SKILL;L_listen;SP_speak",finish-line,re-test to prove gain (before/after)

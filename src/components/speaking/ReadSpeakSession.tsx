@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SpeakingHintPanel } from "@/components/speaking/SpeakingHintPanel";
+import { TeacherSamplePlayer } from "@/components/speaking-samples/TeacherSamplePlayer";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
@@ -424,6 +425,14 @@ export function ReadSpeakSession({
             <p className="text-sm font-bold text-slate-900">{selectedQuestion.promptEn}</p>
             <p className="mt-1 text-sm text-slate-600">{selectedQuestion.promptTh}</p>
           </div>
+
+          <TeacherSamplePlayer
+            target={{
+              kind: "standalone_read_then_speak",
+              ref: selectedQuestion.id,
+              questionType: "read_then_speak",
+            }}
+          />
 
           {speechError ? <p className="mt-3 text-sm font-semibold text-red-600">{speechError}</p> : null}
 

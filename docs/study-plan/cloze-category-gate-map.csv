@@ -1,0 +1,13 @@
+cloze_category,gate,notes
+present-simple-singular,G1_present,he/she/it + -s; foundational SVA
+subject-verb-agreement-plural,G1_present,plural subject takes bare verb
+plural-noun,G1_present,basic noun number morphology
+singular-after-a-an,G1_present,a/an forces singular
+uncountable-noun,G1_present,no -s on uncountables
+noun-form,G1_present,derive correct noun form
+past-participle,G5_passive,used to build passive / perfect
+gerund,G6_advanced,-ing as noun; advanced syntax
+adverb-form,G6_advanced,word-formation (-ly etc.)
+adjective-form,G6_advanced,word-formation
+preposition-form,G6_advanced,collocational prepositions
+transition-word,G4_punct,cohesion / linking devices

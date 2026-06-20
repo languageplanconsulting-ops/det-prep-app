@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Plan — Read &amp; Speak redesign preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ep-blue': '#004AAD',
+            'ep-yellow': '#FFCC00',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      line-height: 1.7;
+      background: #f8fafc;
+    }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Step indicator */
+    .step-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .step-dot.active { background: #004AAD; color: white; }
+    .step-dot.done { background: #d1fae5; color: #065f46; }
+    .step-dot.idle { background: #e2e8f0; color: #94a3b8; }
+    .step-label { font-size: 12px; font-weight: 500; transition: color 0.3s; }
+    .step-label.active { color: #004AAD; }
+    .step-label.done { color: #065f46; }
+    .step-label.idle { color: #94a3b8; }
+    .step-line { height: 2px; background: #e2e8f0; flex: 1; transition: background 0.3s; }
+    .step-line.done { background: #bbf7d0; }
+
+    /* Question card */
+    .question-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: white;
+    }
+    .question-card:hover { border-color: #93c5fd; background: #eff6ff; }
+    .question-card.selected { border-color: #004AAD; background: #eff6ff; }
+
+    /* Timer ring */
+    .timer-ring { transition: stroke-dashoffset 1s linear; }
+
+    /* Record button */
+    .record-btn {
+      transition: all 0.2s ease;
+    }
+    .record-btn.recording {
+      background: #ef4444 !important;
+    }
+
+    /* Pulse animation */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+    .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+
+    /* Fade in */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.35s ease forwards; }
+
+    /* Transcript typing cursor */
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .typing-cursor::after {
+      content: '|';
+      animation: blink 0.8s step-end infinite;
+      color: #004AAD;
+    }
+
+    /* Progress bar */
+    .wc-bar { transition: width 0.4s ease; }
+
+    /* Segmented control */
+    .seg-btn {
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+      color: #64748b;
+    }
+    .seg-btn.active { background: #004AAD; color: white; }
+
+    /* Back link */
+    .back-link {
+      color: #64748b; font-size: 13px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .back-link:hover { color: #004AAD; }
+
+    /* Sticky submit area */
+    .submit-area {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      border-top: 1px solid #f1f5f9;
+      padding: 12px 0 4px;
+      margin-top: 8px;
+    }
+
+    /* Score chip */
+    .score-chip {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-weight: 600;
+    }
+
+    /* Outline scaffold card */
+    .scaffold-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 18px;
+    }
+    .scaffold-step {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 4px 0;
+      font-size: 14px;
+    }
+    .scaffold-num {
+      width: 22px; height: 22px; min-width: 22px;
+      background: #dbeafe; color: #1d4ed8;
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 11px; font-weight: 700;
+      margin-top: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- NAV -->
+  <nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-50">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-ep-blue flex items-center justify-center">
+          <span class="text-white font-bold text-xs">EP</span>
+        </div>
+        <span class="font-semibold text-slate-800 text-sm">ENGLISH PLAN</span>
+      </div>
+      <div class="h-4 w-px bg-slate-200"></div>
+      <span class="text-xs text-slate-400 hidden sm:block">English Plan · DET · Read &amp; Speak (อ่านแล้วพูด) — redesign preview</span>
+      <span class="text-xs text-slate-400 sm:hidden">Read &amp; Speak preview</span>
+    </div>
+  </nav>
+
+  <!-- STEP INDICATOR -->
+  <div class="bg-white border-b border-slate-100">
+    <div class="max-w-2xl mx-auto px-4 py-3">
+      <div class="flex items-center gap-1">
+        <!-- Step 1 -->
+        <div class="flex flex-col items-center gap-1" style="min-width:80px">
+          <div class="step-dot" id="dot1">1</div>
+          <span class="step-label text-center" id="lbl1">อ่านโจทย์</span>
+        </div>
+        <div class="step-line flex-1" id="line1"></div>
+        <!-- Step 2 -->
+        <div class="flex flex-col items-center gap-1" style="min-width:80px">
+          <div class="step-dot" id="dot2">2</div>
+          <span class="step-label text-center" id="lbl2">เตรียมตัว</span>
+        </div>
+        <div class="step-line flex-1" id="line2"></div>
+        <!-- Step 3 -->
+        <div class="flex flex-col items-center gap-1" style="min-width:80px">
+          <div class="step-dot" id="dot3">3</div>
+          <span class="step-label text-center" id="lbl3">พูด &amp; ส่ง</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="max-w-2xl mx-auto px-4 py-6">
+
+    <!-- ==================== STEP 1 ==================== -->
+    <div id="step1" class="fade-in">
+
+      <!-- Passage card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-xs font-semibold text-ep-blue bg-blue-50 px-3 py-1 rounded-full">บทอ่าน / โจทย์</span>
+        </div>
+        <p class="text-slate-800 text-[15px] leading-relaxed">
+          Many students now have the option to attend school from home using online tools.
+          While studying at home offers flexibility and a comfortable environment, some experts worry
+          that students may miss important social experiences and face more distractions.
+          Schools and families continue to debate what learning model works best for young people today.
+        </p>
+      </div>
+
+      <!-- Question selection -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <h2 class="font-semibold text-slate-800 mb-1">เลือกคำถามที่จะตอบ</h2>
+        <p class="text-sm text-slate-500 mb-4">เลือก 1 คำถาม แล้วระบบจะพาไปเตรียมตัวเฉพาะสำหรับคำถามนั้น</p>
+
+        <div class="flex flex-col gap-3">
+
+          <!-- Q1 -->
+          <div class="question-card" id="qcard1" onclick="selectQuestion(0)">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex-1">
+                <p class="text-slate-800 font-medium text-[15px]">Do you think students learn better at home or at school? Give reasons.</p>
+                <p class="text-slate-500 text-sm mt-1">นักเรียนเรียนได้ดีกว่าที่บ้านหรือที่โรงเรียน? ให้เหตุผล</p>
+              </div>
+              <span class="score-chip bg-slate-100 text-slate-500 shrink-0">0 / 160</span>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="question-card" id="qcard2" onclick="selectQuestion(1)">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex-1">
+                <p class="text-slate-800 font-medium text-[15px]">What is one problem with online learning mentioned in the passage?</p>
+                <p class="text-slate-500 text-sm mt-1">บทอ่านกล่าวถึงปัญหาอะไรของการเรียนออนไลน์?</p>
+              </div>
+              <span class="score-chip bg-green-50 text-green-700 shrink-0">115 / 160</span>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="question-card" id="qcard3" onclick="selectQuestion(2)">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex-1">
+                <p class="text-slate-800 font-medium text-[15px]">Should schools offer both in-person and online options? Why or why not?</p>
+                <p class="text-slate-500 text-sm mt-1">โรงเรียนควรมีทั้งแบบในห้องและออนไลน์ไหม? ทำไม?</p>
+              </div>
+              <span class="score-chip bg-slate-100 text-slate-500 shrink-0">0 / 160</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /step1 -->
+
+
+    <!-- ==================== STEP 2 ==================== -->
+    <div id="step2" class="hidden fade-in">
+
+      <!-- Back -->
+      <div class="mb-4">
+        <span class="back-link" onclick="goToStep(1)">← เลือกคำถามอื่น</span>
+      </div>
+
+      <!-- Chosen question banner -->
+      <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-5">
+        <div class="text-xs font-semibold text-ep-blue mb-1 uppercase tracking-wide">คำถามที่เลือก</div>
+        <p class="text-slate-800 font-semibold text-[15px]" id="step2Question">—</p>
+        <p class="text-slate-500 text-sm mt-0.5" id="step2QuestionTh">—</p>
+      </div>
+
+      <!-- Prep timer -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-5">
+        <h2 class="font-semibold text-slate-800 mb-1">เวลาเตรียมตัว</h2>
+        <p class="text-sm text-slate-500 mb-4">เลือกเวลาเตรียมตัว หรือข้ามไปพูดได้เลย</p>
+
+        <!-- Segmented control -->
+        <div class="flex items-center gap-1 bg-slate-100 rounded-xl p-1 mb-5 w-fit">
+          <button class="seg-btn active" id="seg1" onclick="setDuration(1)">1 นาที</button>
+          <button class="seg-btn" id="seg2" onclick="setDuration(2)">2 นาที</button>
+          <button class="seg-btn" id="seg3" onclick="setDuration(3)">3 นาที</button>
+        </div>
+
+        <!-- Timer display -->
+        <div id="timerDisplay" class="flex flex-col items-center gap-4 mb-5">
+          <div class="relative" style="width:120px;height:120px">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <!-- Track -->
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+              <!-- Progress -->
+              <circle id="timerRing" cx="60" cy="60" r="50" fill="none"
+                stroke="#004AAD" stroke-width="6"
+                stroke-linecap="round"
+                stroke-dasharray="314"
+                stroke-dashoffset="0"
+                transform="rotate(-90 60 60)"
+                class="timer-ring"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="font-mono text-2xl font-semibold text-slate-800" id="timerText">01:00</span>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button id="timerStartBtn"
+              onclick="startTimer()"
+              class="bg-ep-blue text-white text-sm font-medium px-5 py-2 rounded-xl hover:bg-blue-800 transition">
+              ▶ เริ่มจับเวลา
+            </button>
+            <button id="timerStopBtn" onclick="stopTimer()" class="hidden bg-slate-100 text-slate-600 text-sm font-medium px-4 py-2 rounded-xl hover:bg-slate-200 transition">
+              ■ หยุด
+            </button>
+          </div>
+        </div>
+
+        <!-- Skip / ready -->
+        <div class="text-center border-t border-slate-100 pt-4">
+          <button onclick="goToStep(3)"
+            class="bg-ep-blue text-white font-semibold px-6 py-2.5 rounded-xl hover:bg-blue-800 transition text-sm">
+            พร้อมพูดแล้ว →
+          </button>
+          <p class="text-xs text-slate-400 mt-2">ข้ามการจับเวลาก็ได้ — ไปพูดได้เลย</p>
+        </div>
+      </div>
+
+      <!-- Outline scaffold -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">โครงตอบเร็ว</span>
+        </div>
+        <div class="scaffold-card">
+          <div class="scaffold-step">
+            <div class="scaffold-num">1</div>
+            <div><span class="font-medium text-slate-700">เลือกข้าง</span> — บอกชัดว่าคิดว่าอะไรดีกว่า / เห็นด้วยหรือไม่</div>
+          </div>
+          <div class="scaffold-step">
+            <div class="scaffold-num">2</div>
+            <div><span class="font-medium text-slate-700">2 เหตุผลสั้น</span> — แต่ละเหตุผล 1–2 ประโยค</div>
+          </div>
+          <div class="scaffold-step">
+            <div class="scaffold-num">3</div>
+            <div><span class="font-medium text-slate-700">ตัวอย่างสั้น</span> — ยกตัวอย่างจากชีวิตจริง / จากบทอ่าน</div>
+          </div>
+          <div class="scaffold-step">
+            <div class="scaffold-num">4</div>
+            <div><span class="font-medium text-slate-700">สรุปสั้น</span> — 1 ประโยคจบ ย้ำความเห็นหลัก</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /step2 -->
+
+
+    <!-- ==================== STEP 3 ==================== -->
+    <div id="step3" class="hidden fade-in">
+
+      <!-- Back -->
+      <div class="mb-4 flex gap-4">
+        <span class="back-link" onclick="goToStep(1)">← เลือกคำถามอื่น</span>
+        <span class="back-link" onclick="goToStep(2)">⏱ กลับไปเตรียมตัว</span>
+      </div>
+
+      <!-- Chosen question compact -->
+      <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-5">
+        <div class="text-xs font-semibold text-ep-blue mb-0.5">คำถามที่ต้องตอบ</div>
+        <p class="text-slate-800 font-medium text-sm" id="step3Question">—</p>
+        <p class="text-slate-500 text-xs mt-0.5" id="step3QuestionTh">—</p>
+      </div>
+
+      <!-- Record card -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-5">
+
+        <!-- Record button -->
+        <div class="flex flex-col items-center gap-3 mb-5">
+          <button id="recordBtn"
+            class="record-btn w-20 h-20 rounded-full bg-ep-blue text-white flex flex-col items-center justify-center gap-1 shadow-md hover:shadow-lg transition text-center"
+            onclick="toggleRecord()">
+            <span class="text-2xl" id="recordIcon">🎙️</span>
+            <span class="text-[10px] font-semibold leading-tight px-1" id="recordLabel">เริ่มพูด<br>live caption</span>
+          </button>
+
+          <!-- Recording status -->
+          <div id="recordingStatus" class="hidden flex items-center gap-2">
+            <div class="pulse-dot w-2.5 h-2.5 rounded-full bg-red-500"></div>
+            <span class="text-sm text-red-600 font-medium">กำลังฟัง… แตะเพื่อหยุด</span>
+          </div>
+          <div id="idleStatus" class="text-xs text-slate-400 text-center">
+            แตะปุ่มเพื่อเริ่มอัดเสียง — ระบบจะถอดคำพูดแบบ live
+          </div>
+        </div>
+
+        <!-- Transcript -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-sm font-medium text-slate-700">ข้อความจากเสียงพูด · แก้ไขได้ก่อนส่ง</label>
+            <span id="typingIndicator" class="text-xs text-ep-blue font-medium hidden">กำลังถอดเสียง…</span>
+          </div>
+          <textarea
+            id="transcript"
+            rows="5"
+            class="w-full border border-slate-200 rounded-xl p-3.5 text-[15px] text-slate-800 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent leading-relaxed"
+            placeholder="ข้อความที่พูดจะปรากฏที่นี่ — หรือพิมพ์เองได้"
+            oninput="updateWordCount()"
+          ></textarea>
+        </div>
+
+        <!-- Word count progress -->
+        <div class="mb-3">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-sm text-slate-600" id="wcLabel">0 / 15 คำขั้นต่ำ</span>
+            <span class="text-xs text-slate-400" id="wcExtra"></span>
+          </div>
+          <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div class="wc-bar h-full rounded-full bg-slate-300" id="wcBar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <!-- Note -->
+        <p class="text-xs text-slate-400 mb-4">
+          live caption อาจไม่ครบบน iPad/Safari — พิมพ์/แก้เพิ่มได้
+        </p>
+
+        <!-- Submit area -->
+        <div class="submit-area">
+          <button
+            id="submitBtn"
+            disabled
+            class="w-full py-3 rounded-xl font-semibold text-sm transition"
+            style="background:#e2e8f0; color:#94a3b8; cursor:not-allowed;"
+            onclick="handleSubmit()">
+            ส่งคำตอบ →
+          </button>
+          <p class="text-xs text-slate-400 text-center mt-1.5" id="submitHint">พูดให้ครบ 15 คำก่อนส่ง</p>
+        </div>
+
+      </div>
+
+      <!-- Success overlay (hidden) -->
+      <div id="successCard" class="hidden bg-green-50 border border-green-200 rounded-2xl p-8 text-center fade-in">
+        <div class="text-4xl mb-3">✅</div>
+        <h3 class="font-bold text-green-800 text-lg mb-1">ส่งคำตอบแล้ว!</h3>
+        <p class="text-green-700 text-sm mb-4">คำตอบของคุณถูกบันทึกเรียบร้อย</p>
+        <button onclick="resetAll()" class="bg-ep-blue text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-blue-800 transition">
+          ลองอีกครั้ง →
+        </button>
+      </div>
+
+    </div><!-- /step3 -->
+
+  </div><!-- /main -->
+
+  <script>
+    // ── DATA ──────────────────────────────────────────────────────────────
+    const questions = [
+      {
+        en: "Do you think students learn better at home or at school? Give reasons.",
+        th: "นักเรียนเรียนได้ดีกว่าที่บ้านหรือที่โรงเรียน? ให้เหตุผล"
+      },
+      {
+        en: "What is one problem with online learning mentioned in the passage?",
+        th: "บทอ่านกล่าวถึงปัญหาอะไรของการเรียนออนไลน์?"
+      },
+      {
+        en: "Should schools offer both in-person and online options? Why or why not?",
+        th: "โรงเรียนควรมีทั้งแบบในห้องและออนไลน์ไหม? ทำไม?"
+      }
+    ];
+
+    const sampleAnswers = [
+      "I believe students learn better at school because they can interact with teachers and classmates directly. For example, when I was studying, working in groups helped me understand difficult topics faster. Also, being at school reduces distractions and keeps students focused on their work. In conclusion, the school environment provides better learning outcomes.",
+      "One problem with online learning mentioned in the passage is that students may miss important social experiences. The text says experts worry about this issue. Also, students at home can face more distractions that affect their ability to concentrate and study effectively.",
+      "I think schools should definitely offer both options because every student learns differently. Some students focus better at home while others need the structure of a classroom. Providing flexibility allows students to choose what works best for them. Therefore, a hybrid model would benefit the most students overall."
+    ];
+
+    // ── STATE ─────────────────────────────────────────────────────────────
+    let currentStep = 1;
+    let selectedQ = -1;
+    let timerDuration = 1; // minutes
+    let timerSeconds = 60;
+    let timerInterval = null;
+    let timerRunning = false;
+    let isRecording = false;
+    let recordInterval = null;
+    let transcriptTarget = '';
+    let transcriptCurrent = 0;
+
+    // ── STEP MANAGEMENT ──────────────────────────────────────────────────
+    function goToStep(n) {
+      // Hide all
+      ['step1','step2','step3'].forEach((id,i) => {
+        const el = document.getElementById(id);
+        el.classList.add('hidden');
+        el.classList.remove('fade-in');
+      });
+      // Show target
+      const target = document.getElementById('step' + n);
+      target.classList.remove('hidden');
+      // Trigger reflow for animation
+      void target.offsetWidth;
+      target.classList.add('fade-in');
+
+      currentStep = n;
+      updateStepIndicator();
+
+      // Stop timer if leaving step 2
+      if (n !== 2 && timerRunning) stopTimer();
+      // Stop recording if leaving step 3
+      if (n !== 3 && isRecording) stopRecording();
+
+      // Populate step 2 / 3 question display
+      if (n === 2 && selectedQ >= 0) {
+        document.getElementById('step2Question').textContent = questions[selectedQ].en;
+        document.getElementById('step2QuestionTh').textContent = questions[selectedQ].th;
+        // Reset timer
+        setDuration(timerDuration);
+      }
+      if (n === 3 && selectedQ >= 0) {
+        document.getElementById('step3Question').textContent = questions[selectedQ].en;
+        document.getElementById('step3QuestionTh').textContent = questions[selectedQ].th;
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateStepIndicator() {
+      for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById('dot' + i);
+        const lbl = document.getElementById('lbl' + i);
+        dot.className = 'step-dot';
+        lbl.className = 'step-label text-center';
+
+        if (i < currentStep) {
+          dot.classList.add('done');
+          lbl.classList.add('done');
+          dot.textContent = '✓';
+        } else if (i === currentStep) {
+          dot.classList.add('active');
+          lbl.classList.add('active');
+          dot.textContent = i;
+        } else {
+          dot.classList.add('idle');
+          lbl.classList.add('idle');
+          dot.textContent = i;
+        }
+      }
+      // Lines
+      const line1 = document.getElementById('line1');
+      const line2 = document.getElementById('line2');
+      line1.className = 'step-line flex-1' + (currentStep > 1 ? ' done' : '');
+      line2.className = 'step-line flex-1' + (currentStep > 2 ? ' done' : '');
+    }
+
+    // ── QUESTION SELECTION ────────────────────────────────────────────────
+    function selectQuestion(idx) {
+      selectedQ = idx;
+      // Reset recording state for step 3
+      document.getElementById('transcript').value = '';
+      updateWordCount();
+      stopRecording();
+      document.getElementById('successCard').classList.add('hidden');
+      // Visual feedback
+      [0,1,2].forEach(i => {
+        document.getElementById('qcard'+(i+1)).classList.remove('selected');
+      });
+      document.getElementById('qcard'+(idx+1)).classList.add('selected');
+      // Advance
+      setTimeout(() => goToStep(2), 180);
+    }
+
+    // ── TIMER ─────────────────────────────────────────────────────────────
+    function setDuration(m) {
+      if (timerRunning) stopTimer();
+      timerDuration = m;
+      timerSeconds = m * 60;
+      updateTimerDisplay();
+      // Segmented control
+      [1,2,3].forEach(i => {
+        const btn = document.getElementById('seg'+i);
+        btn.className = 'seg-btn' + (i === m ? ' active' : '');
+      });
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSeconds / 60);
+      const s = timerSeconds % 60;
+      document.getElementById('timerText').textContent =
+        String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+
+      // Ring — 314 = 2πr (r=50)
+      const total = timerDuration * 60;
+      const fraction = timerSeconds / total;
+      const offset = 314 * (1 - fraction);
+      document.getElementById('timerRing').style.strokeDashoffset = offset;
+    }
+
+    function startTimer() {
+      if (timerRunning) return;
+      timerRunning = true;
+      document.getElementById('timerStartBtn').classList.add('hidden');
+      document.getElementById('timerStopBtn').classList.remove('hidden');
+
+      timerInterval = setInterval(() => {
+        if (timerSeconds > 0) {
+          timerSeconds--;
+          updateTimerDisplay();
+        } else {
+          stopTimer();
+          // Auto-advance
+          goToStep(3);
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (!timerRunning) return;
+      timerRunning = false;
+      clearInterval(timerInterval);
+      timerInterval = null;
+      document.getElementById('timerStartBtn').classList.remove('hidden');
+      document.getElementById('timerStopBtn').classList.add('hidden');
+    }
+
+    // ── RECORDING ─────────────────────────────────────────────────────────
+    function toggleRecord() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    function startRecording() {
+      isRecording = true;
+      const btn = document.getElementById('recordBtn');
+      btn.classList.add('recording');
+      document.getElementById('recordIcon').textContent = '⏺';
+      document.getElementById('recordLabel').innerHTML = 'กำลังฟัง<br>แตะเพื่อหยุด';
+      document.getElementById('recordingStatus').classList.remove('hidden');
+      document.getElementById('idleStatus').classList.add('hidden');
+      document.getElementById('typingIndicator').classList.remove('hidden');
+
+      // Start simulating transcript
+      if (selectedQ >= 0) {
+        transcriptTarget = sampleAnswers[selectedQ];
+      } else {
+        transcriptTarget = sampleAnswers[0];
+      }
+      transcriptCurrent = document.getElementById('transcript').value.length;
+      // If transcript was cleared, start fresh
+      if (transcriptCurrent === 0) {
+        // Add word by word
+        const words = transcriptTarget.split(' ');
+        let wordIdx = 0;
+        const textarea = document.getElementById('transcript');
+
+        recordInterval = setInterval(() => {
+          if (!isRecording || wordIdx >= words.length) {
+            clearInterval(recordInterval);
+            document.getElementById('typingIndicator').classList.add('hidden');
+            return;
+          }
+          const current = textarea.value;
+          textarea.value = current + (current.length > 0 ? ' ' : '') + words[wordIdx];
+          wordIdx++;
+          updateWordCount();
+          // Auto-scroll textarea
+          textarea.scrollTop = textarea.scrollHeight;
+        }, 280);
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      clearInterval(recordInterval);
+      recordInterval = null;
+      const btn = document.getElementById('recordBtn');
+      btn.classList.remove('recording');
+      document.getElementById('recordIcon').textContent = '🎙️';
+      document.getElementById('recordLabel').innerHTML = 'เริ่มพูด<br>live caption';
+      document.getElementById('recordingStatus').classList.add('hidden');
+      document.getElementById('idleStatus').classList.remove('hidden');
+      document.getElementById('typingIndicator').classList.add('hidden');
+    }
+
+    // ── WORD COUNT ────────────────────────────────────────────────────────
+    function updateWordCount() {
+      const text = document.getElementById('transcript').value.trim();
+      const words = text === '' ? 0 : text.split(/\s+/).filter(w => w.length > 0).length;
+      const min = 15;
+      const pct = Math.min(100, (words / min) * 100);
+
+      document.getElementById('wcLabel').textContent = words + ' / ' + min + ' คำขั้นต่ำ';
+      document.getElementById('wcBar').style.width = pct + '%';
+
+      const bar = document.getElementById('wcBar');
+      const submitBtn = document.getElementById('submitBtn');
+      const submitHint = document.getElementById('submitHint');
+
+      if (words >= min) {
+        bar.style.background = '#22c55e';
+        document.getElementById('wcExtra').textContent = '✓ ครบแล้ว';
+        submitBtn.disabled = false;
+        submitBtn.style.background = '#004AAD';
+        submitBtn.style.color = 'white';
+        submitBtn.style.cursor = 'pointer';
+        submitHint.textContent = '';
+      } else {
+        bar.style.background = pct > 60 ? '#004AAD' : '#cbd5e1';
+        document.getElementById('wcExtra').textContent = (min - words) + ' คำอีก';
+        submitBtn.disabled = true;
+        submitBtn.style.background = '#e2e8f0';
+        submitBtn.style.color = '#94a3b8';
+        submitBtn.style.cursor = 'not-allowed';
+        submitHint.textContent = 'พูดให้ครบ 15 คำก่อนส่ง';
+      }
+    }
+
+    // ── SUBMIT ────────────────────────────────────────────────────────────
+    function handleSubmit() {
+      stopRecording();
+      document.querySelector('#step3 .bg-white.rounded-2xl').classList.add('hidden');
+      document.getElementById('successCard').classList.remove('hidden');
+    }
+
+    function resetAll() {
+      selectedQ = -1;
+      document.getElementById('transcript').value = '';
+      updateWordCount();
+      document.getElementById('successCard').classList.add('hidden');
+      document.querySelector('#step3 .bg-white.rounded-2xl').classList.remove('hidden');
+      [0,1,2].forEach(i => {
+        document.getElementById('qcard'+(i+1)).classList.remove('selected');
+      });
+      stopTimer();
+      setDuration(1);
+      goToStep(1);
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────────────
+    updateStepIndicator();
+    updateTimerDisplay();
+  </script>
+
+</body>
+</html>

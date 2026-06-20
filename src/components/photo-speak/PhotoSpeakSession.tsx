@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { TeacherSamplePlayer } from "@/components/speaking-samples/TeacherSamplePlayer";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
@@ -365,6 +366,14 @@ export function PhotoSpeakSession({ itemId }: { itemId: string }) {
           </div>
           <p className="text-sm font-bold text-neutral-900">{item.promptEn}</p>
           <p className="mt-2 text-sm text-neutral-600">{item.promptTh}</p>
+
+          <TeacherSamplePlayer
+            target={{
+              kind: "standalone_speak_about_photo",
+              ref: item.id,
+              questionType: "speak_about_photo",
+            }}
+          />
 
           <label className="mt-4 block text-sm font-bold">
             Optional speaking timer (auto-stops mic)

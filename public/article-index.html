@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>เลือกสไตล์ส่วนบทความ — 3 แบบ</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>tailwind.config={theme:{extend:{colors:{ep:{blue:'#004AAD',yellow:'#FFCC00'}},fontFamily:{sans:['"IBM Plex Sans Thai"','sans-serif']}}}}</script>
+<style>body{font-family:'IBM Plex Sans Thai',sans-serif}</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+<div class="mx-auto max-w-3xl px-5 py-14">
+  <h1 class="text-3xl font-bold">ส่วน "บทความ" บนหน้าแรก — 3 สไตล์ให้เลือก</h1>
+  <p class="mt-2 text-gray-600">แต่ละลิงก์มี 2 ส่วน: (A) ส่วนบทความที่ฝังบนหน้าแรก + (B) หน้าอ่านบทความเต็ม โดยใช้บทความ "จากห้องสอบที่กรุงเทพฯ…" เป็นบทความแรก</p>
+
+  <div class="mt-8 space-y-4">
+    <a href="/article-v1-editorial.html" class="block rounded-2xl border border-gray-200 bg-white p-6 transition hover:border-ep-blue hover:shadow-lg">
+      <div class="flex items-center justify-between"><h2 class="text-xl font-bold">V1 · Editorial Magazine</h2><span class="text-ep-blue">เปิด →</span></div>
+      <p class="mt-1 text-gray-600">การ์ดเด่นแบบนิตยสาร (แถบสีน้ำเงิน + headline ใหญ่) ในเซกชัน "บทความ &amp; คู่มือ" + หน้าอ่านสะอาดตา infographic/ตารางจัดเต็ม เหมาะถ้าอยากดูเป็นทางการ น่าเชื่อถือ</p>
+    </a>
+    <a href="/article-v2-teachernote.html" class="block rounded-2xl border border-gray-200 bg-white p-6 transition hover:border-ep-blue hover:shadow-lg">
+      <div class="flex items-center justify-between"><h2 class="text-xl font-bold">V2 · Teacher's Note (บันทึกของครู)</h2><span class="text-ep-blue">เปิด →</span></div>
+      <p class="mt-1 text-gray-600">สไตล์เดียวกับ pop-up ที่พี่ชอบ — กระดาษเส้น, ปากกาไฮไลต์, washi tape, น้ำเสียงพี่ดอย อบอุ่น เป็นกันเอง เหมือนครูเล่าให้ฟัง</p>
+    </a>
+    <a href="/article-v3-clarity.html" class="block rounded-2xl border border-gray-200 bg-white p-6 transition hover:border-ep-blue hover:shadow-lg">
+      <div class="flex items-center justify-between"><h2 class="text-xl font-bold">V3 · Clarity Long-read</h2><span class="text-ep-blue">เปิด →</span></div>
+      <p class="mt-1 text-gray-600">เข้ากับ landing clarity-pro ปัจจุบันที่สุด — การ์ดเด่น + การ์ดรอง, หน้าอ่านมีสารบัญ (TOC) ติดข้างเลื่อนตาม อ่านบทความยาวสบายสุด</p>
+    </a>
+  </div>
+
+  <div class="mt-10 rounded-2xl bg-blue-50 p-5 text-sm text-gray-700">
+    <p class="font-semibold text-ep-blue">ขั้นต่อไป</p>
+    <p class="mt-1">บอกผมว่าเลือกสไตล์ไหน (หรือผสม เช่น "การ์ดแบบ V3 + หน้าอ่านแบบ V2") แล้วผมจะลงมือสร้างเป็น React จริงในหน้าแรก (admin-gated ก่อนตามธรรมเนียม) พร้อมโครงรองรับบทความถัดไปครับ</p>
+  </div>
+</div>
+</body>
+</html>

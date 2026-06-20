@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Plan — ในแอปมีอะไรให้ใช้บ้าง (V2 Visual Grid)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-yellow': '#FFCC00',
+        },
+        fontFamily: {
+          sans: ['"IBM Plex Sans Thai"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+      }}
+    }
+  </script>
+  <style>
+    body { font-family: 'IBM Plex Sans Thai', sans-serif; line-height: 1.7; color: #111827; background: #f8f9fb; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    html { scroll-behavior: smooth; }
+
+    /* Hero highlight card */
+    .hero-card {
+      border-radius: 20px;
+      padding: 28px 24px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      cursor: default;
+    }
+    .hero-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.10);
+    }
+
+    /* Skill block */
+    .skill-block {
+      background: #fff;
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    /* Exercise tile */
+    .ex-tile {
+      border-radius: 12px;
+      padding: 12px 14px;
+      transition: background 0.14s ease;
+      cursor: default;
+    }
+    .ex-tile:hover { filter: brightness(0.97); }
+
+    /* Tool card */
+    .tool-card {
+      background: #fff;
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      padding: 22px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: box-shadow 0.18s ease;
+    }
+    .tool-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+
+    /* Count chip */
+    .count-chip {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    /* CTA button */
+    .cta-btn {
+      display: inline-block;
+      background: #004AAD;
+      color: #fff;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 14px 36px;
+      border-radius: 14px;
+      text-decoration: none;
+      transition: background 0.16s ease, transform 0.12s ease;
+      box-shadow: 0 4px 14px rgba(0,74,173,0.25);
+    }
+    .cta-btn:hover { background: #003a8c; transform: translateY(-1px); }
+    .cta-btn:active { transform: scale(0.98); }
+
+    /* Section header accent */
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #EEF3FF;
+      color: #004AAD;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    /* Stats bar */
+    .stat-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+    }
+
+    /* Fade-up animation */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-up { animation: fadeUp 0.5s ease both; }
+    .fade-up-2 { animation: fadeUp 0.5s 0.08s ease both; }
+    .fade-up-3 { animation: fadeUp 0.5s 0.16s ease both; }
+    .fade-up-4 { animation: fadeUp 0.5s 0.24s ease both; }
+    .fade-up-5 { animation: fadeUp 0.5s 0.32s ease both; }
+    @media (prefers-reduced-motion: reduce) { .fade-up,.fade-up-2,.fade-up-3,.fade-up-4,.fade-up-5 { animation: none; } }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Preview ribbon -->
+  <div class="bg-gray-800 text-white text-xs flex items-center justify-between px-4 py-2">
+    <a href="/app-contents-index.html" class="text-gray-300 hover:text-white transition-colors flex items-center gap-1">
+      <span>←</span> <span>back</span>
+    </a>
+    <span class="font-mono text-gray-400">V2 · Visual grid</span>
+  </div>
+
+  <!-- Nav -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50" style="box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:#004AAD;">
+          <span class="text-white font-bold text-xs">EP</span>
+        </div>
+        <span class="font-semibold text-gray-900 text-sm tracking-wide">ENGLISH PLAN</span>
+      </div>
+      <a href="/mini-diagnosis/start" class="text-xs font-semibold text-ep-blue bg-blue-50 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors">เริ่มฟรี →</a>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-4 py-10 pb-20 space-y-16">
+
+    <!-- ─── PART A: CORE TOOLS ─────────────────────────── -->
+    <section>
+      <div class="fade-up text-center mb-8">
+        <div class="section-badge mx-auto w-fit">🛠 เครื่องมือหลัก</div>
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
+          ในแอปมีอะไรให้ใช้บ้าง
+        </h2>
+        <p class="text-gray-500 mt-2 text-sm md:text-base">ครบตั้งแต่วัดระดับ → ทำข้อสอบ → รับฟีดแบ็ก → เก็บเทคนิค</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <!-- Tool 1: Mini Diagnosis -->
+        <div class="tool-card fade-up flex gap-4 items-start">
+          <div class="flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center text-xl" style="background:#FEF9E7;">
+            🎯
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-semibold text-gray-900 text-base">เช็กระดับฟรี</h3>
+              <span class="count-chip bg-yellow-50 text-yellow-700">Mini Diagnosis</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">ตอบไม่กี่ข้อ ไม่กี่นาที</p>
+            <p class="text-sm text-gray-700 mt-1">รู้ทันทีว่าอยู่ระดับไหน + ทักษะไหนต้องเก็บก่อน</p>
+          </div>
+        </div>
+
+        <!-- Tool 2: Mock Test -->
+        <div class="tool-card fade-up-2 flex gap-4 items-start">
+          <div class="flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center text-xl" style="background:#EEF3FF;">
+            📝
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-semibold text-gray-900 text-base">ข้อสอบเสมือนจริง</h3>
+              <span class="count-chip bg-blue-50 text-blue-700">Mock Test</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-1 mono">20 ข้อ · ~1 ชั่วโมง · คะแนน 0–160</p>
+            <p class="text-sm text-gray-700 mt-1">เห็น 2 ทักษะที่ฉุดคะแนนแยกชัดเจน</p>
+          </div>
+        </div>
+
+        <!-- Tool 3: Feedback -->
+        <div class="tool-card fade-up-3 flex gap-4 items-start">
+          <div class="flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center text-xl" style="background:#ECFDF5;">
+            🔍
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-semibold text-gray-900 text-base">ฟีดแบ็กรายข้อ ภาษาไทย</h3>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">ไวยากรณ์ · คำศัพท์ · ความลื่นไหล · การตอบตรงโจทย์</p>
+            <p class="text-sm text-gray-700 mt-1">รู้ว่าต้องแก้ประโยคไหน คำไหน มีโน้ตทุกข้อ</p>
+          </div>
+        </div>
+
+        <!-- Tool 4: Tips -->
+        <div class="tool-card fade-up-4 flex gap-4 items-start">
+          <div class="flex-shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center text-xl" style="background:#FFF3E0;">
+            💡
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-semibold text-gray-900 text-base">เทคนิคเพิ่มคะแนน</h3>
+              <span class="count-chip bg-orange-50 text-orange-700">บทเรียนสั้น</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">comma · -ed/-s · เทคนิคจำง่าย</p>
+            <p class="text-sm text-gray-700 mt-1">เก็บคะแนนที่หล่นง่ายๆ คืนเร็ว</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ─── PART B: EXAM BANK ──────────────────────────── -->
+    <section class="fade-up-5">
+
+      <!-- Section header -->
+      <div class="text-center mb-10">
+        <div class="section-badge mx-auto w-fit">📚 คลังข้อสอบ</div>
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 leading-snug mt-1">
+          คลังข้อสอบครบทั้ง 4 ทักษะ
+        </h2>
+        <p class="text-base text-gray-600 mt-2 max-w-lg mx-auto">
+          ของจริงให้ฝึกเยอะ พร้อมอธิบายภาษาไทย
+        </p>
+        <p class="text-sm text-gray-400 mt-1 max-w-sm mx-auto">
+          หาข้อสอบจริงมาฝึกยาก — เว็บอื่นอธิบายอังกฤษล้วน<br>ที่นี่มีเยอะ + อธิบายไทยทุกข้อ
+        </p>
+
+        <!-- Stats bar -->
+        <div class="flex items-center justify-center gap-6 mt-6 flex-wrap">
+          <div class="text-center">
+            <div class="stat-item text-2xl text-ep-blue">600+</div>
+            <div class="text-xs text-gray-500">ข้อ</div>
+          </div>
+          <div class="w-px h-8 bg-gray-200"></div>
+          <div class="text-center">
+            <div class="stat-item text-2xl text-ep-blue">4</div>
+            <div class="text-xs text-gray-500">ทักษะ</div>
+          </div>
+          <div class="w-px h-8 bg-gray-200"></div>
+          <div class="text-center">
+            <div class="stat-item text-2xl text-ep-blue">12</div>
+            <div class="text-xs text-gray-500">แบบฝึก</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero highlight cards -->
+      <div class="mb-6">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">⭐ แบบฝึกแนะนำ</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+          <!-- Hero 1: Interactive Speaking -->
+          <div class="hero-card" style="background:linear-gradient(135deg,#E8F0FE 0%,#C7D9FD 100%); border:1px solid #B8CFFE;">
+            <div class="text-3xl mb-3">🗣️</div>
+            <div class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1 mono">Speaking</div>
+            <h3 class="font-bold text-gray-900 text-base leading-snug">พูดแบบโต้ตอบ</h3>
+            <p class="text-xs text-gray-500 mt-1">Interactive Speaking</p>
+            <p class="text-sm text-blue-800 mt-3 leading-snug">ระบบถามต่อเนื่อง ตอบสด เหมือนคุยจริง</p>
+          </div>
+
+          <!-- Hero 2: Reading -->
+          <div class="hero-card" style="background:linear-gradient(135deg,#E6FFFB 0%,#B5F5EC 100%); border:1px solid #A0EAD9;">
+            <div class="text-3xl mb-3">📖</div>
+            <div class="text-xs font-bold text-teal-600 uppercase tracking-wide mb-1 mono">Reading</div>
+            <h3 class="font-bold text-gray-900 text-base leading-snug">การอ่านจับใจความ</h3>
+            <p class="text-xs text-gray-500 mt-1">Reading Comprehension</p>
+            <p class="text-sm text-teal-800 mt-3 leading-snug">หาประโยคที่หาย · ใจความหลัก · ตั้งชื่อเรื่อง</p>
+          </div>
+
+          <!-- Hero 3: Vocabulary -->
+          <div class="hero-card" style="background:linear-gradient(135deg,#FFFBEB 0%,#FDE68A 100%); border:1px solid #FCD34D;">
+            <div class="text-3xl mb-3">💬</div>
+            <div class="text-xs font-bold text-amber-600 uppercase tracking-wide mb-1 mono">Vocabulary</div>
+            <h3 class="font-bold text-gray-900 text-base leading-snug">คำศัพท์ในบริบท</h3>
+            <p class="text-xs text-gray-500 mt-1">Vocabulary in Context</p>
+            <p class="text-sm text-amber-800 mt-3 leading-snug">เก็บศัพท์จากบริบทจริง ไม่ใช่ท่องลอยๆ</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Full grid by skill -->
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">ครบทุกแบบฝึก</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- Listening block -->
+        <div class="skill-block">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🎧</span>
+              <span class="font-semibold text-gray-800">Listening</span>
+            </div>
+            <span class="count-chip bg-sky-50 text-sky-700">3 แบบ</span>
+          </div>
+          <div class="space-y-1.5">
+            <div class="ex-tile" style="background:#F0F8FF;">
+              <p class="text-sm font-medium text-sky-900">ฟังแล้วพิมพ์</p>
+              <p class="text-xs text-sky-600">Dictation — พิมพ์สิ่งที่ได้ยินให้ถูกต้อง</p>
+            </div>
+            <div class="ex-tile" style="background:#F0F8FF;">
+              <p class="text-sm font-medium text-sky-900">การสนทนาแบบโต้ตอบ</p>
+              <p class="text-xs text-sky-600">Interactive Listening — ฟังแล้วตอบโต้</p>
+            </div>
+            <div class="ex-tile" style="background:#F0F8FF;">
+              <p class="text-sm font-medium text-sky-900">สรุปการสนทนา</p>
+              <p class="text-xs text-sky-600">Conversation Summary — จับประเด็นหลัก</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reading block -->
+        <div class="skill-block">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">📖</span>
+              <span class="font-semibold text-gray-800">Reading</span>
+            </div>
+            <span class="count-chip bg-emerald-50 text-emerald-700">4 แบบ</span>
+          </div>
+          <div class="space-y-1.5">
+            <div class="ex-tile" style="background:#F0FDF8;">
+              <p class="text-sm font-medium text-emerald-900">การอ่านจับใจความ ⭐</p>
+              <p class="text-xs text-emerald-600">Reading Comprehension — ใจความ + ตั้งชื่อเรื่อง</p>
+            </div>
+            <div class="ex-tile" style="background:#F0FDF8;">
+              <p class="text-sm font-medium text-emerald-900">คำศัพท์ในบริบท ⭐</p>
+              <p class="text-xs text-emerald-600">Vocabulary in Context — เลือกศัพท์จากบริบทจริง</p>
+            </div>
+            <div class="ex-tile" style="background:#F0FDF8;">
+              <p class="text-sm font-medium text-emerald-900">เติมคำในช่องว่าง</p>
+              <p class="text-xs text-emerald-600">Fill in the Blanks — เลือกคำที่ถูกต้อง</p>
+            </div>
+            <div class="ex-tile" style="background:#F0FDF8;">
+              <p class="text-sm font-medium text-emerald-900">เลือกคำจริง</p>
+              <p class="text-xs text-emerald-600">Real Word Selection — คำจริง vs. ปลอม</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Writing block -->
+        <div class="skill-block">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">✍️</span>
+              <span class="font-semibold text-gray-800">Writing</span>
+            </div>
+            <span class="count-chip bg-violet-50 text-violet-700">2 แบบ</span>
+          </div>
+          <div class="space-y-1.5">
+            <div class="ex-tile" style="background:#F8F3FF;">
+              <p class="text-sm font-medium text-violet-900">เขียนจากภาพ</p>
+              <p class="text-xs text-violet-600">Photo Description — บรรยายภาพ 1 นาที</p>
+            </div>
+            <div class="ex-tile" style="background:#F8F3FF;">
+              <p class="text-sm font-medium text-violet-900">อ่านแล้วเขียนเรียงความ</p>
+              <p class="text-xs text-violet-600">Read then Write — เขียนโต้ตอบบทความ</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Speaking block -->
+        <div class="skill-block">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🗣️</span>
+              <span class="font-semibold text-gray-800">Speaking</span>
+            </div>
+            <span class="count-chip bg-rose-50 text-rose-700">3 แบบ</span>
+          </div>
+          <div class="space-y-1.5">
+            <div class="ex-tile" style="background:#FFF1F4;">
+              <p class="text-sm font-medium text-rose-900">พูดแบบโต้ตอบ ⭐</p>
+              <p class="text-xs text-rose-600">Interactive Speaking — ระบบถามต่อเนื่อง ตอบสด</p>
+            </div>
+            <div class="ex-tile" style="background:#FFF1F4;">
+              <p class="text-sm font-medium text-rose-900">พูดจากภาพ</p>
+              <p class="text-xs text-rose-600">Photo Description Speaking — อธิบายภาพ 1 นาที</p>
+            </div>
+            <div class="ex-tile" style="background:#FFF1F4;">
+              <p class="text-sm font-medium text-rose-900">อ่านแล้วพูด</p>
+              <p class="text-xs text-rose-600">Read then Speak — พูดโต้ตอบบทความ</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ─── CTA ────────────────────────────────────────── -->
+    <section class="text-center py-4">
+      <p class="text-sm text-gray-500 mb-5">เริ่มต้นด้วยเช็กระดับฟรี — ไม่ต้องสมัคร ไม่กี่นาที</p>
+      <a href="/mini-diagnosis/start" class="cta-btn">เริ่มเช็กระดับฟรี →</a>
+      <p class="text-xs text-gray-400 mt-4">ไม่มีค่าใช้จ่าย · ไม่ต้องใส่บัตรเครดิต</p>
+    </section>
+
+  </main>
+
+  <!-- Thin footer -->
+  <footer class="border-t border-gray-100 py-6 text-center">
+    <p class="text-xs text-gray-400">English Plan · DET Prep · <span class="mono">V2 Visual Grid Preview</span></p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>บทความ · V3 Clarity Long-read</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { ep: { blue: '#004AAD', yellow: '#FFCC00' } },
+  fontFamily: { sans: ['"IBM Plex Sans Thai"','sans-serif'], mono: ['"JetBrains Mono"','monospace'] }
+}}}
+</script>
+<style>body{font-family:'IBM Plex Sans Thai',sans-serif} html{scroll-behavior:smooth}</style>
+</head>
+<body class="bg-white text-gray-900">
+
+<!-- A) SECTION ON LANDING (clarity-pro consistent) -->
+<div class="border-b border-gray-100 bg-gray-50"><div class="mx-auto max-w-xs px-5 py-2 text-center text-[11px] font-semibold tracking-widest text-gray-400">↓ ส่วน "บทความ" บนหน้าแรก ↓</div></div>
+
+<section class="mx-auto max-w-5xl px-5 py-16">
+  <div class="mb-8 text-center">
+    <h2 class="text-2xl font-bold sm:text-3xl">บทความล่าสุด</h2>
+    <p class="mx-auto mt-2 max-w-xl text-sm text-gray-500">ข้อมูลจริง อ่านง่าย ตรงประเด็น จากทีม English Plan</p>
+  </div>
+
+  <div class="grid gap-5 lg:grid-cols-3">
+    <!-- featured wide -->
+    <a href="#read" class="group flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-7 transition hover:border-ep-blue hover:shadow-lg lg:col-span-2">
+      <div>
+        <div class="mb-4 flex items-center gap-2">
+          <span class="rounded-full bg-ep-blue px-3 py-1 font-mono text-[11px] font-bold text-white">ใหม่ล่าสุด</span>
+          <span class="font-mono text-[11px] text-gray-400">DET · เรียนต่ออังกฤษ · อ่าน ~6 นาที</span>
+        </div>
+        <h3 class="text-2xl font-bold leading-snug group-hover:text-ep-blue">จากห้องสอบที่กรุงเทพฯ สู่โต๊ะทำงานที่บ้าน</h3>
+        <p class="mt-2 text-gray-600">เมื่อ "ใบเบิกทาง" สู่มหาวิทยาลัยอังกฤษกำลังเปลี่ยนไป — DET สอบที่บ้าน รู้ผล 48 ชม. ถูกกว่า ~3 เท่า มหาวิทยาลัยกว่า 130 แห่งรับ แต่มีเส้นแบ่ง "วีซ่า" ที่ห้ามพลาด</p>
+      </div>
+      <div class="mt-6 flex items-center gap-3">
+        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-ep-blue text-sm font-bold text-white">ด</span>
+        <span class="text-sm text-gray-500">P'Doy · Academic Director</span>
+        <span class="ml-auto font-semibold text-ep-blue">อ่าน →</span>
+      </div>
+    </a>
+    <!-- side stack -->
+    <div class="flex flex-col gap-5">
+      <div class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-5">
+        <span class="font-mono text-[11px] text-gray-400">เร็ว ๆ นี้</span>
+        <p class="mt-1 font-semibold text-gray-400">เจาะพาร์ท Speaking ของ DET</p>
+      </div>
+      <div class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-5">
+        <span class="font-mono text-[11px] text-gray-400">เร็ว ๆ นี้</span>
+        <p class="mt-1 font-semibold text-gray-400">อ่านผลคะแนน DET ให้เป็น</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- B) FULL ARTICLE w/ sticky TOC -->
+<div class="border-y border-gray-100 bg-gray-50"><div class="mx-auto max-w-xs px-5 py-2 text-center text-[11px] font-semibold tracking-widest text-gray-400">↓ หน้าอ่านบทความ (สไตล์ Clarity long-read) ↓</div></div>
+
+<div class="mx-auto max-w-6xl px-5 py-14">
+  <div class="lg:grid lg:grid-cols-[220px_1fr] lg:gap-12">
+    <!-- sticky TOC -->
+    <aside class="hidden lg:block">
+      <div class="sticky top-8">
+        <p class="mb-3 font-mono text-[11px] font-bold uppercase tracking-widest text-gray-400">สารบัญ</p>
+        <nav class="space-y-2 text-sm">
+          <a href="#s1" class="block text-gray-500 hover:text-ep-blue">1 · เรื่องเล่าจากเมื่อก่อน</a>
+          <a href="#s2" class="block text-gray-500 hover:text-ep-blue">2 · ทางเลือกใหม่ DET</a>
+          <a href="#s3" class="block text-gray-500 hover:text-ep-blue">3 · มหาวิทยาลัยที่รับ</a>
+          <a href="#s4" class="block text-gray-500 hover:text-ep-blue">4 · เทียบ DET ↔ IELTS</a>
+          <a href="#s5" class="block font-semibold text-ep-blue hover:underline">5 · เส้นแบ่งวีซ่า ⚠️</a>
+          <a href="#s6" class="block text-gray-500 hover:text-ep-blue">6 · ทำไมถึงสำคัญ</a>
+        </nav>
+        <div class="mt-6 rounded-xl bg-blue-50 p-4 text-sm">
+          <p class="font-semibold text-ep-blue">เริ่มแบบวินิจฉัยฟรี</p>
+          <p class="mt-1 text-gray-600">รู้ผลทันที + ฟีดแบ็กไทย</p>
+          <a href="/mini-diagnosis/start" class="mt-2 inline-block font-semibold text-ep-blue">เริ่มเลย →</a>
+        </div>
+      </div>
+    </aside>
+
+    <article class="min-w-0">
+      <p class="font-mono text-xs font-bold uppercase tracking-widest text-ep-blue">DET · UK Admissions · 2026</p>
+      <h1 class="mt-2 text-3xl font-bold leading-tight sm:text-[40px]">จากห้องสอบที่กรุงเทพฯ สู่โต๊ะทำงานที่บ้าน</h1>
+      <p class="mt-3 text-xl text-gray-500">เมื่อ "ใบเบิกทาง" สู่มหาวิทยาลัยอังกฤษกำลังเปลี่ยนไป</p>
+      <div class="mt-5 flex items-center gap-3 border-b border-gray-100 pb-6">
+        <span class="flex h-11 w-11 items-center justify-center rounded-full bg-ep-blue text-base font-bold text-white">ด</span>
+        <div class="text-sm"><div class="font-semibold">โดย P'Doy</div><div class="text-gray-500">Academic Director, English Plan · อ่าน ~6 นาที</div></div>
+      </div>
+
+      <div class="mt-8 space-y-5 text-[17px] leading-[1.85] text-gray-800">
+        <h2 id="s1" class="scroll-mt-8 text-2xl font-bold text-gray-900">เรื่องเล่าจากเมื่อก่อน ที่หลายคนยังจำได้ดี</h2>
+        <p>ครับ ผมอยากให้ทุกคนลองนึกภาพย้อนกลับไปสักหน่อย เมื่อก่อน น้อง ๆ ที่ฝันจะไปเรียนต่อที่อังกฤษ เส้นทางมันค่อนข้าง "ตายตัว" พอตัดสินใจว่าจะไป สิ่งแรกที่เจอเหมือนกันหมดคือคำสามคำ — <strong>IELTS</strong></p>
+        <p>น้องบางคนอยู่ต่างจังหวัด ต้องนั่งรถเข้ามาสอบที่กรุงเทพฯ จองที่พัก ตื่นแต่เช้าไปนั่งในห้องสอบที่ตึงเครียด สอบทั้งวัน แล้วต้อง<strong>รอผลเป็นสัปดาห์</strong> ถ้าคะแนนไม่ถึงก็จ่ายใหม่อีกรอบ ครั้งละเกือบ <strong>7,000–8,000 บาท</strong></p>
+        <p>บางคนเก่งภาษาอังกฤษจริง ๆ แต่ติดที่ "ระบบการสอบ" ไม่ใช่ที่ "ความสามารถ"</p>
+        <p class="border-l-4 border-ep-yellow bg-yellow-50 py-3 pl-5 text-lg font-medium italic">นั่นคือภาพของเมื่อก่อน — แต่วันนี้ ทุกอย่างกำลังเปลี่ยนไปแล้ว</p>
+
+        <h2 id="s2" class="scroll-mt-8 text-2xl font-bold text-gray-900">ทางเลือกใหม่ที่ชื่อ DET</h2>
+        <p>มีผู้เล่นหน้าใหม่เข้ามาเขย่าวงการอย่างเงียบ ๆ แต่ทรงพลัง — <strong>Duolingo English Test (DET)</strong> จุดที่ต่างจาก IELTS แบบหน้ามือเป็นหลังมือ:</p>
+        <div class="not-prose my-7 grid grid-cols-2 overflow-hidden rounded-2xl border border-gray-200 text-sm">
+          <div class="border-r border-gray-200 bg-gray-50 p-5"><p class="mb-3 font-bold text-gray-500">IELTS เมื่อก่อน</p><ul class="space-y-2 text-gray-600"><li>🏢 สอบที่ศูนย์</li><li>⏳ รอผลเป็นสัปดาห์</li><li>💸 ~7,500 บาท</li><li>🕐 เกือบทั้งวัน</li></ul></div>
+          <div class="bg-blue-50 p-5"><p class="mb-3 font-bold text-ep-blue">DET ตอนนี้</p><ul class="space-y-2 text-gray-700"><li>🏠 สอบที่บ้าน</li><li>⚡ รู้ผล 48 ชม.</li><li>💰 ~2,400 บาท</li><li>⏱️ ไม่ถึง 1 ชม.</li></ul></div>
+        </div>
+        <p>เดิม DET ถูกมองว่าเป็นแค่ "ทางเลือกสำรอง" แต่หลังโควิด มหาวิทยาลัยทั่วโลกเปิดรับ พอเปิดแล้วก็พบว่า "มันเวิร์ก" จนกลายเป็นมาตรฐานที่ยอมรับกว้างขวาง</p>
+
+        <h2 id="s3" class="scroll-mt-8 text-2xl font-bold text-gray-900">มหาวิทยาลัยอังกฤษรับ DET จริงไหม?</h2>
+        <p>คำถามที่ถามบ่อยสุด: "รับแค่มหาวิทยาลัยเล็ก ๆ หรือเปล่า?" — <strong>ไม่ใช่เลยครับ</strong> ตอนนี้กว่า <strong>130 แห่ง</strong> รวมกลุ่ม <strong>Russell Group</strong></p>
+        <div class="not-prose my-7 overflow-hidden rounded-2xl border border-gray-200">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-ep-blue text-white"><tr><th class="px-4 py-3">มหาวิทยาลัย</th><th class="px-3 py-3">กลุ่ม</th><th class="px-3 py-3 text-right">DET</th></tr></thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr><td class="px-4 py-2.5">Imperial College London</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">115–130</td></tr>
+              <tr class="bg-gray-50"><td class="px-4 py-2.5">King's College London</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">120–135</td></tr>
+              <tr><td class="px-4 py-2.5">Edinburgh</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">115–130</td></tr>
+              <tr class="bg-gray-50"><td class="px-4 py-2.5">Manchester</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">115–130</td></tr>
+              <tr><td class="px-4 py-2.5">Bristol</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">115–130</td></tr>
+              <tr class="bg-gray-50"><td class="px-4 py-2.5">Birmingham</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">115–125</td></tr>
+              <tr><td class="px-4 py-2.5">Glasgow</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">115–130</td></tr>
+              <tr class="bg-gray-50"><td class="px-4 py-2.5">Leeds</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">115–125</td></tr>
+              <tr><td class="px-4 py-2.5">Southampton</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">110–125</td></tr>
+              <tr class="bg-gray-50"><td class="px-4 py-2.5">Warwick</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">115–130</td></tr>
+              <tr><td class="px-4 py-2.5">Exeter</td><td class="px-3 py-2.5 text-ep-blue">Russell Group</td><td class="px-3 py-2.5 text-right font-mono">110–125</td></tr>
+              <tr class="bg-gray-50"><td class="px-4 py-2.5">Surrey</td><td class="px-3 py-2.5 text-gray-400">—</td><td class="px-3 py-2.5 text-right font-mono">120</td></tr>
+              <tr><td class="px-4 py-2.5">Reading</td><td class="px-3 py-2.5 text-gray-400">—</td><td class="px-3 py-2.5 text-right font-mono">110–120</td></tr>
+            </tbody>
+          </table>
+          <p class="bg-gray-50 px-4 py-3 text-xs text-gray-500">หมายเหตุ: ตัวเลขเป็นช่วงโดยประมาณ คะแนนจริงขึ้นกับคณะ/หลักสูตร — เช็กหน้าเว็บหลักสูตรเสมอ</p>
+        </div>
+
+        <h2 id="s4" class="scroll-mt-8 text-2xl font-bold text-gray-900">เทียบ DET ↔ IELTS</h2>
+        <div class="not-prose my-7 overflow-hidden rounded-2xl border border-gray-200">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-900 text-white"><tr><th class="px-4 py-3">DET</th><th class="px-3 py-3">IELTS</th><th class="px-3 py-3">ความหมาย</th></tr></thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr><td class="px-4 py-2.5 font-mono font-bold text-ep-blue">120–125</td><td class="px-3 py-2.5 font-mono">6.5</td><td class="px-3 py-2.5 text-gray-600">เกณฑ์มาตรฐานส่วนใหญ่ (ป.ตรี/ป.โท)</td></tr>
+              <tr class="bg-gray-50"><td class="px-4 py-2.5 font-mono font-bold text-ep-blue">130–135</td><td class="px-3 py-2.5 font-mono">7.0</td><td class="px-3 py-2.5 text-gray-600">หลักสูตรแข่งขันสูง</td></tr>
+              <tr><td class="px-4 py-2.5 font-mono font-bold text-ep-blue">140–145</td><td class="px-3 py-2.5 font-mono">7.5</td><td class="px-3 py-2.5 text-gray-600">เฉพาะทางที่ต้องการภาษาแน่น</td></tr>
+              <tr class="bg-gray-50"><td class="px-4 py-2.5 font-mono font-bold text-ep-blue">150–160</td><td class="px-3 py-2.5 font-mono">8.0–9.0</td><td class="px-3 py-2.5 text-gray-600">ใช้ภาษาคล่องมาก</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>เล็งหลักสูตรที่ขอ IELTS 6.5 → ทำ DET 120 ขึ้นไปก็แข็งแรง แต่แนะนำตั้งเป้า <strong>125–130</strong> เผื่อไว้ เพราะ "คะแนนขั้นต่ำ" กับ "คะแนนที่แข่งขันได้" คนละเรื่องกัน</p>
+
+        <h2 id="s5" class="scroll-mt-8 text-2xl font-bold text-gray-900">เรื่องสำคัญสุด: "รับเข้าเรียน" กับ "วีซ่า"</h2>
+        <p>คนเข้าใจผิดเยอะสุดตรงนี้ครับ DET ใช้ <strong>"รับเข้าเรียน"</strong> ได้สบาย แต่เรื่อง <strong>วีซ่านักเรียน</strong> มีรายละเอียด ความจริงคือ DET ยังไม่อยู่ในรายชื่อ <strong>SELT</strong> ที่ UKVI รับรองอย่างเป็นทางการ — แต่สำหรับนักเรียนส่วนใหญ่ <strong>ไม่ใช่ปัญหา</strong>:</p>
+        <div class="not-prose my-7 grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl bg-emerald-50 p-5 ring-1 ring-emerald-200"><p class="mb-1 font-bold text-emerald-700">✅ เข้าเรียน (Admission)</p><p class="text-sm text-gray-600">ใช้ DET → ได้ offer → มหาวิทยาลัยประเมินภาษาเอง → ออก <strong>CAS</strong> (โดยทั่วไปครอบคลุมภาษาสำหรับวีซ่าด้วย ไม่ต้องสอบ SELT แยก)</p></div>
+          <div class="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200"><p class="mb-1 font-bold text-amber-700">⚠️ วีซ่า (Visa)</p><p class="text-sm text-gray-600">ส่วนใหญ่ CAS ครอบคลุมให้ แต่ <strong>บางกรณี/บางเส้นทาง</strong> อาจขอ SELT เพิ่ม</p></div>
+        </div>
+        <p class="border-l-4 border-ep-blue bg-blue-50 py-3 pl-5 font-medium">กฎเหล็กของพี่ดอย: ก่อนจองสอบ DET เช็กหน้าเว็บ "หลักสูตรนั้น ๆ" โดยตรง + ยืนยันกับมหาวิทยาลัยว่า CAS ครอบคลุมภาษาสำหรับวีซ่าไหม อย่าเชื่อแค่ตารางเทียบลอย ๆ บนอินเทอร์เน็ตครับ</p>
+
+        <h2 id="s6" class="scroll-mt-8 text-2xl font-bold text-gray-900">ทำไมถึงสำคัญกับน้อง ๆ คนไทย</h2>
+        <p>วันนี้ เด็กคนนั้นนั่งสอบที่โต๊ะในห้องนอนตัวเองได้ จ่ายในราคาที่ครอบครัวไม่ลำบาก รู้ผลในสองวัน ส่งหลายมหาวิทยาลัยพร้อมกันได้ฟรี — นี่คือ <strong>โอกาสที่เปิดกว้างขึ้นจริง ๆ</strong></p>
+        <p>แต่สิ่งที่ไม่เคยเปลี่ยนคือ <strong>ความสามารถภาษาอังกฤษที่แท้จริง</strong> DET เป็นระบบ adaptive วัดทักษะแบบบูรณาการ มันจะ "จับโป๊ะ" คนที่ท่องเทคนิคมาแต่ใช้จริงไม่ได้ ทางลัดที่ดีที่สุดจึงยังเป็นทางเดิม — พัฒนาภาษาให้เก่งขึ้นจริง ๆ ครับ โลกกำลังเปิดประตูกว้างขึ้น หน้าที่ของเราคือเตรียมตัวให้พร้อมก้าวผ่านไปอย่างมั่นใจ</p>
+        <p class="rounded-xl bg-gray-50 p-4 text-sm italic text-gray-500">เรียบเรียงจากข้อมูล ณ ปี 2026 ครับ นโยบายมหาวิทยาลัยและกฎวีซ่าอัปเดตเสมอ ก่อนตัดสินใจขอให้ตรวจสอบข้อมูลล่าสุดจากหน้าเว็บหลักสูตรและ GOV.UK โดยตรง — P'Doy, Academic Director, English Plan</p>
+      </div>
+    </article>
+  </div>
+</div>
+
+<footer class="border-t border-gray-100 bg-gray-50 py-6 text-center text-xs text-gray-400">V3 · Clarity Long-read — preview เท่านั้น</footer>
+</body>
+</html>

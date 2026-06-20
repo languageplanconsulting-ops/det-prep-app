@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>English Plan — Study plan page preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'IBM Plex Sans Thai', sans-serif; background:#eef2f7; margin:0; padding:24px; display:flex; justify-content:center; color:#1a1a2e; }
+  .screen { width:100%; max-width:360px; background:#fff; border-radius:14px; overflow:hidden; border:1px solid #e3e8f0; }
+  .head { background:#004AAD; color:#fff; padding:14px 16px; }
+  .num { flex-shrink:0; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:500; color:#fff; }
+  .step { display:flex; gap:10px; padding:12px; border:1px solid #e3e8f0; border-radius:12px; background:#fff; }
+  .locked { opacity:0.7; }
+  .chip { font-size:11px; background:#e7eefb; color:#004AAD; border-radius:6px; padding:3px 8px; }
+  .lock { flex-shrink:0; color:#9aa1ad; font-size:16px; }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <div class="head">
+      <div style="font-size:15px;font-weight:500;">แผนเรียนเฉพาะคุณ</div>
+      <div style="font-size:12px;color:#cfe0f7;margin-top:2px;">จาก 95 → เป้าหมาย 120 · เรียงจากจุดอ่อนพื้นฐานก่อน</div>
+    </div>
+    <div style="padding:14px;display:flex;flex-direction:column;gap:10px;">
+
+      <div class="step" style="border:2px solid #004AAD;background:#f4f8ff;">
+        <div class="num" style="background:#004AAD;">1</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:500;">Present simple — ประธานเอกพจน์</div>
+          <div style="font-size:12px;color:#993c1d;margin-top:2px;">ทำไม: คุณเขียน "he go" → ควรเป็น "he goes"</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;align-items:center;">
+            <span class="chip">บทเรียน</span><span class="chip">ฝึก 30 ข้อ</span><span class="chip">วัดซ้ำ</span>
+            <span style="font-size:11px;color:#888;padding:3px 4px;">~45 นาที</span>
+          </div>
+          <button style="margin-top:10px;background:#004AAD;color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;">เริ่มเลย →</button>
+        </div>
+        <div style="flex-shrink:0;color:#004AAD;font-size:18px;"><i class="ti ti-player-play"></i></div>
+      </div>
+
+      <div class="step locked">
+        <div class="num" style="background:#d3d7df;">2</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;">Past tense — รูปอดีต</div><div style="font-size:12px;color:#5b6472;margin-top:2px;">บทเรียน · ฝึก 30 ข้อ · วัดซ้ำ</div></div>
+        <div class="lock"><i class="ti ti-lock"></i></div>
+      </div>
+
+      <div class="step locked">
+        <div class="num" style="background:#d3d7df;">3</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;">Commas — FANBOYS & intro clause</div><div style="font-size:12px;color:#5b6472;margin-top:2px;">บทเรียน · ฝึก Dictation · วัดซ้ำ</div></div>
+        <div class="lock"><i class="ti ti-lock"></i></div>
+      </div>
+
+      <div class="step locked">
+        <div class="num" style="background:#d3d7df;">4</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;">Passive & perfect — รูปถูกกระทำ</div><div style="font-size:12px;color:#5b6472;margin-top:2px;">บทเรียน · ฝึก 30 ข้อ · วัดซ้ำ</div></div>
+        <div class="lock"><i class="ti ti-lock"></i></div>
+      </div>
+
+      <div class="step locked">
+        <div class="num" style="background:#d3d7df;">5</div>
+        <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;">Reading skill — จับใจความ</div><div style="font-size:12px;color:#5b6472;margin-top:2px;">ทักษะการอ่าน ไม่ใช่ท่องศัพท์</div></div>
+        <div class="lock"><i class="ti ti-lock"></i></div>
+      </div>
+
+      <div class="step locked" style="border:1px solid #ead9a6;background:#fcf6e6;opacity:0.85;">
+        <div class="num" style="background:#FFCC00;color:#5a4600;"><i class="ti ti-flag-check"></i></div>
+        <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;">เส้นชัย: Mock test เต็มรูปแบบ</div><div style="font-size:12px;color:#5b6472;margin-top:2px;">วัดผลก่อน/หลัง — พิสูจน์ว่าขึ้นจริง</div></div>
+        <div class="lock"><i class="ti ti-lock"></i></div>
+      </div>
+
+    </div>
+    <div style="margin:0 14px 16px;background:#fff7df;border:1px solid #ffe18a;border-radius:12px;padding:13px;text-align:center;">
+      <div style="font-size:13px;color:#5a4600;">ปลดล็อกทั้งแผน — เริ่มจากจุดอ่อนของคุณ</div>
+      <button style="margin-top:9px;width:100%;background:#004AAD;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;">ดูแพ็กเกจ →</button>
+    </div>
+  </div>
+</body>
+</html>

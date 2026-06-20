@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>English Plan — Read &amp; Write essay hint preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-yellow': '#FFCC00',
+        }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    line-height: 1.7;
+    background-color: #f8f9fb;
+    color: #1a1a2e;
+  }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Nav ── */
+  .ep-nav { background: #004AAD; color: white; }
+  .nav-timer {
+    background: rgba(255,204,0,0.2); color: #FFCC00;
+    border: 1px solid rgba(255,204,0,0.4); border-radius: 8px;
+    padding: 4px 10px; font-size: 13px; font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Segmented control ── */
+  .segmented-container {
+    background: #e8edf5; border-radius: 12px; padding: 4px;
+    display: flex; gap: 2px; overflow-x: auto;
+  }
+  .segmented-btn {
+    padding: 7px 14px; border-radius: 8px; font-size: 13px;
+    font-weight: 500; cursor: pointer; transition: background 0.15s, color 0.15s;
+    border: none; background: transparent; color: #555;
+    white-space: nowrap; font-family: 'IBM Plex Sans Thai', sans-serif;
+  }
+  .segmented-btn.active {
+    background: #004AAD; color: white;
+    box-shadow: 0 1px 4px rgba(0,74,173,0.25);
+  }
+
+  /* ── Textarea ── */
+  .textarea-exam {
+    width: 100%; min-height: 130px;
+    border: 1.5px solid #dce4f0; border-radius: 12px;
+    padding: 12px 14px; font-size: 15px;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    line-height: 1.7; resize: vertical; outline: none;
+    transition: border-color 0.15s; color: #1a1a2e;
+  }
+  .textarea-exam:focus {
+    border-color: #004AAD;
+    box-shadow: 0 0 0 3px rgba(0,74,173,0.1);
+  }
+
+  /* ── Submit ── */
+  .submit-btn {
+    background: #004AAD; color: white; border: none;
+    border-radius: 12px; padding: 13px 28px;
+    font-size: 15px; font-weight: 600;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    cursor: pointer; width: 100%;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .submit-btn:hover { background: #0056c7; }
+  .submit-btn:active { transform: scale(0.98); }
+
+  /* ── Cards & chips ── */
+  .step-card {
+    background: white; border: 1px solid #e8edf5;
+    border-radius: 14px; padding: 14px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .step-number {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #004AAD; color: white; font-size: 12px;
+    font-weight: 600; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .chip {
+    display: inline-flex; align-items: center;
+    background: #eef3fb; color: #004AAD;
+    border-radius: 99px; padding: 3px 10px;
+    font-size: 12px; font-weight: 500; line-height: 1.5;
+  }
+  .chip.amber { background: #fff8e1; color: #856404; }
+  .chip.teal  { background: #e8f7f2; color: #0a6b50; }
+  .chip.green { background: #edfaf4; color: #0a6b35; }
+  .chip.purple{ background: #f3eeff; color: #6b21a8; }
+
+  /* ── Collapsible ── */
+  .collapse-body { display: none; }
+  .collapse-body.open { display: block; }
+  .collapse-header {
+    cursor: pointer; user-select: none;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 14px;
+    background: white; border: 1px solid #e8edf5;
+    border-radius: 12px;
+    font-size: 13.5px; font-weight: 600; color: #1a1a2e;
+    transition: background 0.12s;
+  }
+  .collapse-header:hover { background: #f5f8ff; }
+  .collapse-icon { transition: transform 0.2s; font-style: normal; }
+  .collapse-icon.open { transform: rotate(180deg); }
+
+  /* ── Lock overlay ── */
+  .panel-wrapper { position: relative; border-radius: 16px; overflow: hidden; }
+  .lock-overlay {
+    display: none; position: absolute; inset: 0; z-index: 10;
+    align-items: center; justify-content: center; padding: 1.5rem;
+    border-radius: 1rem;
+    background: linear-gradient(to bottom, rgba(248,249,251,0) 0%, rgba(248,249,251,0.6) 18%, rgba(248,249,251,0.97) 40%);
+  }
+  .lock-overlay.visible { display: flex; }
+  .lock-card {
+    background: white; border-radius: 14px; padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15); max-width: 300px; width: 100%;
+    margin-top: 100px;
+  }
+  .locked-blur-all {
+    filter: blur(3.5px); opacity: 0.5;
+    pointer-events: none; user-select: none;
+  }
+
+  /* ── Type tabs ── */
+  .type-tab-bar {
+    display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px;
+  }
+  .type-tab {
+    padding: 6px 14px; border-radius: 8px; font-size: 13px;
+    font-weight: 500; cursor: pointer; border: 1.5px solid #dce4f0;
+    background: white; color: #666; white-space: nowrap;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    transition: all 0.15s;
+  }
+  .type-tab.active {
+    background: #004AAD; color: white; border-color: #004AAD;
+    box-shadow: 0 1px 4px rgba(0,74,173,0.25);
+  }
+  .type-panel { display: none; }
+  .type-panel.active { display: block; }
+
+  /* ── Sample level tabs ── */
+  .level-tab-bar { display: flex; gap: 4px; }
+  .level-tab {
+    padding: 5px 14px; border-radius: 8px; font-size: 12px;
+    font-weight: 600; cursor: pointer; border: 1.5px solid #dce4f0;
+    background: white; color: #666;
+    font-family: 'JetBrains Mono', monospace; transition: all 0.15s;
+  }
+  .level-tab.active {
+    background: #0a6b50; color: white; border-color: #0a6b50;
+  }
+  .level-panel { display: none; }
+  .level-panel.active { display: block; }
+
+  /* ── Vocab word chips ── */
+  .word-chip {
+    display: inline-block; background: #f3f7ff; color: #1e3a6e;
+    border: 1px solid #d0ddf5; border-radius: 6px;
+    padding: 2px 8px; font-size: 12px; font-family: 'JetBrains Mono', monospace;
+    margin: 2px 2px;
+  }
+
+  /* ── Grammar item ── */
+  .gram-item {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    background: #fdf6e3; border-left: 3px solid #f59e0b;
+    border-radius: 0 6px 6px 0; padding: 4px 10px; margin-bottom: 4px;
+    color: #78350f;
+  }
+
+  /* ── Reading prompt box ── */
+  .prompt-box {
+    background: #eef3fb; border-left: 4px solid #004AAD;
+    border-radius: 0 12px 12px 0; padding: 14px 16px;
+    font-size: 15px; line-height: 1.7; color: #1a2a4a; font-style: italic;
+  }
+
+  /* ── Badge ── */
+  .vip-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: linear-gradient(135deg, #004AAD, #0066dd);
+    color: white; border-radius: 99px; padding: 3px 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+  }
+
+  /* ── Preview ribbon ── */
+  .preview-ribbon {
+    background: #1a1a2e; color: #e2e8f0; text-align: center;
+    padding: 8px 16px; font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+  }
+
+  /* ── Common topic item ── */
+  .topic-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 6px 0; border-bottom: 1px solid #f0f3f8; font-size: 13.5px;
+  }
+  .topic-item:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     PREVIEW RIBBON
+════════════════════════════════════════════════ -->
+<div class="preview-ribbon">
+  English Plan · DET · Read &amp; Write (essay) hint — preview
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     NAV
+════════════════════════════════════════════════ -->
+<nav class="ep-nav px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-md">
+  <div class="flex items-center gap-2">
+    <div class="w-7 h-7 rounded-full bg-ep-yellow flex items-center justify-center">
+      <span class="text-ep-blue font-bold text-xs">EP</span>
+    </div>
+    <span class="font-bold text-sm tracking-wide">ENGLISH PLAN</span>
+  </div>
+  <div class="nav-timer">23:47</div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════ -->
+<div class="max-w-2xl mx-auto px-4 py-5 space-y-4">
+
+  <!-- ── VIP Toggle ── -->
+  <div class="segmented-container">
+    <button class="segmented-btn active" id="btn-unlocked" onclick="setLock(false)">
+      👑 นักเรียนคอร์ส Fast Track (VIP) — ปลดล็อก
+    </button>
+    <button class="segmented-btn" id="btn-locked" onclick="setLock(true)">
+      ผู้ใช้ทั่วไป — 🔒 ล็อก
+    </button>
+  </div>
+
+  <!-- ── Exam Question Header ── -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+    <h1 class="text-base font-bold text-ep-blue mb-1">✍️ อ่านแล้วเขียนเรียงความ</h1>
+    <p class="text-xs text-gray-500 mb-3">เขียนอย่างน้อย 50 คำ — Write at least 50 words</p>
+
+    <!-- Reading prompt -->
+    <div class="prompt-box mb-4">
+      "Do you think social media has made communication easier or harder? Why? Provide reasons and examples to support your view."
+    </div>
+
+    <!-- Textarea -->
+    <textarea class="textarea-exam mb-3" placeholder="Write your answer here…"></textarea>
+
+    <!-- Word counter -->
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs text-gray-400 font-mono" id="word-count">0 words</span>
+      <span class="text-xs text-gray-400">เป้าหมาย: ≥ 50 คำ</span>
+    </div>
+
+    <button class="submit-btn">ส่งคำตอบ</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       HINT PANEL
+  ═════════════════════════════════════════════ -->
+  <div class="panel-wrapper">
+
+    <!-- Hint panel header (always visible) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-3">
+      <div class="flex items-start justify-between gap-2 mb-3">
+        <div>
+          <h2 class="text-base font-bold text-gray-800">✨ แพตเทิร์นเรียงความจากพี่ดอย</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Answer-pattern hint สำหรับ Read &amp; Write (Essay)</p>
+        </div>
+        <span class="vip-badge flex-shrink-0">👑 Fast Track VIP</span>
+      </div>
+
+      <!-- (A) Marking criteria — always visible -->
+      <div>
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">เกณฑ์ให้คะแนน (Marking criteria)</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="chip">📖 Vocabulary</span>
+          <span class="chip">📝 Grammar</span>
+          <span class="chip amber">🎯 Relevance</span>
+          <span class="chip teal">📏 Length ≥ 50 words</span>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">* ต้องเขียนให้ครบ 50 คำ ไม่งั้นคะแนนจะหักทันที</p>
+      </div>
+    </div>
+
+    <!-- Blurred section (locked) + peek step-1 -->
+    <div id="hint-blurred-region">
+
+      <!-- Step 1 peek (shows in both states, not blurred) -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-3" id="step1-peek">
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">เลือกประเภทโจทย์</p>
+        <div class="type-tab-bar mb-3" id="type-tab-bar-peek">
+          <span class="type-tab active">Type 1 — What/Why</span>
+          <span class="type-tab">Type 2 — Opinion</span>
+          <span class="type-tab">Type 3 — Descriptive</span>
+        </div>
+        <p class="text-xs text-gray-400 mb-2">โครงสร้างเรียงความ (Essay scaffold)</p>
+        <div class="step-card flex items-start gap-3">
+          <div class="step-number">1</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-mono text-sm text-ep-blue leading-relaxed">"[Topic] has become a popular alternative to [traditional ___]."</p>
+            <p class="text-xs text-gray-500 mt-1">เกริ่นนำ — ให้ context ของหัวข้อก่อนเลย</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- REST of unlocked content (blurred when locked) -->
+      <div id="rest-of-hint" class="">
+
+        <!-- Type tabs (full) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-3">
+          <div class="type-tab-bar mb-3" id="type-tab-bar-main">
+            <button class="type-tab active" onclick="switchType(1)">Type 1 — What/Why</button>
+            <button class="type-tab" onclick="switchType(2)">Type 2 — Opinion</button>
+            <button class="type-tab" onclick="switchType(3)">Type 3 — Descriptive</button>
+          </div>
+
+          <!-- ── TYPE 1 ── -->
+          <div class="type-panel active" id="type-1">
+            <!-- Example topics -->
+            <div class="mb-3">
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">ตัวอย่างโจทย์ที่ออกบ่อย</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="chip purple text-xs">Benefits &amp; drawbacks of social media</span>
+                <span class="chip purple text-xs">Reasons to protect forests &amp; biodiversity</span>
+                <span class="chip purple text-xs">Advantages/disadvantages of online shopping</span>
+                <span class="chip purple text-xs">Reasons to study at home</span>
+              </div>
+            </div>
+
+            <!-- Step scaffold -->
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">โครงสร้างเรียงความ (Essay scaffold)</p>
+            <div class="space-y-2 mb-3">
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">1</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"[Topic] has become a popular alternative to [traditional ___]."</p>
+                  <p class="text-xs text-gray-500 mt-1">เกริ่นนำ — ให้ context ของหัวข้อก่อนเลย</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">2</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"The benefits of ___ include ___, ___, and ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">ข้อดี — list ข้อดีหลัก 3 ข้อ</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">3</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"Additionally, ___ also enables [people] to develop ___ skills."</p>
+                  <p class="text-xs text-gray-500 mt-1">เสริมข้อดี — ขยายความด้วย enable / allow</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">4</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"However, ___ also has some drawbacks. Firstly, ___, which can lead to feelings of isolation or detachment. Secondly, ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">ข้อเสีย — ยอมรับข้อเสีย 2 ข้อ (ให้ balanced)</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">5</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"Despite these drawbacks, ___ has become an increasingly viable option for ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">สรุป — concede แต่ conclude ข้าง positive</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vocab collapsible -->
+            <div class="mb-2">
+              <div class="collapse-header rounded-xl" onclick="toggleCollapse('vocab-1', this)">
+                <span>📚 คำ &amp; วลีที่ใช้บ่อย</span>
+                <i class="collapse-icon">▼</i>
+              </div>
+              <div class="collapse-body open mt-2 px-1" id="vocab-1">
+                <div class="flex flex-wrap">
+                  <span class="word-chip">a popular alternative to</span>
+                  <span class="word-chip">drawbacks / disadvantages</span>
+                  <span class="word-chip">viable option</span>
+                  <span class="word-chip">technical issues</span>
+                  <span class="word-chip">challenge</span>
+                  <span class="word-chip">well-suited to</span>
+                  <span class="word-chip">self-directed</span>
+                  <span class="word-chip">prevalence</span>
+                  <span class="word-chip">cost-effective</span>
+                  <span class="word-chip">gain insight into</span>
+                  <span class="word-chip">utilize</span>
+                  <span class="word-chip">access information</span>
+                  <span class="word-chip">has the potential to</span>
+                  <span class="word-chip">enable (sb) to</span>
+                  <span class="word-chip">resulting in</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Grammar collapsible -->
+            <div>
+              <div class="collapse-header rounded-xl" onclick="toggleCollapse('gram-1', this)">
+                <span>✏️ จุดไวยากรณ์ที่ควรใช้</span>
+                <i class="collapse-icon">▼</i>
+              </div>
+              <div class="collapse-body open mt-2 px-1" id="gram-1">
+                <div class="space-y-1">
+                  <div class="gram-item">"…, especially …"</div>
+                  <div class="gram-item">"With …, they can …"</div>
+                  <div class="gram-item">"…, such as …"</div>
+                  <div class="gram-item">"…, which can lead to …"</div>
+                  <div class="gram-item">"enable something to + V.inf"</div>
+                  <div class="gram-item">"…, resulting in …"</div>
+                  <div class="gram-item">"by + V-ing"</div>
+                  <div class="gram-item">"contribute to … + V-ing"</div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /type-1 -->
+
+          <!-- ── TYPE 2 ── -->
+          <div class="type-panel" id="type-2">
+            <div class="mb-3">
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">ตัวอย่างโจทย์ที่ออกบ่อย</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="chip purple text-xs">City vs countryside — where is better to live?</span>
+                <span class="chip purple text-xs">Has social media made communication easier or harder?</span>
+                <span class="chip purple text-xs">Should the government provide free education?</span>
+                <span class="chip purple text-xs">Technology's positive / negative impact on society</span>
+              </div>
+            </div>
+
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">โครงสร้างเรียงความ (Essay scaffold)</p>
+            <div class="space-y-2 mb-3">
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">1</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"In my opinion, ___." &nbsp;/&nbsp; "I strongly believe that ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">บอกจุดยืนทันที — อย่าลังเล</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">2</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"Firstly, ___. For example, ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">เหตุผล 1 + ตัวอย่างรองรับ</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">3</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"Secondly, ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">เหตุผล 2 — เสริมให้แข็งแกร่ง</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">4</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"On the other hand, some people argue that ___. However, ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">ยอมรับอีกมุม แล้ว counter — ทำให้ essay ดู balanced</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">5</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"In conclusion, I believe that ___ because ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">สรุปย้ำจุดยืน — echo intro</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <div class="collapse-header rounded-xl" onclick="toggleCollapse('vocab-2', this)">
+                <span>📚 คำ &amp; วลีที่ใช้บ่อย</span>
+                <i class="collapse-icon">▼</i>
+              </div>
+              <div class="collapse-body open mt-2 px-1" id="vocab-2">
+                <div class="flex flex-wrap">
+                  <span class="word-chip">in my opinion</span>
+                  <span class="word-chip">I strongly believe</span>
+                  <span class="word-chip">from my perspective</span>
+                  <span class="word-chip">there is no doubt that</span>
+                  <span class="word-chip">it is undeniable that</span>
+                  <span class="word-chip">play a crucial role</span>
+                  <span class="word-chip">the advantages outweigh the disadvantages</span>
+                  <span class="word-chip">compelling</span>
+                  <span class="word-chip">beneficial</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="collapse-header rounded-xl" onclick="toggleCollapse('gram-2', this)">
+                <span>✏️ จุดไวยากรณ์ที่ควรใช้</span>
+                <i class="collapse-icon">▼</i>
+              </div>
+              <div class="collapse-body open mt-2 px-1" id="gram-2">
+                <div class="space-y-1">
+                  <div class="gram-item">"While some argue that …, I believe …"</div>
+                  <div class="gram-item">Comparatives — "better than / more important than"</div>
+                  <div class="gram-item">"not only … but also …"</div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /type-2 -->
+
+          <!-- ── TYPE 3 ── -->
+          <div class="type-panel" id="type-3">
+            <div class="mb-3">
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">ตัวอย่างโจทย์ที่ออกบ่อย</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="chip purple text-xs">A place that holds special meaning to you</span>
+                <span class="chip purple text-xs">A person you admire</span>
+                <span class="chip purple text-xs">A memorable experience with a friend</span>
+                <span class="chip purple text-xs">Your hometown / a place where you feel peaceful</span>
+                <span class="chip purple text-xs">An object with sentimental value</span>
+              </div>
+            </div>
+
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">โครงสร้างเรียงความ (Essay scaffold)</p>
+            <div class="space-y-2 mb-3">
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">1</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"One [place/person/object] that holds special meaning to me is ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">เกริ่นถึงสิ่งนั้น — ตั้งชื่อมันก่อนเลย</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">2</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"It is ___ / He/She is ___. Whenever I ___, I ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">บรรยายรายละเอียด + ความสัมพันธ์</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">3</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"What makes it special is ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">ทำไมพิเศษ — cleft sentence ดูดีมาก</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">4</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"Being there / With them, I feel ___."</p>
+                  <p class="text-xs text-gray-500 mt-1">ความรู้สึก — ใช้ adjective หลากหลาย</p>
+                </div>
+              </div>
+              <div class="step-card flex items-start gap-3">
+                <div class="step-number">5</div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-mono text-sm text-ep-blue leading-relaxed">"Overall, ___ will always hold a special place in my heart."</p>
+                  <p class="text-xs text-gray-500 mt-1">สรุป — idiomatic, sounds natural</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <div class="collapse-header rounded-xl" onclick="toggleCollapse('vocab-3', this)">
+                <span>📚 คำ &amp; วลีที่ใช้บ่อย</span>
+                <i class="collapse-icon">▼</i>
+              </div>
+              <div class="collapse-body open mt-2 px-1" id="vocab-3">
+                <div class="flex flex-wrap">
+                  <span class="word-chip">holds special meaning</span>
+                  <span class="word-chip">sentimental value</span>
+                  <span class="word-chip">evokes memories of</span>
+                  <span class="word-chip">a sense of (peace / belonging)</span>
+                  <span class="word-chip">cherish</span>
+                  <span class="word-chip">remarkable</span>
+                  <span class="word-chip">serene</span>
+                  <span class="word-chip">nostalgic</span>
+                  <span class="word-chip">vivid</span>
+                  <span class="word-chip">admire</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="collapse-header rounded-xl" onclick="toggleCollapse('gram-3', this)">
+                <span>✏️ จุดไวยากรณ์ที่ควรใช้</span>
+                <i class="collapse-icon">▼</i>
+              </div>
+              <div class="collapse-body mt-2 px-1" id="gram-3">
+                <div class="space-y-1">
+                  <div class="gram-item">"What makes it special is …" (cleft sentence)</div>
+                  <div class="gram-item">"Whenever I …, I feel …"</div>
+                  <div class="gram-item">"Being there / Having …, I …" (participle clause)</div>
+                  <div class="gram-item">"… will always hold a special place in my heart"</div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /type-3 -->
+
+        </div><!-- /type tabs card -->
+
+        <!-- (C) Common Topics -->
+        <div class="mb-2">
+          <div class="collapse-header bg-white rounded-2xl shadow-sm border border-gray-100" onclick="toggleCollapse('common-topics', this)">
+            <span>🔥 หัวข้อที่ออกบ่อย (Common topics)</span>
+            <i class="collapse-icon">▼</i>
+          </div>
+          <div class="collapse-body open mt-2" id="common-topics">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">01</span><span>Technology &amp; its impact on society</span></div>
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">02</span><span>The importance of education / family &amp; friends</span></div>
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">03</span><span>The role of [X] in our lives</span></div>
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">04</span><span>Environmental issues &amp; sustainability</span></div>
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">05</span><span>Advantages/disadvantages of living in a city vs countryside</span></div>
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">06</span><span>Effects of social media on communication &amp; relationships</span></div>
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">07</span><span>Work–life balance</span></div>
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">08</span><span>The role of governments in social &amp; economic issues</span></div>
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">09</span><span>Travel &amp; cultural exchange</span></div>
+              <div class="topic-item"><span class="text-ep-blue font-mono text-xs mt-1">10</span><span>The impact of advertising on consumer behavior</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- (D) Sample Answers -->
+        <div class="mb-4">
+          <div class="collapse-header bg-white rounded-2xl shadow-sm border border-gray-100" onclick="toggleCollapse('sample-answers', this)">
+            <span>📄 ตัวอย่างคำตอบ — Benefits &amp; drawbacks of social media</span>
+            <i class="collapse-icon">▼</i>
+          </div>
+          <div class="collapse-body open mt-2" id="sample-answers">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+              <div class="level-tab-bar mb-3">
+                <button class="level-tab active" onclick="switchLevel('B1')">B1</button>
+                <button class="level-tab" onclick="switchLevel('B2')">B2 (90–115)</button>
+                <button class="level-tab" onclick="switchLevel('C1')">C1 (120–140)</button>
+              </div>
+
+              <!-- B1 -->
+              <div class="level-panel active" id="level-B1">
+                <div class="bg-blue-50 rounded-xl p-3 mb-2">
+                  <p class="text-xs font-semibold text-ep-blue mb-1.5">B1 sample (~65 words)</p>
+                  <p class="text-sm leading-relaxed text-gray-700">Social media has become a popular way to communicate. The benefits include staying in touch with friends and family, sharing information quickly, and meeting new people. However, it also has drawbacks. Some people spend too much time on their phones, which can lead to feelings of isolation. Additionally, there is a lot of false information online. Despite these problems, social media is useful if we use it carefully.</p>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="chip teal text-xs">simple vocabulary ✓</span>
+                  <span class="chip teal text-xs">clear structure ✓</span>
+                  <span class="chip amber text-xs">limited connectors</span>
+                </div>
+              </div>
+
+              <!-- B2 -->
+              <div class="level-panel" id="level-B2">
+                <div class="bg-blue-50 rounded-xl p-3 mb-2">
+                  <p class="text-xs font-semibold text-ep-blue mb-1.5">B2 sample (~100 words)</p>
+                  <p class="text-sm leading-relaxed text-gray-700">Social media has become a popular alternative to traditional face-to-face communication. The benefits include instant connection with people across the world, access to a wide range of information, and the ability to share ideas freely. Additionally, social media enables people to develop digital communication skills that are increasingly valued in the workplace. However, it also has some drawbacks. Firstly, excessive use can lead to feelings of isolation and reduced attention spans. Secondly, the prevalence of misinformation poses a serious challenge. Despite these drawbacks, social media remains an increasingly viable option for staying informed and connected.</p>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="chip teal text-xs">varied vocabulary ✓</span>
+                  <span class="chip teal text-xs">good connectors ✓</span>
+                  <span class="chip teal text-xs">balanced argument ✓</span>
+                </div>
+              </div>
+
+              <!-- C1 -->
+              <div class="level-panel" id="level-C1">
+                <div class="bg-blue-50 rounded-xl p-3 mb-2">
+                  <p class="text-xs font-semibold text-ep-blue mb-1.5">C1 sample (~130 words)</p>
+                  <p class="text-sm leading-relaxed text-gray-700">Social media has fundamentally transformed the way people interact, becoming a popular alternative to conventional forms of communication. Among its most compelling benefits is the ability to forge and sustain connections across geographical boundaries, enabling individuals to access diverse perspectives and gain insight into cultures beyond their own. Furthermore, platforms such as LinkedIn and Twitter have become invaluable professional tools, allowing users to utilize networking opportunities that were previously inaccessible. However, these advantages are not without cost. The prevalence of curated, idealized content has been shown to contribute to social comparison and a profound sense of detachment, particularly among younger users. Secondly, algorithmic echo chambers may reinforce existing biases, resulting in a polarized discourse. Nevertheless, when approached with critical awareness, social media undeniably has the potential to enrich both personal and professional life.</p>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="chip teal text-xs">sophisticated vocabulary ✓</span>
+                  <span class="chip teal text-xs">complex grammar ✓</span>
+                  <span class="chip teal text-xs">nuanced argument ✓</span>
+                  <span class="chip green text-xs">idiomatic expressions ✓</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /rest-of-hint -->
+    </div><!-- /hint-blurred-region -->
+
+    <!-- Lock overlay -->
+    <div class="lock-overlay" id="lock-overlay">
+      <div style="width:100%; position:absolute; top:0; height:200px; background:linear-gradient(to bottom, rgba(248,249,251,0) 0%, rgba(248,249,251,0.95) 100%);"></div>
+      <div class="lock-card" style="position:relative; z-index:2;">
+        <div class="text-3xl mb-2">🔒</div>
+        <h3 class="font-bold text-gray-800 mb-1">แพตเทิร์นนี้สำหรับนักเรียนคอร์สเท่านั้น</h3>
+        <p class="text-sm text-gray-500 mb-4 leading-relaxed">เข้าถึงโครงสร้าง scaffold, คำศัพท์ และตัวอย่างคำตอบได้ด้วย VIP / Fast Track</p>
+        <button class="submit-btn" style="border-radius:10px; padding:11px 20px; font-size:14px;">
+          ปลดล็อกด้วย VIP / Fast Track →
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /panel-wrapper -->
+
+  <!-- bottom padding -->
+  <div class="h-6"></div>
+</div><!-- /main -->
+
+<script>
+  // ── Word counter ──
+  const ta = document.querySelector('.textarea-exam');
+  const wc = document.getElementById('word-count');
+  ta.addEventListener('input', () => {
+    const words = ta.value.trim() === '' ? 0 : ta.value.trim().split(/\s+/).length;
+    wc.textContent = words + ' word' + (words !== 1 ? 's' : '');
+    wc.style.color = words >= 50 ? '#0a6b50' : '#9ca3af';
+  });
+
+  // ── Lock / Unlock ──
+  function setLock(locked) {
+    const restOfHint = document.getElementById('rest-of-hint');
+    const overlay    = document.getElementById('lock-overlay');
+    const btnU       = document.getElementById('btn-unlocked');
+    const btnL       = document.getElementById('btn-locked');
+
+    if (locked) {
+      restOfHint.classList.add('locked-blur-all');
+      overlay.classList.add('visible');
+      btnL.classList.add('active');
+      btnU.classList.remove('active');
+    } else {
+      restOfHint.classList.remove('locked-blur-all');
+      overlay.classList.remove('visible');
+      btnU.classList.add('active');
+      btnL.classList.remove('active');
+    }
+  }
+
+  // ── Collapse / Expand ──
+  function toggleCollapse(id, header) {
+    const body = document.getElementById(id);
+    const icon = header.querySelector('.collapse-icon');
+    body.classList.toggle('open');
+    icon.classList.toggle('open');
+  }
+
+  // ── Type tabs ──
+  function switchType(n) {
+    // main tab bar
+    document.querySelectorAll('#type-tab-bar-main .type-tab').forEach((t, i) => {
+      t.classList.toggle('active', i === n - 1);
+    });
+    document.querySelectorAll('.type-panel').forEach((p, i) => {
+      p.classList.toggle('active', i === n - 1);
+    });
+  }
+
+  // ── Level tabs ──
+  function switchLevel(lvl) {
+    document.querySelectorAll('.level-tab').forEach(t => {
+      t.classList.toggle('active', t.textContent.startsWith(lvl));
+    });
+    document.querySelectorAll('.level-panel').forEach(p => {
+      p.classList.toggle('active', p.id === 'level-' + lvl);
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>English Plan — Study plan report preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'IBM Plex Sans Thai', sans-serif; background:#eef2f7; margin:0; padding:24px; display:flex; justify-content:center; color:#1a1a2e; }
+  .screen { width:100%; max-width:360px; background:#fff; border-radius:14px; overflow:hidden; border:1px solid #e3e8f0; }
+  .head { background:#004AAD; color:#fff; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; }
+  .skill-row { display:flex; align-items:center; gap:10px; }
+  .skill-row .label { width:34px; font-size:13px; }
+  .track { flex:1; height:8px; border-radius:5px; background:#e7ecf4; }
+  .fill { height:100%; border-radius:5px; background:#004AAD; }
+  .val { width:26px; text-align:right; font-size:13px; font-weight:500; color:#004AAD; }
+  .cta { margin-top:14px; width:100%; background:#004AAD; color:#fff; border:none; border-radius:12px; padding:13px; font-size:15px; font-weight:500; font-family:inherit; cursor:pointer; }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <div class="head">
+      <span style="font-size:15px;font-weight:500;">ผลการวัดระดับของคุณ</span>
+      <span style="font-size:12px;color:#FFCC00;">English Plan</span>
+    </div>
+    <div style="padding:18px 16px;">
+      <div style="text-align:center;">
+        <div style="font-size:13px;color:#5b6472;">คะแนนที่คาดการณ์ (เต็ม 160)</div>
+        <div style="font-size:46px;font-weight:600;color:#004AAD;line-height:1.15;">95</div>
+      </div>
+      <div style="margin-top:6px;">
+        <div style="position:relative;height:10px;border-radius:6px;background:#e7ecf4;">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:59%;background:#004AAD;border-radius:6px;"></div>
+          <div style="position:absolute;left:75%;top:-4px;bottom:-4px;width:3px;background:#FFCC00;border-radius:2px;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#5b6472;margin-top:6px;">
+          <span>ตอนนี้ 95</span>
+          <span style="color:#9a7b00;">เป้าหมาย 120 · ห่าง 25 แต้ม</span>
+        </div>
+      </div>
+      <div style="margin-top:18px;display:flex;flex-direction:column;gap:11px;">
+        <div class="skill-row"><span class="label">ฟัง</span><div class="track"><div class="fill" style="width:62%;"></div></div><span class="val">100</span></div>
+        <div class="skill-row"><span class="label">พูด</span><div class="track"><div class="fill" style="width:58%;"></div></div><span class="val">92</span></div>
+        <div class="skill-row"><span class="label">อ่าน</span><div class="track"><div class="fill" style="width:68%;"></div></div><span class="val">108</span></div>
+        <div class="skill-row"><span class="label" style="color:#993c1d;">เขียน</span><div class="track" style="background:#f7e0da;"><div class="fill" style="width:51%;background:#D85A30;"></div></div><span class="val" style="color:#993c1d;">82</span></div>
+      </div>
+      <div style="margin-top:18px;border:1px solid #f3c2bd;background:#fdeeeb;border-radius:12px;padding:12px;">
+        <div style="font-size:12px;color:#993c1d;font-weight:500;display:flex;align-items:center;gap:6px;"><i class="ti ti-flag-3"></i> แก้ก่อนเป็นอันดับแรก</div>
+        <div style="font-size:15px;font-weight:500;margin-top:5px;">Present simple ยังไม่แน่น</div>
+        <div style="font-size:13px;color:#5b6472;margin-top:3px;">คุณเขียน "he go" — ที่ถูกคือ "he goes"</div>
+      </div>
+      <button class="cta">ดูแผนเรียนของฉัน →</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useBillingActions } from "@/hooks/useBillingActions";
+import { track } from "@/lib/activity-tracker";
 import type { PaywallSpec, UpsellAction } from "@/lib/paywall-upsell";
 
 export function PaywallUpsellCard({
@@ -15,6 +16,11 @@ export function PaywallUpsellCard({
   const { startUpgradeCheckout, startAddOnCheckout } = useBillingActions();
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Behavioural telemetry: a non-converted user actually saw a paywall (no-op for paid/admin).
+  useEffect(() => {
+    track("paywall_view", { metadata: { context: spec.titleEn, compact } });
+  }, [spec.titleEn, compact]);
 
   const examCompactActions = useMemo(() => {
     if (!compact) return spec.actions;
@@ -42,6 +48,15 @@ export function PaywallUpsellCard({
 
   const trigger = async (action: UpsellAction, index: number) => {
     const key = `${action.kind}-${action.targetTier ?? action.sku ?? index}`;
+    track("upgrade_click", {
+      targetLabel: action.labelEn,
+      metadata: {
+        context: spec.titleEn,
+        kind: action.kind,
+        ...(action.targetTier ? { tier: action.targetTier } : {}),
+        ...(action.sku ? { sku: action.sku } : {}),
+      },
+    });
     setBusyKey(key);
     setError(null);
     try {

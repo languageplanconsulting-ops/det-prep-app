@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Photo Hint V2 · Step Scaffold Panel</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-yellow': '#FFCC00',
+        }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    line-height: 1.7;
+    background-color: #f8f9fb;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .hint-panel-content {
+    transition: filter 0.3s ease, opacity 0.3s ease;
+  }
+  .hint-panel-content.locked {
+    filter: blur(3px);
+    opacity: 0.55;
+    pointer-events: none;
+    user-select: none;
+  }
+  .hint-panel-content.locked .step-1-card {
+    filter: blur(0) !important;
+    opacity: 1 !important;
+  }
+  .lock-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    border-radius: 1rem;
+  }
+  .lock-overlay.visible {
+    display: flex;
+  }
+  .step-card {
+    position: relative;
+    background: white;
+    border: 1px solid #e8edf5;
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .step-number {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #004AAD;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    background: #eef3fb;
+    color: #004AAD;
+    border-radius: 99px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .chip.amber {
+    background: #fff8e1;
+    color: #856404;
+  }
+  .chip.teal {
+    background: #e8f7f2;
+    color: #0a6b50;
+  }
+  .segmented-btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    border: none;
+    background: transparent;
+    color: #555;
+    white-space: nowrap;
+  }
+  .segmented-btn.active {
+    background: #004AAD;
+    color: white;
+    box-shadow: 0 1px 4px rgba(0,74,173,0.25);
+  }
+  .segmented-container {
+    background: #e8edf5;
+    border-radius: 12px;
+    padding: 4px;
+    display: flex;
+    gap: 2px;
+  }
+  .insert-btn {
+    font-size: 11px;
+    color: #004AAD;
+    background: #eef3fb;
+    border: none;
+    border-radius: 6px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .textarea-exam {
+    width: 100%;
+    min-height: 120px;
+    border: 1.5px solid #dce4f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    line-height: 1.7;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+    color: #1a1a2e;
+  }
+  .textarea-exam:focus {
+    border-color: #004AAD;
+    box-shadow: 0 0 0 3px rgba(0,74,173,0.1);
+  }
+  .photo-placeholder {
+    background: linear-gradient(135deg, #e8edf5 0%, #d0dae8 100%);
+    border-radius: 14px;
+    aspect-ratio: 4/3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #8fa3be;
+    font-size: 14px;
+    border: 2px dashed #c5d0e0;
+  }
+  .submit-btn {
+    background: #004AAD;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .submit-btn:hover {
+    background: #0056c7;
+  }
+  .submit-btn:active {
+    transform: scale(0.98);
+  }
+  .panel-wrapper {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .lock-card {
+    background: white;
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    max-width: 300px;
+    width: 100%;
+  }
+  /* Step 1 peek-through in locked state */
+  .hint-panel-locked .step-peek {
+    filter: none !important;
+    opacity: 1 !important;
+  }
+  .hint-panel-content.locked .step-1-unblur {
+    filter: none;
+    opacity: 1;
+  }
+  /* Custom approach: wrap panel in relative container, blur all but step1 */
+  .locked-blur-all {
+    filter: blur(3.5px);
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+  }
+  .no-blur {
+    filter: none !important;
+    opacity: 1 !important;
+  }
+  .ep-nav {
+    background: #004AAD;
+    color: white;
+  }
+  .nav-timer {
+    background: rgba(255,204,0,0.2);
+    color: #FFCC00;
+    border: 1px solid rgba(255,204,0,0.4);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- Preview ribbon -->
+<div class="bg-gray-100 border-b border-gray-200 px-4 py-2 flex items-center gap-3 text-sm text-gray-500 sticky top-0 z-50">
+  <a href="/photo-hint-index.html" class="text-ep-blue font-medium hover:underline flex items-center gap-1">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M8.5 2L3.5 7L8.5 12" stroke="#004AAD" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    ← back
+  </a>
+  <span class="text-gray-300">|</span>
+  <span class="font-medium text-gray-600">V2 · Step scaffold panel</span>
+  <span class="text-gray-300">·</span>
+  <span class="text-xs bg-ep-blue text-white rounded px-2 py-0.5 font-medium">Design Preview</span>
+</div>
+
+<!-- Page wrapper -->
+<div class="max-w-5xl mx-auto px-4 py-6 pb-16">
+
+  <!-- Toggle control -->
+  <div class="mb-6">
+    <p class="text-xs text-gray-400 font-medium mb-2 uppercase tracking-wide">สถานะผู้ใช้ (toggle to preview)</p>
+    <div class="segmented-container w-fit">
+      <button class="segmented-btn active" id="btn-vip" onclick="setMode('vip')">
+        👑 นักเรียนคอร์ส Fast Track (VIP) — ปลดล็อก
+      </button>
+      <button class="segmented-btn" id="btn-free" onclick="setMode('free')">
+        ผู้ใช้ทั่วไป — 🔒 ล็อก
+      </button>
+    </div>
+  </div>
+
+  <!-- Exam screen card -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+    <!-- Slim nav -->
+    <div class="ep-nav px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <!-- EP Logo wordmark -->
+        <div class="bg-ep-yellow rounded-md px-2 py-1 flex items-center">
+          <span class="text-ep-blue font-bold text-sm leading-none" style="font-family:'JetBrains Mono',monospace">EP</span>
+        </div>
+        <span class="text-white text-sm font-medium opacity-90">English Plan</span>
+      </div>
+      <div class="nav-timer">1:00</div>
+    </div>
+
+    <!-- Exam header -->
+    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <h1 class="text-base font-semibold text-ep-blue">📸 เขียนจากภาพ · Write about photo · 1 นาที</h1>
+      <p class="text-sm text-gray-500 mt-0.5">เขียนอย่างน้อย 1 ประโยค ให้ครอบคลุมสิ่งที่เห็นในภาพ</p>
+    </div>
+
+    <!-- Two-column layout on desktop, stacked on mobile -->
+    <div class="lg:grid lg:grid-cols-[1fr_340px] divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+
+      <!-- LEFT: Photo + textarea + submit -->
+      <div class="p-5 flex flex-col gap-4">
+        <!-- Photo placeholder -->
+        <div class="photo-placeholder">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-2 opacity-60">
+            <rect x="4" y="8" width="32" height="24" rx="4" stroke="#8fa3be" stroke-width="1.8"/>
+            <circle cx="14" cy="16" r="3" stroke="#8fa3be" stroke-width="1.8"/>
+            <path d="M4 26l8-6 6 5 5-4 13 11" stroke="#8fa3be" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="font-medium text-sm" style="color:#8fa3be">ตัวอย่างรูป</span>
+          <span class="text-xs mt-1 opacity-70" style="color:#8fa3be">ภาพจะแสดงในสนามสอบจริง</span>
+        </div>
+
+        <!-- Textarea -->
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">คำตอบของคุณ</label>
+          <textarea
+            class="textarea-exam"
+            placeholder="Write your answer here… เขียนคำตอบที่นี่"
+            id="answer-area"
+          ></textarea>
+          <div class="flex justify-between items-center mt-1.5">
+            <span class="text-xs text-gray-400" id="char-count">0 characters</span>
+            <span class="text-xs text-gray-400">แนะนำ: 2–4 ประโยค</span>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button class="submit-btn">ส่งคำตอบ →</button>
+      </div>
+
+      <!-- RIGHT: Hint panel -->
+      <div class="p-5">
+        <div class="panel-wrapper" id="panel-wrapper">
+
+          <!-- VIP state: full content -->
+          <div id="vip-panel" class="flex flex-col gap-3">
+            <div class="flex items-center justify-between mb-1">
+              <h2 class="text-sm font-semibold text-ep-blue flex items-center gap-1.5">
+                🧭 โครงคำตอบ 3 ขั้น
+                <span class="text-xs font-normal text-gray-400">(พี่ดอย)</span>
+              </h2>
+              <span class="text-xs bg-ep-yellow text-ep-blue rounded-full px-2 py-0.5 font-semibold">👑 VIP</span>
+            </div>
+
+            <!-- Step 1 -->
+            <div class="step-card">
+              <div class="flex items-start gap-2.5">
+                <div class="step-number mt-0.5">1</div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">บรรยายภาพ</p>
+                  <p class="font-mono text-sm text-ep-blue font-medium leading-snug">"This photo depicts <span class="text-amber-500">______</span> ."</p>
+                  <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">(ภาพนี้แสดงถึง…)</p>
+                  <div class="mt-2 flex flex-wrap gap-1">
+                    <span class="chip">a group of people</span>
+                    <span class="chip">a busy street</span>
+                    <span class="chip">a quiet park</span>
+                  </div>
+                </div>
+              </div>
+              <button class="insert-btn absolute bottom-3 right-3">ใส่ในคำตอบ ↘</button>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-card">
+              <div class="flex items-start gap-2.5">
+                <div class="step-number mt-0.5" style="background:#1d6fa8">2</div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">เดาจากฉากหลัง</p>
+                  <p class="font-mono text-sm font-medium leading-snug" style="color:#1d6fa8">"Judging from the background, I believe that <span class="text-amber-500">______</span> ."</p>
+                  <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">(ดูจากฉากหลัง ผมเชื่อว่า…)</p>
+                  <div class="mt-2 flex flex-wrap gap-1">
+                    <span class="chip">it appears to be</span>
+                    <span class="chip">presumably</span>
+                    <span class="chip">likely taken at…</span>
+                  </div>
+                </div>
+              </div>
+              <button class="insert-btn absolute bottom-3 right-3">ใส่ในคำตอบ ↘</button>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-card">
+              <div class="flex items-start gap-2.5">
+                <div class="step-number mt-0.5" style="background:#0f6e56">3</div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">ความรู้สึกของคุณ</p>
+                  <p class="font-mono text-sm font-medium leading-snug" style="color:#0f6e56">"If I were to be there, I would feel <span class="text-amber-500">______</span> ."</p>
+                  <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">(ถ้าได้อยู่ตรงนั้น ผมจะรู้สึก…)</p>
+                  <div class="mt-2 flex flex-wrap gap-1">
+                    <span class="chip teal">peaceful</span>
+                    <span class="chip teal">lively</span>
+                    <span class="chip teal">nostalgic</span>
+                    <span class="chip teal">relaxed</span>
+                  </div>
+                </div>
+              </div>
+              <button class="insert-btn absolute bottom-3 right-3">ใส่ในคำตอบ ↘</button>
+            </div>
+
+            <!-- Vocab chip bank -->
+            <div class="bg-gray-50 rounded-xl p-3 border border-gray-100">
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">คำศัพท์ที่ใช้ได้เกือบทุกภาพ</p>
+              <div class="mb-2">
+                <p class="text-xs text-gray-400 mb-1">บรรยาย</p>
+                <div class="flex flex-wrap gap-1">
+                  <span class="chip">in the foreground</span>
+                  <span class="chip">in the background</span>
+                  <span class="chip">what appears to be</span>
+                </div>
+              </div>
+              <div class="mb-2">
+                <p class="text-xs text-gray-400 mb-1">เชื่อม</p>
+                <div class="flex flex-wrap gap-1">
+                  <span class="chip amber">moreover</span>
+                  <span class="chip amber">overall</span>
+                  <span class="chip amber">in addition</span>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 mb-1">ความรู้สึก</p>
+                <div class="flex flex-wrap gap-1">
+                  <span class="chip teal">energetic</span>
+                  <span class="chip teal">a bit overwhelmed</span>
+                  <span class="chip teal">at ease</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pidoy tip -->
+            <div class="flex items-start gap-2.5 bg-ep-yellow bg-opacity-15 rounded-xl p-3 border border-yellow-200">
+              <div class="flex-shrink-0 mt-0.5">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="9" cy="9" r="8.25" stroke="#856404" stroke-width="1.5"/>
+                  <path d="M9 8v5" stroke="#856404" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="9" cy="5.5" r="0.75" fill="#856404"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-amber-800 mb-0.5">พี่ดอย tip</p>
+                <p class="text-xs text-amber-700 leading-relaxed">ใช้ครบ 3 ขั้น = ตอบตรงโจทย์ + มีโครงสร้าง ใน 1 นาที</p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- LOCKED state: dimmed blur + step-1 peek -->
+          <div id="free-panel" class="hidden flex flex-col gap-3">
+
+            <!-- Step 1 peek-through (always visible, no blur) -->
+            <div class="mb-1">
+              <div class="flex items-center justify-between mb-2">
+                <h2 class="text-sm font-semibold text-gray-400 flex items-center gap-1.5">
+                  🧭 โครงคำตอบ 3 ขั้น
+                  <span class="text-xs font-normal text-gray-300">(พี่ดอย)</span>
+                </h2>
+                <span class="text-xs bg-gray-100 text-gray-400 rounded-full px-2 py-0.5 font-medium">🔒 ล็อก</span>
+              </div>
+
+              <!-- Step 1 visible hint (peek) -->
+              <div class="step-card border-dashed" style="border-color:#c5d0e0; background:#f9fbff;">
+                <div class="flex items-start gap-2.5">
+                  <div class="step-number mt-0.5">1</div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">บรรยายภาพ — ตัวอย่างโครงประโยค</p>
+                    <p class="font-mono text-sm text-ep-blue font-medium leading-snug">"This photo depicts <span class="text-amber-500">______</span> ."</p>
+                    <p class="text-xs text-gray-400 mt-0.5">(ภาพนี้แสดงถึง…)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Blurred steps 2 & 3 -->
+            <div class="relative">
+              <div class="flex flex-col gap-3" style="filter:blur(3.5px); opacity:0.45; pointer-events:none; user-select:none;">
+                <div class="step-card">
+                  <div class="flex items-start gap-2.5">
+                    <div class="step-number mt-0.5" style="background:#1d6fa8">2</div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">เดาจากฉากหลัง</p>
+                      <p class="font-mono text-sm font-medium text-blue-600 leading-snug">"Judging from the background, I believe that ______ ."</p>
+                      <div class="mt-2 flex flex-wrap gap-1">
+                        <span class="chip">it appears to be</span>
+                        <span class="chip">presumably</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="step-card">
+                  <div class="flex items-start gap-2.5">
+                    <div class="step-number mt-0.5" style="background:#0f6e56">3</div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">ความรู้สึกของคุณ</p>
+                      <p class="font-mono text-sm font-medium text-green-700 leading-snug">"If I were to be there, I would feel ______ ."</p>
+                      <div class="mt-2 flex flex-wrap gap-1">
+                        <span class="chip teal">peaceful</span>
+                        <span class="chip teal">lively</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                  <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">คำศัพท์ที่ใช้ได้เกือบทุกภาพ</p>
+                  <div class="flex flex-wrap gap-1">
+                    <span class="chip">in the foreground</span>
+                    <span class="chip amber">moreover</span>
+                    <span class="chip teal">energetic</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lock card overlay -->
+              <div class="absolute inset-0 flex items-center justify-center" style="padding: 0.5rem;">
+                <div class="lock-card">
+                  <div class="text-3xl mb-3">🔒</div>
+                  <h3 class="text-sm font-semibold text-gray-800 leading-snug mb-1">โครงคำตอบนี้เปิดเฉพาะนักเรียนคอร์ส Duolingo Fast Track (VIP)</h3>
+                  <p class="text-xs text-gray-500 leading-relaxed mb-4">โครงประโยคทั้ง 3 ขั้น + คำศัพท์พร้อมใช้ ช่วยให้ตอบตรงโจทย์ภายใน 1 นาทีทุกครั้ง</p>
+                  <a
+                    href="#"
+                    class="block w-full text-center bg-ep-blue text-white text-sm font-semibold rounded-xl py-3 hover:bg-blue-700 transition-colors"
+                    onclick="return false"
+                  >ดูคอร์ส Fast Track →</a>
+                  <p class="text-xs text-gray-400 mt-2">เปิดเพิ่มเติมจาก 30+ mini-lessons</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Design note -->
+  <div class="mt-6 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-700 max-w-2xl">
+    <p class="font-semibold mb-1">Design notes (preview only)</p>
+    <ul class="text-xs text-blue-600 leading-relaxed list-disc list-inside space-y-1">
+      <li>ผู้ใช้ VIP เห็นโครงประโยค 3 ขั้นพร้อม vocab chips ครบทุก step</li>
+      <li>ผู้ใช้ทั่วไปเห็น step 1 แบบ peek-through (ethical show-value) ส่วน step 2–3 + vocab ถูก blur</li>
+      <li>Lock card ใช้ข้อความตรงไปตรงมา ไม่มี dark patterns — แสดง value ก่อน CTA</li>
+      <li>Desktop: 2-column layout (photo+textarea ซ้าย, panel ขวา) | Mobile: stack</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+  // Character counter
+  const area = document.getElementById('answer-area');
+  const counter = document.getElementById('char-count');
+  area.addEventListener('input', () => {
+    counter.textContent = area.value.length + ' characters';
+  });
+
+  // Toggle logic
+  let currentMode = 'vip';
+
+  function setMode(mode) {
+    currentMode = mode;
+    const vipPanel = document.getElementById('vip-panel');
+    const freePanel = document.getElementById('free-panel');
+    const btnVip = document.getElementById('btn-vip');
+    const btnFree = document.getElementById('btn-free');
+
+    if (mode === 'vip') {
+      vipPanel.classList.remove('hidden');
+      freePanel.classList.add('hidden');
+      btnVip.classList.add('active');
+      btnFree.classList.remove('active');
+    } else {
+      vipPanel.classList.add('hidden');
+      freePanel.classList.remove('hidden');
+      btnFree.classList.add('active');
+      btnVip.classList.remove('active');
+    }
+  }
+
+  // Init
+  setMode('vip');
+</script>
+</body>
+</html>

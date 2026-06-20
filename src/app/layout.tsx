@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { LoginWelcomeModalGate } from "@/components/auth/LoginWelcomeModalGate";
 import { RevampAnnouncementModal } from "@/components/announcements/RevampAnnouncementModal";
 import { AdminSoftSkin } from "@/components/admin/AdminSoftSkin";
+import { ActivityTracker } from "@/components/analytics/ActivityTracker";
 import { PreviewBanner } from "@/components/admin/PreviewBanner";
 import { ContentBankHydrator } from "@/components/content/ContentBankHydrator";
 import { MainNav } from "@/components/layout/MainNav";
@@ -42,6 +43,7 @@ export default function RootLayout({
       >
         <NavigationProgress />
         <EffectiveTierProvider>
+          <ActivityTracker />
           <AdminSoftSkin />
           <ContentBankHydrator />
           <PreviewBanner />

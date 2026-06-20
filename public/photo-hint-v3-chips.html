@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 · Insert-able Starters — Photo Hint Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-yellow': '#FFCC00',
+        }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    line-height: 1.7;
+    background: #f8f9fb;
+    margin: 0;
+    padding: 0;
+    color: #1a1a2e;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Preview ribbon */
+  .preview-ribbon {
+    background: #1a1a2e;
+    color: #e0e6ff;
+    font-size: 12px;
+    padding: 7px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .preview-ribbon a {
+    color: #93b4ff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color .15s;
+  }
+  .preview-ribbon a:hover { color: #fff; }
+  .ribbon-label {
+    background: #004AAD;
+    color: #FFCC00;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 20px;
+    letter-spacing: .4px;
+  }
+  .ribbon-sep { color: #4a5568; }
+
+  /* App nav */
+  .app-nav {
+    background: #fff;
+    border-bottom: 1px solid #e8eaf0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ep-logo {
+    background: #004AAD;
+    color: #FFCC00;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 8px;
+    letter-spacing: .3px;
+  }
+  .nav-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #004AAD;
+  }
+  .vip-badge {
+    margin-left: auto;
+    background: #fff8e1;
+    color: #b07a00;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    border: 1px solid #ffe082;
+  }
+
+  /* Exam header */
+  .exam-header {
+    background: linear-gradient(135deg, #e8f0ff 0%, #f0f4ff 100%);
+    border-bottom: 1px solid #d0d9f0;
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .exam-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #003a8a;
+    margin: 0 0 4px;
+  }
+  .exam-sub {
+    font-size: 13px;
+    color: #5a72a8;
+    margin: 0;
+  }
+  .timer-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff;
+    border: 1px solid #c5d0e8;
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 12px;
+    color: #003a8a;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  /* Photo placeholder */
+  .photo-placeholder {
+    background: #e8eaf0;
+    border: 2px dashed #b0b8cc;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    color: #8090a8;
+    font-size: 13px;
+    gap: 6px;
+  }
+  .photo-placeholder .icon { font-size: 32px; }
+
+  /* Segmented toggle */
+  .seg-wrap {
+    background: #e8eaf0;
+    border-radius: 14px;
+    padding: 4px;
+    display: flex;
+    gap: 0;
+  }
+  .seg-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    border-radius: 11px;
+    padding: 9px 8px;
+    font-size: 12px;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-weight: 500;
+    color: #6272a0;
+    cursor: pointer;
+    transition: all .2s;
+    line-height: 1.4;
+    text-align: center;
+  }
+  .seg-btn.active {
+    background: #fff;
+    color: #004AAD;
+    box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  }
+
+  /* Hint section */
+  .hint-section {
+    margin: 0 0 12px;
+  }
+  .hint-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #5a72a8;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* Starter chips */
+  .starter-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .starter-chip {
+    background: #eef2ff;
+    border: 1.5px solid #c5d0f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #003a8a;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    transition: all .15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+    width: 100%;
+  }
+  .starter-chip:hover {
+    background: #dde6ff;
+    border-color: #8fa8e8;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,74,173,.12);
+  }
+  .starter-chip:active {
+    transform: translateY(0);
+  }
+  .chip-en {
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    display: block;
+  }
+  .chip-th {
+    font-size: 11.5px;
+    color: #6272a0;
+    display: block;
+    margin-top: 2px;
+  }
+  .chip-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .chip-inserted {
+    background: #d4f4e4 !important;
+    border-color: #7dd3a8 !important;
+    color: #1a7a4a !important;
+  }
+  .chip-inserted .chip-en { color: #1a7a4a; }
+  .chip-inserted .chip-th { color: #4aa870; }
+
+  /* Locked chip styles */
+  .starter-chip.locked {
+    background: #f4f5f8;
+    border-color: #d8dce8;
+    color: #9098b0;
+    cursor: default;
+    position: relative;
+  }
+  .starter-chip.locked:hover {
+    background: #f4f5f8;
+    border-color: #d8dce8;
+    transform: none;
+    box-shadow: none;
+  }
+  .starter-chip.locked .chip-en { color: #9098b0; }
+  .starter-chip.locked .chip-th { color: #b0b8cc; }
+  .lock-badge {
+    font-size: 11px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* Vocab bank */
+  .vocab-toggle {
+    background: none;
+    border: 1px solid #c5d0e8;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    color: #003a8a;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+    transition: background .15s;
+  }
+  .vocab-toggle:hover { background: #f0f4ff; }
+  .vocab-toggle .arrow {
+    font-size: 11px;
+    transition: transform .2s;
+    color: #8090a8;
+  }
+  .vocab-toggle.open .arrow { transform: rotate(180deg); }
+
+  .vocab-bank {
+    display: none;
+    background: #fafbff;
+    border: 1px solid #e0e6f8;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 6px;
+  }
+  .vocab-bank.show { display: block; }
+
+  .vocab-group {
+    margin-bottom: 10px;
+  }
+  .vocab-group:last-child { margin-bottom: 0; }
+  .vocab-group-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: #8090a8;
+    margin: 0 0 6px;
+  }
+  .vocab-chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .vocab-chip {
+    background: #fff;
+    border: 1px solid #d0d8f0;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: #003a8a;
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .vocab-chip:hover {
+    background: #dde6ff;
+    border-color: #8fa8e8;
+  }
+  .vocab-chip.locked-vocab {
+    background: #f4f5f8;
+    border-color: #dde0e8;
+    color: #9098b0;
+    cursor: default;
+  }
+  .vocab-chip.locked-vocab:hover {
+    background: #f4f5f8;
+    border-color: #dde0e8;
+  }
+  .vocab-chip-inserted {
+    background: #d4f4e4 !important;
+    border-color: #7dd3a8 !important;
+    color: #1a7a4a !important;
+  }
+
+  /* Pii Doi tip */
+  .doi-tip {
+    background: #fff8e1;
+    border: 1px solid #ffe082;
+    border-left: 3px solid #FFCC00;
+    border-radius: 10px;
+    padding: 10px 13px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #7a5800;
+    line-height: 1.6;
+  }
+  .doi-tip strong { color: #5a3e00; }
+
+  /* Lock card (locked state) */
+  .lock-card {
+    background: #fff7ed;
+    border: 1.5px solid #fcd34d;
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 12px;
+    text-align: center;
+  }
+  .lock-card-icon { font-size: 26px; margin-bottom: 6px; }
+  .lock-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #92400e;
+    margin: 0 0 6px;
+  }
+  .lock-card-desc {
+    font-size: 12.5px;
+    color: #a16207;
+    margin: 0 0 12px;
+    line-height: 1.6;
+  }
+  .cta-btn {
+    display: inline-block;
+    background: #004AAD;
+    color: #FFCC00;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    padding: 9px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s;
+  }
+  .cta-btn:hover { background: #003585; }
+
+  /* Textarea */
+  .answer-textarea {
+    width: 100%;
+    border: 1.5px solid #d0d8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    color: #1a1a2e;
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.7;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    background: #fff;
+  }
+  .answer-textarea:focus {
+    border-color: #004AAD;
+    box-shadow: 0 0 0 3px rgba(0,74,173,.1);
+  }
+  .answer-textarea::placeholder { color: #aab0c8; }
+
+  /* Submit btn */
+  .submit-btn {
+    width: 100%;
+    background: #004AAD;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    padding: 13px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+    margin-top: 10px;
+  }
+  .submit-btn:hover { background: #003585; }
+  .submit-btn:active { transform: scale(.98); }
+
+  /* Main layout */
+  .main-content {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px 16px 40px;
+  }
+
+  /* Inserted toast */
+  #insert-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    background: #1a7a4a;
+    color: #fff;
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    opacity: 0;
+    transition: all .3s;
+    pointer-events: none;
+    z-index: 200;
+    white-space: nowrap;
+  }
+  #insert-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Responsive adjustments */
+  @media (min-width: 640px) {
+    .main-content { padding: 24px 24px 60px; }
+    .exam-title { font-size: 19px; }
+    .photo-placeholder { height: 220px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Preview ribbon -->
+<div class="preview-ribbon">
+  <a href="/photo-hint-index.html">← back</a>
+  <span class="ribbon-sep">|</span>
+  <span class="ribbon-label">V3 · Insert-able starters</span>
+  <span style="margin-left:auto; opacity:.6; font-size:11px;">Design preview only · not production</span>
+</div>
+
+<!-- App nav -->
+<div class="app-nav">
+  <span class="ep-logo">EP</span>
+  <span class="nav-title">English Plan · DET Prep</span>
+  <span class="vip-badge" id="vip-nav-badge">👑 Fast Track</span>
+</div>
+
+<!-- Exam header -->
+<div class="exam-header">
+  <div class="exam-title">📸 เขียนจากภาพ · Write about the photo</div>
+  <div class="exam-sub">บรรยายสิ่งที่เห็นในภาพให้ละเอียดที่สุด</div>
+  <div class="timer-pill">⏱ 1 นาที · 1 minute</div>
+</div>
+
+<!-- Main content -->
+<div class="main-content">
+
+  <!-- Toggle -->
+  <div style="margin-bottom: 20px;">
+    <div class="seg-wrap">
+      <button class="seg-btn active" id="btn-vip" onclick="setMode('vip')">
+        👑 นักเรียนคอร์ส Fast Track (VIP)<br><span style="font-size:10.5px; opacity:.8;">— ปลดล็อก</span>
+      </button>
+      <button class="seg-btn" id="btn-free" onclick="setMode('free')">
+        ผู้ใช้ทั่วไป<br><span style="font-size:10.5px; opacity:.8;">— 🔒 ล็อก</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Photo placeholder -->
+  <div class="photo-placeholder" style="margin-bottom:16px;">
+    <div class="icon">🖼</div>
+    <div>ตัวอย่างรูป · example photo</div>
+    <div style="font-size:11px; color:#b0b8cc; margin-top:2px;">[ ภาพจะแสดงในข้อสอบจริง ]</div>
+  </div>
+
+  <!-- === HINT PANEL === -->
+  <div id="hint-panel" style="margin-bottom:14px;">
+
+    <!-- Unlocked state -->
+    <div id="state-unlocked">
+      <div class="hint-section">
+        <div class="hint-label">
+          ✨ เริ่มประโยคด้วยแพตเทิร์นของพี่ดอย
+          <span style="font-size:11px; color:#8090a8; font-weight:400;">(แตะเพื่อใส่ในคำตอบ)</span>
+        </div>
+        <div class="starter-chips" id="starter-chips-unlocked">
+          <button class="starter-chip" onclick="insertStarter(this, 'This photo depicts ')">
+            <span class="chip-icon">➤</span>
+            <span>
+              <span class="chip-en">This photo depicts …</span>
+              <span class="chip-th">ภาพนี้แสดงถึง…</span>
+            </span>
+          </button>
+          <button class="starter-chip" onclick="insertStarter(this, 'Judging from the background, I believe that ')">
+            <span class="chip-icon">➤</span>
+            <span>
+              <span class="chip-en">Judging from the background, I believe that …</span>
+              <span class="chip-th">ดูจากฉากหลัง ผมเชื่อว่า…</span>
+            </span>
+          </button>
+          <button class="starter-chip" onclick="insertStarter(this, 'If I were to be there, I would feel ')">
+            <span class="chip-icon">➤</span>
+            <span>
+              <span class="chip-en">If I were to be there, I would feel …</span>
+              <span class="chip-th">ถ้าได้อยู่ตรงนั้น ผมจะรู้สึก…</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Pii Doi tip -->
+        <div class="doi-tip">
+          <strong>💡 พี่ดอย tip:</strong> ใส่ 3 ประโยคนี้ก่อน แล้วเติมรายละเอียด = ครบโครงใน 1 นาที ✅
+        </div>
+      </div>
+
+      <!-- Vocab bank -->
+      <div class="hint-section">
+        <button class="vocab-toggle" id="vocab-toggle-btn" onclick="toggleVocab()">
+          <span>📚 คลังคำที่ใช้ได้เกือบทุกภาพ</span>
+          <span class="arrow">▼</span>
+        </button>
+        <div class="vocab-bank" id="vocab-bank">
+          <div class="vocab-group">
+            <div class="vocab-group-label">🔍 บรรยาย</div>
+            <div class="vocab-chips-row">
+              <button class="vocab-chip" onclick="insertVocab(this, 'a group of people')">a group of people</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'a busy street')">a busy street</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'a quiet street')">a quiet street</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'in the foreground')">in the foreground</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'in the background')">in the background</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'what appears to be')">what appears to be</button>
+            </div>
+          </div>
+          <div class="vocab-group">
+            <div class="vocab-group-label">🤔 เดาบริบท</div>
+            <div class="vocab-chips-row">
+              <button class="vocab-chip" onclick="insertVocab(this, 'judging from')">judging from</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'it looks like')">it looks like</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'presumably')">presumably</button>
+            </div>
+          </div>
+          <div class="vocab-group">
+            <div class="vocab-group-label">💭 ความรู้สึก</div>
+            <div class="vocab-chips-row">
+              <button class="vocab-chip" onclick="insertVocab(this, 'peaceful')">peaceful</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'lively')">lively</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'nostalgic')">nostalgic</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'relaxed')">relaxed</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'energetic')">energetic</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'a bit overwhelmed')">a bit overwhelmed</button>
+            </div>
+          </div>
+          <div class="vocab-group">
+            <div class="vocab-group-label">🔗 เชื่อม</div>
+            <div class="vocab-chips-row">
+              <button class="vocab-chip" onclick="insertVocab(this, 'moreover,')">moreover,</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'in addition,')">in addition,</button>
+              <button class="vocab-chip" onclick="insertVocab(this, 'overall,')">overall,</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Locked state -->
+    <div id="state-locked" style="display:none;">
+      <div class="hint-section">
+        <div class="hint-label">
+          ✨ เริ่มประโยคด้วยแพตเทิร์นของพี่ดอย
+          <span style="font-size:11px; color:#8090a8; font-weight:400;">(แตะเพื่อใส่ในคำตอบ)</span>
+        </div>
+        <div class="starter-chips">
+          <!-- First chip: peek unlocked (ethical show-value) -->
+          <button class="starter-chip" onclick="insertStarter(this, 'This photo depicts ')">
+            <span class="chip-icon">➤</span>
+            <span>
+              <span class="chip-en">This photo depicts …</span>
+              <span class="chip-th">ภาพนี้แสดงถึง…</span>
+            </span>
+          </button>
+          <!-- Remaining chips: locked -->
+          <div class="starter-chip locked">
+            <span class="chip-icon" style="opacity:.4;">➤</span>
+            <span>
+              <span class="chip-en">Judging from the background, I believe that …</span>
+              <span class="chip-th">ดูจากฉากหลัง ผมเชื่อว่า…</span>
+            </span>
+            <span class="lock-badge">🔒</span>
+          </div>
+          <div class="starter-chip locked">
+            <span class="chip-icon" style="opacity:.4;">➤</span>
+            <span>
+              <span class="chip-en">If I were to be there, I would feel …</span>
+              <span class="chip-th">ถ้าได้อยู่ตรงนั้น ผมจะรู้สึก…</span>
+            </span>
+            <span class="lock-badge">🔒</span>
+          </div>
+        </div>
+
+        <!-- Vocab bank locked -->
+        <div style="margin-top:8px;">
+          <div style="background:#f4f5f8; border:1px solid #d8dce8; border-radius:10px; padding:9px 14px; display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:13px; color:#9098b0; font-weight:500;">📚 คลังคำที่ใช้ได้เกือบทุกภาพ</span>
+            <span style="font-size:13px;">🔒</span>
+          </div>
+        </div>
+
+        <!-- Lock card -->
+        <div class="lock-card">
+          <div class="lock-card-icon">🔒</div>
+          <div class="lock-card-title">แพตเทิร์นเริ่มประโยคนี้เปิดเฉพาะ<br>นักเรียนคอร์ส Duolingo Fast Track (VIP)</div>
+          <div class="lock-card-desc">
+            เรียนรู้แพตเทิร์นประโยคที่ได้คะแนน DET สูง พร้อมคลังคำ ready-to-use<br>
+            สำหรับ Write about the photo ทุกแบบ
+          </div>
+          <a href="#" class="cta-btn" onclick="return false;">ดูคอร์ส Fast Track →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- === END HINT PANEL === -->
+
+  <!-- Answer textarea -->
+  <div style="margin-bottom:4px;">
+    <label style="font-size:12px; font-weight:600; color:#5a72a8; display:block; margin-bottom:6px;">
+      📝 คำตอบของคุณ
+    </label>
+    <textarea
+      class="answer-textarea"
+      id="answer-box"
+      placeholder="เริ่มเขียนที่นี่… หรือแตะแพตเทิร์นด้านบนเพื่อใส่ประโยคเริ่มต้น"
+    ></textarea>
+    <div style="text-align:right; font-size:11px; color:#aab0c8; margin-top:3px;" id="char-count">0 คำ</div>
+  </div>
+
+  <button class="submit-btn">ส่งคำตอบ · Submit</button>
+
+</div>
+
+<!-- Toast -->
+<div id="insert-toast">✅ ใส่แล้ว!</div>
+
+<script>
+  var currentMode = 'vip';
+
+  function setMode(mode) {
+    currentMode = mode;
+    var unlocked = document.getElementById('state-unlocked');
+    var locked = document.getElementById('state-locked');
+    var btnVip = document.getElementById('btn-vip');
+    var btnFree = document.getElementById('btn-free');
+    var vipBadge = document.getElementById('vip-nav-badge');
+
+    if (mode === 'vip') {
+      unlocked.style.display = 'block';
+      locked.style.display = 'none';
+      btnVip.classList.add('active');
+      btnFree.classList.remove('active');
+      vipBadge.style.display = '';
+    } else {
+      unlocked.style.display = 'none';
+      locked.style.display = 'block';
+      btnVip.classList.remove('active');
+      btnFree.classList.add('active');
+      vipBadge.style.display = 'none';
+    }
+  }
+
+  function insertStarter(btn, text) {
+    var ta = document.getElementById('answer-box');
+    var cur = ta.value;
+    if (cur.length > 0 && !cur.endsWith('\n')) {
+      ta.value = cur + '\n' + text;
+    } else {
+      ta.value = cur + text;
+    }
+    ta.focus();
+    var len = ta.value.length;
+    ta.setSelectionRange(len, len);
+    updateCount();
+
+    var allChips = document.querySelectorAll('.starter-chip:not(.locked)');
+    allChips.forEach(function(c) { c.classList.remove('chip-inserted'); });
+    btn.classList.add('chip-inserted');
+    setTimeout(function() { btn.classList.remove('chip-inserted'); }, 900);
+
+    showToast('✅ เพิ่มประโยคเริ่มต้นแล้ว!');
+  }
+
+  function insertVocab(btn, text) {
+    var ta = document.getElementById('answer-box');
+    var cur = ta.value;
+    var sel = ta.selectionStart;
+    if (cur.length > 0 && sel === cur.length) {
+      if (!cur.endsWith(' ') && !cur.endsWith('\n')) {
+        ta.value = cur + ' ' + text;
+      } else {
+        ta.value = cur + text;
+      }
+    } else {
+      ta.value = cur + (cur.length > 0 ? ' ' : '') + text;
+    }
+    ta.focus();
+    var len = ta.value.length;
+    ta.setSelectionRange(len, len);
+    updateCount();
+
+    btn.classList.add('vocab-chip-inserted');
+    setTimeout(function() { btn.classList.remove('vocab-chip-inserted'); }, 700);
+
+    showToast('✅ เพิ่มคำแล้ว!');
+  }
+
+  function toggleVocab() {
+    var bank = document.getElementById('vocab-bank');
+    var btn = document.getElementById('vocab-toggle-btn');
+    var isOpen = bank.classList.contains('show');
+    if (isOpen) {
+      bank.classList.remove('show');
+      btn.classList.remove('open');
+    } else {
+      bank.classList.add('show');
+      btn.classList.add('open');
+    }
+  }
+
+  var toastTimer;
+  function showToast(msg) {
+    var t = document.getElementById('insert-toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { t.classList.remove('show'); }, 1600);
+  }
+
+  function updateCount() {
+    var ta = document.getElementById('answer-box');
+    var words = ta.value.trim() === '' ? 0 : ta.value.trim().split(/\s+/).length;
+    document.getElementById('char-count').textContent = words + ' คำ';
+  }
+
+  document.getElementById('answer-box').addEventListener('input', updateCount);
+</script>
+
+</body>
+</html>

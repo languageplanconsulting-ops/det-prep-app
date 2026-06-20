@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { ArticleSection } from "@/components/landing/ArticleSection";
 import { FeedbackShowcase } from "@/components/landing/FeedbackShowcase";
 import { useBillingActions } from "@/hooks/useBillingActions";
 
@@ -726,6 +727,9 @@ export function AdminLandingPageClient({
           </Link>
         </div>
       </section>
+
+      {/* ARTICLES — "บันทึกของครู" */}
+      <ArticleSection />
 
       {/* FOOTER */}
       <footer className="border-t border-gray-100 bg-white px-5 py-8">
