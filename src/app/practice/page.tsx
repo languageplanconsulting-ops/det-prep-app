@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { DictationIntroModal } from "@/components/dictation/DictationIntroModal";
 import { FillInBlankIntroModal } from "@/components/fitb/FillInBlankIntroModal";
 import { InteractiveSpeakingIntroModal } from "@/components/interactive-speaking/InteractiveSpeakingIntroModal";
+import { MiniDiagnosisPromptModal } from "@/components/practice/MiniDiagnosisPromptModal";
 import { PracticeHubV2 } from "@/components/practice/PracticeHubV2";
 import { PracticePageOverview } from "@/components/practice/PracticePageOverview";
 import { ReadingSkillsIntroModal } from "@/components/reading/ReadingSkillsIntroModal";
@@ -232,6 +233,7 @@ export default function PracticeHubPage() {
 
   return (
     <>
+      <MiniDiagnosisPromptModal />
       <ReadingSkillsIntroModal
         open={readingIntroOpen}
         onOpenChange={setReadingIntroOpen}

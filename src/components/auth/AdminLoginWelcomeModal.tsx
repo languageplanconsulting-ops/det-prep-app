@@ -74,6 +74,7 @@ export function AdminLoginWelcomeModal() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<UserSummary>({ label: "student", planStatus: "ACTIVE" });
   const [freeFeedbackChoice, setFreeFeedbackChoice] = useState("write_about_photo");
+  const [freeView, setFreeView] = useState<"choose" | "access">("choose");
 
   // ── Show/hide logic: verbatim from LoginWelcomeModal ──
   useEffect(() => {
@@ -127,6 +128,7 @@ export function AdminLoginWelcomeModal() {
       window.sessionStorage.removeItem(STORAGE_KEY);
     }
     setOpen(false);
+    setFreeView("choose");
   };
 
   const current = useMemo(() => featureCopy(effectiveTier), [effectiveTier]);
@@ -139,6 +141,63 @@ export function AdminLoginWelcomeModal() {
   // ─── FREE tier: "Show the value" layout ──────────────────────────────────
 
   if (effectiveTier === "free") {
+    if (freeView === "choose") {
+      return (
+        <div
+          className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="login-welcome-title"
+          onClick={close}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl md:p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-5 text-center">
+              <div className="mb-3 inline-block rounded-full border border-gray-200 bg-gray-100 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                Current Plan: Free
+              </div>
+              <h1 id="login-welcome-title" className="text-2xl font-black leading-tight text-[#004aad] md:text-3xl">
+                วันนี้อยากเริ่มจากตรงไหน?
+              </h1>
+              <p className="mt-2 text-sm text-gray-600">เลือกได้เลย — เริ่มแบบไหนก็ฟรี</p>
+            </div>
+
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={() => { close(); router.push("/study-plan/test"); }}
+                className="block w-full rounded-2xl bg-[#004aad] p-5 text-left text-white shadow-md transition hover:bg-[#003d91] active:scale-[0.99]"
+              >
+                <div className="flex items-center gap-2 text-lg font-black">📊 ทำแบบทดสอบวัดระดับ (Mock Test)</div>
+                <p className="mt-1 text-sm font-medium text-white/90">
+                  วัดครบ 4 ทักษะใน ~15 นาที แล้วรับ <span className="font-black text-[#ffcc00]">แผนเรียนเฉพาะคุณ</span> ทันที
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFreeView("access")}
+                className="block w-full rounded-2xl border-2 border-gray-200 bg-white p-5 text-left text-gray-900 shadow-sm transition hover:border-[#004aad] hover:shadow-md active:scale-[0.99]"
+              >
+                <div className="flex items-center gap-2 text-lg font-black text-[#004aad]">🎧 ใช้เครดิตฟรี ลองข้อสอบของเรา</div>
+                <p className="mt-1 text-sm font-medium text-gray-600">
+                  Dictation · Conversation · Reading ฯลฯ — ลองอย่างละ 1 ครั้งฟรี
+                </p>
+              </button>
+            </div>
+
+            <div className="mt-5 text-center">
+              <button type="button" onClick={close} className="font-mono text-[10px] text-gray-400 underline hover:text-[#004aad]">
+                ข้ามไปก่อน
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     const freeFeedbackOptions = [
       { id: "write_about_photo", emoji: "✍️", label: "Write about Photo" },
       { id: "speak_about_photo", emoji: "🗣️", label: "Speak about Photo" },
@@ -280,6 +339,7 @@ export function AdminLoginWelcomeModal() {
             type="button"
             className="w-full rounded-xl bg-[#004aad] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[#003d91] active:scale-[0.98]"
             onClick={() => {
+              if (typeof window !== "undefined") window.sessionStorage.setItem("ep-show-mini-diagnosis-prompt", "1");
               close();
               router.push("/practice");
             }}
