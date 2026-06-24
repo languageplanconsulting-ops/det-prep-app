@@ -39,6 +39,12 @@ export function AdminShellBar() {
         User behavior
       </Link>
       <Link
+        href="/admin/free-users"
+        className="rounded-[4px] border-2 border-black bg-violet-100 px-3 py-1 text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-violet-200"
+      >
+        Free users
+      </Link>
+      <Link
         href="/admin/bug-reports"
         className="rounded-[4px] border-2 border-black bg-rose-100 px-3 py-1 text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-rose-200"
       >
