@@ -18,9 +18,14 @@ const VALUE_BULLETS: { th: string; en: string }[] = [
   { th: "Mock Test เต็มรูปแบบ", en: "Full-length mock tests" },
 ];
 
-const PEER_QUOTE =
-  "เก็บ Writing ก่อน คะแนนขยับจาก 95 → 120 ภายในสามอาทิตย์";
-const PEER_QUOTE_NOTE = "(ตัวอย่างจากผู้ใช้จริง)";
+// Real student testimonial (matches the landing page social proof).
+const REVIEW = {
+  quote:
+    "ตอนแรกกังวลเรื่อง Writing กับ Speaking มาก ไม่รู้จะแก้ตรงไหน พอได้ฟีดแบ็กที่บอกตรง ๆ ว่าต้องปรับอะไร ก็มั่นใจขึ้นเยอะ",
+  name: "พิมพ์",
+  initial: "พ",
+  delta: "95 → 115",
+};
 
 // Blurred "locked preview" set thumbnails — purely decorative
 const PREVIEW_LABELS = [
@@ -160,32 +165,28 @@ export function AdminFreeQuotaLockedLink({
                 </div>
               </div>
 
-              {/* Peer quote */}
+              {/* Real student testimonial */}
               <blockquote className="rounded-2xl bg-[#fffbe6] px-4 py-3">
+                <div className="mb-1.5 text-sm tracking-wide text-[#FFCC00]">
+                  ★★★★★
+                </div>
                 <p className="text-sm font-medium leading-relaxed text-neutral-800">
-                  &ldquo;{PEER_QUOTE}&rdquo;
+                  &ldquo;{REVIEW.quote}&rdquo;
                 </p>
-                <p className="mt-1 text-[10px] text-neutral-400">
-                  {PEER_QUOTE_NOTE}
-                </p>
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#004AAD]/10 text-xs font-bold text-[#004AAD]">
+                    {REVIEW.initial}
+                  </span>
+                  <div>
+                    <div className="text-xs font-semibold text-neutral-800">
+                      {REVIEW.name}
+                    </div>
+                    <div className="font-mono text-xs text-neutral-400">
+                      {REVIEW.delta}
+                    </div>
+                  </div>
+                </div>
               </blockquote>
-
-              {/* Score delta teaser */}
-              <div className="flex items-center justify-center gap-4 rounded-2xl bg-[#f0f6ff] py-4">
-                <div className="text-center">
-                  <p className="font-mono text-2xl font-black text-neutral-300">
-                    95
-                  </p>
-                  <p className="text-[10px] text-neutral-400">ก่อน</p>
-                </div>
-                <span className="text-lg text-[#004AAD]">→</span>
-                <div className="text-center">
-                  <p className="font-mono text-2xl font-black text-[#004AAD]">
-                    120+
-                  </p>
-                  <p className="text-[10px] text-neutral-500">หลังฝึก</p>
-                </div>
-              </div>
             </div>
 
             {/* ── CTAs ─────────────────────────────────────────────────── */}

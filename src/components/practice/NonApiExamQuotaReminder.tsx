@@ -73,16 +73,34 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
   if (!snapshot) return null;
 
   const tone = toneForSnapshot(snapshot);
+  const isLifetime = snapshot.cycleKind === "lifetime";
+  const isFree = effectiveTier === "free";
   const progress = snapshot.limit > 0 ? Math.min(100, Math.round((snapshot.used / snapshot.limit) * 100)) : 0;
-  const remainingLabel =
-    snapshot.remaining === 1 ? "1 test left" : `${snapshot.remaining} tests left`;
-  const usageLabel = `${snapshot.used}/${snapshot.limit} used`;
-  const planLabel = effectiveTier === "free" ? "Free plan reminder" : "Basic plan reminder";
-  const windowLabel = snapshot.cycleKind === "lifetime" ? "Lifetime usage" : "Monthly usage";
-  const footerLabel =
-    snapshot.cycleKind === "lifetime"
-      ? "Free access is one-time per supported exam bank."
-      : "Resets with the next monthly cycle.";
+
+  // Thai-forward copy (exam names stay in English as proper labels).
+  const headingLabel =
+    snapshot.remaining <= 0
+      ? `ใช้สิทธิ์ทดลองฟรีของ ${snapshot.examLabel} ครบแล้ว`
+      : `เหลือสิทธิ์ทดลองฟรี ${snapshot.examLabel} อีก ${snapshot.remaining} ครั้ง`;
+
+  const descriptionLabel = isLifetime
+    ? "ผู้ใช้แพ็กฟรีทดลองแต่ละบทเรียนได้ 1 ครั้ง หลังจากนั้นยังเปิดดูคลังข้อสอบได้ แต่แต่ละชุดจะล็อกจนกว่าจะอัปเกรด"
+    : snapshot.sharesPool
+      ? "Dictation, Fill in the Blank และ Real Word ใช้โควต้า Literacy ก้อนเดียวกันในแพ็ก Basic"
+      : `โควต้าของ ${snapshot.examLabel} ในรอบนี้`;
+
+  const planLabel = isFree ? "สิทธิ์ทดลองฟรี" : "แพ็ก Basic";
+  const cycleChipLabel = isLifetime ? "ทดลองฟรี 1 ครั้ง/บทเรียน" : snapshot.cycleLabel;
+  const usageLabel = `ใช้ไป ${snapshot.used}/${snapshot.limit}`;
+  const quotaSideLabel = isLifetime ? "โควต้าฟรี" : "เดือนนี้";
+  const windowLabel = isLifetime ? "ใช้ไปแล้ว" : "ใช้เดือนนี้";
+  const helperLabel =
+    snapshot.remaining <= 0
+      ? "อยากฝึกต่อแบบไม่จำกัด? อัปเกรดเพื่อปลดล็อกทุกชุด"
+      : "ลองฟรีได้เลย — ใช้สิทธิ์ตามจำนวนที่เหลือ";
+  const footerLabel = isLifetime
+    ? "ทดลองฟรีได้ 1 ครั้ง ต่อ 1 คลังข้อสอบ"
+    : "รีเซ็ตเมื่อขึ้นรอบเดือนใหม่";
 
   return (
     <section
@@ -99,17 +117,15 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
               {planLabel}
             </span>
             <span className="rounded-full border border-black/10 bg-white/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-black/65">
-              {snapshot.cycleLabel}
+              {cycleChipLabel}
             </span>
           </div>
 
           <h2 className="mt-3 text-2xl font-black tracking-tight md:text-3xl">
-            {remainingLabel} for {snapshot.examLabel}
+            {headingLabel}
           </h2>
           <p className="mt-2 max-w-xl text-sm leading-6 text-black/70">
-            {snapshot.sharesPool
-              ? `${snapshot.poolMessage} You’re currently viewing ${snapshot.examLabel}, so this number reflects your shared Literacy allowance.`
-              : snapshot.poolMessage}
+            {descriptionLabel}
           </p>
         </div>
 
@@ -117,13 +133,13 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-                Remaining
+                คงเหลือ
               </p>
               <p className="mt-1 text-3xl font-black tabular-nums">{snapshot.remaining}</p>
             </div>
             <div className="text-right">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">
-                {snapshot.cycleKind === "lifetime" ? "Free quota" : "This month"}
+                {quotaSideLabel}
               </p>
               <p className="mt-1 text-sm font-bold text-black/70">{usageLabel}</p>
             </div>
@@ -147,7 +163,7 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
       <div className="relative mt-5 flex flex-wrap items-center gap-3 text-xs font-semibold text-black/65">
         <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5">
           <span className={`h-2.5 w-2.5 rounded-full ${tone.dot}`} />
-          Soft reminder only: your current access rules stay the same.
+          {helperLabel}
         </span>
         <span className="rounded-full bg-white/60 px-3 py-1.5">
           {footerLabel}
