@@ -17,9 +17,11 @@ export function resolveEffectiveTierFromProfile(input: {
 }): Tier {
   const tier = normalizeTier(input.tier);
   if (tier === "free") return "free";
-  if (tier === "vip" && input.vip_granted_by_course === true && !input.tier_expires_at) {
-    return "vip";
-  }
+  // A paid tier with NO expiry date = permanent access. This covers course VIP
+  // grants and manual admin/DB upgrades where tier is set without tier_expires_at.
+  // Normal purchases always store a future expiry; expired plans store a *past*
+  // date (not null), so they still correctly fall through to "free" below.
+  if (!input.tier_expires_at) return tier;
   return hasValidPlanExpiry(input.tier_expires_at) ? tier : "free";
 }
 
