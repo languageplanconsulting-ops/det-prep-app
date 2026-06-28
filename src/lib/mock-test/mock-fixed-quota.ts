@@ -8,13 +8,15 @@ export function mockFixedMonthStartIso(now = new Date()): string {
 
 /**
  * Sessions that consume the learner monthly mock quota.
- * Admin preview runs and single-step previews do not count.
+ * Admin preview runs, single-step previews, and admin-reset (quotaExempt)
+ * sessions do not count.
  */
 export function isBillableMockFixedSession(targets: unknown): boolean {
   if (!targets || typeof targets !== "object" || Array.isArray(targets)) return true;
   const t = targets as Record<string, unknown>;
   if (t.adminPreviewMode === true) return false;
   if (t.singleStepPreview === true) return false;
+  if (t.quotaExempt === true) return false;
   return true;
 }
 

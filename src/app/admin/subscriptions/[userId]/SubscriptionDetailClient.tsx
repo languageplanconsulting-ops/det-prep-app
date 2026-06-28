@@ -392,6 +392,47 @@ export function SubscriptionDetailClient() {
     }
   };
 
+  const [resettingMocks, setResettingMocks] = useState(false);
+  const resetMockUsage = async () => {
+    if (
+      !window.confirm(
+        "Reset this user's mock-test usage for the current month? Their attempt history is kept; only this month's quota count is cleared.",
+      )
+    ) {
+      return;
+    }
+    setResettingMocks(true);
+    try {
+      const res = await fetch(`/api/admin/subscriptions/${userId}/reset-mocks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ reason: "Admin manual mock quota reset" }),
+      });
+      const json = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        cleared?: number;
+      };
+      if (!res.ok) {
+        throw new Error(json.error ?? "Could not reset mock usage");
+      }
+      push({
+        type: "success",
+        titleEn: `Mock usage reset (${json.cleared ?? 0} cleared).`,
+        titleTh: `รีเซ็ตโควตา Mock เดือนนี้แล้ว (${json.cleared ?? 0} ครั้ง)`,
+      });
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Could not reset mock usage",
+        titleTh: "รีเซ็ตโควตา Mock ไม่สำเร็จ",
+      });
+    } finally {
+      setResettingMocks(false);
+    }
+  };
+
   const grantExtraCredits = async (kind: "feedback" | "mock") => {
     setAiSaving(true);
     try {
@@ -1121,6 +1162,20 @@ export function SubscriptionDetailClient() {
                   <p className="ep-stat mt-1 text-lg font-black text-[#004AAD]">{v}</p>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3 border-t-2 border-neutral-200 pt-4">
+              <button
+                type="button"
+                onClick={() => void resetMockUsage()}
+                disabled={resettingMocks}
+                className="rounded-[4px] border-4 border-black bg-[#FFCC00] px-3 py-2 text-sm font-black shadow-[3px_3px_0_0_#000] disabled:opacity-50"
+              >
+                {resettingMocks ? "Resetting…" : "Reset this month's usage / รีเซ็ตโควตาเดือนนี้"}
+              </button>
+              <p className="text-[11px] font-bold text-neutral-500">
+                Clears this month&apos;s mock count (keeps attempt history). Auto-renews on the 1st anyway.
+              </p>
             </div>
 
             <div className="mt-4 border-t-2 border-neutral-200 pt-4">
