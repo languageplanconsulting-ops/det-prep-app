@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { absoluteUrl } from "@/lib/site-metadata";
 
 const storySections: Array<{
@@ -163,72 +162,76 @@ export default function AboutPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#fff4bf_0%,#eef4ff_38%,#f7efe3_100%)] px-4 py-12 text-neutral-900 sm:px-6">
+    <main className="min-h-screen bg-[radial-gradient(#d1d5db_1px,transparent_1px)] bg-[size:24px_24px] bg-[#f3f4f6] px-4 py-12 text-neutral-900 sm:px-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(aboutLd)} />
 
       <div className="mx-auto max-w-7xl">
         <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="border-4 border-black bg-white p-8 shadow-[10px_10px_0_0_#111] sm:p-10">
-            <p className="font-mono text-[11px] font-black uppercase tracking-[0.28em] text-[#004aad]">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg sm:p-10">
+            <span className="inline-block rounded-full border border-gray-200 bg-gray-100 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gray-500">
               About English Plan
-            </p>
-            <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">
+            </span>
+            <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight sm:text-5xl">
               จากห้องเรียนสู่แอปฝึกสอบ
               <span className="block text-[#004aad]">Duolingo English Test ที่สร้างมาเพื่อเด็กไทย</span>
             </h1>
-            <p className="mt-6 max-w-4xl text-lg leading-8 text-neutral-700">
+            <p className="mt-5 max-w-3xl text-base leading-8 text-gray-600 sm:text-lg">
               เรื่องราวนี้คือที่มาของ English Plan, พี่ดอย, และแอปฝึกสอบที่ไม่ได้สร้างมาเพื่อให้ฝึกเยอะขึ้นอย่างเดียว
               แต่สร้างมาเพื่อให้เด็กไทยรู้ว่าควรฝึกอะไร ทำไมคะแนนยังไม่ขึ้น และจะพัฒนาได้จริงอย่างไร
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-7 flex flex-wrap gap-3">
               <Link
                 href="/practice"
-                className="border-4 border-black bg-[#004aad] px-6 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[6px_6px_0_0_#111]"
+                className="rounded-xl bg-[#004aad] px-6 py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#003d91]"
               >
-                Open practice hub
+                เปิด Practice hub
               </Link>
               <Link
                 href="/duolingo-english-test"
-                className="border-4 border-black bg-[#ffcc00] px-6 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#111]"
+                className="rounded-xl bg-[#ffcc00] px-6 py-3 text-sm font-bold text-neutral-900 shadow-md transition hover:bg-[#ffd633]"
               >
-                DET guide hub
+                คู่มือ DET
               </Link>
               <Link
                 href="/pricing"
-                className="border-4 border-black bg-white px-6 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#111]"
+                className="rounded-xl border-2 border-gray-200 bg-white px-6 py-3 text-sm font-bold text-neutral-900 shadow-sm transition hover:border-[#004aad]"
               >
-                View plans
+                ดูแพ็กเกจ
               </Link>
             </div>
           </div>
 
           <div className="grid gap-6">
-            <BrutalPanel variant="elevated" eyebrow="Academic Director" title="พี่ดอย / P'Doy">
-              <p className="text-sm leading-7 text-neutral-700">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <span className="inline-block rounded-full border border-gray-200 bg-gray-100 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                Academic Director
+              </span>
+              <h3 className="mt-3 text-xl font-black text-[#004aad]">{"พี่ดอย / P'Doy"}</h3>
+              <p className="mt-2 text-sm leading-7 text-gray-600">
                 อยู่กับ Duolingo English Test ตั้งแต่ช่วงแรกที่ข้อสอบเริ่มเป็นที่รู้จักในไทย และสอนนักเรียนมากกว่า 1,000 คนทั่วประเทศ
               </p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="border-2 border-black bg-[#eef4ff] p-4 text-center">
-                  <div className="text-3xl font-black text-[#004aad]">1,000+</div>
-                  <div className="mt-1 text-xs font-bold uppercase tracking-wide text-neutral-700">Students taught</div>
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="rounded-xl bg-[#eef4ff] p-4 text-center">
+                  <div className="text-2xl font-black text-[#004aad]">1,000+</div>
+                  <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-gray-500">Students taught</div>
                 </div>
-                <div className="border-2 border-black bg-[#fff6cc] p-4 text-center">
-                  <div className="text-3xl font-black text-neutral-900">2020</div>
-                  <div className="mt-1 text-xs font-bold uppercase tracking-wide text-neutral-700">DET journey began</div>
+                <div className="rounded-xl bg-[#fff6cc] p-4 text-center">
+                  <div className="text-2xl font-black text-neutral-900">2020</div>
+                  <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-gray-500">DET journey began</div>
                 </div>
-                <div className="border-2 border-black bg-[#ffe3db] p-4 text-center">
-                  <div className="text-3xl font-black text-neutral-900">2026</div>
-                  <div className="mt-1 text-xs font-bold uppercase tracking-wide text-neutral-700">New app launched</div>
+                <div className="rounded-xl bg-[#ffe3db] p-4 text-center">
+                  <div className="text-2xl font-black text-neutral-900">2026</div>
+                  <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-gray-500">New app launched</div>
                 </div>
               </div>
-            </BrutalPanel>
+            </div>
 
-            <section className="border-4 border-black bg-[#111] p-6 text-white shadow-[10px_10px_0_0_#000]">
-              <p className="font-mono text-[11px] font-black uppercase tracking-[0.26em] text-[#ffcc00]">
+            <section className="rounded-2xl bg-[#004aad] p-6 text-white shadow-lg">
+              <span className="inline-block rounded-full bg-white/15 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-[#ffcc00]">
                 Core belief
-              </p>
-              <blockquote className="mt-4 text-2xl font-black leading-tight">
+              </span>
+              <blockquote className="mt-4 text-xl font-black leading-snug sm:text-2xl">
                 “นักเรียนทุกคนสามารถพัฒนาคะแนนได้ ถ้ามีวิธีฝึกที่ถูกต้อง มีระบบที่ช่วยชี้ทาง และมีฟีดแบ็กที่ตรงจุด”
               </blockquote>
             </section>
@@ -240,48 +243,55 @@ export default function AboutPage() {
             {timeline.map((item) => (
               <section
                 key={item.year}
-                className={`border-4 border-black p-6 shadow-[8px_8px_0_0_#111] ${item.color}`}
+                className={`rounded-2xl border border-gray-200 p-6 shadow-sm ${item.color}`}
               >
-                <p className="font-mono text-[11px] font-black uppercase tracking-[0.26em] text-[#004aad]">
+                <span className="inline-block rounded-full border border-gray-200 bg-white/70 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gray-600">
                   {item.year}
-                </p>
-                <h2 className="mt-3 text-2xl font-black tracking-tight">{item.title}</h2>
-                <p className="mt-3 text-sm leading-7 text-neutral-800">{item.body}</p>
+                </span>
+                <h2 className="mt-3 text-xl font-black tracking-tight">{item.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-gray-700">{item.body}</p>
               </section>
             ))}
           </div>
         </section>
 
         <section className="mt-10 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <BrutalPanel variant="elevated" eyebrow="What we learned" title="สิ่งที่เราเห็นจากนักเรียนจริง">
-            <p className="text-sm leading-7 text-neutral-700">
+          <div className="h-fit rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <span className="inline-block rounded-full border border-gray-200 bg-gray-100 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gray-500">
+              What we learned
+            </span>
+            <h2 className="mt-3 text-xl font-black text-[#004aad]">สิ่งที่เราเห็นจากนักเรียนจริง</h2>
+            <p className="mt-3 text-sm leading-7 text-gray-600">
               หลังจากสอนนักเรียนมากกว่า 1,000 คน English Plan ไม่ได้เก็บไว้แค่ประสบการณ์ แต่ได้เห็นข้อมูลจริงว่าเด็กไทยมักพลาดตรงไหนในการเตรียมสอบ DET
             </p>
-            <ul className="mt-5 space-y-3 text-sm font-semibold leading-7 text-neutral-800">
+            <ul className="mt-5 space-y-2.5 text-sm font-medium leading-7 text-gray-700">
               {learnerPainPoints.map((item) => (
-                <li key={item}>- {item}</li>
+                <li key={item} className="flex gap-2">
+                  <span className="shrink-0 text-[#004aad]">✓</span>
+                  {item}
+                </li>
               ))}
             </ul>
-          </BrutalPanel>
+          </div>
 
           <section className="space-y-6">
             {storySections.map((section) => {
               const accentBg =
                 section.accent === "yellow"
-                  ? "bg-[#fff6cc]"
+                  ? "bg-[#fffbe9]"
                   : section.accent === "rose"
-                    ? "bg-[#ffe3db]"
+                    ? "bg-[#fff3ee]"
                     : "bg-white";
               return (
                 <section
                   key={section.title}
-                  className={`border-4 border-black p-6 shadow-[8px_8px_0_0_#111] sm:p-8 ${accentBg}`}
+                  className={`rounded-2xl border border-gray-200 p-6 shadow-sm sm:p-7 ${accentBg}`}
                 >
-                  <p className="font-mono text-[11px] font-black uppercase tracking-[0.24em] text-[#004aad]">
+                  <span className="inline-block rounded-full border border-gray-200 bg-white/70 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gray-500">
                     {section.eyebrow}
-                  </p>
-                  <h2 className="mt-3 text-3xl font-black tracking-tight">{section.title}</h2>
-                  <div className="mt-5 space-y-5 text-base leading-8 text-neutral-800">
+                  </span>
+                  <h2 className="mt-3 text-2xl font-black tracking-tight text-[#1a1a2e]">{section.title}</h2>
+                  <div className="mt-4 space-y-4 text-base leading-8 text-gray-700">
                     {section.paragraphs.map((paragraph) => (
                       <p key={paragraph}>{paragraph}</p>
                     ))}
@@ -293,23 +303,23 @@ export default function AboutPage() {
         </section>
 
         <section className="mt-10 grid gap-6 lg:grid-cols-2">
-          <section className="border-4 border-black bg-white p-8 shadow-[10px_10px_0_0_#111]">
-            <p className="font-mono text-[11px] font-black uppercase tracking-[0.24em] text-[#004aad]">
+          <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+            <span className="inline-block rounded-full border border-gray-200 bg-gray-100 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gray-500">
               Why this matters
-            </p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight">
+            </span>
+            <h2 className="mt-3 text-2xl font-black tracking-tight">
               แอปนี้ไม่ได้สร้างมาเพื่อให้ฝึกเยอะขึ้น แต่สร้างมาเพื่อให้ฝึกถูกทาง
             </h2>
-            <p className="mt-4 text-base leading-8 text-neutral-700">
+            <p className="mt-4 text-base leading-8 text-gray-600">
               สำหรับ English Plan การเตรียมสอบที่ดีไม่ใช่แค่การทำโจทย์ให้มากที่สุด แต่คือการช่วยให้นักเรียนรู้ว่าควรฝึกอะไร ผิดเพราะอะไร และอะไรคือคอขวดที่กำลังกดคะแนนอยู่
             </p>
           </section>
 
-          <section className="border-4 border-black bg-[#004aad] p-8 text-white shadow-[10px_10px_0_0_#111]">
-            <p className="font-mono text-[11px] font-black uppercase tracking-[0.24em] text-[#ffcc00]">
+          <section className="rounded-2xl bg-[#004aad] p-6 text-white shadow-lg sm:p-8">
+            <span className="inline-block rounded-full bg-white/15 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-[#ffcc00]">
               Next step
-            </p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight">
+            </span>
+            <h2 className="mt-3 text-2xl font-black tracking-tight">
               พร้อมเริ่มฝึกแบบมีระบบแล้วหรือยัง
             </h2>
             <p className="mt-4 text-base leading-8 text-white/90">
@@ -319,13 +329,13 @@ export default function AboutPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/mini-diagnosis/start"
-                className="border-4 border-black bg-[#ffcc00] px-5 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#000]"
+                className="rounded-xl bg-[#ffcc00] px-5 py-3 text-sm font-bold text-neutral-900 shadow-md transition hover:bg-[#ffd633]"
               >
                 Mini diagnosis
               </Link>
               <Link
                 href="/mock-test/start"
-                className="border-4 border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-wide text-[#004aad] shadow-[6px_6px_0_0_#000]"
+                className="rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#004aad] shadow-md transition hover:bg-gray-50"
               >
                 Mock test
               </Link>
