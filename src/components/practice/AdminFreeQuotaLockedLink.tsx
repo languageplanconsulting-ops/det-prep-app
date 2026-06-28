@@ -145,7 +145,7 @@ export function AdminFreeQuotaLockedLink({
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">
                   เซ็ตที่รอคุณอยู่
                 </p>
-                <div className="mt-2 grid grid-cols-4 gap-1.5">
+                <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                   {PREVIEW_LABELS.map((label) => (
                     <div
                       key={label}

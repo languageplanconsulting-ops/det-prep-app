@@ -213,7 +213,7 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
           <img
             src={report.imageUrl}
             alt=""
-            className="max-h-80 w-full object-cover"
+            className="max-h-56 sm:max-h-80 w-full object-cover"
             referrerPolicy="no-referrer"
           />
         </div>
@@ -276,7 +276,7 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
         maxItems={8}
       />
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <PhotoCriterionBlock
           title="Grammar"
           titleEn={`Grammar (${nav.critEn})`}

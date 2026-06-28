@@ -80,7 +80,7 @@ export function DialogueSummaryDifficultySetsPage({
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.25em] text-ep-blue">
           Round {round} · {DIALOGUE_SUMMARY_DIFFICULTY_LABEL[difficulty]}
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Dialogue → summary — sets</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight">Dialogue → summary — sets</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Open a set to read the scenario and dialogue, then write your summary. Best score /{DIALOGUE_SUMMARY_MAX_SCORE}{" "}
           is saved per set.

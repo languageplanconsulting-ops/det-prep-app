@@ -53,7 +53,7 @@ export function GuideRevampBody({
   return (
     <div className="space-y-5">
       {/* outcome-first: why bother */}
-      <div className="rounded-2xl px-4 py-3.5" style={{ backgroundColor: `${accent}14` }}>
+      <div className="rounded-2xl px-3 py-2.5 sm:px-4 sm:py-3.5" style={{ backgroundColor: `${accent}14` }}>
         <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: accent }}>
           {outcomeLabel}
         </p>
@@ -81,7 +81,7 @@ export function GuideRevampBody({
       {/* honest mechanics + live credits (feedback-graded exams only) */}
       {mechanics ? (
         <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm font-bold">{mechanics.title}</p>
             <div className="text-right">
               <p className="font-mono text-base font-bold" style={{ color: accent }}>
@@ -157,7 +157,7 @@ export function GuideRevampFooter({
       <button
         type="button"
         onClick={onDismiss}
-        className="mt-2 w-full py-0.5 text-center text-sm font-semibold text-slate-400 hover:text-slate-600"
+        className="mt-2 w-full py-2.5 text-center text-sm font-semibold text-slate-400 hover:text-slate-600"
       >
         {secondaryLabel}
       </button>

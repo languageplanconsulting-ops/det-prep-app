@@ -11,7 +11,7 @@ import { LogoutButton } from "@/components/auth/LogoutButton";
 export function AdminShellBar() {
   return (
     <div
-      className="sticky top-14 z-[1000] flex flex-wrap items-center gap-x-3 gap-y-2 border-b-4 border-black bg-neutral-100 px-4 py-2.5 sm:top-[3.25rem]"
+      className="sticky top-14 z-[1000] flex flex-nowrap items-center gap-x-3 gap-y-2 overflow-x-auto md:flex-wrap border-b-4 border-black bg-neutral-100 px-3 sm:px-4 py-2.5 sm:top-[3.25rem]"
       style={{ fontFamily: "var(--font-jetbrains), monospace" }}
     >
       <Link
@@ -62,7 +62,7 @@ export function AdminShellBar() {
       >
         Back to app
       </Link>
-      <div className="ml-auto flex flex-wrap items-center gap-2">
+      <div className="ml-auto flex shrink-0 flex-wrap items-center gap-2">
         <LogoutButton />
         <AdminSimpleLogout />
       </div>

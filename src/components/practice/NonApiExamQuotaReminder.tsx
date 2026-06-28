@@ -129,7 +129,7 @@ export function NonApiExamQuotaReminder({ exam }: { exam: NonApiReminderExam }) 
           </p>
         </div>
 
-        <div className="grid min-w-[220px] gap-3 rounded-[24px] border border-black/10 bg-white/70 p-4 backdrop-blur-[1px] sm:min-w-[260px]">
+        <div className="grid min-w-0 gap-3 rounded-[24px] border border-black/10 bg-white/70 p-4 backdrop-blur-[1px] sm:min-w-[220px] lg:min-w-[260px]">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-black/45">

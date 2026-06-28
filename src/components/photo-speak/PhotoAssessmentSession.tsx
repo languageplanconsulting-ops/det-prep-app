@@ -364,7 +364,7 @@ export function PhotoAssessmentSession({
           <img
             src={item.imageUrl}
             alt=""
-            className="mb-4 max-h-72 w-full rounded-sm border object-cover"
+            className="mb-4 max-h-56 sm:max-h-72 w-full rounded-sm border object-cover"
             referrerPolicy="no-referrer"
           />
           <p className="text-sm font-bold text-neutral-900">{item.promptEn}</p>

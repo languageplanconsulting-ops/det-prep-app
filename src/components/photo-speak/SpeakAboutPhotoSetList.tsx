@@ -99,7 +99,7 @@ export function SpeakAboutPhotoSetList() {
             </>
           }
         />
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
           {([1, 2, 3, 4, 5] as const).map((round) => {
             const stats = getSpeakAboutPhotoRoundStats(round);
             return (
@@ -140,13 +140,13 @@ export function SpeakAboutPhotoSetList() {
         <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">
           Speak about photo
         </p>
-        <h1 className="mt-2 text-3xl font-black">Choose a photo</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-black">Choose a photo</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Quick mode: all uploaded photos are shown below (with round labels), using the same image bank as{" "}
           <strong>Write about photo</strong>. Tap <strong>Start</strong> to open a speaking attempt.
         </p>
       </header>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {([1, 2, 3, 4, 5] as const).map((round) => {
           const stats = getSpeakAboutPhotoRoundStats(round);
           return (

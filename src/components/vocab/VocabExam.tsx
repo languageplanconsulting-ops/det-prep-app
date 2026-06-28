@@ -108,7 +108,7 @@ export function VocabExam({
               {segment}
               {i < blankCount ? (
                 <span
-                  className={`mx-0.5 inline-block min-w-[4.5rem] border-b-4 border-ep-blue px-1 text-center font-black transition-[color,background-color,border-color,transform] duration-300 ease-out ${
+                  className={`mx-0.5 inline-block min-w-[3rem] sm:min-w-[4.5rem] border-b-4 border-ep-blue px-1 text-center font-black transition-[color,background-color,border-color,transform] duration-300 ease-out ${
                     filledCorrect[i] !== undefined
                       ? "scale-[1.02] text-ep-blue"
                       : "text-ep-blue/90"

@@ -335,7 +335,7 @@ export function WriteAboutPhotoSession({ itemId }: { itemId: string }) {
             <img
               src={item.imageUrl}
               alt=""
-              className="max-h-72 w-full object-cover"
+              className="max-h-56 sm:max-h-72 w-full object-cover"
               referrerPolicy="no-referrer"
             />
           </div>

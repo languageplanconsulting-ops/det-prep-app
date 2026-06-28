@@ -74,7 +74,7 @@ export function DialogueSummaryRoundDifficultyHub({ round }: { round: DialogueSu
 
       <header className="ep-brutal rounded-sm border-4 border-black bg-white p-6 shadow-[4px_4px_0_0_#000]">
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.25em] text-ep-blue">Round {round}</p>
-        <h1 className="mt-2 text-3xl font-black tracking-tight">Choose difficulty</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight">Choose difficulty</h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-600">
           Each level is scored out of {DIALOGUE_SUMMARY_MAX_SCORE} using the same rubric (relevancy, grammar, flow,
           vocabulary).

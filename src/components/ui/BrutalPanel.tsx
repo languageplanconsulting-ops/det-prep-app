@@ -25,7 +25,7 @@ export function BrutalPanel({
   if (elevated) {
     return (
       <section
-        className={`relative overflow-hidden rounded-sm border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000] ${className}`}
+        className={`relative overflow-hidden rounded-sm border-4 border-black bg-white p-4 sm:p-6 shadow-[5px_5px_0_0_#000] sm:shadow-[8px_8px_0_0_#000] ${className}`}
       >
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#004AAD_0%,#FFCC00_50%,#004AAD_100%)]"

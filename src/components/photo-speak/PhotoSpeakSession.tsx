@@ -340,7 +340,7 @@ export function PhotoSpeakSession({ itemId }: { itemId: string }) {
               referrerPolicy="no-referrer"
             />
           </div>
-          <p className="ep-stat mt-4 text-center text-6xl font-black text-ep-blue">
+          <p className="ep-stat mt-4 text-center text-4xl sm:text-6xl font-black text-ep-blue">
             {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}
           </p>
           <button

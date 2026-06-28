@@ -196,7 +196,7 @@ export function MockTestResultsClient({ sessionId }: { sessionId: string }) {
   return (
     <main className="mx-auto max-w-4xl space-y-8 px-4 py-10">
       <section
-        className={`${mt.border} ${mt.shadow} rounded-[4px] bg-[#004AAD] p-8 text-[#FFCC00]`}
+        className={`${mt.border} ${mt.shadow} rounded-[4px] bg-[#004AAD] p-5 sm:p-8 text-[#FFCC00]`}
       >
         <p className="text-sm font-bold opacity-90">
           {v2
@@ -204,7 +204,7 @@ export function MockTestResultsClient({ sessionId }: { sessionId: string }) {
             : "Overall / คะแนนรวม"}
         </p>
         <p
-          className="mt-2 text-7xl font-black tabular-nums"
+          className="mt-2 text-5xl sm:text-6xl md:text-7xl font-black tabular-nums"
           style={{ fontFamily: "var(--font-jetbrains), monospace" }}
         >
           {v2 ? overall.toFixed(1) : `~${overall}`}

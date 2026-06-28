@@ -117,7 +117,7 @@ export function PracticePageOverview() {
           {pulseError ? (
             <p className="mb-2 text-xs font-bold text-red-700">{pulseError}</p>
           ) : null}
-          <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div className="rounded-sm border-2 border-black bg-white p-2">
               <p
                 className={`ep-stat text-2xl font-bold text-ep-blue ${pulseLoading ? "opacity-60" : ""}`}

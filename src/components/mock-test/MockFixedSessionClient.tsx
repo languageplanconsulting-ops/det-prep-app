@@ -472,7 +472,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
           <p className="mt-2 text-sm font-bold text-neutral-700">
             Step {singleStepResult.stepIndex} ({singleStepResult.taskType})
           </p>
-          <p className="mt-3 text-4xl font-black text-[#004AAD]">{singleStepResult.score}/160</p>
+          <p className="mt-3 text-3xl sm:text-4xl font-black text-[#004AAD]">{singleStepResult.score}/160</p>
           <p className="mt-2 text-xs font-bold text-neutral-600">
             This preview mode runs one step only so you can QA UI + grading quickly.
           </p>

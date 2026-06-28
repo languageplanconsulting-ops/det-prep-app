@@ -123,7 +123,7 @@ export function PracticeExamCountdownPanel() {
             type="date"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            className="mt-1 w-full max-w-xs border-2 border-black bg-white px-2 py-2 text-sm font-bold text-neutral-900 shadow-[2px_2px_0_0_#000]"
+            className="mt-1 w-full max-w-sm sm:max-w-xs border-2 border-black bg-white px-2 py-2 text-sm font-bold text-neutral-900 shadow-[2px_2px_0_0_#000]"
           />
           <div className="mt-4 flex flex-wrap gap-2">
             <button

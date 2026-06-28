@@ -85,18 +85,18 @@ export function IntroModalShell({
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-6 pb-4 pt-6 md:px-8 md:pt-7">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3 border-b border-slate-200 px-4 sm:px-6 pb-4 pt-6 md:px-8 md:pt-7">
               <h1 id={labelledBy} className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
                 {title}
               </h1>
               {badge}
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto bg-[#f8fafc] px-6 py-6 md:px-8">
+            <div className="min-h-0 flex-1 overflow-y-auto bg-[#f8fafc] px-4 sm:px-6 py-6 md:px-8">
               {children}
             </div>
 
-            <div className="border-t border-slate-200 bg-white px-6 py-5 md:px-8">{footer}</div>
+            <div className="border-t border-slate-200 bg-white px-4 sm:px-6 py-5 md:px-8">{footer}</div>
           </div>
         ) : (
           /* ── ORIGINAL brutalist (users) ── */

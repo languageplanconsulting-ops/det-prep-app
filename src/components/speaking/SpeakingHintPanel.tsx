@@ -149,7 +149,7 @@ export function SpeakingHintPanel({ unlocked }: { unlocked: boolean }) {
           <div key={i} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3">
             <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xs font-bold text-white">{i + 1}</span>
             <div className="min-w-0">
-              <p className="font-mono text-sm font-semibold leading-6 text-slate-900">{p.en}</p>
+              <p className="font-mono text-sm font-semibold leading-6 text-slate-900 break-words">{p.en}</p>
               <p className="mt-0.5 text-xs text-slate-500">{p.th}</p>
             </div>
           </div>

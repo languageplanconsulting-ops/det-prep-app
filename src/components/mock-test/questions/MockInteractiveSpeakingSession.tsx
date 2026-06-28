@@ -594,7 +594,7 @@ export function MockInteractiveSpeakingSession({
           <p className="text-xs font-black uppercase tracking-widest text-neutral-500">
             Think time
           </p>
-          <p className="text-6xl font-black tabular-nums text-[#004AAD]">
+          <p className="text-4xl sm:text-6xl font-black tabular-nums text-[#004AAD]">
             {prepLeft}
             <span className="text-2xl">s</span>
           </p>

@@ -227,7 +227,7 @@ export function DictationReport({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-4">
               <div className="text-center">
-                <p className="text-4xl font-bold leading-none text-[#004AAD]">{Math.round(score)}</p>
+                <p className="text-3xl sm:text-4xl font-bold leading-none text-[#004AAD]">{Math.round(score)}</p>
                 <p className="text-xs text-slate-500">/ {maxScore}</p>
               </div>
               <div>

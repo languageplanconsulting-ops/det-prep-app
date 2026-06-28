@@ -337,7 +337,7 @@ export function HighlightedReadingText({
               {p.t}
             </button>
             {active ? (
-              <span className="absolute bottom-[calc(100%+8px)] left-1/2 z-20 w-[280px] -translate-x-1/2 rounded-sm border-2 border-black bg-white p-2 text-left shadow-[4px_4px_0_0_#000]">
+              <span className="absolute bottom-[calc(100%+8px)] left-1/2 z-20 w-[min(280px,calc(100vw-32px))] -translate-x-1/2 rounded-sm border-2 border-black bg-white p-2 text-left shadow-[4px_4px_0_0_#000]">
                 <button
                   type="button"
                   onClick={() => onPickWord(null)}

@@ -84,7 +84,7 @@ export function ReadWriteRoundTopicsPage({ round }: { round: number }) {
         <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">
           Read & write (essay)
         </p>
-        <h1 className="mt-2 text-3xl font-black">Round {r}</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-black">Round {r}</h1>
         <p className="mt-2 text-sm text-neutral-600">
           {!mounted || (topics.length === 0 && hydrating)
             ? "Loading topics for this round…"

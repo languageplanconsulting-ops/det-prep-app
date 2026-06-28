@@ -217,7 +217,7 @@ export function EssayHintPanel({ unlocked }: { unlocked: boolean }) {
               {i + 1}
             </span>
             <div className="min-w-0">
-              <p className="font-mono text-sm font-semibold leading-6 text-slate-900">{s.en}</p>
+              <p className="font-mono text-sm font-semibold leading-6 text-slate-900 break-words">{s.en}</p>
               <p className="mt-0.5 text-xs text-slate-500">{s.th}</p>
             </div>
           </div>

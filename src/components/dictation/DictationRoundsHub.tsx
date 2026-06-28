@@ -151,7 +151,7 @@ export function DictationRoundsHub() {
           LITERACY · DICTATION
         </div>
 
-        <h1 className="text-4xl font-black uppercase italic leading-none tracking-tighter md:text-5xl">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase italic leading-none tracking-tighter">
           เขียนตามคำบอก <br />
           <span className="not-italic text-[#004aad]">Listen and Type</span>
         </h1>

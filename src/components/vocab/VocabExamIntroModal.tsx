@@ -156,7 +156,7 @@ export function VocabExamIntroModal() {
             <p className="mb-3 text-center font-mono text-xs font-black uppercase tracking-widest">
               Select Your Challenge / เลือกความท้าทาย
             </p>
-            <div className="flex justify-around gap-2">
+            <div className="flex flex-col sm:flex-row justify-around gap-2">
               <div className="flex flex-col items-center">
                 <div className="mb-1 border-2 border-black bg-green-400 px-2 py-0.5 text-[0.75rem] font-extrabold uppercase">
                   Easy

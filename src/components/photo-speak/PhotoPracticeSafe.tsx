@@ -121,7 +121,7 @@ export function PhotoPracticeSafe({ mode }: Props) {
         <img
           src={item.imageUrl}
           alt=""
-          className="max-h-[26rem] w-full rounded-sm border border-neutral-200 object-cover"
+          className="max-h-64 sm:max-h-[26rem] w-full rounded-sm border border-neutral-200 object-cover"
           referrerPolicy="no-referrer"
         />
         <p className="mt-4 text-sm font-bold text-neutral-900">{item.promptEn}</p>

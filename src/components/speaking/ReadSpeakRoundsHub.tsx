@@ -28,7 +28,7 @@ export function ReadSpeakRoundsHub() {
 
   if (soft) {
     return (
-      <div className="mx-auto max-w-6xl space-y-6 py-2">
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-2">
         <Link href="/practice" className="text-sm font-semibold text-[#004AAD] hover:underline">
           ← กลับหน้าฝึก
         </Link>

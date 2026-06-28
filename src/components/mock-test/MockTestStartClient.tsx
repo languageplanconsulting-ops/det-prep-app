@@ -497,7 +497,7 @@ export function MockTestStartClient() {
   if (!launchLive && !adminCanPreview) {
     return (
       <main className="mx-auto max-w-5xl space-y-8 px-4 py-10">
-        <section className="border-4 border-black bg-white p-8 shadow-[8px_8px_0_0_#111]">
+        <section className="border-4 border-black bg-white p-5 sm:p-8 shadow-[8px_8px_0_0_#111]">
           <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#0055FF]">DET · MOCK CENTER</p>
           <h1 className="mt-3 text-4xl font-black uppercase italic tracking-tighter md:text-5xl">Coming Soon</h1>
           <p className="mt-4 text-base font-bold text-neutral-900">{MOCK_TEST_LAUNCH_MESSAGE_TH}</p>
@@ -970,7 +970,7 @@ export function MockTestStartClient() {
           <Link href="/practice" className="mb-2 inline-flex items-center gap-2 font-mono text-xs font-bold hover:underline">
             ← BACK / กลับ
           </Link>
-          <h1 className="text-4xl font-black uppercase italic tracking-tighter leading-none md:text-6xl">
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none">
             DET · MOCK CENTER <br />
             <span className="not-italic text-[#0055FF]">แดชบอร์ดและการจำลองสอบ</span>
           </h1>
@@ -1025,7 +1025,7 @@ export function MockTestStartClient() {
             <div className="grid gap-6 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:15px_15px] bg-white p-6 md:grid-cols-12 md:items-center">
               <div className="flex flex-col items-center justify-center py-2 md:col-span-4 md:border-r-4 md:border-dashed md:border-black">
                 <p className="mb-1 font-mono text-xs font-bold uppercase text-gray-400">High Score</p>
-                <p className="text-7xl font-black tracking-tighter text-[#0055FF]">{fmtScore(bestAttempt?.actual_total)}</p>
+                <p className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter text-[#0055FF]">{fmtScore(bestAttempt?.actual_total)}</p>
                 <p className="text-xs font-bold">Estimated Overall</p>
               </div>
               <div className="grid grid-cols-2 gap-3 md:col-span-8 lg:grid-cols-4">
@@ -1066,7 +1066,7 @@ export function MockTestStartClient() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] border-collapse text-left">
+              <table className="w-full min-w-[560px] md:min-w-0 border-collapse text-left">
                 <thead className="border-b-2 border-black bg-gray-100 font-mono text-[10px] uppercase">
                   <tr>
                     <th className="border-r-2 border-black p-3">Date / เวลา</th>
@@ -1205,11 +1205,11 @@ export function MockTestStartClient() {
         >
           <div className="mx-auto flex min-h-full max-w-5xl items-center justify-center">
             {starting ? (
-              <div className="w-full max-w-2xl border-4 border-black bg-white p-8 shadow-[10px_10px_0_0_#111] md:p-10">
+              <div className="w-full max-w-2xl border-4 border-black bg-white p-5 sm:p-8 md:p-10 shadow-[10px_10px_0_0_#111]">
                 <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#004aad]">
                   Launch Sequence // กำลังเปิดข้อสอบ
                 </p>
-                <h2 className="mt-3 text-4xl font-black uppercase italic leading-none tracking-tighter md:text-5xl">
+                <h2 className="mt-3 text-2xl sm:text-4xl md:text-5xl font-black uppercase italic leading-none tracking-tighter">
                   Starting Mock <br />
                   <span className="not-italic text-[#004aad]">Please wait</span>
                 </h2>
@@ -1264,17 +1264,17 @@ export function MockTestStartClient() {
               </div>
             ) : (
               <div className="w-full max-w-2xl border-4 border-black bg-white p-6 shadow-[10px_10px_0_0_#111] md:p-10">
-                <div className="mb-8 flex items-end justify-between border-b-4 border-black pb-6">
+                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b-4 border-black pb-4 sm:pb-6">
                   <div>
                     <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#004aad]">
                       Preflight Check // ก่อนเริ่มสอบ
                     </p>
-                    <h2 className="mt-2 text-4xl font-black uppercase italic leading-none tracking-tighter md:text-5xl">
+                    <h2 className="mt-2 text-2xl sm:text-4xl md:text-5xl font-black uppercase italic leading-none tracking-tighter">
                       ยืนยันการเริ่มสอบ <br />
                       <span className="not-italic text-[#004aad]">Start Mock Set</span>
                     </h2>
                   </div>
-                  <div className="min-w-[100px] border-[3px] border-black bg-[#ffcc00] p-2 text-center">
+                  <div className="shrink-0 border-[3px] border-black bg-[#ffcc00] p-2 text-center sm:min-w-[100px]">
                     <p className="font-mono text-[9px] font-black uppercase">Tier Status</p>
                     <p className="text-xl font-black uppercase italic">{effectiveTier}</p>
                   </div>
@@ -1438,7 +1438,7 @@ export function MockTestStartClient() {
                   <button
                     type="button"
                     onClick={() => setShowPreflight(false)}
-                    className="border-[3px] border-black bg-white px-10 py-4 font-black uppercase text-gray-500 shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111]"
+                    className="border-[3px] border-black bg-white px-6 sm:px-10 py-3 sm:py-4 font-black uppercase text-gray-500 shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111]"
                   >
                     Cancel
                   </button>

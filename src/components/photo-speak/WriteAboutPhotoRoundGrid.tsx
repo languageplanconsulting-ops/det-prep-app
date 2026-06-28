@@ -75,7 +75,7 @@ export function WriteAboutPhotoRoundGrid({ roundParam }: { roundParam: string })
       </div>
       <header className="ep-brutal rounded-sm border-black bg-white p-6">
         <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">Round {round}</p>
-        <h1 className="mt-2 text-3xl font-black">Write about photo</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-black">Write about photo</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Five rounds, no difficulty tiers. Pick a photo — timer, then type or dictate. Thumbnails show your
           latest score after you submit.

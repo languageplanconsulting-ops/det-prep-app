@@ -303,7 +303,7 @@ export function ReadSpeakSession({
               >
                 {done ? "✓" : n}
               </span>
-              <span className={`whitespace-nowrap text-xs font-semibold ${active ? "text-[#004AAD]" : "text-slate-400"}`}>
+              <span className={`text-xs font-semibold hidden sm:inline ${active ? "text-[#004AAD]" : "text-slate-400"}`}>
                 {label}
               </span>
               {n < 3 ? <span className="h-px flex-1 bg-slate-200" /> : null}
@@ -363,7 +363,7 @@ export function ReadSpeakSession({
         <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
           <p className="text-[10px] font-bold uppercase tracking-widest text-ep-blue">กำลังเตรียมตัว</p>
           <p className="mt-2 text-sm font-bold text-slate-800">{selectedQuestion.promptEn}</p>
-          <p className="mt-6 font-mono text-6xl font-black text-[#004AAD]">
+          <p className="mt-6 font-mono text-4xl sm:text-6xl font-black text-[#004AAD]">
             {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}
           </p>
           <p className="mt-2 text-xs text-slate-400">โครง: เลือกข้าง → 2 เหตุผล → ตัวอย่างสั้น → สรุป</p>
@@ -502,11 +502,11 @@ export function ReadSpeakSession({
                 setPhase("pick-question");
                 setSelectedQuestion(null);
               }}
-              className="font-semibold text-slate-500 hover:text-[#004AAD]"
+              className="py-2 font-semibold text-slate-500 hover:text-[#004AAD]"
             >
               ← เลือกคำถามอื่น
             </button>
-            <Link href={roundBase} className="font-semibold text-slate-500 hover:text-[#004AAD]">
+            <Link href={roundBase} className="py-2 font-semibold text-slate-500 hover:text-[#004AAD]">
               หัวข้ออื่นในรอบนี้
             </Link>
           </div>

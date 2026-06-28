@@ -139,7 +139,7 @@ export function AnnotatedEssay({
         Annotated feedback — hover each highlight · red grammar · blue vocab · green
         coherence · yellow task
       </p>
-      <div className="whitespace-pre-wrap font-medium text-neutral-900">{out}</div>
+      <div className="whitespace-pre-wrap break-words font-medium text-neutral-900">{out}</div>
     </div>
   );
 }

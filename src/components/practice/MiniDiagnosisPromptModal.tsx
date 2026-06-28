@@ -34,7 +34,7 @@ export function MiniDiagnosisPromptModal() {
       onClick={close}
     >
       <div
-        className="relative w-full max-w-md rounded-[20px] border-2 border-[#111111] bg-white p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.15)]"
+        className="relative w-full max-w-sm sm:max-w-md rounded-[20px] border-2 border-[#111111] bg-white p-4 sm:p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.15)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-2 inline-block rounded-full border border-gray-200 bg-gray-100 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-gray-500">

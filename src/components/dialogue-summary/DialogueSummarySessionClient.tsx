@@ -203,7 +203,7 @@ export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryEx
           </div>
         </div>
         <div className="relative px-6 py-8">
-          <h1 className="text-3xl font-black leading-tight tracking-tight text-neutral-900 md:text-4xl">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-tight text-neutral-900">
             {exam.titleEn}
           </h1>
           <p className="mt-2 text-lg font-semibold text-neutral-600">{exam.titleTh}</p>

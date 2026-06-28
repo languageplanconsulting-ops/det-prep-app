@@ -39,7 +39,7 @@ export function SpeakingVocabularyUpgradePanel({
             key={u.id}
             className="rounded-sm border-2 border-black bg-[#fafafa] p-4 text-sm shadow-[2px_2px_0_0_#000]"
           >
-            <p className="text-base font-medium text-neutral-900">
+            <p className="text-base font-medium text-neutral-900 break-words">
               <span className="line-through decoration-neutral-400 text-neutral-500">
                 {u.originalWord}
               </span>

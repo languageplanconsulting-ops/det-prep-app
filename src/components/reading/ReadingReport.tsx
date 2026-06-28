@@ -292,7 +292,7 @@ function VocabRow({
           ✓ Saved to notebook
         </span>
       ) : (
-        <div className="mt-1 grid grid-cols-2 gap-2">
+        <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => void save()}

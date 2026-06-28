@@ -145,7 +145,7 @@ export function FitbReportPanel({
                       <button
                         type="button"
                         onClick={() => dismissMistake(i)}
-                        className="shrink-0 border-2 border-black bg-white px-2 py-1 text-xs font-bold shadow-[2px_2px_0_0_#000]"
+                        className="shrink-0 border-2 border-black bg-white px-3 py-1.5 sm:px-2 sm:py-1 text-xs font-bold shadow-[2px_2px_0_0_#000]"
                       >
                         I already know this
                       </button>
@@ -153,7 +153,7 @@ export function FitbReportPanel({
                     <button
                       type="button"
                     onClick={() => void addWordToNotebook(i)}
-                      className="shrink-0 border-2 border-black bg-ep-yellow px-2 py-1 text-xs font-bold shadow-[2px_2px_0_0_#000]"
+                      className="shrink-0 border-2 border-black bg-ep-yellow px-3 py-1.5 sm:px-2 sm:py-1 text-xs font-bold shadow-[2px_2px_0_0_#000]"
                     >
                       Add to notebook
                     </button>

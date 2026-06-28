@@ -73,7 +73,7 @@ export function VocabRoundsHub() {
         />
         <VocabularyBuilderAvailabilityBanner />
         <RoundsExplainer />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {VOCAB_ROUND_NUMBERS.map((round) => (
             <RoundCard
               key={`${round}-${v}`}
@@ -115,7 +115,7 @@ export function VocabRoundsHub() {
           COMPREHENSION · VOCABULARY IN CONTEXT
         </div>
 
-        <h1 className="text-4xl font-black uppercase italic leading-none tracking-tighter md:text-5xl">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase italic leading-none tracking-tighter">
           คลังข้อสอบคำศัพท์ <br />
           <span className="text-2xl not-italic text-[#004aad] md:text-3xl">Vocabulary Exam Bank</span>
         </h1>

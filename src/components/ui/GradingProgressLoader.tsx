@@ -64,8 +64,8 @@ export function GradingProgressLoader({
       <div
         className={
           premium
-            ? "ep-brutal relative w-full max-w-xl overflow-hidden border-4 border-black bg-white p-6 shadow-[10px_10px_0_0_#000]"
-            : "ep-brutal w-full max-w-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#000]"
+            ? "ep-brutal relative w-full max-w-xl overflow-hidden border-4 border-black bg-white p-4 sm:p-6 shadow-[6px_6px_0_0_#000] sm:shadow-[10px_10px_0_0_#000]"
+            : "ep-brutal w-full max-w-lg border-4 border-black bg-white p-4 sm:p-6 shadow-[6px_6px_0_0_#000] sm:shadow-[8px_8px_0_0_#000]"
         }
       >
         {premium ? (

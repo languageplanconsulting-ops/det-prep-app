@@ -143,7 +143,7 @@ export function MockFixedResultsLoadingClient({ sessionId }: { sessionId: string
         <div className="mt-4 grid gap-4 sm:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-[4px] border-4 border-black bg-[#004AAD] px-4 py-5 text-center text-[#FFCC00]">
             <p className="text-xs font-bold uppercase tracking-wide">Countdown</p>
-            <p className="mt-1 text-5xl font-black tabular-nums">{fmt(remaining)}</p>
+            <p className="mt-1 text-4xl sm:text-5xl font-black tabular-nums">{fmt(remaining)}</p>
             <p className="mt-2 text-xs font-bold text-[#FFCC00]/90">Approximate processing window</p>
           </div>
           <div className="rounded-[4px] border-4 border-black bg-white p-4">

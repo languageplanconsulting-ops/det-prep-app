@@ -361,7 +361,7 @@ export function ReadWriteSession({
 
       {phase === "prep-run" ? (
         <BrutalPanel title="Planning…" variant="accent">
-          <p className="ep-stat text-6xl font-black text-ep-blue">{secondsLeft}</p>
+          <p className="ep-stat text-4xl sm:text-6xl font-black text-ep-blue">{secondsLeft}</p>
           <button
             type="button"
             onClick={() => setPhase("write")}

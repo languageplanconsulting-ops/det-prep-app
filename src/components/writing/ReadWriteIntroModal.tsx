@@ -215,7 +215,7 @@ export function ReadWriteIntroModal({
                   feedback credit is used when you submit for grading.
                 </p>
               </div>
-              <div className="min-w-[140px] border-2 border-black bg-white p-2 text-center">
+              <div className="w-full md:min-w-[140px] border-2 border-black bg-white p-2 text-center">
                 <p className="font-mono text-[10px] font-bold">CREDITS LEFT</p>
                 <p className="text-2xl font-black text-emerald-500">
                   {showCredits ? `${remaining} / ${limit}` : "PLAN-BASED"}

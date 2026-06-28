@@ -75,7 +75,7 @@ export function SpeakAboutPhotoRoundGrid({ roundParam }: { roundParam: string })
       </div>
       <header className="ep-brutal rounded-sm border-black bg-white p-6">
         <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">Round {round}</p>
-        <h1 className="mt-2 text-3xl font-black">Speak about photo</h1>
+        <h1 className="mt-2 text-2xl sm:text-3xl font-black">Speak about photo</h1>
         <p className="mt-2 text-sm text-neutral-600">
           Same photos as <strong>Write about photo</strong> (admin upload). Thumbnails stay blurred here until
           you tap <strong>Start</strong>. After you submit, your score appears and you can open{" "}
