@@ -5,15 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { PaywallUpsellCard } from "@/components/upsell/PaywallUpsellCard";
-import { CadenceTile } from "@/components/mock-test/dashboard/CadenceTile";
-import { HowToUsePanel } from "@/components/mock-test/dashboard/HowToUsePanel";
-import { SetArchive } from "@/components/mock-test/dashboard/SetArchive";
 import type {
   MockSetGroup,
   SetAttemptStats,
 } from "@/components/mock-test/dashboard/types";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
-import { MOCK_TEST_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
+import { MOCK_TEST_MONTHLY_LIMIT } from "@/lib/access-control";
 import { FIXED_MOCK_ESTIMATED_DURATION_LABEL } from "@/lib/mock-test/fixed-sequence";
 import { countBillableMockFixedSessions, mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
 import {
@@ -44,11 +41,6 @@ type MockAttemptRow = {
 
 type MockSetRow = { id: string; name: string; stepCount: number };
 
-function fmtScore(n: number | null | undefined): string {
-  if (n == null || !Number.isFinite(Number(n))) return "—";
-  return String(Math.round(Number(n)));
-}
-
 function sortMockAttempts(list: MockAttemptRow[]) {
   return [...list].sort((a, b) => {
     const pa = a.dashboard_saved_at != null && a.dashboard_saved_at !== "" ? 1 : 0;
@@ -58,79 +50,12 @@ function sortMockAttempts(list: MockAttemptRow[]) {
   });
 }
 
-function formatDateShort(value: string | null | undefined): string {
-  if (!value) return "—";
-  try {
-    return new Date(value).toLocaleDateString(undefined, {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  } catch {
-    return "—";
-  }
-}
-
-function formatDateTime(value: string | null | undefined): string {
-  if (!value) return "—";
-  try {
-    return new Date(value).toLocaleString(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  } catch {
-    return "—";
-  }
-}
-
-function csvEscape(value: string): string {
-  const normalized = value.replaceAll('"', '""');
-  return `"${normalized}"`;
-}
-
 const MOCK_START_LOADING_STEPS = [
   "Locking your mock credit…",
   "Preparing the 20-step sequence…",
   "Loading timers and skill targets…",
   "Opening your exam workspace…",
 ] as const;
-
-function downloadAttemptsCsv(attempts: MockAttemptRow[], setNameById: Record<string, string>) {
-  const header = [
-    "date",
-    "mock_set",
-    "saved_to_dashboard",
-    "total",
-    "literacy",
-    "comprehension",
-    "production",
-    "conversation",
-    "session_id",
-  ];
-  const rows = attempts.map((row) => [
-    formatDateTime(row.created_at),
-    setNameById[row.set_id] ?? row.set_id,
-    row.dashboard_saved_at ? "yes" : "no",
-    fmtScore(row.actual_total),
-    fmtScore(row.actual_writing),
-    fmtScore(row.actual_reading),
-    fmtScore(row.actual_speaking),
-    fmtScore(row.actual_listening),
-    row.session_id,
-  ]);
-  const csv = [header, ...rows]
-    .map((line) => line.map((cell) => csvEscape(String(cell))).join(","))
-    .join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `mock-test-history-${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
 
 function archiveKeyFromName(name: string): { key: string; label: string } {
   const raw = name.trim();
@@ -160,35 +85,6 @@ function archiveKeyFromName(name: string): { key: string; label: string } {
   return { key: "archive", label: "ARCHIVE" };
 }
 
-function tierMarketing(tier: Tier) {
-  if (tier === "free") {
-    return {
-      headline: "Mock tests are locked on Free.",
-      body: "Upgrade to Basic to unlock 2 mock tests per month and start building a score history.",
-      cta: "Upgrade to Basic",
-    };
-  }
-  if (tier === "basic") {
-    return {
-      headline: "Need more mock reps each month?",
-      body: "Premium raises you to 4 mock tests per month so you can measure progress more often.",
-      cta: "See Premium",
-    };
-  }
-  if (tier === "premium") {
-    return {
-      headline: "Want the highest mock flexibility?",
-      body: "VIP gives you 6 mock tests per month and the strongest monthly mock runway.",
-      cta: "See VIP",
-    };
-  }
-  return {
-    headline: "You already have the highest mock access.",
-    body: "Use all 6 monthly mocks strategically: one baseline, focused retakes, and one final benchmark.",
-    cta: "View Pricing",
-  };
-}
-
 export function MockTestStartClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -215,7 +111,6 @@ export function MockTestStartClient() {
   const [fastPassPreviewMode, setFastPassPreviewMode] = useState(false);
   const [previewSeparateMode, setPreviewSeparateMode] = useState(false);
   const [previewStepIndex, setPreviewStepIndex] = useState(13);
-  const [unpinSessionId, setUnpinSessionId] = useState<string | null>(null);
   const [startVisualTick, setStartVisualTick] = useState(0);
   // Soft (admin) before-start browse state — search + status filter over 50+ sets.
   const [softQuery, setSoftQuery] = useState("");
@@ -328,9 +223,6 @@ export function MockTestStartClient() {
     return [...map.values()].sort((a, b) => b.key.localeCompare(a.key));
   }, [sets]);
 
-  const sortedAttempts = attempts.slice(0, 50);
-  const pinnedAttemptCount = attempts.filter((row) => row.dashboard_saved_at).length;
-  const marketing = tierMarketing(effectiveTier);
   const selectedSetName = setNameById[selectedSetId] ?? "—";
   const mockBlockedSpec = useMemo(() => {
     if (hasUser === false && !adminCanPreview) return null;
@@ -474,26 +366,6 @@ export function MockTestStartClient() {
     }
   };
 
-  const unpinFromDashboard = (sessionId: string) => {
-    void (async () => {
-      setUnpinSessionId(sessionId);
-      try {
-        const res = await fetch(`/api/mock-test/fixed/results/${sessionId}/dashboard`, {
-          method: "PATCH",
-          credentials: "same-origin",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ saved: false }),
-        });
-        if (!res.ok) return;
-        setAttempts((prev) =>
-          sortMockAttempts(prev.map((r) => (r.session_id === sessionId ? { ...r, dashboard_saved_at: null } : r))),
-        );
-      } finally {
-        setUnpinSessionId(null);
-      }
-    })();
-  };
-
   if (!launchLive && !adminCanPreview) {
     return (
       <main className="mx-auto max-w-5xl space-y-8 px-4 py-10">
@@ -521,10 +393,10 @@ export function MockTestStartClient() {
     );
   }
 
-  if (adminCanPreview) {
-    // ── Admin / preview "Progress Journey" before-start page (50+ sets) ──
-    // Reuses ALL the same data + handlers; only the layout changes. Real
-    // (non-admin) users fall through to the original brutalist dashboard below.
+  {
+    // ── Unified "Progress Journey" before-start page (admin + learner) ──
+    // Everyone gets the same layout. The only admin-specific UI is the preview
+    // controls box inside the preflight modal, gated by `adminCanPreview`.
     type SoftPick = { kind: "continue" | "weakness" | "best"; set: MockSetRow; rationale: string };
     const softPicks: SoftPick[] = [];
     if (currentGroup) {
@@ -920,26 +792,29 @@ export function MockTestStartClient() {
                     </div>
                   </div>
 
-                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Admin controls</p>
-                    <div className="mt-2 space-y-2 text-[12px] font-semibold text-slate-700">
-                      <label className="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" checked={adminPreviewMode} onChange={(e) => setAdminPreviewMode(e.target.checked)} className="h-4 w-4 accent-[#004AAD]" /> Admin test mode (ข้ามการรอ 10 นาที)
-                      </label>
-                      <label className="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" checked={skipTimerMode} onChange={(e) => setSkipTimerMode(e.target.checked)} className="h-4 w-4 accent-[#004AAD]" /> ข้ามการจับเวลา
-                      </label>
-                      <label className="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" checked={fastPassPreviewMode} onChange={(e) => setFastPassPreviewMode(e.target.checked)} className="h-4 w-4 accent-[#004AAD]" /> Fast pass (ข้ามทั้ง 20 ข้ออัตโนมัติ)
-                      </label>
+                  {adminCanPreview ? (
+                    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Admin controls</p>
+                      <div className="mt-2 space-y-2 text-[12px] font-semibold text-slate-700">
+                        <label className="flex cursor-pointer items-center gap-2">
+                          <input type="checkbox" checked={adminPreviewMode} onChange={(e) => setAdminPreviewMode(e.target.checked)} className="h-4 w-4 accent-[#004AAD]" /> Admin test mode (ข้ามการรอ 10 นาที)
+                        </label>
+                        <label className="flex cursor-pointer items-center gap-2">
+                          <input type="checkbox" checked={skipTimerMode} onChange={(e) => setSkipTimerMode(e.target.checked)} className="h-4 w-4 accent-[#004AAD]" /> ข้ามการจับเวลา
+                        </label>
+                        <label className="flex cursor-pointer items-center gap-2">
+                          <input type="checkbox" checked={fastPassPreviewMode} onChange={(e) => setFastPassPreviewMode(e.target.checked)} className="h-4 w-4 accent-[#004AAD]" /> Fast pass (ข้ามทั้ง 20 ข้ออัตโนมัติ)
+                        </label>
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
 
                   <div className="mt-5 flex gap-3">
                     <button
                       type="button"
                       onClick={() => void start()}
-                      className="flex-1 rounded-xl bg-[#004AAD] py-3 text-base font-bold text-[#FFCC00] shadow-sm transition hover:brightness-110"
+                      disabled={!canStart}
+                      className="flex-1 rounded-xl bg-[#004AAD] py-3 text-base font-bold text-[#FFCC00] shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       ยืนยัน เริ่มสอบ
                     </button>
@@ -951,6 +826,13 @@ export function MockTestStartClient() {
                       ยกเลิก
                     </button>
                   </div>
+                  {!canStart && !adminCanPreview ? (
+                    <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
+                      {effectiveTier === "free"
+                        ? "Mock Test ใช้ได้ตั้งแต่แพ็กเกจ Basic ขึ้นไป — อัปเกรดเพื่อเริ่มสอบจำลอง"
+                        : "ใช้สิทธิ์ Mock Test ของเดือนนี้ครบแล้ว — รอเดือนหน้า หรืออัปเกรด/ซื้อเครดิตเพิ่ม"}
+                    </p>
+                  ) : null}
                   {startError ? (
                     <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 ring-1 ring-rose-200">{startError}</p>
                   ) : null}
@@ -962,498 +844,4 @@ export function MockTestStartClient() {
       </>
     );
   }
-
-  return (
-    <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 md:px-8">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <Link href="/practice" className="mb-2 inline-flex items-center gap-2 font-mono text-xs font-bold hover:underline">
-            ← BACK / กลับ
-          </Link>
-          <h1 className="text-2xl sm:text-4xl md:text-6xl font-black uppercase italic tracking-tighter leading-none">
-            DET · MOCK CENTER <br />
-            <span className="not-italic text-[#0055FF]">แดชบอร์ดและการจำลองสอบ</span>
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm font-bold text-neutral-700">
-            Full 20-step simulation · {FIXED_MOCK_ESTIMATED_DURATION_LABEL} · one credit is used when you start.
-          </p>
-        </div>
-
-        <CadenceTile
-          used={used}
-          limit={limit}
-          remainingCount={remainingCount}
-          mockAddonRemaining={mockAddonRemaining}
-          lifetimeAttempts={attempts.length}
-          tier={effectiveTier}
-          loading={tierLoading}
-        />
-      </div>
-
-      <HowToUsePanel
-        firstSetName={
-          canShowWelcomeCta && recommendedSetId
-            ? currentGroup?.rows.find((r) => r.id === recommendedSetId)?.name
-            : undefined
-        }
-        onStartFirst={
-          canShowWelcomeCta && recommendedSetId
-            ? () => pickSet(recommendedSetId)
-            : undefined
-        }
-      />
-
-      <SetArchive
-        currentGroup={currentGroup}
-        pastGroups={pastGroups}
-        statsBySetId={statsBySetId}
-        attemptCount={attempts.length}
-        recommendedSetId={recommendedSetId}
-        onPickSet={pickSet}
-      />
-
-      {!isFirstTimeUser ? (
-        <>
-          <section className="overflow-hidden border-4 border-black bg-white shadow-[8px_8px_0_0_#111]">
-            <div className="flex items-center justify-between bg-black p-3 text-white">
-              <h2 className="text-sm font-black uppercase italic tracking-widest">Personal Best // คะแนนสูงสุดของคุณ</h2>
-              <span className="font-mono text-[10px] opacity-60">
-                UPDATED: {bestAttempt ? formatDateShort(bestAttempt.created_at) : "—"}
-              </span>
-            </div>
-
-            <div className="grid gap-6 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:15px_15px] bg-white p-6 md:grid-cols-12 md:items-center">
-              <div className="flex flex-col items-center justify-center py-2 md:col-span-4 md:border-r-4 md:border-dashed md:border-black">
-                <p className="mb-1 font-mono text-xs font-bold uppercase text-gray-400">High Score</p>
-                <p className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter text-[#0055FF]">{fmtScore(bestAttempt?.actual_total)}</p>
-                <p className="text-xs font-bold">Estimated Overall</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3 md:col-span-8 lg:grid-cols-4">
-                <div className="border-[3px] border-black bg-white p-2 text-center">
-                  <p className="font-mono text-[8px] font-black uppercase opacity-50">Lit</p>
-                  <p className="text-2xl font-black text-[#FF5C00]">{fmtScore(bestAttempt?.actual_writing)}</p>
-                </div>
-                <div className="border-[3px] border-black bg-white p-2 text-center">
-                  <p className="font-mono text-[8px] font-black uppercase opacity-50">Comp</p>
-                  <p className="text-2xl font-black text-[#FF5C00]">{fmtScore(bestAttempt?.actual_reading)}</p>
-                </div>
-                <div className="border-[3px] border-black bg-white p-2 text-center">
-                  <p className="font-mono text-[8px] font-black uppercase opacity-50">Prod</p>
-                  <p className="text-2xl font-black text-[#FF5C00]">{fmtScore(bestAttempt?.actual_speaking)}</p>
-                </div>
-                <div className="border-[3px] border-black bg-white p-2 text-center">
-                  <p className="font-mono text-[8px] font-black uppercase opacity-50">Conv</p>
-                  <p className="text-2xl font-black text-[#FF5C00]">{fmtScore(bestAttempt?.actual_listening)}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="overflow-hidden border-4 border-black bg-white shadow-[8px_8px_0_0_#111]">
-            <div className="flex items-center justify-between border-b-4 border-black bg-[#0055FF] p-3 text-white">
-              <div>
-                <h2 className="text-sm font-black uppercase italic tracking-widest">Attempt History // ประวัติการสอบ (Last 50)</h2>
-                <p className="mt-1 font-mono text-[10px] font-bold">{sortedAttempts.length}/50 COMPLETED</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => downloadAttemptsCsv(sortedAttempts, setNameById)}
-                disabled={sortedAttempts.length === 0}
-                className="border-2 border-black bg-[#FFD600] px-3 py-2 font-mono text-[10px] font-black uppercase text-black shadow-[3px_3px_0_0_#111] disabled:opacity-40"
-              >
-                Download CSV
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] md:min-w-0 border-collapse text-left">
-                <thead className="border-b-2 border-black bg-gray-100 font-mono text-[10px] uppercase">
-                  <tr>
-                    <th className="border-r-2 border-black p-3">Date / เวลา</th>
-                    <th className="border-r-2 border-black p-3">Mock Set / ชุดสอบ</th>
-                    <th className="border-r-2 border-black p-3 text-center">Score</th>
-                    <th className="border-r-2 border-black p-3 text-center">Pinned</th>
-                    <th className="p-3 text-center">Report</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 text-xs font-bold">
-                  {sortedAttempts.length > 0 ? (
-                    sortedAttempts.map((row) => {
-                      const isSaved = row.dashboard_saved_at != null && row.dashboard_saved_at !== "";
-                      return (
-                        <tr key={row.id} className="hover:bg-slate-50">
-                          <td className="border-r-2 border-black p-3 font-mono">{formatDateShort(row.created_at)}</td>
-                          <td className="border-r-2 border-black p-3 italic">{setNameById[row.set_id] ?? row.set_id.slice(0, 8)}</td>
-                          <td className="border-r-2 border-black p-3 text-center text-lg text-[#0055FF]">
-                            {fmtScore(row.actual_total)}
-                          </td>
-                          <td className="border-r-2 border-black p-3 text-center">
-                            {isSaved ? (
-                              <button
-                                type="button"
-                                disabled={unpinSessionId === row.session_id}
-                                onClick={() => unpinFromDashboard(row.session_id)}
-                                className="font-mono text-[10px] font-black uppercase underline disabled:opacity-40"
-                              >
-                                {unpinSessionId === row.session_id ? "..." : "Pinned"}
-                              </button>
-                            ) : (
-                              <span className="font-mono text-[10px] uppercase opacity-40">No</span>
-                            )}
-                          </td>
-                          <td className="p-3 text-center">
-                            <Link
-                              href={`/mock-test/fixed/results/${row.session_id}`}
-                              className="inline-block bg-black px-3 py-1 text-[9px] font-black uppercase text-white shadow-[3px_3px_0_0_#111]"
-                            >
-                              View Report
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr className="bg-gray-50 italic text-gray-400">
-                      <td colSpan={5} className="p-3 text-center font-mono text-[10px]">
-                        No completed mock attempts yet.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </>
-      ) : null}
-
-      {mockBlockedSpec ? <PaywallUpsellCard spec={mockBlockedSpec} compact /> : null}
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="border-4 border-black bg-white p-5 shadow-[8px_8px_0_0_#111]">
-          <p className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-[#0055FF]">ACCESS LOGIC</p>
-          <h3 className="mt-2 text-xl font-black">Monthly mock access by plan</h3>
-          <div className="mt-4 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
-            {(["free", "basic", "premium", "vip"] as const).map((tier) => (
-              <div key={tier} className={`border-[3px] border-black p-3 ${tier === effectiveTier ? "bg-[#FFD600]" : "bg-white"}`}>
-                <p className="font-mono text-[9px] font-black uppercase">{tier}</p>
-                <p className="mt-1 text-2xl font-black text-[#0055FF]">{MOCK_TEST_MONTHLY_LIMIT[tier]}</p>
-                <p className="text-[9px] font-bold uppercase">per month</p>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 text-xs font-bold text-neutral-700">
-            Free users cannot start mock tests. Basic gets 2/month, Premium gets 4/month, and VIP gets 6/month.
-          </p>
-        </div>
-
-        <div className="border-4 border-black bg-[#f0fdf4] p-5 shadow-[8px_8px_0_0_#111]">
-          <p className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-[#16a34a]">UPGRADE INCENTIVE</p>
-          <h3 className="mt-2 text-xl font-black">{marketing.headline}</h3>
-          <p className="mt-3 text-sm font-semibold text-neutral-700">{marketing.body}</p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link
-              href="/pricing"
-              className="border-[3px] border-black bg-[#22c55e] px-5 py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#111]"
-            >
-              {marketing.cta}
-            </Link>
-            <button
-              type="button"
-              onClick={() => recommendedSetId && pickSet(recommendedSetId)}
-              disabled={
-                !recommendedSetId || !canStart || (!adminCanPreview && tierLoading)
-              }
-              className="border-[3px] border-black bg-white px-5 py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#111] disabled:opacity-45"
-            >
-              Start recommended
-            </button>
-          </div>
-          <p className="mt-3 text-[11px] font-bold text-neutral-600">
-            The more monthly mocks you unlock, the more often you can benchmark, review weak skills, and prove score gains.
-          </p>
-        </div>
-      </div>
-
-      {adminCanPreview ? (
-        <div className="border-4 border-black bg-black p-3 font-mono text-[9px] leading-tight text-[#FFD600] shadow-[8px_8px_0_0_#111]">
-          NEXT_PUBLIC_MOCK_TEST_CLOSED={String(!launchLive)}
-          <br />
-          TOTAL_SETS_AVAILABLE: {sets.length}
-          <br />
-          USER_SESSION: {adminPreviewMode ? "ADMIN_PREVIEW" : "LEARNER_VIEW"}
-        </div>
-      ) : null}
-
-      <div className="flex flex-col items-center justify-between gap-4 border-t-2 border-dashed border-black pt-4 md:flex-row">
-        <p className="font-mono text-[9px] font-black uppercase text-gray-400">
-          DET Mock System // Dashboard View // Pinned reports: {pinnedAttemptCount}
-        </p>
-        <div className="flex gap-4">
-          <Link href="/pricing" className="font-mono text-[9px] font-black uppercase underline">Upgrade Plans</Link>
-          <Link href="/practice" className="font-mono text-[9px] font-black uppercase underline">Back to Practice</Link>
-        </div>
-      </div>
-
-      {showPreflight ? (
-        <div
-          className="fixed inset-0 z-[80] overflow-y-auto px-4 py-6 md:px-8"
-          style={{
-            backgroundImage: "radial-gradient(#111 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
-            backgroundColor: "#f3f4f6",
-          }}
-        >
-          <div className="mx-auto flex min-h-full max-w-5xl items-center justify-center">
-            {starting ? (
-              <div className="w-full max-w-2xl border-4 border-black bg-white p-5 sm:p-8 md:p-10 shadow-[10px_10px_0_0_#111]">
-                <p className="font-mono text-[10px] font-black uppercase tracking-[0.3em] text-[#004aad]">
-                  Launch Sequence // กำลังเปิดข้อสอบ
-                </p>
-                <h2 className="mt-3 text-2xl sm:text-4xl md:text-5xl font-black uppercase italic leading-none tracking-tighter">
-                  Starting Mock <br />
-                  <span className="not-italic text-[#004aad]">Please wait</span>
-                </h2>
-                <div className="mt-8 border-4 border-black bg-[#ffcc00] p-4 shadow-[4px_4px_0_0_#111]">
-                  <p className="text-sm font-black uppercase">Preparing your exam workspace</p>
-                  <p className="mt-2 text-[11px] font-bold text-black/80">
-                    Do not refresh this page. We are creating your session, locking your credit, and loading the first step.
-                  </p>
-                </div>
-                <div className="mt-8 border-4 border-black bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] font-black uppercase text-neutral-500">Progress</span>
-                    <span className="font-mono text-[10px] font-black uppercase text-[#004aad]">
-                      {Math.min(MOCK_START_LOADING_STEPS.length, startVisualTick + 1)}/{MOCK_START_LOADING_STEPS.length}
-                    </span>
-                  </div>
-                  <div className="mt-3 h-4 border-[3px] border-black bg-neutral-100">
-                    <div
-                      className="h-full bg-[#004aad] transition-[width] duration-500"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          ((startVisualTick % MOCK_START_LOADING_STEPS.length) + 1) /
-                            MOCK_START_LOADING_STEPS.length *
-                            100,
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                  <p className="mt-4 text-sm font-black text-neutral-900">
-                    {
-                      MOCK_START_LOADING_STEPS[
-                        Math.min(startVisualTick, MOCK_START_LOADING_STEPS.length - 1)
-                      ]
-                    }
-                  </p>
-                  <div className="mt-5 flex gap-2">
-                    {MOCK_START_LOADING_STEPS.map((label, idx) => {
-                      const active = idx <= Math.min(startVisualTick, MOCK_START_LOADING_STEPS.length - 1);
-                      return (
-                        <div key={label} className="flex-1">
-                          <div
-                            className={`h-3 border-2 border-black ${
-                              active ? "bg-[#ffcc00]" : "bg-white"
-                            }`}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="w-full max-w-2xl border-4 border-black bg-white p-6 shadow-[10px_10px_0_0_#111] md:p-10">
-                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b-4 border-black pb-4 sm:pb-6">
-                  <div>
-                    <p className="font-mono text-[10px] font-black uppercase tracking-widest text-[#004aad]">
-                      Preflight Check // ก่อนเริ่มสอบ
-                    </p>
-                    <h2 className="mt-2 text-2xl sm:text-4xl md:text-5xl font-black uppercase italic leading-none tracking-tighter">
-                      ยืนยันการเริ่มสอบ <br />
-                      <span className="not-italic text-[#004aad]">Start Mock Set</span>
-                    </h2>
-                  </div>
-                  <div className="shrink-0 border-[3px] border-black bg-[#ffcc00] p-2 text-center sm:min-w-[100px]">
-                    <p className="font-mono text-[9px] font-black uppercase">Tier Status</p>
-                    <p className="text-xl font-black uppercase italic">{effectiveTier}</p>
-                  </div>
-                </div>
-
-                <div className="mb-8 flex items-start gap-4 border-[3px] border-black bg-[#ffcc00] p-4 shadow-[4px_4px_0_0_#111]">
-                  <span className="text-3xl">⚠️</span>
-                  <div>
-                    <p className="text-sm font-black uppercase leading-tight">คำเตือนเรื่องสิทธิ์การสอบ (Credit Notice)</p>
-                    <p className="mt-1 text-[11px] font-bold text-black/80">
-                      การกดเริ่มจะใช้ <span className="underline">1 Mock Credit</span> ทันที หากกดออกกลางคันระบบจะไม่คืนสิทธิ์และไม่มีการคืนเงิน กรุณาเผื่อเวลาอย่างน้อย {FIXED_MOCK_ESTIMATED_DURATION_LABEL}
-                    </p>
-                    <p className="mt-1 font-mono text-[9px] font-bold uppercase text-black/40">
-                      Starting now uses 1 credit. Quitting early = No refund.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="border-2 border-black bg-gray-50 p-3">
-                    <p className="font-mono text-[9px] font-black uppercase opacity-40">Selected Set / ชุดที่เลือก</p>
-                    <p className="mt-1 text-lg font-black uppercase italic text-[#004aad]">{selectedSetName}</p>
-                  </div>
-                  <div className="border-2 border-black bg-gray-50 p-3">
-                    <p className="font-mono text-[9px] font-black uppercase opacity-40">Credits Left / สิทธิ์คงเหลือ</p>
-                    <p className="mt-1 text-lg font-black">
-                      {remainingCount} <span className="text-[10px] opacity-40">Sessions</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mb-10 space-y-4">
-                  <h3 className="flex items-center gap-2 border-b-2 border-black pb-1 text-sm font-black uppercase">
-                    🎯 ตั้งเป้าหมายของคุณ (Set Your Targets)
-                  </h3>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="space-y-1">
-                      <label className="font-mono text-[10px] font-black uppercase opacity-50">Total Target</label>
-                      <input
-                        value={targets.total}
-                        onChange={(e) => setTargets((prev) => ({ ...prev, total: e.target.value }))}
-                        placeholder="Target total (e.g. 125)"
-                        className="w-full border-[3px] border-black px-3 py-[10px] font-extrabold outline-none focus:bg-[#fff9e6] focus:shadow-[4px_4px_0_0_#004aad]"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {([
-                        ["listening", "Listening"],
-                        ["speaking", "Speaking"],
-                      ] as const).map(([key, label]) => (
-                        <div key={key} className="space-y-1">
-                          <label className="font-mono text-[10px] font-black uppercase opacity-50">{label}</label>
-                          <input
-                            value={targets[key]}
-                            onChange={(e) => setTargets((prev) => ({ ...prev, [key]: e.target.value }))}
-                            placeholder="Target"
-                            className="w-full border-[3px] border-black px-3 py-[10px] font-extrabold outline-none focus:bg-[#fff9e6] focus:shadow-[4px_4px_0_0_#004aad]"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 md:col-span-2">
-                      {([
-                        ["reading", "Reading"],
-                        ["writing", "Writing"],
-                      ] as const).map(([key, label]) => (
-                        <div key={key} className="space-y-1">
-                          <label className="font-mono text-[10px] font-black uppercase opacity-50">{label}</label>
-                          <input
-                            value={targets[key]}
-                            onChange={(e) => setTargets((prev) => ({ ...prev, [key]: e.target.value }))}
-                            placeholder="Target"
-                            className="w-full border-[3px] border-black px-3 py-[10px] font-extrabold outline-none focus:bg-[#fff9e6] focus:shadow-[4px_4px_0_0_#004aad]"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {adminCanPreview ? (
-                  <div className="relative mb-10 border-[3px] border-black bg-black p-5 text-[#FFD600]">
-                    <span className="absolute -top-3 left-4 bg-red-600 px-2 py-0.5 text-[9px] font-black uppercase text-white shadow-sm">
-                      Admin Control Room
-                    </span>
-                    <div className="space-y-3 pt-2">
-                      <label className="flex cursor-pointer items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={adminPreviewMode}
-                          onChange={(e) => setAdminPreviewMode(e.target.checked)}
-                          className="h-5 w-5 accent-[#FFD600]"
-                        />
-                        <span className="text-[11px] font-bold">Admin test mode (Bypass 10-minute wait)</span>
-                      </label>
-                      <label className="flex cursor-pointer items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={skipTimerMode}
-                          onChange={(e) => setSkipTimerMode(e.target.checked)}
-                          className="h-5 w-5 accent-[#FFD600]"
-                        />
-                        <span className="text-[11px] font-bold">Skip timer mode</span>
-                      </label>
-                      <label className="flex cursor-pointer items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={fastPassPreviewMode}
-                          onChange={(e) => setFastPassPreviewMode(e.target.checked)}
-                          className="h-5 w-5 accent-[#FFD600]"
-                        />
-                        <span className="text-[11px] font-bold">Fast pass preview (auto-skip all 20)</span>
-                      </label>
-                      <label className="flex cursor-pointer items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={previewSeparateMode}
-                          onChange={(e) => setPreviewSeparateMode(e.target.checked)}
-                          disabled={fastPassPreviewMode}
-                          className="h-5 w-5 accent-[#FFD600]"
-                        />
-                        <span className="text-[11px] font-bold">Preview separate step only</span>
-                      </label>
-                      {fastPassPreviewMode ? (
-                        <div className="border-2 border-dashed border-[#FFD600] bg-black/40 px-3 py-2 text-[10px] font-bold leading-5">
-                          Shows each question briefly, auto-submits `skippedByAdmin`, skips timers/rest,
-                          and still runs the normal backend scoring + result creation path.
-                        </div>
-                      ) : null}
-                      {previewSeparateMode ? (
-                        <div className="border-2 border-dashed border-[#FFD600] bg-black/40 px-3 py-2">
-                          <p className="text-[10px] font-black uppercase">Preview step</p>
-                          <select
-                            value={previewStepIndex}
-                            onChange={(e) => setPreviewStepIndex(Number(e.target.value) || 13)}
-                            className="mt-2 w-full border-[3px] border-[#FFD600] bg-black px-2 py-2 text-sm font-bold text-[#FFD600]"
-                          >
-                            {Array.from({ length: 20 }).map((_, i) => {
-                              const step = i + 1;
-                              return (
-                                <option key={step} value={step}>
-                                  Step {step}
-                                </option>
-                              );
-                            })}
-                          </select>
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                ) : null}
-
-                <div className="flex flex-col gap-4 md:flex-row">
-                  <button
-                    type="button"
-                    onClick={() => void start()}
-                    className="flex-grow border-[3px] border-black bg-[#004aad] py-4 text-xl font-black uppercase tracking-widest text-white shadow-[6px_6px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[8px_8px_0_0_#111]"
-                  >
-                    Confirm & Start
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowPreflight(false)}
-                    className="border-[3px] border-black bg-white px-6 sm:px-10 py-3 sm:py-4 font-black uppercase text-gray-500 shadow-[4px_4px_0_0_#111] transition hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#111]"
-                  >
-                    Cancel
-                  </button>
-                </div>
-
-                {startError ? (
-                  <p className="mt-4 border-2 border-red-700 bg-red-50 px-3 py-2 text-xs font-bold text-red-800">
-                    {startError}
-                  </p>
-                ) : null}
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
-    </main>
-  );
 }
