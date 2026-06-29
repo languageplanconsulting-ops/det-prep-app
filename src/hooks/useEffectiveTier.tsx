@@ -65,76 +65,94 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshProfile = useCallback(async () => {
-    const supabase = getBrowserSupabase();
-    if (!supabase) {
-      setCurrentBrowserUserId(null);
-      setRealTier("free");
-      setIsAdmin(false);
-      setVipGrantedByCourse(false);
-      setHasStripeSubscription(false);
-      setPlanExpiresAt(null);
-      setLoading(false);
-      void fetchPreviewEligible();
-      return;
-    }
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      setCurrentBrowserUserId(null);
-      setRealTier("free");
-      setIsAdmin(false);
-      setVipGrantedByCourse(false);
-      setHasStripeSubscription(false);
-      setPlanExpiresAt(null);
-      setLoading(false);
-      void fetchPreviewEligible();
-      return;
-    }
-    setCurrentBrowserUserId(user.id);
-    let { data } = await supabase
-      .from("profiles")
-      .select("tier, role, vip_granted_by_course, stripe_subscription_id, stripe_customer_id, tier_expires_at")
-      .eq("id", user.id)
-      .maybeSingle();
+    // 1) Best-effort client read. Wrapped in try/catch so a thrown Supabase/session error
+    //    (seen on some Safari/iPad setups where session storage is blocked) can never leave
+    //    `loading` stuck true or crash the provider.
+    let clientTier: Tier = "free";
+    let clientAdmin = false;
+    let clientVipCourse = false;
+    let clientStripe = false;
+    let clientExpiry: string | null = null;
+    let userId: string | null = null;
+    try {
+      const supabase = getBrowserSupabase();
+      if (supabase) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          userId = user.id;
+          let { data } = await supabase
+            .from("profiles")
+            .select("tier, role, vip_granted_by_course, stripe_subscription_id, stripe_customer_id, tier_expires_at")
+            .eq("id", user.id)
+            .maybeSingle();
 
-    if (
-      isBootstrapAdminEmail(user.email) &&
-      data?.role !== "admin"
-    ) {
-      await claimBootstrapAdminClient(supabase);
-      await fetch("/api/auth/sync-admin-role", {
-        method: "POST",
-        credentials: "same-origin",
-      });
-      const { data: again } = await supabase
-        .from("profiles")
-        .select("tier, role, vip_granted_by_course, stripe_subscription_id, stripe_customer_id, tier_expires_at")
-        .eq("id", user.id)
-        .maybeSingle();
-      data = again;
-    }
+          if (isBootstrapAdminEmail(user.email) && data?.role !== "admin") {
+            await claimBootstrapAdminClient(supabase);
+            await fetch("/api/auth/sync-admin-role", { method: "POST", credentials: "same-origin" });
+            const { data: again } = await supabase
+              .from("profiles")
+              .select("tier, role, vip_granted_by_course, stripe_subscription_id, stripe_customer_id, tier_expires_at")
+              .eq("id", user.id)
+              .maybeSingle();
+            data = again;
+          }
 
-    setRealTier(
-      resolveEffectiveTierFromProfile({
-        tier: data?.tier,
-        tier_expires_at: (data?.tier_expires_at as string | null | undefined) ?? null,
-        vip_granted_by_course: data?.vip_granted_by_course === true,
-      }),
-    );
-    setIsAdmin(data?.role === "admin");
-    setPlanExpiresAt((data?.tier_expires_at as string | null | undefined) ?? null);
-    setVipGrantedByCourse(data?.vip_granted_by_course === true);
-    setHasStripeSubscription(
-      !!data?.stripe_subscription_id ||
-        (!!data?.stripe_customer_id &&
-          resolveEffectiveTierFromProfile({
+          const expiry = (data?.tier_expires_at as string | null | undefined) ?? null;
+          clientTier = resolveEffectiveTierFromProfile({
             tier: data?.tier,
-            tier_expires_at: (data?.tier_expires_at as string | null | undefined) ?? null,
+            tier_expires_at: expiry,
             vip_granted_by_course: data?.vip_granted_by_course === true,
-          }) !== "free" &&
-          data?.vip_granted_by_course !== true),
-    );
+          });
+          clientAdmin = data?.role === "admin";
+          clientExpiry = expiry;
+          clientVipCourse = data?.vip_granted_by_course === true;
+          clientStripe =
+            !!data?.stripe_subscription_id ||
+            (!!data?.stripe_customer_id && clientTier !== "free" && data?.vip_granted_by_course !== true);
+        }
+      }
+    } catch {
+      // fall through to the server read below
+    }
+
+    // 2) Server-authoritative read (first-party cookies — reliable on Safari/iPad). When the
+    //    server confirms a signed-in user, trust it over the client read so a blocked browser
+    //    session can't wrongly demote a paying user to "free".
+    let server:
+      | {
+          authenticated?: boolean;
+          userId?: string | null;
+          effectiveTier?: Tier;
+          isAdmin?: boolean;
+          vipGrantedByCourse?: boolean;
+          hasStripeSubscription?: boolean;
+          planExpiresAt?: string | null;
+        }
+      | null = null;
+    try {
+      const res = await fetch("/api/me", { credentials: "same-origin" });
+      if (res.ok) server = await res.json();
+    } catch {
+      // keep client values
+    }
+
+    if (server?.authenticated) {
+      setCurrentBrowserUserId(userId ?? server.userId ?? null);
+      setRealTier(server.effectiveTier ?? "free");
+      setIsAdmin(server.isAdmin === true || clientAdmin);
+      setVipGrantedByCourse(server.vipGrantedByCourse === true || clientVipCourse);
+      setHasStripeSubscription(server.hasStripeSubscription === true || clientStripe);
+      setPlanExpiresAt(server.planExpiresAt ?? clientExpiry);
+    } else {
+      setCurrentBrowserUserId(userId);
+      setRealTier(clientTier);
+      setIsAdmin(clientAdmin);
+      setVipGrantedByCourse(clientVipCourse);
+      setHasStripeSubscription(clientStripe);
+      setPlanExpiresAt(clientExpiry);
+    }
     setLoading(false);
     void fetchPreviewEligible();
   }, [fetchPreviewEligible]);
@@ -173,8 +191,11 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
   }, [pathname, fetchPreviewEligible]);
 
   const value = useMemo((): EffectiveTierState => {
-    const usePreview = previewEligible && previewTier !== null;
-    const effectiveTier = usePreview ? previewTier : realTier;
+    const resolvedPreviewTier: Tier | null = previewEligible
+      ? previewTier ?? "vip"
+      : null;
+    const usePreview = previewEligible && resolvedPreviewTier !== null;
+    const effectiveTier = usePreview ? resolvedPreviewTier : realTier;
     return {
       effectiveTier,
       realTier,
