@@ -77,9 +77,9 @@ export default function DiagnosticReportView({ report }: { report: Report }) {
           </div>
         )}
 
-        <button style={{ marginTop: 14, width: "100%", background: NAVY, color: "#fff", border: "none", borderRadius: 12, padding: 13, fontSize: 15, fontWeight: 500, cursor: "pointer" }}>
+        <a href="#study-plan-section" style={{ display: "block", marginTop: 14, width: "100%", boxSizing: "border-box", background: NAVY, color: "#fff", textDecoration: "none", textAlign: "center", border: "none", borderRadius: 12, padding: 13, fontSize: 15, fontWeight: 500, cursor: "pointer" }}>
           ดูแผนเรียนของฉัน → ({report.planSkills.map((s) => TH[s.skill]).join(" · ")})
-        </button>
+        </a>
       </div>
     </div>
   );

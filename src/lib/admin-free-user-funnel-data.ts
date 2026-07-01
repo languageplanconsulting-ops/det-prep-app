@@ -26,6 +26,7 @@ type ProfileRow = {
 
 type ResultRow = {
   user_id: string;
+  session_id: string;
   actual_total: number;
   actual_listening: number;
   actual_speaking: number;
@@ -51,6 +52,8 @@ export type FreeUserRow = {
   lastTestAt: string | null;
   weakestSkill: string | null; // Thai label of the lowest sub-score on the latest test
   levelLabel: string | null;
+  /** every test this user took (latest first) — each links to its full saved report */
+  tests: Array<{ sessionId: string; total: number; createdAt: string }>;
   converted: boolean;
   activityEvents: number; // 0 if behavior table not deployed
   lastActiveAt: string | null;
@@ -108,7 +111,7 @@ export async function fetchFreeUserFunnelData(): Promise<FreeUserFunnelSnapshot>
     supabase
       .from("mini_diagnosis_results")
       .select(
-        "user_id,actual_total,actual_listening,actual_speaking,actual_reading,actual_writing,level_label,created_at",
+        "user_id,session_id,actual_total,actual_listening,actual_speaking,actual_reading,actual_writing,level_label,created_at",
       )
       .order("created_at", { ascending: false }),
     supabase.from("payment_history").select("user_id,created_at").eq("status", "succeeded"),
@@ -191,6 +194,11 @@ export async function fetchFreeUserFunnelData(): Promise<FreeUserFunnelSnapshot>
       lastTestAt: latest ? latest.created_at : null,
       weakestSkill: latest ? weakestSkillTh(latest) : null,
       levelLabel: latest ? latest.level_label : null,
+      tests: userResults.map((r) => ({
+        sessionId: r.session_id,
+        total: round1(Number(r.actual_total)),
+        createdAt: r.created_at,
+      })),
       converted,
       activityEvents: act?.count ?? 0,
       lastActiveAt: act?.last ?? null,

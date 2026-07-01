@@ -32,7 +32,7 @@ export default async function StudyPlanResultPage({ params }: { params: Promise<
   return (
     <main style={{ minHeight: "100vh", background: "#eef2f7", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 20, alignItems: "center" }}>
       <DiagnosticReportView report={report} />
-      <StudyPlanView plan={plan} />
+      <StudyPlanView plan={plan} freeUser={freeUser} />
     </main>
   );
 }

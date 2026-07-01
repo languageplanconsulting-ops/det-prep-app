@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mini Test · V1 Calm Clarity</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { ep: { blue: '#004AAD', yellow: '#FFCC00' } },
+    fontFamily: { sans: ['"IBM Plex Sans Thai"', 'system-ui', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+  } } }
+</script>
+<style>
+  body{background:#f6f7f9}
+  .card{background:#fff;border:1px solid #e8eaf0;border-radius:1.25rem;box-shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px -16px rgba(16,24,40,.12)}
+  .opt{transition:all .15s ease}
+  .opt:hover{border-color:#c7d2e8;background:#f9fbff}
+  .opt.sel{border-color:#004AAD;background:#f2f6ff;box-shadow:0 0 0 1px #004AAD}
+</style>
+</head>
+<body class="font-sans text-slate-800">
+
+<!-- top app bar -->
+<div class="sticky top-0 z-20 border-b border-slate-200 bg-[#f6f7f9]/90 backdrop-blur">
+  <div class="mx-auto flex max-w-3xl items-center gap-4 px-5 py-3">
+    <a href="/minitest-redesign-index.html" class="font-mono text-xs font-bold text-slate-400 hover:text-ep-blue">← directions</a>
+    <div class="flex flex-1 items-center gap-2">
+      <span class="font-mono text-xs font-semibold text-slate-500">ข้อ 4 / 9</span>
+      <div class="flex flex-1 gap-1">
+        <span class="h-1.5 flex-1 rounded-full bg-ep-blue"></span>
+        <span class="h-1.5 flex-1 rounded-full bg-ep-blue"></span>
+        <span class="h-1.5 flex-1 rounded-full bg-ep-blue"></span>
+        <span class="h-1.5 flex-1 rounded-full bg-ep-blue"></span>
+        <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+        <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+        <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+        <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+        <span class="h-1.5 flex-1 rounded-full bg-slate-200"></span>
+      </div>
+    </div>
+    <span class="font-mono text-sm font-bold text-slate-700">04:12</span>
+  </div>
+</div>
+
+<div class="mx-auto max-w-3xl px-5 py-8 space-y-12">
+  <div class="text-center">
+    <p class="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-ep-blue">Version 1</p>
+    <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-900">Calm Clarity</h1>
+    <p class="mx-auto mt-2 max-w-md text-sm text-slate-500">เงียบ โล่ง อ่านง่าย ลดความกังวล — คอลัมน์เดียว พื้นนวล การ์ดขาวเส้นบาง</p>
+  </div>
+
+  <!-- ============ READING ============ -->
+  <section>
+    <div class="mb-3 flex items-center gap-2 text-slate-400"><span class="font-mono text-xs font-bold">01</span><span class="text-sm font-semibold tracking-wide">อ่าน · Reading</span><span class="h-px flex-1 bg-slate-200"></span></div>
+    <div class="card overflow-hidden">
+      <div class="border-b border-slate-100 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-semibold text-slate-900">บทความ</h2>
+          <span class="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-xs text-slate-500">9 คำถาม</span>
+        </div>
+        <p class="mt-0.5 text-xs text-slate-400">อ่านบทความแล้วตอบคำถามด้านล่าง · คำที่ไฮไลต์แตะดูความหมายได้</p>
+      </div>
+      <div class="grid gap-0 md:grid-cols-[1.2fr_1fr]">
+        <article class="border-b border-slate-100 px-6 py-5 text-[15px] leading-7 text-slate-700 md:border-b-0 md:border-r">
+          <p>Greenwashing is when a company pretends to be more environmentally friendly than it really is. In the <span class="cursor-help rounded bg-amber-50 px-0.5 font-medium text-amber-700 underline decoration-amber-300 decoration-dotted underline-offset-2">United Kingdom</span>, this has become a common problem. Many businesses use words like "green," "natural," or "eco-friendly" on their products because they know that shoppers care about the planet.</p>
+          <div class="my-4 rounded-xl border border-dashed border-ep-blue/40 bg-ep-blue/[0.04] px-4 py-3 text-center text-xs font-medium text-ep-blue">ย่อหน้า 2 หายไป — เลือกคำตอบข้อ 1 เพื่อเติม</div>
+          <p>To deal with this problem, the UK government has introduced new rules. The Competition and Markets Authority now checks that environmental claims are honest and clear. Companies that break the rules can be fined or forced to change their advertising.</p>
+        </article>
+        <div class="px-6 py-5">
+          <p class="font-mono text-[11px] font-bold uppercase tracking-widest text-slate-400">คำถามที่ 1</p>
+          <h3 class="mt-1 text-[15px] font-semibold leading-snug text-slate-900">ย่อหน้าใดเติมช่องว่าง (P2) ได้ดีที่สุด?</h3>
+          <p class="mt-0.5 text-xs text-amber-600">เลือกแล้วเปลี่ยนไม่ได้</p>
+          <div class="mt-3 space-y-2">
+            <button class="opt sel flex w-full gap-2.5 rounded-xl border border-slate-200 px-3.5 py-3 text-left text-[13px] leading-snug text-slate-700"><span class="font-mono text-xs font-bold text-ep-blue">A</span><span>Climate change is one of the biggest challenges in the world today. Temperatures are rising…</span></button>
+            <button class="opt flex w-full gap-2.5 rounded-xl border border-slate-200 px-3.5 py-3 text-left text-[13px] leading-snug text-slate-700"><span class="font-mono text-xs font-bold text-slate-400">B</span><span>Greenwashing is a word that many people in Britain have started to hear…</span></button>
+            <button class="opt flex w-full gap-2.5 rounded-xl border border-slate-200 px-3.5 py-3 text-left text-[13px] leading-snug text-slate-700"><span class="font-mono text-xs font-bold text-slate-400">C</span><span>There are several ways that companies do this. Some put pictures of leaves on packaging…</span></button>
+            <button class="opt flex w-full gap-2.5 rounded-xl border border-slate-200 px-3.5 py-3 text-left text-[13px] leading-snug text-slate-700"><span class="font-mono text-xs font-bold text-slate-400">D</span><span>Fortunately, the government has decided to act against dishonest companies…</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+        <span class="font-mono text-xs text-slate-400">ตอบแล้ว 0 / 9</span>
+        <button class="rounded-xl bg-ep-blue px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#003a87]">ถัดไป</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FILL IN BLANKS ============ -->
+  <section>
+    <div class="mb-3 flex items-center gap-2 text-slate-400"><span class="font-mono text-xs font-bold">02</span><span class="text-sm font-semibold tracking-wide">เติมคำ · Fill in the Blanks</span><span class="h-px flex-1 bg-slate-200"></span></div>
+    <div class="card px-6 py-6">
+      <p class="text-sm font-semibold text-slate-900">เติมตัวอักษรที่หายไปให้เป็นคำที่ถูกต้อง</p>
+      <p class="mt-0.5 text-xs text-slate-400">ตัวอักษรสีเทาคือตัวที่ให้มาแล้ว · พิมพ์เฉพาะช่องว่าง</p>
+      <div class="mt-5 rounded-2xl bg-slate-50 px-5 py-6 text-[15px] leading-9 text-slate-700">
+        The new policy will <span class="inline-flex items-center gap-0.5 align-middle">
+          <span class="grid h-8 w-7 place-items-center rounded-md bg-slate-200 font-mono text-sm font-bold text-slate-500">e</span>
+          <span class="grid h-8 w-7 place-items-center rounded-md bg-slate-200 font-mono text-sm font-bold text-slate-500">n</span>
+          <span class="grid h-8 w-7 place-items-center rounded-md border-2 border-ep-blue bg-white font-mono text-sm font-bold text-ep-blue">c</span>
+          <span class="grid h-8 w-7 place-items-center rounded-md border-2 border-dashed border-slate-300 bg-white"></span>
+          <span class="grid h-8 w-7 place-items-center rounded-md border-2 border-dashed border-slate-300 bg-white"></span>
+          <span class="grid h-8 w-7 place-items-center rounded-md border-2 border-dashed border-slate-300 bg-white"></span>
+          <span class="grid h-8 w-7 place-items-center rounded-md border-2 border-dashed border-slate-300 bg-white"></span>
+          <span class="grid h-8 w-7 place-items-center rounded-md border-2 border-dashed border-slate-300 bg-white"></span>
+        </span> shoppers to recycle more.
+      </div>
+      <div class="mt-3 flex items-center gap-2 text-xs text-slate-400"><span class="inline-block h-2 w-2 rounded-full bg-ep-blue"></span> ช่องที่กำลังพิมพ์ <span class="ml-2 inline-block h-2 w-2 rounded-full bg-slate-300"></span> ยังว่าง</div>
+      <div class="mt-5 flex justify-end"><button class="rounded-xl bg-ep-blue px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#003a87]">ส่งคำตอบ</button></div>
+    </div>
+  </section>
+
+  <!-- ============ DICTATION ============ -->
+  <section>
+    <div class="mb-3 flex items-center gap-2 text-slate-400"><span class="font-mono text-xs font-bold">03</span><span class="text-sm font-semibold tracking-wide">ฟังแล้วพิมพ์ · Dictation</span><span class="h-px flex-1 bg-slate-200"></span></div>
+    <div class="card px-6 py-6">
+      <p class="text-sm font-semibold text-slate-900">ฟังประโยคแล้วพิมพ์ให้ตรงทุกคำ</p>
+      <p class="mt-0.5 text-xs text-slate-400">Type exactly what you hear</p>
+      <div class="mt-5 flex items-center gap-4 rounded-2xl bg-slate-50 px-5 py-4">
+        <button class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-ep-blue text-white shadow-sm transition hover:bg-[#003a87]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="flex-1">
+          <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-200"><div class="h-full w-1/3 rounded-full bg-ep-blue"></div></div>
+          <div class="mt-1.5 flex justify-between font-mono text-[11px] text-slate-400"><span>0:03</span><span class="rounded-full bg-slate-200 px-2 text-slate-500">ฟังได้ไม่จำกัด</span><span>0:09</span></div>
+        </div>
+      </div>
+      <label class="mt-5 block text-xs font-medium text-slate-500">สิ่งที่ได้ยิน</label>
+      <textarea rows="3" placeholder="พิมพ์สิ่งที่คุณได้ยิน…" class="mt-1.5 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[15px] text-slate-800 outline-none transition focus:border-ep-blue focus:ring-4 focus:ring-ep-blue/10"></textarea>
+      <div class="mt-4 flex justify-end"><button class="rounded-xl bg-ep-blue px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#003a87]">ส่งคำตอบ</button></div>
+    </div>
+  </section>
+
+  <!-- ============ LISTENING ============ -->
+  <section>
+    <div class="mb-3 flex items-center gap-2 text-slate-400"><span class="font-mono text-xs font-bold">04</span><span class="text-sm font-semibold tracking-wide">ฟัง · Interactive Listening</span><span class="h-px flex-1 bg-slate-200"></span></div>
+    <div class="card px-6 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-semibold text-slate-900">สถานการณ์ที่ 1 — ร้านกาแฟในแคมปัส</p>
+          <p class="mt-0.5 text-xs text-slate-400">ฟังบทสนทนาแล้วตอบคำถาม</p>
+        </div>
+        <span class="rounded-full bg-slate-100 px-2.5 py-1 font-mono text-xs text-slate-500">1 / 3</span>
+      </div>
+      <div class="mt-5 flex items-center gap-4 rounded-2xl bg-ep-blue/[0.04] px-5 py-4 ring-1 ring-ep-blue/10">
+        <button class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-ep-blue text-white shadow-sm transition hover:bg-[#003a87]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-slate-700">กดเพื่อฟัง</p>
+          <p class="font-mono text-xs text-slate-400">ฟังได้สูงสุด 3 ครั้ง · เหลือ 2 ครั้ง</p>
+        </div>
+        <div class="flex gap-1"><span class="h-2 w-2 rounded-full bg-ep-blue"></span><span class="h-2 w-2 rounded-full bg-slate-300"></span><span class="h-2 w-2 rounded-full bg-slate-300"></span></div>
+      </div>
+      <div class="mt-5">
+        <p class="text-sm font-medium text-slate-800">Why did the student order a different drink?</p>
+        <div class="mt-3 space-y-2">
+          <button class="opt flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-left text-sm text-slate-700"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-slate-100 font-mono text-xs font-bold text-slate-500">A</span> The café was out of oat milk</button>
+          <button class="opt sel flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-left text-sm text-slate-700"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ep-blue font-mono text-xs font-bold text-white">B</span> She wanted to try the seasonal special</button>
+          <button class="opt flex w-full items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-left text-sm text-slate-700"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-slate-100 font-mono text-xs font-bold text-slate-500">C</span> Her usual order was too expensive</button>
+        </div>
+      </div>
+      <div class="mt-5 flex justify-end"><button class="rounded-xl bg-ep-blue px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#003a87]">สถานการณ์ต่อไป</button></div>
+    </div>
+  </section>
+
+  <!-- ============ SPEAKING ============ -->
+  <section>
+    <div class="mb-3 flex items-center gap-2 text-slate-400"><span class="font-mono text-xs font-bold">05</span><span class="text-sm font-semibold tracking-wide">พูด · Read Then Speak</span><span class="h-px flex-1 bg-slate-200"></span></div>
+    <div class="card px-6 py-6">
+      <p class="text-sm font-semibold text-slate-900">อ่านหัวข้อ แล้วพูดเป็นภาษาอังกฤษ</p>
+      <p class="mt-0.5 text-xs text-slate-400">พูดต่อเนื่องอย่างน้อย 15 คำ · มีคำบรรยายสดให้แก้ไขได้</p>
+      <div class="mt-4 rounded-2xl border-l-2 border-ep-yellow bg-amber-50/60 px-5 py-4">
+        <p class="font-mono text-[11px] font-bold uppercase tracking-widest text-amber-600">หัวข้อพูด</p>
+        <p class="mt-1 text-[15px] font-medium text-slate-800">Describe a skill you would like to learn and why.</p>
+      </div>
+      <div class="mt-5 flex items-center gap-3">
+        <button class="inline-flex items-center gap-2 rounded-full bg-ep-blue px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#003a87]">
+          <span class="relative flex h-2.5 w-2.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/60"></span><span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span></span>
+          เริ่มพูด
+        </button>
+        <button class="rounded-full border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-50">ล้าง</button>
+      </div>
+      <label class="mt-5 block text-xs font-medium text-slate-500">คำบรรยายสด (แก้ไขได้)</label>
+      <textarea rows="3" class="mt-1.5 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[15px] leading-relaxed text-slate-800 outline-none transition focus:border-ep-blue focus:ring-4 focus:ring-ep-blue/10">I would really like to learn how to edit videos because…</textarea>
+      <div class="mt-4 flex items-center justify-between">
+        <span class="font-mono text-xs text-slate-400">12 คำ · ต้องการอย่างน้อย 15</span>
+        <button class="rounded-xl bg-slate-200 px-6 py-2.5 text-sm font-semibold text-slate-400" disabled>ส่งคำตอบ</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="rounded-2xl border border-slate-200 bg-white px-6 py-5 text-sm text-slate-500">
+    <p class="font-semibold text-slate-700">ทำไมแบบนี้</p>
+    <p class="mt-1.5 leading-relaxed">โฟกัสทีละข้อ ลดสิ่งรบกวน (Krug) · พื้นนวล + การ์ดเส้นบางทำให้ "เนื้อหา" เด่นไม่ใช่ "กรอบ" · progress แบบจุดบอกความคืบหน้าโดยไม่กดดัน · ปุ่มหลักเดียวชัดเจน (Hick) · เหมาะกับผู้เรียนที่เครียดกับการสอบ</p>
+  </footer>
+</div>
+</body>
+</html>

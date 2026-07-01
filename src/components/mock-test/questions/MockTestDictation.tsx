@@ -100,14 +100,12 @@ export function MockTestDictation({
           setBlobUrl(objectUrl);
           setStatus("ready");
         }
-      } catch (e) {
+      } catch {
         if (!cancelled) {
           setStatus("error");
-          setError(
-            e instanceof Error
-              ? e.message
-              : "Could not synthesize audio. กรุณาลองใหม่อีกครั้ง",
-          );
+          // Never surface raw provider/dev errors to learners — show an instruction
+          // and fall back to the browser voice button below.
+          setError("เสียงอัตโนมัติไม่พร้อมใช้งานชั่วคราว — ใช้ปุ่มอ่านออกเสียงด้านล่าง หรือลองใหม่อีกครั้ง");
         }
       }
     })();

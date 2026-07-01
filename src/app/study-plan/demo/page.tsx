@@ -12,7 +12,7 @@ export default function StudyPlanDemoPage() {
   return (
     <main style={{ minHeight: "100vh", background: "#eef2f7", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 20, alignItems: "center" }}>
       <DiagnosticReportView report={report} />
-      <StudyPlanView plan={plan} />
+      <StudyPlanView plan={plan} freeUser={true} />
     </main>
   );
 }

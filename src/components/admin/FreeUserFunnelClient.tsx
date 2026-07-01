@@ -14,6 +14,7 @@ type FreeUserRow = {
   lastTestAt: string | null;
   weakestSkill: string | null;
   levelLabel: string | null;
+  tests: Array<{ sessionId: string; total: number; createdAt: string }>;
   converted: boolean;
   activityEvents: number;
   lastActiveAt: string | null;
@@ -223,7 +224,7 @@ export function FreeUserFunnelClient() {
               <th className="px-4 py-3 font-semibold">ผู้ใช้</th>
               <th className="px-3 py-3 font-semibold">ลงทะเบียน</th>
               <th className="px-3 py-3 font-semibold">สถานะ</th>
-              <th className="px-3 py-3 text-center font-semibold">Mini Test</th>
+              <th className="px-3 py-3 text-center font-semibold">Mini Test · คลิกดูรายงาน</th>
               <th className="px-3 py-3 text-right font-semibold">คะแนนดีสุด</th>
               <th className="px-3 py-3 font-semibold">จุดอ่อน</th>
               <th className="px-3 py-3 text-right font-semibold">กิจกรรม</th>
@@ -246,8 +247,23 @@ export function FreeUserFunnelClient() {
                     </span>
                   </td>
                   <td className="px-3 py-3 text-center">
-                    {u.tookTest ? (
-                      <span className="font-mono text-gray-700">{u.testCount}×</span>
+                    {u.tests.length > 0 ? (
+                      <div className="flex flex-wrap justify-center gap-1">
+                        {u.tests.map((t, i) => (
+                          <a
+                            key={t.sessionId}
+                            href={`/mini-diagnosis/results/${t.sessionId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`เปิดรายงานฉบับเต็ม · ${fmtDate(t.createdAt)} · ${t.total} คะแนน`}
+                            className="inline-flex items-center gap-1 rounded-full border border-[#004AAD]/30 bg-[#004AAD]/5 px-2 py-0.5 font-mono text-xs font-semibold text-[#004AAD] transition hover:bg-[#004AAD] hover:text-white"
+                          >
+                            {u.tests.length > 1 ? `#${u.tests.length - i} ` : ""}
+                            {t.total}
+                            <span aria-hidden>↗</span>
+                          </a>
+                        ))}
+                      </div>
                     ) : (
                       <span className="text-gray-300">—</span>
                     )}
