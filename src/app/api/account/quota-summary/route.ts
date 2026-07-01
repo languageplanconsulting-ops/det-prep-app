@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const adminAccess = await getAdminAccess(request);
+  const adminAccess = await getAdminAccess();
 
   await ensureProfileForAuthUser({
     userId: user.id,
