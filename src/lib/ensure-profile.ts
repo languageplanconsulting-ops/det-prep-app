@@ -37,7 +37,22 @@ export async function ensureProfileForAuthUser(params: {
     };
     if (nextFullName && !existing.full_name) patch.full_name = nextFullName;
     if (nextAvatarUrl && !existing.avatar_url) patch.avatar_url = nextAvatarUrl;
-    if (params.tier) patch.tier = params.tier;
+    // Never DOWNGRADE an existing paid tier here. This helper runs on EVERY login (via
+    // /api/auth/register-profile, which passes tier:"free" for any non-VIP user). Without
+    // this guard, each login wiped paying customers — basic/premium and expired-course VIPs —
+    // back to "free". Only apply an explicit tier when it is not a demotion: upgrades (paid
+    // tiers) always apply; "free" applies only when there is no existing paid tier to protect.
+    // Genuine downgrades happen through admin/revoke flows and plan-expiry resolution, not here.
+    {
+      const existingTier = existing.tier as string | null | undefined;
+      const existingIsPaid =
+        existingTier === "basic" ||
+        existingTier === "premium" ||
+        existingTier === "vip";
+      if (params.tier && (params.tier !== "free" || !existingIsPaid)) {
+        patch.tier = params.tier;
+      }
+    }
     if (typeof params.vipGrantedByCourse === "boolean") {
       patch.vip_granted_by_course = params.vipGrantedByCourse;
     }
