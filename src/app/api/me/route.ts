@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { readAuthoritativeProfile } from "@/lib/authoritative-profile";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
-import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 
 export const dynamic = "force-dynamic";
@@ -30,26 +30,10 @@ export async function GET() {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ authenticated: false });
 
-    // Read the profile authoritatively (service role, RLS-immune). Fall back to the
-    // user-scoped client only if the service key isn't configured for this environment.
-    let data:
-      | {
-          tier?: unknown;
-          role?: unknown;
-          vip_granted_by_course?: unknown;
-          stripe_subscription_id?: unknown;
-          stripe_customer_id?: unknown;
-          tier_expires_at?: unknown;
-        }
-      | null = null;
-    const columns =
-      "tier, role, vip_granted_by_course, stripe_subscription_id, stripe_customer_id, tier_expires_at";
-    try {
-      const admin = createServiceRoleSupabase();
-      ({ data } = await admin.from("profiles").select(columns).eq("id", user.id).maybeSingle());
-    } catch {
-      ({ data } = await supabase.from("profiles").select(columns).eq("id", user.id).maybeSingle());
-    }
+    // Read the profile authoritatively (service role, RLS-immune) now that we know who the
+    // user is — a stale user-scoped token can otherwise return null and collapse a payer to
+    // "free", which this authoritative route would then broadcast.
+    const data = await readAuthoritativeProfile(user.id, supabase);
 
     const effectiveTier = resolveEffectiveTierFromProfile({
       tier: data?.tier,

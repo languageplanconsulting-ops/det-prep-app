@@ -18,6 +18,10 @@ import {
 } from "@/lib/admin-preview";
 import { isBootstrapAdminEmail } from "@/lib/admin-emails";
 import { setCurrentBrowserUserId } from "@/lib/browser-user-scope";
+import {
+  readValidConfirmedTier,
+  rememberConfirmedTier,
+} from "@/lib/last-known-tier";
 import { claimBootstrapAdminClient } from "@/lib/claim-bootstrap-admin";
 import { mostPrivilegedTier, resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
@@ -131,31 +135,62 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
           planExpiresAt?: string | null;
         }
       | null = null;
-    try {
-      const res = await fetch("/api/me", { credentials: "same-origin" });
-      if (res.ok) server = await res.json();
-    } catch {
-      // keep client values
+    // Retry once on a transient network/5xx failure (an authenticated:false 200 is a
+    // definitive "no session" answer, not an error, so it is not retried).
+    for (let attempt = 0; attempt < 2 && !server; attempt++) {
+      try {
+        const res = await fetch("/api/me", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (res.ok) server = await res.json();
+      } catch {
+        // keep client values
+      }
+      if (!server && attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      }
     }
 
-    if (server?.authenticated) {
-      setCurrentBrowserUserId(userId ?? server.userId ?? null);
-      // Take the MORE privileged of the two reads. Both read the same RLS-protected
-      // profile, so neither can over-report — but either can transiently under-report
-      // ("free") on a stale-token/RLS hiccup. Biasing toward access means a paying
-      // customer is never locked out because one of the two reads happened to fail.
-      setRealTier(mostPrivilegedTier(clientTier, server.effectiveTier ?? "free"));
-      setIsAdmin(server.isAdmin === true || clientAdmin);
-      setVipGrantedByCourse(server.vipGrantedByCourse === true || clientVipCourse);
-      setHasStripeSubscription(server.hasStripeSubscription === true || clientStripe);
-      setPlanExpiresAt(server.planExpiresAt ?? clientExpiry);
+    const serverConfirmed = server?.authenticated === true;
+    const effectiveUserId = userId ?? server?.userId ?? null;
+
+    // Live resolution. The server read is service-role (RLS-immune) and trusted; the client
+    // read is a same-source cross-check. Take the more privileged so a single failed read
+    // can't demote a payer.
+    let liveTier: Tier = serverConfirmed
+      ? mostPrivilegedTier(clientTier, server?.effectiveTier ?? "free")
+      : clientTier;
+    const liveExpiry = serverConfirmed
+      ? server?.planExpiresAt ?? clientExpiry
+      : clientExpiry;
+
+    // Absolute guarantee: a paid user is NEVER shown "free" because of a flaky read.
+    // A trusted read updates the remembered tier (recording paid, clearing on genuine
+    // free/expired). When no trusted read is available, fall back to that memory — which is
+    // user-scoped and expiry-aware, so it can never over-grant.
+    if (serverConfirmed) {
+      rememberConfirmedTier(effectiveUserId, liveTier, liveExpiry);
     } else {
-      setCurrentBrowserUserId(userId);
-      setRealTier(clientTier);
-      setIsAdmin(clientAdmin);
-      setVipGrantedByCourse(clientVipCourse);
-      setHasStripeSubscription(clientStripe);
-      setPlanExpiresAt(clientExpiry);
+      const remembered = readValidConfirmedTier(effectiveUserId);
+      if (remembered) liveTier = mostPrivilegedTier(liveTier, remembered);
+    }
+
+    if (serverConfirmed || effectiveUserId) {
+      setCurrentBrowserUserId(effectiveUserId);
+      setRealTier(liveTier);
+      setIsAdmin(server?.isAdmin === true || clientAdmin);
+      setVipGrantedByCourse(server?.vipGrantedByCourse === true || clientVipCourse);
+      setHasStripeSubscription(server?.hasStripeSubscription === true || clientStripe);
+      setPlanExpiresAt(liveExpiry);
+    } else {
+      // No identity from either source (logged out / total failure) → free + login prompt.
+      setCurrentBrowserUserId(null);
+      setRealTier("free");
+      setIsAdmin(false);
+      setVipGrantedByCourse(false);
+      setHasStripeSubscription(false);
+      setPlanExpiresAt(null);
     }
     setLoading(false);
     void fetchPreviewEligible();

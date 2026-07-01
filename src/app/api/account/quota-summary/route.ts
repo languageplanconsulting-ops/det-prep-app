@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
 
 import { AI_MONTHLY_LIMIT, MOCK_TEST_MONTHLY_LIMIT } from "@/lib/access-control";
+import { readAuthoritativeProfile } from "@/lib/authoritative-profile";
 import { getAddonBalancesForUser, getVipWeeklyAiQuotaForUser } from "@/lib/addon-credits";
 import { mockFixedMonthStartIso, countBillableMockFixedSessions } from "@/lib/mock-test/mock-fixed-quota";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
+import { getAdminAccess } from "@/lib/admin-auth";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { getRequestAuthUser } from "@/lib/supabase-request-client";
 
-export async function GET() {
-  const supabase = await createRouteHandlerSupabase();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export async function GET(request: Request) {
+  const { user, supabase } = await getRequestAuthUser(request);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const adminAccess = await getAdminAccess(request);
 
   await ensureProfileForAuthUser({
     userId: user.id,
@@ -25,12 +26,14 @@ export async function GET() {
       (user.user_metadata?.avatar_url as string | undefined) ?? null,
   });
 
-  const [{ data: profile }, { data: sessions }, addon] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("tier, role, tier_expires_at, vip_granted_by_course, ai_credits_used, lifetime_ai_used, ai_quota_mode, ai_monthly_limit_override")
-      .eq("id", user.id)
-      .maybeSingle(),
+  const [profile, { data: sessions }, addon] = await Promise.all([
+    // Authoritative (service-role) profile read so a stale user-token can't make a paying
+    // customer's quota resolve as "free". Mirrors /api/me.
+    readAuthoritativeProfile(
+      user.id,
+      supabase,
+      "tier, role, tier_expires_at, vip_granted_by_course, ai_credits_used, lifetime_ai_used, ai_quota_mode, ai_monthly_limit_override",
+    ),
     supabase
       .from("mock_fixed_sessions")
       .select("targets")
@@ -39,12 +42,14 @@ export async function GET() {
     getAddonBalancesForUser(user.id),
   ]);
 
-  const tier = resolveEffectiveTierFromProfile({
-    tier: profile?.tier,
-    tier_expires_at: (profile?.tier_expires_at as string | null | undefined) ?? null,
-    vip_granted_by_course: profile?.vip_granted_by_course === true,
-  });
-  const isAdmin = profile?.role === "admin";
+  const tier = adminAccess.ok
+    ? "vip"
+    : resolveEffectiveTierFromProfile({
+        tier: profile?.tier,
+        tier_expires_at: (profile?.tier_expires_at as string | null | undefined) ?? null,
+        vip_granted_by_course: profile?.vip_granted_by_course === true,
+      });
+  const isAdmin = profile?.role === "admin" || adminAccess.ok;
   const aiUsed = Math.max(0, Number(profile?.ai_credits_used ?? 0));
   const lifetimeAiUsed = profile?.lifetime_ai_used === true;
   const aiLimit = AI_MONTHLY_LIMIT[tier];
