@@ -19,7 +19,7 @@ import {
 import { isBootstrapAdminEmail } from "@/lib/admin-emails";
 import { setCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import { claimBootstrapAdminClient } from "@/lib/claim-bootstrap-admin";
-import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
+import { mostPrivilegedTier, resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 export type EffectiveTierState = {
@@ -140,7 +140,11 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
 
     if (server?.authenticated) {
       setCurrentBrowserUserId(userId ?? server.userId ?? null);
-      setRealTier(server.effectiveTier ?? "free");
+      // Take the MORE privileged of the two reads. Both read the same RLS-protected
+      // profile, so neither can over-report — but either can transiently under-report
+      // ("free") on a stale-token/RLS hiccup. Biasing toward access means a paying
+      // customer is never locked out because one of the two reads happened to fail.
+      setRealTier(mostPrivilegedTier(clientTier, server.effectiveTier ?? "free"));
       setIsAdmin(server.isAdmin === true || clientAdmin);
       setVipGrantedByCourse(server.vipGrantedByCourse === true || clientVipCourse);
       setHasStripeSubscription(server.hasStripeSubscription === true || clientStripe);

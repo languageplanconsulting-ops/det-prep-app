@@ -1,7 +1,21 @@
-import type { Tier } from "@/lib/access-control";
+import { TIER_ORDER, type Tier } from "@/lib/access-control";
 
 export function normalizeTier(raw: unknown): Tier {
   return raw === "basic" || raw === "premium" || raw === "vip" ? raw : "free";
+}
+
+/**
+ * Returns the more privileged of two tiers (free < basic < premium < vip).
+ *
+ * Both the client and the server resolve tier by reading the SAME RLS-protected
+ * `profiles` row, so neither can ever report a tier higher than the user truly has.
+ * That makes "take the highest" safe *and* correct: a transient null/expired-token
+ * read on one side (which collapses to "free") can never demote a paying user as
+ * long as the other side read the real row. A false "free" locks out a customer who
+ * paid; a false "paid" is impossible here — so we always bias toward access.
+ */
+export function mostPrivilegedTier(a: Tier, b: Tier): Tier {
+  return TIER_ORDER.indexOf(a) >= TIER_ORDER.indexOf(b) ? a : b;
 }
 
 export function hasValidPlanExpiry(expiresAt: string | null | undefined, now = new Date()): boolean {
