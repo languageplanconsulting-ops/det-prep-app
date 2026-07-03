@@ -237,8 +237,12 @@ export function MiniListeningStep({
     return n;
   };
 
-  const isCurrentScenarioComplete = (): boolean =>
-    currentScenario != null && answeredForCurrent() >= scenarioItemCount(currentScenario);
+  const isCurrentScenarioComplete = (): boolean => {
+    if (currentScenario == null) return false;
+    // Safety net: a scenario with no answerable items must never hard-block.
+    if (scenarioItemCount(currentScenario) === 0) return true;
+    return answeredForCurrent() >= scenarioItemCount(currentScenario);
+  };
 
   const goNext = () => {
     if (!currentScenario) return;
@@ -327,6 +331,7 @@ export function MiniListeningStep({
   /* ---------- scenario ---------- */
   const answered = answeredForCurrent();
   const totalItems = scenarioItemCount(currentScenario);
+  const isFitbScenario = currentScenario.kind === "fitb" || currentScenario.kind === "fitb_with_summary";
 
   return (
     <div className="space-y-4">
@@ -408,6 +413,13 @@ export function MiniListeningStep({
           {answered}/{totalItems}
         </span>
       </div>
+
+      {/* fill-in-the-blank scenarios have no options — cue the user to TYPE */}
+      {isFitbScenario ? (
+        <p className="rounded-xl bg-ep-yellow/20 px-3.5 py-2.5 text-xs font-semibold text-slate-700">
+          ✍️ สถานการณ์นี้ให้ “พิมพ์” คำที่หายไปในประโยค (ไม่มีตัวเลือกให้กด)
+        </p>
+      ) : null}
 
       <ScenarioQuestions
         scenario={currentScenario}
