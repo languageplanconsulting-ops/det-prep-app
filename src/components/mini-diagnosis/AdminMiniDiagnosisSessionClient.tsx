@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { QuestionRouter } from "@/components/mock-test/questions/QuestionRouter";
-import { MockTestTimerBar } from "@/components/mock-test/MockTestTimerBar";
 import { usePhaseTimer } from "@/hooks/usePhaseTimer";
-import { MiniInteractiveListeningStep } from "@/components/mini-diagnosis/MiniInteractiveListeningStep";
+import { setSfxEnabled, sfxCorrect, sfxSubmit } from "@/lib/exam-sfx";
+import { ConfettiBurst, MascotTip } from "@/components/mini-diagnosis/steps/ui";
+import { MiniStepIntro } from "@/components/mini-diagnosis/steps/MiniStepIntro";
+import { MiniDictationStep } from "@/components/mini-diagnosis/steps/MiniDictationStep";
+import { MiniFitbStep } from "@/components/mini-diagnosis/steps/MiniFitbStep";
+import { MiniListeningStep } from "@/components/mini-diagnosis/steps/MiniListeningStep";
+import { MiniReadThenSpeakStep } from "@/components/mini-diagnosis/steps/MiniReadThenSpeakStep";
+import { MiniRealWordStep } from "@/components/mini-diagnosis/steps/MiniRealWordStep";
+import { MiniVocabReadingStep } from "@/components/mini-diagnosis/steps/MiniVocabReadingStep";
+import { MiniWritePhotoStep } from "@/components/mini-diagnosis/steps/MiniWritePhotoStep";
 
 type SessionPayload = {
   id: string;
@@ -29,22 +36,58 @@ type SessionPayload = {
 
 const STEP_COUNT = 9;
 
-const TASK_LABELS: Record<string, { en: string; th: string; hint: string }> = {
-  dictation: { en: "Dictation", th: "ฟังแล้วพิมพ์", hint: "Type exactly what you hear." },
-  real_english_word: { en: "Real English Word", th: "คำอังกฤษจริง", hint: "Pick only the real English words." },
-  vocabulary_reading: { en: "Vocabulary Reading", th: "คำศัพท์ + การอ่าน", hint: "Balance vocab accuracy and passage understanding." },
-  fill_in_blanks: { en: "Fill in the Blanks", th: "เติมคำในช่องว่าง", hint: "Use grammar and context together." },
-  interactive_listening: { en: "Listening Mini Test", th: "มินิเทสต์การฟัง", hint: "ฟังบทสนทนาในแคมปัส 3 สถานการณ์ กดฟังได้ไม่เกิน 3 ครั้งต่อสถานการณ์ แล้วตอบคำถามทั้งหมด / 3 campus scenarios, up to 3 plays each, then answer every question." },
-  write_about_photo: { en: "Write About Photo", th: "เขียนจากภาพ", hint: "Keep your sentence structure clear and on topic." },
-  read_then_speak: { en: "Read Then Speak", th: "อ่านแล้วพูด", hint: "Read quickly, then speak in full connected ideas." },
+const TASK_META: Record<string, { th: string; en: string; icon: string; tip: string }> = {
+  dictation: {
+    th: "ฟังแล้วพิมพ์",
+    en: "Dictation",
+    icon: "🎧",
+    tip: "ฟังประโยคแล้วพิมพ์ตามให้ตรงที่สุด — ฟังได้ 3 ครั้ง ใจเย็นๆ นะ",
+  },
+  real_english_word: {
+    th: "คำอังกฤษจริง",
+    en: "Real English Word",
+    icon: "🔤",
+    tip: "แตะเฉพาะคำที่มีอยู่จริง — คำสะกดมั่วจะหักคะแนน เลือกเฉพาะที่มั่นใจ",
+  },
+  vocabulary_reading: {
+    th: "คำศัพท์ + การอ่าน",
+    en: "Vocabulary + Reading",
+    icon: "📖",
+    tip: "แตะช่องว่างในเนื้อเรื่องเพื่อเลือกคำ เสร็จแล้วค่อยตอบคำถามการอ่าน",
+  },
+  fill_in_blanks: {
+    th: "เติมคำในช่องว่าง",
+    en: "Fill in the Blanks",
+    icon: "✏️",
+    tip: "ดูตัวอักษรที่ให้มาก่อน แล้วใช้บริบทของประโยคช่วยเดาคำ",
+  },
+  interactive_listening: {
+    th: "มินิเทสต์การฟัง",
+    en: "Listening Mini Test",
+    icon: "🎙️",
+    tip: "มี 3 สถานการณ์ ฟังได้สถานการณ์ละ 3 ครั้ง — ใส่หูฟังจะช่วยได้มาก",
+  },
+  write_about_photo: {
+    th: "เขียนจากภาพ",
+    en: "Write About Photo",
+    icon: "🖼️",
+    tip: "บรรยายสิ่งที่เห็นในภาพเป็นประโยคเต็มๆ ยิ่งเขียนได้เยอะยิ่งดี",
+  },
+  read_then_speak: {
+    th: "อ่านแล้วพูด",
+    en: "Read Then Speak",
+    icon: "🗣️",
+    tip: "ข้อสุดท้ายแล้ว! อ่านโจทย์ แล้วพูดเป็นประโยคต่อเนื่อง ไม่ต้องกลัวผิด",
+  },
 };
 
 function taskMeta(taskType: string | undefined) {
   return (
-    TASK_LABELS[taskType ?? ""] ?? {
+    TASK_META[taskType ?? ""] ?? {
+      th: "ข้อสอบเช็กระดับ",
       en: "Mini diagnosis task",
-      th: "ข้อสอบมินิไดแอกโนซิส",
-      hint: "Stay calm and answer directly.",
+      icon: "📝",
+      tip: "ตั้งใจตอบตามที่ทำได้จริง ระบบจะได้วัดระดับให้แม่นๆ",
     }
   );
 }
@@ -56,7 +99,24 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dictationTimerStarted, setDictationTimerStarted] = useState(true);
+  const [celebrating, setCelebrating] = useState<{ step: number } | null>(null);
+  const [resting, setResting] = useState<{ remaining: number } | null>(null);
+  const [introFor, setIntroFor] = useState<number | null>(null);
+  const introSeen = useRef<Set<number>>(new Set());
+  const restTimerRef = useRef<number | null>(null);
   const timer = usePhaseTimer();
+
+  // Test-session sounds on for everyone (visual feedback always accompanies).
+  useEffect(() => {
+    setSfxEnabled(true);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (restTimerRef.current) window.clearInterval(restTimerRef.current);
+    },
+    [],
+  );
 
   const load = async () => {
     try {
@@ -82,6 +142,7 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
 
   useEffect(() => {
     void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   const stepIndex = session?.current_step ?? 1;
@@ -89,41 +150,53 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
     () => session?.mini_diagnosis_set_items?.find((item) => item.step_index === stepIndex) ?? null,
     [session, stepIndex],
   );
-  const currentMeta = taskMeta(current?.task_type);
+  const meta = taskMeta(current?.task_type);
   const answeredCount = session?.responses?.length ?? 0;
-  const progressPct = Math.round((answeredCount / STEP_COUNT) * 100);
 
   useEffect(() => {
     if (!current) return;
-    if (current.task_type === "dictation") {
-      setDictationTimerStarted(false);
-      timer.startTimer(stepIndex, current.time_limit_sec);
-      timer.pauseTimer();
-      return;
+    // Timer starts paused for every step — it begins after the intro panel is
+    // dismissed (and, for dictation, only after the audio finishes playing).
+    setDictationTimerStarted(current.task_type !== "dictation");
+    timer.startTimer(stepIndex, current.time_limit_sec);
+    timer.pauseTimer();
+    if (!introSeen.current.has(current.step_index)) {
+      setIntroFor(current.step_index);
+    } else if (current.task_type !== "dictation") {
+      timer.resumeTimer();
     }
-    setDictationTimerStarted(true);
-    timer.resetTimer(stepIndex, current.time_limit_sec);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.step_index, current?.task_type]);
 
-  const question = current
-    ? {
-        id: `${sessionId}-${current.step_index}`,
-        phase: current.step_index,
-        question_type: current.task_type as any,
-        skill: "production" as const,
-        difficulty: "medium" as const,
-        content: current.content,
-        correct_answer: current.correct_answer,
-        is_ai_graded: current.is_ai_graded,
-        is_active: true,
-      }
-    : null;
+  const dismissIntro = () => {
+    if (!current) return;
+    introSeen.current.add(current.step_index);
+    setIntroFor(null);
+    if (current.task_type !== "dictation") timer.resumeTimer();
+  };
+
+  const beginRest = (seconds: number, after: () => void) => {
+    setResting({ remaining: seconds });
+    restTimerRef.current = window.setInterval(() => {
+      setResting((prev) => {
+        if (!prev) return prev;
+        if (prev.remaining <= 1) {
+          if (restTimerRef.current) window.clearInterval(restTimerRef.current);
+          restTimerRef.current = null;
+          after();
+          return null;
+        }
+        return { remaining: prev.remaining - 1 };
+      });
+    }, 1000);
+  };
 
   const submit = async (answer: unknown) => {
     if (!current || submitting) return;
     try {
       setSubmitting(true);
       setError(null);
+      sfxSubmit();
       const res = await fetch(`/api/mini-diagnosis/session/${sessionId}/submit-step`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -137,6 +210,7 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
         return;
       }
       if (json.complete) {
+        sfxCorrect();
         if (typeof window !== "undefined") {
           window.location.assign(`/mini-diagnosis/results/${sessionId}`);
           return;
@@ -144,7 +218,21 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
         router.push(`/mini-diagnosis/results/${sessionId}`);
         return;
       }
+
+      // Celebrate, then rest if this step has a break, then show the next step.
+      const finishedStep = current.step_index;
+      const restSec = Math.max(0, Number(current.rest_after_step_sec ?? 0));
+      sfxCorrect();
+      setCelebrating({ step: finishedStep });
       await load();
+      window.setTimeout(() => {
+        setCelebrating(null);
+        if (restSec > 0) {
+          beginRest(restSec, () => window.scrollTo({ top: 0 }));
+        } else {
+          window.scrollTo({ top: 0 });
+        }
+      }, 1600);
       setSubmitting(false);
     } catch {
       setError("ส่งคำตอบสำเร็จไม่ครบ กรุณาลองกดส่งอีกครั้งหรือรีโหลดหน้า");
@@ -154,107 +242,197 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
 
   if (error) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-        <div className="max-w-md rounded-2xl border border-red-100 bg-white p-6 text-center shadow-sm">
-          <p className="text-sm font-semibold text-red-600">{error}</p>
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-4">
+        <div className="max-w-md rounded-2xl border border-rose-100 bg-white p-6 text-center shadow-sm">
+          <p className="text-sm font-semibold text-rose-600">{error}</p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-4 rounded-xl bg-ep-blue px-4 py-2.5 text-sm font-bold text-white"
+          >
+            รีโหลดหน้า
+          </button>
         </div>
       </main>
     );
   }
-  if (loading || !session || !question || !current) {
+
+  if (loading || !session || !current) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-        <div className="flex items-center gap-3 text-sm font-medium text-gray-500">
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-ep-blue" />
-          กำลังโหลดแบบเช็กระดับ…
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-4">
+        <div className="flex flex-col items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static public asset */}
+          <img src="/mascot-doy.png" alt="" className="h-16 w-16 animate-bounce object-contain" />
+          <p className="text-sm font-semibold text-slate-500">กำลังโหลดแบบเช็กระดับ…</p>
         </div>
       </main>
     );
   }
+
+  /* ---------- rest screen between sections ---------- */
+  if (resting) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-4">
+        <div className="w-full max-w-sm space-y-4">
+          <MascotTip
+            size="lg"
+            text={`เก่งมาก! ผ่านมาแล้ว ${answeredCount}/${STEP_COUNT} ข้อ 🎉`}
+            sub="พักหายใจแป๊บนึง เดี๋ยวไปข้อต่อไปกัน"
+          />
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-400">พักสั้นๆ</p>
+            <p className="mt-2 font-mono text-5xl font-bold text-ep-blue">{resting.remaining}</p>
+            <p className="mt-1 text-xs text-slate-400">วินาที</p>
+            <button
+              type="button"
+              onClick={() => {
+                if (restTimerRef.current) window.clearInterval(restTimerRef.current);
+                restTimerRef.current = null;
+                setResting(null);
+                window.scrollTo({ top: 0 });
+              }}
+              className="mt-4 rounded-xl border-2 border-ep-blue px-4 py-2 text-sm font-bold text-ep-blue transition hover:bg-blue-50"
+            >
+              พร้อมแล้ว ไปต่อเลย →
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const stepBody = (() => {
+    const props = {
+      content: current.content,
+      submitting,
+      onSubmit: submit,
+    };
+    switch (current.task_type) {
+      case "dictation":
+        return (
+          <MiniDictationStep
+            {...props}
+            onAudioPlaybackFinished={() => {
+              if (dictationTimerStarted) return;
+              setDictationTimerStarted(true);
+              timer.resumeTimer();
+            }}
+          />
+        );
+      case "real_english_word":
+        return <MiniRealWordStep {...props} />;
+      case "vocabulary_reading":
+        return <MiniVocabReadingStep {...props} />;
+      case "fill_in_blanks":
+        return <MiniFitbStep {...props} />;
+      case "interactive_listening":
+        return <MiniListeningStep {...props} />;
+      case "write_about_photo":
+        return <MiniWritePhotoStep {...props} />;
+      case "read_then_speak":
+        return <MiniReadThenSpeakStep {...props} />;
+      default:
+        return (
+          <p className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
+            Unsupported task type: {current.task_type}
+          </p>
+        );
+    }
+  })();
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="mx-auto max-w-3xl space-y-5">
-        {/* Header */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          {/* top progress bar */}
-          <div className="mb-5">
-            <div className="mb-1.5 flex items-center justify-between text-xs font-medium text-gray-400">
-              <span>เช็กระดับฟรี · ข้อ {stepIndex}/{STEP_COUNT}</span>
-              <span className="font-mono">{progressPct}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-              <div
-                className="h-full rounded-full bg-ep-blue transition-all duration-500"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
+    <main className="min-h-screen bg-[#f5f7fb] pb-10">
+      {/* sticky top bar: step dots + timer */}
+      <div className="sticky top-0 z-40 border-b border-slate-200/70 bg-[#f5f7fb]/95 px-4 py-2.5 backdrop-blur">
+        <div className="mx-auto flex max-w-lg items-center gap-3">
+          <div className="flex flex-1 items-center gap-1">
+            {Array.from({ length: STEP_COUNT }).map((_, i) => {
+              const n = i + 1;
+              return (
+                <span
+                  key={n}
+                  className={`h-2 flex-1 rounded-full transition-colors ${
+                    n < stepIndex ? "bg-emerald-400" : n === stepIndex ? "bg-ep-blue" : "bg-slate-200"
+                  }`}
+                />
+              );
+            })}
           </div>
-
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-ep-blue">
-                Mini diagnosis
-              </p>
-              <h1 className="mt-1.5 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">
-                {currentMeta.th}
-                <span className="ml-2 align-middle text-base font-semibold text-ep-blue">{currentMeta.en}</span>
-              </h1>
-              <p className="mt-2 text-sm leading-relaxed text-gray-500">{currentMeta.hint}</p>
-            </div>
-            <div className="shrink-0 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-wide text-gray-400">ชุดข้อสอบ</p>
-              <p className="mt-1 text-sm font-bold text-ep-blue">
-                {session.mini_diagnosis_sets?.user_title ?? session.mini_diagnosis_sets?.name ?? "Mini diagnosis"}
-              </p>
-            </div>
-          </div>
-
-          {/* timer */}
-          <div className="mt-5">
-            <MockTestTimerBar
-              progress={timer.progress}
-              isWarning={timer.isWarning}
-              isCritical={timer.isCritical}
-              formattedTime={timer.formattedTime}
-            />
-            {current.task_type === "dictation" && !dictationTimerStarted ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setDictationTimerStarted(true);
-                  timer.resumeTimer();
-                }}
-                className="mt-4 rounded-xl bg-ep-blue px-5 py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90"
-              >
-                เริ่มจับเวลา / Start timer
-              </button>
-            ) : null}
-          </div>
-        </section>
-
-        {/* Question body (shared QuestionRouter, wrapped in a calm card) */}
-        <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          {current.task_type === "interactive_listening" ? (
-            <MiniInteractiveListeningStep
-              content={current.content}
-              submitting={submitting}
-              onSubmit={submit}
-            />
-          ) : (
-            <QuestionRouter
-              question={question as any}
-              submitting={submitting}
-              onDictationAudioFinished={() => {
-                if (dictationTimerStarted) return;
-                setDictationTimerStarted(true);
-                timer.resumeTimer();
-              }}
-              onSubmit={submit}
-            />
-          )}
-        </section>
+          <span
+            className={`shrink-0 rounded-full px-3 py-1 font-mono text-xs font-bold ${
+              timer.isCritical
+                ? "bg-rose-100 text-rose-600"
+                : timer.isWarning
+                  ? "bg-amber-100 text-amber-700"
+                  : "bg-white text-slate-600 ring-1 ring-slate-200"
+            }`}
+          >
+            ⏱ {timer.formattedTime}
+          </span>
+        </div>
       </div>
+
+      <div className="mx-auto max-w-lg space-y-4 px-4 pt-4">
+        {/* step heading + mascot tip */}
+        <div className="flex items-baseline justify-between">
+          <h1 className="text-lg font-bold text-slate-900">
+            {meta.icon} {meta.th}
+          </h1>
+          <span className="font-mono text-xs font-bold text-slate-400">
+            ข้อ {stepIndex}/{STEP_COUNT}
+          </span>
+        </div>
+        <MascotTip text={meta.tip} />
+
+        {/* dictation: start-timer gate */}
+        {current.task_type === "dictation" && !dictationTimerStarted ? (
+          <p className="rounded-xl bg-ep-yellow/25 px-3 py-2 text-xs font-semibold text-slate-700">
+            ⏱ เวลาจะเริ่มนับหลังเสียงเล่นจบครั้งแรก — กดฟังเมื่อพร้อม
+          </p>
+        ) : null}
+
+        {stepBody}
+      </div>
+
+      {/* pre-exam introduction (what this task really measures) */}
+      {introFor != null && !celebrating && current ? (
+        <MiniStepIntro
+          taskType={current.task_type}
+          stepIndex={current.step_index}
+          stepCount={STEP_COUNT}
+          timeLimitSec={current.time_limit_sec}
+          onStart={dismissIntro}
+        />
+      ) : null}
+
+      {/* celebration overlay */}
+      {celebrating ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-6">
+          <div className="relative w-full max-w-xs overflow-hidden rounded-3xl bg-white p-6 text-center shadow-xl">
+            <ConfettiBurst />
+            {/* eslint-disable-next-line @next/next/no-img-element -- static public asset */}
+            <img
+              src="/mascot-doy.png"
+              alt=""
+              className="mx-auto h-20 w-20 object-contain"
+              style={{ animation: "minidiag-pop 0.5s ease-out" }}
+            />
+            <p className="mt-2 text-xl font-bold text-slate-900">เยี่ยมมาก! 🎉</p>
+            <p className="mt-1 text-sm font-semibold text-slate-500">
+              ข้อ {celebrating.step} เสร็จแล้ว · เหลืออีก {STEP_COUNT - celebrating.step} ข้อ
+            </p>
+            <div className="mt-3 flex justify-center gap-1">
+              {Array.from({ length: STEP_COUNT }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 w-4 rounded-full ${i < celebrating.step ? "bg-emerald-400" : "bg-slate-200"}`}
+                />
+              ))}
+            </div>
+            <style>{`@keyframes minidiag-pop { 0% { transform: scale(0.4); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }`}</style>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

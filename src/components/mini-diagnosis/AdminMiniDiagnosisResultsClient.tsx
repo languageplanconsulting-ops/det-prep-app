@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-// ─── Types (verbatim from MiniDiagnosisResultsClient) ────────────────────────
+import { setSfxEnabled, sfxReveal } from "@/lib/exam-sfx";
+import { ConfettiBurst } from "@/components/mini-diagnosis/steps/ui";
+
+// ─── Types (verbatim) ─────────────────────────────────────────────────────────
 
 type StepItem = {
   step_index: number;
@@ -43,55 +46,51 @@ type ResultRow = {
   created_at?: string;
 };
 
-// ─── Label helpers (verbatim) ─────────────────────────────────────────────────
+// ─── Label helpers ────────────────────────────────────────────────────────────
+
+const SKILL_TH: Record<string, { th: string; icon: string; practiceNote: string }> = {
+  listening: { th: "ฟัง", icon: "🎧", practiceNote: "ฝึก Dictation + Listening มินิเทสต์" },
+  speaking: { th: "พูด", icon: "🗣️", practiceNote: "ฝึก Read Then Speak + Speak About Photo" },
+  reading: { th: "อ่าน", icon: "📖", practiceNote: "ฝึก Reading + เติมคำในช่องว่าง" },
+  writing: { th: "เขียน", icon: "✍️", practiceNote: "ฝึก Write About Photo + Read & Write" },
+};
 
 function breakdownLabel(key: string) {
   const labels: Record<string, string> = {
-    dictation: "Dictation / ฟังแล้วพิมพ์",
-    interactive_listening: "Listening Mini Test / มินิเทสต์การฟัง",
-    read_then_speak: "Read Then Speak / อ่านแล้วพูด",
-    fill_in_blanks: "Fill in the Blank / เติมคำ",
-    vocabulary_reading: "Vocabulary Reading / คำศัพท์ + การอ่าน",
-    write_about_photo: "Write About Photo / เขียนจากภาพ",
-    reading: "Reading",
-    listening: "Listening",
-    speaking: "Speaking",
-    writing: "Writing",
+    dictation: "ฟังแล้วพิมพ์ (Dictation)",
+    interactive_listening: "มินิเทสต์การฟัง",
+    read_then_speak: "อ่านแล้วพูด",
+    fill_in_blanks: "เติมคำในช่องว่าง",
+    vocabulary_reading: "คำศัพท์ + การอ่าน",
+    write_about_photo: "เขียนจากภาพ",
+    real_english_word: "คำอังกฤษจริง",
+    reading: "อ่าน (Reading)",
+    listening: "ฟัง (Listening)",
+    speaking: "พูด (Speaking)",
+    writing: "เขียน (Writing)",
   };
   return labels[key] ?? key.replaceAll("_", " ");
 }
 
 function breakdownPctLabel(skill: string, part: string) {
   const map: Record<string, Record<string, string>> = {
-    listening: {
-      dictation: "50%",
-      interactive_listening: "50%",
-    },
-    speaking: {
-      read_then_speak: "100%",
-    },
-    reading: {
-      fill_in_blanks: "50%",
-      vocabulary_reading: "50%",
-    },
-    writing: {
-      write_about_photo: "55%",
-      dictation: "30%",
-      fill_in_blanks: "15%",
-    },
+    listening: { dictation: "50%", interactive_listening: "50%" },
+    speaking: { read_then_speak: "100%" },
+    reading: { fill_in_blanks: "50%", vocabulary_reading: "50%" },
+    writing: { write_about_photo: "55%", dictation: "30%", fill_in_blanks: "15%" },
   };
   return map[skill]?.[part] ?? "";
 }
 
 function taskLabel(taskType: string) {
   const labels: Record<string, string> = {
-    dictation: "Dictation / ฟังแล้วพิมพ์",
-    real_english_word: "Real English Word / คำอังกฤษจริง",
-    vocabulary_reading: "Vocabulary Reading / คำศัพท์ + การอ่าน",
-    fill_in_blanks: "Fill in the Blank / เติมคำ",
-    interactive_listening: "Listening Mini Test / มินิเทสต์การฟัง",
-    write_about_photo: "Write About Photo / เขียนจากภาพ",
-    read_then_speak: "Read Then Speak / อ่านแล้วพูด",
+    dictation: "🎧 ฟังแล้วพิมพ์",
+    real_english_word: "🔤 คำอังกฤษจริง",
+    vocabulary_reading: "📖 คำศัพท์ + การอ่าน",
+    fill_in_blanks: "✏️ เติมคำในช่องว่าง",
+    interactive_listening: "🎙️ มินิเทสต์การฟัง",
+    write_about_photo: "🖼️ เขียนจากภาพ",
+    read_then_speak: "🗣️ อ่านแล้วพูด",
   };
   return labels[taskType] ?? taskType;
 }
@@ -107,25 +106,31 @@ function extractFitbAnswers(answer: unknown): string[] {
   return [];
 }
 
-// ─── Objective review renderer (verbatim logic, calm visual reskin) ───────────
+// CEFR band from a 0–160 score, using Duolingo's published mapping.
+function cefrFromTotal(total: number): string {
+  if (total >= 150) return "C2";
+  if (total >= 130) return "C1";
+  if (total >= 110) return "B2";
+  if (total >= 90) return "B1";
+  if (total >= 60) return "A2";
+  return "A1";
+}
+
+// ─── Objective review renderer (logic verbatim, soft reskin) ──────────────────
 
 function renderObjectiveReview(taskType: string, answer: unknown, item: StepItem) {
   if (taskType === "dictation") {
     return (
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#004AAD]">
-            คำตอบของคุณ / Your answer
-          </p>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-700">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl border border-slate-200 bg-white p-3.5">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">คำตอบของคุณ</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-700">
             {String((answer as { answer?: unknown })?.answer ?? answer ?? "") || "—"}
           </p>
         </div>
-        <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#004AAD]">
-            เฉลย / Reference script
-          </p>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-700">
+        <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3.5">
+          <p className="text-[11px] font-bold uppercase tracking-wide text-ep-blue">เฉลย</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-700">
             {String((item.content as { reference_sentence?: unknown } | null)?.reference_sentence ?? "") || "—"}
           </p>
         </div>
@@ -139,31 +144,26 @@ function renderObjectiveReview(taskType: string, answer: unknown, item: StepItem
       ? (((item.correct_answer as { answers?: unknown[] }).answers ?? []).map((value) => String(value ?? "")))
       : [];
     return (
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#004AAD]">
-            คำตอบของคุณ / Your blanks
-          </p>
-          <div className="mt-3 space-y-2">
-            {yourAnswers.map((value, idx) => (
-              <div key={idx} className="rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
-                Blank {idx + 1}: <span className="font-semibold">{value || "—"}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-[#004AAD]">
-            เฉลย / Correct blanks
-          </p>
-          <div className="mt-3 space-y-2">
-            {correctAnswers.map((value, idx) => (
-              <div key={idx} className="rounded-lg border border-blue-100 bg-white px-3 py-2 text-sm text-neutral-700">
-                Blank {idx + 1}: <span className="font-semibold">{value || "—"}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="space-y-2">
+        {correctAnswers.map((correct, idx) => {
+          const typed = yourAnswers[idx] ?? "";
+          const match = typed.trim().toLowerCase() === correct.trim().toLowerCase();
+          return (
+            <div
+              key={idx}
+              className={`flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-sm ${
+                match ? "border-emerald-200 bg-emerald-50/70" : "border-rose-200 bg-rose-50/60"
+              }`}
+            >
+              <span className="font-semibold text-slate-700">
+                ช่อง {idx + 1}: {typed || "—"}
+              </span>
+              <span className={match ? "font-bold text-emerald-700" : "font-bold text-rose-600"}>
+                {match ? "✓" : `เฉลย: ${correct}`}
+              </span>
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -178,24 +178,31 @@ function renderObjectiveReview(taskType: string, answer: unknown, item: StepItem
     const prompts = Array.isArray((answer as { question_prompts?: unknown[] })?.question_prompts)
       ? ((answer as { question_prompts?: unknown[] }).question_prompts ?? []).map((value) => String(value ?? ""))
       : [];
+    const rows = prompts.length > 0 ? prompts : correctAnswers.map((_, i) => `ข้อ ${i + 1}`);
     return (
-      <div className="space-y-3">
-        {prompts.map((prompt, idx) => {
+      <div className="space-y-2">
+        {rows.map((prompt, idx) => {
           const picked = selectedAnswers[idx] ?? "";
           const correct = correctAnswers[idx] ?? "";
           const match = picked === correct;
           return (
-            <div key={idx} className="grid gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm md:grid-cols-[1.4fr_1fr_1fr]">
-              <div>
-                <p className="text-xs font-bold text-[#004AAD]">Q{idx + 1}</p>
-                <p className="mt-1 text-sm leading-relaxed text-neutral-700">{prompt}</p>
-              </div>
-              <div className={`rounded-lg border px-3 py-2 text-sm ${match ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-800"}`}>
-                <span className="font-semibold">คุณตอบ:</span> {picked || "—"}
-              </div>
-              <div className="rounded-lg border border-blue-100 bg-blue-50/40 px-3 py-2 text-sm text-neutral-700">
-                <span className="font-semibold">เฉลย:</span> {correct || "—"}
-              </div>
+            <div
+              key={idx}
+              className={`rounded-xl border p-3.5 ${
+                match ? "border-emerald-200 bg-emerald-50/70" : "border-rose-200 bg-rose-50/60"
+              }`}
+            >
+              <p className="text-xs font-bold text-slate-500">
+                {match ? "✓" : "✕"} Q{idx + 1}. {prompt}
+              </p>
+              <p className="mt-1 text-sm text-slate-700">
+                คุณตอบ: <span className="font-semibold">{picked || "—"}</span>
+                {!match ? (
+                  <span className="ml-2 text-emerald-700">
+                    เฉลย: <span className="font-semibold">{correct || "—"}</span>
+                  </span>
+                ) : null}
+              </p>
             </div>
           );
         })}
@@ -208,7 +215,7 @@ function renderObjectiveReview(taskType: string, answer: unknown, item: StepItem
       ? ((answer as { round_selections?: Array<Record<string, unknown>> }).round_selections ?? [])
       : [];
     return (
-      <div className="space-y-3">
+      <div className="space-y-2">
         {rounds.map((round, idx) => {
           const selected = Array.isArray(round.selected) ? round.selected.map((value) => String(value ?? "")) : [];
           const realWords = Array.isArray(round.realWords) ? round.realWords.map((value) => String(value ?? "")) : [];
@@ -216,14 +223,14 @@ function renderObjectiveReview(taskType: string, answer: unknown, item: StepItem
           const missedReal = realWords.filter((word) => !selected.includes(word));
           const pickedFake = selected.filter((word) => fakeWords.includes(word));
           return (
-            <div key={idx} className="grid gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm md:grid-cols-2">
-              <div className="rounded-lg border border-blue-100 bg-blue-50/40 p-3">
-                <p className="text-xs font-bold text-[#004AAD]">คำจริงที่พลาด / Missed real words</p>
-                <p className="mt-2 text-sm text-neutral-700">{missedReal.join(", ") || "None / ไม่มี"}</p>
+            <div key={idx} className="grid gap-2 sm:grid-cols-2">
+              <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3.5">
+                <p className="text-xs font-bold text-ep-blue">คำจริงที่พลาด</p>
+                <p className="mt-1.5 text-sm text-slate-700">{missedReal.join(", ") || "ไม่มี 🎉"}</p>
               </div>
-              <div className="rounded-lg border border-red-100 bg-red-50/40 p-3">
-                <p className="text-xs font-bold text-red-700">คำปลอมที่กด / Fake words picked</p>
-                <p className="mt-2 text-sm text-neutral-700">{pickedFake.join(", ") || "None / ไม่มี"}</p>
+              <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-3.5">
+                <p className="text-xs font-bold text-rose-600">คำมั่วที่เผลอกด</p>
+                <p className="mt-1.5 text-sm text-slate-700">{pickedFake.join(", ") || "ไม่มี 🎉"}</p>
               </div>
             </div>
           );
@@ -233,90 +240,38 @@ function renderObjectiveReview(taskType: string, answer: unknown, item: StepItem
   }
 
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-[#004AAD]">Answer / คำตอบ</p>
-        <pre className="mt-3 whitespace-pre-wrap text-sm text-neutral-700">
-          {JSON.stringify(answer ?? null, null, 2)}
-        </pre>
-      </div>
-      <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 shadow-sm">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-[#004AAD]">Correct / เฉลย</p>
-        <pre className="mt-3 whitespace-pre-wrap text-sm text-neutral-700">
-          {JSON.stringify(item.correct_answer ?? item.content ?? null, null, 2)}
-        </pre>
-      </div>
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+      <pre className="whitespace-pre-wrap text-xs text-slate-600">{JSON.stringify(answer ?? null, null, 2)}</pre>
     </div>
   );
 }
 
-// ─── Skill score bar helper (ฟัง / พูด / อ่าน / เขียน, brand style) ────────────
+// ─── Step review card ─────────────────────────────────────────────────────────
 
-const THAI_SKILL: Record<string, { th: string; en: string }> = {
-  Listening: { th: "ฟัง", en: "Listening" },
-  Speaking: { th: "พูด", en: "Speaking" },
-  Reading: { th: "อ่าน", en: "Reading" },
-  Writing: { th: "เขียน", en: "Writing" },
-};
-
-// CEFR band from a 0–160 score, using Duolingo's published mapping.
-function cefrFromTotal(total: number): string {
-  if (total >= 150) return "C2";
-  if (total >= 130) return "C1";
-  if (total >= 110) return "B2";
-  if (total >= 90) return "B1";
-  if (total >= 60) return "A2";
-  return "A1";
-}
-
-function SkillBar({ label, value }: { label: string; value: number }) {
-  const pct = Math.min(100, Math.max(0, (value / 160) * 100));
-  const t = THAI_SKILL[label] ?? { th: label, en: label };
-  return (
-    <div>
-      <div className="flex items-baseline justify-between">
-        <span className="text-base font-black text-neutral-900">
-          {t.th} <span className="text-xs font-bold uppercase text-neutral-400">{t.en}</span>
-        </span>
-        <span className="font-mono text-sm font-black text-[#004AAD]">
-          {Math.round(value)}
-          <span className="ml-0.5 text-xs font-bold text-neutral-400">/160</span>
-        </span>
-      </div>
-      <div className="mt-1.5 h-3.5 w-full border-2 border-black bg-neutral-100">
-        <div className="h-full bg-[#004AAD] transition-all duration-500" style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
-}
-
-// ─── Collapsible step review ──────────────────────────────────────────────────
-
-function StepReviewCard({
-  item,
-  response,
-}: {
-  item: StepItem;
-  response: ResponseRow | null;
-}) {
+function StepReviewCard({ item, response }: { item: StepItem; response: ResponseRow | null }) {
   const [open, setOpen] = useState(false);
   const score = Math.round(Number(response?.score ?? 0));
+  const good = score >= 112; // ≥70%
+  const mid = score >= 80;
   const hasImprovement = Boolean(response?.review?.improvementPoints);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-neutral-50"
+        className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-slate-50"
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#004AAD]/10 font-mono text-xs font-bold text-[#004AAD]">
-          {item.step_index}
+        <span
+          className={`flex h-9 w-14 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-bold ${
+            good ? "bg-emerald-100 text-emerald-700" : mid ? "bg-blue-50 text-ep-blue" : "bg-rose-50 text-rose-600"
+          }`}
+        >
+          {score}
         </span>
-        <span className="flex-1 text-sm font-semibold text-neutral-800">{taskLabel(item.task_type)}</span>
-        <span className="font-mono text-lg font-bold text-[#004AAD]">{score}</span>
+        <span className="flex-1 text-sm font-semibold text-slate-800">{taskLabel(item.task_type)}</span>
         <svg
-          className={`ml-2 h-4 w-4 shrink-0 text-neutral-400 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
@@ -327,29 +282,25 @@ function StepReviewCard({
       </button>
 
       {open && (
-        <div className="border-t border-neutral-100 px-5 pb-5 pt-4">
+        <div className="border-t border-slate-100 px-4 pb-4 pt-3.5">
           {hasImprovement ? (
-            <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-              <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-[#004AAD]">
-                  คำตอบของคุณ / Your submission
-                </p>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-neutral-700">
+            <div className="space-y-3">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">คำตอบของคุณ</p>
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
                   {String((response!.answer as { text?: unknown })?.text ?? response!.answer ?? "")}
                 </p>
               </div>
-              <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-700">
-                  วิธีเพิ่มคะแนน / How to improve
-                </p>
-                <ul className="mt-3 space-y-2 text-sm leading-relaxed text-neutral-700">
+              <div className="rounded-xl border border-amber-100 bg-amber-50/60 p-3.5">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-amber-700">วิธีเพิ่มคะแนน</p>
+                <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-slate-700">
                   {((response!.review!.improvementPoints as Array<{ th?: string; en?: string }>) ?? []).map(
                     (point, idx) => (
-                      <li key={idx} className="flex gap-2 border-b border-amber-100 pb-2 last:border-0 last:pb-0">
+                      <li key={idx} className="flex gap-2">
                         <span className="mt-0.5 shrink-0 text-amber-500">•</span>
                         {point.th || point.en}
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -363,76 +314,19 @@ function StepReviewCard({
   );
 }
 
-// ─── Value-peek upsell card ───────────────────────────────────────────────────
-
-function MockValuePeek({ weakSkills }: { weakSkills: string[] }) {
-  const weak1 = weakSkills[0];
-  const weak2 = weakSkills[1];
-
-  return (
-    <div className="rounded-3xl border border-[#004AAD]/20 bg-gradient-to-br from-[#004AAD]/5 to-white p-6 shadow-sm">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-[#004AAD]">
-        Full Mock Test เพิ่มอะไรให้คุณ?
-      </p>
-      <p className="mt-1 text-xs text-neutral-500">What you get beyond this mini snapshot</p>
-
-      <ul className="mt-4 space-y-3">
-        {[
-          {
-            icon: "📋",
-            th: "แบบทดสอบเต็มรูปแบบ 40+ ข้อ ใกล้เคียง DET จริง",
-            en: "Full 40-item exam that mirrors the real DET format",
-          },
-          {
-            icon: "🎯",
-            th: weak1
-              ? `ข้อสอบเจาะลึก ${weak1} — จุดอ่อนที่ระบบตรวจพบในผลนี้`
-              : "ข้อสอบเจาะลึกทุกสกิล",
-            en: weak1 ? `Deep practice set for ${weak1} — your flagged weak skill` : "Targeted deep practice per skill",
-          },
-          {
-            icon: "💬",
-            th: `ฟีดแบ็กแบบละเอียดรายข้อ${weak2 ? ` สำหรับ ${weak2} ด้วย` : ""}`,
-            en: `Detailed per-item feedback${weak2 ? ` including ${weak2}` : ""}`,
-          },
-          {
-            icon: "📈",
-            th: "ดู score trajectory ข้ามเดือน วัดพัฒนาการได้จริง",
-            en: "Month-over-month score tracking so progress is visible",
-          },
-        ].map((item, idx) => (
-          <li key={idx} className="flex gap-3 text-sm leading-snug text-neutral-700">
-            <span className="mt-0.5 shrink-0 text-base">{item.icon}</span>
-            <span>
-              <span className="font-semibold">{item.th}</span>
-              <br />
-              <span className="text-neutral-400">{item.en}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      <Link
-        href="/pricing"
-        className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-[#004AAD]/30 bg-white px-5 py-3 text-sm font-semibold text-[#004AAD] shadow-sm transition-colors hover:bg-[#004AAD]/5"
-      >
-        ดูแพ็กเกจทั้งหมด
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </Link>
-      <p className="mt-2 text-center text-xs text-neutral-400">No pressure — explore when you&apos;re ready</p>
-    </div>
-  );
-}
-
-// ─── Main export ──────────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: string }) {
-  // ── data loading (verbatim) ──────────────────────────────────────────────
   const [result, setResult] = useState<ResultRow | null>(null);
   const [stepItems, setStepItems] = useState<StepItem[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [displayTotal, setDisplayTotal] = useState(0);
+  const [celebrate, setCelebrate] = useState(false);
+  const revealPlayed = useRef(false);
+
+  useEffect(() => {
+    setSfxEnabled(true);
+  }, []);
 
   const loadReport = async () => {
     try {
@@ -459,9 +353,31 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
 
   useEffect(() => {
     void loadReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
-  // ── derived values (verbatim) ────────────────────────────────────────────
+  // Count-up + reveal celebration once the result arrives.
+  useEffect(() => {
+    if (!result) return;
+    const total = Math.round(result.actual_total ?? 0);
+    if (!revealPlayed.current) {
+      revealPlayed.current = true;
+      sfxReveal();
+      setCelebrate(true);
+      window.setTimeout(() => setCelebrate(false), 1800);
+    }
+    const durationMs = 900;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / durationMs);
+      setDisplayTotal(Math.round(total * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [result]);
+
   const responses = useMemo(() => result?.report_payload?.responses ?? [], [result]);
   const scoreBreakdown = useMemo(() => result?.report_payload?.scoreBreakdown ?? {}, [result]);
   const merged = useMemo(
@@ -473,38 +389,25 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
     [responses, stepItems],
   );
 
-  // ── weak-skill derivation for CTA (uses verbatim weaknesses field) ───────
-  const weakSkillNames = useMemo(
-    () =>
-      (result?.weaknesses ?? [])
-        .slice(0, 2)
-        .map((w) => w.key.charAt(0).toUpperCase() + w.key.slice(1)),
-    [result],
-  );
-
-  // ── error state ──────────────────────────────────────────────────────────
   if (loadError) {
     return (
-      <main className="min-h-screen bg-neutral-50 px-4 py-10">
-        <div className="mx-auto max-w-md rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-md">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#004AAD]">
-            Mini diagnosis — Admin preview
-          </p>
-          <h1 className="mt-3 text-xl font-bold text-neutral-900">หน้านี้โหลดไม่สำเร็จ</h1>
-          <p className="mt-3 text-sm text-red-600">{loadError}</p>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-4">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm">
+          <h1 className="text-lg font-bold text-slate-900">หน้านี้โหลดไม่สำเร็จ</h1>
+          <p className="mt-2 text-sm text-rose-600">{loadError}</p>
+          <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
             <button
               type="button"
               onClick={() => void loadReport()}
-              className="rounded-xl bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm transition-opacity hover:opacity-90"
+              className="rounded-xl bg-ep-blue px-5 py-3 text-sm font-bold text-white"
             >
-              Reload / โหลดใหม่
+              โหลดใหม่
             </button>
             <Link
               href="/mini-diagnosis/start"
-              className="rounded-xl border border-neutral-200 bg-white px-5 py-3 text-sm font-semibold text-neutral-700 shadow-sm transition-colors hover:bg-neutral-50"
+              className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700"
             >
-              Back / กลับ
+              กลับ
             </Link>
           </div>
         </div>
@@ -512,273 +415,237 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
     );
   }
 
-  if (!result)
+  if (!result) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm font-medium text-neutral-500">
-        Loading diagnosis report…
-      </div>
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-4">
+        <div className="flex flex-col items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static public asset */}
+          <img src="/mascot-doy.png" alt="" className="h-16 w-16 animate-bounce object-contain" />
+          <p className="text-sm font-semibold text-slate-500">พี่ดอยกำลังรวมคะแนน…</p>
+        </div>
+      </main>
     );
+  }
 
-  const skills: Array<{ label: string; value: number }> = [
-    { label: "Listening", value: result.actual_listening },
-    { label: "Speaking", value: result.actual_speaking },
-    { label: "Reading", value: result.actual_reading },
-    { label: "Writing", value: result.actual_writing },
-  ];
   const total = Math.round(result.actual_total ?? 0);
   const totalPct = Math.min(100, Math.max(0, (total / 160) * 100));
-
-  // primary weak skill for the practice CTA anchor
+  const skills = [
+    { key: "reading", value: Math.round(result.actual_reading ?? 0) },
+    { key: "listening", value: Math.round(result.actual_listening ?? 0) },
+    { key: "writing", value: Math.round(result.actual_writing ?? 0) },
+    { key: "speaking", value: Math.round(result.actual_speaking ?? 0) },
+  ].sort((a, b) => b.value - a.value);
+  const weakest = skills[skills.length - 1]!;
+  const strongest = skills[0]!;
+  const weakMeta = SKILL_TH[weakest.key] ?? { th: weakest.key, icon: "🎯", practiceNote: "" };
+  const strongMeta = SKILL_TH[strongest.key] ?? { th: strongest.key, icon: "💪", practiceNote: "" };
 
   return (
-    <main className="min-h-screen bg-neutral-50 px-4 py-10">
-      <div className="mx-auto max-w-4xl space-y-6">
-        {/* ── Score snapshot ─────────────────────────────────────────────── */}
-        <section className="border-4 border-black bg-white p-8 shadow-[10px_10px_0_0_#111]">
-          <p className="font-mono text-[11px] font-black uppercase tracking-[0.22em] text-[#004AAD]">
-            ผลวัดระดับของคุณ · Your level snapshot
-          </p>
+    <main className="min-h-screen bg-[#f5f7fb] px-4 py-8">
+      <div className="mx-auto max-w-xl space-y-4">
+        {/* mascot header */}
+        <div className="flex items-end gap-2.5">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static public asset */}
+          <img src="/mascot-doy.png" alt="" className="h-14 w-14 shrink-0 object-contain" />
+          <div className="relative flex-1 rounded-2xl rounded-bl-md border border-blue-100 bg-blue-50 px-3.5 py-2.5">
+            <p className="text-sm font-semibold leading-snug text-slate-800">
+              ทำครบทั้ง 9 ข้อแล้ว เก่งมาก! 🎉 นี่คือระดับของคุณตอนนี้
+            </p>
+          </div>
+        </div>
 
-          <div className="mt-5 flex items-end gap-4">
-            <span className="text-6xl font-black tracking-tight md:text-7xl">≈ {total}</span>
-            <span className="mb-2 border-2 border-black bg-[#FFCC00] px-3 py-1 text-sm font-black uppercase">
-              {cefrFromTotal(total)}
+        {/* score hero */}
+        <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          {celebrate ? <ConfettiBurst /> : null}
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+            คะแนนประเมิน (เทียบสเกล DET 10–160)
+          </p>
+          <p className="mt-2 font-mono text-6xl font-bold tracking-tight text-ep-blue">≈{displayTotal}</p>
+          <div className="mt-2 flex items-center justify-center gap-2">
+            <span className="rounded-full bg-ep-yellow/40 px-3 py-1 text-xs font-bold text-slate-800">
+              CEFR ≈ {cefrFromTotal(total)}
             </span>
+            {result.level_label ? (
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-ep-blue">
+                {result.level_label}
+              </span>
+            ) : null}
           </div>
-          <p className="mt-1 text-sm font-bold text-neutral-500">
-            คะแนนประเมิน Duolingo English Test (10–160)
-          </p>
-          {result.level_label ? (
-            <p className="mt-1 text-sm font-black text-[#004AAD]">{result.level_label}</p>
-          ) : null}
-
-          {/* 0–160 gauge */}
-          <div className="mt-4 h-5 w-full max-w-md border-2 border-black bg-neutral-100">
-            <div className="h-full bg-[#004AAD]" style={{ width: `${totalPct}%` }} />
+          <div className="mx-auto mt-4 h-3 max-w-sm overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full rounded-full bg-ep-blue transition-all duration-700"
+              style={{ width: `${totalPct}%` }}
+            />
           </div>
-          <div className="mt-1 flex max-w-md justify-between font-mono text-[10px] font-black text-neutral-500">
+          <div className="mx-auto mt-1 flex max-w-sm justify-between font-mono text-[10px] font-bold text-slate-400">
             <span>10</span>
             <span>85</span>
             <span>160</span>
           </div>
+        </section>
 
-          {/* Skill bars: ฟัง พูด อ่าน เขียน */}
-          <div className="mt-8 grid gap-x-10 gap-y-5 md:grid-cols-2">
-            {skills.map((s) => (
-              <SkillBar key={s.label} label={s.label} value={s.value} />
-            ))}
+        {/* 4 skill bars */}
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-bold text-slate-800">4 ทักษะของคุณ</p>
+          <div className="mt-3.5 space-y-3.5">
+            {skills.map((s) => {
+              const meta = SKILL_TH[s.key] ?? { th: s.key, icon: "•", practiceNote: "" };
+              const pct = Math.min(100, Math.max(0, (s.value / 160) * 100));
+              const isWeakest = s.key === weakest.key;
+              return (
+                <div key={s.key}>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-sm font-semibold text-slate-800">
+                      {meta.icon} {meta.th}
+                      <span className="ml-1.5 text-[11px] font-bold uppercase text-slate-400">{s.key}</span>
+                      {isWeakest ? (
+                        <span className="ml-2 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-600">
+                          แก้ก่อน
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className={`font-mono text-sm font-bold ${isWeakest ? "text-rose-600" : "text-ep-blue"}`}>
+                      {s.value}
+                      <span className="ml-0.5 text-[10px] text-slate-400">/160</span>
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${isWeakest ? "bg-rose-400" : "bg-ep-blue"}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
-        {/* ── Strengths / Weaknesses ──────────────────────────────────────── */}
-        <section className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">
-              Top strengths / จุดแข็ง
+        {/* strength + focus-first */}
+        <section className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4">
+            <p className="text-xs font-bold text-emerald-700">💪 จุดแข็งของคุณ</p>
+            <p className="mt-1 text-base font-bold text-slate-900">
+              {strongMeta.icon} {strongMeta.th} · {strongest.value}/160
             </p>
-            <div className="mt-4 space-y-3">
-              {(result.strengths ?? []).map((row) => (
-                <div key={row.key} className="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-3">
-                  <p className="text-sm font-semibold capitalize text-neutral-800">{row.key}</p>
-                  <p className="font-mono text-sm font-bold text-emerald-700">
-                    {Math.round(Number(row.score ?? 0))}
-                    <span className="ml-0.5 text-xs font-normal opacity-60">/160</span>
-                  </p>
-                </div>
-              ))}
-            </div>
+            <p className="mt-1 text-xs leading-relaxed text-slate-600">
+              ทักษะนี้เป็นฐานที่ดี ใช้ต่อยอดทักษะอื่นได้เลย
+            </p>
           </div>
-
-          <div className="rounded-2xl border border-red-100 bg-white p-6 shadow-sm">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-red-600">
-              Main weaknesses / จุดอ่อนหลัก
+          <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4">
+            <p className="text-xs font-bold text-rose-600">🎯 โฟกัสอันนี้ก่อน</p>
+            <p className="mt-1 text-base font-bold text-slate-900">
+              {weakMeta.icon} {weakMeta.th} · {weakest.value}/160
             </p>
-            <div className="mt-4 space-y-3">
-              {(result.weaknesses ?? []).map((row) => (
-                <div key={row.key} className="flex items-center justify-between rounded-xl bg-red-50 px-4 py-3">
-                  <p className="text-sm font-semibold capitalize text-neutral-800">{row.key}</p>
-                  <p className="font-mono text-sm font-bold text-red-600">
-                    {Math.round(Number(row.score ?? 0))}
-                    <span className="ml-0.5 text-xs font-normal opacity-60">/160</span>
-                  </p>
-                </div>
-              ))}
-            </div>
+            <p className="mt-1 text-xs leading-relaxed text-slate-600">{weakMeta.practiceNote}</p>
           </div>
         </section>
 
-        {/* ── Contextual next-step CTA (fixed: no bare /pricing dump) ──────── */}
-        <section className="rounded-3xl border border-[#004AAD]/10 bg-gradient-to-br from-[#004AAD] to-[#0059CC] p-7 shadow-md text-white">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#FFCC00]">
-            Next step / ไปต่อยังไงดี
-          </p>
+        {/* single clear next action */}
+        <Link
+          href="/practice"
+          className="flex items-center justify-center gap-2 rounded-2xl bg-ep-blue px-6 py-4 text-base font-bold text-white shadow-sm transition active:scale-[0.99]"
+        >
+          เริ่มฝึก{weakMeta.th}เลย →
+        </Link>
 
-          {weakSkillNames.length > 0 && (
-            <p className="mt-2 text-lg font-semibold leading-snug">
-              ระบบตรวจพบว่าคุณควรเพิ่ม{" "}
-              <span className="font-bold text-[#FFCC00]">{weakSkillNames.join(" และ ")}</span>
-              {" "}ก่อนเลย
-            </p>
-          )}
-          <p className="mt-1 text-sm text-white/75">
-            {weakSkillNames.length > 0
-              ? `Your score shows ${weakSkillNames.join(" & ")} need the most attention right now.`
-              : "Use this report to decide what to practise next."}
-          </p>
+        {/* step review */}
+        <section className="space-y-2.5">
+          <div className="flex items-baseline justify-between px-1">
+            <p className="text-sm font-bold text-slate-800">รีวิวทีละข้อ</p>
+            <p className="text-xs text-slate-400">แตะเพื่อดูคำตอบ + เฉลย</p>
+          </div>
+          {merged.map(({ item, response }) => (
+            <StepReviewCard key={item.step_index} item={item} response={response} />
+          ))}
+        </section>
 
-          {/* Primary CTA — practice the weak skill */}
-          <Link
-            href="/practice"
-            className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-[#FFCC00] px-6 py-4 text-base font-bold text-[#004AAD] shadow transition-opacity hover:opacity-90"
-          >
-            ฝึกจุดอ่อนเลย
-            {weakSkillNames[0] ? ` — ${weakSkillNames[0]}` : ""}
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+        {/* score breakdown — progressive disclosure */}
+        <details className="group rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <summary className="flex cursor-pointer items-center justify-between px-4 py-3.5 text-sm font-bold text-slate-800 [&::-webkit-details-marker]:hidden">
+            คะแนนแต่ละทักษะคิดมายังไง?
+            <svg
+              className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
-          </Link>
-          <p className="mt-2 text-center text-xs text-white/60">
-            ไปยังหน้า Practice / Go to /practice
-          </p>
-        </section>
-
-        {/* ── Value-peek upsell (contextual, not a bare /pricing dump) ─────── */}
-        <MockValuePeek weakSkills={weakSkillNames} />
-
-        {/* ── Score breakdown ────────────────────────────────────────────── */}
-        <section className="rounded-3xl bg-white p-7 shadow-md">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xl font-bold text-neutral-900">Score breakdown / ที่มาของคะแนน</p>
-              <p className="mt-1 text-sm text-neutral-500">ทุกสกิลคิดเต็ม 160 ตามสูตร mini test ชุดนี้</p>
-            </div>
-            <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2.5 text-xs font-medium text-neutral-500">
-              Total = (Reading + Listening + Speaking + Writing) / 4
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          </summary>
+          <div className="space-y-3 border-t border-slate-100 px-4 pb-4 pt-3.5">
             {(
               [
-                ["listening", result.actual_listening],
-                ["speaking", result.actual_speaking],
                 ["reading", result.actual_reading],
+                ["listening", result.actual_listening],
                 ["writing", result.actual_writing],
+                ["speaking", result.actual_speaking],
               ] as const
             ).map(([skill, value]) => {
               const parts = Object.entries(
                 (scoreBreakdown?.[skill as keyof typeof scoreBreakdown] as Record<string, number> | undefined) ?? {},
               );
               return (
-                <div key={skill} className="rounded-2xl border border-neutral-100 bg-neutral-50 p-5">
-                  <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-                        {skill}
-                      </p>
-                      <p className="text-base font-bold text-neutral-800">{breakdownLabel(skill)}</p>
-                    </div>
-                    <div className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-right shadow-sm">
-                      <p className="font-mono text-[9px] font-bold uppercase text-neutral-400">Skill score</p>
-                      <p className="font-mono text-xl font-bold text-[#004AAD]">
-                        {Math.round(Number(value ?? 0))}/160
-                      </p>
-                    </div>
+                <div key={skill} className="rounded-xl bg-slate-50 p-3.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-bold text-slate-800">{breakdownLabel(skill)}</p>
+                    <p className="font-mono text-sm font-bold text-ep-blue">{Math.round(Number(value ?? 0))}/160</p>
                   </div>
-
-                  <div className="mt-4 space-y-2">
+                  <div className="mt-2 space-y-1">
                     {parts.map(([part, partScore]) => (
-                      <div
-                        key={part}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3"
-                      >
-                        <div>
-                          <p className="text-sm font-semibold text-neutral-800">{breakdownLabel(part)}</p>
-                          <p className="text-xs text-neutral-400">
-                            Weight {breakdownPctLabel(skill, part) || "Included"}
-                          </p>
-                        </div>
-                        <p className="font-mono text-lg font-bold text-[#004AAD]">
-                          {Math.round(Number(partScore ?? 0))}
-                        </p>
+                      <div key={part} className="flex items-center justify-between text-xs text-slate-600">
+                        <span>
+                          {breakdownLabel(part)}
+                          {breakdownPctLabel(skill, part) ? (
+                            <span className="ml-1 text-slate-400">({breakdownPctLabel(skill, part)})</span>
+                          ) : null}
+                        </span>
+                        <span className="font-mono font-bold">{Math.round(Number(partScore ?? 0))}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               );
             })}
-          </div>
-
-          {/* Raw section scores */}
-          <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/40 p-5">
-            <p className="text-sm font-bold text-[#004AAD]">Raw section scores / คะแนนดิบแต่ละส่วน</p>
-            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {Object.entries(
-                (scoreBreakdown.supporting as Record<string, number> | undefined) ?? {},
-              ).map(([part, partScore]) => (
-                <div
-                  key={part}
-                  className="rounded-xl border border-blue-100 bg-white px-4 py-3 shadow-sm"
-                >
-                  <p className="text-sm font-semibold text-neutral-800">{breakdownLabel(part)}</p>
-                  <p className="mt-1 font-mono text-xl font-bold text-[#004AAD]">
-                    {Math.round(Number(partScore ?? 0))}/160
-                  </p>
-                  {part === "real_english_word" ? (
-                    <p className="mt-1 text-xs text-neutral-400">
-                      Shown for practice review, not used in skill formula.
-                    </p>
-                  ) : null}
-                </div>
-              ))}
+            {/* raw section scores */}
+            <div className="rounded-xl bg-blue-50/50 p-3.5">
+              <p className="text-xs font-bold text-ep-blue">คะแนนดิบแต่ละส่วน (เต็ม 160)</p>
+              <div className="mt-2 space-y-1">
+                {Object.entries((scoreBreakdown.supporting as Record<string, number> | undefined) ?? {}).map(
+                  ([part, partScore]) => (
+                    <div key={part} className="flex items-center justify-between text-xs text-slate-600">
+                      <span>
+                        {breakdownLabel(part)}
+                        {part === "real_english_word" ? (
+                          <span className="ml-1 text-slate-400">(ไว้ดูประกอบ ไม่คิดในสูตร)</span>
+                        ) : null}
+                      </span>
+                      <span className="font-mono font-bold">{Math.round(Number(partScore ?? 0))}</span>
+                    </div>
+                  ),
+                )}
+              </div>
             </div>
           </div>
-        </section>
+        </details>
 
-        {/* ── How to read this result ─────────────────────────────────────── */}
-        <section className="rounded-3xl border border-neutral-200 bg-white p-7 shadow-sm">
-          <p className="text-lg font-bold text-neutral-900">วิธีดูผลนี้ / How to read this result</p>
-          <div className="mt-4 space-y-3 text-sm leading-relaxed text-neutral-600">
-            <p>
-              This is a mini test, so the score accuracy will not be the same as the full mock test.
-              It is designed to give you a quick snapshot of your current strengths and weaknesses.
-            </p>
-            <p>
-              นี่คือแบบทดสอบขนาดสั้น ดังนั้นความแม่นของคะแนนจะไม่เท่ากับ full mock test
-              แต่ผลนี้จะช่วยให้คุณเห็นภาพเร็วๆ ว่าตอนนี้คุณเด่นด้านไหน และควรกลับไปแก้จุดไหนก่อน
-            </p>
-            <p>
-              Use this report to decide where to practise next, especially in the skills and task types where your score dropped most.
-            </p>
-          </div>
-        </section>
+        {/* honesty note */}
+        <p className="px-2 text-center text-xs leading-relaxed text-slate-400">
+          นี่คือแบบทดสอบขนาดสั้น ความแม่นของคะแนนจะไม่เท่า full mock test —
+          ใช้ผลนี้เพื่อดูว่าเด่นด้านไหนและควรแก้จุดไหนก่อน
+        </p>
 
-        {/* ── Step review (collapsible) ───────────────────────────────────── */}
-        <section className="rounded-3xl bg-white p-7 shadow-md">
-          <p className="text-xl font-bold text-neutral-900">Step review / รีวิวทีละข้อ</p>
-          <p className="mt-1 text-sm text-neutral-400">กดแต่ละข้อเพื่อดูรายละเอียด / Tap to expand each step</p>
-          <div className="mt-5 space-y-3">
-            {merged.map(({ item, response }) => (
-              <StepReviewCard key={item.step_index} item={item} response={response} />
-            ))}
-          </div>
-        </section>
-
-        {/* ── Bottom action row ───────────────────────────────────────────── */}
-        <section className="flex flex-col gap-3 pb-10 sm:flex-row">
-          <Link
-            href="/practice"
-            className="flex-1 rounded-2xl bg-[#004AAD] px-6 py-4 text-center text-sm font-bold text-[#FFCC00] shadow-md transition-opacity hover:opacity-90"
-          >
-            ฝึกจุดอ่อนเลย → /practice
+        {/* quiet secondary row */}
+        <div className="flex items-center justify-center gap-4 pb-6 text-xs">
+          <Link href="/mock-test/start" className="font-semibold text-slate-500 underline-offset-2 hover:underline">
+            อยากได้คะแนนแม่นขึ้น? ลอง Full Mock Test
           </Link>
-          <Link
-            href="/pricing"
-            className="flex-1 rounded-2xl border border-neutral-200 bg-white px-6 py-4 text-center text-sm font-semibold text-neutral-700 shadow-sm transition-colors hover:bg-neutral-50"
-          >
-            ดูแพ็กเกจ Full Mock → /pricing
+          <span className="text-slate-300">·</span>
+          <Link href="/pricing" className="font-semibold text-slate-500 underline-offset-2 hover:underline">
+            ดูแพ็กเกจ
           </Link>
-        </section>
+        </div>
       </div>
     </main>
   );
