@@ -164,6 +164,24 @@ function MockTestFillInBlanksPracticeLike({
     }
   };
 
+  // Backspace on an empty blank jumps back to the previous blank and removes its
+  // last letter — so delete flows across words like one continuous field.
+  const handleKeyDown = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Backspace" || (inputs[idx] ?? "").length > 0) return;
+    for (let j = idx - 1; j >= 0; j -= 1) {
+      if (fitbRemainderLength(missingWords[j]!) > 0) {
+        e.preventDefault();
+        setInputs((prev) => {
+          const out = prev.slice();
+          out[j] = (out[j] ?? "").slice(0, -1);
+          return out;
+        });
+        inputRefs.current[j]?.focus();
+        break;
+      }
+    }
+  };
+
   const canSubmit = inputs.every((_, i) => {
     const remLen = fitbRemainderLength(missingWords[i]!);
     return remLen === 0 || (inputs[i] ?? "").trim().length > 0;
@@ -206,6 +224,7 @@ function MockTestFillInBlanksPracticeLike({
                     inputRefs.current[b] = el;
                   }}
                   maxLength={remLen}
+                  onKeyDown={(e) => handleKeyDown(b, e)}
                   onChange={(e) => updateInput(b, e.target.value)}
                   className="absolute left-0 top-0 z-10 h-full w-full cursor-text opacity-0"
                   aria-label={`Blank ${b + 1}`}

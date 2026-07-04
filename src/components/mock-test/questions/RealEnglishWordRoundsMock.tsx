@@ -127,14 +127,15 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
       <p className="text-xs text-neutral-600">
         Choose real words only. Each correct real word = +{scorePerCorrect} points. Each selected fake word = -{fakePenalty} points.
       </p>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {round.words.map((w) => {
+      <div key={roundIdx} className="grid gap-2 sm:grid-cols-2">
+        {round.words.map((w, i) => {
           const active = selected.has(w);
           return (
             <button
               key={w}
               type="button"
               disabled={submitting}
+              style={{ animation: `rew-tile-in 0.34s ease-out ${Math.min(i * 0.035, 0.5)}s both` }}
               onClick={() =>
                 setSelected((prev) => {
                   const next = new Set(prev);
@@ -150,6 +151,7 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
           );
         })}
       </div>
+      <style>{`@keyframes rew-tile-in { from { opacity: 0; transform: translateY(10px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
       <button
         type="button"
         disabled={submitting}

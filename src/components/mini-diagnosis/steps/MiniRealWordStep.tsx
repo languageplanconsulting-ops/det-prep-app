@@ -161,14 +161,15 @@ export function MiniRealWordStep({
         <p className="mt-1 text-xs text-slate-500">
           คำจริง +{scorePerCorrect} คะแนน · คำมั่ว (สะกดไม่มีจริง) −{fakePenalty} คะแนน
         </p>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          {round.words.map((w) => {
+        <div key={roundIdx} className="mt-3 grid grid-cols-2 gap-2">
+          {round.words.map((w, i) => {
             const active = selected.has(w);
             return (
               <button
                 key={w}
                 type="button"
                 disabled={submitting}
+                style={{ animation: `minidiag-tile-in 0.34s ease-out ${Math.min(i * 0.035, 0.5)}s both` }}
                 onClick={() => {
                   sfxTap();
                   setSelected((prev) => {
@@ -178,7 +179,7 @@ export function MiniRealWordStep({
                     return next;
                   });
                 }}
-                className={`rounded-xl border-2 px-3 py-2.5 text-center text-sm font-bold transition active:scale-95 ${
+                className={`rounded-xl border-2 px-3 py-2.5 text-center text-sm font-bold transition-colors active:scale-95 ${
                   active
                     ? "border-ep-blue bg-ep-blue text-white shadow-sm"
                     : "border-slate-200 bg-white text-slate-800 hover:border-ep-blue/40"
@@ -190,6 +191,7 @@ export function MiniRealWordStep({
             );
           })}
         </div>
+        <style>{`@keyframes minidiag-tile-in { from { opacity: 0; transform: translateY(10px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
       </SoftCard>
 
       <PrimaryButton disabled={submitting} onClick={submitRound}>

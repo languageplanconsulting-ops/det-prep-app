@@ -26,6 +26,14 @@ function nextEditableIndex(locked: boolean[], from: number, missingWords: FitbSe
   return -1;
 }
 
+function prevEditableIndex(locked: boolean[], from: number, missingWords: FitbSet["missingWords"]): number {
+  for (let j = from - 1; j >= 0; j--) {
+    if (locked[j]) continue;
+    if (fitbRemainderLength(missingWords[j]!) > 0) return j;
+  }
+  return -1;
+}
+
 export function FitbSessionClient({
   set,
   round,
@@ -158,6 +166,24 @@ export function FitbSessionClient({
       }
     },
     [locked, set.missingWords],
+  );
+
+  // Backspace on an empty blank jumps back to the previous editable blank and
+  // removes its last letter — delete flows across words like one field.
+  const handleKeyDown = useCallback(
+    (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key !== "Backspace" || (inputs[i] ?? "").length > 0) return;
+      const pi = prevEditableIndex(locked, i, set.missingWords);
+      if (pi < 0) return;
+      e.preventDefault();
+      setInputs((prev) => {
+        const cp = [...prev];
+        cp[pi] = (cp[pi] ?? "").slice(0, -1);
+        return cp;
+      });
+      window.requestAnimationFrame(() => inputRefs.current[pi]?.focus());
+    },
+    [inputs, locked, set.missingWords],
   );
 
   const submitAttempt = () => {
@@ -309,6 +335,7 @@ export function FitbSessionClient({
                         spellCheck={false}
                         value={typed}
                         maxLength={remLen}
+                        onKeyDown={(e) => handleKeyDown(b, e)}
                         onChange={(e) => updateInput(b, e.target.value)}
                         className="absolute left-0 top-0 h-full w-full opacity-0"
                         style={{ width: `${wch}ch`, minWidth: "2.5ch" }}

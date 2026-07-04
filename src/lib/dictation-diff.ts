@@ -22,8 +22,10 @@ export interface CharDiffResult {
 type Trace = "diag" | "up" | "left";
 
 function normalizeDictationCompareText(s: string): string {
-  // Dictation policy: ignore case and full stops, but keep commas and other punctuation.
-  return s.replace(/\./g, "").toLowerCase();
+  // Dictation policy: among punctuation ONLY the comma counts. Lowercase and keep
+  // only letters, digits and commas — full stops, spaces, apostrophes, hyphens
+  // and every other mark are ignored for scoring.
+  return s.toLowerCase().replace(/[^a-z0-9,]/g, "");
 }
 
 /**

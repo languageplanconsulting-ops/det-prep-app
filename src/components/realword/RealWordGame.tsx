@@ -51,7 +51,7 @@ export function RealWordGame({
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+          <div key={wordSet.setId} className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
             {wordSet.words.map((w, i) => {
               const on = selected.has(i);
               return (
@@ -59,7 +59,8 @@ export function RealWordGame({
                   key={`${w.word}-${i}`}
                   type="button"
                   onClick={() => toggle(i)}
-                  className={`rounded-xl border px-4 py-3.5 text-center text-[15px] font-bold transition ${
+                  style={{ animation: `realword-tile-in 0.34s ease-out ${Math.min(i * 0.03, 0.5)}s both` }}
+                  className={`rounded-xl border px-4 py-3.5 text-center text-[15px] font-bold transition-colors ${
                     on
                       ? "border-[#FFCC00] bg-[#FFCC00] text-[#004AAD]"
                       : "border-slate-200 bg-white hover:border-[#004AAD]"
@@ -70,6 +71,7 @@ export function RealWordGame({
               );
             })}
           </div>
+          <style>{`@keyframes realword-tile-in { from { opacity: 0; transform: translateY(10px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
 
           <StickyExamCTA hint={`เลือกแล้ว ${selected.size} คำ`}>
             <button
