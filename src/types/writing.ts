@@ -35,6 +35,11 @@ export interface CriterionBreakdownPoint extends BilingualLine {
   /** Concrete fix or better wording (speaking/photo reports from AI). */
   suggestionEn?: string;
   suggestionTh?: string;
+  /** Grammar-only: short name of the grammar rule this fix is about
+   *  (e.g. "การใช้ if I were") — leads the card so the learner knows
+   *  which rule to revise before reading the explanation. */
+  topicEn?: string;
+  topicTh?: string;
 }
 
 export interface WritingCriterionReport {

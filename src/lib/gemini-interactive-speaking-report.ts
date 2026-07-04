@@ -44,6 +44,8 @@ function criterion(
     excerpt?: string;
     suggestionEn?: string;
     suggestionTh?: string;
+    topicEn?: string;
+    topicTh?: string;
   }[],
 ): WritingCriterionReport {
   return {
@@ -57,6 +59,9 @@ function criterion(
       en: b.en,
       th: b.th,
       excerpt: b.excerpt,
+      ...(b.topicEn?.trim() || b.topicTh?.trim()
+        ? { topicEn: b.topicEn?.trim(), topicTh: b.topicTh?.trim() }
+        : {}),
       ...(b.suggestionEn?.trim() || b.suggestionTh?.trim()
         ? {
             suggestionEn: b.suggestionEn?.trim(),
@@ -92,7 +97,7 @@ Task relevancy: how well they engaged with each question and stayed on topic acr
 
 Priority for feedback:
 - Prioritize grammar corrections first, then vocabulary upgrades.
-- grammarBreakdown should contain up to 8 concrete spoken-language fixes where possible.
+- grammarBreakdown should contain up to 8 concrete spoken-language fixes where possible. Each grammarBreakdown item must include grammarTopicTh — a SHORT Thai name of the grammar rule/topic that fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple") so the learner knows which rule to revise before reading the explanation.
 - Each grammar suggestion should sound natural in conversation, not like formal essay English.
 
 vocabularyUpgradeSuggestions: up to 8 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.
@@ -221,6 +226,8 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
         const issueTh = String(o?.issueTh ?? o?.th ?? "");
         const sugEn = o?.suggestionEn != null ? String(o.suggestionEn).trim() : "";
         const sugTh = o?.suggestionTh != null ? String(o.suggestionTh).trim() : "";
+        const topicEn = o?.grammarTopicEn != null ? String(o.grammarTopicEn).trim() : "";
+        const topicTh = o?.grammarTopicTh != null ? String(o.grammarTopicTh).trim() : "";
         return {
           en: issueEn,
           th: issueTh,
@@ -228,6 +235,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
           ...(sugEn || sugTh
             ? { suggestionEn: sugEn || undefined, suggestionTh: sugTh || undefined }
             : {}),
+          ...(topicEn || topicTh ? { topicEn: topicEn || undefined, topicTh: topicTh || undefined } : {}),
         };
       });
 

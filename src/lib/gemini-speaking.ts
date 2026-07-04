@@ -42,6 +42,8 @@ function criterion(
     excerpt?: string;
     suggestionEn?: string;
     suggestionTh?: string;
+    topicEn?: string;
+    topicTh?: string;
   }[],
 ): WritingCriterionReport {
   return {
@@ -60,6 +62,9 @@ function criterion(
             suggestionEn: b.suggestionEn?.trim(),
             suggestionTh: b.suggestionTh?.trim(),
           }
+        : {}),
+      ...(b.topicEn?.trim() || b.topicTh?.trim()
+        ? { topicEn: b.topicEn?.trim(), topicTh: b.topicTh?.trim() }
         : {}),
     })),
   };
@@ -109,6 +114,7 @@ Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, task
 - excerpt: exact short quote from the ${scoreText} (use quotation marks in JSON string only).
 - issueEn / issueTh: what is wrong (bilingual).
 - suggestionEn / suggestionTh: a concrete correction or better wording (bilingual)—for vocabulary, name 1–3 better words or collocations when possible.
+- grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement", "การใช้ a/an/the"). This must lead the fix so the learner knows which rule to revise before reading the explanation. Keep it under ~6 words.
 
 Priority for feedback:
 - Prioritize grammar corrections first, then vocabulary upgrades.
@@ -181,6 +187,7 @@ function buildUserPayload(
         taskSummaryTh: "string",
         grammarBreakdown: [
           {
+            grammarTopicTh: "string — short Thai grammar topic that leads the fix, e.g. การใช้ if I were",
             excerpt: `string exact from ${scoreText}`,
             issueEn: "string",
             issueTh: "string",
@@ -328,6 +335,8 @@ export async function generateSpeakingReportWithGemini(params: {
         const issueTh = String(o?.issueTh ?? o?.th ?? "");
         const sugEn = o?.suggestionEn != null ? String(o.suggestionEn).trim() : "";
         const sugTh = o?.suggestionTh != null ? String(o.suggestionTh).trim() : "";
+        const topicEn = o?.grammarTopicEn != null ? String(o.grammarTopicEn).trim() : "";
+        const topicTh = o?.grammarTopicTh != null ? String(o.grammarTopicTh).trim() : "";
         return {
           en: issueEn,
           th: issueTh,
@@ -335,6 +344,7 @@ export async function generateSpeakingReportWithGemini(params: {
           ...(sugEn || sugTh
             ? { suggestionEn: sugEn || undefined, suggestionTh: sugTh || undefined }
             : {}),
+          ...(topicEn || topicTh ? { topicEn: topicEn || undefined, topicTh: topicTh || undefined } : {}),
         };
       });
 

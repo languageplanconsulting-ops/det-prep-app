@@ -151,6 +151,8 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
         betterTh: display.betterTh,
         noteEn: b.en,
         noteTh: b.th,
+        topicEn: b.topicEn,
+        topicTh: b.topicTh,
       };
     })
     .filter((x) => x.wrong && (x.betterEn || x.betterTh))

@@ -12,6 +12,9 @@ export type GrammarFixItem = {
   betterTh?: string;
   noteEn?: string;
   noteTh?: string;
+  /** Short grammar rule name (e.g. "การใช้ if I were") — leads the card. */
+  topicEn?: string;
+  topicTh?: string;
 };
 
 export function GrammarFixesPanel({
@@ -46,6 +49,11 @@ export function GrammarFixesPanel({
             key={item.id}
             className="rounded-sm border-2 border-black bg-[#fafafa] p-3 text-sm shadow-[2px_2px_0_0_#000]"
           >
+            {item.topicTh?.trim() || item.topicEn?.trim() ? (
+              <p className="mb-2 inline-block rounded-sm bg-[#004AAD] px-2 py-1 text-xs font-black text-white">
+                📚 {item.topicTh?.trim() || item.topicEn?.trim()}
+              </p>
+            ) : null}
             <p className="ep-stat text-[10px] font-bold uppercase tracking-wide text-red-700">
               Original (fix this)
             </p>
@@ -69,20 +77,24 @@ export function GrammarFixesPanel({
               <AddToNotebookButton
                 attemptId={attemptId}
                 entrySource={entrySource}
-                suggestedPremade={NOTEBOOK_BUILTIN.productionFeedback}
-                directSaveToProductionFeedback
+                suggestedPremade={NOTEBOOK_BUILTIN.grammar}
                 className="border-emerald-700/30 bg-emerald-100"
-                getPayload={() => ({
-                  titleEn,
-                  titleTh,
-                  bodyEn: `Wrong: ${item.wrong}\n\nBetter: ${item.betterEn ?? item.betterTh ?? ""}${
-                    item.noteEn ? `\n\nWhy: ${item.noteEn}` : ""
-                  }`,
-                  bodyTh: `ของเดิม: ${item.wrong}\n\nแบบที่ดีขึ้น: ${item.betterTh ?? item.betterEn ?? ""}${
-                    item.noteTh ? `\n\nเหตุผล: ${item.noteTh}` : ""
-                  }`,
-                  excerpt: item.wrong.slice(0, 120),
-                })}
+                getPayload={() => {
+                  const topic = item.topicTh?.trim() || item.topicEn?.trim();
+                  return {
+                    // Grammar entries LEAD with the rule topic so the notebook shows
+                    // the rule to revise first; the correction goes in the body.
+                    titleEn: topic || titleEn,
+                    titleTh: topic || titleTh,
+                    bodyEn: `Wrong: ${item.wrong}\n\nBetter: ${item.betterEn ?? item.betterTh ?? ""}${
+                      item.noteEn ? `\n\nWhy: ${item.noteEn}` : ""
+                    }`,
+                    bodyTh: `ของเดิม: ${item.wrong}\n\nแบบที่ดีขึ้น: ${item.betterTh ?? item.betterEn ?? ""}${
+                      item.noteTh ? `\n\nเหตุผล: ${item.noteTh}` : ""
+                    }`,
+                    excerpt: item.wrong.slice(0, 120),
+                  };
+                }}
               />
             </div>
           </li>

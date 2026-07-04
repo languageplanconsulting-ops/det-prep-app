@@ -60,6 +60,8 @@ function criterion(
     excerpt?: string;
     suggestionEn?: string;
     suggestionTh?: string;
+    topicEn?: string;
+    topicTh?: string;
   }[],
 ): WritingCriterionReport {
   return {
@@ -73,6 +75,9 @@ function criterion(
       en: b.en,
       th: b.th,
       excerpt: b.excerpt,
+      ...(b.topicEn?.trim() || b.topicTh?.trim()
+        ? { topicEn: b.topicEn?.trim(), topicTh: b.topicTh?.trim() }
+        : {}),
       ...(b.suggestionEn?.trim() || b.suggestionTh?.trim()
         ? {
             suggestionEn: b.suggestionEn?.trim(),
@@ -97,7 +102,7 @@ Total 0-160 = (0.4*G + 0.3*V + 0.2*C + 0.1*T) × 1.6, each subscore 0-100.
 
 For EACH criterion summary, include (A) brief assessment and (B) a line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" plus a concrete action tied to THIS learner's wording.
 
-Breakdown items: use issueEn, issueTh. excerpt = exact short quote from the relevant punctuated section. suggestionEn / suggestionTh = concrete fix (bilingual).
+Breakdown items: use issueEn, issueTh. excerpt = exact short quote from the relevant punctuated section. suggestionEn / suggestionTh = concrete fix (bilingual). grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement"). It must lead the fix so the learner knows which rule to revise before reading the explanation. Keep it under ~6 words.
 
 Grammar bands: ~30% A1–A2 issues; ~50% B1–B2; ~70% clean; ~90% ≥1 complex structure; 100% ≥3 complex structures.
 
@@ -181,6 +186,7 @@ function buildUserPayload(
         taskSummaryTh: "string",
         grammarBreakdown: [
           {
+            grammarTopicTh: "string — short Thai grammar topic that leads the fix, e.g. การใช้ if I were",
             excerpt: "string",
             issueEn: "string",
             issueTh: "string",
@@ -234,6 +240,8 @@ function mapBreak(arr: unknown): {
   excerpt?: string;
   suggestionEn?: string;
   suggestionTh?: string;
+  topicEn?: string;
+  topicTh?: string;
 }[] {
   return asArr(arr)
     .slice(0, 8)
@@ -243,6 +251,8 @@ function mapBreak(arr: unknown): {
       const issueTh = String(o?.issueTh ?? o?.th ?? "");
       const sugEn = o?.suggestionEn != null ? String(o.suggestionEn).trim() : "";
       const sugTh = o?.suggestionTh != null ? String(o.suggestionTh).trim() : "";
+      const topicEn = o?.grammarTopicEn != null ? String(o.grammarTopicEn).trim() : "";
+      const topicTh = o?.grammarTopicTh != null ? String(o.grammarTopicTh).trim() : "";
       return {
         en: issueEn,
         th: issueTh,
@@ -250,6 +260,7 @@ function mapBreak(arr: unknown): {
         ...(sugEn || sugTh
           ? { suggestionEn: sugEn || undefined, suggestionTh: sugTh || undefined }
           : {}),
+        ...(topicEn || topicTh ? { topicEn: topicEn || undefined, topicTh: topicTh || undefined } : {}),
       };
     });
 }

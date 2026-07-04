@@ -13,6 +13,8 @@ export type NotebookCriterionSlice = {
     excerpt?: string;
     suggestionEn?: string;
     suggestionTh?: string;
+    topicEn?: string;
+    topicTh?: string;
   }>;
 };
 
@@ -38,8 +40,10 @@ export function appendCriterion(
       noteEn: b.en,
       noteTh: b.th,
     });
-    partsEn.push(`• ${b.en}\n`);
-    partsTh.push(`• ${b.th}\n`);
+    // Grammar breakdown items lead with the rule topic when present.
+    const topic = b.topicTh?.trim() || b.topicEn?.trim();
+    partsEn.push(topic ? `• [${topic}] ${b.en}\n` : `• ${b.en}\n`);
+    partsTh.push(topic ? `• [${topic}] ${b.th}\n` : `• ${b.th}\n`);
     if (display.wrong) {
       partsEn.push(`  “${display.wrong}”\n`);
     }
