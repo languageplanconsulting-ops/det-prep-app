@@ -526,9 +526,14 @@ function FitbRow({
   onChange: (val: string) => void;
   disabled: boolean;
 }) {
+  const [focused, setFocused] = useState(false);
   const mw = sentence.missingWords[0];
-  const prefix = (mw?.correctWord ?? "").slice(0, Math.max(0, Number(mw?.prefix_length ?? 0)));
+  const word = (mw?.correctWord ?? "").trim();
+  const prefixLen = Math.min(Math.max(1, Math.floor(Number(mw?.prefix_length ?? 1) || 1)), 5, word.length);
+  const prefix = word.slice(0, prefixLen);
+  const remLen = Math.max(0, word.length - prefixLen);
   const display = sentence.text.replace(/\[BLANK 1\]/gi, "______");
+  const typed = value.slice(0, remLen);
   return (
     <SoftCard>
       <p className="text-sm font-semibold leading-relaxed text-slate-800">
@@ -537,23 +542,51 @@ function FitbRow({
       {mw?.explanationThai ? (
         <p className="mt-1 text-xs text-slate-400">คำใบ้: {mw.explanationThai}</p>
       ) : null}
-      <div className="mt-2.5 flex items-center gap-2">
-        {prefix ? (
-          <span className="rounded-lg bg-slate-100 px-2.5 py-2 font-mono text-sm font-bold text-slate-600">
-            {prefix}
+      {/* letter-box blank: given prefix tiles + one slot per missing letter */}
+      <div className="mt-3 flex flex-wrap items-center gap-1">
+        {prefix.split("").map((ch, k) => (
+          <span
+            key={`p${k}`}
+            className="inline-flex h-9 min-w-[1.85rem] items-center justify-center rounded-md bg-slate-100 px-1 font-mono text-base font-bold text-slate-500"
+          >
+            {ch}
           </span>
-        ) : null}
-        <input
-          type="text"
-          disabled={disabled}
-          value={value}
-          autoCapitalize="off"
-          autoCorrect="off"
-          spellCheck={false}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={prefix ? "พิมพ์ส่วนที่เหลือ…" : "พิมพ์คำตอบ…"}
-          className="w-full rounded-xl border-2 border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900 outline-none transition focus:border-ep-blue focus:bg-white"
-        />
+        ))}
+        <span className={`relative inline-flex items-center gap-1 rounded-lg p-0.5 transition ${focused ? "ring-2 ring-ep-blue/60" : ""}`}>
+          <input
+            type="text"
+            disabled={disabled}
+            value={typed}
+            maxLength={remLen}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onChange={(e) => onChange(e.target.value.slice(0, remLen))}
+            aria-label={`ช่องว่างที่ ${index + 1}`}
+            className="absolute left-0 top-0 z-10 h-full w-full cursor-text opacity-0"
+          />
+          {Array.from({ length: remLen }, (_, k) => {
+            const ch = typed[k];
+            const isCursor = focused && k === Math.min(typed.length, remLen - 1) && !ch;
+            return (
+              <span
+                key={`s${k}`}
+                className={`inline-flex h-9 min-w-[1.85rem] items-center justify-center rounded-md px-1 font-mono text-base font-bold ${
+                  ch
+                    ? "border-2 border-ep-blue bg-white text-slate-900"
+                    : isCursor
+                      ? "animate-pulse border-2 border-ep-blue bg-blue-50 text-ep-blue"
+                      : "border-2 border-dashed border-slate-300 bg-slate-50 text-slate-300"
+                }`}
+                aria-hidden
+              >
+                {ch ?? "_"}
+              </span>
+            );
+          })}
+        </span>
       </div>
     </SoftCard>
   );

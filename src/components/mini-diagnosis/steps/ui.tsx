@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { sfxTap } from "@/lib/exam-sfx";
 
@@ -176,6 +176,79 @@ export function ConfettiBurst() {
         0% { opacity: 1; transform: translateY(0) rotate(0deg); }
         100% { opacity: 0; transform: translateY(110px) rotate(320deg); }
       }`}</style>
+    </div>
+  );
+}
+
+/**
+ * Full-screen grading animation for the AI-scored steps (write-about-photo,
+ * read-then-speak). พี่ดอย reassures while a sequential "scoring flow" checklist
+ * lights up — reading answer → vocabulary → grammar → overall level — so the
+ * wait feels like real work happening, not a dead spinner.
+ */
+export function GradingOverlay({ kind }: { kind: "Writing" | "Speaking" }) {
+  const steps = [
+    { th: "อ่านคำตอบของคุณ", en: "Reading your answer" },
+    { th: "ตรวจคำศัพท์", en: "Checking vocabulary" },
+    { th: "ตรวจไวยากรณ์", en: "Checking grammar" },
+    { th: "ประเมินระดับรวม", en: "Determining overall level" },
+  ];
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setActive((a) => (a + 1) % steps.length), 1400);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const pct = Math.round(((active + 1) / steps.length) * 100);
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/55 px-4">
+      <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl">
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element -- static public asset */}
+          <img src="/mascot-doy.png" alt="" className="h-14 w-14 shrink-0 object-contain" />
+          <div>
+            <p className="text-base font-bold text-slate-900">รอแปปนึงนะครับ 🙏</p>
+            <p className="text-sm font-semibold text-ep-blue">กำลังให้คะแนน {kind}</p>
+          </div>
+        </div>
+
+        {/* moving progress bar */}
+        <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-full rounded-full bg-ep-blue transition-all duration-500 ease-out" style={{ width: `${pct}%` }} />
+        </div>
+
+        {/* scoring-flow checklist */}
+        <div className="mt-4 space-y-2">
+          {steps.map((s, i) => {
+            const done = i < active;
+            const now = i === active;
+            return (
+              <div
+                key={s.en}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition ${
+                  now ? "bg-blue-50" : "bg-transparent"
+                }`}
+              >
+                <span
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                    done
+                      ? "bg-emerald-500 text-white"
+                      : now
+                        ? "bg-ep-blue text-white"
+                        : "bg-slate-200 text-slate-400"
+                  }`}
+                >
+                  {done ? "✓" : now ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" /> : i + 1}
+                </span>
+                <div className="min-w-0">
+                  <p className={`text-sm font-semibold ${now || done ? "text-slate-800" : "text-slate-400"}`}>{s.th}</p>
+                  <p className="text-[11px] text-slate-400">{s.en}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

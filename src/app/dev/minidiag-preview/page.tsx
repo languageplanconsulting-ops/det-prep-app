@@ -9,7 +9,7 @@
 import { useEffect, useState } from "react";
 
 import { setSfxEnabled, sfxCorrect } from "@/lib/exam-sfx";
-import { ConfettiBurst, MascotTip } from "@/components/mini-diagnosis/steps/ui";
+import { ConfettiBurst, MascotTip, GradingOverlay } from "@/components/mini-diagnosis/steps/ui";
 import { MiniDictationStep } from "@/components/mini-diagnosis/steps/MiniDictationStep";
 import { MiniFitbStep } from "@/components/mini-diagnosis/steps/MiniFitbStep";
 import { MiniListeningStep } from "@/components/mini-diagnosis/steps/MiniListeningStep";
@@ -139,6 +139,7 @@ const TABS = [
   "Vocab+Reading",
   "FITB",
   "Listening",
+  "Grading",
   "Write Photo",
   "Read+Speak",
   "Celebration",
@@ -356,6 +357,7 @@ export default function MiniDiagPreviewPage() {
         ) : null}
         {tab === "FITB" ? <MiniFitbStep content={FITB_CONTENT} onSubmit={onSubmit} /> : null}
         {tab === "Listening" ? <MiniListeningStep content={LISTENING_CONTENT} onSubmit={onSubmit} /> : null}
+        {tab === "Grading" ? <GradingOverlay kind="Writing" /> : null}
         {tab === "Write Photo" ? (
           <MiniWritePhotoStep content={WRITE_PHOTO_CONTENT} onSubmit={onSubmit} />
         ) : null}

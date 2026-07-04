@@ -144,14 +144,21 @@ export function MiniRealWordStep({
             </span>
           ) : null}
         </div>
-        <span className="rounded-full bg-ep-blue/10 px-3 py-1 font-mono text-xs font-bold text-ep-blue">
-          เลือกแล้ว {selected.size} คำ
+        <span
+          className={`rounded-full px-3 py-1 font-mono text-xs font-bold ${
+            selected.size > realPerRound ? "bg-amber-100 text-amber-700" : "bg-ep-blue/10 text-ep-blue"
+          }`}
+        >
+          เลือกแล้ว {selected.size}/{realPerRound} คำ
         </span>
       </div>
 
       <SoftCard>
         <p className="text-sm font-bold text-slate-800">แตะเฉพาะคำอังกฤษที่มีอยู่จริง</p>
         <p className="mt-0.5 text-xs text-slate-500">
+          รอบนี้มีคำจริงอยู่ <span className="font-bold text-ep-blue">{realPerRound} คำ</span> จากทั้งหมด {round.words.length} คำ
+        </p>
+        <p className="mt-1 text-xs text-slate-500">
           คำจริง +{scorePerCorrect} คะแนน · คำมั่ว (สะกดไม่มีจริง) −{fakePenalty} คะแนน
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2">

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { usePhaseTimer } from "@/hooks/usePhaseTimer";
 import { setSfxEnabled, sfxCorrect, sfxSubmit } from "@/lib/exam-sfx";
-import { ConfettiBurst, MascotTip } from "@/components/mini-diagnosis/steps/ui";
+import { ConfettiBurst, MascotTip, GradingOverlay } from "@/components/mini-diagnosis/steps/ui";
 import { MiniStepIntro } from "@/components/mini-diagnosis/steps/MiniStepIntro";
 import { MiniDictationStep } from "@/components/mini-diagnosis/steps/MiniDictationStep";
 import { MiniFitbStep } from "@/components/mini-diagnosis/steps/MiniFitbStep";
@@ -393,6 +393,11 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
 
         {stepBody}
       </div>
+
+      {/* AI grading animation (writing / speaking) */}
+      {submitting && current?.is_ai_graded ? (
+        <GradingOverlay kind={current.task_type === "read_then_speak" ? "Speaking" : "Writing"} />
+      ) : null}
 
       {/* pre-exam introduction (what this task really measures) */}
       {introFor != null && !celebrating && current ? (

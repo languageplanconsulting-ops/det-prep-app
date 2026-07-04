@@ -98,6 +98,21 @@ function fitbScore(answer: unknown, correct: unknown, content?: Record<string, u
   return 0;
 }
 
+/**
+ * Canonicalize a word for spelling-tolerant comparison: lowercase, strip
+ * non-alphanumerics, then fold British -ise/-isa/-yse into American -ize/-iza/
+ * -yze so "authorised" === "authorized", "organisation" === "organization", etc.
+ * Applied symmetrically to both sides, so it only ever ADDS tolerance.
+ */
+function canonSpelling(w: string): string {
+  return String(w ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .replace(/ise/g, "ize")
+    .replace(/isa/g, "iza")
+    .replace(/yse/g, "yze");
+}
+
 function heuristicScore(taskType: string, answer: unknown, correct: unknown, content?: Record<string, unknown> | null): number {
   if (taskType === "dictation") {
     const actualRaw = (answer as { answer?: unknown })?.answer ?? answer;
@@ -129,7 +144,9 @@ function heuristicScore(taskType: string, answer: unknown, correct: unknown, con
     if (selectedAnswers.length > 0 && correctAnswers.length > 0) {
       const totalQuestions = Math.min(selectedAnswers.length, correctAnswers.length);
       const correctCount = selectedAnswers.reduce((count, selected, idx) => {
-        return count + (selected === (correctAnswers[idx] ?? "") ? 1 : 0);
+        // Spelling-tolerant compare so British/American variants (e.g.
+        // authorised/authorized, organise/organize) both count as correct.
+        return count + (canonSpelling(selected) === canonSpelling(correctAnswers[idx] ?? "") ? 1 : 0);
       }, 0);
       return normalize160((correctCount / totalQuestions) * 160);
     }
