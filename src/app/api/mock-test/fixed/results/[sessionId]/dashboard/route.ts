@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
@@ -34,7 +34,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ sessio
     return NextResponse.json({ ok: true, dashboard_saved_at: data.dashboard_saved_at ?? null });
   }
 
-  const supabase = await createRouteHandlerSupabase();
+  const supabase = await createRequestSupabase(req);
   const {
     data: { user },
   } = await supabase.auth.getUser();

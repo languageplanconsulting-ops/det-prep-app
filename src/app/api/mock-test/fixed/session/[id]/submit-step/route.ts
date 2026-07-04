@@ -11,7 +11,7 @@ import { INTERACTIVE_SPEAKING_TURN_COUNT } from "@/lib/interactive-speaking-cons
 import { scoreBuckets } from "@/lib/mock-test/fixed-mock-score-buckets";
 import { gradeFitbBlank, normalizeFitbCompare } from "@/lib/fitb-scoring";
 import { getAdminAccess } from "@/lib/admin-auth";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import type { DialogueSummaryExam } from "@/types/dialogue-summary";
 import type { FitbMissingWord } from "@/types/fitb";
@@ -445,7 +445,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const access = await getAdminAccess();
   const isSimpleAdmin = access.ok && access.simple === true;
 
-  const supabase = isSimpleAdmin ? createServiceRoleSupabase() : await createRouteHandlerSupabase();
+  const supabase = isSimpleAdmin ? createServiceRoleSupabase() : await createRequestSupabase(req);
   let userId: string | null = null;
 
   if (!isSimpleAdmin) {

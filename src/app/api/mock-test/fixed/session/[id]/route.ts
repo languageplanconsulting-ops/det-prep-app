@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -10,7 +10,7 @@ const NO_STORE_HEADERS = {
   Expires: "0",
 };
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   const access = await getAdminAccess();
@@ -67,7 +67,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     );
   }
 
-  const supabase = await createRouteHandlerSupabase();
+  const supabase = await createRequestSupabase(req);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -136,7 +136,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ ok: true });
   }
 
-  const supabase = await createRouteHandlerSupabase();
+  const supabase = await createRequestSupabase(req);
   const {
     data: { user },
   } = await supabase.auth.getUser();

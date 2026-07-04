@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 
-export async function GET(_req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
 
   const access = await getAdminAccess();
@@ -36,7 +36,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ session
     });
   }
 
-  const supabase = await createRouteHandlerSupabase();
+  const supabase = await createRequestSupabase(req);
   const {
     data: { user },
   } = await supabase.auth.getUser();

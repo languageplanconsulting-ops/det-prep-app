@@ -10,7 +10,7 @@ import { countBillableMockFixedSessions, mockFixedMonthStartIso } from "@/lib/mo
 import { isMockTestAvailableNow } from "@/lib/mock-test/mock-test-availability";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 
 type StartBody = {
   setId?: string;
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ sessionId: data.id });
   }
 
-  const supabase = await createRouteHandlerSupabase();
+  const supabase = await createRequestSupabase(req);
   const {
     data: { user },
   } = await supabase.auth.getUser();
