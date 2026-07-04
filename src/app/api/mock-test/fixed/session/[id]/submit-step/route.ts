@@ -349,16 +349,23 @@ async function scoreAnswerWithNormalCriteria({
     if (taskType === "interactive_speaking") {
       const userTurnsRaw = (answer as { user_turn_answers?: unknown[] })?.user_turn_answers;
       const contentTurns = Array.isArray(content.turns) ? content.turns : [];
+      // The AI follow-up questions are generated at runtime, so the actual
+      // question text arrives in the answer payload (turns[].questionEn), not in
+      // the static set content. Prefer those so grading sees the real Q&A pairs.
+      const answerTurns = Array.isArray((answer as { turns?: unknown[] })?.turns)
+        ? ((answer as { turns?: unknown[] }).turns as Record<string, unknown>[])
+        : [];
       const transcripts = extractInteractiveSpeakingTranscripts(answer);
       if (transcripts.length >= INTERACTIVE_SPEAKING_TURN_COUNT) {
         const turns = transcripts
           .slice(0, INTERACTIVE_SPEAKING_TURN_COUNT)
           .map((a, idx) => {
             const t = (contentTurns[idx] ?? {}) as Record<string, unknown>;
+            const at = (answerTurns[idx] ?? {}) as Record<string, unknown>;
             return {
               turnIndex: idx + 1,
-              questionEn: String(t.question_en ?? `Turn ${idx + 1}`),
-              questionTh: String(t.question_th ?? ""),
+              questionEn: String(at.questionEn ?? at.question_en ?? t.question_en ?? `Turn ${idx + 1}`),
+              questionTh: String(at.questionTh ?? at.question_th ?? t.question_th ?? ""),
               transcript: String(a ?? ""),
             };
           });
