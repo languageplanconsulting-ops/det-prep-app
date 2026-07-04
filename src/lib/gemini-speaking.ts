@@ -96,6 +96,8 @@ The learner read a prompt and spoke. You receive a raw ASR transcript (may lack 
 
 ${workflow}${fillerRule}
 
+PUNCTUATION POLICY (mandatory): The transcript is from speech recognition — the learner SPOKE, they did not type. Punctuation, capitalization and sentence boundaries are NOT part of the learner's performance. Completely disregard punctuation when scoring: never raise or lower ANY subscore (grammar, vocabulary, coherence, task) because of punctuation, capitalization, or sentence-boundary formatting, and NEVER list a punctuation or capitalization issue in any breakdown or improvement point.
+
 Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
 Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
 
@@ -121,7 +123,10 @@ Grammar: ~30% A1–A2 issues; ~50% B1–B2 subord/tense; ~70% no clear mistakes;
 
 Vocabulary: C1/B2 used well vs mistakes vs thin range (see standard DET bands).
 
-Coherence: transitions + referencing vs run-ons vs none.
+Coherence (ความต่อเนื่อง):
+- ALWAYS recommend specific transitional / linking words in the coherence feedback (e.g. first, then, next, after that, however, because, for example, in addition, finally) — name at least one concrete transition the learner could have added, tied to their own wording.
+- If the learner did NOT use transitional words to connect their ideas, treat it as a real coherence weakness and lower the coherence score accordingly — do NOT award a high coherence score when linking words are absent.
+- Spoken self-correction: if the learner hesitates, repeats, or restarts but then repairs to a CORRECT form, do NOT deduct for the hesitation or the repair itself (this is natural spoken repair and should be treated as correct). Only deduct when the FINAL repaired form is still wrong — then apply the normal grammar / coherence criteria to that final form.
 
 Task relevancy: personal on-topic vs generalized vs off-topic.
 

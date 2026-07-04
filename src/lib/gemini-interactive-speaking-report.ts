@@ -81,6 +81,13 @@ WORKFLOW (mandatory):
 Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
 Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
 
+PUNCTUATION POLICY (mandatory): transcripts are from speech recognition — the learner SPOKE, not typed. Completely disregard punctuation, capitalization and sentence boundaries when scoring: never raise or lower ANY subscore because of them, and never list a punctuation/capitalization issue in a breakdown or improvement point.
+
+Coherence (ความต่อเนื่อง):
+- ALWAYS recommend specific transitional / linking words in the coherence feedback (e.g. first, then, next, however, because, for example, in addition, finally), naming at least one concrete transition tied to the learner's own wording.
+- If the learner did NOT use transitional words to connect ideas, treat it as a real coherence weakness and lower the coherence score accordingly.
+- Spoken self-correction: if the learner hesitates, repeats, or restarts but then repairs to a CORRECT form, do NOT deduct for the hesitation or the repair itself — only deduct when the FINAL repaired form is still wrong.
+
 Task relevancy: how well they engaged with each question and stayed on topic across the scenario.
 
 Priority for feedback:

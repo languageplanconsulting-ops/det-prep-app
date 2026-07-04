@@ -90,7 +90,8 @@ CRITICAL — speak-about-photo input handling:
 - The raw transcript came from SPEECH recognition. The learner spoke aloud; they did NOT type. Speech recognition output has NO punctuation, NO capitalization, NO sentence boundaries.
 - This is EXPECTED behavior, not a learner mistake. You MUST add all punctuation yourself in step 1 below.
 - DO NOT penalize the learner for any missing or wrong punctuation in the raw transcript. Punctuation issues should NEVER appear in grammarBreakdown for speak-about-photo. Grade as if the punctuatedTranscript YOU produced is what the learner intended.
-- Capitalization, full stops, commas, question marks: 100% your responsibility, not the learner's. Zero punctuation penalty applies to speaking input.`
+- Capitalization, full stops, commas, question marks: 100% your responsibility, not the learner's. Zero punctuation penalty applies to speaking input.
+- Spoken self-correction: if the learner hesitates, repeats, or restarts but then repairs to a CORRECT form, do NOT deduct for the hesitation or the repair itself — treat the corrected form as what they meant. Only deduct when the FINAL repaired form is still wrong.`
       : "";
 
   return `You are an expert English examiner for Thai learners (DET-style "speak about a photo").
@@ -102,6 +103,8 @@ WORKFLOW (mandatory):
 
 Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
 Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
+
+Coherence (ความต่อเนื่อง): ALWAYS recommend specific transitional / linking words in the coherence feedback (e.g. first, then, next, however, because, for example, in addition, finally), naming at least one concrete transition tied to the learner's own wording. If the learner did NOT use transitional words to connect their ideas, treat it as a real coherence weakness and lower the coherence score accordingly — do not award a high coherence score when linking words are absent.
 
 For EACH criterion summary, include (A) brief assessment and (B) a line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" plus a concrete action tied to THIS learner's wording.
 
