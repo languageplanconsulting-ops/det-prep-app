@@ -55,6 +55,13 @@ type InteractiveSpeakingCreditLockRow = {
   charge_source: "plan" | "addon" | null;
 };
 
+type SpeakingPartnerCreditLockRow = {
+  attempt_id: string;
+  user_id: string;
+  status: "pending" | "charged";
+  charge_source: "plan" | "addon" | null;
+};
+
 export type VipWeeklyAiQuota = {
   mode: "weekly" | "monthly_override";
   weekStart: string | null;
@@ -902,6 +909,81 @@ export async function reserveInteractiveSpeakingCreditForAttempt(args: {
 
   if (insertError) {
     const retryExisting = await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId);
+    if (retryExisting) {
+      return {
+        ok: true,
+        source: retryExisting.charge_source,
+        alreadyReserved: true,
+      };
+    }
+    return { ok: false, reason: insertError.message, source: null };
+  }
+  return { ok: true, source: null };
+}
+
+export async function getSpeakingPartnerCreditLockForAttempt(
+  userId: string,
+  attemptId: string,
+): Promise<SpeakingPartnerCreditLockRow | null> {
+  const supabase = createServiceRoleSupabase();
+  const { data, error } = await supabase
+    .from("speaking_partner_credit_locks")
+    .select("attempt_id, user_id, status, charge_source")
+    .eq("attempt_id", attemptId)
+    .eq("user_id", userId)
+    .maybeSingle<SpeakingPartnerCreditLockRow>();
+  if (error) throw new Error(error.message);
+  return data ?? null;
+}
+
+/**
+ * Reserves a "My Speaking Partner" attempt against the SAME shared
+ * `interactive_speaking` credit pool/quota as the exam-style interactive
+ * speaking feature — this feature intentionally does not have its own quota
+ * dimension. It uses its own lock table purely so the two features' pending/
+ * charged bookkeeping never collide.
+ */
+export async function reserveSpeakingPartnerCreditForAttempt(args: {
+  userId: string;
+  attemptId: string;
+}): Promise<{
+  ok: boolean;
+  reason?: string;
+  source: "plan" | "addon" | null;
+  alreadyReserved?: boolean;
+}> {
+  const { userId, attemptId } = args;
+  const existing = await getSpeakingPartnerCreditLockForAttempt(userId, attemptId);
+  if (existing) {
+    return {
+      ok: true,
+      source: existing.charge_source,
+      alreadyReserved: true,
+    };
+  }
+
+  const credit = await getAiCreditStateForUser(userId, "interactive_speaking");
+  if (!credit.allowed) {
+    return {
+      ok: false,
+      reason: credit.reason ?? "Feedback quota reached",
+      source: null,
+    };
+  }
+
+  const supabase = createServiceRoleSupabase();
+  const nowIso = new Date().toISOString();
+  const { error: insertError } = await supabase
+    .from("speaking_partner_credit_locks")
+    .insert({
+      attempt_id: attemptId,
+      user_id: userId,
+      status: "pending",
+      updated_at: nowIso,
+    });
+
+  if (insertError) {
+    const retryExisting = await getSpeakingPartnerCreditLockForAttempt(userId, attemptId);
     if (retryExisting) {
       return {
         ok: true,

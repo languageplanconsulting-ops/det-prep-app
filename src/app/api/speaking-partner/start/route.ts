@@ -1,0 +1,52 @@
+import { NextResponse } from "next/server";
+import { reserveSpeakingPartnerCreditForAttempt } from "@/lib/addon-credits";
+import { getRequestAuthUser } from "@/lib/supabase-request-client";
+import { getAdminAccess } from "@/lib/admin-auth";
+
+export async function POST(req: Request) {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Expected JSON object" }, { status: 400 });
+  }
+
+  const o = body as Record<string, unknown>;
+  const attemptId = o.attemptId;
+
+  if (typeof attemptId !== "string" || !attemptId.trim()) {
+    return NextResponse.json({ error: "attemptId required" }, { status: 400 });
+  }
+
+  try {
+    const { user } = await getRequestAuthUser(req);
+    const userId = user?.id ?? null;
+    // Admins / preview-eligible accounts don't reserve real feedback credits.
+    if (!userId || (await getAdminAccess()).ok) {
+      return NextResponse.json({ ok: true, charged: false, source: null, alreadyReserved: false });
+    }
+
+    const reserved = await reserveSpeakingPartnerCreditForAttempt({
+      userId,
+      attemptId: attemptId.trim(),
+    });
+    if (!reserved.ok) {
+      const status = reserved.reason?.includes("quota") ? 402 : 500;
+      return NextResponse.json({ error: reserved.reason ?? "Could not reserve feedback credit" }, { status });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      charged: false,
+      source: reserved.source,
+      alreadyReserved: reserved.alreadyReserved ?? false,
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Could not start session";
+    console.error("[speaking-partner-start]", e);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
