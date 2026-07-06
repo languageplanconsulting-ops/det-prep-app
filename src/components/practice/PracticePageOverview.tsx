@@ -6,7 +6,7 @@ import { SimpleLineChart } from "@/components/charts/SimpleLineChart";
 import { DashboardPlanCard } from "@/components/dashboard/DashboardPlanCard";
 import { DashboardHowToUseAnnouncement } from "@/components/dashboard/DashboardHowToUseAnnouncement";
 import { DashboardVipAnnouncement } from "@/components/dashboard/DashboardVipAnnouncement";
-import { PracticeExamCountdownPanel } from "@/components/practice/PracticeExamCountdownPanel";
+import { StudyPlanCalendarCard } from "@/components/dashboard/StudyPlanCalendarCard";
 import { PracticeTimeBySkillPie } from "@/components/practice/PracticeTimeBySkillPie";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import {
@@ -146,7 +146,7 @@ export function PracticePageOverview() {
         </BrutalPanel>
       </div>
 
-      <PracticeExamCountdownPanel />
+      <StudyPlanCalendarCard />
 
       <PracticeTimeBySkillPie />
 
