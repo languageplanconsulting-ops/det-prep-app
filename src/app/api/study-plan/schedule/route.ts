@@ -18,7 +18,7 @@ export async function GET(req: Request) {
 
   const { data } = await supabase
     .from("study_plan_schedules")
-    .select("exam_date, cadence_days, default_duration_minutes, reminder_time")
+    .select("exam_date, cadence_days, default_duration_minutes, reminder_time, is_freeform")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -43,6 +43,7 @@ export async function POST(req: Request) {
   const cadenceDays = o.cadenceDays;
   const defaultDurationMinutes = o.defaultDurationMinutes;
   const reminderTime = typeof o.reminderTime === "string" ? o.reminderTime : "19:00";
+  const isFreeform = o.isFreeform === true;
 
   if (typeof examDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(examDate)) {
     return NextResponse.json({ error: "examDate must be YYYY-MM-DD" }, { status: 400, headers: NO_STORE_HEADERS });
@@ -60,6 +61,7 @@ export async function POST(req: Request) {
     cadence_days: cadenceDays,
     default_duration_minutes: defaultDurationMinutes,
     reminder_time: reminderTime,
+    is_freeform: isFreeform,
     updated_at: new Date().toISOString(),
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: NO_STORE_HEADERS });

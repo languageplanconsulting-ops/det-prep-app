@@ -40,10 +40,22 @@ export type WeaknessReport = {
   autoGraded: SkillWeakness[];
   aiGraded: DimensionWeakness[];
   weakestDimension: DimensionWeakness | null;
+  latestPrediction: { target: number; predicted: number } | null;
 };
 
 export async function computeWeaknessReport(userId: string): Promise<WeaknessReport> {
   const supabase = createServiceRoleSupabase();
+
+  const { data: predictionRow } = await supabase
+    .from("study_plan_results")
+    .select("target, predicted")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const latestPrediction = predictionRow
+    ? { target: predictionRow.target as number, predicted: predictionRow.predicted as number }
+    : null;
 
   const { data: attempts } = await supabase
     .from("practice_attempts")
@@ -100,5 +112,5 @@ export async function computeWeaknessReport(userId: string): Promise<WeaknessRep
     ? aiGraded.reduce((a, b) => (a.avgScorePercent <= b.avgScorePercent ? a : b))
     : null;
 
-  return { autoGraded, aiGraded, weakestDimension };
+  return { autoGraded, aiGraded, weakestDimension, latestPrediction };
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createRequestSupabase } from "@/lib/supabase-request-client";
+import { fetchRecentActivity } from "@/lib/study-plan/activity";
 
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -19,13 +20,16 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const since = searchParams.get("since") ?? new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10);
 
-  const { data } = await supabase
-    .from("study_plan_completions")
-    .select("completion_date, tier_completed")
-    .eq("user_id", user.id)
-    .gte("completion_date", since);
+  const [{ data }, activity] = await Promise.all([
+    supabase
+      .from("study_plan_completions")
+      .select("completion_date, tier_completed")
+      .eq("user_id", user.id)
+      .gte("completion_date", since),
+    fetchRecentActivity(supabase, user.id, since).catch(() => []),
+  ]);
 
-  return NextResponse.json({ completions: data ?? [] }, { headers: NO_STORE_HEADERS });
+  return NextResponse.json({ completions: data ?? [], activity }, { headers: NO_STORE_HEADERS });
 }
 
 /** POST /api/study-plan/completions — record one completion for today's session. */
