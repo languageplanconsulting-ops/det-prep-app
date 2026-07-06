@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { QuestionRouter } from "@/components/mock-test/questions/QuestionRouter";
 import { MockTestTimerBar } from "@/components/mock-test/MockTestTimerBar";
+import { MascotLoader } from "@/components/ui/MascotLoader";
 import { usePhaseTimer } from "@/hooks/usePhaseTimer";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { mt } from "@/lib/mock-test/mock-test-styles";
@@ -342,38 +343,16 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
 
   if (error) return <div className="p-8 text-center font-bold text-red-700">{error}</div>;
   if (loading || !session || !question)
-    return soft ? (
-      <div className="p-10 text-center">
-        <div className="mx-auto flex w-fit items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#004AAD] border-t-transparent" />
-          <div className="text-left">
-            <div className="font-bold text-slate-900">
-              {loadingReason === "adapting"
-                ? "กำลังเตรียมข้อต่อไป…"
-                : loadingReason === "rest"
-                  ? "กำลังพักสั้น ๆ…"
-                  : "กำลังโหลด…"}
-            </div>
-            <div className="mt-0.5 text-xs font-semibold text-slate-400">รอสักครู่</div>
-          </div>
-        </div>
-      </div>
-    ) : (
-      <div className="p-10 text-center">
-        <div className="mx-auto flex w-fit items-center gap-3 rounded-[4px] border-4 border-black bg-white px-5 py-4">
-          <div className="h-5 w-5 animate-spin rounded-full border-4 border-black border-t-transparent" />
-          <div className="text-left">
-            <div className="font-black">
-              {loadingReason === "adapting"
-                ? "Adapting next questions... / กำลังปรับคำถามตามประสิทธิภาพของคุณ"
-                : loadingReason === "rest"
-                  ? "Refocusing... / กำลังรีเฟรชช่วงพัก"
-                  : "Loading... / กำลังโหลด..."}
-            </div>
-            <div className="mt-1 text-xs font-bold uppercase tracking-wide text-neutral-600">Please wait</div>
-          </div>
-        </div>
-      </div>
+    return (
+      <MascotLoader
+        label={
+          loadingReason === "adapting"
+            ? "กำลังเตรียมข้อต่อไป…"
+            : loadingReason === "rest"
+              ? "กำลังพักสั้น ๆ…"
+              : "กำลังโหลด…"
+        }
+      />
     );
   if (!current || !question) {
     return (
