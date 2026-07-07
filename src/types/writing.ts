@@ -217,7 +217,8 @@ export interface NotebookEntry {
     | "real-word"
     | "dialogue-summary"
     | "interactive-speaking"
-    | "mini-study-lesson";
+    | "mini-study-lesson"
+    | "campus-vocab";
   categoryIds: string[];
   titleEn: string;
   titleTh: string;

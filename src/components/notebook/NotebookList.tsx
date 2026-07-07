@@ -133,6 +133,7 @@ function sourceHashtag(e: NotebookEntry): string {
     "dialogue-summary": "dialogue-summary",
     "interactive-speaking": "interactive-speaking",
     "mini-study-lesson": "mini-study",
+    "campus-vocab": "campus-vocab",
   };
   return m[e.source] ?? "note";
 }
@@ -250,6 +251,7 @@ function notebookSourceLabel(e: NotebookEntry): string {
     "dialogue-summary": "Dialogue summary",
     "interactive-speaking": "Interactive speaking",
     "mini-study-lesson": "Mini Study lesson",
+    "campus-vocab": "Campus vocabulary",
   };
   return m[e.source] ?? "Notebook";
 }

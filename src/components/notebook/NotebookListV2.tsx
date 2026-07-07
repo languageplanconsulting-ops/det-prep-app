@@ -38,6 +38,7 @@ const SOURCE_TAG: Record<NotebookEntry["source"], string> = {
   "dialogue-summary": "dialogue",
   "interactive-speaking": "interactive-speak",
   "mini-study-lesson": "mini-study",
+  "campus-vocab": "campus-vocab",
 };
 
 type EntryType = "production" | "grammar" | "vocabulary" | "note";

@@ -132,7 +132,9 @@ function migrateEntry(raw: unknown): NotebookEntry | null {
                   ? "real-word"
                   : rawSource === "dialogue-summary"
                     ? "dialogue-summary"
-                    : "writing-read-and-write";
+                    : rawSource === "campus-vocab"
+                      ? "campus-vocab"
+                      : "writing-read-and-write";
 
   return {
     id: String(o.id),
@@ -292,7 +294,9 @@ export async function addNotebookEntry(
                     ? "dialogue-summary"
                     : entry.source === "mini-study-lesson"
                       ? "mini-study-lesson"
-                      : "writing-read-and-write";
+                      : entry.source === "campus-vocab"
+                        ? "campus-vocab"
+                        : "writing-read-and-write";
   const id =
     typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
