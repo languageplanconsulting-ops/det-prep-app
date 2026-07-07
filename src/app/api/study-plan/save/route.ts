@@ -6,7 +6,7 @@ import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 // POST { target, predicted, report, answers } → persists the diagnostic result.
 // Returns { id, freeUser } so the client can lock/unlock the plan by the real tier.
 export async function POST(req: Request) {
-  const userId = await getOptionalAuthUserId();
+  const userId = await getOptionalAuthUserId(req);
   if (!userId) {
     return NextResponse.json({ error: "ต้องเข้าสู่ระบบเพื่อบันทึกผล", needsAuth: true }, { status: 401 });
   }

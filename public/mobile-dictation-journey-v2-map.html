@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V2 · แผนที่ผจญภัย (Map)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#004AAD; --yellow:#FFCC00; --yellow-soft:#FFF3CC;
+    --bg:#F6F3EC; --card:#fff; --ink:#1A1A1A; --sub:#6E6A62; --line:#E9E4D8;
+    --green:#1B9E54;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .hd{display:flex;align-items:center;gap:10px;padding:8px 16px 10px}
+  .back{width:38px;height:38px;border-radius:99px;background:#fff;border:1px solid #e7e3d8;display:flex;align-items:center;justify-content:center;font-size:22px;color:#16203a}
+  .hd h1{flex:1;text-align:center;font-size:16px;font-weight:800;color:#16203a}
+  .pill{background:#e7f0fc;color:var(--blue);font-size:11px;font-weight:700;padding:6px 12px;border-radius:99px}
+  .scroll{flex:1;overflow-y:auto}
+  /* world region */
+  .world{position:relative;padding:8px 0 0}
+  .sky{background:linear-gradient(180deg,#D9EAFB,#EAF3FF);}
+  .grass{background:linear-gradient(180deg,#DDF3E4,#EAF7EE);}
+  .sand{background:linear-gradient(180deg,#FBEFD6,#FDF6E6);}
+  .worldhd{display:flex;align-items:center;gap:12px;padding:14px 20px 6px}
+  .worldbadge{width:52px;height:52px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 6px 0 rgba(0,0,0,.08)}
+  .wb1{background:#fff;border:2px solid var(--green)}
+  .wb2{background:#fff;border:2px solid var(--line)}
+  .worldhd .wt{font-size:17px;font-weight:900;color:var(--ink)}
+  .worldhd .ws{font-size:11px;font-weight:600;color:var(--sub);margin-top:1px}
+  .prog{margin-left:auto;text-align:right}
+  .prog b{font-size:15px;font-weight:900;color:var(--green)}
+  .prog span{font-size:10px;color:var(--sub);display:block}
+  .mapbox{position:relative;height:1000px;margin:6px 0 0}
+  .cloud{position:absolute;color:rgba(255,255,255,.85);font-size:44px}
+  .tree{position:absolute;font-size:30px;filter:drop-shadow(0 3px 2px rgba(0,0,0,.08))}
+  svg.route{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
+  .stone{position:absolute;transform:translate(-50%,-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .disc{width:58px;height:58px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px;box-shadow:0 5px 0 rgba(0,0,0,.14)}
+  .done{background:var(--green);color:#fff;box-shadow:0 5px 0 #14683a}
+  .perfect{background:var(--yellow);color:#7a5a00;box-shadow:0 5px 0 #c9a200}
+  .cur{background:#fff;color:var(--blue);border:4px solid var(--blue);box-shadow:0 5px 0 #c8d6ee}
+  .todo{background:#fff;color:#a9a292;border:3px solid rgba(0,0,0,.10);box-shadow:0 5px 0 rgba(0,0,0,.08)}
+  .lock{background:rgba(255,255,255,.75);color:#b7b1a3;box-shadow:0 5px 0 rgba(0,0,0,.06)}
+  .disc small{font-size:9px}
+  .slabel{font-size:9px;font-weight:800;color:#5b6b52;background:rgba(255,255,255,.8);padding:1px 7px;border-radius:99px}
+  .hero{position:absolute;transform:translate(-50%,-118%);z-index:4;font-size:34px;filter:drop-shadow(0 6px 6px rgba(0,0,0,.22))}
+  .flag{position:absolute;transform:translate(-50%,-50%);z-index:2;display:flex;flex-direction:column;align-items:center}
+  .flag .ic{width:50px;height:50px;border-radius:16px;background:#fff;border:2px dashed var(--yellow);display:flex;align-items:center;justify-content:center;font-size:24px}
+  .flag .t{font-size:9px;font-weight:800;color:#a9820b;margin-top:2px;background:rgba(255,255,255,.8);padding:1px 6px;border-radius:99px}
+  .lockband{display:flex;align-items:center;gap:10px;justify-content:center;padding:22px;color:var(--sub);font-size:12px;font-weight:700}
+  /* sticky cta */
+  .cta{position:absolute;left:0;right:0;bottom:0;padding:12px 18px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(246,243,236,0),var(--bg) 30%)}
+  .cta button{width:100%;background:var(--yellow);color:#6a4e00;font-weight:900;font-size:16px;padding:16px;border:none;border-radius:99px;box-shadow:0 10px 22px rgba(255,204,0,.5)}
+  .cta .mini{text-align:center;font-size:11px;color:var(--sub);font-weight:600;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="hd">
+    <div class="back">‹</div>
+    <h1>ตามคำบอก</h1>
+    <div class="pill">แบบฝึก</div>
+  </div>
+
+  <div class="scroll" style="padding-bottom:96px">
+    <!-- WORLD 1: ง่าย -->
+    <div class="world grass">
+      <div class="worldhd">
+        <div class="worldbadge wb1">🌱</div>
+        <div>
+          <div class="wt">โลกที่ 1 · ง่าย</div>
+          <div class="ws">ประโยคสั้น ฟังชัด</div>
+        </div>
+        <div class="prog"><b>8/20</b><span>ผ่านแล้ว</span></div>
+      </div>
+      <div class="mapbox" id="map1">
+      <div class="cloud" style="left:8%;top:4%">☁️</div>
+      <div class="cloud" style="right:6%;top:10%;font-size:34px">☁️</div>
+      <div class="tree" style="left:6%;top:70%">🌳</div>
+      <div class="tree" style="right:7%;top:44%">🌲</div>
+      <div class="tree" style="left:9%;top:30%;font-size:24px">🌴</div>
+      <svg class="route" viewBox="0 0 350 1000" preserveAspectRatio="none">
+        <path d="M 91.0 950.0 C 91.0 905.0, 189.0 905.0, 189.0 860.0 C 189.0 815.0, 259.0 815.0, 259.0 770.0 C 259.0 725.0, 168.0 725.0, 168.0 680.0 C 168.0 635.0, 91.0 635.0, 91.0 590.0 C 91.0 545.0, 175.0 545.0, 175.0 500.0 C 175.0 455.0, 259.0 455.0, 259.0 410.0 C 259.0 365.0, 175.0 365.0, 175.0 320.0 C 175.0 275.0, 91.0 275.0, 91.0 230.0 C 91.0 180.0, 182.0 180.0, 182.0 130.0" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="11" stroke-linecap="round"/>
+        <path d="M 91.0 950.0 C 91.0 905.0, 189.0 905.0, 189.0 860.0 C 189.0 815.0, 259.0 815.0, 259.0 770.0 C 259.0 725.0, 168.0 725.0, 168.0 680.0 C 168.0 635.0, 91.0 635.0, 91.0 590.0 C 91.0 545.0, 175.0 545.0, 175.0 500.0 C 175.0 455.0, 259.0 455.0, 259.0 410.0 C 259.0 365.0, 175.0 365.0, 175.0 320.0 C 175.0 275.0, 91.0 275.0, 91.0 230.0 C 91.0 180.0, 182.0 180.0, 182.0 130.0" fill="none" stroke="#C9A227" stroke-width="11" stroke-linecap="round" stroke-dasharray="1 18"/>
+      </svg>
+      <div class="stone" style="left:26%;top:95%"><div class="disc perfect">★</div><div class="slabel">ชุด 1</div></div>
+      <div class="stone" style="left:54%;top:86%"><div class="disc done">88<small>%</small></div><div class="slabel">ชุด 2</div></div>
+      <div class="stone" style="left:74%;top:77%"><div class="disc perfect">★</div><div class="slabel">ชุด 3</div></div>
+      <div class="stone" style="left:48%;top:68%"><div class="disc done">72<small>%</small></div><div class="slabel">ชุด 4</div></div>
+      <div class="stone" style="left:26%;top:59%"><div class="disc done">81<small>%</small></div><div class="slabel">ชุด 5</div></div>
+      <div class="flag" style="left:52%;top:59%"><div class="ic">🎁</div><div class="t">ป้ายแรก</div></div>
+      <div class="stone" style="left:50%;top:50%"><div class="disc perfect">★</div><div class="slabel">ชุด 6</div></div>
+      <div class="stone" style="left:74%;top:41%"><div class="disc done">64<small>%</small></div><div class="slabel">ชุด 7</div></div>
+      <div class="stone" style="left:50%;top:32%"><div class="disc cur">8</div><div class="slabel">ชุด 8</div></div>
+      <div class="hero" style="left:50%;top:32%">🧑‍🎓</div>
+      <div class="stone" style="left:26%;top:23%"><div class="disc todo">9</div><div class="slabel">ชุด 9</div></div>
+      <div class="stone" style="left:52%;top:13%"><div class="disc todo">10</div><div class="slabel">ชุด 10</div></div>
+      <div class="flag" style="left:26%;top:13%"><div class="ic">🎁</div><div class="t">ครึ่งทาง</div></div>
+      </div>
+    </div>
+
+    <!-- WORLD 2: locked preview -->
+    <div class="world sand">
+      <div class="worldhd">
+        <div class="worldbadge wb2">🔒</div>
+        <div>
+          <div class="wt">โลกที่ 2 · ปานกลาง</div>
+          <div class="ws">ปลดล็อกเมื่อจบระดับง่าย</div>
+        </div>
+        <div class="prog"><b style="color:var(--sub)">0/20</b><span>รอปลดล็อก</span></div>
+      </div>
+      <div class="lockband">🔒 จบ 12 ด่านที่เหลือเพื่อเปิดโลกนี้</div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="mini">🔥 3 วันติด · ทำต่อให้ครบเป้าวันนี้</div>
+    <button>▶ ลุยด่านที่ 8</button>
+  </div>
+</div>
+</body>
+</html>

@@ -1,5 +1,9 @@
+import type Stripe from "stripe";
+
 import { logAdminAction } from "@/lib/admin-auth";
 import { weekStartMondayIsoDate } from "@/lib/addon-credits";
+import { getStripe } from "@/lib/stripe";
+import { fulfillOneTimePlanPurchase } from "@/lib/stripe-fulfillment";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
 const REPAIR_WINDOW_DAYS = 30;
@@ -260,4 +264,98 @@ export async function repairDowngradedPaidUsers(
   }
 
   return { scanned: broken?.length ?? 0, restored, skippedNoPaidPayment };
+}
+
+export type UnsyncedStripeRepairResult = {
+  scanned: number;
+  fixed: Array<{ id: string; email: string | null; tier: string | null }>;
+  skippedNoPaidSession: number;
+  errors: number;
+};
+
+/**
+ * Repairs the "never fulfilled at all" case: the customer paid in Stripe
+ * (has stripe_customer_id) but tier is still 'free' with no expiry and no
+ * subscription — meaning the webhook (checkout.session.completed /
+ * async_payment_succeeded / payment_intent.succeeded) never ran fulfillment
+ * for them. This is the common failure mode for Thai PromptPay, where
+ * payment settles asynchronously after the customer has left the checkout
+ * page, and the dashboard's webhook endpoint isn't subscribed to the async
+ * event types.
+ *
+ * Unlike repairMissingTierExpiries / repairDowngradedPaidUsers, this reads
+ * live from the Stripe API (no local trace exists yet to repair from) and
+ * calls the same fulfillOneTimePlanPurchase() the webhook uses — so it's
+ * exactly as idempotent (keyed on stripe_payment_intent_id).
+ */
+export async function repairUnsyncedStripeCustomers(
+  options: { limit?: number } = {},
+): Promise<UnsyncedStripeRepairResult> {
+  const supabase = createServiceRoleSupabase();
+  const cap = Math.min(options.limit ?? 100, 200);
+
+  const { data: candidates, error: scanErr } = await supabase
+    .from("profiles")
+    .select("id, email, stripe_customer_id, vip_granted_by_course")
+    .eq("tier", "free")
+    .not("stripe_customer_id", "is", null)
+    .is("stripe_subscription_id", null)
+    .is("tier_expires_at", null)
+    .limit(cap);
+
+  if (scanErr) {
+    console.error("[repair-unsynced-stripe] scan failed", scanErr.message);
+    return { scanned: 0, fixed: [], skippedNoPaidSession: 0, errors: 0 };
+  }
+
+  const users = (candidates ?? []).filter((r) => r.vip_granted_by_course !== true);
+  if (users.length === 0) {
+    return { scanned: candidates?.length ?? 0, fixed: [], skippedNoPaidSession: 0, errors: 0 };
+  }
+
+  const stripe = getStripe();
+  const fixed: UnsyncedStripeRepairResult["fixed"] = [];
+  let skippedNoPaidSession = 0;
+  let errors = 0;
+
+  for (const user of users) {
+    const customerId = user.stripe_customer_id as string;
+    const userId = user.id as string;
+    const email = (user.email as string | null) ?? null;
+
+    try {
+      const sessions = await stripe.checkout.sessions.list({ customer: customerId, limit: 20 });
+      let foundAndFulfilled = false;
+
+      for (const session of sessions.data) {
+        const meta = session.metadata ?? {};
+        const eligible =
+          session.mode === "payment" &&
+          meta.purchaseKind === "plan" &&
+          meta.userId === userId &&
+          session.payment_status === "paid";
+        if (!eligible) continue;
+
+        const full = (await stripe.checkout.sessions.retrieve(session.id, {
+          expand: ["payment_intent", "customer"],
+        })) as Stripe.Checkout.Session;
+
+        const result = await fulfillOneTimePlanPurchase(full);
+        if (result.ok) {
+          fixed.push({ id: userId, email, tier: result.tier });
+          foundAndFulfilled = true;
+          break; // most recent paid session is enough; fulfillment is idempotent anyway
+        }
+      }
+
+      if (!foundAndFulfilled) {
+        skippedNoPaidSession += 1;
+      }
+    } catch (e) {
+      console.error("[repair-unsynced-stripe] failed for user", userId, e);
+      errors += 1;
+    }
+  }
+
+  return { scanned: users.length, fixed, skippedNoPaidSession, errors };
 }

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import { shuffleMcOptions, answersMatch } from "@/lib/reading-utils";
 import type {
   ReadingExamResultRow,
@@ -63,6 +64,8 @@ export function ReadingExam({
   const { shuffled } = shuffledPerStep[step];
 
   const selectQ1 = (option: string) => {
+    if (option === correctP2) sfxCorrect();
+    else sfxWrong();
     setAnswers((a) => ({ ...a, missingSentence: option }));
     setQ1Revealed(true);
   };
@@ -79,6 +82,7 @@ export function ReadingExam({
   const goNext = () => {
     if (!canAdvance) return;
     if (step < ORDER.length - 1) {
+      sfxTransition();
       setStep((s) => s + 1);
       return;
     }

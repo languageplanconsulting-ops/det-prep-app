@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { HighlightedReadingText } from "@/components/reading/ReadingExam";
+import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import { shuffleMcOptions } from "@/lib/reading-utils";
 import type { VocabularyReadingMockContent } from "@/lib/mock-test/vocabulary-reading-mock";
 import {
@@ -143,6 +144,7 @@ export function VocabularyReadingMockExam({
       });
       return;
     }
+    sfxTransition();
     setInternalAnswers(nextAnswers);
     setInternalStep((s) => s + 1);
   };
@@ -161,6 +163,8 @@ export function VocabularyReadingMockExam({
     }
     if (step === revealStep) {
       if (!missingReveal) {
+        if (opt === p2Correct) sfxCorrect();
+        else sfxWrong();
         setMissingPick(opt);
         setMissingReveal(true);
         return;

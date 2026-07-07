@@ -2,6 +2,7 @@ import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { GRADING_TEACHER_TONE } from "@/lib/gemini-production-thai-style";
+import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 
 export type GraderResult = {
   score: number;
@@ -10,15 +11,27 @@ export type GraderResult = {
   improvements: string[];
 };
 
-const SYSTEM = `You are an expert DET examiner. Score the following response on a scale of 0–10.
+const SPOKEN_RESPONSE_POLICY = `
+This response is a SPOKEN answer transcribed by speech recognition — the learner spoke, they did not type. Punctuation, capitalization, sentence boundaries, and spelling in the transcript were chosen by the speech-recognition engine, not the learner. Completely disregard all of this when scoring: never lower the score because of it, and never mention a punctuation, capitalization, or spelling issue anywhere in feedback, strengths, or improvements.
+Every item in "improvements" that points out a language mistake MUST include a concrete corrected example — quote the problem phrase and show the fixed version (e.g. "You said '...' — a stronger way to say this: '...'"). Never criticize a mistake without showing the fix.`;
+
+function buildSystem(isSpoken: boolean): string {
+  return `You are an expert DET examiner. Score the following response on a scale of 0–10.
 Evaluate: content relevance (3pts), language accuracy (3pts),
 fluency and coherence (2pts), vocabulary range (2pts).
 Return JSON only: { "score": number, "feedback": string, "strengths": string[], "improvements": string[] }
+${isSpoken ? SPOKEN_RESPONSE_POLICY : ""}
 ${GRADING_TEACHER_TONE}`;
+}
 
 function parseJson(raw: string): GraderResult | null {
   try {
-    const json = JSON.parse(raw.replace(/```json\n?|\n?```/g, "").trim());
+    const json = parseGeminiJsonObjectResponse(raw) as {
+      score?: unknown;
+      feedback?: unknown;
+      strengths?: unknown;
+      improvements?: unknown;
+    };
     if (typeof json.score !== "number") return null;
     return {
       score: Math.max(0, Math.min(10, json.score)),
@@ -37,6 +50,7 @@ export async function gradeDetResponse(
   studentResponse: string,
   taskDescription: string,
   log?: { userId: string | null },
+  opts?: { isSpoken?: boolean },
 ): Promise<GraderResult> {
   const prompt = `${taskDescription}\n\nStudent response:\n${studentResponse}`;
   const modelName = await resolveGeminiTextModel();
@@ -48,7 +62,7 @@ export async function gradeDetResponse(
     const { text, usage } = await generateGradingJsonCompletion({
       model: modelName,
       keys: { geminiApiKey: geminiKey, anthropicApiKey: anthropicKey, openAiApiKey: openAiKey },
-      systemInstruction: SYSTEM,
+      systemInstruction: buildSystem(Boolean(opts?.isSpoken)),
       userPayload: `${prompt}\n\nRespond with JSON only.`,
       temperature: 0.2,
     });
@@ -116,7 +130,7 @@ Return JSON only: { "bullets": [ { "en": string, "th": string } ] } with exactly
 Thai lines: supportive teacher tone; you may end a Thai line with ครับ only when it sounds natural.`,
       temperature: 0.35,
     });
-    const j = JSON.parse(text.replace(/```json\n?|\n?```/g, "").trim());
+    const j = parseGeminiJsonObjectResponse(text) as { bullets?: unknown };
     if (typeof j === "object" && Array.isArray(j.bullets)) {
       if (usage) {
         scheduleApiUsageLog({

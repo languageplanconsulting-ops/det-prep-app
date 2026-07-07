@@ -72,6 +72,15 @@ export function loadReadingAdminOccupancy(): ReadingAdminOccupancy {
   }
 }
 
+export function parseReadingAdminOccupancyFromJson(raw: string | null): ReadingAdminOccupancy {
+  if (!raw) return emptyReadingOccupancy();
+  try {
+    return migrateReadingOccupancy(JSON.parse(raw));
+  } catch {
+    return emptyReadingOccupancy();
+  }
+}
+
 function saveReadingAdminOccupancy(next: ReadingAdminOccupancy): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(READING_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
@@ -233,10 +242,14 @@ export function loadReadingBank(): ReadingFullBank {
   return parseStoredBank(localStorage.getItem(READING_BANK_KEY));
 }
 
-/** Learner-facing bank: only admin-uploaded slots are visible (no default/premade sets). */
-export function loadReadingVisibleBank(): ReadingFullBank {
-  const bank = loadReadingBank();
-  const occ = loadReadingAdminOccupancy();
+export function parseReadingBankFromJson(raw: string | null): ReadingFullBank {
+  return parseStoredBank(raw);
+}
+
+export function composeReadingVisibleBank(
+  bank: ReadingFullBank,
+  occ: ReadingAdminOccupancy,
+): ReadingFullBank {
   const out = emptyReadingFullBank();
   for (const r of READING_ROUND_NUMBERS) {
     for (const d of READING_DIFFICULTIES) {
@@ -247,6 +260,11 @@ export function loadReadingVisibleBank(): ReadingFullBank {
     }
   }
   return out;
+}
+
+/** Learner-facing bank: only admin-uploaded slots are visible (no default/premade sets). */
+export function loadReadingVisibleBank(): ReadingFullBank {
+  return composeReadingVisibleBank(loadReadingBank(), loadReadingAdminOccupancy());
 }
 
 export function persistReadingBank(bank: ReadingFullBank): void {

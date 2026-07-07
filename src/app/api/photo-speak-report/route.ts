@@ -10,6 +10,7 @@ import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { recordDataCollectionSubmission } from "@/lib/data-collection";
 import { getAdminAccess } from "@/lib/admin-auth";
 
 export const maxDuration = 120;
@@ -80,9 +81,9 @@ export async function POST(req: Request) {
   try {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
-    const userId = await getOptionalAuthUserId();
+    const userId = await getOptionalAuthUserId(req);
     // Admins / preview-eligible accounts don't consume real feedback credits.
-    const adminBypass = (await getAdminAccess()).ok;
+    const adminBypass = (await getAdminAccess(req)).ok;
     if (userId && !adminBypass) {
       const feedbackSurface =
         originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
@@ -140,6 +141,17 @@ export async function POST(req: Request) {
         report.rewardBonus = rewardBonus;
       }
     }
+    await recordDataCollectionSubmission({
+      userId,
+      examType: originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo",
+      attemptId: typeof attemptId === "string" ? attemptId : null,
+      promptTitle: typeof titleEn === "string" ? titleEn : null,
+      promptText: typeof promptEn === "string" ? promptEn : null,
+      submittedText: transcript,
+      wordCount,
+      score160: report.score160,
+      report,
+    });
     return NextResponse.json(report);
   } catch (e) {
     const message = normalizeGradingErrorMessage(e);

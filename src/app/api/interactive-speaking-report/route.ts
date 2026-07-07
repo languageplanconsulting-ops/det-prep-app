@@ -13,6 +13,7 @@ import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 import { getAdminAccess } from "@/lib/admin-auth";
+import { recordDataCollectionSubmission } from "@/lib/data-collection";
 
 export const maxDuration = 120;
 
@@ -83,9 +84,9 @@ export async function POST(req: Request) {
   try {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
-    const userId = await getOptionalAuthUserId();
+    const userId = await getOptionalAuthUserId(req);
     // Admins / preview-eligible accounts don't consume real feedback credits.
-    const adminBypass = (await getAdminAccess()).ok;
+    const adminBypass = (await getAdminAccess(req)).ok;
     // Honor an existing reservation: if the learner already reserved a credit
     // for THIS attempt at /start, they're entitled to grade it — never block
     // them now even if their balance changed mid-exam. Only re-check the
@@ -169,6 +170,17 @@ export async function POST(req: Request) {
         report.rewardBonus = rewardBonus;
       }
     }
+    await recordDataCollectionSubmission({
+      userId,
+      examType: "interactive_speaking",
+      attemptId: typeof attemptId === "string" ? attemptId : null,
+      promptTitle: scenarioTitleEn.trim(),
+      promptText: turns.map((t) => t.questionEn).filter(Boolean).join(" | "),
+      submittedText: turns.map((t) => `Q${t.turnIndex}: ${t.transcript}`).join("\n\n"),
+      wordCount,
+      score160: report.score160,
+      report,
+    });
     return NextResponse.json(report);
   } catch (e) {
     const message = normalizeGradingErrorMessage(e);

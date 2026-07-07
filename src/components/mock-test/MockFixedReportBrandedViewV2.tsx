@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { sfxReveal } from "@/lib/exam-sfx";
+import { sfxCelebrate } from "@/lib/exam-sfx";
 import type { FixedMockScoredRow } from "@/lib/mock-test/fixed-mock-score-buckets";
 
 /**
@@ -149,10 +149,11 @@ export function MockFixedReportBrandedViewV2({
   const ringCirc = 2 * Math.PI * 44;
   const ringOffset = ringCirc * (1 - Math.max(0, Math.min(160, total)) / 160);
 
-  // Celebratory chime when the score report reveals (admin + unmuted only).
+  // A full mock test finishing is the biggest single moment in the app —
+  // grand celebration on target hit, still a celebration (just smaller) otherwise.
   useEffect(() => {
-    sfxReveal();
-  }, []);
+    sfxCelebrate(total >= targets.total ? "lg" : "md");
+  }, [total, targets.total]);
 
   // Outcome-first: the 2 weakest skills + a one-tap route to practise each
   // (Cagan/Brown — the results page must answer "what do I do next?").

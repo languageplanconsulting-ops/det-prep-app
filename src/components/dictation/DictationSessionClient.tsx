@@ -7,6 +7,7 @@ import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { getDictationAudioDataUrlByItemId } from "@/lib/dictation-audio-indexeddb";
 import { dictationScoreFromDiff, diffDictationChars } from "@/lib/dictation-diff";
+import { sfxCorrect, sfxWrong } from "@/lib/exam-sfx";
 import { dictationMaxForDifficulty, saveDictationAttempt } from "@/lib/dictation-storage";
 import type { DictationDifficulty, DictationItem, DictationRoundNum } from "@/types/dictation";
 
@@ -203,6 +204,8 @@ export function DictationSessionClient({
   const submitPractice = () => {
     const d = diffDictationChars(item.transcript, userText);
     const score = dictationScoreFromDiff(d.correctChars, d.totalChars, maxScore);
+    if (score >= maxScore * 0.6) sfxCorrect();
+    else sfxWrong();
     saveDictationAttempt({
       round,
       difficulty,

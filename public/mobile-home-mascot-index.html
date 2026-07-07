@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>มาสคอตบนหน้าหลัก (มือถือ) · 3 เวอร์ชัน</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--ink);padding:40px 20px 80px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .head{display:flex;align-items:center;gap:18px;margin-bottom:6px}
+  .head img{width:74px;height:74px;border-radius:99px;object-fit:cover;object-position:32% 20%;background:#fff;border:2px solid var(--yellow)}
+  h1{font-size:27px;font-weight:900}
+  .lede{color:var(--sub);font-size:14px;margin:10px 0 4px;max-width:720px;line-height:1.7}
+  .from{font-size:12px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:16px 0 28px;display:inline-block;line-height:1.6}
+  .from b{color:var(--blue)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px;text-decoration:none;color:inherit;display:block;transition:transform .15s, box-shadow .15s;box-shadow:0 8px 22px rgba(0,0,0,.05)}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.10)}
+  .emoji{font-size:34px}
+  .tagn{font-size:11px;font-weight:800;color:var(--blue);letter-spacing:.5px;margin-top:8px}
+  .card h2{font-size:20px;font-weight:900;margin:6px 0 8px}
+  .best{display:inline-block;background:var(--yellow);color:#6a4e00;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;margin-left:6px;vertical-align:middle}
+  .card p{font-size:13px;color:var(--sub);line-height:1.6}
+  ul{margin:12px 0 0;padding-left:18px}
+  li{font-size:12px;color:var(--sub);line-height:1.7}
+  .note{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px}
+  .note h3{font-size:14px;font-weight:900;margin-bottom:10px}
+  .note p{font-size:13px;color:var(--sub);line-height:1.8}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <img src="/mascot-doy.png" alt="มาสคอต English Plan">
+    <div>
+      <h1>มาสคอตบน "หน้าหลัก" (แอปมือถือ) 📱</h1>
+      <p class="lede" style="margin-top:4px">3 วิธีเอามาสคอตมาเป็นหน้าตาของแอปบนหน้า หน้าหลัก (HomeScreen) — คงเลย์เอาต์จริง (สตรีค/XP, แบบฝึกประจำวัน, Mini Test, หมวดแบบฝึก, Mock) แล้วสอดมาสคอตเข้าไปคนละแบบ</p>
+    </div>
+  </div>
+  <div class="from">📱 ต้นฉบับที่แก้: <b>HomeScreen.tsx</b> (แท็บ หน้าหลัก) · มาสคอต = <b>public/mascot-doy.png</b> (พื้นหลังโปร่งแล้ว) · ธีมมือถือจริง (cream + EP blue/yellow + ฟอนต์ Prompt)</div>
+
+  <div class="grid">
+    <a class="card" href="/mobile-home-mascot-v1-greeter.html">
+      <div class="emoji">👋</div>
+      <div class="tagn">VERSION 1</div>
+      <h2>Greeter (ทักทาย) <span class="best">ปลอดภัยสุด</span></h2>
+      <p>มาสคอตอยู่ในการ์ดทักทายใต้หัวข้อ — มีลูกโป่งคำพูด "วันนี้ฝึกอะไรดี?" แล้วตามด้วยสตรีค/เป้ารายวัน ที่เหลือคงเดิมทั้งหมด</p>
+      <ul>
+        <li>เปลี่ยนน้อย เสี่ยงน้อย พอร์ตง่ายสุด</li>
+        <li>อบอุ่น เป็นมิตร ไม่รก</li>
+        <li>มาสคอตโผล่จุดเดียว เด่นชัด</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-home-mascot-v2-coach.html">
+      <div class="emoji">🧑‍🏫</div>
+      <div class="tagn">VERSION 2</div>
+      <h2>Coach (โค้ชเช็กอิน)</h2>
+      <p>แบนเนอร์โค้ช "น้องแพลน" เด่นบนสุด — พูดเจาะจงรายวัน ("วันนี้เก็บ Writing ต่อนะ 🔥") พร้อมสตรีค/XP/เป้า + ปุ่มเริ่มฝึก มาสคอตอยู่ในโลโก้ด้วย</p>
+      <ul>
+        <li>มีบุคลิก/เสียงชัด เป็นตัวละครประจำแอป</li>
+        <li>กระตุ้นให้กลับมาทุกวัน (daily check-in)</li>
+        <li>ผูกกับระบบ XP/สตรีคที่มีอยู่แล้ว</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-home-mascot-v3-playful.html">
+      <div class="emoji">✨</div>
+      <div class="tagn">VERSION 3</div>
+      <h2>Playful (โผล่หลายจุด)</h2>
+      <p>มาสคอตเป็นตัวการ์ตูนสนุก ๆ ที่โผล่ทั่วหน้า — ทักในหัวข้อ, โผล่ออกมาจากการ์ดแบบฝึกประจำวันพร้อมสติกเกอร์, แอบโผล่ข้างหัวข้อหมวด สดใสวัยรุ่น</p>
+      <ul>
+        <li>สะดุดตา จำง่าย เอนเกจสูง</li>
+        <li>เหมาะกลุ่มนักเรียน/วัยรุ่น</li>
+        <li>เสี่ยงดู "เล่น" เกินถ้าใช้เยอะ · ต้องคุมพอดี</li>
+      </ul>
+    </a>
+  </div>
+
+  <div class="note">
+    <h3>เหมือนกันทั้ง 3 แบบ</h3>
+    <p>• คงเลย์เอาต์ + ฟีเจอร์จริงของ HomeScreen ทุกอย่าง (สตรีค/XP, แบบฝึกประจำวัน, Mini Test, 4 หมวด, Mock) &nbsp;•&nbsp; ใช้ <b>มาสคอตตัวเดียวกัน</b> (พื้นหลังโปร่ง) &nbsp;•&nbsp; ธีมมือถือจริง + ฟอนต์ Prompt<br><br>
+    ต่างกันที่ <b>บทบาทมาสคอต</b>: V1 คนทักทาย (นิ่ง) · V2 โค้ชที่พูดนำ (มีเสียง เช็กอินรายวัน) · V3 ตัวการ์ตูนสนุก (สติกเกอร์ โผล่หลายจุด)<br><br>
+    <b>หมายเหตุ:</b> ชื่อ "น้องแพลน" ใน V2 ตั้งชั่วคราว บอกได้ว่าอยากใช้ชื่ออะไร &nbsp;·&nbsp; มาสคอตปัจจุบันเป็นภาพครึ่งตัว/หน้า ถ้าจะใช้จริงควรมี <b>เต็มตัว + หลายท่าทาง</b> (ยิ้ม/ชูนิ้ว/ดีใจ) เลือกเวอร์ชันที่ชอบแล้วผมพอร์ตลง <b>HomeScreen.tsx</b> จริงให้ (verify บน Expo web)</p>
+  </div>
+</div>
+</body>
+</html>

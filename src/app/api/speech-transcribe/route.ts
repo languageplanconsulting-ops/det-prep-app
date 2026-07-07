@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
   try {
     const model = await resolveTranscriptionGeminiModel();
-    const userId = await getOptionalAuthUserId();
+    const userId = await getOptionalAuthUserId(req);
     const { transcript, usage } = await transcribeEnglishAudioWithGemini({
       apiKey: key,
       model,

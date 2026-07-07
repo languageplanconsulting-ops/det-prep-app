@@ -63,6 +63,15 @@ export function loadVocabAdminOccupancy(): VocabAdminOccupancy {
   }
 }
 
+export function parseVocabAdminOccupancyFromJson(raw: string | null): VocabAdminOccupancy {
+  if (!raw) return emptyVocabOccupancy();
+  try {
+    return migrateVocabOccupancy(JSON.parse(raw));
+  } catch {
+    return emptyVocabOccupancy();
+  }
+}
+
 function saveVocabAdminOccupancy(next: VocabAdminOccupancy): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(VOCAB_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
@@ -198,20 +207,27 @@ export function loadVocabBank(): VocabFullBank {
   return parseStoredBank(localStorage.getItem(VOCAB_SETS_KEY));
 }
 
-/** Learner-facing bank: only admin-uploaded set slots are visible. */
-export function loadVocabVisibleBank(): VocabFullBank {
-  const bank = loadVocabBank();
-  const occ = loadVocabAdminOccupancy();
+export function parseVocabBankFromJson(raw: string | null): VocabFullBank {
+  return parseStoredBank(raw);
+}
+
+export function composeVocabVisibleBank(
+  bank: VocabFullBank,
+  occ: VocabAdminOccupancy,
+): VocabFullBank {
   const out = emptyVocabFullBank();
   for (const r of VOCAB_ROUND_NUMBERS) {
     const allowed = new Set(occ[r]);
     out[r] = bank[r]
-      .filter(
-        (s) => allowed.has(s.setNumber) && !isBuiltInPlaceholderVocabSet(s),
-      )
+      .filter((s) => allowed.has(s.setNumber) && !isBuiltInPlaceholderVocabSet(s))
       .sort((a, b) => a.setNumber - b.setNumber);
   }
   return out;
+}
+
+/** Learner-facing bank: only admin-uploaded set slots are visible. */
+export function loadVocabVisibleBank(): VocabFullBank {
+  return composeVocabVisibleBank(loadVocabBank(), loadVocabAdminOccupancy());
 }
 
 export function persistVocabBank(bank: VocabFullBank): void {

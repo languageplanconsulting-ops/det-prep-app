@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { DialogueSummarySessionClient } from "@/components/dialogue-summary/DialogueSummarySessionClient";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { getDialogueSummaryVisibleExam } from "@/lib/dialogue-summary-storage";
 import type { DialogueSummaryDifficulty, DialogueSummaryExam, DialogueSummaryRoundNum } from "@/types/dialogue-summary";
 
@@ -20,7 +21,15 @@ export function DialogueSummarySessionGate({
   const [exam, setExam] = useState<DialogueSummaryExam | null | undefined>(undefined);
 
   useEffect(() => {
-    setExam(getDialogueSummaryVisibleExam(round, difficulty, setNumber) ?? null);
+    let cancelled = false;
+    void (async () => {
+      await ensureCanonicalPracticeContent();
+      if (cancelled) return;
+      setExam(getDialogueSummaryVisibleExam(round, difficulty, setNumber) ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [round, difficulty, setNumber]);
 
   if (exam === undefined) {

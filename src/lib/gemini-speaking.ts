@@ -101,7 +101,7 @@ The learner read a prompt and spoke. You receive a raw ASR transcript (may lack 
 
 ${workflow}${fillerRule}
 
-PUNCTUATION POLICY (mandatory): The transcript is from speech recognition — the learner SPOKE, they did not type. Punctuation, capitalization and sentence boundaries are NOT part of the learner's performance. Completely disregard punctuation when scoring: never raise or lower ANY subscore (grammar, vocabulary, coherence, task) because of punctuation, capitalization, or sentence-boundary formatting, and NEVER list a punctuation or capitalization issue in any breakdown or improvement point.
+PUNCTUATION POLICY (mandatory): The transcript is from speech recognition — the learner SPOKE, they did not type. Punctuation, capitalization, sentence boundaries, and spelling are NOT part of the learner's performance — the exact spelling/casing in the transcript was chosen by the speech-recognition engine, not the learner. Completely disregard all of this when scoring: never raise or lower ANY subscore (grammar, vocabulary, coherence, task) because of punctuation, capitalization, sentence-boundary formatting, or spelling, and NEVER list a punctuation, capitalization, or spelling issue in any breakdown or improvement point.
 
 Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
 Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
@@ -110,10 +110,10 @@ For EACH criterion summary (grammarSummaryEn/Th, etc.), include TWO parts:
 (A) One-sentence assessment.
 (B) A line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" followed by a concrete action tied to THIS learner's wording (not generic advice).
 
-Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, taskBreakdown):
+Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, taskBreakdown) — EVERY item MUST have:
 - excerpt: exact short quote from the ${scoreText} (use quotation marks in JSON string only).
-- issueEn / issueTh: what is wrong (bilingual).
-- suggestionEn / suggestionTh: a concrete correction or better wording (bilingual)—for vocabulary, name 1–3 better words or collocations when possible.
+- issueEn / issueTh: what is wrong (bilingual, spoken-language focus — never punctuation/capitalization/spelling).
+- suggestionEn / suggestionTh: MANDATORY on every single item — the FULL corrected version of the excerpt (a real rewritten sentence or phrase the learner could say instead), not just abstract advice like "fix the tense" with no example shown. For vocabulary, name 1–3 better words or collocations. If you cannot write a concrete corrected version, do not include that breakdown item at all.
 - grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement", "การใช้ a/an/the"). This must lead the fix so the learner knows which rule to revise before reading the explanation. Keep it under ~6 words.
 
 Priority for feedback:

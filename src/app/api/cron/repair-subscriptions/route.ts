@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {
   repairDowngradedPaidUsers,
   repairMissingTierExpiries,
+  repairUnsyncedStripeCustomers,
 } from "@/lib/repair-missing-expiry";
 
 export const runtime = "nodejs";
@@ -11,11 +12,14 @@ export const dynamic = "force-dynamic";
 /**
  * Scheduled subscription self-heal (Vercel Cron).
  *
- * Runs the same two idempotent repairs the admin subscriptions page triggers,
+ * Runs the same idempotent repairs the admin subscriptions page triggers,
  * but on a schedule so broken payers get fixed even when no admin opens that
  * page:
- *   - repairMissingTierExpiries:   paid tier with NULL expiry  → back-fill expiry
- *   - repairDowngradedPaidUsers:   free tier with valid expiry → restore real tier
+ *   - repairMissingTierExpiries:    paid tier with NULL expiry  → back-fill expiry
+ *   - repairDowngradedPaidUsers:    free tier with valid expiry → restore real tier
+ *   - repairUnsyncedStripeCustomers: free tier, paid in Stripe, webhook never
+ *     ran fulfillment at all (common for PromptPay async settlement) → pull
+ *     from Stripe directly and fulfill.
  *
  * Auth: when CRON_SECRET is set, Vercel sends `Authorization: Bearer <secret>`
  * on every cron invocation. We require it so the endpoint can't be triggered by
@@ -36,6 +40,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   try {
     const missingExpiry = await repairMissingTierExpiries({ adminId: null });
     const downgraded = await repairDowngradedPaidUsers({ adminId: null });
+    const unsyncedStripe = await repairUnsyncedStripeCustomers();
 
     const summary = {
       ok: true,
@@ -47,6 +52,12 @@ export async function GET(request: Request): Promise<NextResponse> {
         scanned: downgraded.scanned,
         restored: downgraded.restored.length,
         skippedNoPaidPayment: downgraded.skippedNoPaidPayment,
+      },
+      unsyncedStripe: {
+        scanned: unsyncedStripe.scanned,
+        fixed: unsyncedStripe.fixed.length,
+        skippedNoPaidSession: unsyncedStripe.skippedNoPaidSession,
+        errors: unsyncedStripe.errors,
       },
     };
     console.log("[cron/repair-subscriptions]", JSON.stringify(summary));

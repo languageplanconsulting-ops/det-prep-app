@@ -7,6 +7,7 @@ import {
   DICTATION_SET_COUNT,
 } from "@/lib/dictation-constants";
 import { defaultDictationFullBank } from "@/lib/dictationData";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import {
   ensureDictationBankReady,
   getDictationProgress,
@@ -27,6 +28,7 @@ export function DictationSetGrid({
 
   useEffect(() => {
     void (async () => {
+      await ensureCanonicalPracticeContent();
       await ensureDictationBankReady();
       setBank(loadDictationBank());
     })();

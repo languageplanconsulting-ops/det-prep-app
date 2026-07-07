@@ -530,3 +530,20 @@ export function conversationMaxForDifficulty(_d: ConversationDifficulty): number
 export function conversationMaxForExam(_exam: { difficulty: ConversationDifficulty; maxScore?: number }): number {
   return CONVERSATION_FULL_SCORE;
 }
+
+export function parseConversationBankFromJson(raw: string | null): ConversationBankByRound {
+  return parseStoredBank(raw);
+}
+
+export function getConversationExamFromBank(
+  bank: ConversationBankByRound,
+  round: number,
+  difficulty: ConversationDifficulty,
+  setNumber: number,
+): ConversationExam | null {
+  const rb = bank[round];
+  if (!rb) return null;
+  const found = rb[difficulty].find((e) => e.setNumber === setNumber) ?? null;
+  if (!found || !isUploadedConversationExam(found)) return null;
+  return found;
+}

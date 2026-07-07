@@ -2,6 +2,7 @@
 
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+import { sfxSubmit } from "@/lib/exam-sfx";
 import { playBlinkBeep } from "@/lib/play-blink-beep";
 import type { RealWordSet } from "@/types/realword";
 
@@ -25,7 +26,7 @@ export function RealWordGame({
   };
 
   const submit = () => {
-    playBlinkBeep();
+    sfxSubmit();
     onSubmit();
   };
 

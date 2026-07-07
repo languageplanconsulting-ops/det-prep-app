@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 · Focus Mode</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-dark:#052C6B;--blue-soft:#E7EFFF;--yellow:#FFCC00;--yellow-soft:#FFF3CC;
+    --bg:#F6F3EC;--card:#fff;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8;--green:#1B9E54;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);display:flex;flex-direction:column;border:10px solid #12141c}
+
+  /* Immersive listen zone (deep blue) */
+  .listen{background:var(--blue-dark);padding:44px 24px 30px;border-bottom-left-radius:34px;border-bottom-right-radius:34px;position:relative}
+  .topbar{display:flex;align-items:center;justify-content:space-between}
+  .back{width:36px;height:36px;border-radius:99px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff}
+  .prog{color:rgba(255,255,255,.8);font-size:12px;font-weight:700}
+  .center{display:flex;flex-direction:column;align-items:center;margin-top:16px}
+  .tapcue{color:rgba(255,255,255,.75);font-size:12px;font-weight:600;margin-bottom:16px;letter-spacing:.3px}
+
+  .playhalo{position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center}
+  .ring{position:absolute;inset:0;border-radius:99px;border:2px solid var(--yellow);opacity:.3;animation:pulsering 2.4s ease-out infinite}
+  .ring:nth-child(2){animation-delay:1.2s}
+  @keyframes pulsering{0%{transform:scale(.7);opacity:.5}100%{transform:scale(1.18);opacity:0}}
+  .playbtn{width:112px;height:112px;border-radius:99px;background:var(--yellow);border:none;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 16px 30px rgba(0,0,0,.35);animation:breathe 2.6s ease-in-out infinite}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  .playbtn .tri{width:0;height:0;border-style:solid;border-width:19px 0 19px 31px;border-color:transparent transparent transparent #06317A;margin-left:7px}
+
+  .eq{display:flex;align-items:flex-end;gap:5px;height:30px;margin-top:24px}
+  .eq i{width:5px;background:var(--yellow);border-radius:99px;animation:bounce 1s ease-in-out infinite}
+  .eq i:nth-child(1){height:35%;animation-delay:0s}.eq i:nth-child(2){height:65%;animation-delay:.1s}
+  .eq i:nth-child(3){height:100%;animation-delay:.2s}.eq i:nth-child(4){height:50%;animation-delay:.3s}
+  .eq i:nth-child(5){height:85%;animation-delay:.4s}.eq i:nth-child(6){height:45%;animation-delay:.5s}
+  .eq i:nth-child(7){height:78%;animation-delay:.6s}.eq i:nth-child(8){height:55%;animation-delay:.7s}
+  .eq i:nth-child(9){height:92%;animation-delay:.8s}.eq i:nth-child(10){height:40%;animation-delay:.9s}
+  .eq i:nth-child(11){height:70%;animation-delay:1s}
+  @keyframes bounce{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+
+  .replay{display:flex;align-items:center;gap:8px;margin-top:22px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:99px;padding:9px 18px}
+  .replay .t{font-size:13px;font-weight:800;color:#fff}
+  .plays{color:rgba(255,255,255,.7);font-size:11px;margin-top:10px;font-weight:500}
+
+  /* Answer zone (cream) */
+  .answer{flex:1;display:flex;flex-direction:column;padding:22px}
+  .lbl{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:10px}
+  .field textarea{width:100%;min-height:110px;border:none;border-bottom:2px solid var(--line);background:transparent;padding:6px 2px;font-family:inherit;font-size:18px;line-height:1.5;color:var(--ink);resize:none}
+  .field textarea::placeholder{color:#B7B1A3}
+  .tips{font-size:11px;color:var(--sub);margin-top:10px}
+  .spacer{flex:1}
+  .submit{background:var(--ink);color:#fff;font-weight:900;font-size:16px;padding:17px;border:none;border-radius:99px;width:100%;box-shadow:0 10px 22px rgba(0,0,0,.18)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="listen">
+    <div class="topbar"><div class="back">‹</div><div class="prog">ตามคำบอก · ด่าน 8/200</div><div style="width:36px"></div></div>
+    <div class="center">
+      <div class="tapcue">🎧 แตะเพื่อฟัง · ฟังกี่ครั้งก็ได้</div>
+      <div class="playhalo">
+        <span class="ring"></span><span class="ring"></span>
+        <button class="playbtn"><span class="tri"></span></button>
+      </div>
+      <div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="replay"><span>🔁</span><span class="t">ฟังอีกครั้ง</span></div>
+      <div class="plays">เล่นไปแล้ว 2 ครั้ง</div>
+    </div>
+  </div>
+
+  <div class="answer">
+    <div class="lbl">พิมพ์สิ่งที่ได้ยิน</div>
+    <div class="field"><textarea placeholder="เริ่มพิมพ์ที่นี่…"></textarea></div>
+    <div class="tips">ไม่ต้องกังวลตัวพิมพ์ใหญ่–เล็ก หรือเครื่องหมายวรรคตอน</div>
+    <div class="spacer"></div>
+    <button class="submit">ส่งคำตอบ</button>
+  </div>
+</div>
+</body>
+</html>

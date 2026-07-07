@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { RealWordSessionClient } from "@/components/realword/RealWordSessionClient";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { getRealWordVisibleSet } from "@/lib/realword-storage";
 import type { RealWordDifficulty, RealWordRoundNum, RealWordSet } from "@/types/realword";
 
@@ -21,7 +22,15 @@ export function RealWordSessionGate({
   const [set, setWordSet] = useState<RealWordSet | null | undefined>(undefined);
 
   useEffect(() => {
-    setWordSet(getRealWordVisibleSet(round, difficulty, setNumber) ?? null);
+    let cancelled = false;
+    void (async () => {
+      await ensureCanonicalPracticeContent();
+      if (cancelled) return;
+      setWordSet(getRealWordVisibleSet(round, difficulty, setNumber) ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [round, difficulty, setNumber]);
 
   if (set === undefined) {

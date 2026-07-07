@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เล่น V4 · Change by Design (Brown) · โค้ชพี่ดอย</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-soft:#E7EFFF;--yellow:#FFCC00;--bg:#FBF7EF;--ink:#20242C;--sub:#726C61;--line:#ECE5D6;--green:#1B9E54;--green-soft:#E3F5EA}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .hd{display:flex;align-items:center;gap:10px;padding:8px 16px}
+  .back{width:38px;height:38px;border-radius:99px;background:#fff;border:1px solid #e7e3d8;display:flex;align-items:center;justify-content:center;font-size:22px;color:#16203a}
+  .hd h1{flex:1;text-align:center;font-size:15px;font-weight:800;color:#16203a}
+  .hd .ctx{font-size:11px;color:var(--sub);font-weight:700}
+  .coach{display:flex;gap:11px;align-items:flex-start;margin:2px 16px 12px}
+  .ava{width:46px;height:46px;border-radius:99px;background:var(--yellow);border:3px solid #fff;box-shadow:0 6px 14px rgba(0,0,0,.14);display:flex;align-items:center;justify-content:center;font-size:23px;flex:0 0 auto}
+  .bubble{background:#fff;border:1px solid var(--line);border-radius:16px;border-top-left-radius:4px;padding:12px 14px;box-shadow:0 8px 18px rgba(0,0,0,.05)}
+  .bubble .who{font-size:11px;font-weight:900;color:var(--blue)}
+  .bubble p{font-size:12.5px;color:var(--ink);line-height:1.55;margin-top:2px}
+  .bubble p b{color:var(--blue)}
+  .reassure{margin:0 16px 12px;background:var(--green-soft);border-radius:12px;padding:9px 14px;font-size:12px;font-weight:700;color:#14683a;display:flex;align-items:center;gap:8px}
+  .scroll{flex:1;overflow-y:auto;padding:0 16px 8px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .tile{background:#fff;border:2px solid var(--line);border-radius:18px;padding:18px 8px;text-align:center;font-weight:800;font-size:16px;color:var(--ink);position:relative;box-shadow:0 4px 10px rgba(0,0,0,.04)}
+  .tile.sel{background:#FFF9E6;border-color:var(--yellow);color:#7a5a00}
+  .tile.sel::after{content:"⭐";position:absolute;top:7px;right:10px;font-size:13px}
+  .foot{padding:12px 18px 20px;background:linear-gradient(to top,var(--bg) 70%,transparent)}
+  .count{text-align:center;font-size:12px;color:var(--sub);font-weight:700;margin-bottom:9px}
+  .count b{color:var(--blue)}
+  .cta{width:100%;background:var(--blue);color:#fff;font-weight:900;font-size:16px;padding:15px;border:none;border-radius:99px;box-shadow:0 10px 22px rgba(0,74,173,.25)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="hd"><div class="back">‹</div><h1>คำศัพท์จริง</h1><div class="ctx">ชุด 8</div></div>
+
+  <div class="coach">
+    <div class="ava">🧑‍🏫</div>
+    <div class="bubble">
+      <div class="who">พี่ดอย</div>
+      <p>เลือกเฉพาะ <b>คำที่มีจริง</b> นะ · เคล็ดลับ: คำจริงมักอ่านออกเสียงได้ลื่น ถ้าอ่านแล้วสะดุด ๆ ให้สงสัยไว้ก่อน</p>
+    </div>
+  </div>
+
+  <div class="reassure">💚 ไม่ชัวร์ก็ข้ามได้ · เดาผิดไม่หัก XP · ทำเพื่อฝึกสายตา</div>
+
+  <div class="scroll">
+    <div class="grid">
+      <div class="tile sel">honest</div>
+      <div class="tile">flimble</div>
+      <div class="tile sel">garden</div>
+      <div class="tile">travle</div>
+      <div class="tile sel">bright</div>
+      <div class="tile">gorstle</div>
+      <div class="tile sel">silent</div>
+      <div class="tile">wunder</div>
+      <div class="tile">market</div>
+      <div class="tile">chalimp</div>
+      <div class="tile sel">gentle</div>
+      <div class="tile">forrest</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="count">เลือกไว้ <b>5</b> คำแล้ว · พร้อมก็กดได้เลย</div>
+    <button class="cta">ตรวจคำตอบของฉัน</button>
+  </div>
+</div>
+</body>
+</html>

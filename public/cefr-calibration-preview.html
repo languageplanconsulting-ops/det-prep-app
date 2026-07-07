@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CEFR Calibration · ตัวอย่างข้อสอบวัดระดับ</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: { 'ep-blue': '#004AAD', 'ep-yellow': '#FFCC00' },
+      fontFamily: { sans: ['"IBM Plex Sans Thai"','sans-serif'], mono: ['"JetBrains Mono"','monospace'] },
+    }},
+  };
+</script>
+<style>
+  body { background:#f5f7fb; }
+  .num { font-family:'JetBrains Mono', monospace; }
+  .bar { transition: width .8s cubic-bezier(.22,1,.36,1); }
+  .lvl-btn.active { background:#004AAD; color:#fff; }
+  .task-btn.active { background:#fff; color:#004AAD; border-color:#004AAD; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .chip.picked { background:#004AAD; color:#fff; border-color:#004AAD; }
+  .fade { animation: fade .35s ease; }
+  @keyframes fade { from { opacity:0; transform:translateY(4px);} to {opacity:1; transform:none;} }
+</style>
+</head>
+<body class="font-sans text-slate-800">
+<div class="max-w-3xl mx-auto px-4 py-8 sm:py-10">
+
+  <!-- header -->
+  <div class="flex items-center gap-3 mb-5">
+    <img src="/mascot-doy.png" alt="พี่ดอย" class="w-11 h-11 object-contain" onerror="this.style.display='none'" />
+    <div>
+      <p class="text-xs text-slate-500">CEFR Calibration Test · ข้อสอบวัดระดับ 4 ทักษะ</p>
+      <p class="text-sm font-semibold text-ep-blue">ตัวอย่างข้อสอบจริง — คลิกเล่นได้ทุกข้อ ทุกระดับ A2–C2</p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 p-5 mb-5 shadow-sm">
+    <p class="text-sm text-slate-600 leading-relaxed">
+      แต่ละข้อมี <b>ค่าความยาก θ</b> บนสเกล DET (10–160). เลือก <b>ทักษะ</b> แล้วเลือก <b>ระดับ</b>
+      เพื่อดูข้อสอบจริง แล้วลองตอบดู — ด้านล่างจะอธิบายว่าคำตอบกลายเป็น "ระดับ" ได้อย่างไร.
+      <span class="block mt-1 text-slate-400 text-xs">Each item is anchored to a difficulty θ on the DET scale. Pick a skill and a level to try the real questions; the estimator at the bottom shows how answers become a CEFR level.</span>
+    </p>
+  </div>
+
+  <!-- task tabs -->
+  <div id="taskTabs" class="flex flex-wrap gap-2 mb-4"></div>
+
+  <!-- level pills -->
+  <div class="flex items-center gap-2 mb-4">
+    <span class="text-xs text-slate-400 mr-1">ระดับ:</span>
+    <div id="levelPills" class="flex gap-1.5"></div>
+    <span id="thetaTag" class="num ml-auto text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-500"></span>
+  </div>
+
+  <!-- question card -->
+  <div id="card" class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm mb-5 min-h-[220px]"></div>
+
+  <!-- estimation engine -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm mb-5">
+    <p class="text-sm font-semibold text-ep-blue mb-1">⚙️ คำตอบกลายเป็น "ระดับ" ได้อย่างไร</p>
+    <p class="text-xs text-slate-500 mb-4">How answers become a level — try it: toggle pass/fail per level for one skill.</p>
+    <div id="sim" class="flex flex-wrap gap-2 mb-4"></div>
+    <div class="grid sm:grid-cols-3 gap-3">
+      <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+        <p class="text-[11px] text-slate-400 mb-1">Ability estimate θ̂</p>
+        <p id="simTheta" class="num text-3xl font-bold text-ep-blue">–</p>
+        <p class="text-[10px] text-slate-400">DET-equivalent</p>
+      </div>
+      <div class="rounded-xl bg-slate-50 border border-slate-200 p-4 text-center">
+        <p class="text-[11px] text-slate-400 mb-1">CEFR level</p>
+        <p id="simLevel" class="text-3xl font-bold text-amber-700">–</p>
+        <p id="simMargin" class="text-[10px] text-slate-400">&nbsp;</p>
+      </div>
+      <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
+        <p class="text-[11px] text-slate-400 mb-1">สูตร (interpolated)</p>
+        <p id="simFormula" class="num text-[11px] leading-relaxed text-slate-600">–</p>
+      </div>
+    </div>
+    <p class="text-[11px] text-slate-400 mt-3 leading-relaxed">
+      θ̂ = ระดับสูงสุดที่ผ่าน (≥60%) + สัดส่วนที่ผ่านในระดับถัดไป × ระยะห่าง θ.
+      การจัดข้อแบบ <b>adaptive</b> ทำให้ทุกข้ออยู่ใกล้ "เพดาน" ของผู้เรียน → แม่นด้วยข้อน้อย.
+    </p>
+  </div>
+
+  <!-- worked example score card -->
+  <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+    <p class="text-sm font-semibold text-ep-blue mb-1">📋 ตัวอย่างผลลัพธ์ (score card แบบ DET)</p>
+    <p class="text-xs text-slate-500 mb-4">Sample report — 4 skills + 4 integrated subscores, exactly like a real DET card.</p>
+    <div id="scoreCard" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4"></div>
+    <div class="border-t border-slate-100 pt-3">
+      <p class="text-[11px] text-slate-400 mb-2">Integrated subscores</p>
+      <div id="integrated" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+    </div>
+    <p class="text-xs text-slate-600 mt-4 bg-ep-yellow/15 rounded-lg px-3 py-2">
+      💡 <b>Speaking</b> ต่ำกว่าทักษะอื่น 1 ระดับ (B1 vs B2) → กลายเป็นจุดเริ่มของแผนเรียนอัตโนมัติ.
+    </p>
+  </div>
+
+  <p class="text-center text-[11px] text-slate-400 mt-6">Preview · เนื้อหาตัวอย่างสำหรับพิจารณา · เสียงใช้ TTS ของเบราว์เซอร์</p>
+</div>
+
+<script>
+const THETA = { A2:55, B1:80, B2:112, C1:140, C2:158 };
+const LEVELS = ['A2','B1','B2','C1','C2'];
+const BANDS = [
+  {level:'A1',min:10,max:45},{level:'A2',min:50,max:55},{level:'B1',min:60,max:95},
+  {level:'B2',min:100,max:125},{level:'C1',min:130,max:150},{level:'C2',min:155,max:160}
+];
+const toCefr = s => { s=Math.max(10,Math.min(160,Math.round(s))); let r=BANDS[0]; for(const b of BANDS){ if(s>=b.min) r=b; } return r.level; };
+
+// ---- speak helper (TTS) ----
+function speak(text, rate){
+  try{ window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; u.rate=rate||0.95;
+    window.speechSynthesis.speak(u);
+  }catch(e){ alert('เบราว์เซอร์นี้ไม่รองรับเสียง TTS'); }
+}
+
+// ---- item bank ----
+const DICT = {
+  A2:{s:"My sister works in a big hospital near the station.", rate:0.9},
+  B1:{s:"Although it was raining, we decided to walk to the market together.", rate:0.92},
+  B2:{s:"The committee has postponed the meeting until further notice because of the ongoing negotiations.", rate:0.98},
+  C1:{s:"Had the researchers anticipated the anomaly, they would have adjusted their methodology accordingly.", rate:1.0},
+  C2:{s:"The ostensibly innocuous amendment nevertheless precipitated a cascade of unforeseen complications.", rate:1.02},
+};
+const FITB = {
+  A2:{pre:"She go", stem:"go", after:" to school every day.", ans:"goes", hint:"present simple (3rd person -s)"},
+  B1:{pre:"Yesterday we ", stem:"buy", after:" a new car.", ans:"bought", hint:"past simple, irregular"},
+  B2:{pre:"The bridge, which ", stem:"build", after:" in 1920, is still used.", ans:"was built", hint:"past passive in a relative clause"},
+  C1:{pre:"Not only did he ", stem:"apolog", after:", but he also paid for the damage.", ans:"apologize", hint:"inversion after 'not only'"},
+  C2:{pre:"Little did they ", stem:"realiz", after:" the gravity of the situation.", ans:"realize", hint:"fronting + inversion (register)"},
+};
+const REAL = {
+  A2:{real:["house","quickly","water","friend"], fake:["morb","plent","gronesty"]},
+  B1:{real:["manage","weather","decision","industry"], fake:["flimper","descide","manageful"]},
+  B2:{real:["reluctant","allocate","conceive","superficial"], fake:["conceptful","allocute","reluctation"]},
+  C1:{real:["ubiquitous","tacit","mitigate","nuance"], fake:["mitigant","ubiquitary","tacify"]},
+  C2:{real:["perspicacious","obfuscate","sedulous","defenestrate"], fake:["obfusive","sedulate","perspicate"]},
+};
+const READ = {
+  A2:{p:"The library is open from 9 a.m. to 6 p.m. on weekdays. On Saturdays it closes at 1 p.m. It is closed on Sundays.",
+      q:"Can you use the library on Saturday afternoon?", opts:["Yes, until 6 p.m.","No — it closes at 1 p.m.","Only on Sunday"], a:1, tag:"literal"},
+  B1:{p:"When I moved to the city, I missed the quiet of my village. But over time I grew to love the energy of the streets and the people I met.",
+      q:"How did the writer's feeling change?", opts:["Stayed homesick","From missing home to enjoying the city","Never liked the city"], a:1, tag:"main idea"},
+  B2:{p:"Proponents of remote work cite productivity gains, yet they often overlook the erosion of spontaneous collaboration that offices quietly enable.",
+      q:"What is the author's attitude to remote work?", opts:["Fully supportive","Cautiously critical — sees a trade-off","Completely opposed"], a:1, tag:"attitude/inference"},
+  C1:{p:"While the intervention yielded statistically significant gains, the effect size was modest and the confounds non-trivial, warranting cautious interpretation.",
+      q:"What does the author imply about the conclusions?", opts:["They are decisive","They should be treated with caution","They are worthless"], a:1, tag:"argument"},
+  C2:{p:"One might, charitably, call the proposal ambitious; a less generous observer would note that ambition and feasibility have rarely been on speaking terms here.",
+      q:"What is the author's tone?", opts:["Sincere praise","Ironic / sceptical","Neutral reporting"], a:1, tag:"tone/irony"},
+};
+const LISTEN = {
+  A2:{clip:"The train to Chiang Mai now leaves from platform four.", rate:0.9, q:"Which platform?", opts:["Platform 2","Platform 4","Platform 14"], a:1, tag:"literal detail"},
+  B1:{clip:"Let's meet at the coffee shop near the station at half past ten, before the class starts.", rate:0.95, q:"When do they meet?", opts:["10:00","10:30","11:30"], a:1, tag:"detail"},
+  B2:{clip:"Honestly, the film had its moments, but I left the cinema feeling it promised far more than it delivered.", rate:0.98, q:"How does the speaker feel about the film?", opts:["Delighted","Disappointed","Indifferent"], a:1, tag:"attitude"},
+  C1:{clip:"The data suggest a correlation, but we should resist the temptation to infer causation from what may be a coincidental trend.", rate:1.0, q:"What is the speaker's main point?", opts:["Causation is proven","Don't confuse correlation with causation","The data are useless"], a:1, tag:"argument"},
+  C2:{clip:"If that's their idea of a compromise, I'd hate to see what they consider a hard line.", rate:1.02, q:"What does the speaker imply?", opts:["The offer was generous","The offer was far from a real compromise","They accept the deal"], a:1, tag:"implication"},
+};
+const CONVO = {
+  prompt:"Tell me about your hometown.",
+  follow:[
+    {lvl:'B1', q:"What would you change about it?"},
+    {lvl:'B2', q:"How has it changed over the last ten years?"},
+    {lvl:'C1', q:"Some people say small towns are dying. What's your view — and what should be done?"},
+  ],
+};
+const WRITE = {
+  img:"🏙️🧺 ตลาดริมถนนที่พลุกพล่าน (a busy street market)",
+  tasks:[
+    {lvl:'A2', q:"Describe what you see. (3–4 sentences)"},
+    {lvl:'B1', q:"What are the people doing, and why might they be there?"},
+    {lvl:'B2', q:"Describe the scene and speculate about what happens next."},
+    {lvl:'C1', q:"Describe the scene and argue whether markets like this should be preserved."},
+  ],
+};
+const RUBRIC = [
+  {en:"Grammar range", w:"40%", a2:"simple present, frequent errors", b2:"varied tenses, mostly accurate", c1:"wide range, rare slips"},
+  {en:"Vocabulary", w:"30%", a2:"basic & concrete", b2:"some idiomatic/abstract", c1:"precise, register-aware"},
+  {en:"Coherence", w:"20%", a2:"short, listable", b2:"clear, well-linked", c1:"structured argument"},
+  {en:"Task fulfilment", w:"10%", a2:"answers literally", b2:"meets the twist", c1:"debates & concedes"},
+];
+
+const TASKS = [
+  {id:'dictation', label:'Dictation', th:'เขียนตามคำบอก', skill:'Listening'},
+  {id:'fitb', label:'Fill blank', th:'เติมคำ', skill:'Reading'},
+  {id:'real', label:'Real words', th:'เลือกคำจริง', skill:'Reading'},
+  {id:'reading', label:'Reading', th:'การอ่าน', skill:'Reading'},
+  {id:'listening', label:'Listening', th:'การฟัง', skill:'Listening'},
+  {id:'convo', label:'Conversation', th:'สนทนา', skill:'Speaking'},
+  {id:'write', label:'Write photo', th:'เขียนจากรูป', skill:'Writing'},
+];
+
+let curTask='dictation', curLevel='B1';
+
+// ---- render tabs & pills ----
+function renderTabs(){
+  document.getElementById('taskTabs').innerHTML = TASKS.map(t=>
+    `<button data-task="${t.id}" class="task-btn text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 ${t.id===curTask?'active':''}">
+       ${t.label}<span class="block text-[10px] opacity-60">${t.th}</span></button>`).join('');
+  document.querySelectorAll('.task-btn').forEach(b=>b.onclick=()=>{curTask=b.dataset.task; renderTabs(); render();});
+}
+function renderPills(){
+  document.getElementById('levelPills').innerHTML = LEVELS.map(l=>
+    `<button data-lvl="${l}" class="lvl-btn text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 ${l===curLevel?'active':''}">${l}</button>`).join('');
+  document.querySelectorAll('.lvl-btn').forEach(b=>b.onclick=()=>{curLevel=b.dataset.lvl; renderPills(); render();});
+  document.getElementById('thetaTag').textContent = 'θ '+THETA[curLevel];
+}
+
+// ---- render question card per task ----
+function render(){
+  renderPills();
+  const c=document.getElementById('card'); c.className='bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm mb-5 min-h-[220px] fade';
+  const skill = TASKS.find(t=>t.id===curTask).skill;
+  const head = `<div class="flex items-center justify-between mb-4">
+    <span class="text-xs px-2 py-1 rounded-md bg-ep-blue/10 text-ep-blue font-semibold">${skill}</span>
+    <span class="num text-[11px] text-slate-400">${curLevel} · θ ${THETA[curLevel]}</span></div>`;
+
+  if(curTask==='dictation'){
+    const d=DICT[curLevel];
+    c.innerHTML=head+`
+      <p class="text-sm text-slate-600 mb-3">🎧 กดฟังแล้วพิมพ์ประโยคที่ได้ยิน <span class="text-slate-400">/ Listen and type what you hear.</span></p>
+      <button id="play" class="inline-flex items-center gap-2 text-sm font-semibold text-white bg-ep-blue px-4 py-2 rounded-xl mb-3">▶ เล่นเสียง</button>
+      <textarea id="dtext" rows="2" class="w-full border border-slate-200 rounded-xl p-3 text-sm" placeholder="พิมพ์ที่นี่..."></textarea>
+      <button id="dcheck" class="mt-3 text-sm font-semibold text-ep-blue border border-ep-blue px-4 py-2 rounded-xl">ตรวจ</button>
+      <div id="dres" class="mt-3 text-sm"></div>`;
+    document.getElementById('play').onclick=()=>speak(d.s,d.rate);
+    document.getElementById('dcheck').onclick=()=>{
+      const said=(document.getElementById('dtext').value||'').toLowerCase().replace(/[^a-z0-9 ]/g,'').split(/\s+/).filter(Boolean);
+      const gold=d.s.toLowerCase().replace(/[^a-z0-9 ]/g,'').split(/\s+/).filter(Boolean);
+      const goldSet={}; gold.forEach(w=>goldSet[w]=(goldSet[w]||0)+1);
+      let hit=0; said.forEach(w=>{if(goldSet[w]>0){hit++; goldSet[w]--;}});
+      const pct=Math.round(100*hit/gold.length);
+      document.getElementById('dres').innerHTML=`<div class="rounded-xl bg-slate-50 p-3">
+        <b>${pct}%</b> ของคำถูกต้อง (${hit}/${gold.length}).
+        <span class="text-slate-500">เฉลย: <i>${d.s}</i></span><br>
+        <span class="text-[11px] text-slate-400">คะแนนข้อนี้ = ${pct}% ของ θ ${THETA[curLevel]} → ใช้ประเมินทักษะ Listening</span></div>`;
+    };
+  }
+  else if(curTask==='fitb'){
+    const f=FITB[curLevel];
+    c.innerHTML=head+`
+      <p class="text-sm text-slate-600 mb-3">✍️ เติมคำให้ถูกต้องตามหลักไวยากรณ์ (ให้ต้นคำมาแล้ว) <span class="text-slate-400">/ Complete the word — grammar form, not vocabulary.</span></p>
+      <p class="text-base leading-loose">${f.pre}<b class="text-ep-blue">${f.stem}</b>___
+        <input id="fin" class="border-b-2 border-ep-blue w-32 mx-1 text-center outline-none" placeholder="?" />${f.after}</p>
+      <p class="text-[11px] text-slate-400 mt-2">เป้าหมาย: ${f.hint}</p>
+      <button id="fcheck" class="mt-4 text-sm font-semibold text-ep-blue border border-ep-blue px-4 py-2 rounded-xl">ตรวจ</button>
+      <div id="fres" class="mt-3 text-sm"></div>`;
+    document.getElementById('fcheck').onclick=()=>{
+      const v=(document.getElementById('fin').value||'').trim().toLowerCase();
+      const ok=v===f.ans.toLowerCase();
+      document.getElementById('fres').innerHTML=`<div class="rounded-xl ${ok?'bg-green-50 text-green-700':'bg-rose-50 text-rose-700'} p-3">
+        ${ok?'✓ ถูกต้อง':'✗ เฉลย: <b>'+f.ans+'</b>'} <span class="text-[11px] text-slate-400 block">ผ่าน/ไม่ผ่านที่ θ ${THETA[curLevel]}</span></div>`;
+    };
+  }
+  else if(curTask==='real'){
+    const r=REAL[curLevel];
+    const all=[...r.real.map(w=>({w,real:true})),...r.fake.map(w=>({w,real:false}))].sort(()=>0.1);
+    c.innerHTML=head+`
+      <p class="text-sm text-slate-600 mb-3">✅ แตะคำที่เป็น <b>คำจริง</b>ในภาษาอังกฤษ (ปล่อยคำปลอมไว้) <span class="text-slate-400">/ Tap the real English words only.</span></p>
+      <div id="grid" class="flex flex-wrap gap-2 mb-3"></div>
+      <button id="rcheck" class="text-sm font-semibold text-ep-blue border border-ep-blue px-4 py-2 rounded-xl">ตรวจ</button>
+      <div id="rres" class="mt-3 text-sm"></div>`;
+    const grid=document.getElementById('grid');
+    grid.innerHTML=all.map((o,i)=>`<button data-i="${i}" data-real="${o.real}" class="chip text-sm px-3 py-2 rounded-lg border border-slate-200 bg-slate-50">${o.w}</button>`).join('');
+    grid.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>ch.classList.toggle('picked'));
+    document.getElementById('rcheck').onclick=()=>{
+      let hit=0, fa=0;
+      grid.querySelectorAll('.chip').forEach(ch=>{
+        const picked=ch.classList.contains('picked'), real=ch.dataset.real==='true';
+        if(picked&&real)hit++; if(picked&&!real)fa++;
+      });
+      const h=hit/r.real.length, f=fa/r.fake.length, corr=Math.max(0,(h-f));
+      document.getElementById('rres').innerHTML=`<div class="rounded-xl bg-slate-50 p-3 text-slate-700">
+        hit rate <b>${(h*100).toFixed(0)}%</b> − false-alarm <b>${(f*100).toFixed(0)}%</b> = corrected <b>${(corr*100).toFixed(0)}%</b>
+        <span class="text-[11px] text-slate-400 block">การหักคะแนนคำปลอมกันคน "แตะทุกคำ" → นี่คือหัวใจความแม่นของข้อนี้</span></div>`;
+    };
+  }
+  else if(curTask==='reading' || curTask==='listening'){
+    const isL=curTask==='listening'; const d=(isL?LISTEN:READ)[curLevel];
+    c.innerHTML=head+`
+      ${isL
+        ? `<p class="text-sm text-slate-600 mb-3">🎧 ฟังคลิปแล้วตอบ <span class="text-slate-400">/ Listen, then answer.</span></p>
+           <button id="lplay" class="inline-flex items-center gap-2 text-sm font-semibold text-white bg-ep-blue px-4 py-2 rounded-xl mb-3">▶ เล่นเสียง</button>`
+        : `<div class="text-sm leading-relaxed bg-slate-50 rounded-xl p-4 mb-3">${d.p}</div>`}
+      <p class="text-sm font-semibold mb-2">${d.q} <span class="text-[10px] font-normal text-slate-400">[${d.tag}]</span></p>
+      <div id="opts" class="space-y-2"></div>
+      <div id="qres" class="mt-3 text-sm"></div>`;
+    if(isL) document.getElementById('lplay').onclick=()=>speak(d.clip,d.rate);
+    const opts=document.getElementById('opts');
+    opts.innerHTML=d.opts.map((o,i)=>`<button data-i="${i}" class="opt w-full text-left text-sm border border-slate-200 rounded-xl px-3 py-2 hover:border-ep-blue">${o}</button>`).join('');
+    opts.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const ok=+b.dataset.i===d.a;
+      opts.querySelectorAll('.opt').forEach(x=>x.disabled=true);
+      b.classList.add(ok?'!border-green-500':'!border-rose-500', ok?'bg-green-50':'bg-rose-50');
+      document.getElementById('qres').innerHTML=`<div class="rounded-xl ${ok?'bg-green-50 text-green-700':'bg-rose-50 text-rose-700'} p-3">
+        ${ok?'✓ ถูกต้อง':'✗ คำตอบที่ถูกคือ: '+d.opts[d.a]} <span class="text-[11px] text-slate-400 block">ผ่าน/ไม่ผ่านที่ θ ${THETA[curLevel]}</span></div>`;
+    });
+  }
+  else if(curTask==='convo'){
+    c.innerHTML=head+`
+      <p class="text-sm text-slate-600 mb-3">🗣️ พูดตอบตามคำถามที่ค่อย ๆ ยากขึ้น — AI ให้ระดับจากคำพูดจริง <span class="text-slate-400">/ One prompt, escalating follow-ups; the AI grades the response to a CEFR level.</span></p>
+      <div class="rounded-xl bg-ep-blue/5 border border-ep-blue/20 p-4 mb-3">
+        <p class="text-[11px] text-ep-blue font-semibold mb-1">เริ่มต้น</p>
+        <p class="text-sm font-medium">"${CONVO.prompt}"</p>
+      </div>
+      <div class="space-y-2 mb-4">${CONVO.follow.map(f=>`
+        <div class="flex items-start gap-2">
+          <span class="num text-[10px] font-bold text-white bg-ep-blue rounded px-1.5 py-0.5 mt-0.5">${f.lvl}</span>
+          <p class="text-sm text-slate-700">"${f.q}"</p></div>`).join('')}</div>
+      ${rubricHTML()}`;
+  }
+  else if(curTask==='write'){
+    c.innerHTML=head+`
+      <p class="text-sm text-slate-600 mb-3">🖼️ เขียนบรรยายรูป — โจทย์เดียวกันยากขึ้นทีละขั้น <span class="text-slate-400">/ One image, escalating task; the AI grades the writing to a level.</span></p>
+      <div class="rounded-xl bg-slate-100 border border-slate-200 p-6 text-center text-3xl mb-3">${WRITE.img}</div>
+      <div class="space-y-2 mb-4">${WRITE.tasks.map(t=>`
+        <div class="flex items-start gap-2">
+          <span class="num text-[10px] font-bold text-white bg-ep-blue rounded px-1.5 py-0.5 mt-0.5">${t.lvl}</span>
+          <p class="text-sm text-slate-700">"${t.q}"</p></div>`).join('')}</div>
+      ${rubricHTML()}`;
+  }
+}
+function rubricHTML(){
+  return `<div class="border-t border-slate-100 pt-3">
+    <p class="text-[11px] text-slate-400 mb-2">AI rubric → CEFR (weights)</p>
+    <div class="space-y-1.5">${RUBRIC.map(r=>`
+      <div class="text-xs grid grid-cols-[130px_1fr] gap-2">
+        <span class="font-medium text-slate-600">${r.en} <span class="num text-slate-400">${r.w}</span></span>
+        <span class="text-slate-500">${r.a2} → <b class="text-slate-700">${r.b2}</b> → ${r.c1}</span></div>`).join('')}</div>
+  </div>`;
+}
+
+// ---- estimator simulator ----
+let simState = {A2:true,B1:true,B2:'half',C1:false,C2:false};
+function renderSim(){
+  const order=['half','pass','fail'];
+  const lbl={pass:'✓ ผ่าน',half:'½ ครึ่ง',fail:'✗ ตก'};
+  document.getElementById('sim').innerHTML=LEVELS.map(l=>{
+    const st=simState[l]===true?'pass':simState[l]===false?'fail':simState[l];
+    const color=st==='pass'?'bg-green-100 text-green-700 border-green-300':st==='half'?'bg-amber-100 text-amber-700 border-amber-300':'bg-slate-100 text-slate-500 border-slate-200';
+    return `<button data-l="${l}" class="simbtn text-xs px-3 py-2 rounded-xl border ${color}">
+      <span class="num font-bold">${l}</span> · θ${THETA[l]}<br><span class="text-[10px]">${lbl[st]}</span></button>`;
+  }).join('');
+  document.querySelectorAll('.simbtn').forEach(b=>b.onclick=()=>{
+    const l=b.dataset.l; let st=simState[l]===true?'pass':simState[l]===false?'fail':simState[l];
+    const nxt={pass:'half',half:'fail',fail:'pass'}[st];
+    simState[l]= nxt==='pass'?true: nxt==='fail'?false: 'half';
+    renderSim(); computeSim();
+  });
+  computeSim();
+}
+function passRate(l){ const s=simState[l]; return s===true?1: s==='half'?0.5:0; }
+function computeSim(){
+  // highest fully-passed tier, then interpolate by next tier's passRate
+  let passedIdx=-1;
+  for(let i=0;i<LEVELS.length;i++){ if(passRate(LEVELS[i])>=0.6) passedIdx=i; else break; }
+  let theta, formula;
+  if(passedIdx<0){ theta=40; formula='ไม่ผ่าน A2 → below A2'; }
+  else {
+    const base=THETA[LEVELS[passedIdx]];
+    const nextIdx=passedIdx+1;
+    if(nextIdx<LEVELS.length){
+      const pr=passRate(LEVELS[nextIdx]);
+      const span=THETA[LEVELS[nextIdx]]-base;
+      theta=Math.round(base+pr*span);
+      formula=`${base} + ${pr}×(${THETA[LEVELS[nextIdx]]}−${base}) = ${theta}`;
+    } else { theta=THETA['C2']; formula='ผ่านสูงสุด (C2)'; }
+  }
+  const lvl=toCefr(theta);
+  document.getElementById('simTheta').textContent=theta;
+  document.getElementById('simLevel').textContent=lvl;
+  document.getElementById('simFormula').textContent=formula;
+  // margin: near a band edge?
+  const b=BANDS.find(x=>x.level===lvl);
+  const near = b && (theta>=b.max-4) ? ' · borderline '+(BANDS[BANDS.indexOf(b)+1]||{}).level : (b&&theta<=b.min+4?' · low':'');
+  document.getElementById('simMargin').textContent = near||' ';
+}
+
+// ---- worked-example score card ----
+const CARD=[
+  {skill:'Reading',en:'การอ่าน',theta:118},{skill:'Listening',en:'การฟัง',theta:110},
+  {skill:'Writing',en:'การเขียน',theta:108},{skill:'Speaking',en:'การพูด',theta:96},
+];
+function renderCard(){
+  const cefrColor=l=>({A2:'text-slate-500',B1:'text-amber-600',B2:'text-ep-blue',C1:'text-green-600',C2:'text-purple-600'}[l]||'text-slate-500');
+  document.getElementById('scoreCard').innerHTML=CARD.map(s=>{
+    const l=toCefr(s.theta);
+    return `<div class="rounded-xl border border-slate-200 p-3 text-center">
+      <p class="text-[11px] text-slate-400">${s.skill}</p>
+      <p class="text-2xl font-bold ${cefrColor(l)}">${l}</p>
+      <p class="num text-[11px] text-slate-500">DET ${s.theta}</p></div>`;
+  }).join('');
+  const g={}; CARD.forEach(s=>g[s.skill]=s.theta);
+  const inte=[
+    {n:'Literacy',th:'R+W',v:(g.Reading+g.Writing)/2},
+    {n:'Comprehension',th:'R+L',v:(g.Reading+g.Listening)/2},
+    {n:'Conversation',th:'L+S',v:(g.Listening+g.Speaking)/2},
+    {n:'Production',th:'W+S',v:(g.Writing+g.Speaking)/2},
+  ];
+  document.getElementById('integrated').innerHTML=inte.map(s=>{
+    const v=Math.round(s.v/5)*5, l=toCefr(v);
+    return `<div class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-center">
+      <p class="text-[10px] text-slate-400">${s.n} <span class="num">${s.th}</span></p>
+      <p class="text-lg font-bold ${cefrColor(l)}">${l}</p>
+      <p class="num text-[10px] text-slate-500">${v}</p></div>`;
+  }).join('');
+}
+
+renderTabs(); render(); renderSim(); renderCard();
+</script>
+</body>
+</html>

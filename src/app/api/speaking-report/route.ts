@@ -10,6 +10,7 @@ import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { recordDataCollectionSubmission } from "@/lib/data-collection";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { isSpeakingRound } from "@/lib/speaking-constants";
 
@@ -75,9 +76,9 @@ export async function POST(req: Request) {
   try {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
-    const userId = await getOptionalAuthUserId();
+    const userId = await getOptionalAuthUserId(req);
     // Admins / preview-eligible accounts don't consume real feedback credits.
-    const adminBypass = (await getAdminAccess()).ok;
+    const adminBypass = (await getAdminAccess(req)).ok;
     if (userId && !adminBypass) {
       const credit = await getAiCreditStateForUser(userId, "read_then_speak");
       if (!credit.allowed) {
@@ -130,6 +131,17 @@ export async function POST(req: Request) {
         report.rewardBonus = rewardBonus;
       }
     }
+    await recordDataCollectionSubmission({
+      userId,
+      examType: "read_then_speak",
+      attemptId: typeof attemptId === "string" ? attemptId : null,
+      promptTitle: typeof topicTitleEn === "string" ? topicTitleEn : null,
+      promptText: typeof questionPromptEn === "string" ? questionPromptEn : null,
+      submittedText: transcript,
+      wordCount,
+      score160: report.score160,
+      report,
+    });
     return NextResponse.json(report);
   } catch (e) {
     const message = normalizeGradingErrorMessage(e);

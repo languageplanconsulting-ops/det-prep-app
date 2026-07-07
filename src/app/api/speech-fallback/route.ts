@@ -54,7 +54,7 @@ export async function POST(req: Request) {
   }
 
   const trimmed = text.trim();
-  const userId = await getOptionalAuthUserId();
+  const userId = await getOptionalAuthUserId(req);
 
   const runGemini = async () => {
     if (!geminiKey) {

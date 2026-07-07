@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DET Mobile — Practice hub</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --blue:#004AAD; --yellow:#FFCC00; --ink:#10162B; --sub:#6B7280; --line:#E7EAF1; --bg:#F4F6FB; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:'IBM Plex Sans Thai',sans-serif; background:#e9edf4; color:var(--ink); padding:24px 16px 50px; }
+  h1{ text-align:center; font-size:21px; }
+  .sub{ text-align:center; color:#667; font-size:13px; margin:4px 0 22px; }
+  .phone{ width:330px; height:700px; background:#fff; border-radius:46px; padding:12px; box-shadow:0 26px 64px rgba(0,0,0,.2); border:1px solid #d8dde6; margin:0 auto; }
+  .screen{ width:100%; height:100%; border-radius:36px; overflow:hidden; position:relative; background:var(--bg); }
+  .notch{ position:absolute; top:11px; left:50%; transform:translateX(-50%); width:120px; height:22px; background:#000; border-radius:0 0 14px 14px; z-index:9; }
+  .scroll{ position:absolute; inset:0; overflow-y:auto; padding:46px 16px 24px; }
+  .hdr{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .brand{ display:flex; gap:10px; align-items:center; }
+  .logo{ height:36px; width:36px; border-radius:10px; background:var(--blue); color:#fff; font-weight:900; font-size:13px; display:flex; align-items:center; justify-content:center; }
+  .hero{ background:var(--blue); border-radius:22px; padding:18px; color:#fff; }
+  .hero .l{ color:#cde0ff; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+  .hero .t{ font-size:26px; font-weight:900; margin-top:2px; }
+  .hero .n{ color:#e6f0ff; font-size:12px; margin-top:3px; }
+  .mini{ margin-top:12px; background:var(--yellow); border-radius:22px; padding:15px; display:flex; gap:12px; align-items:center; }
+  .mini .t{ font-size:15px; font-weight:900; color:#1a1a1a; }
+  .mini .s{ font-size:11px; color:#5a4a00; }
+  .mini .go{ font-size:13px; font-weight:900; color:var(--blue); }
+  .sec{ margin-top:22px; }
+  .secT{ font-size:16px; font-weight:900; }
+  .secS{ font-size:12px; color:var(--sub); margin:1px 0 10px; }
+  .card{ background:#fff; border-radius:22px; border:1px solid var(--line); overflow:hidden; }
+  .row{ display:flex; align-items:center; gap:12px; padding:13px 14px; border-bottom:1px solid #F1F3F8; }
+  .row:last-child{ border-bottom:none; }
+  .ic{ font-size:19px; width:24px; text-align:center; }
+  .th{ font-size:15px; font-weight:700; }
+  .en{ font-size:11px; color:var(--sub); }
+  .chev{ font-size:22px; color:#C4CBD8; font-weight:300; }
+  .soon{ font-size:10px; font-weight:800; color:#9aa3b2; background:#EEF0F4; padding:3px 7px; border-radius:6px; }
+  .open{ font-size:11px; font-weight:800; color:#16A34A; }
+  .lock{ font-size:13px; }
+</style>
+</head>
+<body>
+<h1>DET Mobile — หน้าหลัก (เหมือนเว็บ)</h1>
+<p class="sub">มิเรอร์ Practice hub ของเว็บ: 4 หมวด · 12 แบบฝึก + Mock + Mini · ใช้เนื้อหา Supabase ชุดเดียวกัน</p>
+
+<div class="phone"><div class="notch"></div><div class="screen"><div class="scroll">
+  <div class="hdr">
+    <div class="brand"><div class="logo">EP</div><div><div style="font-weight:800;font-size:15px;">English Plan</div><div style="font-size:11px;color:#6B7280;">student@email.com</div></div></div>
+    <div style="color:#b91c1c;font-weight:700;font-size:12px;">ออกจากระบบ</div>
+  </div>
+
+  <div class="hero"><div class="l">แพ็กของคุณ</div><div class="t">ฟรี</div><div class="n">แตะเพื่ออัปเกรด ปลดล็อกทุกแบบฝึก ›</div></div>
+
+  <div class="mini"><span style="font-size:22px;">🎯</span><div style="flex:1;"><div class="t">ทำ Mini Test ฟรี</div><div class="s">วัดระดับเร็ว ๆ รู้จุดอ่อน — ฟรีสำหรับทุกคน</div></div><div class="go">เริ่ม ›</div></div>
+
+  <div class="sec"><div class="secT">Literacy</div><div class="secS">ตามคำบอก · เติมคำ · คำจริง</div>
+    <div class="card">
+      <div class="row"><span class="ic">🎧</span><div style="flex:1;"><div class="th">ตามคำบอก</div><div class="en">Dictation</div></div><span class="chev">›</span></div>
+      <div class="row"><span class="ic">✏️</span><div style="flex:1;"><div class="th">เติมคำในช่องว่าง</div><div class="en">Fill in the blank</div></div><span class="chev">›</span></div>
+      <div class="row"><span class="ic">🔤</span><div style="flex:1;"><div class="th">คำจริง / คำลวง</div><div class="en">Real word</div></div><span class="chev">›</span></div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="secT">Comprehension</div><div class="secS">ศัพท์ & การอ่านจับใจความ</div>
+    <div class="card">
+      <div class="row"><span class="ic">📚</span><div style="flex:1;"><div class="th">ศัพท์ (Vocabulary)</div><div class="en">Vocabulary</div></div><span class="chev">›</span></div>
+      <div class="row"><span class="ic">📖</span><div style="flex:1;"><div class="th">การอ่าน (Reading)</div><div class="en">Reading</div></div><span class="chev">›</span></div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="secT">Conversation</div><div class="secS">ฟัง & ตอบโต้บทสนทนา</div>
+    <div class="card">
+      <div class="row"><span class="ic">💬</span><div style="flex:1;"><div class="th">บทสนทนาโต้ตอบ</div><div class="en">Interactive conversation</div></div><span class="chev">›</span></div>
+      <div class="row"><span class="ic">🧩</span><div style="flex:1;"><div class="th">สรุปบทสนทนา</div><div class="en">Dialogue → summary</div></div><span class="soon">เร็ว ๆ นี้</span><span class="chev">›</span></div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="secT">Production</div><div class="secS">งานเขียน & งานพูด</div>
+    <div class="card">
+      <div class="row"><span class="ic">🖼️</span><div style="flex:1;"><div class="th">เขียนจากภาพ</div><div class="en">Write about photo</div></div><span class="soon">เร็ว ๆ นี้</span><span class="chev">›</span></div>
+      <div class="row"><span class="ic">📝</span><div style="flex:1;"><div class="th">อ่านแล้วเขียน</div><div class="en">Read, then write</div></div><span class="soon">เร็ว ๆ นี้</span><span class="chev">›</span></div>
+      <div class="row"><span class="ic">🗣️</span><div style="flex:1;"><div class="th">พูดจากภาพ</div><div class="en">Speak about photo</div></div><span class="soon">เร็ว ๆ นี้</span><span class="chev">›</span></div>
+      <div class="row"><span class="ic">🎙️</span><div style="flex:1;"><div class="th">อ่านแล้วพูด</div><div class="en">Read, then speak</div></div><span class="soon">เร็ว ๆ นี้</span><span class="chev">›</span></div>
+      <div class="row"><span class="ic">🎤</span><div style="flex:1;"><div class="th">สนทนาโต้ตอบ (พูด)</div><div class="en">Interactive speaking</div></div><span class="soon">เร็ว ๆ นี้</span><span class="chev">›</span></div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="secT">Mock Test</div><div class="secS">ข้อสอบเสมือนจริง 20 ขั้นตอน · 20 ชุด</div>
+    <div class="card">
+      <div class="row"><span class="ic">📋</span><div class="th" style="flex:1;">Mock 12</div><span class="lock">🔒</span><span class="chev">›</span></div>
+      <div class="row"><span class="ic">📋</span><div class="th" style="flex:1;">Mock 18</div><span class="lock">🔒</span><span class="chev">›</span></div>
+      <div class="row"><span class="ic">📋</span><div class="th" style="flex:1;">Mock 20</div><span class="lock">🔒</span><span class="chev">›</span></div>
+    </div>
+  </div>
+</div></div></div>
+</body>
+</html>

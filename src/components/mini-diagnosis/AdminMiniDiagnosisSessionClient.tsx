@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { usePhaseTimer } from "@/hooks/usePhaseTimer";
-import { setSfxEnabled, sfxCorrect, sfxSubmit } from "@/lib/exam-sfx";
+import { sfxCelebrate, sfxSubmit } from "@/lib/exam-sfx";
 import { ConfettiBurst, MascotTip, GradingOverlay } from "@/components/mini-diagnosis/steps/ui";
 import { MiniStepIntro } from "@/components/mini-diagnosis/steps/MiniStepIntro";
 import { MiniDictationStep } from "@/components/mini-diagnosis/steps/MiniDictationStep";
@@ -106,11 +106,6 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
   const restTimerRef = useRef<number | null>(null);
   const timer = usePhaseTimer();
 
-  // Test-session sounds on for everyone (visual feedback always accompanies).
-  useEffect(() => {
-    setSfxEnabled(true);
-  }, []);
-
   useEffect(
     () => () => {
       if (restTimerRef.current) window.clearInterval(restTimerRef.current);
@@ -210,7 +205,7 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
         return;
       }
       if (json.complete) {
-        sfxCorrect();
+        sfxCelebrate("lg");
         if (typeof window !== "undefined") {
           window.location.assign(`/mini-diagnosis/results/${sessionId}`);
           return;
@@ -222,7 +217,7 @@ export function AdminMiniDiagnosisSessionClient({ sessionId }: { sessionId: stri
       // Celebrate, then rest if this step has a break, then show the next step.
       const finishedStep = current.step_index;
       const restSec = Math.max(0, Number(current.rest_after_step_sec ?? 0));
-      sfxCorrect();
+      sfxCelebrate("md");
       setCelebrating({ step: finishedStep });
       await load();
       window.setTimeout(() => {

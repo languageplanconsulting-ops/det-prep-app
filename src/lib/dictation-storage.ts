@@ -643,3 +643,17 @@ export function getDictationRoundStats(round: DictationRoundNum): {
     byDifficulty,
   };
 }
+
+/** Parse dictation bank JSON (Supabase snapshot / API) — same logic as localStorage hydrate. */
+export function parseDictationBankFromJson(raw: string | null): DictationFullBank {
+  return parseStoredBank(raw);
+}
+
+export function getDictationItemFromBank(
+  bank: DictationFullBank,
+  round: DictationRoundNum,
+  difficulty: DictationDifficulty,
+  setNumber: number,
+): DictationItem | null {
+  return bank[round][difficulty].find((x) => x.setNumber === setNumber) ?? null;
+}

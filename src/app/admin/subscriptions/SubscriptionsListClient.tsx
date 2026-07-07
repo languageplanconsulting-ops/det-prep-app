@@ -119,6 +119,7 @@ export function SubscriptionsListClient() {
   const [sort, setSort] = useState("newest");
   const [savingId, setSavingId] = useState<string | null>(null);
   const [repairing, setRepairing] = useState(false);
+  const [syncingAll, setSyncingAll] = useState(false);
 
   const limit = 25;
 
@@ -264,6 +265,46 @@ export function SubscriptionsListClient() {
     }
   };
 
+  const syncAllUnsynced = async () => {
+    if (syncingAll) return;
+    const ok = window.confirm(
+      "Scan all 'Unsynced' users (free tier + Stripe customer ID + no paid expiry) and pull their payment status from Stripe. This may take 30–60 seconds depending on how many users are stuck.\n\nProceed? / ดำเนินการต่อ?",
+    );
+    if (!ok) return;
+    setSyncingAll(true);
+    try {
+      const res = await fetch("/api/admin/subscriptions/bulk-stripe-resync", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ limit: 200 }),
+      });
+      const json = await res.json() as { fixed?: number; scanned?: number; skippedNoPaidSession?: number; errors?: number; error?: string };
+      if (!res.ok) throw new Error(json?.error ?? "Bulk sync failed");
+      const { fixed = 0, scanned = 0, skippedNoPaidSession = 0, errors: errs = 0 } = json;
+      push({
+        type: fixed > 0 ? "success" : "info",
+        titleEn:
+          fixed > 0
+            ? `Fixed ${fixed} of ${scanned} unsynced user${fixed === 1 ? "" : "s"}.${skippedNoPaidSession > 0 ? ` ${skippedNoPaidSession} had no paid Stripe session.` : ""}${errs > 0 ? ` ${errs} error${errs === 1 ? "" : "s"}.` : ""}`
+            : `Scanned ${scanned} users — none had a paid Stripe session yet.`,
+        titleTh:
+          fixed > 0
+            ? `แก้ไขแล้ว ${fixed} จาก ${scanned} คน`
+            : `สแกน ${scanned} คนแล้ว — ไม่พบการชำระเงิน`,
+      });
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Bulk sync failed.",
+        titleTh: "ซิงค์ไม่สำเร็จ",
+      });
+    } finally {
+      setSyncingAll(false);
+    }
+  };
+
   const from = total === 0 ? 0 : (page - 1) * limit + 1;
   const to = Math.min(page * limit, total);
 
@@ -291,6 +332,16 @@ export function SubscriptionsListClient() {
             {repairing
               ? "Repairing… / กำลังซ่อม…"
               : "Repair missing expiries / ซ่อมวันหมดอายุ"}
+          </button>
+          <button
+            type="button"
+            onClick={() => void syncAllUnsynced()}
+            disabled={syncingAll}
+            className="rounded-[4px] border-4 border-black bg-amber-400 px-4 py-2 text-sm font-black uppercase shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {syncingAll
+              ? "Syncing… / กำลังซิงค์…"
+              : "⚠ Sync All Unsynced / ซิงค์ทั้งหมด"}
           </button>
           <button
             type="button"

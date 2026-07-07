@@ -145,7 +145,15 @@ export function AdminPricingContent() {
       setActivationState("confirming");
       setActivationMessage("กำลังยืนยันการชำระเงินและเปิดสิทธิ์แพลนของคุณ...");
 
-      for (let attempt = 0; attempt < 4; attempt += 1) {
+      // PromptPay settlement is async on Stripe's side — usually a few seconds
+      // up to ~2 minutes. Poll for ~90s before falling back to "pending" (the
+      // daily cron + admin re-sync still catch it after that, but most real
+      // payments confirm well inside this window so the customer isn't left
+      // wondering if the purchase went through).
+      const MAX_ATTEMPTS = 24;
+      const POLL_INTERVAL_MS = 3500;
+
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
         const res = await fetch("/api/stripe/confirm-session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -171,13 +179,18 @@ export function AdminPricingContent() {
         }
 
         if (res.status === 202 && json.pending) {
-          if (attempt < 3) {
-            await sleep(1500);
+          if (attempt < MAX_ATTEMPTS - 1) {
+            setActivationMessage(
+              "กำลังรอ Stripe ยืนยันการชำระเงิน (PromptPay อาจใช้เวลาถึง 1-2 นาที)...",
+            );
+            await sleep(POLL_INTERVAL_MS);
             continue;
           }
           setHandledSessionId(sessionId);
           setActivationState("pending");
-          setActivationMessage("Stripe ยืนยันว่าชำระเงินกำลังปิดงานอยู่ ระบบจะอัปเดตสิทธิ์ให้อัตโนมัติในอีกไม่กี่วินาที");
+          setActivationMessage(
+            "Stripe ยังไม่ยืนยันการชำระเงินภายในหน้านี้ ไม่ต้องกังวล — ระบบจะตรวจสอบและเปิดสิทธิ์ให้อัตโนมัติทันทีที่ Stripe ยืนยัน (ปกติไม่เกินไม่กี่นาที ช้าสุดไม่เกิน 24 ชม.) คุณสามารถปิดหน้านี้ได้",
+          );
           window.dispatchEvent(new Event("ep-refresh-tier"));
           return;
         }

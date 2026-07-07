@@ -26,9 +26,9 @@ export async function POST(req: Request) {
   }
 
   try {
-    const userId = await getOptionalAuthUserId();
+    const userId = await getOptionalAuthUserId(req);
     // Admins / preview-eligible accounts don't reserve real feedback credits.
-    if (!userId || (await getAdminAccess()).ok) {
+    if (!userId || (await getAdminAccess(req)).ok) {
       return NextResponse.json({ ok: true, charged: false, source: null, alreadyReserved: false });
     }
 

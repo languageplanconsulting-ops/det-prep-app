@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V2 · The Design of Everyday Things (Norman)</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-soft:#E7EFFF;--yellow:#FFCC00;--bg:#F6F3EC;--card:#fff;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8;--green:#1B9E54;--green-soft:#DCF5E6;--amber:#F59E0B}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .hd{display:flex;align-items:center;gap:10px;padding:8px 16px}
+  .back{width:38px;height:38px;border-radius:99px;background:#fff;border:1px solid #e7e3d8;display:flex;align-items:center;justify-content:center;font-size:22px;color:#16203a}
+  .hd h1{flex:1;text-align:center;font-size:16px;font-weight:800;color:#16203a}
+  .pill{background:#e7f0fc;color:var(--blue);font-size:11px;font-weight:700;padding:6px 12px;border-radius:99px}
+  .seg{display:flex;gap:6px;background:#E3DDD1;border-radius:14px;padding:3px;margin:6px 18px 14px}
+  .seg div{flex:1;text-align:center;font-size:12.5px;font-weight:800;color:var(--sub);padding:8px 4px;border-radius:11px}
+  .seg .on{background:#fff;color:var(--ink);box-shadow:0 2px 5px rgba(0,0,0,.08)}
+  .scroll{flex:1;overflow-y:auto;padding:0 18px 28px}
+  /* mastery mapping header: current state -> goal (95%) */
+  .mast{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px}
+  .mast .row1{display:flex;justify-content:space-between;align-items:baseline}
+  .mast .lab{font-size:12px;font-weight:800;color:var(--sub)}
+  .mast .pct{font-size:30px;font-weight:900;color:var(--blue);line-height:1}
+  .mast .pct small{font-size:13px;color:var(--sub);font-weight:700}
+  .mbar{position:relative;height:12px;background:#EEE9DD;border-radius:99px;margin:14px 0 6px;overflow:visible}
+  .mbar i{display:block;height:100%;width:71%;background:linear-gradient(90deg,#2E7DD6,#004AAD);border-radius:99px}
+  .gate{position:absolute;top:-4px;left:95%;width:2px;height:20px;background:var(--ink)}
+  .gate b{position:absolute;top:-18px;left:-14px;font-size:9px;font-weight:900;color:var(--ink);white-space:nowrap}
+  .mast .need{font-size:11.5px;color:var(--sub);font-weight:700}
+  .mast .need b{color:var(--ink)}
+  /* legend = signifiers spelled out */
+  .legend{display:flex;gap:14px;justify-content:center;margin:14px 0 4px;flex-wrap:wrap}
+  .lg{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--sub)}
+  .sw{width:14px;height:14px;border-radius:5px}
+  .sw.g{background:var(--green)}.sw.a{background:var(--amber)}.sw.t{background:#fff;border:2px solid var(--blue)}.sw.l{background:#ded8ca}
+  /* recommended */
+  .rec{display:flex;align-items:center;gap:12px;background:var(--blue-soft);border:2px solid var(--blue);border-radius:18px;padding:13px 15px;margin:16px 0 18px}
+  .rec .d{width:44px;height:44px;border-radius:12px;background:#fff;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--blue)}
+  .rec .t{flex:1}.rec .t b{font-size:14px;font-weight:900;color:var(--ink);display:block}.rec .t span{font-size:11px;color:var(--blue);font-weight:700}
+  .rec .go{background:var(--yellow);color:#6a4e00;font-weight:900;font-size:13px;padding:9px 16px;border:none;border-radius:99px}
+  .cap{font-size:11px;font-weight:900;color:var(--sub);letter-spacing:.4px;margin:0 2px 10px}
+  /* the board: state visible at a glance, mapping = position */
+  .board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .cell{aspect-ratio:1;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative}
+  .cell b{font-size:17px;font-weight:900}
+  .cell span{font-size:10px;font-weight:800}
+  .cell.g{background:var(--green);color:#fff}
+  .cell.a{background:#FFF3D6;color:#a9820b;border:2px solid var(--amber)}
+  .cell.t{background:#fff;color:var(--ink);border:2px solid var(--line)}
+  .cell.cur{background:#fff;color:var(--blue);border:3px solid var(--blue);box-shadow:0 8px 18px rgba(0,74,173,.16)}
+  .cell.l{background:#EDE8DC;color:#b7b1a3}
+  .cell .star{position:absolute;top:6px;right:8px;font-size:11px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="hd"><div class="back">‹</div><h1>คำศัพท์จริง</h1><div class="pill">แบบฝึก</div></div>
+  <div class="seg"><div class="on">ง่าย</div><div>ปานกลาง</div><div>ยาก</div></div>
+
+  <div class="scroll">
+    <div class="mast">
+      <div class="row1"><div class="lab">ความแม่นระดับง่าย</div><div class="pct">71<small>%</small></div></div>
+      <div class="mbar"><i></i><div class="gate"><b>เป้า 95%</b></div></div>
+      <div class="need">ทำผ่านแล้ว <b>7/20 ชุด</b> · ดันความแม่นอีก <b>24%</b> เพื่อปลดล็อกระดับถัดไป</div>
+    </div>
+
+    <div class="legend">
+      <div class="lg"><span class="sw g"></span>ผ่าน ≥95%</div>
+      <div class="lg"><span class="sw a"></span>ทำซ้ำ</div>
+      <div class="lg"><span class="sw t"></span>ยังไม่ทำ</div>
+      <div class="lg"><span class="sw l"></span>ยังไม่เปิด</div>
+    </div>
+
+    <div class="rec">
+      <div class="d">8</div>
+      <div class="t"><b>ระบบแนะนำ: ชุดที่ 8</b><span>ชุดถัดไปที่ยังไม่ได้ทำ</span></div>
+      <button class="go">เริ่ม ▶</button>
+    </div>
+
+    <div class="cap">ทั้ง 20 ชุด</div>
+    <div class="board">
+      <div class="cell g"><span class="star">★</span><b>1</b><span>100%</span></div>
+      <div class="cell g"><b>2</b><span>95%</span></div>
+      <div class="cell g"><b>3</b><span>81%</span></div>
+      <div class="cell g"><span class="star">★</span><b>4</b><span>100%</span></div>
+      <div class="cell g"><b>5</b><span>88%</span></div>
+      <div class="cell a"><b>6</b><span>64%</span></div>
+      <div class="cell g"><b>7</b><span>92%</span></div>
+      <div class="cell cur"><b>8</b><span>ทำต่อ</span></div>
+      <div class="cell t"><b>9</b><span>ใหม่</span></div>
+      <div class="cell t"><b>10</b><span>ใหม่</span></div>
+      <div class="cell t"><b>11</b><span>ใหม่</span></div>
+      <div class="cell t"><b>12</b><span>ใหม่</span></div>
+      <div class="cell t"><b>13</b><span>ใหม่</span></div>
+      <div class="cell t"><b>14</b><span>ใหม่</span></div>
+      <div class="cell t"><b>15</b><span>ใหม่</span></div>
+      <div class="cell t"><b>16</b><span>ใหม่</span></div>
+      <div class="cell t"><b>17</b><span>ใหม่</span></div>
+      <div class="cell t"><b>18</b><span>ใหม่</span></div>
+      <div class="cell t"><b>19</b><span>ใหม่</span></div>
+      <div class="cell t"><b>20</b><span>ใหม่</span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -78,7 +78,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const userId = await getOptionalAuthUserId();
+    const userId = await getOptionalAuthUserId(req);
     const out = await generateInteractiveSpeakingNextQuestion({
       apiKey: key,
       model: INTERACTIVE_SPEAKING_NEXT_QUESTION_GEMINI_MODEL,

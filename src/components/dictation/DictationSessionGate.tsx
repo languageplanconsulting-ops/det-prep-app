@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { DictationSessionClient } from "@/components/dictation/DictationSessionClient";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { ensureDictationBankReady, getDictationItem } from "@/lib/dictation-storage";
 import type { DictationDifficulty, DictationItem, DictationRoundNum } from "@/types/dictation";
 
@@ -20,10 +21,17 @@ export function DictationSessionGate({
   const [item, setItem] = useState<DictationItem | null | undefined>(undefined);
 
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
+      await ensureCanonicalPracticeContent();
+      if (cancelled) return;
       await ensureDictationBankReady();
+      if (cancelled) return;
       setItem(getDictationItem(round, difficulty, setNumber) ?? null);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [round, difficulty, setNumber]);
 
   if (item === undefined) {

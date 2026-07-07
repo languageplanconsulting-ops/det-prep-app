@@ -1,37 +1,21 @@
 /**
- * exam-sfx — punchy, playful UI sounds synthesized via the Web Audio API.
- * No asset downloads, no network. Respects a per-device mute (default ON, like
- * Duolingo) and stays silent if audio is blocked. Pairs with visual feedback —
- * never the only signal (WCAG).
+ * exam-sfx — gamified UI sounds for the whole app (clicks, correct/wrong,
+ * transitions, celebrations). Plays real audio assets from /audio/sfx,
+ * pooled + preloaded so overlapping taps don't cut each other off. Respects
+ * a per-device mute (default ON, like Duolingo) and stays silent if audio
+ * is blocked. Pairs with visual feedback — never the only signal (WCAG).
  */
 
 const MUTE_KEY = "ep-sfx-muted";
 const MUTE_EVENT = "ep-sfx-mute-change";
 
-/** New sounds play ONLY when enabled (admins). Off for normal users. */
-let _enabled = false;
+/** On for everyone by default. Kept as a hook so a caller could still disable it. */
+let _enabled = true;
 export function setSfxEnabled(on: boolean): void {
   _enabled = on;
 }
 export function isSfxEnabled(): boolean {
   return _enabled;
-}
-
-let _ctx: AudioContext | null = null;
-
-function getCtx(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const Ctor =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return null;
-    if (!_ctx) _ctx = new Ctor();
-    if (_ctx.state === "suspended") void _ctx.resume();
-    return _ctx;
-  } catch {
-    return null;
-  }
 }
 
 export function getSfxMuted(): boolean {
@@ -53,79 +37,151 @@ export function setSfxMuted(muted: boolean): void {
 
 export const SFX_MUTE_EVENT = MUTE_EVENT;
 
-type Note = {
-  f: number;
-  type?: OscillatorType;
-  start: number;
-  dur: number;
-  vol?: number;
-  slideTo?: number;
-};
+/**
+ * Small pool per asset so rapid-fire taps overlap instead of cutting off.
+ * Grows lazily (one element fetched up front, more only once actually needed)
+ * so we don't fire N parallel requests for the same file on module load.
+ */
+const POOL_SIZE = 4;
+const pools = new Map<string, HTMLAudioElement[]>();
+const poolCursor = new Map<string, number>();
 
-function play(notes: Note[]): void {
+function makeAudio(src: string, volume: number): HTMLAudioElement {
+  const el = new Audio(src);
+  el.preload = "auto";
+  el.volume = volume;
+  return el;
+}
+
+function getPool(src: string, volume: number): HTMLAudioElement[] {
+  let pool = pools.get(src);
+  if (!pool) {
+    pool = [makeAudio(src, volume)];
+    pools.set(src, pool);
+  }
+  return pool;
+}
+
+function playFile(src: string, volume = 0.55): void {
+  if (typeof window === "undefined") return;
   if (!_enabled || getSfxMuted()) return;
-  const ctx = getCtx();
-  if (!ctx) return;
   try {
-    const now = ctx.currentTime;
-    for (const n of notes) {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = n.type ?? "triangle";
-      const t0 = now + n.start;
-      osc.frequency.setValueAtTime(n.f, t0);
-      if (n.slideTo) osc.frequency.exponentialRampToValueAtTime(n.slideTo, t0 + n.dur);
-      const v = n.vol ?? 0.07;
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(v, t0 + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + n.dur);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(t0);
-      osc.stop(t0 + n.dur + 0.03);
-      osc.onended = () => {
-        try {
-          osc.disconnect();
-          gain.disconnect();
-        } catch {
-          /* ignore */
-        }
-      };
+    const pool = getPool(src, volume);
+    const i = poolCursor.get(src) ?? 0;
+    let el = pool[i];
+    if (!el) {
+      el = makeAudio(src, volume);
+      pool[i] = el;
     }
+    poolCursor.set(src, (i + 1) % POOL_SIZE);
+    el.currentTime = 0;
+    void el.play().catch(() => {
+      /* autoplay blocked before first user gesture — ignore */
+    });
   } catch {
     /* ignore */
   }
 }
 
-/** Light bouncy "pop" on tap/select. */
+/** Synthesized fallback for the one event with no matching asset (wrong answer). */
+let _ctx: AudioContext | null = null;
+function getCtx(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const Ctor =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!Ctor) return null;
+    if (!_ctx) _ctx = new Ctor();
+    if (_ctx.state === "suspended") void _ctx.resume();
+    return _ctx;
+  } catch {
+    return null;
+  }
+}
+
+function playSynthThunk(): void {
+  if (!_enabled || getSfxMuted()) return;
+  const ctx = getCtx();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(210, now);
+    osc.frequency.exponentialRampToValueAtTime(150, now + 0.18);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.06, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.21);
+    osc.onended = () => {
+      try {
+        osc.disconnect();
+        gain.disconnect();
+      } catch {
+        /* ignore */
+      }
+    };
+  } catch {
+    /* ignore */
+  }
+}
+
+const ASSET = {
+  click: "/audio/sfx/click.wav",
+  pop: "/audio/sfx/pop.wav",
+  transition: "/audio/sfx/transition.wav",
+  celebrateBell: "/audio/sfx/celebrate-bell.wav",
+  celebrateFanfare: "/audio/sfx/celebrate-fanfare.wav",
+  celebrateGrand: "/audio/sfx/celebrate-grand.wav",
+} as const;
+
+/** Preload the frequent, low-latency-sensitive sounds; celebrations load on first use. */
+if (typeof window !== "undefined") {
+  getPool(ASSET.click, 0.45);
+  getPool(ASSET.pop, 0.6);
+  getPool(ASSET.transition, 0.5);
+}
+
+/** Cute bubble pop on any tap/select — every button/tile in the app. */
 export function sfxTap(): void {
-  play([{ f: 520, slideTo: 720, type: "triangle", start: 0, dur: 0.08, vol: 0.07 }]);
+  playFile(ASSET.click, 0.45);
 }
 
-/** Cheerful rising two-note on a correct answer. */
+/** Highkey bubble-pop "ding" on a correct answer. */
 export function sfxCorrect(): void {
-  play([
-    { f: 660, type: "triangle", start: 0, dur: 0.1, vol: 0.08 },
-    { f: 990, type: "triangle", start: 0.08, dur: 0.14, vol: 0.08 },
-  ]);
+  playFile(ASSET.pop, 0.6);
 }
 
-/** Soft low "thunk" on wrong — gentle, never harsh. */
+/** Soft synthesized "thunk" on wrong — gentle, never harsh. */
 export function sfxWrong(): void {
-  play([{ f: 210, slideTo: 150, type: "sine", start: 0, dur: 0.18, vol: 0.06 }]);
+  playSynthThunk();
 }
 
-/** Upward "whoosh" on submit. */
+/** Page-swipe whoosh on submit / moving to the next question. */
 export function sfxSubmit(): void {
-  play([{ f: 380, slideTo: 920, type: "sine", start: 0, dur: 0.2, vol: 0.06 }]);
+  playFile(ASSET.transition, 0.5);
 }
 
-/** Little 4-note arpeggio when a score/report reveals. */
+/** Same page-swipe sound for step/screen navigation (mock test, lessons, diagnosis). */
+export function sfxTransition(): void {
+  playFile(ASSET.transition, 0.5);
+}
+
+/** Happy bell chime when a score/report reveals. Fires often — keep it light. */
 export function sfxReveal(): void {
-  play([
-    { f: 523, start: 0, dur: 0.12, vol: 0.07 },
-    { f: 659, start: 0.1, dur: 0.12, vol: 0.07 },
-    { f: 784, start: 0.2, dur: 0.12, vol: 0.07 },
-    { f: 1047, start: 0.3, dur: 0.22, vol: 0.08 },
-  ]);
+  playFile(ASSET.celebrateBell, 0.55);
+}
+
+/**
+ * Bigger celebration moments. "md" = finishing a lesson/exercise set or a
+ * streak day (fanfare). "lg" = finishing a full mock test, a big streak
+ * milestone, or a badge (grand violin swell) — keep this one rare.
+ */
+export function sfxCelebrate(size: "md" | "lg" = "md"): void {
+  playFile(size === "lg" ? ASSET.celebrateGrand : ASSET.celebrateFanfare, 0.65);
 }

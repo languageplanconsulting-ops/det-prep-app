@@ -92,10 +92,10 @@ Hard scoring rules for write-about-photo (mandatory):
       ? `
 
 CRITICAL — speak-about-photo input handling:
-- The raw transcript came from SPEECH recognition. The learner spoke aloud; they did NOT type. Speech recognition output has NO punctuation, NO capitalization, NO sentence boundaries.
+- The raw transcript came from SPEECH recognition. The learner spoke aloud; they did NOT type. Speech recognition output has NO punctuation, NO capitalization, NO sentence boundaries, and its spelling/casing choices are the ASR engine's, not the learner's.
 - This is EXPECTED behavior, not a learner mistake. You MUST add all punctuation yourself in step 1 below.
-- DO NOT penalize the learner for any missing or wrong punctuation in the raw transcript. Punctuation issues should NEVER appear in grammarBreakdown for speak-about-photo. Grade as if the punctuatedTranscript YOU produced is what the learner intended.
-- Capitalization, full stops, commas, question marks: 100% your responsibility, not the learner's. Zero punctuation penalty applies to speaking input.
+- DO NOT penalize the learner for any missing or wrong punctuation, capitalization, or spelling in the raw transcript. These issues should NEVER appear in grammarBreakdown for speak-about-photo. Grade as if the punctuatedTranscript YOU produced is what the learner intended.
+- Capitalization, full stops, commas, question marks, spelling: 100% your responsibility, not the learner's. Zero penalty for any of these applies to speaking input.
 - Spoken self-correction: if the learner hesitates, repeats, or restarts but then repairs to a CORRECT form, do NOT deduct for the hesitation or the repair itself — treat the corrected form as what they meant. Only deduct when the FINAL repaired form is still wrong.`
       : "";
 
@@ -113,7 +113,7 @@ Coherence (ความต่อเนื่อง): ALWAYS recommend specific t
 
 For EACH criterion summary, include (A) brief assessment and (B) a line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" plus a concrete action tied to THIS learner's wording.
 
-Breakdowns: excerpt (exact quote), issueEn/issueTh, suggestionEn/suggestionTh with concrete corrections. For vocabulary, suggest better words or collocations when possible. grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement"). It must lead the fix so the learner knows which rule to revise. Keep it under ~6 words.
+Breakdowns (EVERY item MUST have): excerpt (exact quote), issueEn/issueTh (spoken-language focus — never punctuation/capitalization/spelling), suggestionEn/suggestionTh — MANDATORY on every single item, the FULL corrected version of the excerpt (a real rewritten sentence or phrase), never just abstract advice with no example shown. If you cannot write a concrete corrected version, do not include that breakdown item at all. For vocabulary, suggest better words or collocations when possible. grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement"). It must lead the fix so the learner knows which rule to revise. Keep it under ~6 words.
 
 Priority for feedback:
 - Prioritize grammar corrections first, then vocabulary upgrades.

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หน้าหลัก · มาสคอต V2 (Coach)</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-soft:#E7EFFF;--navy:#0a1f44;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8;
+    --mint:#DFF3E7;--mint-ink:#1B7A4B;--peach:#FCE9DC;--peach-ink:#B5642A;--lilac:#ECE7FB;--lilac-ink:#5B46B0;--sky:#E1EEFB;--sky-ink:#1F6FB2;--green:#1B9E54}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .scroll{flex:1;overflow-y:auto;padding-bottom:12px}
+  .hd{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 4px}
+  .hd .l{display:flex;align-items:center;gap:11px}
+  .mava{width:44px;height:44px;border-radius:99px;object-fit:cover;object-position:32% 20%;background:#fff;border:2px solid var(--yellow)}
+  .greet{font-size:17px;font-weight:900;color:var(--ink)}
+  .tier{display:inline-block;background:var(--blue-soft);color:var(--blue);font-size:11px;font-weight:800;padding:2px 10px;border-radius:99px;margin-top:2px}
+  .ava{width:44px;height:44px;border-radius:99px;background:#0a1f44;color:#fff;font-weight:900;font-size:17px;display:flex;align-items:center;justify-content:center}
+  /* coach hero banner */
+  .coach{margin:12px 20px 6px;background:linear-gradient(135deg,#004AAD,#00337A);border-radius:26px;padding:18px;position:relative;overflow:hidden;box-shadow:0 14px 30px rgba(0,51,122,.3)}
+  .coach .name{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px}
+  .coach .row{display:flex;align-items:flex-end;gap:8px;margin-top:12px}
+  .coach .bubble{flex:1;background:#fff;border-radius:18px;border-bottom-left-radius:5px;padding:13px 15px}
+  .coach .bubble b{font-size:15.5px;font-weight:900;color:var(--ink);line-height:1.35;display:block}
+  .coach .bubble span{font-size:12px;color:var(--blue);font-weight:700}
+  .coach img{width:104px;height:104px;object-fit:contain;margin:-8px -6px -14px 0}
+  .coach .strk{display:flex;gap:8px;margin-top:12px}
+  .coach .pill{flex:1;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:8px 10px;color:#fff}
+  .coach .pill b{font-size:14px;font-weight:900}
+  .coach .pill span{font-size:10px;color:#c9d8f5;font-weight:700;display:block}
+  .coach .cta{margin-top:12px;width:100%;background:var(--yellow);color:#3a2e00;font-size:14px;font-weight:900;padding:12px;border:none;border-radius:99px}
+  .sec{display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin:22px 0 12px}
+  .sec h2{font-size:18px;font-weight:900;color:var(--ink)}
+  .sec a{font-size:12.5px;font-weight:700;color:var(--sub)}
+  .daily{margin:0 20px 12px;background:var(--navy);border-radius:24px;padding:20px;display:flex;align-items:center;box-shadow:0 12px 26px rgba(10,31,68,.28)}
+  .daily .t{flex:1}
+  .rec{display:inline-block;background:var(--yellow);color:#3a2e00;font-size:11px;font-weight:900;padding:4px 11px;border-radius:99px;margin-bottom:9px}
+  .daily h3{font-size:20px;font-weight:900;color:#fff;line-height:1.3}
+  .daily p{font-size:12px;color:#b9c7e6;margin-top:6px;line-height:1.5}
+  .daily .go{display:inline-block;background:var(--yellow);color:#3a2e00;font-size:13px;font-weight:900;padding:9px 16px;border-radius:99px;margin-top:13px}
+  .daily .em{font-size:52px;margin-left:6px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px}
+  .cat{border-radius:20px;padding:16px}
+  .cat .ci{font-size:28px}
+  .cat b{display:block;font-size:15px;font-weight:900;margin-top:8px}
+  .cat span{font-size:12px;font-weight:600;opacity:.85}
+  .hrow{display:flex;gap:14px;padding:0 20px 8px;overflow-x:auto}
+  .mock{width:150px;flex:0 0 auto;background:#fff;border-radius:20px;padding:13px;box-shadow:0 8px 20px rgba(0,0,0,.05)}
+  .mock .thumb{height:78px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:11px}
+  .mock .mt{font-size:13.5px;font-weight:800;color:var(--ink);line-height:1.35}
+  .mock .tag{font-size:11px;font-weight:800;color:var(--blue);margin-top:8px}
+  .tabs{display:flex;border-top:1px solid var(--line);background:#fff;padding:8px 0 10px}
+  .tab{flex:1;text-align:center;font-size:10.5px;font-weight:700;color:#b7b1a3}
+  .tab .ti{font-size:18px;display:block;margin-bottom:2px}
+  .tab.on{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="scroll">
+    <div class="hd">
+      <div class="l">
+        <img class="mava" src="/mascot-doy.png" alt="มาสคอต">
+        <div><div class="greet">สวัสดี 👋</div><div class="tier">VIP</div></div>
+      </div>
+      <div class="ava">D</div>
+    </div>
+
+    <!-- coach check-in -->
+    <div class="coach">
+      <div class="name">🧑‍🏫 น้องแพลน</div>
+      <div class="row">
+        <div class="bubble">
+          <b>วันนี้เก็บ Writing ต่อนะ เหลืออีกนิดเดียว! 🔥</b>
+          <span>ทำแบบฝึกวันนี้ให้ครบ รักษาสตรีคไว้</span>
+        </div>
+        <img src="/mascot-doy.png" alt="น้องแพลน">
+      </div>
+      <div class="strk">
+        <div class="pill"><b>🔥 1</b><span>วันติด</span></div>
+        <div class="pill"><b>⭐ Lv.1</b><span>11 XP</span></div>
+        <div class="pill"><b>0/30</b><span>เป้าวันนี้</span></div>
+      </div>
+      <button class="cta">▶ เริ่มฝึกกับน้องแพลน</button>
+    </div>
+
+    <div class="sec"><h2>เริ่มฝึกวันนี้</h2></div>
+    <div class="daily">
+      <div class="t">
+        <div class="rec">⭐ แนะนำ</div>
+        <h3>แบบฝึกประจำวัน<br>สุ่มชุดที่ดีที่สุดให้คุณ</h3>
+        <p>เหมาะกับคนมีเวลาน้อย · ฝึกสั้น ๆ ทุกวัน</p>
+        <div class="go">เริ่มเลย →</div>
+      </div>
+      <div class="em">🎲</div>
+    </div>
+
+    <div class="sec"><h2>แบบฝึกยอดนิยม</h2><a>ดูทั้งหมด ›</a></div>
+    <div class="grid">
+      <div class="cat" style="background:var(--mint)"><div class="ci">✍️</div><b style="color:var(--mint-ink)">Literacy</b><span style="color:var(--mint-ink)">อ่าน–เขียน</span></div>
+      <div class="cat" style="background:var(--peach)"><div class="ci">📖</div><b style="color:var(--peach-ink)">Comprehension</b><span style="color:var(--peach-ink)">ความเข้าใจ</span></div>
+      <div class="cat" style="background:var(--lilac)"><div class="ci">💬</div><b style="color:var(--lilac-ink)">Conversation</b><span style="color:var(--lilac-ink)">บทสนทนา</span></div>
+      <div class="cat" style="background:var(--sky)"><div class="ci">🎤</div><b style="color:var(--sky-ink)">Production</b><span style="color:var(--sky-ink)">พูด–เขียน</span></div>
+    </div>
+
+    <div class="sec"><h2>Mock Test</h2><a>ดูทั้งหมด ›</a></div>
+    <div class="hrow">
+      <div class="mock"><div class="thumb">📋</div><div class="mt">June 2026 · Set A</div><div class="tag">● เริ่มเลย</div></div>
+      <div class="mock"><div class="thumb">📋</div><div class="mt">June 2026 · Set B</div><div class="tag">● เริ่มเลย</div></div>
+      <div class="mock"><div class="thumb">📋</div><div class="mt">May 2026 · Set A</div><div class="tag" style="color:var(--green)">✓ ทำแล้ว</div></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on"><span class="ti">🏠</span>หน้าหลัก</div>
+    <div class="tab"><span class="ti">✏️</span>แบบฝึก</div>
+    <div class="tab"><span class="ti">📝</span>Mock Test</div>
+    <div class="tab"><span class="ti">📒</span>โน้ต</div>
+    <div class="tab"><span class="ti">👤</span>บัญชี</div>
+  </div>
+</div>
+</body>
+</html>

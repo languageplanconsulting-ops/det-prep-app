@@ -1,6 +1,26 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePracticeHeroStats, daysUntil } from "@/hooks/usePracticeHeroStats";
+import { sfxCelebrate } from "@/lib/exam-sfx";
+
+const STREAK_SEEN_KEY = "ep-streak-seen";
+
+/** Celebrate the first time a fresh, higher streak count is seen (once per increase, not every page view). */
+function useStreakCelebration(streak: number) {
+  useEffect(() => {
+    if (streak <= 0) return;
+    try {
+      const seen = Number(window.localStorage.getItem(STREAK_SEEN_KEY) ?? "0");
+      if (streak > seen) {
+        sfxCelebrate(streak % 7 === 0 ? "lg" : "md");
+        window.localStorage.setItem(STREAK_SEEN_KEY, String(streak));
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [streak]);
+}
 
 /**
  * HubMomentumStrip — compact "behavioural hooks" bar shown above the round
@@ -20,6 +40,7 @@ import { usePracticeHeroStats, daysUntil } from "@/hooks/usePracticeHeroStats";
  */
 export function HubMomentumStrip() {
   const stats = usePracticeHeroStats();
+  useStreakCelebration(stats.streakDays ?? 0);
 
   if (stats.loading) {
     return (

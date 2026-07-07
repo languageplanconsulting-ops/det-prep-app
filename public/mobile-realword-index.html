@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คำศัพท์จริง · 5 แนวทางจากหนังสือดีไซน์</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--ink);padding:40px 20px 80px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;font-weight:900}
+  .lede{color:var(--sub);font-size:14px;margin:8px 0 4px;max-width:680px;line-height:1.65}
+  .from{font-size:12px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:16px 0 28px;display:inline-block;line-height:1.6}
+  .from b{color:var(--blue)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;text-decoration:none;color:inherit;display:block;transition:transform .15s, box-shadow .15s;box-shadow:0 8px 22px rgba(0,0,0,.05)}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.10)}
+  .emoji{font-size:34px}
+  .tagn{font-size:11px;font-weight:900;color:var(--blue);letter-spacing:.5px;margin-top:8px}
+  .book{font-size:11.5px;font-weight:800;color:#a9820b;background:#FFF3CC;display:inline-block;padding:3px 9px;border-radius:99px;margin-top:6px}
+  .card h2{font-size:19px;font-weight:900;margin:8px 0 6px}
+  .best{display:inline-block;background:var(--yellow);color:#6a4e00;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;margin-left:6px;vertical-align:middle}
+  .card p{font-size:13px;color:var(--sub);line-height:1.6}
+  ul{margin:11px 0 0;padding-left:18px}
+  li{font-size:12px;color:var(--sub);line-height:1.7}
+  .note{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px}
+  .note h3{font-size:14px;font-weight:900;margin-bottom:10px}
+  .note p{font-size:13px;color:var(--sub);line-height:1.8}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>"คำศัพท์จริง" — 5 แนวทางออกแบบใหม่ 📚</h1>
+  <p class="lede">หน้าจอเดิมเป็นแค่รายการ "รอบที่ 1 · ชุด N" ที่หน้าตาเหมือนกันหมด — ไม่บอกว่าคุณอยู่ตรงไหน ทำอะไรต่อ หรือทำไปแล้วกี่ชุด แต่ละเวอร์ชันหยิบ <b>แก่นจากหนังสือดีไซน์เล่มหนึ่ง</b> มาแก้ปัญหานี้คนละมุม</p>
+  <div class="from">📱 ต้นฉบับที่แก้: <b>ExamPracticeScreen</b> (มือถือ) — แท็บระดับ ง่าย/ปานกลาง/ยาก + รายการชุดธรรมดา · ใช้ข้อมูลจริง (ยังไม่ทำ / คะแนน% / ✓ ผ่าน / ★ เต็ม / 🔒 ล็อก)</div>
+
+  <div class="grid">
+    <a class="card" href="/mobile-realword-v1-krug-continue.html">
+      <div class="emoji">👆</div>
+      <div class="tagn">VERSION 1</div>
+      <div class="book">Don't Make Me Think — Krug</div>
+      <h2>ทำต่อทันที <span class="best">ปลอดภัยสุด</span></h2>
+      <p>ปุ่มเดียวเด่นชัด "ทำต่อ ชุดที่ 8" — ระบบเลือกให้ ผู้เรียนไม่ต้องคิดว่าจะกดชุดไหน ที่เหลือเป็นรายการเลือกเองแบบจาง ๆ</p>
+      <ul>
+        <li>แก้ "ต้องคิด" → เห็นปุ๊บรู้ปั๊บว่ากดอะไร</li>
+        <li>หนึ่งการกระทำหลัก · สแกนเร็ว โปร่ง</li>
+        <li>ทำเป็น React Native ได้เร็วที่สุด</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-realword-v2-norman-board.html">
+      <div class="emoji">🎛️</div>
+      <div class="tagn">VERSION 2</div>
+      <div class="book">The Design of Everyday Things — Norman</div>
+      <h2>บอร์ดสถานะ + เป้าแม่นยำ</h2>
+      <p>ทุกชุดส่ง "สัญญาณ" สถานะชัดด้วยสี (ผ่าน/ทำซ้ำ/ยังไม่ทำ/ล็อก) + แถบ mapping ความแม่นจริง → เป้า 95% พร้อมคำอธิบายสีกำกับ</p>
+      <ul>
+        <li>Signifiers + Feedback: รู้สถานะทุกชุดในตาเดียว</li>
+        <li>Mapping: เห็นว่าต้องดันอีกเท่าไรถึงปลดล็อก</li>
+        <li>กริดตัวเลขกะทัดรัด เห็นครบ 20 ชุด</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-realword-v3-tidwell-map.html">
+      <div class="emoji">🧭</div>
+      <div class="tagn">VERSION 3</div>
+      <div class="book">Designing Interfaces — Tidwell</div>
+      <h2>แผนผังลำดับ (บท)</h2>
+      <p>ใช้แพตเทิร์น "Sequence Map" — จัดชุดเป็น "บท" ต่อกันด้วยเส้นราง มีคำอธิบายว่า รอบ/บท คืออะไร ปลดล็อกไล่ลำดับ</p>
+      <ul>
+        <li>อธิบาย "รอบ/ชุดคืออะไร" ที่เดิมไม่เคยบอก</li>
+        <li>เห็นลำดับ+ความคืบหน้าแต่ละบทชัด</li>
+        <li>เป็นแพตเทิร์นมาตรฐานที่ผู้ใช้คุ้นเคย</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-realword-v4-coach-empathy.html">
+      <div class="emoji">🧑‍🏫</div>
+      <div class="tagn">VERSION 4</div>
+      <div class="book">Change by Design — Brown</div>
+      <h2>โค้ชพี่ดอย (เห็นใจผู้เรียน)</h2>
+      <p>เริ่มจาก empathy — พี่ดอยพูดให้กำลังใจ ลดความกดดัน เฟรมแต่ละชุดเป็น "ก้าวเล็ก ๆ" ทำผิดได้ โทนอบอุ่น เป็นมนุษย์</p>
+      <ul>
+        <li>ลดความวิตกของผู้เรียนไทยที่กลัวภาษาอังกฤษ</li>
+        <li>เชื่อมกับแบรนด์ "พี่ดอย" ที่มีอยู่แล้ว</li>
+        <li>สร้างความรู้สึก "อยากทำต่อ" ด้วยกำลังใจ</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-realword-v5-nodder-mastery.html">
+      <div class="emoji">🔥</div>
+      <div class="tagn">VERSION 5</div>
+      <div class="book">Evil by Design — Nodder</div>
+      <h2>บันไดพิชิต (เกม แต่ซื่อสัตย์)</h2>
+      <p>ใช้จิตวิทยาจูงใจอย่างมีจริยธรรม — สตรีค 🔥 + เป้า XP รายวัน + บันไดชุด + กล่องรางวัลข้างหน้า กระตุ้น "อีกชุดเดียว" (ตัวเลขจริง ไม่หลอก)</p>
+      <ul>
+        <li>เชื่อมระบบ XP/สตรีคที่มี (gamification.ts) โดยตรง</li>
+        <li>Loss-aversion แบบซื่อสัตย์: รักษาสตรีค</li>
+        <li>เอนเกจสูงสุด · เสี่ยงดู "เด็ก/เยอะ" ถ้าเกินพอดี</li>
+      </ul>
+    </a>
+  </div>
+
+  <div class="note">
+    <h3>แก่นที่ทั้ง 5 แบบแก้เหมือนกัน</h3>
+    <p>• เห็น <b>"คุณอยู่ตรงไหน / เหลืออีกกี่ชุด"</b> ทันที &nbsp;•&nbsp; แสดง <b>คะแนน% / ✓ ผ่าน / ★ เต็ม</b> จากข้อมูลจริง (`getRealwordProgress`) แทนการ์ดที่เหมือนกันหมด &nbsp;•&nbsp; มี <b>ปุ่ม "ทำต่อ" หลักปุ่มเดียว</b> เพื่อไม่ให้เลือกจนงง (Hick's Law) &nbsp;•&nbsp; ระดับ ง่าย→ยาก เป็น <b>ขั้นที่ปลดล็อกต่อกัน</b> ไม่ใช่แค่แท็บ<br><br>
+    ต่างกันที่ <b>โทน/แนวคิดหลัก</b>: V1 เรียบ-ตรงประเด็น · V2 เป็นระบบ-แม่นยำ · V3 เป็นระเบียบ-อธิบายชัด · V4 อบอุ่น-ให้กำลังใจ · V5 สนุก-เร้าใจ &nbsp;— เลือกได้ตามว่าอยากให้ผู้เรียนรู้สึกแบบไหน แล้วผมจะพอร์ตลง <b>ExamPracticeScreen.tsx</b> ให้จริง (แบบ admin-gated ก่อน เหมือนทุกครั้ง)</p>
+  </div>
+</div>
+</body>
+</html>

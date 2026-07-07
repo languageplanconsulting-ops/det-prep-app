@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เล่น V5 · Evil by Design (Nodder) · เกมจับผิดคำ</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-soft:#E7EFFF;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8;--green:#1B9E54;--green-soft:#DCF5E6;--red:#DC2626}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .hd{display:flex;align-items:center;gap:10px;padding:8px 16px}
+  .back{width:38px;height:38px;border-radius:99px;background:#fff;border:1px solid #e7e3d8;display:flex;align-items:center;justify-content:center;font-size:22px;color:#16203a}
+  .hd h1{flex:1;text-align:center;font-size:15px;font-weight:800;color:#16203a}
+  .hd .ctx{font-size:11px;color:var(--sub);font-weight:700}
+  /* game HUD: timer + combo + caught count */
+  .hud{margin:2px 16px 10px;background:linear-gradient(135deg,#0A1F44,#00337A);border-radius:18px;padding:13px 16px;box-shadow:0 12px 26px rgba(0,51,122,.28)}
+  .hudtop{display:flex;align-items:center;gap:12px}
+  .caught{flex:1}
+  .caught .k{font-size:10.5px;color:#B9C7E6;font-weight:700}
+  .caught .v{font-size:19px;color:#fff;font-weight:900}
+  .caught .v b{color:var(--yellow)}
+  .combo{background:rgba(255,204,0,.16);border:1px solid rgba(255,204,0,.4);color:var(--yellow);font-size:12px;font-weight:900;padding:6px 12px;border-radius:99px}
+  .timerbar{height:8px;background:rgba(255,255,255,.18);border-radius:99px;margin-top:11px;overflow:hidden}
+  .timerbar i{display:block;height:100%;width:72%;background:linear-gradient(90deg,#FFCC00,#FFA800);border-radius:99px}
+  .ttag{font-size:10.5px;color:#B9C7E6;font-weight:700;margin-top:6px}
+  .instr{text-align:center;font-size:13.5px;font-weight:800;color:var(--ink);margin:2px 16px 12px}
+  .instr b{color:var(--blue)}
+  .scroll{flex:1;overflow-y:auto;padding:0 16px 8px}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+  .tile{background:#fff;border:2px solid var(--line);border-radius:14px;padding:16px 4px;text-align:center;font-weight:800;font-size:14px;color:var(--ink);position:relative;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+  .tile.sel{background:var(--yellow);border-color:#E6B800;color:#5c4600;transform:translateY(-2px);box-shadow:0 8px 16px rgba(255,204,0,.4)}
+  .tile.sel::after{content:"+1";position:absolute;top:-9px;right:-4px;background:var(--green);color:#fff;font-size:10px;font-weight:900;padding:2px 6px;border-radius:99px}
+  .foot{padding:12px 18px 20px;background:linear-gradient(to top,var(--bg) 70%,transparent)}
+  .cta{width:100%;background:var(--yellow);color:#6a4e00;font-weight:900;font-size:16px;padding:16px;border:none;border-radius:99px;box-shadow:0 10px 22px rgba(255,204,0,.45)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="hd"><div class="back">‹</div><h1>คำศัพท์จริง</h1><div class="ctx">ชุด 8</div></div>
+
+  <div class="hud">
+    <div class="hudtop">
+      <div class="caught">
+        <div class="k">จับคำจริงได้แล้ว</div>
+        <div class="v"><b>5</b> / 9 คำ</div>
+      </div>
+      <div class="combo">🔥 คอมโบ ×3</div>
+    </div>
+    <div class="timerbar"><i></i></div>
+    <div class="ttag">⏱ เหลือ 0:22 · จับครบภายในเวลารับโบนัส XP</div>
+  </div>
+
+  <div class="instr">แตะให้ไว — จับเฉพาะ <b>คำจริง</b> · อย่าโดนคำมั่วหลอก!</div>
+
+  <div class="scroll">
+    <div class="grid">
+      <div class="tile sel">honest</div>
+      <div class="tile">flimble</div>
+      <div class="tile sel">garden</div>
+      <div class="tile">travle</div>
+      <div class="tile sel">bright</div>
+      <div class="tile">gorstle</div>
+      <div class="tile sel">silent</div>
+      <div class="tile">wunder</div>
+      <div class="tile">market</div>
+      <div class="tile">chalimp</div>
+      <div class="tile sel">gentle</div>
+      <div class="tile">forrest</div>
+    </div>
+  </div>
+
+  <div class="foot"><button class="cta">ส่งคำตอบ · จับได้ 5 คำ</button></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Cost of Feedback — DET App AI Economics</title>
+<style>
+  :root{
+    --ink:#17223B;
+    --ink-soft:#4A5573;
+    --paper:#F4F5F1;
+    --panel:#FFFFFF;
+    --line:#E1E2D9;
+    --accent:#B8863B;
+    --accent-deep:#8C6529;
+    --accent-tint:#F1E4C8;
+    --blue:#2C5AA6;
+    --blue-tint:#7FA0D6;
+    --teal:#2E7D6B;
+    --good:#2E7D5C;
+    --good-tint:#DDEEE4;
+    --critical:#B23A2E;
+    --critical-tint:#F5DEDB;
+    color-scheme: light;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{
+    font-family:"Iowan Old Style","Palatino Linotype","URW Palladio L",Georgia,serif;
+    text-wrap:balance;
+  }
+  .tnum{font-variant-numeric:tabular-nums}
+  .mono{font-family:"SF Mono","Menlo","Consolas",monospace}
+
+  .wrap{max-width:920px;margin:0 auto;padding:3.5rem 1.75rem 5rem}
+
+  /* ---- masthead ---- */
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.72rem;
+    font-weight:700;
+    color:var(--accent-deep);
+    margin:0 0 .9rem;
+  }
+  .eyebrow::before{content:"● "; color:var(--accent)}
+  h1{
+    font-size:clamp(2.1rem,4.4vw,3.1rem);
+    font-weight:600;
+    margin:0 0 .6rem;
+    letter-spacing:-.01em;
+  }
+  .dek{
+    font-size:1.1rem;
+    color:var(--ink-soft);
+    max-width:58ch;
+    margin:0 0 1.4rem;
+  }
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.4rem 1.4rem;
+    font-size:.82rem;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    padding-top:1rem;
+  }
+  .meta-row b{color:var(--ink)}
+
+  /* ---- section scaffolding ---- */
+  section{margin-top:3.6rem}
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:1.1rem}
+  h2{
+    font-size:1.5rem;
+    font-weight:600;
+    margin:0;
+    letter-spacing:-.005em;
+  }
+  .section-note{font-size:.85rem; color:var(--ink-soft); max-width:34ch; text-align:right}
+
+  /* ---- KPI strip ---- */
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  .kpi{
+    background:var(--panel);
+    padding:1.5rem 1.4rem;
+  }
+  .kpi .label{
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-size:.68rem;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin-bottom:.55rem;
+  }
+  .kpi .value{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.65rem;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .kpi .value small{font-size:.85rem; font-weight:500; color:var(--ink-soft)}
+  .kpi .sub{font-size:.78rem; color:var(--ink-soft); margin-top:.35rem}
+
+  /* ---- one-time vs recurring ---- */
+  .split{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1.1rem;
+  }
+  @media (max-width:640px){ .split{grid-template-columns:1fr} }
+  .split-card{
+    border-radius:14px;
+    padding:1.4rem 1.5rem;
+    border:1px solid var(--line);
+  }
+  .split-card.one-time{background:var(--good-tint); border-color:#c3ded0}
+  .split-card.recurring{background:var(--accent-tint); border-color:#e3cfa0}
+  .split-card .kicker{
+    text-transform:uppercase; letter-spacing:.08em; font-size:.68rem; font-weight:700;
+  }
+  .split-card.one-time .kicker{color:var(--good)}
+  .split-card.recurring .kicker{color:var(--accent-deep)}
+  .split-card h3{margin:.4rem 0 .5rem; font-size:1.05rem}
+  .split-card p{margin:0 0 .7rem; font-size:.86rem; color:var(--ink)}
+  .split-card ul{margin:0; padding-left:1.1rem; font-size:.84rem}
+  .split-card li{margin-bottom:.3rem}
+
+  .caveat-inline{
+    font-size:.82rem;
+    color:var(--ink-soft);
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:3px solid var(--blue);
+    border-radius:8px;
+    padding:.9rem 1.1rem;
+    margin-top:1.1rem;
+  }
+  .caveat-inline b{color:var(--ink)}
+
+  /* ---- composition bar ---- */
+  .comp-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:1.6rem 1.7rem 1.4rem;
+  }
+  .comp-bar{
+    display:flex;
+    height:2.5rem;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:inset 0 0 0 1px rgba(23,34,59,.06);
+  }
+  .comp-seg{position:relative}
+  .comp-seg.grading{background:var(--blue)}
+  .comp-seg.tts{background:var(--accent)}
+  .comp-seg.stt{background:var(--teal)}
+  .comp-seg.gen{background:var(--blue-tint)}
+  .legend{
+    display:flex; flex-wrap:wrap; gap:1.1rem 1.6rem;
+    margin-top:1rem;
+    font-size:.82rem;
+  }
+  .legend .item{display:flex; align-items:center; gap:.5rem}
+  .swatch{width:.7rem; height:.7rem; border-radius:3px; flex:none}
+
+  /* ---- ranked bar chart ---- */
+  .ranked{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:1.6rem 1.7rem 1.2rem;
+  }
+  .rank-row{
+    display:grid;
+    grid-template-columns:200px 1fr 92px;
+    align-items:center;
+    gap:.9rem;
+    padding:.5rem 0;
+    border-bottom:1px solid var(--line);
+  }
+  .rank-row:last-child{border-bottom:none}
+  .rank-label{font-size:.86rem; color:var(--ink)}
+  .rank-track{
+    position:relative;
+    height:1.15rem;
+    background-image:repeating-linear-gradient(to right, var(--line) 0, var(--line) 1px, transparent 1px, transparent 25%);
+    border-radius:3px;
+  }
+  .rank-fill{
+    position:absolute; top:0; left:0; bottom:0;
+    min-width:3px;
+    border-radius:3px;
+    background:var(--blue);
+  }
+  .rank-fill.tts{background:var(--accent)}
+  .rank-fill.stt{background:var(--teal)}
+  .rank-fill.gen{background:var(--blue-tint)}
+  .rank-value{font-size:.86rem; text-align:right; color:var(--ink-soft)}
+  .axis{
+    display:grid;
+    grid-template-columns:200px 1fr 92px;
+    gap:.9rem;
+    font-size:.68rem;
+    color:var(--ink-soft);
+    margin-top:.5rem;
+  }
+  .axis-ticks{display:flex; justify-content:space-between}
+  .chart-unit-badge{
+    display:inline-block;
+    font-size:.72rem;
+    font-weight:700;
+    color:var(--blue);
+    background:#E3ECFA;
+    border-radius:999px;
+    padding:.15rem .6rem;
+    margin-bottom:1rem;
+  }
+
+  /* ---- journeys ---- */
+  .journeys{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:1.1rem;
+  }
+  .journey-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:1.4rem 1.5rem 1.5rem;
+  }
+  .journey-card .name{font-weight:600; font-size:1rem; margin-bottom:.2rem}
+  .journey-card .desc{font-size:.8rem; color:var(--ink-soft); margin-bottom:.9rem}
+  .journey-card .total{
+    font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+    font-size:1.5rem; font-weight:600;
+    margin-bottom:.15rem;
+  }
+  .journey-card .total small{font-size:.8rem; font-weight:500; color:var(--ink-soft)}
+  .journey-card .range-note{font-size:.72rem; color:var(--ink-soft); margin-bottom:.8rem}
+  .mini-bar{display:flex; height:.6rem; border-radius:4px; overflow:hidden; margin-bottom:.6rem}
+  .journey-card .breakdown{font-size:.76rem; color:var(--ink-soft)}
+
+  /* ---- callouts ---- */
+  .callout{
+    display:flex;
+    gap:1.1rem;
+    border-radius:14px;
+    padding:1.3rem 1.5rem;
+    align-items:flex-start;
+    border:1px solid;
+  }
+  .callout.critical{background:var(--critical-tint); border-color:#e6c3bd}
+  .callout.good{background:var(--good-tint); border-color:#c3ded0}
+  .callout .mark{
+    flex:none;
+    width:2.1rem; height:2.1rem;
+    border-radius:50%;
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:1.05rem;
+    font-family:"Iowan Old Style",Georgia,serif;
+  }
+  .callout.critical .mark{background:var(--critical)}
+  .callout.good .mark{background:var(--good)}
+  .callout h3{margin:.1rem 0 .35rem; font-size:1.02rem}
+  .callout p{margin:0; font-size:.88rem}
+  .callout.critical p{color:#5c2b25}
+  .callout.good p{color:#1f4a37}
+  .callouts-stack{display:flex; flex-direction:column; gap:1rem}
+
+  /* ---- appendix / details ---- */
+  details{
+    margin-top:1rem;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:1.1rem 1.4rem;
+  }
+  summary{
+    cursor:pointer;
+    font-weight:600;
+    font-size:.92rem;
+    list-style:none;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸ "; color:var(--accent-deep)}
+  details[open] summary::before{content:"▾ "}
+  .tablewrap{overflow-x:auto; margin-top:1rem}
+  table{border-collapse:collapse; width:100%; font-size:.8rem; min-width:760px}
+  th,td{border-bottom:1px solid var(--line); padding:.5rem .6rem; text-align:left; vertical-align:top}
+  th{font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:700}
+  td.num, th.num{text-align:right}
+  .provider-tag{
+    display:inline-block; padding:.08rem .5rem; border-radius:999px;
+    font-size:.68rem; font-weight:700;
+  }
+  .provider-tag.gemini{background:#E3ECFA; color:var(--blue)}
+  .provider-tag.claude{background:#F1E4F5; color:#7b1fa2}
+  .provider-tag.openai{background:#E1F0E5; color:#2e7d32}
+  .provider-tag.eleven{background:var(--critical-tint); color:var(--critical)}
+
+  .caveat{
+    font-size:.82rem;
+    color:var(--ink-soft);
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:3px solid var(--accent);
+    border-radius:8px;
+    padding:1rem 1.2rem;
+    margin-top:1.2rem;
+  }
+  .caveat b{color:var(--ink)}
+
+  footer{
+    margin-top:3.5rem;
+    padding-top:1.3rem;
+    border-top:1px solid var(--line);
+    font-size:.76rem;
+    color:var(--ink-soft);
+  }
+
+  a{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Cost briefing · July 2026</p>
+    <h1 class="display">The cost of feedback</h1>
+    <p class="dek">Every time the DET app grades an answer, transcribes a recording, or reads a question aloud, it spends a fraction of a Baht on AI. This edition splits that spend into what's paid once versus what repeats for every learner, and fixes the earlier chart that made small numbers look large.</p>
+    <div class="meta-row">
+      <span><b>Primary model</b> Gemini 2.5 Flash</span>
+      <span><b>Providers in use</b> Gemini · optional Claude / OpenAI / ElevenLabs fallback</span>
+      <span><b>FX assumption</b> ฿36.5 = US$1</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>Unit economics, at a glance</h2>
+      <p class="section-note">Recurring cost per learner action — narration for fixed content excluded once it's cached.</p>
+    </div>
+    <div class="kpis">
+      <div class="kpi">
+        <div class="label">Full mock test</div>
+        <div class="value tnum">฿0.54–0.83</div>
+        <div class="sub">low end once narration is cached; high end if it isn't</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Interactive speaking session</div>
+        <div class="value tnum">฿0.89–0.99</div>
+        <div class="sub">mostly recurring — 5 of 6 turns are AI-improvised</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Mini-diagnosis run</div>
+        <div class="value tnum">฿0.30–0.59</div>
+        <div class="sub">same fixed 9 questions for every learner</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Cheapest single call</div>
+        <div class="value tnum">0.2 satang</div>
+        <div class="sub">AI follow-up question (flash-lite)</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>One-time vs. recurring — what actually repeats</h2>
+      <p class="section-note">Answering directly: some narration is one-time; some can never be.</p>
+    </div>
+    <div class="split">
+      <div class="split-card one-time">
+        <div class="kicker">Can be one-time</div>
+        <h3>Narration for fixed, pre-written content</h3>
+        <p>Dictation prompts, reading passages, listening clips, mock-test questions — the same script for every learner. The app already has the plumbing for this: a <code class="mono">question_audio_url</code> field, and an admin tool that bulk-generates audio once and stores the link.</p>
+        <ul>
+          <li>If an admin ran that step for a question, every learner since has been playing the <b>same stored file</b> — ฿0 marginal cost per play.</li>
+          <li>If that step was skipped, the app quietly falls back to calling the TTS API live, every single time that question loads — full recurring cost, indefinitely.</li>
+        </ul>
+      </div>
+      <div class="split-card recurring">
+        <div class="kicker">Always recurring</div>
+        <h3>Anything tied to one specific learner</h3>
+        <p>Grading a response, transcribing a recording, and reading an AI-improvised follow-up question aloud all depend on content that doesn't exist until that learner acts — there's nothing to cache.</p>
+        <ul>
+          <li><b>Grading &amp; transcription</b> — always this learner's own words.</li>
+          <li><b>Follow-up question narration</b> in interactive speaking / speaking partner — the question text is generated fresh each session, so its audio can't be pre-made either.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="caveat-inline">
+      <b>Straight answer to "we paid once, right?":</b> for fixed-content narration, only if it was actually pre-generated and the URL saved — that part isn't automatic today, it depends on the content-authoring step being run. For AI-improvised conversation turns, no — that audio can never be one-time by design, since the question itself is new every session.
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Where the recurring money goes</h2>
+      <p class="section-note">Composition of one interactive speaking session — ฿0.89, best case.</p>
+    </div>
+    <div class="comp-card">
+      <div class="comp-bar" role="img" aria-label="Cost composition: reading follow-up questions aloud 53%, transcription 25%, grading 21%, question generation 1%">
+        <div class="comp-seg tts" style="width:53.4%"></div>
+        <div class="comp-seg stt" style="width:24.6%"></div>
+        <div class="comp-seg grading" style="width:20.9%"></div>
+        <div class="comp-seg gen" style="width:1.2%"></div>
+      </div>
+      <div class="legend">
+        <div class="item"><span class="swatch" style="background:var(--accent)"></span><b>Reading the 5 AI follow-ups aloud</b> — ฿0.48 · 53%</div>
+        <div class="item"><span class="swatch" style="background:var(--teal)"></span><b>Transcribing 6 answers</b> — ฿0.22 · 25%</div>
+        <div class="item"><span class="swatch" style="background:var(--blue)"></span><b>Grading the conversation</b> — ฿0.19 · 21%</div>
+        <div class="item"><span class="swatch" style="background:var(--blue-tint)"></span><b>Generating the 5 follow-ups</b> — ฿0.01 · 1%</div>
+      </div>
+    </div>
+    <div class="caveat-inline">This flow has almost no caching leverage: the opening line is the only turn that could ever be reused, and it's one-sixth of the audio. The other five turns are improvised per session, so narrating them is unavoidably recurring.</div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Cost per feature, ranked</h2>
+      <p class="section-note">Every bar below is priced <b>per single use</b> — nothing is multiplied.</p>
+    </div>
+    <div class="ranked">
+      <span class="chart-unit-badge">Unit: satang per single use &nbsp;·&nbsp; 100 satang = ฿1</span>
+
+      <div class="rank-row">
+        <div class="rank-label">Multi-turn speaking report<br><span class="mono" style="font-size:.72rem;color:var(--ink-soft)">interactive + partner</span></div>
+        <div class="rank-track"><div class="rank-fill" style="width:100%"></div></div>
+        <div class="rank-value tnum">18.6 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Writing report</div>
+        <div class="rank-track"><div class="rank-fill" style="width:82.3%"></div></div>
+        <div class="rank-value tnum">15.3 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Speaking report</div>
+        <div class="rank-track"><div class="rank-fill" style="width:59.1%"></div></div>
+        <div class="rank-value tnum">11.0 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Dialogue summary report</div>
+        <div class="rank-track"><div class="rank-fill" style="width:57.0%"></div></div>
+        <div class="rank-value tnum">10.6 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Photo-based reports<br><span class="mono" style="font-size:.72rem;color:var(--ink-soft)">speak &amp; write about photo</span></div>
+        <div class="rank-track"><div class="rank-fill" style="width:53.2%"></div></div>
+        <div class="rank-value tnum">9.9 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Reading a question aloud <span class="mono" style="font-size:.72rem;color:var(--ink-soft)">TTS, if not cached</span></div>
+        <div class="rank-track"><div class="rank-fill tts" style="width:51.1%"></div></div>
+        <div class="rank-value tnum">9.5 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Mini-diagnosis step</div>
+        <div class="rank-track"><div class="rank-fill" style="width:41.4%"></div></div>
+        <div class="rank-value tnum">7.7 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Transcribing an answer <span class="mono" style="font-size:.72rem;color:var(--ink-soft)">STT</span></div>
+        <div class="rank-track"><div class="rank-fill stt" style="width:19.9%"></div></div>
+        <div class="rank-value tnum">3.7 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Mock test — open question</div>
+        <div class="rank-track"><div class="rank-fill" style="width:17.7%"></div></div>
+        <div class="rank-value tnum">3.3 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Mock test — insight summary</div>
+        <div class="rank-track"><div class="rank-fill" style="width:15.6%"></div></div>
+        <div class="rank-value tnum">2.9 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">Study-plan diagnostic grader</div>
+        <div class="rank-track"><div class="rank-fill" style="width:8.1%"></div></div>
+        <div class="rank-value tnum">1.5 satang</div>
+      </div>
+
+      <div class="rank-row">
+        <div class="rank-label">AI follow-up question <span class="mono" style="font-size:.72rem;color:var(--ink-soft)">flash-lite</span></div>
+        <div class="rank-track"><div class="rank-fill gen" style="width:1.1%"></div></div>
+        <div class="rank-value tnum">0.2 satang</div>
+      </div>
+
+      <div class="axis">
+        <div></div>
+        <div class="axis-ticks"><span>0</span><span>5</span><span>10</span><span>15</span><span>18.6 satang</span></div>
+        <div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Full learner journeys</h2>
+      <p class="section-note">What a complete flow costs end to end. Range reflects whether narration is cached.</p>
+    </div>
+    <div class="journeys">
+
+      <div class="journey-card">
+        <div class="name">Interactive speaking</div>
+        <div class="desc">Opening question, 5 AI follow-ups, 6 spoken answers, one final report.</div>
+        <div class="total tnum">฿0.89 <small>· $0.024</small></div>
+        <div class="range-note">up to ฿0.99 if the opening line isn't cached either</div>
+        <div class="mini-bar">
+          <div style="width:53.4%;background:var(--accent)"></div>
+          <div style="width:24.6%;background:var(--teal)"></div>
+          <div style="width:20.9%;background:var(--blue)"></div>
+          <div style="width:1.2%;background:var(--blue-tint)"></div>
+        </div>
+        <div class="breakdown">TTS ฿0.48 · STT ฿0.22 · grading ฿0.19 · questions ฿0.01</div>
+      </div>
+
+      <div class="journey-card">
+        <div class="name">Speaking partner</div>
+        <div class="desc">Free-topic conversation practice — same 6-turn shape as interactive speaking.</div>
+        <div class="total tnum">฿0.89 <small>· $0.024</small></div>
+        <div class="range-note">up to ฿0.99 if the opening line isn't cached either</div>
+        <div class="mini-bar">
+          <div style="width:53.4%;background:var(--accent)"></div>
+          <div style="width:24.6%;background:var(--teal)"></div>
+          <div style="width:20.9%;background:var(--blue)"></div>
+          <div style="width:1.2%;background:var(--blue-tint)"></div>
+        </div>
+        <div class="breakdown">TTS ฿0.48 · STT ฿0.22 · grading ฿0.19 · questions ฿0.01</div>
+      </div>
+
+      <div class="journey-card">
+        <div class="name">Fixed mock test</div>
+        <div class="desc">Full 20-step set — objective items score for free; four open-response items need AI grading.</div>
+        <div class="total tnum">฿0.54 <small>· $0.015</small></div>
+        <div class="range-note">up to ฿0.83 if question narration isn't cached</div>
+        <div class="mini-bar">
+          <div style="width:81.5%;background:var(--blue)"></div>
+          <div style="width:13.0%;background:var(--teal)"></div>
+          <div style="width:5.5%;background:var(--blue-tint)"></div>
+        </div>
+        <div class="breakdown">Grading ฿0.44 · STT ฿0.07 · summary ฿0.03 <span style="opacity:.7">(narration ฿0.29 excluded — reused)</span></div>
+      </div>
+
+      <div class="journey-card">
+        <div class="name">Mini-diagnosis</div>
+        <div class="desc">9-step placement test — same fixed questions for every learner.</div>
+        <div class="total tnum">฿0.30 <small>· $0.008</small></div>
+        <div class="range-note">up to ฿0.59 if question narration isn't cached</div>
+        <div class="mini-bar">
+          <div style="width:73.3%;background:var(--blue)"></div>
+          <div style="width:26.7%;background:var(--teal)"></div>
+        </div>
+        <div class="breakdown">Grading ฿0.22 · STT ฿0.08 <span style="opacity:.7">(narration ฿0.29 excluded — reused)</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="callouts-stack">
+      <div class="callout good">
+        <div class="mark">✓</div>
+        <div>
+          <h3>The biggest lever isn't switching providers — it's confirming caching runs</h3>
+          <p>For fixed-content flows (mock tests, mini-diagnosis, dictation, reading), narration is the largest recurring line item — roughly a third to over half of the per-attempt cost — but it's also the one that's <b>entirely avoidable</b> once it's generated and stored a single time. Worth confirming the admin bulk-generation step actually ran for every fixed question bank, since a skipped step means silently paying full price on every play, forever.</p>
+        </div>
+      </div>
+      <div class="callout critical">
+        <div class="mark">!</div>
+        <div>
+          <h3>The one line item to watch regardless</h3>
+          <p>ElevenLabs, the fallback voice provider, costs roughly <b>20–25× more per clip</b> than Gemini's own text-to-speech — about ฿2.19 versus ฿0.10 — because it bills per character rather than per token. It only fires when Gemini TTS is unavailable or a clip exceeds the length cap, but even one cached Gemini clip is cheaper than one live ElevenLabs clip, so caching and provider choice compound.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <details>
+    <summary>Full rate card &amp; per-feature detail (18 call sites)</summary>
+
+    <div class="tablewrap">
+      <table>
+        <tr><th>Provider / model</th><th class="num">Input</th><th class="num">Output</th><th>Used for</th></tr>
+        <tr><td><span class="provider-tag gemini">Gemini</span> 2.5 Flash (text)</td><td class="num tnum">$0.30 / ฿11.0</td><td class="num tnum">$2.50 / ฿91.3</td><td>Default grader for every report</td></tr>
+        <tr><td><span class="provider-tag gemini">Gemini</span> 2.5 Flash-Lite</td><td class="num tnum">$0.10 / ฿3.7</td><td class="num tnum">$0.40 / ฿14.6</td><td>Follow-up question generation only</td></tr>
+        <tr><td><span class="provider-tag gemini">Gemini</span> 2.5 Flash (audio in)</td><td class="num tnum">$1.00 / ฿36.5</td><td class="num tnum">$2.50 / ฿91.3</td><td>Speech transcription (STT)</td></tr>
+        <tr><td><span class="provider-tag gemini">Gemini</span> 2.5 Flash TTS</td><td class="num tnum">$0.50 / ฿18.3 (text)</td><td class="num tnum">$10.00 / ฿365 (audio)</td><td>Reading questions aloud</td></tr>
+        <tr><td><span class="provider-tag openai">OpenAI</span> gpt-4o-mini</td><td class="num tnum">$0.15 / ฿5.5</td><td class="num tnum">$0.60 / ฿21.9</td><td>Optional fallback grader</td></tr>
+        <tr><td><span class="provider-tag claude">Claude</span> Haiku 4.5</td><td class="num tnum">~$1.00 / ฿36.5</td><td class="num tnum">~$5.00 / ฿182.5</td><td>Optional fallback grader, rarely used</td></tr>
+        <tr><td><span class="provider-tag eleven">ElevenLabs</span> multilingual v2</td><td class="num tnum" colspan="2">~$0.15–0.30 / ฿5.5–11.0 per 1K chars</td><td>Fallback voice synthesis</td></tr>
+      </table>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <tr><th>Feature</th><th>Model</th><th class="num">Cost / use</th><th>Frequency</th><th>Cacheable?</th></tr>
+        <tr><td>Speaking report</td><td>2.5-flash</td><td class="num tnum">฿0.110</td><td>1× / attempt</td><td>No — this learner's answer</td></tr>
+        <tr><td>Speak-about-photo report</td><td>2.5-flash</td><td class="num tnum">฿0.099</td><td>1× / attempt</td><td>No</td></tr>
+        <tr><td>Write-about-photo report</td><td>2.5-flash</td><td class="num tnum">฿0.099</td><td>1× / submission</td><td>No</td></tr>
+        <tr><td>Interactive speaking report (6-turn)</td><td>2.5-flash</td><td class="num tnum">฿0.186</td><td>1× / session</td><td>No</td></tr>
+        <tr><td>Interactive speaking — next question</td><td>2.5-flash-lite</td><td class="num tnum">฿0.002</td><td>5× / session</td><td>No</td></tr>
+        <tr><td>Speaking partner report</td><td>2.5-flash</td><td class="num tnum">฿0.186</td><td>1× / session</td><td>No</td></tr>
+        <tr><td>Speaking partner — next question</td><td>2.5-flash-lite</td><td class="num tnum">฿0.002</td><td>5× / session</td><td>No</td></tr>
+        <tr><td>Dialogue summary report</td><td>2.5-flash</td><td class="num tnum">฿0.106</td><td>1× / attempt</td><td>No</td></tr>
+        <tr><td>Writing report (read-then-write)</td><td>2.5-flash</td><td class="num tnum">฿0.153</td><td>1× / submission</td><td>No</td></tr>
+        <tr><td>Speech transcription (STT)</td><td>2.5-flash (audio)</td><td class="num tnum">฿0.037</td><td>1× / recording</td><td>No — always a new recording</td></tr>
+        <tr><td>Speech synthesis — fixed content (TTS)</td><td>flash-preview-tts</td><td class="num tnum">฿0.095</td><td>1× / narrated prompt</td><td><b>Yes</b> — if the authoring step ran</td></tr>
+        <tr><td>Speech synthesis — AI follow-up question (TTS)</td><td>flash-preview-tts</td><td class="num tnum">฿0.095</td><td>5× / conversation session</td><td>No — text is new every session</td></tr>
+        <tr><td>Speech synthesis — ElevenLabs</td><td>eleven_multilingual_v2</td><td class="num tnum">฿2.19</td><td>1× / prompt, fallback only</td><td>Same rule as Gemini TTS above</td></tr>
+        <tr><td>Mock test — open question grading</td><td>2.5-flash</td><td class="num tnum">฿0.033</td><td>per open item</td><td>No</td></tr>
+        <tr><td>Mock test — insight summary</td><td>2.5-flash</td><td class="num tnum">฿0.029</td><td>1× / completed test</td><td>No</td></tr>
+        <tr><td>Mini-diagnosis — photo-speak step</td><td>2.5-flash (fallback chain)</td><td class="num tnum">฿0.077</td><td>1× / step</td><td>No</td></tr>
+        <tr><td>Mini-diagnosis — speaking step</td><td>2.5-flash (fallback chain)</td><td class="num tnum">฿0.077</td><td>1× / step</td><td>No</td></tr>
+        <tr><td>Study-plan diagnostic grader</td><td>2.5-flash</td><td class="num tnum">฿0.015</td><td>1× / assessment</td><td>No</td></tr>
+      </table>
+    </div>
+
+    <div class="caveat">
+      <b>On these numbers:</b> live pricing pages and a live FX rate weren't reachable from this session, so USD rates are best-known estimates for Gemini 2.5 Flash / Flash-Lite / Flash-TTS, gpt-4o-mini, Claude Haiku 4.5, and ElevenLabs — verify against ai.google.dev/pricing, openai.com/pricing, anthropic.com/pricing and elevenlabs.io/pricing before budgeting on them. THB uses an approximate ฿36.5/$1 rate — check bot.or.th for the current one. Token and audio-length estimates come from reading the prompt-building code, not measured production averages. The "cacheable?" column reflects what the code structurally allows, not confirmation that every fixed question bank has actually had its audio pre-generated — that depends on whether the admin authoring step was run per question. The app's own <code class="mono">api_usage_logs</code> table has actual per-call token counts if exact figures are needed.
+    </div>
+  </details>
+
+  <footer>
+    Compiled 2026-07-06 from src/lib/gemini-*.ts, src/lib/mock-test/, src/lib/study-plan/, src/lib/mini-study/audio-cache.ts, and the corresponding src/app/api routes.
+  </footer>
+
+</div>
+</body>
+</html>

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ConversationSessionClient } from "@/components/conversation/ConversationSessionClient";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { hydrateConversationExamForPlayback } from "@/lib/conversation-audio-hydrate";
 import { getConversationExam } from "@/lib/conversation-storage";
 import type { ConversationDifficulty, ConversationExam } from "@/types/conversation";
@@ -35,18 +36,21 @@ export function ConversationSessionGate({
 
   useEffect(() => {
     let cancelled = false;
-    const raw = getConversationExam(round, difficulty, setNumber);
-    if (raw === null) {
-      setExam(null);
-      return;
-    }
-    void hydrateConversationExamForPlayback(raw)
-      .then((h) => {
+    void (async () => {
+      await ensureCanonicalPracticeContent();
+      if (cancelled) return;
+      const raw = getConversationExam(round, difficulty, setNumber);
+      if (raw === null) {
+        setExam(null);
+        return;
+      }
+      try {
+        const h = await hydrateConversationExamForPlayback(raw);
         if (!cancelled) setExam(h);
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) setExam(raw);
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };

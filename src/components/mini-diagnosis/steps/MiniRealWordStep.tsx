@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { PrimaryButton, SoftCard } from "@/components/mini-diagnosis/steps/ui";
-import { sfxCorrect, sfxTap } from "@/lib/exam-sfx";
+import { sfxCelebrate, sfxTap, sfxTransition } from "@/lib/exam-sfx";
 
 function shuffle<T>(arr: T[]): T[] {
   const out = arr.slice();
@@ -105,6 +105,7 @@ export function MiniRealWordStep({
       fakeWords: round.words.filter((w) => !round.realSet.has(w)),
     };
     if (roundIdx >= configuredRounds - 1) {
+      sfxCelebrate("md");
       onSubmit({
         score160: nextScore,
         detail: {
@@ -118,7 +119,7 @@ export function MiniRealWordStep({
       });
       return;
     }
-    sfxCorrect();
+    sfxTransition();
     setScore(nextScore);
     setRoundSelections((prev) => [...prev, roundSelection]);
     setRoundIdx((x) => x + 1);

@@ -9,6 +9,11 @@ import { contributionVector, macroSkillForTaskType } from "@/lib/mock-test/v2/ta
 import type { PoolQuestionRow } from "@/lib/mock-test/v2/pool-picker";
 import type { RoutingBand, V2ResponseRecord } from "@/lib/mock-test/v2/types";
 
+// Task types whose "answer" is a speech-recognition transcript, not typed text —
+// the fallback grader must never penalize punctuation/capitalization/spelling
+// for these, and must always show a corrected example alongside any criticism.
+const SPOKEN_TASK_TYPES: MockQuestionType[] = ["read_then_speak", "speak_about_photo", "interactive_speaking"];
+
 function normalizeTyped(s: string): string {
   return s
     .trim()
@@ -114,6 +119,7 @@ export async function scoreSlot(
         text,
         `Task type: ${qt}. Score as DET open response (map internally to 0–160 scale).`,
         { userId },
+        { isSpoken: SPOKEN_TASK_TYPES.includes(qt) },
       );
       const score160 = (g.score / 10) * 160;
       taskScore100 = score160ToTask100(score160);

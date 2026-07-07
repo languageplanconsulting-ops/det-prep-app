@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pricing V2 · Clean 3-Tier</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<script>tailwind.config={theme:{extend:{colors:{ep:{blue:'#004AAD',yellow:'#FFCC00'}},fontFamily:{sans:['"IBM Plex Sans Thai"','sans-serif'],mono:['"JetBrains Mono"','monospace']}}}}</script>
+<style>body{background:#f6f7f9}</style>
+</head>
+<body class="font-sans text-slate-800">
+<div class="mx-auto max-w-4xl px-5 py-10">
+  <a href="/pricing-simple-index.html" class="font-mono text-xs font-bold text-slate-400 hover:text-ep-blue">← versions</a>
+  <div class="mt-5 text-center">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900">เลือกแพ็กเกจ</h1>
+    <p class="mt-1.5 text-sm text-slate-500">ทุกแพลนต่อ 30 วัน · เปรียบเทียบแค่ 3 อย่างที่สำคัญ</p>
+  </div>
+
+  <div class="mt-8 grid gap-4 md:grid-cols-3">
+    <!-- Basic -->
+    <div class="flex flex-col rounded-3xl border border-slate-200 bg-white p-6">
+      <h2 class="text-base font-bold text-slate-900">Basic</h2>
+      <p class="mt-0.5 text-xs text-slate-400">เริ่มจริงจัง วัดจุดอ่อน</p>
+      <p class="mt-4 font-mono text-3xl font-bold text-slate-800">฿399</p>
+      <p class="text-xs text-slate-400">/ 30 วัน</p>
+      <dl class="mt-5 space-y-2.5 text-sm">
+        <div class="flex justify-between"><dt class="text-slate-500">ตรวจงาน</dt><dd class="font-semibold text-slate-800">12 ครั้ง</dd></div>
+        <div class="flex justify-between"><dt class="text-slate-500">Mock Test</dt><dd class="font-semibold text-slate-800">2 ครั้ง</dd></div>
+        <div class="flex justify-between"><dt class="text-slate-500">คลังฝึก</dt><dd class="font-semibold text-slate-800">มาตรฐาน</dd></div>
+      </dl>
+      <button class="mt-6 w-full rounded-xl border border-ep-blue/30 py-3 text-sm font-semibold text-ep-blue transition hover:bg-ep-blue/5">เลือก Basic</button>
+    </div>
+
+    <!-- Premium (highlighted) -->
+    <div class="relative flex flex-col rounded-3xl border-2 border-ep-blue bg-white p-6 shadow-xl shadow-ep-blue/10 md:-mt-3 md:mb-3">
+      <span class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-ep-blue px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-ep-yellow">แนะนำ</span>
+      <h2 class="text-base font-bold text-slate-900">Premium</h2>
+      <p class="mt-0.5 text-xs text-slate-400">อัปคะแนนต่อเนื่อง</p>
+      <p class="mt-4 font-mono text-3xl font-bold text-ep-blue">฿699</p>
+      <p class="text-xs text-slate-400">/ 30 วัน</p>
+      <dl class="mt-5 space-y-2.5 text-sm">
+        <div class="flex justify-between"><dt class="text-slate-500">ตรวจงาน</dt><dd class="font-semibold text-ep-blue">30 ครั้ง</dd></div>
+        <div class="flex justify-between"><dt class="text-slate-500">Mock Test</dt><dd class="font-semibold text-ep-blue">4 ครั้ง</dd></div>
+        <div class="flex justify-between"><dt class="text-slate-500">คลังฝึก</dt><dd class="font-semibold text-ep-blue">ครบทุกทักษะ</dd></div>
+      </dl>
+      <button class="mt-6 w-full rounded-xl bg-ep-blue py-3 text-sm font-bold text-white shadow-lg shadow-ep-blue/30 transition hover:bg-[#003a87]">เลือก Premium</button>
+    </div>
+
+    <!-- VIP -->
+    <div class="flex flex-col rounded-3xl border border-slate-200 bg-white p-6">
+      <h2 class="text-base font-bold text-slate-900">VIP</h2>
+      <p class="mt-0.5 text-xs text-slate-400">เตรียมสอบเข้มข้นสุด</p>
+      <p class="mt-4 font-mono text-3xl font-bold text-slate-800">฿999</p>
+      <p class="text-xs text-slate-400">/ 30 วัน</p>
+      <dl class="mt-5 space-y-2.5 text-sm">
+        <div class="flex justify-between"><dt class="text-slate-500">ตรวจงาน</dt><dd class="font-semibold text-slate-800">60 ครั้ง</dd></div>
+        <div class="flex justify-between"><dt class="text-slate-500">Mock Test</dt><dd class="font-semibold text-slate-800">6 ครั้ง</dd></div>
+        <div class="flex justify-between"><dt class="text-slate-500">คลังฝึก</dt><dd class="font-semibold text-slate-800">ไม่จำกัด</dd></div>
+      </dl>
+      <button class="mt-6 w-full rounded-xl border border-ep-blue/30 py-3 text-sm font-semibold text-ep-blue transition hover:bg-ep-blue/5">เลือก VIP</button>
+    </div>
+  </div>
+
+  <div class="mt-6 text-center">
+    <a href="#" class="text-sm text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline">หรือเริ่มฟรี — ลองทุกทักษะอย่างละ 1 ครั้ง →</a>
+  </div>
+  <p class="mt-6 rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-xs text-slate-400">ทำไมแบบนี้ — เหลือแค่ 3 ตัวเลขต่อแพลน (ตรวจงาน · Mock · คลังฝึก) ตัดฟีเจอร์ยาว ๆ ออก · Premium เด่นชัด · Free ลดเป็นลิงก์เล็ก ไม่แย่งความสนใจ</p>
+</div>
+</body>
+</html>

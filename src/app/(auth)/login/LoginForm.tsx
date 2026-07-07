@@ -12,6 +12,7 @@ import {
   authLabel,
 } from "@/lib/auth-ui";
 import { claimBootstrapAdminClient } from "@/lib/claim-bootstrap-admin";
+import { setPreviewTier } from "@/lib/admin-preview";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 function formatLoginError(message: string): string {
@@ -116,7 +117,8 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
         setAdminErr(data.error || "Wrong code");
         return;
       }
-      router.push("/admin");
+      setPreviewTier("vip");
+      router.push("/practice");
       router.refresh();
     } finally {
       setAdminBusy(false);

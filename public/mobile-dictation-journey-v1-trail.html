@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V1 · เส้นทางผจญภัย (Trail)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#004AAD; --blue-dark:#06317A; --blue-soft:#E7EFFF;
+    --yellow:#FFCC00; --yellow-soft:#FFF3CC;
+    --bg:#F6F3EC; --card:#fff; --ink:#1A1A1A; --sub:#6E6A62; --line:#E9E4D8;
+    --green:#1B9E54; --green-soft:#DCF5E6; --red:#DC2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:700;color:var(--ink);padding-top:10px}
+  /* header */
+  .hd{display:flex;align-items:center;gap:10px;padding:8px 16px 12px}
+  .back{width:38px;height:38px;border-radius:99px;background:#fff;border:1px solid #e7e3d8;display:flex;align-items:center;justify-content:center;font-size:22px;color:#16203a}
+  .hd h1{flex:1;text-align:center;font-size:16px;font-weight:800;color:#16203a}
+  .pill{background:#e7f0fc;color:var(--blue);font-size:11px;font-weight:700;padding:6px 12px;border-radius:99px}
+  /* progress banner */
+  .quest{margin:2px 16px 8px;background:linear-gradient(120deg,var(--blue),#0a5bc4);border-radius:24px;padding:16px 18px;color:#fff;position:relative;overflow:hidden;box-shadow:0 12px 24px rgba(0,74,173,.28)}
+  .quest .lvlrow{display:flex;justify-content:space-between;align-items:flex-end}
+  .quest .cap{font-size:11px;font-weight:600;opacity:.85;letter-spacing:.3px}
+  .quest .big{font-size:24px;font-weight:900;line-height:1.1;margin-top:2px}
+  .quest .streak{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:7px 11px;font-size:13px;font-weight:800;display:flex;align-items:center;gap:5px}
+  .qbar{height:9px;background:rgba(255,255,255,.22);border-radius:99px;margin-top:12px;overflow:hidden}
+  .qbar>i{display:block;height:100%;width:38%;background:var(--yellow);border-radius:99px}
+  .quest .sub{font-size:11px;opacity:.9;margin-top:7px;font-weight:500}
+  .star{position:absolute;color:rgba(255,255,255,.13);font-size:80px;right:-14px;top:-18px}
+  /* chapter tabs */
+  .chaps{display:flex;gap:8px;padding:4px 16px 6px;overflow-x:auto}
+  .chip{flex:0 0 auto;background:#E3DDD1;color:var(--sub);font-size:12px;font-weight:700;padding:8px 15px;border-radius:99px;display:flex;align-items:center;gap:6px}
+  .chip.on{background:#fff;color:var(--ink);box-shadow:0 2px 5px rgba(0,0,0,.08)}
+  .chip .dot{width:8px;height:8px;border-radius:99px;background:var(--green)}
+  .chip.lock{opacity:.55}
+  /* trail */
+  .scroll{flex:1;overflow-y:auto;position:relative}
+  .trailwrap{position:relative;padding-bottom:40px}
+  svg.path{position:absolute;top:0;left:0;width:100%;z-index:0}
+  .node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px;z-index:2}
+  .disc{width:64px;height:64px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;position:relative;box-shadow:0 6px 0 rgba(0,0,0,.10)}
+  .disc.done{background:var(--green);color:#fff;box-shadow:0 6px 0 #14683a}
+  .disc.perfect{background:var(--yellow);color:#7a5a00;box-shadow:0 6px 0 #c9a200}
+  .disc.cur{background:#fff;color:var(--blue);border:4px solid var(--blue);box-shadow:0 6px 0 #c8d6ee}
+  .disc.todo{background:#fff;color:#b7b1a3;border:3px solid var(--line);box-shadow:0 6px 0 #e0dbcd}
+  .disc.lock{background:#ece7dc;color:#b7b1a3;box-shadow:0 6px 0 #ddd7c8}
+  .disc small{position:absolute;bottom:-3px;font-size:9px}
+  .nlabel{font-size:10px;font-weight:700;color:var(--sub);background:rgba(255,255,255,.7);padding:1px 7px;border-radius:99px}
+  .avatar{position:absolute;width:44px;height:44px;border-radius:99px;background:var(--yellow);border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:22px;transform:translate(-50%,-50%);z-index:3;box-shadow:0 8px 16px rgba(0,0,0,.2)}
+  .youpin{position:absolute;transform:translate(-50%,-100%);z-index:4;background:var(--ink);color:#fff;font-size:10px;font-weight:800;padding:5px 10px;border-radius:99px;white-space:nowrap}
+  .youpin::after{content:"";position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--ink)}
+  .milestone{position:absolute;transform:translate(-50%,-50%);z-index:2;display:flex;flex-direction:column;align-items:center}
+  .chest{width:56px;height:56px;border-radius:18px;background:var(--yellow-soft);border:2px dashed var(--yellow);display:flex;align-items:center;justify-content:center;font-size:26px}
+  .mlab{font-size:9px;font-weight:800;color:#a9820b;margin-top:3px}
+  .startbtn{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;background:var(--yellow);color:#6a4e00;font-weight:900;font-size:15px;padding:14px 34px;border-radius:99px;z-index:5;box-shadow:0 8px 20px rgba(255,204,0,.5);border:none}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="hd">
+    <div class="back">‹</div>
+    <h1>ตามคำบอก</h1>
+    <div class="pill">แบบฝึก</div>
+  </div>
+
+  <div class="quest">
+    <span class="star">✦</span>
+    <div class="lvlrow">
+      <div>
+        <div class="cap">เส้นทาง · ระดับง่าย</div>
+        <div class="big">ด่านที่ 8 / 20</div>
+      </div>
+      <div class="streak">🔥 3 วันติด</div>
+    </div>
+    <div class="qbar"><i></i></div>
+    <div class="sub">อีก 12 ด่านก็จบระดับนี้ · ทำต่อเลย!</div>
+  </div>
+
+  <div class="chaps">
+    <div class="chip on"><span class="dot"></span>ง่าย · 8/20</div>
+    <div class="chip lock">🔒 ปานกลาง</div>
+    <div class="chip lock">🔒 ยาก</div>
+  </div>
+
+  <div class="scroll">
+    <div class="trailwrap" id="trail" style="height:2166px">
+  <svg class="path" height="2166" viewBox="0 0 390 2166" preserveAspectRatio="none">
+    <path d="M 195.0 70 C 195.0 122, 261.1 122, 261.1 174 C 261.1 226, 282.3 226, 282.3 278 C 282.3 330, 244.1 330, 244.1 382 C 244.1 434, 172.5 434, 172.5 486 C 172.5 538, 116.2 538, 116.2 590 C 116.2 642, 113.5 642, 113.5 694 C 113.5 746, 166.2 746, 166.2 798 C 166.2 850, 238.5 850, 238.5 902 C 238.5 954, 281.2 954, 281.2 1006 C 281.2 1058, 265.3 1058, 265.3 1110 C 265.3 1162, 201.6 1162, 201.6 1214 C 201.6 1266, 133.4 1266, 133.4 1318 C 133.4 1370, 107.1 1370, 107.1 1422 C 107.1 1474, 140.6 1474, 140.6 1526 C 140.6 1578, 211.1 1578, 211.1 1630 C 211.1 1682, 270.6 1682, 270.6 1734 C 270.6 1786, 278.7 1786, 278.7 1838 C 278.7 1890, 229.9 1890, 229.9 1942 C 229.9 1994, 157.4 1994, 157.4 2046" fill="none" stroke="#E4DECF" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 195.0 70 C 195.0 122, 261.1 122, 261.1 174 C 261.1 226, 282.3 226, 282.3 278 C 282.3 330, 244.1 330, 244.1 382 C 244.1 434, 172.5 434, 172.5 486 C 172.5 538, 116.2 538, 116.2 590 C 116.2 642, 113.5 642, 113.5 694 C 113.5 746, 166.2 746, 166.2 798 C 166.2 850, 238.5 850, 238.5 902 C 238.5 954, 281.2 954, 281.2 1006 C 281.2 1058, 265.3 1058, 265.3 1110 C 265.3 1162, 201.6 1162, 201.6 1214 C 201.6 1266, 133.4 1266, 133.4 1318 C 133.4 1370, 107.1 1370, 107.1 1422 C 107.1 1474, 140.6 1474, 140.6 1526 C 140.6 1578, 211.1 1578, 211.1 1630 C 211.1 1682, 270.6 1682, 270.6 1734 C 270.6 1786, 278.7 1786, 278.7 1838 C 278.7 1890, 229.9 1890, 229.9 1942 C 229.9 1994, 157.4 1994, 157.4 2046" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-dasharray="2 22"/>
+  </svg>
+  <div class="node" style="left:195.0px;top:70px"><div class="disc perfect">★</div><div class="nlabel">ชุด 1</div></div>
+  <div class="node" style="left:261.1px;top:174px"><div class="disc done">88<small>%</small></div><div class="nlabel">ชุด 2</div></div>
+  <div class="node" style="left:282.3px;top:278px"><div class="disc perfect">★</div><div class="nlabel">ชุด 3</div></div>
+  <div class="node" style="left:244.1px;top:382px"><div class="disc done">72<small>%</small></div><div class="nlabel">ชุด 4</div></div>
+  <div class="node" style="left:172.5px;top:486px"><div class="disc done">81<small>%</small></div><div class="nlabel">ชุด 5</div></div>
+  <div class="milestone" style="left:268.5px;top:486px"><div class="chest">🎁</div><div class="mlab">ปลดล็อกป้าย!</div></div>
+  <div class="node" style="left:116.2px;top:590px"><div class="disc perfect">★</div><div class="nlabel">ชุด 6</div></div>
+  <div class="node" style="left:113.5px;top:694px"><div class="disc done">64<small>%</small></div><div class="nlabel">ชุด 7</div></div>
+  <div class="node" style="left:166.2px;top:798px"><div class="disc cur">8</div></div>
+  <div class="youpin" style="left:166.2px;top:754px">คุณอยู่ตรงนี้</div>
+  <div class="avatar" style="left:206.2px;top:798px">🧑‍🎓</div>
+  <div class="node" style="left:238.5px;top:902px"><div class="disc todo">9</div><div class="nlabel">ชุด 9</div></div>
+  <div class="node" style="left:281.2px;top:1006px"><div class="disc todo">10</div><div class="nlabel">ชุด 10</div></div>
+  <div class="milestone" style="left:185.2px;top:1006px"><div class="chest">🎁</div><div class="mlab">ครึ่งทาง 🎉</div></div>
+  <div class="node" style="left:265.3px;top:1110px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 11</div></div>
+  <div class="node" style="left:201.6px;top:1214px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 12</div></div>
+  <div class="node" style="left:133.4px;top:1318px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 13</div></div>
+  <div class="node" style="left:107.1px;top:1422px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 14</div></div>
+  <div class="node" style="left:140.6px;top:1526px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 15</div></div>
+  <div class="milestone" style="left:236.6px;top:1526px"><div class="chest">🎁</div><div class="mlab">ด่านโบนัส</div></div>
+  <div class="node" style="left:211.1px;top:1630px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 16</div></div>
+  <div class="node" style="left:270.6px;top:1734px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 17</div></div>
+  <div class="node" style="left:278.7px;top:1838px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 18</div></div>
+  <div class="node" style="left:229.9px;top:1942px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 19</div></div>
+  <div class="node" style="left:157.4px;top:2046px"><div class="disc lock">🔒</div><div class="nlabel">ชุด 20</div></div>
+  <div class="milestone" style="left:253.4px;top:2046px"><div class="chest">🎁</div><div class="mlab">จบระดับ 🏆</div></div>
+    </div>
+    <button class="startbtn" id="startbtn">▶ เริ่มด่านที่ 8</button>
+  </div>
+</div>
+</body>
+</html>

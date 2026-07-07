@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หน้าหลัก · Redesign 3 เวอร์ชัน</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--ink);padding:40px 20px 80px}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:27px;font-weight:900}
+  .lede{color:var(--sub);font-size:14px;margin:10px 0 4px;max-width:730px;line-height:1.7}
+  .diag{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:16px 0 26px;font-size:13px;color:var(--sub);line-height:1.7;max-width:730px}
+  .diag b{color:var(--ink)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px;text-decoration:none;color:inherit;display:block;transition:transform .15s, box-shadow .15s;box-shadow:0 8px 22px rgba(0,0,0,.05)}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.10)}
+  .sw{display:flex;gap:6px;margin-bottom:10px}
+  .sw i{width:22px;height:22px;border-radius:7px;display:inline-block}
+  .tagn{font-size:11px;font-weight:800;color:var(--blue);letter-spacing:.5px}
+  .card h2{font-size:20px;font-weight:900;margin:4px 0 8px}
+  .best{display:inline-block;background:var(--yellow);color:#6a4e00;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;margin-left:6px;vertical-align:middle}
+  .card p{font-size:13px;color:var(--sub);line-height:1.6}
+  ul{margin:12px 0 0;padding-left:18px}
+  li{font-size:12px;color:var(--sub);line-height:1.7}
+  .note{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px}
+  .note h3{font-size:14px;font-weight:900;margin-bottom:10px}
+  .note p{font-size:13px;color:var(--sub);line-height:1.8}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>หน้าหลัก — จัดสี/ดีไซน์/เลย์เอาต์ใหม่ 🎨</h1>
+  <p class="lede">3 แนวทางแก้ให้หน้า หน้าหลัก ดูดีขึ้น + สอดมาสคอตให้ลงตัว (ไม่ใช่แปะเพิ่ม)</p>
+  <div class="diag"><b>ปัญหาที่เห็นในเวอร์ชันก่อน:</b> สีชนกันเยอะ (cream + การ์ดกรมท่า + การ์ดฟ้าสด + พาสเทล 4 สี + เหลือง) ไม่มีลำดับความสำคัญ · การ์ดใหญ่เต็มกว้างซ้อนกันหลายใบ ดูหนัก · มาสคอตเหมือนถูกแปะเข้าไป ทั้ง 3 แบบนี้ <b>คุมจานสีให้แคบลง + จัดลำดับ + รวมการ์ดฮีโรให้เหลือใบเดียว</b></div>
+
+  <div class="grid">
+    <a class="card" href="/mobile-home-redesign-v1-cohesive.html">
+      <div class="sw"><i style="background:#004AAD"></i><i style="background:#FFCC00"></i><i style="background:#F6F3EC;border:1px solid var(--line)"></i><i style="background:#fff;border:1px solid var(--line)"></i></div>
+      <div class="tagn">VERSION 1</div>
+      <h2>Cohesive Blue <span class="best">แนะนำ</span></h2>
+      <p>รวม ทักทาย + สตรีค + เป้า + ปุ่มแบบฝึกประจำวัน ไว้ในฮีโรน้ำเงินใบเดียว (มาสคอตอยู่บนนั้น) · Mini Test เป็นแถวบาง · หมวดเป็นการ์ด<b>ขาว</b>ที่ใส่สีแค่ในไอคอน — สีไม่ตีกัน</p>
+      <ul>
+        <li>คุมสีให้เหลือ น้ำเงิน+เหลือง+ขาว/ครีม</li>
+        <li>ลำดับชัด: ฮีโร 1 ใบ → ทดสอบ → หมวด → Mock</li>
+        <li>สะอาด ดู "ออกแบบมา" · พอร์ตง่าย</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-home-redesign-v2-warm.html">
+      <div class="sw"><i style="background:#2B2620"></i><i style="background:#E0693C"></i><i style="background:#EBE3D2"></i><i style="background:#FFFDF9;border:1px solid var(--line)"></i></div>
+      <div class="tagn">VERSION 2</div>
+      <h2>Warm Minimal</h2>
+      <p>โทนอุ่น พรีเมียม เว้นวรรคเยอะ ตัวอักษรใหญ่ · ฮีโรการ์ดครีมกับมาสคอตตัวใหญ่ · สถิติเป็นแถบบาง ๆ · หมวดเป็น<b>ลิสต์</b>อ่านง่าย ใช้สีน้อยมาก (ครีม/แซนด์/ส้มอิฐจุดเดียว)</p>
+      <ul>
+        <li>ดูแพง สงบ ไม่รก</li>
+        <li>เน้นตัวอักษร/ช่องไฟแทนสีเยอะ ๆ</li>
+        <li>มาสคอตเป็นพระเอกในฮีโร</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-home-redesign-v3-playful.html">
+      <div class="sw"><i style="background:#004AAD"></i><i style="background:#FFCC00"></i><i style="background:#FF6B4A"></i><i style="background:#EEF3FB;border:1px solid var(--line)"></i></div>
+      <div class="tagn">VERSION 3</div>
+      <h2>Bold Playful</h2>
+      <p>สดใสแต่<b>คุมโทน</b> — บล็อกฮีโรน้ำเงินเต็มหัว (มาสคอต+ปุ่มอยู่บนนั้น) แล้วชิปสถิติลอยทับ · ใช้สีหลัก น้ำเงิน+เหลือง + ส้มคอรัลเป็นแอ็กเซนต์เดียว · หมวดชังกี้สีสม่ำเสมอ</p>
+      <ul>
+        <li>สดใส เอนเกจ แต่ไม่มั่ว (จานสีแคบ)</li>
+        <li>แบรนด์เด่น (หัวน้ำเงินเต็ม)</li>
+        <li>เหมาะกลุ่มนักเรียน/วัยรุ่น</li>
+      </ul>
+    </a>
+  </div>
+
+  <div class="note">
+    <h3>เหมือนกันทั้ง 3 แบบ</h3>
+    <p>• คงฟีเจอร์จริงของ HomeScreen (สตรีค/XP, แบบฝึกประจำวัน, Mini Test, 4 หมวด, Mock) &nbsp;•&nbsp; <b>จานสีแคบลง มีลำดับความสำคัญชัด</b> &nbsp;•&nbsp; รวมฮีโรให้เหลือใบเดียว (ไม่ใช่การ์ดใหญ่ซ้อนกันหลายใบ) &nbsp;•&nbsp; มาสคอตอยู่ในฮีโร/หัว อย่างกลมกลืน &nbsp;•&nbsp; ธีมมือถือจริง + ฟอนต์ Prompt<br><br>
+    ต่างกันที่โทน: <b>V1</b> น้ำเงินคุมโทน สะอาด · <b>V2</b> อุ่น–มินิมอล พรีเมียม · <b>V3</b> สดใส–ชังกี้ แบรนด์เด่น &nbsp;— เลือกอันที่ชอบ (ผสมได้) แล้วผมพอร์ตลง <b>HomeScreen.tsx</b> จริง</p>
+  </div>
+</div>
+</body>
+</html>

@@ -86,7 +86,7 @@ WORKFLOW (mandatory):
 Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
 Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
 
-PUNCTUATION POLICY (mandatory): transcripts are from speech recognition — the learner SPOKE, not typed. Completely disregard punctuation, capitalization and sentence boundaries when scoring: never raise or lower ANY subscore because of them, and never list a punctuation/capitalization issue in a breakdown or improvement point.
+PUNCTUATION POLICY (mandatory): transcripts are from speech recognition — the learner SPOKE, not typed. Completely disregard punctuation, capitalization, sentence boundaries, AND spelling when scoring — the transcript's exact spelling and casing were chosen by the speech-recognition engine, not the learner. Never raise or lower ANY subscore because of them, and never list a punctuation, capitalization, or spelling issue in a breakdown or improvement point.
 
 Coherence (ความต่อเนื่อง):
 - ALWAYS recommend specific transitional / linking words in the coherence feedback (e.g. first, then, next, however, because, for example, in addition, finally), naming at least one concrete transition tied to the learner's own wording.
@@ -95,9 +95,15 @@ Coherence (ความต่อเนื่อง):
 
 Task relevancy: how well they engaged with each question and stayed on topic across the scenario.
 
+Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, taskBreakdown) — EVERY item MUST have:
+- excerpt: exact short quote from the punctuated answer containing the issue.
+- issueEn / issueTh: what is wrong (bilingual, spoken-language focus — never punctuation/capitalization/spelling).
+- suggestionEn / suggestionTh: MANDATORY on every single item — the FULL corrected version of the excerpt (a real rewritten sentence or phrase the learner could say instead), never just abstract advice like "use past tense" with no example. If you cannot write a concrete corrected version, do not include that breakdown item at all.
+- grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic that fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple") so the learner knows which rule to revise before reading the explanation.
+
 Priority for feedback:
 - Prioritize grammar corrections first, then vocabulary upgrades.
-- grammarBreakdown should contain up to 8 concrete spoken-language fixes where possible. Each grammarBreakdown item must include grammarTopicTh — a SHORT Thai name of the grammar rule/topic that fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple") so the learner knows which rule to revise before reading the explanation.
+- grammarBreakdown should contain up to 8 concrete spoken-language fixes where possible.
 - Each grammar suggestion should sound natural in conversation, not like formal essay English.
 
 vocabularyUpgradeSuggestions: up to 8 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.

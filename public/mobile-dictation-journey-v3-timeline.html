@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3 · เส้นเวลาเควส (Timeline)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#004AAD; --blue-soft:#E7EFFF; --yellow:#FFCC00; --yellow-soft:#FFF3CC;
+    --bg:#F6F3EC; --card:#fff; --ink:#1A1A1A; --sub:#6E6A62; --line:#E9E4D8;
+    --green:#1B9E54; --green-soft:#DCF5E6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .hd{display:flex;align-items:center;gap:10px;padding:8px 16px 8px}
+  .back{width:38px;height:38px;border-radius:99px;background:#fff;border:1px solid #e7e3d8;display:flex;align-items:center;justify-content:center;font-size:22px;color:#16203a}
+  .hd h1{flex:1;text-align:center;font-size:16px;font-weight:800;color:#16203a}
+  .pill{background:#e7f0fc;color:var(--blue);font-size:11px;font-weight:700;padding:6px 12px;border-radius:99px}
+  /* hero continue card */
+  .hero{margin:4px 16px 10px;background:#fff;border-radius:24px;padding:16px;box-shadow:0 12px 26px rgba(0,0,0,.07);border:1px solid var(--line)}
+  .hero .top{display:flex;align-items:center;gap:12px}
+  .hero .ring{width:56px;height:56px;border-radius:99px;background:conic-gradient(var(--blue) 0 144deg,#E7EFFF 144deg 360deg);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .hero .ring i{width:44px;height:44px;border-radius:99px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--blue);font-style:normal}
+  .hero .k{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.3px}
+  .hero .t{font-size:18px;font-weight:900;color:var(--ink);margin-top:1px}
+  .hero .s{font-size:11px;color:var(--sub);margin-top:2px}
+  .hero .go{margin-top:13px;width:100%;background:var(--yellow);color:#6a4e00;font-weight:900;font-size:15px;padding:13px;border:none;border-radius:99px;box-shadow:0 8px 18px rgba(255,204,0,.45)}
+  .stats{display:flex;gap:8px;margin:0 16px 8px}
+  .stat{flex:1;background:#fff;border:1px solid var(--line);border-radius:16px;padding:9px 6px;text-align:center}
+  .stat b{font-size:16px;font-weight:900;color:var(--ink);display:block}
+  .stat span{font-size:10px;color:var(--sub);font-weight:600}
+  /* chapter tabs */
+  .chaps{display:flex;gap:8px;padding:2px 16px 8px}
+  .chip{flex:1;background:#E3DDD1;color:var(--sub);font-size:12px;font-weight:800;padding:9px 6px;border-radius:13px;text-align:center}
+  .chip.on{background:#fff;color:var(--ink);box-shadow:0 2px 5px rgba(0,0,0,.08)}
+  .chip.lk{opacity:.55}
+  /* timeline */
+  .scroll{flex:1;overflow-y:auto;padding:2px 16px 24px}
+  .band{font-size:11px;font-weight:900;color:var(--sub);letter-spacing:.4px;margin:12px 4px 8px;display:flex;align-items:center;gap:8px}
+  .band::after{content:"";flex:1;height:1px;background:var(--line)}
+  .row{display:flex;gap:12px;position:relative}
+  .rail{width:40px;flex:0 0 auto;display:flex;flex-direction:column;align-items:center}
+  .rail .line{width:3px;flex:1;background:var(--line)}
+  .rail .line.done{background:var(--green)}
+  .rail .line.top{border-radius:99px 99px 0 0}
+  .rail .line.bot{border-radius:0 0 99px 99px}
+  .node{width:34px;height:34px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex:0 0 auto;z-index:2}
+  .node.done{background:var(--green);color:#fff}
+  .node.perfect{background:var(--yellow);color:#7a5a00}
+  .node.cur{background:#fff;color:var(--blue);border:3px solid var(--blue)}
+  .node.todo{background:#fff;color:#b7b1a3;border:2px solid var(--line)}
+  .node.lock{background:#ece7dc;color:#b7b1a3}
+  .card{flex:1;background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+  .card.cur{border-color:var(--blue);border-width:2px;box-shadow:0 8px 20px rgba(0,74,173,.12)}
+  .card.lockc{background:#faf8f3;opacity:.75}
+  .card .ci{flex:1}
+  .card .ct{font-size:14px;font-weight:800;color:var(--ink)}
+  .card .cs{font-size:11px;color:var(--sub);margin-top:2px}
+  .card .cs.g{color:var(--green);font-weight:800}
+  .tag{font-size:10px;font-weight:900;padding:5px 10px;border-radius:99px}
+  .tag.done{background:var(--green-soft);color:#14683a}
+  .tag.perfect{background:var(--yellow-soft);color:#a9820b}
+  .tag.redeem{background:#fff7ed;color:#c2410c;border:1px solid #fdba74}
+  .tag.cur{background:var(--blue);color:#fff}
+  .chev{font-size:20px;color:#c4cbd8}
+  .reward{display:flex;align-items:center;gap:10px;background:var(--yellow-soft);border:1px dashed var(--yellow);border-radius:16px;padding:11px 14px;margin:2px 0 12px 52px}
+  .reward .em{font-size:22px}
+  .reward .rt{font-size:12px;font-weight:800;color:#a9820b}
+  .reward .rs{font-size:10px;color:#b58a1a}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="hd">
+    <div class="back">‹</div>
+    <h1>ตามคำบอก</h1>
+    <div class="pill">แบบฝึก</div>
+  </div>
+
+  <div class="hero">
+    <div class="top">
+      <div class="ring"><i>40%</i></div>
+      <div style="flex:1">
+        <div class="k">ทำต่อจากที่ค้าง</div>
+        <div class="t">ด่านที่ 8</div>
+        <div class="s">ระดับง่าย · เหลืออีก 12 ด่านจบระดับ</div>
+      </div>
+    </div>
+    <button class="go">▶ เริ่มด่านที่ 8</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>8/20</b><span>ผ่านแล้ว</span></div>
+    <div class="stat"><b>79%</b><span>คะแนนเฉลี่ย</span></div>
+    <div class="stat"><b>🔥 3</b><span>วันติด</span></div>
+  </div>
+
+  <div class="chaps">
+    <div class="chip on">ง่าย</div>
+    <div class="chip lk">🔒 ปานกลาง</div>
+    <div class="chip lk">🔒 ยาก</div>
+  </div>
+
+  <div class="scroll" id="tl">
+  <div class="band">บทที่ 1 · ก้าวแรก (ชุด 1–5)</div>
+  <div class="row">
+    <div class="rail"><div class="line top done"></div><div class="node perfect">★</div><div class="line bot done"></div></div>
+    <div class="card"><div class="ci"><div class="ct">ชุดที่ 1</div><div class="cs g">สำเร็จแล้ว · 100%</div></div><span class="tag perfect">★ เต็ม</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top done"></div><div class="node done">✓</div><div class="line bot done"></div></div>
+    <div class="card"><div class="ci"><div class="ct">ชุดที่ 2</div><div class="cs">ทำแล้ว · ได้ 88%</div></div><span class="tag redeem">ทำอีก ↻</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top done"></div><div class="node perfect">★</div><div class="line bot done"></div></div>
+    <div class="card"><div class="ci"><div class="ct">ชุดที่ 3</div><div class="cs g">สำเร็จแล้ว · 100%</div></div><span class="tag perfect">★ เต็ม</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top done"></div><div class="node done">✓</div><div class="line bot done"></div></div>
+    <div class="card"><div class="ci"><div class="ct">ชุดที่ 4</div><div class="cs">ทำแล้ว · ได้ 72%</div></div><span class="tag redeem">ทำอีก ↻</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top done"></div><div class="node done">✓</div><div class="line bot done"></div></div>
+    <div class="card"><div class="ci"><div class="ct">ชุดที่ 5</div><div class="cs">ทำแล้ว · ได้ 81%</div></div><span class="tag redeem">ทำอีก ↻</span></div>
+  </div>
+  <div class="reward"><div class="em">🎁</div><div><div class="rt">ปลดล็อกป้าย "ผู้เริ่มต้น"</div><div class="rs">+50 XP</div></div></div>
+  <div class="band">บทที่ 2 · เก็บให้ครบ (ชุด 6–10)</div>
+  <div class="row">
+    <div class="rail"><div class="line top done"></div><div class="node perfect">★</div><div class="line bot done"></div></div>
+    <div class="card"><div class="ci"><div class="ct">ชุดที่ 6</div><div class="cs g">สำเร็จแล้ว · 100%</div></div><span class="tag perfect">★ เต็ม</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top done"></div><div class="node done">✓</div><div class="line bot done"></div></div>
+    <div class="card"><div class="ci"><div class="ct">ชุดที่ 7</div><div class="cs">ทำแล้ว · ได้ 64%</div></div><span class="tag redeem">ทำอีก ↻</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node cur">8</div><div class="line bot"></div></div>
+    <div class="card cur"><div class="ci"><div class="ct">ชุดที่ 8</div><div class="cs">พร้อมเริ่ม · แตะเพื่อลุย</div></div><span class="tag cur">เริ่ม ▶</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node todo">9</div><div class="line bot"></div></div>
+    <div class="card"><div class="ci"><div class="ct">ชุดที่ 9</div><div class="cs">ยังไม่ได้ทำ</div></div><span class="chev">›</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node todo">10</div><div class="line bot"></div></div>
+    <div class="card"><div class="ci"><div class="ct">ชุดที่ 10</div><div class="cs">ยังไม่ได้ทำ</div></div><span class="chev">›</span></div>
+  </div>
+  <div class="reward"><div class="em">🎁</div><div><div class="rt">ครึ่งทางแล้ว! 🎉</div><div class="rs">ปลดล็อกด่านโบนัส</div></div></div>
+  <div class="band">บทที่ 3 · ท้าทาย (ชุด 11–20)</div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 11</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 12</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 13</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 14</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 15</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 16</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 17</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 18</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 19</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  <div class="row">
+    <div class="rail"><div class="line top"></div><div class="node lock">🔒</div><div class="line bot"></div></div>
+    <div class="card lockc"><div class="ci"><div class="ct">ชุดที่ 20</div><div class="cs">ล็อกอยู่</div></div><span class="chev">🔒</span></div>
+  </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -7,6 +7,30 @@
       "runtimeArgs": ["run", "dev"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "static-previews",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "serve", "public", "-l", "4599"],
+      "port": 4599
+    },
+    {
+      "name": "mobile-web",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8081"],
+      "port": 8081
+    },
+    {
+      "name": "mobile-web-2",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8082"],
+      "port": 8082
+    },
+    {
+      "name": "mobile-web-3",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8083"],
+      "port": 8083
     }
   ]
 }

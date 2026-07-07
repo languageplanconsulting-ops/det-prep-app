@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 
 const SKILLS = new Set([
   "literacy",
@@ -14,7 +14,7 @@ const DIFFICULTIES = new Set(["easy", "medium", "hard"]);
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
+    const supabase = await createRequestSupabase(req);
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
+    const supabase = await createRequestSupabase(req);
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -144,7 +144,7 @@ export async function PATCH(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
+    const supabase = await createRequestSupabase(req);
     const {
       data: { user },
     } = await supabase.auth.getUser();

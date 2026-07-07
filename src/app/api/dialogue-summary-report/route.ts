@@ -7,6 +7,7 @@ import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { recordDataCollectionSubmission } from "@/lib/data-collection";
 import { getAdminAccess } from "@/lib/admin-auth";
 import type { DialogueSummaryExam } from "@/types/dialogue-summary";
 
@@ -63,9 +64,9 @@ export async function POST(req: Request) {
   try {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
-    const userId = await getOptionalAuthUserId();
+    const userId = await getOptionalAuthUserId(req);
     // Admins / preview-eligible accounts don't consume real feedback credits.
-    const adminBypass = (await getAdminAccess()).ok;
+    const adminBypass = (await getAdminAccess(req)).ok;
     if (userId && !adminBypass) {
       const credit = await getAiCreditStateForUser(userId, "dialogue_summary");
       if (!credit.allowed) {
@@ -99,6 +100,17 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Could not apply feedback credit after grading" }, { status: 500 });
       }
     }
+    await recordDataCollectionSubmission({
+      userId,
+      examType: "dialogue_summary",
+      attemptId,
+      promptTitle: exam.titleEn,
+      promptText: exam.titleTh,
+      submittedText: summary,
+      wordCount,
+      score160: report.score160,
+      report,
+    });
     return NextResponse.json(report);
   } catch (e) {
     const message = normalizeGradingErrorMessage(e);

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:audio": "tsx scripts/build-mini-study-audio.ts"
+    "build:audio": "tsx scripts/build-mini-study-audio.ts",
+    "mobile": "cd mobile && npm start",
+    "mobile:ios": "cd mobile && npm run ios"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",

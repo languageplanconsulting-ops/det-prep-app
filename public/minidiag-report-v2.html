@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mini Diagnosis · รายงานผล v2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: { 'ep-blue': '#004AAD', 'ep-yellow': '#FFCC00' },
+        fontFamily: {
+          sans: ['"IBM Plex Sans Thai"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { background:#f5f7fb; }
+  .num { font-family:'JetBrains Mono', monospace; }
+  .bar { transition: width .9s cubic-bezier(.22,1,.36,1); }
+  .ring-track { stroke:#e7e9f0; }
+</style>
+</head>
+<body class="font-sans text-slate-800">
+<div class="max-w-3xl mx-auto px-4 py-8 sm:py-12">
+
+  <!-- header -->
+  <div class="flex items-center gap-3 mb-6">
+    <img src="/mascot-doy.png" alt="พี่ดอย" class="w-11 h-11 object-contain" />
+    <div>
+      <p class="text-xs text-slate-500">Mini Diagnosis · ผลตรวจระดับเบื้องต้น</p>
+      <p class="text-sm font-semibold text-ep-blue">พี่ดอยสรุปให้แล้ว — นี่คือจุดยืนของคุณตอนนี้</p>
+    </div>
+  </div>
+
+  <!-- overall hero -->
+  <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 mb-5 shadow-sm">
+    <div class="flex flex-col sm:flex-row items-center gap-6">
+      <!-- dial -->
+      <div class="relative shrink-0">
+        <svg width="150" height="150" viewBox="0 0 150 150">
+          <circle class="ring-track" cx="75" cy="75" r="64" fill="none" stroke-width="14" />
+          <circle cx="75" cy="75" r="64" fill="none" stroke="#004AAD" stroke-width="14"
+            stroke-linecap="round" stroke-dasharray="402"
+            stroke-dashoffset="149" transform="rotate(-90 75 75)" />
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span class="num text-4xl font-bold text-ep-blue leading-none">105</span>
+          <span class="text-[11px] text-slate-400 mt-1">/ 160</span>
+        </div>
+      </div>
+      <!-- summary -->
+      <div class="flex-1 text-center sm:text-left">
+        <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-ep-yellow/25 text-amber-800 mb-2">
+          ประมาณระดับ B1 · Developing well / กำลังไปได้ดี
+        </span>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          คะแนนรวมโดยประมาณเทียบสเกล DET (10–160). เป้าหมายที่คนส่วนใหญ่ตั้งไว้คือ
+          <span class="num font-semibold text-slate-800">120</span> — คุณห่างอีก
+          <span class="num font-semibold text-ep-blue">15</span> คะแนน
+        </p>
+        <!-- target bar -->
+        <div class="mt-3 relative h-3 rounded-full bg-slate-100 overflow-hidden">
+          <div class="bar h-full rounded-full bg-ep-blue" style="width:65.6%"></div>
+        </div>
+        <div class="relative mt-1 text-[10px] text-slate-400">
+          <span class="absolute" style="left:75%; transform:translateX(-50%)">🎯 เป้า 120</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 DET subscores -->
+  <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 mb-5 shadow-sm">
+    <div class="flex items-baseline justify-between mb-4">
+      <h2 class="font-semibold text-slate-800">4 คะแนนย่อยแบบ DET</h2>
+      <span class="text-[11px] text-slate-400">แต่ละอันจับคู่ 2 ทักษะ</span>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+      <!-- subscore row template -->
+      <div>
+        <div class="flex justify-between items-baseline text-sm mb-1">
+          <span class="font-medium">Literacy <span class="text-slate-400 text-xs">อ่าน+เขียน</span></span>
+          <span class="num font-semibold text-slate-800">112</span>
+        </div>
+        <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="bar h-full rounded-full bg-ep-blue" style="width:70%"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between items-baseline text-sm mb-1">
+          <span class="font-medium">Comprehension <span class="text-slate-400 text-xs">อ่าน+ฟัง</span></span>
+          <span class="num font-semibold text-slate-800">118</span>
+        </div>
+        <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="bar h-full rounded-full bg-ep-blue" style="width:73.75%"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between items-baseline text-sm mb-1">
+          <span class="font-medium">Conversation <span class="text-slate-400 text-xs">ฟัง+พูด</span></span>
+          <span class="num font-semibold text-rose-600">92</span>
+        </div>
+        <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="bar h-full rounded-full bg-rose-500" style="width:57.5%"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between items-baseline text-sm mb-1">
+          <span class="font-medium">Production <span class="text-slate-400 text-xs">เขียน+พูด</span></span>
+          <span class="num font-semibold text-slate-800">98</span>
+        </div>
+        <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="bar h-full rounded-full bg-ep-blue" style="width:61.25%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 skills -->
+  <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 mb-5 shadow-sm">
+    <h2 class="font-semibold text-slate-800 mb-4">4 ทักษะหลัก</h2>
+    <div class="space-y-3">
+      <div>
+        <div class="flex justify-between text-sm mb-1"><span>📖 Reading</span><span class="num font-semibold">120</span></div>
+        <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="bar h-full rounded-full bg-emerald-500" style="width:75%"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm mb-1"><span>🎧 Listening</span><span class="num font-semibold">116</span></div>
+        <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="bar h-full rounded-full bg-emerald-500" style="width:72.5%"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm mb-1"><span>✍️ Writing</span><span class="num font-semibold">104</span></div>
+        <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="bar h-full rounded-full bg-ep-blue" style="width:65%"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <span>🗣️ Speaking <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">แก้ก่อน</span></span>
+          <span class="num font-semibold text-rose-600">80</span>
+        </div>
+        <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="bar h-full rounded-full bg-rose-500" style="width:50%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- strength + focus -->
+  <div class="grid sm:grid-cols-2 gap-4 mb-5">
+    <div class="bg-emerald-50 rounded-2xl border border-emerald-100 p-5">
+      <p class="text-xs font-semibold text-emerald-700 mb-1">✅ จุดแข็ง</p>
+      <p class="font-semibold text-slate-800 mb-1">Reading อยู่ในระดับดี</p>
+      <p class="text-sm text-slate-600">คุณอ่านจับใจความและเดาศัพท์จากบริบทได้แม่น — ใช้เป็นฐานต่อยอดทักษะอื่นได้</p>
+    </div>
+    <div class="bg-rose-50 rounded-2xl border border-rose-100 p-5">
+      <p class="text-xs font-semibold text-rose-700 mb-1">🎯 แก้ก่อนเลย</p>
+      <p class="font-semibold text-slate-800 mb-1">Speaking ต่ำที่สุด (80)</p>
+      <p class="text-sm text-slate-600 mb-3">พูดตะกุกตะกัก จังหวะไม่ต่อเนื่อง — จุดนี้ฉุดคะแนน Conversation ทั้งก้อน</p>
+      <a href="/practice?skill=speaking" class="inline-block text-sm font-semibold text-white bg-ep-blue px-4 py-2 rounded-xl">เริ่มฝึกพูด →</a>
+    </div>
+  </div>
+
+  <!-- per-section review -->
+  <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 mb-5 shadow-sm">
+    <h2 class="font-semibold text-slate-800 mb-1">รายละเอียดรายข้อ (9 ขั้น)</h2>
+    <p class="text-xs text-slate-400 mb-4">คะแนนดิบต่องาน ก่อนถ่วงน้ำหนักเป็นทักษะ</p>
+    <div class="divide-y divide-slate-100">
+      <div class="flex items-center justify-between py-2.5 text-sm"><span>1–2 · Dictation (ฟังแล้วพิมพ์)</span><span class="num font-semibold text-emerald-600">118</span></div>
+      <div class="flex items-center justify-between py-2.5 text-sm"><span>3 · Real English Word</span><span class="num font-semibold text-emerald-600">124</span></div>
+      <div class="flex items-center justify-between py-2.5 text-sm"><span>4 · Vocabulary + Reading</span><span class="num font-semibold text-emerald-600">120</span></div>
+      <div class="flex items-center justify-between py-2.5 text-sm"><span>5–6 · Fill in Blanks</span><span class="num font-semibold text-ep-blue">108</span></div>
+      <div class="flex items-center justify-between py-2.5 text-sm"><span>7 · Interactive Listening</span><span class="num font-semibold text-ep-blue">114</span></div>
+      <div class="flex items-center justify-between py-2.5 text-sm"><span>8 · Write about the Photo</span><span class="num font-semibold text-ep-blue">104</span></div>
+      <div class="flex items-center justify-between py-2.5 text-sm"><span>9 · Read then Speak</span><span class="num font-semibold text-rose-600">80</span></div>
+    </div>
+  </div>
+
+  <!-- honesty footer -->
+  <p class="text-[11px] text-slate-400 text-center leading-relaxed">
+    คะแนนนี้เป็น <b>การประเมินเบื้องต้น</b> จากข้อสอบสั้น ไม่ใช่คะแนน DET จริง —
+    ใช้เพื่อบอกจุดอ่อน/จุดแข็งและวางแผนฝึก คะแนนจะแม่นขึ้นเมื่อระบบเก็บข้อมูลมากขึ้น
+  </p>
+
+</div>
+</body>
+</html>

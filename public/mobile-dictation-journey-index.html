@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey Redesign · ตามคำบอก (3 เวอร์ชัน)</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--ink);padding:40px 20px 80px}
+  .wrap{max-width:900px;margin:0 auto}
+  h1{font-size:28px;font-weight:900}
+  .lede{color:var(--sub);font-size:14px;margin:8px 0 4px;max-width:640px;line-height:1.6}
+  .from{font-size:12px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:16px 0 28px;display:inline-block}
+  .from b{color:var(--blue)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;text-decoration:none;color:inherit;display:block;transition:transform .15s, box-shadow .15s;box-shadow:0 8px 22px rgba(0,0,0,.05)}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.10)}
+  .tagn{font-size:11px;font-weight:900;color:var(--blue);letter-spacing:.5px}
+  .card h2{font-size:19px;font-weight:900;margin:6px 0 8px}
+  .card p{font-size:13px;color:var(--sub);line-height:1.6}
+  .emoji{font-size:36px}
+  .best{display:inline-block;background:var(--yellow);color:#6a4e00;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;margin-left:6px;vertical-align:middle}
+  ul{margin:12px 0 0;padding-left:18px}
+  li{font-size:12px;color:var(--sub);line-height:1.7}
+  .note{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+  .note h3{font-size:14px;font-weight:900;margin-bottom:8px}
+  .note p{font-size:13px;color:var(--sub);line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>เปลี่ยน "ตามคำบอก" ให้เป็นเส้นทางเกม 🎮</h1>
+  <p class="lede">แทนที่จะเป็นแค่รายการชุดข้อสอบเรียงกัน ทั้ง 3 แบบทำให้ผู้เรียนเห็น "เส้นทาง" ที่ชัดเจน — ตัวเองอยู่ตรงไหน, ผ่านมากี่ด่าน, เหลืออีกกี่ด่าน, และมีรางวัลรออยู่ข้างหน้า เพื่อกระตุ้นให้เล่นต่อ</p>
+  <div class="from">📱 ต้นฉบับที่แก้: <b>ExamPractice</b> (มือถือ) — แท็บระดับ ง่าย/ปานกลาง/ยาก + รายการ "รอบที่ 1 · ชุด N" ธรรมดา · ใช้ข้อมูลจริง (สถานะ ยังไม่ทำ / คะแนน% / ✓ เต็ม)</div>
+
+  <div class="grid">
+    <a class="card" href="/mobile-dictation-journey-v1-trail.html">
+      <div class="emoji">🛤️</div>
+      <div class="tagn">VERSION 1</div>
+      <h2>เส้นทางผจญภัย</h2>
+      <p>เส้นทางคดเคี้ยวแนวตั้งแบบ Duolingo — แต่ละด่านเป็นวงกลม มีตัวละคร "คุณอยู่ตรงนี้" กล่องรางวัลตามทาง และหมุดบอกตำแหน่ง</p>
+      <ul>
+        <li>สนุก เห็นความก้าวหน้าเป็นภาพชัดที่สุด</li>
+        <li>ระดับ = "โลก/บท" ที่ปลดล็อกทีละขั้น</li>
+        <li>เหมาะกับกลุ่มที่ชอบเกม · เสี่ยงดู "เด็ก" นิดหน่อย</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-dictation-journey-v2-map.html">
+      <div class="emoji">🗺️</div>
+      <div class="tagn">VERSION 2</div>
+      <h2>แผนที่ผจญภัย</h2>
+      <p>แผนที่เป็นภาพ — แต่ละระดับคือ "โลก" (ทุ่งหญ้า/ทะเลทราย) มีก้อนหินเดินทาง ตัวฮีโร่ ต้นไม้ เมฆ และธงรางวัล</p>
+      <ul>
+        <li>ดูพรีเมียม มีเอกลักษณ์ น่าจดจำ</li>
+        <li>สื่อ "การเดินทางข้ามระดับ" ได้ดี</li>
+        <li>งานภาพเยอะ · ใช้เวลาทำ/ปรับมากกว่าอันอื่น</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-dictation-journey-v3-timeline.html">
+      <div class="emoji">🧭</div>
+      <div class="tagn">VERSION 3</div>
+      <h2>เส้นเวลาเควส <span class="best">แนะนำ</span></h2>
+      <p>ไทม์ไลน์แนวตั้ง — การ์ด "ทำต่อ" ใหญ่ด้านบน + สถิติ (ผ่าน/เฉลี่ย/สตรีค) + ด่านเป็นจุดต่อเส้น จัดเป็น "บท" มีแถบรางวัลคั่น</p>
+      <ul>
+        <li>ยังอ่านง่าย/สแกนเร็ว แบบรายการเดิม แต่เป็นเกม</li>
+        <li>ทำเป็น React Native ได้เร็วสุด (ไม่มี SVG ซับซ้อน)</li>
+        <li>ต่อยอดใช้กับทุกวิชาได้ทันที · ปลอดภัยที่สุด</li>
+      </ul>
+    </a>
+  </div>
+
+  <div class="note">
+    <h3>เหมือนกันทั้ง 3 แบบ (แก่นของการออกแบบ)</h3>
+    <p>• เห็น <b>"คุณอยู่ตรงไหน"</b> และ <b>"เหลืออีกกี่ด่าน"</b> ทันที &nbsp;•&nbsp; แสดง <b>คะแนน% / ✓ เต็ม / REDEEM</b> จากข้อมูลจริง &nbsp;•&nbsp; ระดับ (ง่าย→ยาก) กลายเป็น <b>บท/โลกที่ปลดล็อกต่อกัน</b> &nbsp;•&nbsp; มี <b>สตรีค 🔥 + รางวัล/หมุดหมาย</b> ตามทาง เชื่อมกับระบบ XP ที่มีอยู่แล้ว (gamification.ts) &nbsp;•&nbsp; ปุ่ม <b>"ทำต่อ"</b> เด่นชัดปุ่มเดียว ไม่ต้องเลือกเอง</p>
+  </div>
+</div>
+</body>
+</html>

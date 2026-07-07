@@ -4,18 +4,32 @@ import { cookies } from "next/headers";
 
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-import { SIMPLE_ADMIN_COOKIE, verifySimpleAdminToken } from "@/lib/simple-admin";
+import {
+  SIMPLE_ADMIN_COOKIE,
+  SIMPLE_ADMIN_HEADER,
+  verifySimpleAdminToken,
+} from "@/lib/simple-admin";
 
 export type AdminAccessResult =
   | { ok: true; adminUserId: string; simple: false }
   | { ok: true; adminUserId: null; simple: true }
   | { ok: false };
 
-/** Profile-based admin (Supabase user + role) or simple code cookie — both can call admin APIs. */
-export async function getAdminAccess(): Promise<AdminAccessResult> {
+async function verifySimpleAdminFromRequest(request?: Request): Promise<boolean> {
+  if (request) {
+    const headerToken = request.headers.get(SIMPLE_ADMIN_HEADER)?.trim();
+    if (headerToken && (await verifySimpleAdminToken(headerToken))) {
+      return true;
+    }
+  }
   const cookieStore = await cookies();
   const raw = cookieStore.get(SIMPLE_ADMIN_COOKIE)?.value;
-  if (await verifySimpleAdminToken(raw)) {
+  return verifySimpleAdminToken(raw);
+}
+
+/** Profile-based admin (Supabase user + role) or simple code cookie/header — both can call admin APIs. */
+export async function getAdminAccess(request?: Request): Promise<AdminAccessResult> {
+  if (await verifySimpleAdminFromRequest(request)) {
     return { ok: true, adminUserId: null, simple: true };
   }
 

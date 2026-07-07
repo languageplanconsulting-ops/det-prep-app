@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pricing V1 · One-Plan Focus</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<script>tailwind.config={theme:{extend:{colors:{ep:{blue:'#004AAD',yellow:'#FFCC00'}},fontFamily:{sans:['"IBM Plex Sans Thai"','sans-serif'],mono:['"JetBrains Mono"','monospace']}}}}</script>
+<style>body{background:#f6f7f9}</style>
+</head>
+<body class="font-sans text-slate-800">
+<div class="mx-auto max-w-md px-5 py-10">
+  <a href="/pricing-simple-index.html" class="font-mono text-xs font-bold text-slate-400 hover:text-ep-blue">← versions</a>
+
+  <div class="mt-5 text-center">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900">เลือกแพ็กเกจ</h1>
+    <p class="mt-1.5 text-sm text-slate-500">แพลนเดียวที่เราแนะนำสำหรับการอัปคะแนนต่อเนื่อง</p>
+  </div>
+
+  <!-- the one recommended plan -->
+  <div class="mt-6 overflow-hidden rounded-3xl border-2 border-ep-blue bg-white shadow-xl shadow-ep-blue/10">
+    <div class="flex items-center justify-between bg-ep-blue px-6 py-2.5">
+      <span class="font-mono text-[11px] font-bold uppercase tracking-widest text-ep-yellow">แนะนำ</span>
+      <span class="text-xs font-medium text-white/80">คุ้มที่สุดสำหรับคนตั้งใจ</span>
+    </div>
+    <div class="px-6 py-6">
+      <h2 class="text-lg font-bold text-slate-900">Premium</h2>
+      <p class="mt-0.5 text-sm text-slate-500">เหมาะกับคนที่ต้องการอัปคะแนนแบบต่อเนื่อง</p>
+      <div class="mt-4 flex items-baseline gap-1">
+        <span class="font-mono text-4xl font-bold text-ep-blue">฿699</span>
+        <span class="text-sm text-slate-400">/ 30 วัน</span>
+      </div>
+      <ul class="mt-5 space-y-3">
+        <li class="flex items-start gap-3"><span class="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-ep-blue/10 text-xs font-bold text-ep-blue">✓</span><span class="text-[15px] text-slate-700"><b>เครดิตตรวจงาน 30 ครั้ง</b> — ฟีดแบ็กทันทีต่อข้อ</span></li>
+        <li class="flex items-start gap-3"><span class="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-ep-blue/10 text-xs font-bold text-ep-blue">✓</span><span class="text-[15px] text-slate-700"><b>Mock Test 4 ครั้ง</b> — วัดผลเต็มรูปแบบ + จุดอ่อน</span></li>
+        <li class="flex items-start gap-3"><span class="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-ep-blue/10 text-xs font-bold text-ep-blue">✓</span><span class="text-[15px] text-slate-700"><b>คลังฝึกครบทุกทักษะ</b> — อ่าน 30 · ศัพท์ 30 · Literacy 50 · สนทนา 20</span></li>
+      </ul>
+      <button class="mt-6 w-full rounded-2xl bg-ep-blue py-4 text-[15px] font-bold text-white shadow-lg shadow-ep-blue/30 transition hover:bg-[#003a87]">เลือก Premium · ฿699</button>
+      <p class="mt-2.5 text-center text-xs text-slate-400">จ่ายผ่าน PromptPay · เริ่มใช้ได้ทันที</p>
+    </div>
+  </div>
+
+  <!-- other options collapsed -->
+  <details class="mt-4 rounded-2xl border border-slate-200 bg-white px-5 py-1">
+    <summary class="cursor-pointer list-none py-3.5 text-center text-sm font-semibold text-slate-500">ดูตัวเลือกอื่น ▾</summary>
+    <div class="space-y-2 pb-4">
+      <div class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"><div><p class="text-sm font-semibold text-slate-800">Basic</p><p class="text-xs text-slate-400">ตรวจงาน 12 · Mock 2</p></div><div class="text-right"><p class="font-mono text-sm font-bold text-slate-700">฿399</p><button class="text-xs font-semibold text-ep-blue">เลือก →</button></div></div>
+      <div class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"><div><p class="text-sm font-semibold text-slate-800">VIP</p><p class="text-xs text-slate-400">ตรวจงาน 60 · Mock 6 · คลังฝึกไม่จำกัด</p></div><div class="text-right"><p class="font-mono text-sm font-bold text-slate-700">฿999</p><button class="text-xs font-semibold text-ep-blue">เลือก →</button></div></div>
+      <div class="flex items-center justify-between rounded-xl px-4 py-2"><div><p class="text-sm font-semibold text-slate-600">ฟรี</p><p class="text-xs text-slate-400">ลองทุกทักษะอย่างละ 1 ครั้ง</p></div><button class="text-xs font-semibold text-slate-400">เริ่มฟรี →</button></div>
+    </div>
+  </details>
+
+  <p class="mt-6 text-center text-xs text-slate-400">ยกเลิกได้ทุกเมื่อ · ราคาเป็นแบบ 30 วัน ไม่ตัดต่ออัตโนมัติ</p>
+  <p class="mt-6 rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-xs text-slate-400">ทำไมแบบนี้ — โชว์แพลนเดียวที่แนะนำ ลดทางเลือกจาก 4→1 (Hick's Law) ปุ่มเดียวชัดเจน · คนที่อยากเทียบกดดูเองได้</p>
+</div>
+</body>
+</html>

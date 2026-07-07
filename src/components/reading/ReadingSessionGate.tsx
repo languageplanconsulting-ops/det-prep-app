@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import {
   getReadingExamFromSet,
   getReadingVisibleSetByNumber,
@@ -25,12 +26,20 @@ export function ReadingSessionGate({
   const [exam, setExam] = useState<ReadingExamUnit | null | undefined>(undefined);
 
   useEffect(() => {
-    const set = getReadingVisibleSetByNumber(round, difficulty, setNumber);
-    if (!set) {
-      setExam(null);
-      return;
-    }
-    setExam(getReadingExamFromSet(set, examNumber) ?? null);
+    let cancelled = false;
+    void (async () => {
+      await ensureCanonicalPracticeContent();
+      if (cancelled) return;
+      const set = getReadingVisibleSetByNumber(round, difficulty, setNumber);
+      if (!set) {
+        setExam(null);
+        return;
+      }
+      setExam(getReadingExamFromSet(set, examNumber) ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [round, difficulty, setNumber, examNumber]);
 
   if (exam === undefined) {

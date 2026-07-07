@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>มาสคอตบนหน้า Landing · 3 เวอร์ชัน</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--bg);color:var(--ink);padding:40px 20px 80px}
+  .wrap{max-width:1000px;margin:0 auto}
+  .head{display:flex;align-items:center;gap:18px;margin-bottom:6px}
+  .head img{width:76px;height:76px;border-radius:99px;object-fit:cover;object-position:32% 20%;background:#fff;border:2px solid var(--yellow)}
+  h1{font-size:28px;font-weight:800}
+  .lede{color:var(--sub);font-size:14px;margin:10px 0 4px;max-width:720px;line-height:1.7}
+  .from{font-size:12px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:16px 0 28px;display:inline-block;line-height:1.6}
+  .from b{color:var(--blue)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px;text-decoration:none;color:inherit;display:block;transition:transform .15s, box-shadow .15s;box-shadow:0 8px 22px rgba(0,0,0,.05)}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.10)}
+  .emoji{font-size:34px}
+  .tagn{font-size:11px;font-weight:800;color:var(--blue);letter-spacing:.5px;margin-top:8px}
+  .card h2{font-size:20px;font-weight:800;margin:6px 0 8px}
+  .best{display:inline-block;background:var(--yellow);color:#6a4e00;font-size:10px;font-weight:800;padding:3px 9px;border-radius:99px;margin-left:6px;vertical-align:middle}
+  .card p{font-size:13px;color:var(--sub);line-height:1.6}
+  ul{margin:12px 0 0;padding-left:18px}
+  li{font-size:12px;color:var(--sub);line-height:1.7}
+  .note{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px}
+  .note h3{font-size:14px;font-weight:800;margin-bottom:10px}
+  .note p{font-size:13px;color:var(--sub);line-height:1.8}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <img src="/mascot-doy.png" alt="มาสคอต English Plan">
+    <div>
+      <h1>มาสคอตบนหน้า Landing 🎨</h1>
+      <p class="lede" style="margin-top:4px">3 วิธีเอา "มาสคอตคิด ๆ" มาเป็นหน้าตาของแบรนด์บนหน้าแรก — ต่อยอดจากหน้า Calm Clarity ที่ใช้อยู่ (คงแบรนด์ EP + ไม่มีคำว่า "AI")</p>
+    </div>
+  </div>
+  <div class="from">🖥️ ต้นฉบับที่แก้: <b>landing-clarity-pro</b> (หน้า Landing จริง = <b>AdminLandingPageClient.tsx</b>) · มาสคอตเก็บที่ <b>public/mascot-doy.png</b> · ปุ่มลิงก์ของจริง (/mini-diagnosis/start, /signup, /login)</div>
+
+  <div class="grid">
+    <a class="card" href="/landing-mascot-v1-buddy.html">
+      <div class="emoji">🧑‍🎓</div>
+      <div class="tagn">VERSION 1</div>
+      <h2>Hero Buddy <span class="best">ปลอดภัยสุด</span></h2>
+      <p>มาสคอตเป็น "เพื่อนคู่คิด" ยืนข้างพาดหัวใน Hero — ท่าคิดของมาสคอตเชื่อมกับสาร "หาจุดอ่อน" พอดี มีลูกโป่งความคิด "อ่อนตรงไหนนะ?" แล้วโผล่อีกทีตอนโน้ตฟีดแบ็ก + ปุ่มสุดท้าย</p>
+      <ul>
+        <li>สะอาด สงบ ตรงกับโทน Calm Clarity เดิม</li>
+        <li>เปลี่ยนน้อย เสี่ยงน้อย พอร์ตง่ายสุด</li>
+        <li>ให้ความรู้สึกอบอุ่น เข้าถึงง่าย</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/landing-mascot-v2-coach.html">
+      <div class="emoji">💬</div>
+      <div class="tagn">VERSION 2</div>
+      <h2>Coach (พูดนำทาง)</h2>
+      <p>มาสคอต (ตั้งชื่อชั่วคราวว่า "น้องแพลน") เป็นโค้ชที่พูดนำทางทั้งหน้า — Hero เป็นลูกโป่งคำพูดบอก value prop, แต่ละหัวข้อมีมาสคอตพูดเกริ่นสั้น ๆ โทนครีมอบอุ่น</p>
+      <ul>
+        <li>มีบุคลิก/เสียงชัด สร้างความผูกพันกับแบรนด์</li>
+        <li>ลดความกลัวของผู้เรียน (empathy-first)</li>
+        <li>ผูกกับ "น้องแพลน" เป็นตัวละครประจำแอปได้</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/landing-mascot-v3-playful.html">
+      <div class="emoji">✨</div>
+      <div class="tagn">VERSION 3</div>
+      <h2>Playful (โผล่ทั้งหน้า)</h2>
+      <p>มาสคอตเป็นตัวการ์ตูนสนุก ๆ ที่โผล่ทั่วหน้า — เด้งใน Hero พร้อมสติกเกอร์ "+25 คะแนน 🎉", โผล่ขอบการ์ด, รีแอกต์ข้างผลสอบ พื้นจุด ๆ สดใส สไตล์ Gen-Z</p>
+      <ul>
+        <li>สะดุดตา จำง่าย เอนเกจสูง</li>
+        <li>เหมาะกลุ่มนักเรียน/วัยรุ่น</li>
+        <li>เสี่ยงดู "เล่น" เกินถ้าใช้เยอะไป · ต้องคุมพอดี</li>
+      </ul>
+    </a>
+  </div>
+
+  <div class="note">
+    <h3>เหมือนกันทั้ง 3 แบบ</h3>
+    <p>• ใช้ <b>มาสคอตตัวเดียวกัน</b> (public/mascot-doy.png พื้นหลังโปร่ง) ทั้งหน้า &nbsp;•&nbsp; คงพาดหัว/สาร/ปุ่มจริงจากหน้า Calm Clarity ที่ใช้อยู่ &nbsp;•&nbsp; วางมาสคอตใน <b>Hero + โน้ตฟีดแบ็ก + ปุ่มสุดท้าย</b> เป็นอย่างน้อย &nbsp;•&nbsp; <b>ไม่มีคำว่า "AI"</b> — ฟีดแบ็กคือ "ระบบ/ฐานข้อมูล 6 ปีของ English Plan"<br><br>
+    ต่างกันที่ <b>บทบาทของมาสคอต</b>: V1 เพื่อนคู่คิด (นิ่ง สวย) · V2 โค้ชที่พูดนำ (มีเสียง อบอุ่น) · V3 ตัวการ์ตูนสนุก (สติกเกอร์ เด้ง)<br><br>
+    <b>หมายเหตุ:</b> ชื่อ "น้องแพลน" ใน V2 เป็นชื่อตั้งชั่วคราว — บอกได้ว่าอยากใช้ชื่ออะไร &nbsp;·&nbsp; มาสคอตปัจจุบันเป็นภาพครึ่งตัว/หน้า ถ้าจะใช้จริงควรมีเวอร์ชัน <b>เต็มตัว + หลายท่าทาง</b> (ยิ้ม/ชูนิ้ว/ดีใจ) เพื่อความหลากหลาย เลือกเวอร์ชันที่ชอบแล้วผมพอร์ตลง <b>AdminLandingPageClient.tsx</b> ให้จริง</p>
+  </div>
+</div>
+</body>
+</html>

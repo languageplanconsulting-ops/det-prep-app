@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pricing V3 · Toggle Card</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<script>tailwind.config={theme:{extend:{colors:{ep:{blue:'#004AAD',yellow:'#FFCC00'}},fontFamily:{sans:['"IBM Plex Sans Thai"','sans-serif'],mono:['"JetBrains Mono"','monospace']}}}}</script>
+<style>body{background:#f6f7f9}</style>
+</head>
+<body class="font-sans text-slate-800">
+<div class="mx-auto max-w-md px-5 py-10">
+  <a href="/pricing-simple-index.html" class="font-mono text-xs font-bold text-slate-400 hover:text-ep-blue">← versions</a>
+  <div class="mt-5 text-center">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900">เลือกแพ็กเกจ</h1>
+    <p class="mt-1.5 text-sm text-slate-500">เลื่อนดูทีละแพลน — เทียบง่าย ไม่ต้องอ่านทั้งตาราง</p>
+  </div>
+
+  <!-- segmented toggle -->
+  <div id="seg" class="mt-6 grid grid-cols-3 gap-1 rounded-2xl bg-slate-200/70 p-1">
+    <button data-plan="basic" class="seg rounded-xl py-2.5 text-sm font-semibold text-slate-500 transition">Basic</button>
+    <button data-plan="premium" class="seg rounded-xl bg-white py-2.5 text-sm font-bold text-ep-blue shadow-sm transition">Premium</button>
+    <button data-plan="vip" class="seg rounded-xl py-2.5 text-sm font-semibold text-slate-500 transition">VIP</button>
+  </div>
+
+  <div class="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-white">
+    <div id="rec" class="bg-ep-blue px-6 py-2 text-center font-mono text-[11px] font-bold uppercase tracking-widest text-ep-yellow">แนะนำ</div>
+    <div class="px-6 py-6">
+      <h2 id="pName" class="text-lg font-bold text-slate-900">Premium</h2>
+      <p id="pDesc" class="mt-0.5 text-sm text-slate-500">อัปคะแนนต่อเนื่อง</p>
+      <div class="mt-4 flex items-baseline gap-1"><span id="pPrice" class="font-mono text-4xl font-bold text-ep-blue">฿699</span><span class="text-sm text-slate-400">/ 30 วัน</span></div>
+      <div class="mt-5 grid grid-cols-3 gap-2 text-center">
+        <div class="rounded-2xl bg-slate-50 py-3"><p id="pFb" class="font-mono text-xl font-bold text-slate-900">30</p><p class="text-[11px] text-slate-400">ตรวจงาน</p></div>
+        <div class="rounded-2xl bg-slate-50 py-3"><p id="pMock" class="font-mono text-xl font-bold text-slate-900">4</p><p class="text-[11px] text-slate-400">Mock Test</p></div>
+        <div class="rounded-2xl bg-slate-50 py-3"><p id="pLane" class="font-mono text-sm font-bold text-slate-900 leading-loose">ครบ</p><p class="text-[11px] text-slate-400">คลังฝึก</p></div>
+      </div>
+      <button id="pCta" class="mt-6 w-full rounded-2xl bg-ep-blue py-4 text-[15px] font-bold text-white shadow-lg shadow-ep-blue/30 transition hover:bg-[#003a87]">เลือก Premium · ฿699</button>
+      <p class="mt-2.5 text-center text-xs text-slate-400">จ่ายผ่าน PromptPay · เริ่มใช้ทันที</p>
+    </div>
+  </div>
+
+  <div class="mt-5 text-center"><a href="#" class="text-sm text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline">หรือเริ่มฟรี — ลองทุกทักษะอย่างละ 1 ครั้ง →</a></div>
+  <p class="mt-6 rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-xs text-slate-400">ทำไมแบบนี้ — การ์ดเดียวที่สลับด้วยปุ่ม โชว์ทีละแพลน 3 ตัวเลขใหญ่ ๆ อ่านง่ายมาก เหมาะกับมือถือ ไม่มีกำแพง 4 คอลัมน์</p>
+</div>
+
+<script>
+  const DATA = {
+    basic:   { name:"Basic",   desc:"เริ่มจริงจัง วัดจุดอ่อน",     price:"฿399", fb:"12", mock:"2", lane:"มาตรฐาน", rec:false },
+    premium: { name:"Premium", desc:"อัปคะแนนต่อเนื่อง",          price:"฿699", fb:"30", mock:"4", lane:"ครบ",     rec:true  },
+    vip:     { name:"VIP",     desc:"เตรียมสอบเข้มข้นสุด",         price:"฿999", fb:"60", mock:"6", lane:"ไม่จำกัด", rec:false },
+  };
+  const $ = (id) => document.getElementById(id);
+  function render(plan){
+    const d = DATA[plan];
+    $("pName").textContent=d.name; $("pDesc").textContent=d.desc; $("pPrice").textContent=d.price;
+    $("pFb").textContent=d.fb; $("pMock").textContent=d.mock; $("pLane").textContent=d.lane;
+    $("pCta").textContent=`เลือก ${d.name} · ${d.price}`;
+    $("rec").style.display = d.rec ? "block" : "none";
+    document.querySelectorAll(".seg").forEach(b=>{
+      const on = b.dataset.plan===plan;
+      b.className = "seg rounded-xl py-2.5 text-sm transition " + (on ? "bg-white font-bold text-ep-blue shadow-sm" : "font-semibold text-slate-500");
+    });
+  }
+  document.querySelectorAll(".seg").forEach(b=> b.addEventListener("click",()=>render(b.dataset.plan)));
+  render("premium");
+</script>
+</body>
+</html>

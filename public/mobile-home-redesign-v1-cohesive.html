@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หน้าหลัก · Redesign V1 (Cohesive)</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-dk:#06317A;--blue-soft:#E7EFFF;--navy:#0a1f44;--yellow:#FFCC00;--yellow-soft:#FFF3CC;
+    --bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8;--green:#1B9E54;
+    --mint:#D9F2E6;--mint-ink:#1B7A4B;--peach:#FCE3D2;--peach-ink:#B45A28;--lilac:#E7E0FA;--lilac-ink:#6B45C7;--sky:#D9EAFB;--sky-ink:#1466B8}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .scroll{flex:1;overflow-y:auto;padding-bottom:12px}
+  /* header */
+  .hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px}
+  .hd .l{display:flex;align-items:center;gap:11px}
+  .mava{width:42px;height:42px;border-radius:99px;object-fit:cover;object-position:32% 18%;background:#fff;border:2px solid var(--yellow)}
+  .greet{font-size:13px;color:var(--sub);font-weight:600}
+  .name{font-size:17px;font-weight:900;color:var(--ink);margin-top:-2px}
+  .settings{width:40px;height:40px;border-radius:99px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px}
+  /* ONE cohesive hero: greeting + streak + goal + daily CTA + mascot */
+  .hero{margin:6px 18px 0;background:var(--blue);border-radius:28px;padding:20px;position:relative;overflow:hidden;box-shadow:0 16px 34px rgba(0,74,173,.26)}
+  .hero .deco{position:absolute;right:-30px;top:-30px;width:150px;height:150px;background:rgba(255,255,255,.06);border-radius:99px}
+  .hero .top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
+  .hero .k{font-size:12px;font-weight:700;color:rgba(255,255,255,.8)}
+  .hero .h{font-size:21px;font-weight:900;color:#fff;line-height:1.3;margin-top:2px}
+  .hero img{width:88px;height:88px;object-fit:contain;margin:-6px -6px -12px 0}
+  .hero .chips{display:flex;gap:8px;margin-top:14px;position:relative;z-index:1}
+  .hero .chip{background:rgba(255,255,255,.14);border-radius:12px;padding:7px 11px;display:flex;align-items:center;gap:6px}
+  .hero .chip b{font-size:14px;font-weight:900;color:#fff}
+  .hero .chip span{font-size:10px;color:#c9d8f5;font-weight:700}
+  .hero .goal{margin-top:12px;position:relative;z-index:1}
+  .hero .goal .gt{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:6px}
+  .hero .gbar{height:7px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden}
+  .hero .gbar i{display:block;height:100%;width:12%;background:var(--yellow);border-radius:99px}
+  .hero .cta{margin-top:15px;width:100%;background:var(--yellow);color:#3a2e00;font-size:15px;font-weight:900;padding:13px;border:none;border-radius:99px;position:relative;z-index:1}
+  /* secondary: mini test slim */
+  .mini{margin:14px 18px 0;background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:13px;box-shadow:0 8px 20px rgba(0,0,0,.04)}
+  .mini .ic{width:44px;height:44px;border-radius:14px;background:var(--yellow-soft);display:flex;align-items:center;justify-content:center;font-size:22px}
+  .mini .t{flex:1}
+  .mini .t b{font-size:15px;font-weight:900;color:var(--ink);display:block}
+  .mini .t span{font-size:11.5px;color:var(--sub)}
+  .mini .free{font-size:10px;font-weight:800;color:var(--green);background:var(--green-soft,#DCF5E6);padding:3px 9px;border-radius:99px}
+  .mini .go{font-size:20px;color:#c4cbd8}
+  /* sections */
+  .sec{padding:0 20px;margin:24px 0 12px;display:flex;justify-content:space-between;align-items:center}
+  .sec h2{font-size:17px;font-weight:900;color:var(--ink)}
+  .sec a{font-size:12.5px;font-weight:700;color:var(--sub)}
+  /* categories: unified WHITE cards + colored icon chip (color lives only in the chip) */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:0 20px}
+  .cat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:9px;box-shadow:0 6px 16px rgba(0,0,0,.04);min-width:0}
+  .cat .chip{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;flex:0 0 auto}
+  .cat b{font-size:14px;font-weight:900;color:var(--ink);display:block}
+  .cat span{font-size:11px;color:var(--sub);font-weight:600}
+  /* mock */
+  .hrow{display:flex;gap:12px;padding:0 20px 10px;overflow-x:auto}
+  .mock{width:148px;flex:0 0 auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px}
+  .mock .th{height:74px;border-radius:13px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:10px}
+  .mock .mt{font-size:13px;font-weight:800;color:var(--ink);line-height:1.35}
+  .mock .tag{font-size:11px;font-weight:800;color:var(--blue);margin-top:7px}
+  .tabs{display:flex;border-top:1px solid var(--line);background:#fff;padding:8px 0 10px}
+  .tab{flex:1;text-align:center;font-size:10.5px;font-weight:700;color:#b7b1a3}
+  .tab .ti{font-size:18px;display:block;margin-bottom:2px}
+  .tab.on{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="scroll">
+    <div class="hd">
+      <div class="l">
+        <img class="mava" src="/mascot-doy.png" alt="">
+        <div><div class="greet">สวัสดีตอนเช้า 👋</div><div class="name">พร้อมฝึกวันนี้ยัง?</div></div>
+      </div>
+      <div class="settings">⚙️</div>
+    </div>
+
+    <!-- ONE cohesive hero -->
+    <div class="hero">
+      <div class="deco"></div>
+      <div class="top">
+        <div>
+          <div class="k">แบบฝึกที่แนะนำวันนี้</div>
+          <div class="h">แบบฝึกประจำวัน<br>สุ่มชุดที่ดีที่สุดให้คุณ</div>
+        </div>
+        <img src="/mascot-doy.png" alt="มาสคอต">
+      </div>
+      <div class="chips">
+        <div class="chip"><b>🔥 1</b><span>วันติด</span></div>
+        <div class="chip"><b>⭐ Lv.1</b><span>11 XP</span></div>
+      </div>
+      <div class="goal">
+        <div class="gt"><span>เป้าวันนี้</span><span>0 / 30 XP</span></div>
+        <div class="gbar"><i></i></div>
+      </div>
+      <button class="cta">▶ เริ่มเลย</button>
+    </div>
+
+    <div class="mini">
+      <div class="ic">🎯</div>
+      <div class="t"><b>Mini Test · วินิจฉัยจุดอ่อน</b><span>วัดระดับเร็ว ๆ ใน 15 นาที</span></div>
+      <span class="free">ฟรี</span>
+      <span class="go">›</span>
+    </div>
+
+    <div class="sec"><h2>หมวดแบบฝึก</h2><a>ดูทั้งหมด ›</a></div>
+    <div class="grid">
+      <div class="cat"><div class="chip" style="background:var(--mint)">✍️</div><div><b>Literacy</b><span>อ่าน–เขียน</span></div></div>
+      <div class="cat"><div class="chip" style="background:var(--peach)">📖</div><div><b>Comprehension</b><span>ความเข้าใจ</span></div></div>
+      <div class="cat"><div class="chip" style="background:var(--lilac)">💬</div><div><b>Conversation</b><span>บทสนทนา</span></div></div>
+      <div class="cat"><div class="chip" style="background:var(--sky)">🎤</div><div><b>Production</b><span>พูด–เขียน</span></div></div>
+    </div>
+
+    <div class="sec"><h2>Mock Test</h2><a>ดูทั้งหมด ›</a></div>
+    <div class="hrow">
+      <div class="mock"><div class="th">📋</div><div class="mt">June 2026 · Set A</div><div class="tag">● เริ่มเลย</div></div>
+      <div class="mock"><div class="th">📋</div><div class="mt">June 2026 · Set B</div><div class="tag">● เริ่มเลย</div></div>
+      <div class="mock"><div class="th">📋</div><div class="mt">May 2026 · Set A</div><div class="tag" style="color:var(--green)">✓ ทำแล้ว</div></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on"><span class="ti">🏠</span>หน้าหลัก</div>
+    <div class="tab"><span class="ti">✏️</span>แบบฝึก</div>
+    <div class="tab"><span class="ti">📝</span>Mock Test</div>
+    <div class="tab"><span class="ti">📒</span>โน้ต</div>
+    <div class="tab"><span class="ti">👤</span>บัญชี</div>
+  </div>
+</div>
+</body>
+</html>

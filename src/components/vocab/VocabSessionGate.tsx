@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { getVocabPassageFromSet, getVocabVisibleSetByNumber } from "@/lib/vocab-storage";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import type { VocabPassageUnit, VocabRoundNum, VocabSessionLevel } from "@/types/vocab";
@@ -22,12 +23,20 @@ export function VocabSessionGate({
   const [passage, setPassage] = useState<VocabPassageUnit | null | undefined>(undefined);
 
   useEffect(() => {
-    const set = getVocabVisibleSetByNumber(setNumber, round);
-    if (!set) {
-      setPassage(null);
-      return;
-    }
-    setPassage(getVocabPassageFromSet(set, passageNumber) ?? null);
+    let cancelled = false;
+    void (async () => {
+      await ensureCanonicalPracticeContent();
+      if (cancelled) return;
+      const set = getVocabVisibleSetByNumber(setNumber, round);
+      if (!set) {
+        setPassage(null);
+        return;
+      }
+      setPassage(getVocabPassageFromSet(set, passageNumber) ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [round, setNumber, passageNumber]);
 
   const setListHref = `/practice/comprehension/vocabulary/round/${round}/${setNumber}/${sessionLevel}`;

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หน้าหลัก · Redesign V3 (Bold Playful)</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-dk:#06317A;--blue-soft:#E7EFFF;--yellow:#FFCC00;
+    --bg:#EEF3FB;--card:#FFFFFF;--ink:#141B2E;--sub:#6B7185;--line:#E4E9F2;--green:#1B9E54;--coral:#FF6B4A}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .scroll{flex:1;overflow-y:auto;padding-bottom:12px}
+  /* blue hero block — full brand presence, everything on it */
+  .top{background:var(--blue);border-radius:0 0 32px 32px;padding:14px 20px 24px;position:relative;overflow:hidden}
+  .top .deco{position:absolute;right:-40px;top:-20px;width:170px;height:170px;background:rgba(255,255,255,.06);border-radius:99px}
+  .hd{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+  .hd .l{display:flex;align-items:center;gap:10px}
+  .mava{width:40px;height:40px;border-radius:99px;object-fit:cover;object-position:32% 18%;background:#fff;border:2px solid var(--yellow)}
+  .hd .g{font-size:12px;color:rgba(255,255,255,.8);font-weight:600}
+  .hd .n{font-size:15px;font-weight:900;color:#fff;margin-top:-2px}
+  .hd .vip{background:var(--yellow);color:#3a2e00;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;margin-left:4px}
+  .hd .set{width:38px;height:38px;border-radius:99px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:16px}
+  /* hero card inside blue */
+  .herocard{margin-top:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:16px;display:flex;align-items:center;gap:6px;position:relative;z-index:1}
+  .herocard .t{flex:1}
+  .herocard .rec{display:inline-block;background:var(--yellow);color:#3a2e00;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;margin-bottom:8px}
+  .herocard h3{font-size:18px;font-weight:900;color:#fff;line-height:1.3}
+  .herocard .cta{margin-top:12px;display:inline-block;background:var(--yellow);color:#3a2e00;font-size:13px;font-weight:900;padding:10px 18px;border-radius:99px}
+  .herocard img{width:96px;height:96px;object-fit:contain;margin:-6px -4px -12px 0}
+  /* stat chips row overlapping */
+  .chips{display:flex;gap:9px;padding:14px 20px 0}
+  .chip{flex:1;background:var(--card);border-radius:16px;padding:11px 8px;text-align:center;box-shadow:0 6px 16px rgba(20,27,46,.06)}
+  .chip .v{font-size:16px;font-weight:900;color:var(--ink)}
+  .chip .l{font-size:10px;color:var(--sub);font-weight:700;margin-top:1px}
+  .chip.goal .v{color:var(--blue)}
+  .sec{padding:0 20px;margin:22px 0 12px;display:flex;justify-content:space-between;align-items:center}
+  .sec h2{font-size:17px;font-weight:900;color:var(--ink)}
+  .sec a{font-size:12.5px;font-weight:700;color:var(--sub)}
+  /* mini test coral accent for contrast */
+  .mini{margin:0 20px;background:var(--card);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:13px;box-shadow:0 8px 20px rgba(20,27,46,.05)}
+  .mini .ic{width:46px;height:46px;border-radius:14px;background:#FFEDE7;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .mini .t{flex:1}
+  .mini .t b{font-size:15px;font-weight:900;color:var(--ink);display:block}
+  .mini .t span{font-size:11.5px;color:var(--sub)}
+  .mini .free{font-size:10px;font-weight:900;color:#fff;background:var(--coral);padding:4px 10px;border-radius:99px}
+  /* categories: chunky, consistent 2-tone */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:0 20px}
+  .cat{border-radius:20px;padding:16px;position:relative;overflow:hidden;min-height:96px;display:flex;flex-direction:column;justify-content:flex-end}
+  .cat .ic{position:absolute;top:12px;right:12px;font-size:30px;opacity:.9}
+  .cat b{font-size:15px;font-weight:900;display:block}
+  .cat span{font-size:11px;font-weight:700;opacity:.75}
+  .hrow{display:flex;gap:12px;padding:0 20px 10px;overflow-x:auto}
+  .mock{width:148px;flex:0 0 auto;background:var(--card);border-radius:18px;padding:12px;box-shadow:0 6px 16px rgba(20,27,46,.05)}
+  .mock .th{height:74px;border-radius:13px;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:10px}
+  .mock .mt{font-size:13px;font-weight:800;color:var(--ink);line-height:1.35}
+  .mock .tag{font-size:11px;font-weight:800;color:var(--blue);margin-top:7px}
+  .tabs{display:flex;border-top:1px solid var(--line);background:var(--card);padding:8px 0 10px}
+  .tab{flex:1;text-align:center;font-size:10.5px;font-weight:700;color:#aab0c0}
+  .tab .ti{font-size:18px;display:block;margin-bottom:2px}
+  .tab.on{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="scroll">
+    <div class="top">
+      <div class="deco"></div>
+      <div class="hd">
+        <div class="l">
+          <img class="mava" src="/mascot-doy.png" alt="">
+          <div><div class="g">สวัสดีตอนเช้า 👋</div><div class="n">พร้อมลุยยัง? <span class="vip">VIP</span></div></div>
+        </div>
+        <div class="set">⚙️</div>
+      </div>
+      <div class="herocard">
+        <div class="t">
+          <div class="rec">⭐ แนะนำวันนี้</div>
+          <h3>แบบฝึกประจำวัน<br>สุ่มชุดที่ดีที่สุดให้คุณ</h3>
+          <div class="cta">เริ่มเลย →</div>
+        </div>
+        <img src="/mascot-doy.png" alt="มาสคอต">
+      </div>
+    </div>
+
+    <div class="chips">
+      <div class="chip"><div class="v">🔥 1</div><div class="l">วันติด</div></div>
+      <div class="chip"><div class="v">⭐ Lv.1</div><div class="l">11 XP</div></div>
+      <div class="chip goal"><div class="v">0/30</div><div class="l">เป้าวันนี้</div></div>
+    </div>
+
+    <div class="sec"><h2>เริ่มจากตรงนี้</h2></div>
+    <div class="mini">
+      <div class="ic">🎯</div>
+      <div class="t"><b>Mini Test · วินิจฉัยจุดอ่อน</b><span>วัดระดับเร็ว ๆ ใน 15 นาที</span></div>
+      <span class="free">ฟรี</span>
+    </div>
+
+    <div class="sec"><h2>หมวดแบบฝึก</h2><a>ดูทั้งหมด ›</a></div>
+    <div class="grid">
+      <div class="cat" style="background:#D9F2E6;color:#1B7A4B"><span class="ic">✍️</span><b>Literacy</b><span>อ่าน–เขียน</span></div>
+      <div class="cat" style="background:#FCE3D2;color:#B45A28"><span class="ic">📖</span><b>Comprehension</b><span>ความเข้าใจ</span></div>
+      <div class="cat" style="background:#E7E0FA;color:#6B45C7"><span class="ic">💬</span><b>Conversation</b><span>บทสนทนา</span></div>
+      <div class="cat" style="background:#D9EAFB;color:#1466B8"><span class="ic">🎤</span><b>Production</b><span>พูด–เขียน</span></div>
+    </div>
+
+    <div class="sec"><h2>Mock Test</h2><a>ดูทั้งหมด ›</a></div>
+    <div class="hrow">
+      <div class="mock"><div class="th">📋</div><div class="mt">June 2026 · Set A</div><div class="tag">● เริ่มเลย</div></div>
+      <div class="mock"><div class="th">📋</div><div class="mt">June 2026 · Set B</div><div class="tag">● เริ่มเลย</div></div>
+      <div class="mock"><div class="th">📋</div><div class="mt">May 2026 · Set A</div><div class="tag" style="color:var(--green)">✓ ทำแล้ว</div></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on"><span class="ti">🏠</span>หน้าหลัก</div>
+    <div class="tab"><span class="ti">✏️</span>แบบฝึก</div>
+    <div class="tab"><span class="ti">📝</span>Mock Test</div>
+    <div class="tab"><span class="ti">📒</span>โน้ต</div>
+    <div class="tab"><span class="ti">👤</span>บัญชี</div>
+  </div>
+</div>
+</body>
+</html>

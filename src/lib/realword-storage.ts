@@ -237,6 +237,27 @@ export function loadRealWordBank(): RealWordFullBank {
   return parseStoredBank(localStorage.getItem(REALWORD_BANK_KEY));
 }
 
+export function parseRealWordBankFromJson(raw: string | null): RealWordFullBank {
+  return parseStoredBank(raw);
+}
+
+export function composeRealWordVisibleBank(bank: RealWordFullBank): RealWordFullBank {
+  const out = defaultRealWordFullBank();
+  for (const r of REALWORD_ROUND_NUMBERS) {
+    for (const d of REALWORD_DIFFICULTIES) {
+      out[r][d] = bank[r][d]
+        .filter((s) => isRealWordLearnerVisibleSet(r, s))
+        .sort((a, b) => a.setNumber - b.setNumber);
+    }
+  }
+  return out;
+}
+
+/** Learner-facing bank: hide Round 1 built-in placeholders; other rounds show any non-empty uploaded set. */
+export function loadRealWordVisibleBank(): RealWordFullBank {
+  return composeRealWordVisibleBank(loadRealWordBank());
+}
+
 /** Recompute `ep-realword-admin-uploaded-v1` from the bank so admin slot pickers match learner visibility. */
 export function rebuildRealWordAdminOccupancyFromBank(bank: RealWordFullBank): void {
   const occ = emptyRealWordOccupancy();
@@ -266,20 +287,6 @@ export function getRealWordSet(
 ): RealWordSet | null {
   const bank = loadRealWordBank();
   return bank[round][difficulty].find((s) => s.setNumber === setNumber) ?? null;
-}
-
-/** Learner-facing bank: hide Round 1 built-in placeholders; other rounds show any non-empty uploaded set. */
-export function loadRealWordVisibleBank(): RealWordFullBank {
-  const bank = loadRealWordBank();
-  const out = defaultRealWordFullBank();
-  for (const r of REALWORD_ROUND_NUMBERS) {
-    for (const d of REALWORD_DIFFICULTIES) {
-      out[r][d] = bank[r][d]
-        .filter((s) => isRealWordLearnerVisibleSet(r, s))
-        .sort((a, b) => a.setNumber - b.setNumber);
-    }
-  }
-  return out;
 }
 
 export function getRealWordVisibleSet(

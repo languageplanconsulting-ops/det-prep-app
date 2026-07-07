@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { FitbSessionClient } from "@/components/fitb/FitbSessionClient";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { getFitbVisibleSet } from "@/lib/fitb-storage";
 import type { FitbDifficulty, FitbRoundNum, FitbSet } from "@/types/fitb";
 
@@ -22,7 +23,15 @@ export function FitbSessionGate({
   const [set, setSet] = useState<FitbSet | null | undefined>(undefined);
 
   useEffect(() => {
-    setSet(getFitbVisibleSet(round, difficulty, setNumber) ?? null);
+    let cancelled = false;
+    void (async () => {
+      await ensureCanonicalPracticeContent();
+      if (cancelled) return;
+      setSet(getFitbVisibleSet(round, difficulty, setNumber) ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [round, difficulty, setNumber]);
 
   if (set === undefined) {

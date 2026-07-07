@@ -9,6 +9,7 @@ import {
 import { hasActivePaidPlan } from "@/lib/plan-status";
 import { verifySimpleAdminToken, SIMPLE_ADMIN_COOKIE } from "@/lib/simple-admin";
 import { ADMIN_PREVIEW_COOKIE } from "@/lib/admin-preview";
+import { mobileApiCorsResponse } from "@/lib/mobile-api-cors";
 
 /** Require login for these prefixes (see auth spec) */
 function requiresProtectedSession(pathname: string): boolean {
@@ -39,6 +40,10 @@ function isPayingMember(p: ProfileGate | null | undefined): boolean {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  const cors = mobileApiCorsResponse(request);
+  if (cors) return cors;
+
   const previewTier = request.cookies.get(ADMIN_PREVIEW_COOKIE)?.value;
   const previewActive =
     previewTier === "free" ||

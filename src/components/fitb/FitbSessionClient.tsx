@@ -12,6 +12,7 @@ import {
   gradeFitbBlank,
 } from "@/lib/fitb-scoring";
 import { splitFitbPassage } from "@/lib/fitb-passage";
+import { sfxCorrect, sfxWrong } from "@/lib/exam-sfx";
 import { playBlinkBeep } from "@/lib/play-blink-beep";
 import { getFitbProgress, saveFitbProgress } from "@/lib/fitb-storage";
 import type { FitbBlankGrade, FitbDifficulty, FitbRoundNum, FitbSet } from "@/types/fitb";
@@ -203,6 +204,9 @@ export function FitbSessionClient({
     }
     const score = calculateFitbDetScore({ grades: g, clueUsed, difficulty });
     const nextLocked = g.map((gr) => gr === "exact");
+    const mostlyRight = g.filter((gr) => gr !== "wrong").length >= Math.ceil(n * 0.6);
+    if (mostlyRight) sfxCorrect();
+    else sfxWrong();
     setGrades(g);
     setUserAnswers(ua);
     setDetScore(score);

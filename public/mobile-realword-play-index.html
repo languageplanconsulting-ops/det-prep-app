@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เล่น "คำศัพท์จริง" · 5 แนวทางจากหนังสือดีไซน์</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--ink);padding:40px 20px 80px}
+  .wrap{max-width:960px;margin:0 auto}
+  h1{font-size:28px;font-weight:900}
+  .lede{color:var(--sub);font-size:14px;margin:8px 0 4px;max-width:700px;line-height:1.65}
+  .from{font-size:12px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:16px 0 10px;display:inline-block;line-height:1.6}
+  .from b{color:var(--blue)}
+  .also{font-size:12.5px;color:var(--sub);margin:0 0 26px}
+  .also a{color:var(--blue);font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;text-decoration:none;color:inherit;display:block;transition:transform .15s, box-shadow .15s;box-shadow:0 8px 22px rgba(0,0,0,.05)}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(0,0,0,.10)}
+  .emoji{font-size:34px}
+  .tagn{font-size:11px;font-weight:900;color:var(--blue);letter-spacing:.5px;margin-top:8px}
+  .book{font-size:11.5px;font-weight:800;color:#a9820b;background:#FFF3CC;display:inline-block;padding:3px 9px;border-radius:99px;margin-top:6px}
+  .card h2{font-size:19px;font-weight:900;margin:8px 0 6px}
+  .best{display:inline-block;background:var(--yellow);color:#6a4e00;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;margin-left:6px;vertical-align:middle}
+  .card p{font-size:13px;color:var(--sub);line-height:1.6}
+  ul{margin:11px 0 0;padding-left:18px}
+  li{font-size:12px;color:var(--sub);line-height:1.7}
+  .note{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px}
+  .note h3{font-size:14px;font-weight:900;margin-bottom:10px}
+  .note p{font-size:13px;color:var(--sub);line-height:1.8}
+  .note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>เล่น "คำศัพท์จริง" — 5 แนวทางออกแบบ 🎯</h1>
+  <p class="lede">นี่คือหน้าจอ <b>ตอนเล่นจริง</b> — แตะเลือกคำที่เป็นภาษาอังกฤษจริงจากตาราง แล้วกดตรวจ ปัญหาเดิม: ไม่รู้ว่าเลือกไปกี่คำ, สถานะ "เลือกแล้ว" ไม่ชัด, ไม่บอกว่า "คำมั่ว" คืออะไร และ<b>ไม่บอกว่าเดาผิดโดนหักคะแนน</b> ทั้ง 5 แบบแก้คนละมุมตามหนังสือ</p>
+  <div class="from">📱 ต้นฉบับที่แก้: <b>RealWordRunnerScreen</b> (มือถือ) — ตาราง 18 ช่อง (คำจริง+คำมั่ว) แตะเลือก · คะแนน = ถูก − ผิด · ตรวจแล้วไฮไลต์ เขียว✓/แดง✕/เหลืองพลาด</div>
+  <p class="also">🔗 ก่อนหน้านี้: หน้า <b>เลือกชุด</b> (set-picker) มี 5 เวอร์ชันแยกที่ <a href="/mobile-realword-index.html">mobile-realword-index.html</a></p>
+
+  <div class="grid">
+    <a class="card" href="/mobile-realword-play-v1-krug.html">
+      <div class="emoji">👆</div>
+      <div class="tagn">VERSION 1</div>
+      <div class="book">Don't Make Me Think — Krug</div>
+      <h2>ชัดจนไม่ต้องคิด <span class="best">ปลอดภัยสุด</span></h2>
+      <p>โจทย์ตัวใหญ่อ่านง่าย + ตัวอย่าง "คำมั่ว" ชัด ๆ · ช่องที่เลือกเป็นสีน้ำเงิน + ✓ ไม่มีทางเข้าใจผิด · ตัวนับ "เลือกแล้ว 5 คำ" ลอยเหนือปุ่มเดียว</p>
+      <ul>
+        <li>แก้ทุกความกำกวมของหน้าจอเดิม</li>
+        <li>ตาราง 2 คอลัมน์ ช่องใหญ่ กดง่ายด้วยนิ้ว</li>
+        <li>ทำเป็น React Native ได้เร็วที่สุด</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-realword-play-v2-norman.html">
+      <div class="emoji">🚦</div>
+      <div class="tagn">VERSION 2</div>
+      <div class="book">The Design of Everyday Things — Norman</div>
+      <h2>ฟีดแบ็ก + กติกาชัด</h2>
+      <p>บอก "กติกาคะแนน" ล่วงหน้า (ถูก +1 · เดาผิด −1) · หน้าตรวจไฮไลต์ทุกคำ เขียว✓ / แดง✕ / เหลือง "พลาด" พร้อมคำอธิบายสีครบ</p>
+      <ul>
+        <li>Feedback: เห็นชัดว่าเลือกถูก/ผิด/พลาดตรงไหน</li>
+        <li>Mapping: รู้ผลของการเดาผิดตั้งแต่ก่อนกด</li>
+        <li>*ตัวอย่างนี้โชว์หน้าจอ "หลังตรวจ"</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-realword-play-v3-tidwell.html">
+      <div class="emoji">☑️</div>
+      <div class="tagn">VERSION 3</div>
+      <div class="book">Designing Interfaces — Tidwell</div>
+      <h2>ตารางคัดเลือก (Grid Select)</h2>
+      <p>ใช้แพตเทิร์นเลือกหลายช่องมาตรฐาน — มีช่องติ๊ก ✓ หน้าคำ + แถบเครื่องมือบอกจำนวน + ปุ่ม "ล้าง" + แถบความคืบหน้า เป็นระเบียบ สแกนเร็ว</p>
+      <ul>
+        <li>เป็นแพตเทิร์นที่ผู้ใช้คุ้นเคย เข้าใจทันที</li>
+        <li>ช่องติ๊กสื่อ "เลือกได้หลายอัน" ชัดเจน</li>
+        <li>มีปุ่มล้าง/ตัวนับ ควบคุมง่าย</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-realword-play-v4-coach.html">
+      <div class="emoji">🧑‍🏫</div>
+      <div class="tagn">VERSION 4</div>
+      <div class="book">Change by Design — Brown</div>
+      <h2>โค้ชพี่ดอย (ลดความกลัว)</h2>
+      <p>พี่ดอยให้เคล็ดลับ ("คำจริงมักอ่านลื่น") + คำปลอบ "ไม่ชัวร์ก็ข้ามได้ เดาผิดไม่หัก XP" ลดความกดดัน ช่องเลือกเป็นดาวเหลืองอบอุ่น</p>
+      <ul>
+        <li>สอนวิธีคิดระหว่างเล่น ไม่ใช่แค่ให้ทำ</li>
+        <li>ลดความกลัวผิดของผู้เรียนไทย</li>
+        <li>เชื่อมแบรนด์ "พี่ดอย" ที่มีอยู่แล้ว</li>
+      </ul>
+    </a>
+
+    <a class="card" href="/mobile-realword-play-v5-nodder.html">
+      <div class="emoji">🔥</div>
+      <div class="tagn">VERSION 5</div>
+      <div class="book">Evil by Design — Nodder</div>
+      <h2>เกมจับผิดคำ (มีจังหวะ)</h2>
+      <p>ทำให้เป็นเกม — HUD บอก "จับได้ 5/9 คำ" + คอมโบ ×3 + แถบเวลา + ช่อง "+1" เด้ง กระตุ้นให้แตะไว จับครบรับโบนัส (ตัวเลขจริง ไม่หลอก)</p>
+      <ul>
+        <li>เอนเกจสูงสุด · เชื่อมระบบ XP/สตรีค</li>
+        <li>เวลา = ความตื่นเต้น (เลือกออปชันเปิด/ปิดได้)</li>
+        <li>เสี่ยงกดดันผู้เรียนบางคน · ต้องปรับพอดี</li>
+      </ul>
+    </a>
+  </div>
+
+  <div class="note">
+    <h3>แก่นที่ทั้ง 5 แบบแก้เหมือนกัน</h3>
+    <p>• <b>ตัวนับสด</b> "เลือกแล้ว X คำ" ตลอดเวลา (เดิมไม่มี) &nbsp;•&nbsp; สถานะ <b>"เลือกแล้ว" ชัดเจน</b> (สี + ✓/⭐/ช่องติ๊ก) &nbsp;•&nbsp; อธิบาย <b>"คำมั่ว" เป็นรูปธรรม</b> พร้อมตัวอย่าง &nbsp;•&nbsp; สื่อสาร <b>กติกาหักคะแนนเมื่อเดาผิด</b> อย่างซื่อสัตย์ (เดิมซ่อนไว้) &nbsp;•&nbsp; ปุ่มตรวจ <b>บอกจำนวนที่เลือก</b> ก่อนกด<br><br>
+    ต่างกันที่โทน: V1 เรียบ-ตรงประเด็น · V2 เป็นระบบ-ให้ฟีดแบ็ก · V3 เป็นระเบียบ-คุ้นเคย · V4 อบอุ่น-ให้กำลังใจ · V5 สนุก-เร้าใจ — เลือกได้ตามความรู้สึกที่อยากให้ผู้เรียนได้ แล้วผมพอร์ตลง <b>RealWordRunnerScreen.tsx</b> ให้จริง (admin-gated ก่อน) · ถ้าอยากให้ธีมเข้าชุดกัน แนะนำจับคู่กับเวอร์ชันที่เลือกไว้ในหน้า set-picker</p>
+  </div>
+</div>
+</body>
+</html>

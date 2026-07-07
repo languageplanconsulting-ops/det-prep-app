@@ -1,21 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSfxMuted, setSfxEnabled, setSfxMuted, SFX_MUTE_EVENT, sfxTap } from "@/lib/exam-sfx";
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+import { getSfxMuted, setSfxMuted, SFX_MUTE_EVENT, sfxTap } from "@/lib/exam-sfx";
 
 /**
  * SoundToggle — floating mute control + a global click-sound listener.
  *
- * Admin-gated for now (matches the rest of the revamp preview). It:
+ * Live for every user. It:
  *  - plays the punchy tap "pop" on any button/[role=button] click (muteable),
  *  - renders a 🔊/🔇 toggle (default ON, like Duolingo), remembered per device.
- * Add `data-no-sfx` to any element to opt it out. Flip the gate to all users
- * on approval.
+ * Add `data-no-sfx` to any element to opt it out.
  */
 export function SoundToggle() {
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const enabled = isAdmin || previewEligible;
   const [muted, setMuted] = useState(false);
 
   useEffect(() => {
@@ -26,11 +22,6 @@ export function SoundToggle() {
   }, []);
 
   useEffect(() => {
-    setSfxEnabled(enabled);
-  }, [enabled]);
-
-  useEffect(() => {
-    if (!enabled) return;
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
@@ -41,9 +32,7 @@ export function SoundToggle() {
     };
     document.addEventListener("click", onClick, { passive: true });
     return () => document.removeEventListener("click", onClick);
-  }, [enabled]);
-
-  if (!enabled) return null;
+  }, []);
 
   return (
     <button

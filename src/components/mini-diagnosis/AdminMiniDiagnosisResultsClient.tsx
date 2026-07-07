@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { setSfxEnabled, sfxReveal } from "@/lib/exam-sfx";
+import { sfxReveal } from "@/lib/exam-sfx";
 import { ConfettiBurst } from "@/components/mini-diagnosis/steps/ui";
 
 // ─── Types (verbatim) ─────────────────────────────────────────────────────────
@@ -323,10 +323,6 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
   const [displayTotal, setDisplayTotal] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
   const revealPlayed = useRef(false);
-
-  useEffect(() => {
-    setSfxEnabled(true);
-  }, []);
 
   const loadReport = async () => {
     try {

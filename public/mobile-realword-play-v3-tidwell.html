@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เล่น V3 · Designing Interfaces (Tidwell)</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-soft:#E7EFFF;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8;--green:#1B9E54;--red:#DC2626}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .hd{display:flex;align-items:center;gap:10px;padding:8px 16px}
+  .back{width:38px;height:38px;border-radius:99px;background:#fff;border:1px solid #e7e3d8;display:flex;align-items:center;justify-content:center;font-size:22px;color:#16203a}
+  .hd h1{flex:1;text-align:center;font-size:15px;font-weight:800;color:#16203a}
+  .hd .ctx{font-size:11px;color:var(--sub);font-weight:700}
+  .instr{margin:2px 16px 10px;font-size:13.5px;font-weight:800;color:var(--ink)}
+  .instr span{color:var(--sub);font-weight:600;font-size:12px}
+  /* Grid-select pattern toolbar: count + clear + progress */
+  .toolbar{display:flex;align-items:center;gap:10px;margin:0 16px 12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+  .toolbar .n{font-size:13px;font-weight:900;color:var(--ink)}
+  .toolbar .n b{color:var(--blue)}
+  .toolbar .prog{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .toolbar .bar{width:74px;height:7px;background:#EEE9DD;border-radius:99px;overflow:hidden}
+  .toolbar .bar i{display:block;height:100%;width:55%;background:var(--blue);border-radius:99px}
+  .toolbar .clr{font-size:11px;font-weight:800;color:var(--sub);border:1px solid var(--line);border-radius:99px;padding:5px 10px}
+  .scroll{flex:1;overflow-y:auto;padding:0 16px 8px}
+  .seclab{font-size:11px;font-weight:900;color:var(--sub);letter-spacing:.4px;margin:6px 2px 10px;display:flex;align-items:center;gap:8px}
+  .seclab::after{content:"";flex:1;height:1px;background:var(--line)}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+  .tile{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 4px;text-align:center;font-weight:700;font-size:14px;color:var(--ink);position:relative}
+  .tile .box{position:absolute;top:6px;left:7px;width:16px;height:16px;border-radius:5px;border:2px solid #cfc9ba;background:#fff}
+  .tile.sel{background:var(--blue-soft);border-color:var(--blue);color:var(--blue);font-weight:800}
+  .tile.sel .box{background:var(--blue);border-color:var(--blue)}
+  .tile.sel .box::after{content:"✓";position:absolute;top:-4px;left:1px;color:#fff;font-size:12px;font-weight:900}
+  .foot{padding:12px 18px 20px}
+  .cta{width:100%;background:var(--blue);color:#fff;font-weight:900;font-size:16px;padding:15px;border:none;border-radius:99px;box-shadow:0 10px 22px rgba(0,74,173,.25)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="hd"><div class="back">‹</div><h1>คำศัพท์จริง</h1><div class="ctx">ชุด 8</div></div>
+
+  <div class="instr">เลือกทุกคำที่เป็นคำจริง <span>· ติ๊กช่องหน้าคำ · ข้ามคำที่สะกดมั่ว</span></div>
+
+  <div class="toolbar">
+    <div class="n">เลือกแล้ว <b>5</b> คำ</div>
+    <div class="prog"><div class="bar"><i></i></div><div class="clr">ล้าง</div></div>
+  </div>
+
+  <div class="scroll">
+    <div class="seclab">12 คำในรอบนี้</div>
+    <div class="grid">
+      <div class="tile sel"><span class="box"></span>honest</div>
+      <div class="tile"><span class="box"></span>flimble</div>
+      <div class="tile sel"><span class="box"></span>garden</div>
+      <div class="tile"><span class="box"></span>travle</div>
+      <div class="tile sel"><span class="box"></span>bright</div>
+      <div class="tile"><span class="box"></span>gorstle</div>
+      <div class="tile sel"><span class="box"></span>silent</div>
+      <div class="tile"><span class="box"></span>wunder</div>
+      <div class="tile"><span class="box"></span>market</div>
+      <div class="tile"><span class="box"></span>chalimp</div>
+      <div class="tile sel"><span class="box"></span>gentle</div>
+      <div class="tile"><span class="box"></span>forrest</div>
+    </div>
+  </div>
+
+  <div class="foot"><button class="cta">ตรวจคำตอบ · เลือกไว้ 5 คำ</button></div>
+</div>
+</body>
+</html>

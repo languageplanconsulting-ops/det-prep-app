@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เล่น V1 · Don't Make Me Think (Krug)</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-soft:#E7EFFF;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8;--green:#1B9E54;--green-soft:#DCF5E6;--red:#DC2626}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .hd{display:flex;align-items:center;gap:10px;padding:8px 16px}
+  .back{width:38px;height:38px;border-radius:99px;background:#fff;border:1px solid #e7e3d8;display:flex;align-items:center;justify-content:center;font-size:22px;color:#16203a}
+  .hd h1{flex:1;text-align:center;font-size:15px;font-weight:800;color:#16203a}
+  .hd .ctx{font-size:11px;color:var(--sub);font-weight:700}
+  .ask{margin:4px 18px 4px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;box-shadow:0 8px 20px rgba(0,0,0,.05)}
+  .ask h2{font-size:19px;font-weight:900;color:var(--ink);line-height:1.35}
+  .ask h2 b{color:var(--blue)}
+  .ask p{font-size:12.5px;color:var(--sub);margin-top:6px;line-height:1.5}
+  .ask .eg{display:inline-block;background:#FDECEC;color:#b91c1c;font-weight:800;font-size:11px;padding:2px 8px;border-radius:7px;margin-top:8px}
+  .grid{flex:1;overflow-y:auto;padding:14px 18px 8px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start}
+  .tile{background:#fff;border:2px solid var(--line);border-radius:16px;padding:20px 8px;text-align:center;font-weight:800;font-size:17px;color:var(--ink);position:relative;box-shadow:0 4px 10px rgba(0,0,0,.04)}
+  .tile.sel{background:var(--blue-soft);border-color:var(--blue);color:var(--blue)}
+  .tile.sel::after{content:"✓";position:absolute;top:8px;right:11px;font-size:14px;font-weight:900;color:var(--blue)}
+  .foot{padding:12px 18px 20px;background:linear-gradient(to top,var(--bg) 70%,transparent)}
+  .count{display:flex;justify-content:center;margin-bottom:10px}
+  .count span{background:#fff;border:1px solid var(--line);border-radius:99px;padding:7px 16px;font-size:13px;font-weight:800;color:var(--ink)}
+  .count b{color:var(--blue)}
+  .cta{width:100%;background:#12203a;color:#fff;font-weight:900;font-size:16px;padding:16px;border:none;border-radius:99px;box-shadow:0 10px 22px rgba(18,32,58,.3)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="hd"><div class="back">‹</div><h1>คำศัพท์จริง</h1><div class="ctx">ชุด 8</div></div>
+
+  <div class="ask">
+    <h2>แตะคำที่เป็น <b>คำจริง</b> ในภาษาอังกฤษ</h2>
+    <p>เลือกให้ครบทุกคำที่มีอยู่จริง — ข้ามคำที่สะกดมั่วหรือไม่มีในดิกชันนารี</p>
+    <span class="eg">เช่นคำมั่ว: “flimble”, “travle”</span>
+  </div>
+
+  <div class="grid">
+    <div class="tile sel">honest</div>
+    <div class="tile">flimble</div>
+    <div class="tile sel">garden</div>
+    <div class="tile">travle</div>
+    <div class="tile sel">bright</div>
+    <div class="tile">gorstle</div>
+    <div class="tile sel">silent</div>
+    <div class="tile">wunder</div>
+    <div class="tile">market</div>
+    <div class="tile">chalimp</div>
+    <div class="tile sel">gentle</div>
+    <div class="tile">forrest</div>
+  </div>
+
+  <div class="foot">
+    <div class="count"><span>เลือกแล้ว <b>5</b> คำ</span></div>
+    <button class="cta">ตรวจคำตอบ</button>
+  </div>
+</div>
+</body>
+</html>

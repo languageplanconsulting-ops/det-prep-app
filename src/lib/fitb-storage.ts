@@ -204,10 +204,7 @@ function migrateV1BankToFull(v1: Record<FitbDifficulty, FitbSet[]>): FitbFullBan
   return bank;
 }
 
-function parseStoredBank(raw: string | null): FitbFullBank {
-  if (typeof window !== "undefined" && localStorage.getItem(FITB_BANK_EMPTY_KEY) === "1") {
-    return emptyFitbFullBank();
-  }
+function parseStoredBankCore(raw: string | null): FitbFullBank {
   const base = buildDefaultFitbBank();
   if (!raw) return base;
   try {
@@ -257,6 +254,42 @@ function parseStoredBank(raw: string | null): FitbFullBank {
   } catch {
     return base;
   }
+}
+
+function parseStoredBank(raw: string | null): FitbFullBank {
+  if (typeof window !== "undefined" && localStorage.getItem(FITB_BANK_EMPTY_KEY) === "1") {
+    return emptyFitbFullBank();
+  }
+  return parseStoredBankCore(raw);
+}
+
+export function parseFitbBankFromJson(raw: string | null): FitbFullBank {
+  return parseStoredBankCore(raw);
+}
+
+export function parseFitbAdminOccupancyFromJson(raw: string | null): FitbAdminOccupancy {
+  if (!raw) return migrateOccupancy(null);
+  try {
+    return migrateOccupancy(JSON.parse(raw));
+  } catch {
+    return migrateOccupancy(null);
+  }
+}
+
+export function composeFitbVisibleBank(
+  bank: FitbFullBank,
+  occ: FitbAdminOccupancy,
+): FitbFullBank {
+  const out = emptyFitbFullBank();
+  for (const r of FITB_ROUND_NUMBERS) {
+    for (const d of FITB_DIFFICULTIES) {
+      const allowed = new Set(occ[r][d]);
+      out[r][d] = bank[r][d]
+        .filter((s) => allowed.has(s.setNumber))
+        .sort((a, b) => a.setNumber - b.setNumber);
+    }
+  }
+  return out;
 }
 
 export function loadFitbBank(): FitbFullBank {
@@ -353,18 +386,7 @@ export function mergeFitbBankFromAdmin(
 
 /** Learner-facing bank: only admin-uploaded slots are visible (no fallback/default sets). */
 export function loadFitbVisibleBank(): FitbFullBank {
-  const bank = loadFitbBank();
-  const occ = loadFitbAdminOccupancy();
-  const out = emptyFitbFullBank();
-  for (const r of FITB_ROUND_NUMBERS) {
-    for (const d of FITB_DIFFICULTIES) {
-      const allowed = new Set(occ[r][d]);
-      out[r][d] = bank[r][d]
-        .filter((s) => allowed.has(s.setNumber))
-        .sort((a, b) => a.setNumber - b.setNumber);
-    }
-  }
-  return out;
+  return composeFitbVisibleBank(loadFitbBank(), loadFitbAdminOccupancy());
 }
 
 export function getFitbVisibleSet(

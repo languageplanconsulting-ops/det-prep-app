@@ -8,6 +8,7 @@ import { MockTestTimerBar } from "@/components/mock-test/MockTestTimerBar";
 import { MascotLoader } from "@/components/ui/MascotLoader";
 import { usePhaseTimer } from "@/hooks/usePhaseTimer";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+import { sfxTransition } from "@/lib/exam-sfx";
 import { mt } from "@/lib/mock-test/mock-test-styles";
 import type { MockQuestionRow } from "@/lib/mock-test/types";
 
@@ -301,6 +302,8 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       router.push(`/mock-test/fixed/results-loading/${sessionId}`);
       return;
     }
+
+    sfxTransition();
 
     if (!skipTimerMode && current.rest_after_step_sec > 0) {
       setResting(true);

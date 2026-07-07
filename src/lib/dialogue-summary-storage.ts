@@ -180,6 +180,37 @@ export function loadDialogueSummaryBank(): DialogueSummaryFullBank {
   return parseStoredBank(localStorage.getItem(BANK_KEY));
 }
 
+export function parseDialogueSummaryBankFromJson(raw: string | null): DialogueSummaryFullBank {
+  return parseStoredBank(raw);
+}
+
+export function parseDialogueSummaryAdminOccupancyFromJson(
+  raw: string | null,
+): DialogueSummaryAdminOccupancy {
+  if (!raw) return emptyDialogueSummaryOccupancy();
+  try {
+    return migrateDialogueSummaryOccupancy(JSON.parse(raw));
+  } catch {
+    return emptyDialogueSummaryOccupancy();
+  }
+}
+
+export function composeDialogueSummaryVisibleBank(
+  bank: DialogueSummaryFullBank,
+  occ: DialogueSummaryAdminOccupancy,
+): DialogueSummaryFullBank {
+  const out = emptyDialogueSummaryFullBank();
+  for (const r of DIALOGUE_SUMMARY_ROUND_NUMBERS) {
+    for (const d of DIALOGUE_SUMMARY_DIFFICULTIES) {
+      const allowed = new Set(occ[r][d]);
+      out[r][d] = bank[r][d]
+        .filter((e) => allowed.has(e.setNumber))
+        .sort((a, b) => a.setNumber - b.setNumber);
+    }
+  }
+  return out;
+}
+
 export function persistDialogueSummaryBank(bank: DialogueSummaryFullBank): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(BANK_KEY, JSON.stringify(bank));
@@ -197,18 +228,10 @@ export function getDialogueSummaryExam(
 
 /** Learner-facing bank: only admin-uploaded slots are visible (no default/premade sets). */
 export function loadDialogueSummaryVisibleBank(): DialogueSummaryFullBank {
-  const bank = loadDialogueSummaryBank();
-  const occ = loadDialogueSummaryAdminOccupancy();
-  const out = emptyDialogueSummaryFullBank();
-  for (const r of DIALOGUE_SUMMARY_ROUND_NUMBERS) {
-    for (const d of DIALOGUE_SUMMARY_DIFFICULTIES) {
-      const allowed = new Set(occ[r][d]);
-      out[r][d] = bank[r][d]
-        .filter((e) => allowed.has(e.setNumber))
-        .sort((a, b) => a.setNumber - b.setNumber);
-    }
-  }
-  return out;
+  return composeDialogueSummaryVisibleBank(
+    loadDialogueSummaryBank(),
+    loadDialogueSummaryAdminOccupancy(),
+  );
 }
 
 export function getDialogueSummaryVisibleExam(

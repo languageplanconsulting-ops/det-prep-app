@@ -1,10 +1,28 @@
 /** httpOnly cookie set after successful admin code login (no Supabase email required). */
 export const SIMPLE_ADMIN_COOKIE = "ep_admin_simple";
 
+/** Mobile / API clients send the signed token in this header (Bearer JWT is separate). */
+export const SIMPLE_ADMIN_HEADER = "x-ep-admin-token";
+
 const HMAC_MESSAGE = "english-plan-simple-admin-v1";
 
+const DEFAULT_ADMIN_CODE = "englishplanforeover";
+const LEGACY_ADMIN_CODE = "englishplanforever";
+
 export function getAdminLoginCode(): string {
-  return process.env.ADMIN_LOGIN_CODE?.trim() || "englishplanforever";
+  return process.env.ADMIN_LOGIN_CODE?.trim() || DEFAULT_ADMIN_CODE;
+}
+
+/** Accept configured code plus legacy alias so older bookmarks still work. */
+export function isValidAdminLoginCode(code: string): boolean {
+  const trimmed = code.trim();
+  if (!trimmed) return false;
+  const configured = getAdminLoginCode();
+  return (
+    trimmed === configured ||
+    trimmed === DEFAULT_ADMIN_CODE ||
+    trimmed === LEGACY_ADMIN_CODE
+  );
 }
 
 /** Secret used to sign the cookie value (HMAC). Defaults to login code if unset. */
@@ -12,7 +30,7 @@ export function getSimpleAdminSecret(): string {
   return (
     process.env.ADMIN_ACCESS_SECRET?.trim() ||
     process.env.ADMIN_LOGIN_CODE?.trim() ||
-    "englishplanforever"
+    DEFAULT_ADMIN_CODE
   );
 }
 

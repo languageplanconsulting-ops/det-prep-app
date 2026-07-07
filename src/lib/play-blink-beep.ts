@@ -1,16 +1,16 @@
 import { isSfxEnabled, sfxTap } from "@/lib/exam-sfx";
 
 /**
- * Tap sound. For admins (sfx enabled) it plays the new friendly "pop". For
- * normal users it plays the ORIGINAL square-wave blink, byte-for-byte unchanged,
- * so the revamp's sound never reaches them.
+ * Tap sound. Plays the friendly bubble-click "pop" (exam-sfx) whenever sfx is
+ * enabled — the default for everyone. Falls back to the old square-wave blink
+ * only if sfx has been explicitly disabled.
  */
 export function playBlinkBeep(): void {
   if (isSfxEnabled()) {
     sfxTap();
     return;
   }
-  // Original sound (users) — unchanged.
+  // Fallback square-wave beep (only reachable if sfx is disabled).
   if (typeof window === "undefined") return;
   try {
     const Ctx =

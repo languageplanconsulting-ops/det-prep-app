@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เล่น V2 · The Design of Everyday Things (Norman)</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#004AAD;--blue-soft:#E7EFFF;--yellow:#FFCC00;--bg:#F6F3EC;--ink:#1A1A1A;--sub:#6E6A62;--line:#E9E4D8;--green:#1B9E54;--green-soft:#DCF5E6;--red:#DC2626;--amber:#F59E0B}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Prompt',sans-serif;background:#d9d4c7;display:flex;justify-content:center;min-height:100vh;padding:24px 0}
+  .phone{width:390px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.28);position:relative;height:844px;display:flex;flex-direction:column;border:10px solid #12141c}
+  .notch{height:34px;display:flex;align-items:center;justify-content:space-between;padding:10px 26px 0;font-size:13px;font-weight:700;color:var(--ink)}
+  .hd{display:flex;align-items:center;gap:10px;padding:8px 16px}
+  .back{width:38px;height:38px;border-radius:99px;background:#fff;border:1px solid #e7e3d8;display:flex;align-items:center;justify-content:center;font-size:22px;color:#16203a}
+  .hd h1{flex:1;text-align:center;font-size:15px;font-weight:800;color:#16203a}
+  .hd .ctx{font-size:11px;color:var(--sub);font-weight:700}
+  /* honest scoring contract, shown UPFRONT (mapping action -> consequence) */
+  .rule{margin:2px 16px 6px;display:flex;gap:8px}
+  .rule div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;font-size:11px;font-weight:800}
+  .rule .p{color:var(--green)}.rule .m{color:var(--red)}.rule .g{color:var(--blue)}
+  .rule b{display:block;font-size:15px}
+  .scroll{flex:1;overflow-y:auto;padding:8px 16px 8px}
+  .banner{background:var(--green-soft);border:1px solid #a7e3c0;border-radius:14px;padding:10px 14px;font-size:12.5px;font-weight:800;color:#14683a;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .banner b{margin-left:auto;font-size:16px}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+  .tile{background:#fff;border:2px solid var(--line);border-radius:13px;padding:15px 4px;text-align:center;font-weight:800;font-size:14px;color:var(--ink);position:relative}
+  .tile .ic{position:absolute;top:5px;right:6px;font-size:12px;font-weight:900}
+  .tile.ok{background:var(--green-soft);border-color:var(--green);color:#14532d}
+  .tile.ok .ic{color:var(--green)}
+  .tile.no{background:#FDECEC;border-color:var(--red);color:#7f1d1d}
+  .tile.no .ic{color:var(--red)}
+  .tile.miss{background:#FEF3C7;border-color:var(--amber);color:#92400e}
+  .tile.miss .ic{color:var(--amber)}
+  /* legend explains every signifier */
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;margin:16px 4px 4px}
+  .lg{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--sub)}
+  .sw{width:14px;height:14px;border-radius:5px}
+  .sw.g{background:var(--green)}.sw.r{background:var(--red)}.sw.a{background:var(--amber)}
+  .foot{padding:12px 18px 20px}
+  .cta{width:100%;background:#12203a;color:#fff;font-weight:900;font-size:16px;padding:15px;border:none;border-radius:99px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="notch"><span>9:41</span><span>●●● 🔋</span></div>
+  <div class="hd"><div class="back">‹</div><h1>คำศัพท์จริง</h1><div class="ctx">ชุด 8</div></div>
+
+  <div class="rule">
+    <div class="p">ถูก<b>+1</b></div>
+    <div class="m">เดาผิด<b>−1</b></div>
+    <div class="g">เป้า<b>~9 คำ</b></div>
+  </div>
+
+  <div class="scroll">
+    <div class="banner">ตรวจแล้ว — ระบบไฮไลต์ให้เห็นทุกคำ <b>66%</b></div>
+    <div class="grid">
+      <div class="tile ok"><span class="ic">✓</span>honest</div>
+      <div class="tile"><span class="ic"></span>flimble</div>
+      <div class="tile ok"><span class="ic">✓</span>garden</div>
+      <div class="tile no"><span class="ic">✕</span>travle</div>
+      <div class="tile ok"><span class="ic">✓</span>bright</div>
+      <div class="tile"><span class="ic"></span>gorstle</div>
+      <div class="tile ok"><span class="ic">✓</span>silent</div>
+      <div class="tile no"><span class="ic">✕</span>wunder</div>
+      <div class="tile miss"><span class="ic">!</span>market</div>
+      <div class="tile"><span class="ic"></span>chalimp</div>
+      <div class="tile miss"><span class="ic">!</span>gentle</div>
+      <div class="tile"><span class="ic"></span>forrest</div>
+    </div>
+
+    <div class="legend">
+      <div class="lg"><span class="sw g"></span>เลือกถูก (คำจริง)</div>
+      <div class="lg"><span class="sw r"></span>เลือกผิด (คำมั่ว)</div>
+      <div class="lg"><span class="sw a"></span>พลาด (คำจริงที่ไม่ได้เลือก)</div>
+    </div>
+  </div>
+
+  <div class="foot"><button class="cta">ถัดไป →</button></div>
+</div>
+</body>
+</html>
