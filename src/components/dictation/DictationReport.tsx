@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { CoachBubble } from "@/components/ui/CoachBubble";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { DICTATION_SET_COUNT } from "@/lib/dictation-constants";
@@ -312,10 +312,22 @@ export function DictationReport({
           </div>
         ) : null}
 
-        <AdminCoachTip>
-          ฟังให้จบประโยคก่อนพิมพ์ · ระวัง <strong>-ed ท้ายคำ</strong> และ <strong>comma</strong> —
-          2 จุดนี้ทำคะแนนหลุดบ่อยสุด
-        </AdminCoachTip>
+        <CoachBubble>
+          {missed.length === 0 ? (
+            <>เป๊ะเลย! คุณพิมพ์ตรงกับที่ได้ยินทุกคำ ลองด่านที่ยากขึ้นเพื่อฝึกต่อได้เลย 🎉</>
+          ) : missed.length <= 3 ? (
+            <>
+              ใกล้ครบแล้ว พลาดแค่ {missed.length} คำ — ระวัง <strong>-ed ท้ายคำ</strong> และ{" "}
+              <strong>comma</strong> 2 จุดนี้ทำคะแนนหลุดบ่อยสุด ลองฟังซ้ำแล้วเทียบกับคำที่ไฮไลต์สีแดงด้านบนดูนะ
+            </>
+          ) : (
+            <>
+              ไม่เป็นไรเลย ทุกคนต้องฟังหลายรอบกว่าจะจับได้ครบ — ลองฟังทีละประโยคสั้นๆ แล้วพิมพ์ตามทันที
+              ฟังให้จบประโยคก่อนพิมพ์ จะช่วยให้จับ <strong>-ed ท้ายคำ</strong> และ <strong>comma</strong>{" "}
+              ได้แม่นขึ้น
+            </>
+          )}
+        </CoachBubble>
 
         {/* actions: retry + optional guided fix (Plan B reuses redeem logic) */}
         <div className="flex flex-wrap items-center gap-2">

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
-import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { CoachBubble } from "@/components/ui/CoachBubble";
 import { sfxTransition } from "@/lib/exam-sfx";
 import {
   READING_DIFFICULTY_LABEL,
@@ -52,12 +52,16 @@ export function ReadingReport({
   const score = Math.round((correctCount / 4) * maxScore);
   const examTitle = readingExam.titleEn?.trim();
   const vocabList = readingExam.highlightedVocab ?? [];
+  const coachText =
+    correctCount === 4
+      ? "เต็ม 4/4! คุณจับใจความและรายละเอียดของบทอ่านนี้ได้ครบเลย เก่งมาก 🎉"
+      : correctCount >= 2
+        ? `ถูก ${correctCount} จาก 4 ข้อ ทำได้ดีนะ — ข้อที่พลาดเป็นสีแดงด้านล่าง อ่าน "Why this answer" ให้เข้าใจก่อนลองใหม่`
+        : `ถูก ${correctCount} จาก 4 ข้อ ไม่เป็นไรเลย บทอ่านนี้อาจจะยากไปหน่อย — ลองอ่านคำอธิบายของทุกข้อที่ผิดด้านล่างช้าๆ แล้วสังเกตว่าคำตอบที่ถูกอยู่ตรงไหนของย่อหน้า`;
 
   return (
     <div className="space-y-8">
-      <AdminCoachTip>
-        อ่าน <strong>เหตุผลข้อที่ผิด</strong> · เก็บคำศัพท์ที่ไฮไลต์ลง Notebook · ทำซ้ำเพื่อพัฒนาคะแนน
-      </AdminCoachTip>
+      <CoachBubble>{coachText}</CoachBubble>
       <header className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-6 shadow-[4px_4px_0_0_#000]">
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">
           Report — R{round} · {READING_DIFFICULTY_LABEL[difficulty]} · Set {setNumber} · Exam {examNumber}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
-import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { CoachBubble } from "@/components/ui/CoachBubble";
 import { sfxTransition } from "@/lib/exam-sfx";
 import {
   REALWORD_DIFFICULTY_LABEL,
@@ -47,6 +47,17 @@ function getScoreTone(scorePercent: number): {
     panelClass: "bg-[linear-gradient(135deg,#ffe4e6_0%,#ffffff_55%,#fecdd3_100%)]",
     meterClass: "bg-rose-500",
   };
+}
+
+/** Score-tier-aware coaching message — explains the result in plain Thai, not just numbers. */
+function coachMessage(scorePercent: number, UR: number, R: number, M: number): string {
+  if (scorePercent >= 85) {
+    return `เก่งมากเลย! คุณจับคำจริงได้ ${UR} จาก ${R} คำ และโดนคำลวงหลอกแค่ ${M} ครั้งเท่านั้น ลองด่านที่ยากขึ้นดูได้เลย 💪`;
+  }
+  if (scorePercent >= 60) {
+    return `ทำได้ดีนะ! จับคำจริงได้ ${UR} จาก ${R} คำ แต่โดนคำลวงหลอกไป ${M} ครั้ง — คำลวงมักสะกดคล้ายคำจริงมาก ลองอ่านทีละตัวอักษรช้าๆ ก่อนแตะดูนะ`;
+  }
+  return `ไม่เป็นไรเลย ทุกคนต้องฝึกก่อนถึงจะชิน! จับคำจริงได้ ${UR} จาก ${R} คำ — ลองดูคำที่พลาดด้านล่าง อ่านความหมายให้เข้าใจ แล้วลองใหม่อีกครั้งนะ`;
 }
 
 export function RealWordReport({
@@ -109,9 +120,7 @@ export function RealWordReport({
 
   return (
     <div className="space-y-8">
-      <AdminCoachTip>
-        ดูคำที่ <strong>พลาด</strong> และ <strong>คำลวง</strong> ที่กดผิด · เก็บคำจริงลง Notebook แล้วทำซ้ำให้แม่นขึ้น
-      </AdminCoachTip>
+      <CoachBubble>{coachMessage(scorePercent, UR, R, M)}</CoachBubble>
       <section className={`ep-brutal overflow-hidden rounded-sm border-4 border-black p-0 shadow-[5px_5px_0_0_#000] ${tone.panelClass}`}>
         <div className="grid gap-0 lg:grid-cols-[1.35fr_0.95fr]">
           <div className="border-b-4 border-black p-6 lg:border-b-0 lg:border-r-4">

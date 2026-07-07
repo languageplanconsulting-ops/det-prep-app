@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { CoachBubble } from "@/components/ui/CoachBubble";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { sfxTransition } from "@/lib/exam-sfx";
 import { playNotebookSavedSound } from "@/lib/notebook-save-feedback";
@@ -58,6 +58,14 @@ export function FitbReportPanel({
     setNumber < FITB_SET_COUNT
       ? `/practice/literacy/fill-in-blank/round/${round}/${difficulty}/${setNumber + 1}`
       : null;
+  const correctCount = grades.filter((g) => g === "exact").length;
+  const coachText = flawless
+    ? "เป๊ะทุกช่องแบบไม่ใช้คำใบ้เลย! เก่งมากจริงๆ ลองด่านที่ยากขึ้นได้เลย 🎉"
+    : allExact
+      ? `ถูกครบทุกช่องแล้ว (${correctCount}/${n})! ครั้งหน้าลองไม่ใช้คำใบ้ดูนะ จะได้คะแนนเต็มช่อง`
+      : correctCount >= n / 2
+        ? `ถูก ${correctCount} จาก ${n} ช่อง ทำได้ดีนะ — ช่องที่ยังผิด/ใกล้เคียงเป็นสีแดง-เหลืองด้านล่าง อ่านคำอธิบายให้เข้าใจก่อนกด "Try again" นะ`
+        : `ถูก ${correctCount} จาก ${n} ช่อง ไม่เป็นไรเลย — อ่านคำอธิบายของแต่ละช่องด้านล่างให้เข้าใจก่อน แล้วลองสังเกตว่าคำนั้นควรอยู่ในรูป tense หรือรูปคำแบบไหน`;
 
   const flashRedeemButton = () => {
     playBlinkBeep();
@@ -98,9 +106,7 @@ export function FitbReportPanel({
 
   return (
     <div className="space-y-6 border-t-4 border-black pt-6">
-      <AdminCoachTip>
-        ช่องที่ <strong>ผิด/ใกล้เคียง</strong> — ดูคำที่ถูก เก็บลง Notebook แล้วลองใหม่ · เลี่ยงคำใบ้จะได้คะแนนเต็มช่อง
-      </AdminCoachTip>
+      <CoachBubble>{coachText}</CoachBubble>
       {wordToast ? (
         <div
           className="fixed bottom-6 left-1/2 z-[100] w-[min(calc(100vw-2rem),22rem)] -translate-x-1/2 border-4 border-black bg-white px-4 py-3 text-center text-sm font-bold shadow-[4px_4px_0_0_#000]"

@@ -31,6 +31,12 @@
       "runtimeExecutable": "bash",
       "runtimeArgs": ["-c", "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8083"],
       "port": 8083
+    },
+    {
+      "name": "mobile-web-dist",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/ongjui/Downloads/det-mobile && npx serve dist -p 8095 -s"],
+      "port": 8095
     }
   ]
 }

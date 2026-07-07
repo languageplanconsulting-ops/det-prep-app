@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
+import { CoachBubble } from "@/components/ui/CoachBubble";
 import { sfxTransition } from "@/lib/exam-sfx";
 import {
   VOCAB_SESSION_LABEL,
@@ -48,6 +49,12 @@ export function VocabReport({
   const maxScore = VOCAB_SESSION_MAX[sessionLevel];
   const correctCount = rows.filter((r) => r.isCorrect).length;
   const score = Math.round((correctCount / 6) * maxScore);
+  const coachText =
+    correctCount === 6
+      ? "เต็ม 6/6! คุณเข้าใจบริบทของทุกช่องเลย เก่งมากจริงๆ 🎉"
+      : correctCount >= 4
+        ? `ทำได้ดีมาก — ถูก ${correctCount} จาก 6 ช่อง ลองอ่านคำอธิบายของช่องที่ผิดด้านล่าง แล้วสังเกตว่าทำไมคำนั้นถึงเข้ากับประโยคได้ดีกว่า`
+        : `ไม่เป็นไรเลย ${correctCount} จาก 6 ช่อง เป็นจุดเริ่มต้นที่ดี — เคล็ดลับคือ อ่านทั้งประโยคก่อนเดา แล้วดูว่าคำไหนเข้ากับความหมายและไวยากรณ์ ลองดูคำอธิบายทีละข้อด้านล่างนะ`;
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-neutral-900">
@@ -64,6 +71,8 @@ export function VocabReport({
               {correctCount} of 6 correct · weighted by your chosen level.
             </p>
           </header>
+
+          <CoachBubble>{coachText}</CoachBubble>
 
           <section className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#000]">
             <h2 className="text-lg font-black uppercase tracking-tight text-neutral-900">
