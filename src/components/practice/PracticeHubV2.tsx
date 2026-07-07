@@ -543,6 +543,24 @@ export function PracticeHubV2({
               </p>
               <RandomPracticePicker />
               <StudyPlanCalendarCard />
+              <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
+                <p className="text-sm font-bold text-slate-900">📘 บทเรียน (ported from mobile)</p>
+                <p className="mt-1 text-xs text-slate-500">เนื้อหา + ความคืบหน้าซิงก์กับแอปมือถือ</p>
+                <div className="mt-3 grid gap-2">
+                  <Link
+                    href="/practice/lessons/dictation"
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
+                  >
+                    🎧 ตามคำบอก (Dictation) <span className="text-slate-300">→</span>
+                  </Link>
+                  <Link
+                    href="/practice/lessons/real-word"
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
+                  >
+                    🔤 คำจริง (Real word) <span className="text-slate-300">→</span>
+                  </Link>
+                </div>
+              </div>
             </div>
           ) : null}
 
