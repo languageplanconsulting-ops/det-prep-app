@@ -93,8 +93,8 @@ export function RandomPracticePicker() {
       <div className="mb-3 flex items-center gap-2">
         <span className="text-xl">🎲</span>
         <div>
-          <h3 className="text-sm font-bold text-indigo-950">สุ่มแบบฝึกวันนี้</h3>
-          <p className="text-[11px] text-indigo-700">เลือกเวลาที่มี แล้วให้เราสุ่มให้</p>
+          <h3 className="text-sm font-bold text-indigo-950">แบบฝึกที่เราเลือกให้วันนี้</h3>
+          <p className="text-[11px] text-indigo-700">เลือกเวลาที่มี แล้วให้เราเลือกให้</p>
         </div>
       </div>
 
@@ -121,7 +121,7 @@ export function RandomPracticePicker() {
 
       {mode === "lesson" ? (
         <p className="rounded-xl bg-white/70 px-3 py-3 text-center text-xs font-semibold text-indigo-700">
-          บทเรียนแบบสุ่มกำลังจะมาเร็ว ๆ นี้ — ตอนนี้ใช้ &quot;ข้อสอบจริง&quot; ไปก่อนนะครับ
+          บทเรียนแบบเลือกกำลังจะมาเร็ว ๆ นี้ — ตอนนี้ใช้ &quot;ข้อสอบจริง&quot; ไปก่อนนะครับ
         </p>
       ) : (
         <>
@@ -171,7 +171,7 @@ export function RandomPracticePicker() {
             disabled={loading}
             className="w-full rounded-xl bg-[#004AAD] py-2.5 text-sm font-bold text-[#FFCC00] shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] disabled:opacity-50"
           >
-            {loading ? "กำลังสุ่ม…" : "🎲 สุ่มให้เลย"}
+            {loading ? "กำลังเลือก…" : "🎲 เลือกให้เลย"}
           </button>
 
           {queue.length > 0 && (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { NotebookMatchingGame } from "@/components/notebook/NotebookMatchingGame";
 import { NotebookProductionReportFullView } from "@/components/notebook/NotebookProductionReportFullView";
 import { NotebookSpeakingHighlightCard } from "@/components/notebook/NotebookSpeakingHighlightCard";
@@ -85,6 +86,25 @@ export function NotebookListV2() {
     flipped: false,
   });
   const [reviewMode, setReviewMode] = useState<"closed" | "choice" | "flip" | "match">("closed");
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
+
+  // Lock background scroll while any review overlay is open — otherwise a
+  // touchmove/scroll behind a fixed-inset modal can still move the page. This is
+  // the ONLY place that touches document.body.style.overflow for review overlays —
+  // NotebookMatchingGame does NOT lock its own (two independent lock/restore
+  // effects race on cleanup order and can leave scroll permanently stuck off).
+  useEffect(() => {
+    if (reviewMode === "closed") return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [reviewMode]);
 
   const reload = useCallback(() => {
     setEntries(loadNotebook());
@@ -215,7 +235,8 @@ export function NotebookListV2() {
   const reviewCard = deck[review.idx];
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6">
+    <>
+    <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6 print:hidden">
       <p className="text-xs font-bold uppercase tracking-wider text-[#004AAD]">สมุดของฉัน</p>
       <h1 className="mt-1 text-3xl font-bold">Notebook</h1>
       <p className="mt-1 max-w-2xl text-sm text-slate-600">
@@ -442,10 +463,12 @@ export function NotebookListV2() {
         </div>
       )}
 
-      {/* Mode choice */}
-      {reviewMode === "choice" ? (
+      {/* Mode choice — portaled to <body> so it always centers on the viewport,
+          never on an ancestor's scroll height (see NOTEBOOK flashcard fix). */}
+      {reviewMode === "choice" && portalReady
+        ? createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm font-bold text-slate-800">อยากทบทวนแบบไหน?</p>
               <button
@@ -480,12 +503,27 @@ export function NotebookListV2() {
                   ลากคำศัพท์ไปจับคู่กับความหมาย (สูงสุด 20 คำ)
                 </p>
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setReviewMode("closed");
+                  window.print();
+                }}
+                className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#004AAD]"
+              >
+                <p className="text-sm font-bold text-slate-900">📄 ส่งออก PDF</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  ตารางคำศัพท์ + ความหมาย พิมพ์หรือบันทึกเป็น PDF
+                </p>
+              </button>
             </div>
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body,
+      )
+        : null}
 
-      {/* Matching game */}
+      {/* Matching game — self-portals internally, see NotebookMatchingGame.tsx */}
       {reviewMode === "match" ? (
         <NotebookMatchingGame
           deck={deck}
@@ -494,10 +532,11 @@ export function NotebookListV2() {
         />
       ) : null}
 
-      {/* Review overlay (flashcard) */}
-      {reviewMode === "flip" && review.open && reviewCard ? (
+      {/* Review overlay (flashcard) — portaled to <body>, same reason as the choice modal. */}
+      {reviewMode === "flip" && review.open && reviewCard && portalReady
+        ? createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
-          <div className="w-full max-w-md">
+          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto">
             <div className="mb-3 flex items-center justify-between text-white">
               <span className="text-xs font-bold uppercase tracking-wide text-[#FFCC00]">
                 การ์ด {review.idx + 1} / {deck.length}
@@ -563,8 +602,39 @@ export function NotebookListV2() {
               </button>
             </div>
           </div>
-        </div>
-      ) : null}
+        </div>,
+        document.body,
+      )
+        : null}
     </main>
+
+    {/* Print-only vocab table — hidden on screen, shown via window.print() / "Save as PDF" */}
+    <div className="hidden print:block">
+      <h1 className="text-xl font-bold text-slate-900">คำศัพท์ที่เก็บไว้ — English Plan</h1>
+      <p className="mb-4 text-xs text-slate-500">
+        พิมพ์เมื่อ {new Date().toLocaleDateString("th-TH")} · {deck.length} คำ
+      </p>
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="border-b-2 border-slate-800 text-left">
+            <th className="py-2 pr-3">คำศัพท์</th>
+            <th className="py-2 pr-3">ความหมาย</th>
+            <th className="py-2 pr-3">ตัวอย่าง / โน้ต</th>
+            <th className="py-2">วันที่เก็บ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {deck.map((e) => (
+            <tr key={e.id} className="border-b border-slate-200 align-top">
+              <td className="py-2 pr-3 font-semibold">{e.titleEn}</td>
+              <td className="py-2 pr-3">{e.titleTh}</td>
+              <td className="py-2 pr-3 text-slate-600">{e.userNote || e.bodyEn || e.bodyTh || "—"}</td>
+              <td className="py-2 text-slate-500">{fmtDate(e.createdAt)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    </>
   );
 }

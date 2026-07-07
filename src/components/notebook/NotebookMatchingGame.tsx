@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { NotebookEntry } from "@/types/writing";
 
 const MAX_WORDS = 20;
@@ -36,6 +37,14 @@ export function NotebookMatchingGame({
   const [removed, setRemoved] = useState<Set<string>>(new Set());
   const [wrongBoxId, setWrongBoxId] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  // Body scroll-lock is owned by the parent (NotebookListV2) for all review
+  // overlays — don't duplicate it here, two lock/restore effects race on
+  // cleanup order and can leave scroll permanently stuck off.
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   const done = (id: string) => matched.has(id) || removed.has(id);
   const remaining = left.filter((w) => !done(w.id));
@@ -57,9 +66,11 @@ export function NotebookMatchingGame({
     onMastered(id);
   };
 
-  return (
+  if (!portalReady) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-5 shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-[#004AAD]">🧩 เกมจับคู่คำศัพท์</p>
@@ -134,6 +145,7 @@ export function NotebookMatchingGame({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
