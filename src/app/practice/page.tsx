@@ -274,6 +274,7 @@ export default function PracticeHubPage() {
           effectiveTier={effectiveTier}
           isVip={isVip}
           isAdmin={isAdmin}
+          previewEligible={previewEligible}
           showMiniStudy={showMiniStudy}
           conversationGate={canAccessSkill(effectiveTier, "conversation")}
           onReadingIntro={() => setReadingIntroOpen(true)}

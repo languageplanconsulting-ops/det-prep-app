@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { StudyPlanCalendarCard } from "@/components/dashboard/StudyPlanCalendarCard";
+import { RandomPracticePicker } from "@/components/practice/RandomPracticePicker";
 import { daysUntil, setExamDate, usePracticeHeroStats } from "@/hooks/usePracticeHeroStats";
 
 /**
@@ -23,6 +25,8 @@ export type PracticeHubV2Props = {
   effectiveTier: string;
   isVip: boolean;
   isAdmin: boolean;
+  /** DB admin OR a code-only admin login — see useEffectiveTier. */
+  previewEligible: boolean;
   showMiniStudy: boolean;
   /** mirror of canAccessSkill(effectiveTier, "conversation") from the page */
   conversationGate: SkillGate;
@@ -136,6 +140,8 @@ function CoachTip({ children }: { children: ReactNode }) {
 /* ── main component ──────────────────────────────────────────────────── */
 
 export function PracticeHubV2({
+  isAdmin,
+  previewEligible,
   showMiniStudy,
   conversationGate,
   onReadingIntro,
@@ -529,6 +535,17 @@ export function PracticeHubV2({
 
         {/* ═══════════ RIGHT SIDEBAR ═══════════ */}
         <aside className="order-1 space-y-4 lg:order-2">
+          {/* Admin preview: schedule.exam_date here is a separate source of truth from the hero's localStorage exam date above — reconcile before going live for everyone. */}
+          {isAdmin || previewEligible ? (
+            <div className="space-y-3 rounded-2xl bg-[#FFCC00]/15 p-3 ring-2 ring-[#FFCC00]">
+              <p className="px-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-700">
+                Admin preview · not visible to users yet
+              </p>
+              <RandomPracticePicker />
+              <StudyPlanCalendarCard />
+            </div>
+          ) : null}
+
           {/* compact persistent status (real) */}
           <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
             <div className="flex items-center justify-between">

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import {
   bumpTierForCatchUp, computeMissedRecent, computeStreak, generateCalendar,
   type CalendarDay,
@@ -52,6 +51,46 @@ function dayLabel(iso: string): string {
   return d.toLocaleDateString("th-TH", { day: "numeric", month: "short", timeZone: "UTC" });
 }
 
+/** Soft pill button used throughout the setup form — active = filled blue, idle = white/70. */
+function PillOption({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors duration-200 ${
+        active ? "bg-[#004AAD] text-white" : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function CardShell({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 10);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div
+      className={`rounded-2xl bg-white p-5 ring-1 ring-slate-200 transition-all duration-500 ease-out ${
+        mounted ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function StudyPlanCalendarCard() {
   const [loading, setLoading] = useState(true);
   const [schedule, setSchedule] = useState<ScheduleRow | null>(null);
@@ -60,6 +99,7 @@ export function StudyPlanCalendarCard() {
   const [weakness, setWeakness] = useState<WeaknessReport | null>(null);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   const [examDate, setExamDate] = useState<string | null>(null);
   const [cadenceDays, setCadenceDays] = useState(1);
@@ -152,76 +192,67 @@ export function StudyPlanCalendarCard() {
   const weekAvgScore = weekAttempts > 0
     ? Math.round(weekActs.reduce((s, a) => s + a.avgScorePct * a.attempts, 0) / weekAttempts) : 0;
 
+  const selectedEntry = selectedDay ? days.find((d) => d.date === selectedDay) ?? null : null;
+  const selectedActivity = selectedDay ? activityByDate.get(selectedDay) ?? null : null;
+
   if (loading) {
     return (
-      <BrutalPanel eyebrow="Study plan" title="แผนการเรียน">
-        <p className="text-sm text-neutral-500">Loading…</p>
-      </BrutalPanel>
+      <CardShell>
+        <p className="text-sm text-slate-400">กำลังโหลดแผนการเรียน…</p>
+      </CardShell>
     );
   }
 
   if (!schedule || editing) {
     return (
-      <BrutalPanel eyebrow="Study plan" title={editing ? "แก้ไขแผน" : "สร้างแผนการเรียนถึงวันสอบ"}>
-        {!editing && <p className="mb-3 text-sm font-semibold text-neutral-700">สอบวันไหน? เดี๋ยวจัดปฏิทินฝึกให้ถึงวันสอบเลย</p>}
+      <CardShell>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">Study plan</p>
+        <h3 className="mb-1 mt-1 text-lg font-bold text-slate-900">
+          {editing ? "แก้ไขแผน" : "สร้างแผนการเรียนถึงวันสอบ"}
+        </h3>
+        {!editing && <p className="mb-3 text-sm text-slate-500">สอบวันไหน? เดี๋ยวจัดปฏิทินฝึกให้ถึงวันสอบเลย</p>}
 
-        <p className="mb-1 text-xs font-black uppercase tracking-widest text-[#004AAD]">รูปแบบการฝึก</p>
-        <div className="mb-3 flex flex-wrap gap-2">
-          <button type="button" onClick={() => setIsFreeformDraft(false)} className={`border-2 border-black px-3 py-2 text-xs font-bold ${!isFreeformDraft ? "bg-[#004AAD] text-white" : "bg-white text-black"}`}>
+        <p className="mb-1.5 mt-3 text-[10px] font-black uppercase tracking-widest text-slate-400">รูปแบบการฝึก</p>
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          <PillOption active={!isFreeformDraft} onClick={() => setIsFreeformDraft(false)}>
             มีวันสอบแน่นอน
-          </button>
-          <button type="button" onClick={() => setIsFreeformDraft(true)} className={`border-2 border-black px-3 py-2 text-xs font-bold ${isFreeformDraft ? "bg-[#004AAD] text-white" : "bg-white text-black"}`}>
+          </PillOption>
+          <PillOption active={isFreeformDraft} onClick={() => setIsFreeformDraft(true)}>
             ฝึกอิสระ — ไม่ตั้งวันสอบ
-          </button>
+          </PillOption>
         </div>
 
         {!isFreeformDraft && (
           <>
-            <p className="mb-1 text-xs font-black uppercase tracking-widest text-[#004AAD]">วันสอบ</p>
-            <div className="mb-3 flex flex-wrap gap-2">
+            <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">วันสอบ</p>
+            <div className="mb-3 flex flex-wrap gap-1.5">
               {EXAM_PRESETS.map((p) => {
                 const value = addDaysIso(todayIso(), p.days);
-                const active = examDate === value;
                 return (
-                  <button
-                    key={p.label}
-                    type="button"
-                    onClick={() => setExamDate(value)}
-                    className={`border-2 border-black px-3 py-2 text-xs font-bold ${active ? "bg-[#004AAD] text-white" : "bg-white text-black"}`}
-                  >
+                  <PillOption key={p.label} active={examDate === value} onClick={() => setExamDate(value)}>
                     {p.label}
-                  </button>
+                  </PillOption>
                 );
               })}
             </div>
           </>
         )}
 
-        <p className="mb-1 text-xs font-black uppercase tracking-widest text-[#004AAD]">ความถี่</p>
-        <div className="mb-3 flex flex-wrap gap-2">
+        <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">ความถี่</p>
+        <div className="mb-3 flex flex-wrap gap-1.5">
           {CADENCE_OPTIONS.map((c) => (
-            <button
-              key={c.days}
-              type="button"
-              onClick={() => setCadenceDays(c.days)}
-              className={`border-2 border-black px-3 py-2 text-xs font-bold ${cadenceDays === c.days ? "bg-[#004AAD] text-white" : "bg-white text-black"}`}
-            >
+            <PillOption key={c.days} active={cadenceDays === c.days} onClick={() => setCadenceDays(c.days)}>
               {c.th}
-            </button>
+            </PillOption>
           ))}
         </div>
 
-        <p className="mb-1 text-xs font-black uppercase tracking-widest text-[#004AAD]">เวลาต่อวันตามปกติ</p>
-        <div className="mb-4 flex flex-wrap gap-2">
+        <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">เวลาต่อวันตามปกติ</p>
+        <div className="mb-4 flex flex-wrap gap-1.5">
           {DURATION_OPTIONS.map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setDuration(m)}
-              className={`border-2 border-black px-3 py-2 text-xs font-bold ${duration === m ? "bg-[#004AAD] text-white" : "bg-white text-black"}`}
-            >
+            <PillOption key={m} active={duration === m} onClick={() => setDuration(m)}>
               {m} นาที
-            </button>
+            </PillOption>
           ))}
         </div>
 
@@ -230,111 +261,156 @@ export function StudyPlanCalendarCard() {
             type="button"
             disabled={(!isFreeformDraft && !examDate) || saving}
             onClick={submitPlan}
-            className="border-[3px] border-black bg-[#FFCC00] px-4 py-3 text-xs font-black uppercase shadow-[4px_4px_0_0_#111] disabled:opacity-40"
+            className="rounded-xl bg-[#004AAD] px-5 py-2.5 text-xs font-bold text-[#FFCC00] shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] disabled:opacity-40"
           >
             {saving ? "กำลังบันทึก…" : editing ? "บันทึกการแก้ไข" : "สร้างแผนการเรียน"}
           </button>
           {editing && (
-            <button type="button" onClick={() => setEditing(false)} className="border-2 border-black bg-white px-4 py-3 text-xs font-black uppercase">
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="rounded-xl bg-slate-50 px-5 py-2.5 text-xs font-bold text-slate-600 transition-colors duration-200 hover:bg-slate-100"
+            >
               ยกเลิก
             </button>
           )}
         </div>
-      </BrutalPanel>
+      </CardShell>
     );
   }
 
   return (
-    <BrutalPanel eyebrow="Study plan" title="แผนการเรียนของฉัน">
-      <div className="mb-1 flex justify-end">
-        <button type="button" onClick={openEdit} className="text-xs font-black uppercase text-[#004AAD]">แก้ไขแผน</button>
+    <CardShell>
+      <div className="mb-1 flex items-center justify-between">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">Study plan</p>
+        <button
+          type="button"
+          onClick={openEdit}
+          className="text-xs font-bold text-slate-400 transition-colors duration-150 hover:text-[#004AAD]"
+        >
+          แก้ไขแผน
+        </button>
       </div>
+      <h3 className="mb-3 text-lg font-bold text-slate-900">แผนการเรียนของฉัน</h3>
 
       <div className="mb-4 flex gap-3">
-        <div className="flex flex-1 items-baseline gap-2">
+        <div className="flex flex-1 items-baseline gap-2 rounded-xl bg-blue-50 px-3 py-2.5">
           {schedule.is_freeform ? (
             <>
-              <span className="text-3xl">🌱</span>
-              <span className="text-sm font-bold text-neutral-600">โหมดฝึกอิสระ</span>
+              <span className="text-2xl">🌱</span>
+              <span className="text-xs font-bold text-slate-600">โหมดฝึกอิสระ</span>
             </>
           ) : (
             <>
-              <span className="text-3xl font-black text-[#004AAD]">
+              <span className="text-2xl font-black text-[#004AAD]">
                 {Math.max(0, Math.round((Date.parse(schedule.exam_date) - Date.parse(today)) / 86_400_000))}
               </span>
-              <span className="text-sm font-bold text-neutral-600">วันก่อนสอบ</span>
+              <span className="text-xs font-bold text-slate-600">วันก่อนสอบ</span>
             </>
           )}
         </div>
-        <div className="flex flex-1 items-baseline gap-2">
-          <span className="text-2xl font-black text-orange-600">🔥 {streak}</span>
-          <span className="text-sm font-bold text-neutral-600">วันติดต่อกัน</span>
+        <div className="flex flex-1 items-baseline gap-2 rounded-xl bg-amber-50 px-3 py-2.5">
+          <span className="text-xl font-black text-amber-600">🔥 {streak}</span>
+          <span className="text-xs font-bold text-slate-600">วันติดต่อกัน</span>
         </div>
       </div>
 
       {!schedule.is_freeform && weakness?.latestPrediction && (
-        <p className="mb-3 text-sm font-bold text-neutral-800">
+        <p className="mb-3 text-sm font-semibold text-slate-700">
           ตอนนี้ {weakness.latestPrediction.predicted} → เป้าหมาย {weakness.latestPrediction.target}
         </p>
       )}
       {!schedule.is_freeform && !weakness?.latestPrediction && (
-        <p className="mb-3 text-sm text-neutral-500">ยังไม่เคยวัดระดับ — ลองทำ Mini Diagnosis เพื่อดูคะแนนที่คาดการณ์</p>
+        <p className="mb-3 text-sm text-slate-400">ยังไม่เคยวัดระดับ — ลองทำ Mini Diagnosis เพื่อดูคะแนนที่คาดการณ์</p>
       )}
       {isCatchUp && (
-        <div className="mb-3 border-2 border-[#FFCC00] bg-yellow-50 p-3 text-sm font-semibold text-neutral-800">
+        <div className="mb-3 rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-900 ring-1 ring-amber-200">
           💪 พลาดไป {missedRecent} วันในสัปดาห์นี้ — ไม่เป็นไร วันนี้แนะนำเพิ่มเป็น {catchUpTier ?? schedule.default_duration_minutes} นาทีเพื่อตามให้ทัน
         </div>
       )}
 
-      <div className="mb-2 flex gap-2 overflow-x-auto pb-2">
+      <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+        ปฏิทินฝึก · แตะดูรายละเอียด
+      </p>
+      <div className="mb-2 flex gap-1.5 overflow-x-auto pb-2">
         {days.map((d) => {
           const isToday = d.date === today;
           const dayAct = activityByDate.get(d.date);
-          // Any real activity that day counts as done — following the plan
-          // isn't required, doing SOMETHING that day is what shows up here.
           const isDone = doneDates.has(d.date) || !!dayAct;
+          const isSelected = selectedDay === d.date;
           return (
-            <div
+            <button
               key={d.date}
-              className={`flex w-16 shrink-0 flex-col items-center rounded-sm border-2 py-2 text-center ${
-                isDone ? "border-green-600 bg-green-50" : d.isMockTestDay ? "border-[#FFCC00] bg-yellow-50" : "border-black bg-white"
-              } ${isToday ? "ring-2 ring-[#004AAD]" : ""}`}
+              type="button"
+              onClick={() => setSelectedDay(isSelected ? null : d.date)}
+              className={`flex w-14 shrink-0 flex-col items-center gap-1 rounded-2xl py-2 text-center transition-all duration-150 ease-out hover:scale-105 active:scale-95 ${
+                isDone
+                  ? "bg-emerald-100"
+                  : d.isMockTestDay
+                    ? "bg-amber-100"
+                    : "bg-slate-50"
+              } ${isToday ? "ring-2 ring-[#004AAD]" : ""} ${isSelected ? "ring-2 ring-indigo-400" : ""}`}
             >
-              <span className="text-[10px] font-bold text-neutral-500">{dayLabel(d.date)}</span>
-              <span className="mt-1 text-lg">{isDone ? "✅" : d.isMockTestDay ? "🎯" : d.isStudyDay ? "📖" : "—"}</span>
-              {dayAct ? <span className="text-[9px] font-bold text-neutral-500">{dayAct.attempts} ข้อ</span> : null}
-            </div>
+              <span className="text-[10px] font-bold text-slate-500">{dayLabel(d.date)}</span>
+              <span className="text-base">{isDone ? "✅" : d.isMockTestDay ? "🎯" : d.isStudyDay ? "📖" : "·"}</span>
+            </button>
           );
         })}
       </div>
-      {todayEntry?.reason && <p className="mb-3 text-xs text-neutral-500">{todayEntry.reason}</p>}
+
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-out ${
+          selectedEntry ? "mb-3 max-h-40 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        {selectedEntry && (
+          <div className="rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
+            <p className="mb-1 font-bold">{dayLabel(selectedEntry.date)}</p>
+            {selectedActivity ? (
+              <p className="font-medium">
+                📝 ทำไป {selectedActivity.attempts} ข้อ · 📊 เฉลี่ย {selectedActivity.avgScorePct}% · 📚 เก็บคำศัพท์ {selectedActivity.vocabSaved} คำ
+              </p>
+            ) : (
+              <p className="text-indigo-500">ยังไม่มีการฝึกในวันนี้</p>
+            )}
+            {selectedEntry.reason && <p className="mt-1 text-indigo-500">{selectedEntry.reason}</p>}
+          </div>
+        )}
+      </div>
+
+      {todayEntry?.reason && !selectedEntry && <p className="mb-3 text-xs text-slate-400">{todayEntry.reason}</p>}
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <Link
           href={todayEntry?.isMockTestDay ? "/mock-test" : "/practice"}
-          className="inline-block border-[3px] border-black bg-[#FFCC00] px-4 py-3 text-xs font-black uppercase shadow-[4px_4px_0_0_#111]"
+          className="inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-xs font-bold text-[#FFCC00] shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98]"
         >
           {todayEntry?.isMockTestDay ? "ลองข้อสอบจำลองวันนี้ →" : todayEntry?.isStudyDay ? "เริ่มฝึกวันนี้ →" : "ไปหน้าฝึกซ้อม →"}
         </Link>
-        <Link href="/practice" className="text-xs font-black uppercase text-[#004AAD]">เลือกฝึกเอง ไม่ต้องพึ่งแผน →</Link>
+        <Link
+          href="/practice"
+          className="text-xs font-bold text-slate-400 transition-colors duration-150 hover:text-[#004AAD]"
+        >
+          เลือกฝึกเอง ไม่ต้องพึ่งแผน →
+        </Link>
       </div>
 
-      <div className="mb-4 border-t-2 border-dashed border-black pt-3">
-        <p className="mb-2 text-xs font-black uppercase tracking-widest text-[#004AAD]">วันนี้ทำอะไรไปบ้าง</p>
+      <div className="mb-4 rounded-xl bg-slate-50 p-3">
+        <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">วันนี้ทำอะไรไปบ้าง</p>
         {todaysActivity ? (
-          <div className="flex gap-3 text-sm font-semibold text-neutral-800">
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-slate-700">
             <span>📝 {todaysActivity.attempts} ข้อ</span>
             <span>📊 เฉลี่ย {todaysActivity.avgScorePct}%</span>
             <span>📚 {todaysActivity.vocabSaved} คำศัพท์</span>
           </div>
         ) : (
-          <p className="text-sm text-neutral-500">ยังไม่มีการฝึกวันนี้ — ฝึกตามแผนหรือทำเองก็นับหมด</p>
+          <p className="text-xs text-slate-400">ยังไม่มีการฝึกวันนี้ — ฝึกตามแผนหรือทำเองก็นับหมด</p>
         )}
       </div>
 
-      <div className="mb-4 border-t-2 border-dashed border-black pt-3">
-        <p className="mb-2 text-xs font-black uppercase tracking-widest text-[#004AAD]">สรุปสัปดาห์นี้</p>
-        <div className="flex gap-3 text-sm font-semibold text-neutral-800">
+      <div className="mb-4 rounded-xl bg-slate-50 p-3">
+        <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">สรุปสัปดาห์นี้</p>
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-slate-700">
           <span>📅 {weekDaysStudied}/7 วัน</span>
           <span>📊 เฉลี่ย {weekAvgScore}%</span>
           <span>📚 {weekVocab} คำศัพท์ใหม่</span>
@@ -342,9 +418,9 @@ export function StudyPlanCalendarCard() {
       </div>
 
       {(weakSkills.length > 0 || weakness?.weakestDimension) && (
-        <div className="border-t-2 border-dashed border-black pt-3">
-          <p className="mb-2 text-xs font-black uppercase tracking-widest text-[#004AAD]">จุดที่ควรกลับมาทบทวน</p>
-          <ul className="space-y-1 text-sm font-semibold text-neutral-800">
+        <div className="rounded-xl bg-rose-50 p-3">
+          <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-rose-400">จุดที่ควรกลับมาทบทวน</p>
+          <ul className="space-y-1 text-xs font-semibold text-rose-800">
             {weakSkills.map((s) => (
               <li key={`${s.taskType}:${s.difficulty}`}>⚠️ {s.taskType} ระดับ {s.difficulty} — เฉลี่ย {s.avgScorePct}%</li>
             ))}
@@ -354,6 +430,6 @@ export function StudyPlanCalendarCard() {
           </ul>
         </div>
       )}
-    </BrutalPanel>
+    </CardShell>
   );
 }
