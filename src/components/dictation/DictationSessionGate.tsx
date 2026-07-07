@@ -61,7 +61,7 @@ export function DictationSessionGate({
       difficulty={difficulty}
       setId={`dict-r${round}-${difficulty}-s${setNumber}`}
     >
-      <DictationSessionClient item={item} round={round} difficulty={difficulty} setNumber={setNumber} />
+      <DictationSessionClient key={`${round}-${difficulty}-${setNumber}`} item={item} round={round} difficulty={difficulty} setNumber={setNumber} />
     </StudySessionBoundary>
   );
 }

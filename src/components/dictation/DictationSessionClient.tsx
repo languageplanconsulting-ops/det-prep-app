@@ -7,7 +7,7 @@ import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { getDictationAudioDataUrlByItemId } from "@/lib/dictation-audio-indexeddb";
 import { dictationScoreFromDiff, diffDictationChars } from "@/lib/dictation-diff";
-import { sfxCorrect, sfxWrong } from "@/lib/exam-sfx";
+import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import { dictationMaxForDifficulty, saveDictationAttempt } from "@/lib/dictation-storage";
 import type { DictationDifficulty, DictationItem, DictationRoundNum } from "@/types/dictation";
 
@@ -230,6 +230,7 @@ export function DictationSessionClient({
   };
 
   const practiceAgain = () => {
+    sfxTransition();
     setUserText("");
     setPhase("practice");
     setAudioErr(null);
@@ -245,7 +246,7 @@ export function DictationSessionClient({
 
   if (phase === "report") {
     return (
-      <div className="space-y-6">
+      <div key={phase} className="ep-step-slide-in space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href={setsHref}
@@ -262,6 +263,9 @@ export function DictationSessionClient({
           expected={item.transcript}
           userText={userText}
           maxScore={maxScore}
+          round={round}
+          difficulty={difficulty}
+          setNumber={setNumber}
           onPracticeAgain={practiceAgain}
           onFixSubmit={handleFixSubmit}
         />
@@ -272,7 +276,7 @@ export function DictationSessionClient({
   if (soft) {
     // ── Soft-modern admin rebuild — same handlers/state, new presentation ──
     return (
-      <div className="mx-auto max-w-2xl space-y-4">
+      <div key={phase} className="ep-step-slide-in mx-auto max-w-2xl space-y-4">
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Link href={setsHref} className="font-semibold hover:text-[#004AAD]">
             ← ชุดข้อสอบ

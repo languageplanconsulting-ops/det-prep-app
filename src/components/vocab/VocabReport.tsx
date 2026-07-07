@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
+import { sfxTransition } from "@/lib/exam-sfx";
 import {
   VOCAB_SESSION_LABEL,
   VOCAB_SESSION_MAX,
@@ -30,6 +31,7 @@ export function VocabReport({
   onRedeem,
   setListHref,
   bankHref,
+  nextPassageHref,
 }: {
   round: VocabRoundNum;
   sessionLevel: VocabSessionLevel;
@@ -40,6 +42,7 @@ export function VocabReport({
   onRedeem: () => void;
   setListHref: string;
   bankHref: string;
+  nextPassageHref: string | null;
 }) {
   useRevealSfx();
   const maxScore = VOCAB_SESSION_MAX[sessionLevel];
@@ -139,6 +142,15 @@ export function VocabReport({
           </section>
 
           <div className="flex flex-col gap-4">
+            {nextPassageHref ? (
+              <Link
+                href={nextPassageHref}
+                onClick={() => sfxTransition()}
+                className="ep-brutal-reading block border-4 border-black bg-ep-blue py-4 text-center text-lg font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_#000] transition hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_#000]"
+              >
+                Next passage →
+              </Link>
+            ) : null}
             <button
               type="button"
               onClick={onRedeem}

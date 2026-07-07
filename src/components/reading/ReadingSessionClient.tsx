@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { sfxTransition } from "@/lib/exam-sfx";
 import { READING_DIFFICULTY_MAX } from "@/lib/reading-constants";
 import { saveReadingAttempt } from "@/lib/reading-storage";
 import type {
@@ -19,12 +20,14 @@ export function ReadingSessionClient({
   setNumber,
   examNumber,
   readingExam,
+  totalExams,
 }: {
   round: ReadingRoundNum;
   difficulty: ReadingDifficulty;
   setNumber: number;
   examNumber: number;
   readingExam: ReadingExamUnit;
+  totalExams: number;
 }) {
   const [phase, setPhase] = useState<"exam" | "report">("exam");
   const [examKey, setExamKey] = useState(0);
@@ -50,10 +53,16 @@ export function ReadingSessionClient({
   };
 
   const redeem = () => {
+    sfxTransition();
     setResultRows(null);
     setPhase("exam");
     setExamKey((k) => k + 1);
   };
+
+  const nextExamHref =
+    examNumber < totalExams
+      ? `/practice/comprehension/reading/round/${round}/${difficulty}/${setNumber}/${examNumber + 1}`
+      : null;
 
   return (
     <div className="space-y-6">
@@ -70,7 +79,7 @@ export function ReadingSessionClient({
       </div>
 
       {phase === "exam" ? (
-        <div key={`exam-${examKey}`} className="ep-comp-step-in">
+        <div key={`exam-${examKey}`} className="ep-step-slide-in">
           <ReadingExam
             setNumber={setNumber}
             examNumber={examNumber}
@@ -79,7 +88,7 @@ export function ReadingSessionClient({
           />
         </div>
       ) : resultRows ? (
-        <div key="report" className="ep-comp-step-in">
+        <div key="report" className="ep-step-slide-in">
           <ReadingReport
             round={round}
             difficulty={difficulty}
@@ -89,6 +98,7 @@ export function ReadingSessionClient({
             rows={resultRows}
             onRedeem={redeem}
             setListHref={setListHref}
+            nextExamHref={nextExamHref}
           />
         </div>
       ) : null}

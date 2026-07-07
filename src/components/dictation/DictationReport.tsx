@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
-import { sfxReveal } from "@/lib/exam-sfx";
+import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+import { DICTATION_SET_COUNT } from "@/lib/dictation-constants";
 import {
   buildRedeemSlots,
   dictationScoreFromDiff,
@@ -12,6 +14,7 @@ import {
   type CharDisplaySegment,
   type RedeemSlot,
 } from "@/lib/dictation-diff";
+import type { DictationDifficulty, DictationRoundNum } from "@/types/dictation";
 
 /** Word-level diff via LCS — marks which expected words the learner got. */
 function wordLevelDiff(expected: string, user: string): Array<{ word: string; ok: boolean }> {
@@ -153,12 +156,18 @@ export function DictationReport({
   expected,
   userText,
   maxScore,
+  round,
+  difficulty,
+  setNumber,
   onPracticeAgain,
   onFixSubmit,
 }: {
   expected: string;
   userText: string;
   maxScore: number;
+  round: DictationRoundNum;
+  difficulty: DictationDifficulty;
+  setNumber: number;
   onPracticeAgain: () => void;
   onFixSubmit: (merged: string, newScore: number) => void;
 }) {
@@ -167,9 +176,13 @@ export function DictationReport({
   const [showFix, setShowFix] = useState(false);
   const [redeemDismissed, setRedeemDismissed] = useState(false);
   const [fixValues, setFixValues] = useState<string[]>([]);
+  const nextSetHref =
+    setNumber < DICTATION_SET_COUNT
+      ? `/practice/literacy/dictation/round/${round}/${difficulty}/${setNumber + 1}`
+      : null;
 
   useEffect(() => {
-    sfxReveal();
+    sfxCelebrate("md");
   }, []);
 
   const charDiff = useMemo(() => diffDictationChars(expected, userText), [expected, userText]);
@@ -321,6 +334,15 @@ export function DictationReport({
             >
               ✍️ แก้ทีละจุดเพื่อเพิ่มคะแนน
             </button>
+          ) : null}
+          {nextSetHref ? (
+            <Link
+              href={nextSetHref}
+              onClick={() => sfxTransition()}
+              className="rounded-xl bg-ep-blue px-5 py-2.5 text-sm font-bold text-white hover:opacity-90"
+            >
+              ข้อถัดไป →
+            </Link>
           ) : null}
         </div>
 

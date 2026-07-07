@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { sfxTransition } from "@/lib/exam-sfx";
 import {
   READING_DIFFICULTY_LABEL,
   READING_DIFFICULTY_MAX,
@@ -33,6 +34,7 @@ export function ReadingReport({
   rows,
   onRedeem,
   setListHref,
+  nextExamHref,
 }: {
   round: ReadingRoundNum;
   difficulty: ReadingDifficulty;
@@ -42,6 +44,7 @@ export function ReadingReport({
   rows: ReadingExamResultRow[];
   onRedeem: () => void;
   setListHref: string;
+  nextExamHref: string | null;
 }) {
   useRevealSfx();
   const maxScore = READING_DIFFICULTY_MAX[difficulty];
@@ -192,6 +195,15 @@ export function ReadingReport({
       </section>
 
       <div className="flex flex-col gap-4">
+        {nextExamHref ? (
+          <Link
+            href={nextExamHref}
+            onClick={() => sfxTransition()}
+            className="ep-brutal-reading block bg-ep-blue py-4 text-center text-lg font-black uppercase tracking-widest text-white"
+          >
+            Next exam →
+          </Link>
+        ) : null}
         <button
           type="button"
           onClick={() => {

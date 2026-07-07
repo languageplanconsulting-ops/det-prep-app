@@ -21,6 +21,7 @@ export function VocabSessionGate({
   passageNumber: number;
 }) {
   const [passage, setPassage] = useState<VocabPassageUnit | null | undefined>(undefined);
+  const [nextPassageNumber, setNextPassageNumber] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,12 +33,17 @@ export function VocabSessionGate({
         setPassage(null);
         return;
       }
+      const levelPassages = set.passages
+        .filter((p) => p.contentLevel === sessionLevel)
+        .sort((a, b) => a.passageNumber - b.passageNumber);
+      const idx = levelPassages.findIndex((p) => p.passageNumber === passageNumber);
+      setNextPassageNumber(idx >= 0 && idx + 1 < levelPassages.length ? levelPassages[idx + 1]!.passageNumber : null);
       setPassage(getVocabPassageFromSet(set, passageNumber) ?? null);
     })();
     return () => {
       cancelled = true;
     };
-  }, [round, setNumber, passageNumber]);
+  }, [round, sessionLevel, setNumber, passageNumber]);
 
   const setListHref = `/practice/comprehension/vocabulary/round/${round}/${setNumber}/${sessionLevel}`;
 
@@ -69,11 +75,13 @@ export function VocabSessionGate({
       setId={`voc-r${round}-s${setNumber}-l${sessionLevel}-p${passageNumber}`}
     >
       <VocabSessionClient
+        key={`${round}-${sessionLevel}-${setNumber}-${passageNumber}`}
         round={round}
         sessionLevel={sessionLevel}
         setNumber={setNumber}
         passageNumber={passageNumber}
         passage={passage}
+        nextPassageNumber={nextPassageNumber}
       />
     </StudySessionBoundary>
   );

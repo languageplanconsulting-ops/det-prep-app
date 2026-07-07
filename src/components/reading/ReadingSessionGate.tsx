@@ -24,6 +24,7 @@ export function ReadingSessionGate({
   examNumber: number;
 }) {
   const [exam, setExam] = useState<ReadingExamUnit | null | undefined>(undefined);
+  const [totalExams, setTotalExams] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,6 +36,7 @@ export function ReadingSessionGate({
         setExam(null);
         return;
       }
+      setTotalExams(set.exams.length);
       setExam(getReadingExamFromSet(set, examNumber) ?? null);
     })();
     return () => {
@@ -70,11 +72,13 @@ export function ReadingSessionGate({
       setId={`read-r${round}-${difficulty}-s${setNumber}-e${examNumber}`}
     >
       <ReadingSessionClient
+        key={`${round}-${difficulty}-${setNumber}-${examNumber}`}
         round={round}
         difficulty={difficulty}
         setNumber={setNumber}
         examNumber={examNumber}
         readingExam={exam}
+        totalExams={totalExams}
       />
     </StudySessionBoundary>
   );

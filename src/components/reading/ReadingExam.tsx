@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
-import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
+import { sfxCorrect, sfxTap, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import { shuffleMcOptions, answersMatch } from "@/lib/reading-utils";
 import type {
   ReadingExamResultRow,
@@ -71,6 +71,7 @@ export function ReadingExam({
   };
 
   const selectOther = (option: string) => {
+    sfxTap();
     setAnswers((a) => ({ ...a, [current.key]: option }));
   };
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { sfxTransition } from "@/lib/exam-sfx";
 import { VOCAB_SESSION_MAX } from "@/lib/vocab-constants";
 import { saveVocabAttempt } from "@/lib/vocab-storage";
 import type {
@@ -19,12 +20,14 @@ export function VocabSessionClient({
   setNumber,
   passageNumber,
   passage,
+  nextPassageNumber,
 }: {
   round: VocabRoundNum;
   sessionLevel: VocabSessionLevel;
   setNumber: number;
   passageNumber: number;
   passage: VocabPassageUnit;
+  nextPassageNumber: number | null;
 }) {
   const [phase, setPhase] = useState<"exam" | "report">("exam");
   const [examKey, setExamKey] = useState(0);
@@ -51,10 +54,16 @@ export function VocabSessionClient({
   };
 
   const redeem = () => {
+    sfxTransition();
     setResultRows(null);
     setPhase("exam");
     setExamKey((k) => k + 1);
   };
+
+  const nextPassageHref =
+    nextPassageNumber != null
+      ? `/practice/comprehension/vocabulary/round/${round}/${setNumber}/${sessionLevel}/${nextPassageNumber}`
+      : null;
 
   return (
     <div className="space-y-6">
@@ -71,7 +80,7 @@ export function VocabSessionClient({
       </div>
 
       {phase === "exam" ? (
-        <div key={`exam-${examKey}`} className="ep-comp-step-in">
+        <div key={`exam-${examKey}`} className="ep-step-slide-in">
           <VocabExam
             passage={passage}
             setNumber={setNumber}
@@ -80,7 +89,7 @@ export function VocabSessionClient({
           />
         </div>
       ) : resultRows ? (
-        <div key="report" className="ep-comp-step-in">
+        <div key="report" className="ep-step-slide-in">
           <VocabReport
             round={round}
             sessionLevel={sessionLevel}
@@ -91,6 +100,7 @@ export function VocabSessionClient({
             onRedeem={redeem}
             setListHref={setListHref}
             bankHref={bankHref}
+            nextPassageHref={nextPassageHref}
           />
         </div>
       ) : null}
