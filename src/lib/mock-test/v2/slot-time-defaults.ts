@@ -15,7 +15,7 @@ export function v2FallbackSecondsForSlot(slot: AssemblySlot): number {
   if (t === "interactive_listening") return 465;
   if (t === "read_then_speak") return slot.stage === 3 ? 300 : 90;
   if (t === "speak_about_photo") return 90;
-  if (t === "read_and_write") return 480;
+  if (t === "read_and_write") return 3900;
   if (t === "interactive_speaking") return 220;
   return 300;
 }

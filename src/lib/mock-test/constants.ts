@@ -38,7 +38,7 @@ export const PHASE_TIME_LIMIT_SECONDS: Record<number, number> = {
   2: 300,
   3: 300,
   4: 540,
-  5: 900,
+  5: 3900,
   6: 300,
   7: 480,
   8: 240,
