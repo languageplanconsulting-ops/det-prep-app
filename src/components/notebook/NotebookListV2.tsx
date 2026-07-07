@@ -6,7 +6,9 @@ import { NotebookSpeakingHighlightCard } from "@/components/notebook/NotebookSpe
 import { tryParseNotebookProductionReport } from "@/lib/notebook-production-report-parse";
 import {
   addCustomCategory,
+  backfillNotebookEntriesToServer,
   deleteNotebookEntry,
+  hydrateNotebookFromServer,
   loadCustomCategories,
   loadNotebook,
   NOTEBOOK_BUILTIN,
@@ -91,6 +93,37 @@ export function NotebookListV2() {
   useEffect(() => {
     reload();
   }, [reload]);
+
+  // Pull in entries saved elsewhere (mobile app, other browsers/devices) — the
+  // list would otherwise only ever show this browser's localStorage cache.
+  useEffect(() => {
+    let cancelled = false;
+    void hydrateNotebookFromServer()
+      .then((serverEntries) => {
+        if (cancelled) return;
+        setEntries(serverEntries);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // One-time: push any entries that only ever made it to localStorage (e.g. a
+  // save that happened while the server sync call failed) up to the server too.
+  useEffect(() => {
+    const key = "ep-notebook-server-backfill-v1";
+    if (typeof sessionStorage === "undefined") return;
+    if (sessionStorage.getItem(key)) return;
+    const snapshot = loadNotebook();
+    if (snapshot.length === 0) {
+      sessionStorage.setItem(key, "1");
+      return;
+    }
+    void backfillNotebookEntriesToServer(snapshot).finally(() => {
+      sessionStorage.setItem(key, "1");
+    });
+  }, []);
 
   const counts = useMemo(
     () => ({
