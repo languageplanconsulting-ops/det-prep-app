@@ -571,6 +571,12 @@ export function PracticeHubV2({
                   >
                     ✍️ บทฝึกสำหรับโจทย์เขียน (How to write) <span className="text-slate-300">→</span>
                   </Link>
+                  <Link
+                    href="/practice/lessons/how-to-speak"
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
+                  >
+                    🎤 บทฝึกสำหรับโจทย์พูด (How to speak) <span className="text-slate-300">→</span>
+                  </Link>
                 </div>
               </div>
             </div>
