@@ -559,6 +559,12 @@ export function PracticeHubV2({
                   >
                     🔤 คำจริง (Real word) <span className="text-slate-300">→</span>
                   </Link>
+                  <Link
+                    href="/practice/lessons/reading-skills"
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
+                  >
+                    🧩 ทักษะการอ่าน (Reading skills) <span className="text-slate-300">→</span>
+                  </Link>
                 </div>
               </div>
             </div>
