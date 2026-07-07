@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { NotebookMatchingGame } from "@/components/notebook/NotebookMatchingGame";
 import { NotebookProductionReportFullView } from "@/components/notebook/NotebookProductionReportFullView";
 import { NotebookSpeakingHighlightCard } from "@/components/notebook/NotebookSpeakingHighlightCard";
 import { tryParseNotebookProductionReport } from "@/lib/notebook-production-report-parse";
@@ -18,10 +19,9 @@ import {
 import type { NotebookCustomCategory, NotebookEntry } from "@/types/writing";
 
 /**
- * NotebookListV2 — soft-modern admin-only redesign (Cagan + Krug).
+ * NotebookListV2 — soft-modern redesign (Cagan + Krug), launched to all users.
  * Reuses the EXACT same storage layer, report parser, and sub-components as the
- * live NotebookList — only the presentation changes. Gated to admins upstream,
- * so users keep the current notebook untouched.
+ * original NotebookList, which remains in git history for rollback.
  */
 
 const SOURCE_TAG: Record<NotebookEntry["source"], string> = {
@@ -84,6 +84,7 @@ export function NotebookListV2() {
     idx: 0,
     flipped: false,
   });
+  const [reviewMode, setReviewMode] = useState<"closed" | "choice" | "flip" | "match">("closed");
 
   const reload = useCallback(() => {
     setEntries(loadNotebook());
@@ -125,24 +126,32 @@ export function NotebookListV2() {
     });
   }, []);
 
+  const MASTERED_TAB = "mastered";
+
   const counts = useMemo(
     () => ({
-      vocabulary: entries.filter((e) => e.categoryIds.includes(NOTEBOOK_BUILTIN.vocabulary)).length,
+      vocabulary: entries.filter(
+        (e) => e.categoryIds.includes(NOTEBOOK_BUILTIN.vocabulary) && !e.mastered,
+      ).length,
       grammar: entries.filter((e) => e.categoryIds.includes(NOTEBOOK_BUILTIN.grammar)).length,
       production: entries.filter((e) =>
         e.categoryIds.includes(NOTEBOOK_BUILTIN.productionFeedback),
       ).length,
+      mastered: entries.filter((e) => e.mastered).length,
     }),
     [entries],
   );
 
   const chips = useMemo(() => {
-    const base = [
+    const base: { id: string; label: string }[] = [
       { id: NOTEBOOK_BUILTIN.all, label: `ทั้งหมด · ${entries.length}` },
       { id: NOTEBOOK_BUILTIN.vocabulary, label: `📚 คำศัพท์ · ${counts.vocabulary}` },
       { id: NOTEBOOK_BUILTIN.grammar, label: `✍️ ไวยากรณ์ · ${counts.grammar}` },
       { id: NOTEBOOK_BUILTIN.productionFeedback, label: `📊 รายงาน · ${counts.production}` },
     ];
+    if (counts.mastered > 0) {
+      base.push({ id: MASTERED_TAB, label: `🧠 จำได้แล้ว · ${counts.mastered}` });
+    }
     const custom = categories.map((c) => ({
       id: c.id,
       label: `${c.name} · ${entries.filter((e) => e.categoryIds.includes(c.id)).length}`,
@@ -153,13 +162,23 @@ export function NotebookListV2() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return entries
-      .filter((e) => activeTab === NOTEBOOK_BUILTIN.all || e.categoryIds.includes(activeTab))
+      .filter((e) => {
+        if (activeTab === MASTERED_TAB) return !!e.mastered;
+        if (activeTab === NOTEBOOK_BUILTIN.all) return true;
+        if (activeTab === NOTEBOOK_BUILTIN.vocabulary) {
+          return e.categoryIds.includes(activeTab) && !e.mastered;
+        }
+        return e.categoryIds.includes(activeTab);
+      })
       .filter((e) => !q || haystack(e).includes(q))
       .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   }, [entries, activeTab, search]);
 
   const reviewDeck = useMemo(
-    () => entries.filter((e) => e.categoryIds.includes(NOTEBOOK_BUILTIN.vocabulary)),
+    () =>
+      entries.filter(
+        (e) => e.categoryIds.includes(NOTEBOOK_BUILTIN.vocabulary) && !e.mastered,
+      ),
     [entries],
   );
 
@@ -174,6 +193,11 @@ export function NotebookListV2() {
     if (!window.confirm("ลบโน้ตนี้ออกจาก Notebook?")) return;
     deleteNotebookEntry(id);
     reload();
+  };
+
+  const setMastered = (id: string, mastered: boolean) => {
+    updateNotebookEntry(id, { mastered });
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, mastered } : e)));
   };
 
   const createCategory = () => {
@@ -192,16 +216,6 @@ export function NotebookListV2() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6">
-      {/* Admin banner */}
-      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-[#fff7d1] px-3 py-2 text-xs ring-1 ring-[#FFCC00]">
-        <span className="rounded bg-[#004AAD] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FFCC00]">
-          Admin preview
-        </span>
-        <span className="font-semibold text-slate-700">
-          Notebook V2 · ผู้ใช้จริงยังเห็นหน้าเดิม
-        </span>
-      </div>
-
       <p className="text-xs font-bold uppercase tracking-wider text-[#004AAD]">สมุดของฉัน</p>
       <h1 className="mt-1 text-3xl font-bold">Notebook</h1>
       <p className="mt-1 max-w-2xl text-sm text-slate-600">
@@ -229,7 +243,7 @@ export function NotebookListV2() {
           <button
             type="button"
             disabled={!deck.length}
-            onClick={() => setReview({ open: true, idx: 0, flipped: false })}
+            onClick={() => setReviewMode("choice")}
             className="inline-flex items-center gap-2 rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00] disabled:opacity-40"
           >
             🎴 เริ่มทบทวน
@@ -404,7 +418,16 @@ export function NotebookListV2() {
                   />
                 </div>
 
-                <div className="mt-2 flex justify-end">
+                <div className="mt-2 flex justify-end gap-2">
+                  {e.mastered ? (
+                    <button
+                      type="button"
+                      onClick={() => setMastered(e.id, false)}
+                      className="rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
+                    >
+                      ↩️ กลับไปทบทวน
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => removeEntry(e.id)}
@@ -419,8 +442,60 @@ export function NotebookListV2() {
         </div>
       )}
 
+      {/* Mode choice */}
+      {reviewMode === "choice" ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-sm font-bold text-slate-800">อยากทบทวนแบบไหน?</p>
+              <button
+                type="button"
+                onClick={() => setReviewMode("closed")}
+                className="rounded-full bg-slate-100 px-3 py-1 text-sm font-bold text-slate-600"
+              >
+                ✕ ปิด
+              </button>
+            </div>
+            <div className="grid gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setReview({ open: true, idx: 0, flipped: false });
+                  setReviewMode("flip");
+                }}
+                className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#004AAD]"
+              >
+                <p className="text-sm font-bold text-slate-900">🎴 พลิกการ์ด</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  ไล่ดูคำศัพท์ทีละใบ พลิกดูคำแปล
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setReviewMode("match")}
+                className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#004AAD]"
+              >
+                <p className="text-sm font-bold text-slate-900">🧩 เกมจับคู่</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  ลากคำศัพท์ไปจับคู่กับความหมาย (สูงสุด 20 คำ)
+                </p>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Matching game */}
+      {reviewMode === "match" ? (
+        <NotebookMatchingGame
+          deck={deck}
+          onMastered={(id) => setMastered(id, true)}
+          onClose={() => setReviewMode("closed")}
+        />
+      ) : null}
+
       {/* Review overlay (flashcard) */}
-      {review.open && reviewCard ? (
+      {reviewMode === "flip" && review.open && reviewCard ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
           <div className="w-full max-w-md">
             <div className="mb-3 flex items-center justify-between text-white">
@@ -429,7 +504,10 @@ export function NotebookListV2() {
               </span>
               <button
                 type="button"
-                onClick={() => setReview({ open: false, idx: 0, flipped: false })}
+                onClick={() => {
+                  setReview({ open: false, idx: 0, flipped: false });
+                  setReviewMode("closed");
+                }}
                 className="rounded-full bg-white/15 px-3 py-1 text-sm font-bold"
               >
                 ✕ ปิด

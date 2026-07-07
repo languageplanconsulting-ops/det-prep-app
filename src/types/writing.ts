@@ -236,4 +236,6 @@ export interface NotebookEntry {
   createdAt: string;
   /** Read-then-speak / read-then-write: structured layout for a saved submission highlight. */
   rubricHighlightCard?: RubricHighlightNotebookCard;
+  /** Vocabulary word the learner marked "I remember this by heart" — hidden from the active review deck, still browsable/restorable. */
+  mastered?: boolean;
 }

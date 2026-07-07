@@ -151,6 +151,7 @@ function migrateEntry(raw: unknown): NotebookEntry | null {
     rubricHighlightCard:
       parseRubricHighlightCard((o as Record<string, unknown>).rubricHighlightCard) ??
       parseRubricHighlightCard((o as Record<string, unknown>).speakingHighlightCard),
+    mastered: (o as Record<string, unknown>).mastered === true,
   };
 }
 
@@ -334,7 +335,9 @@ export async function addNotebookEntry(
 
 export function updateNotebookEntry(
   id: string,
-  patch: Partial<Pick<NotebookEntry, "categoryIds" | "userNote" | "fullBodyEn" | "fullBodyTh">>,
+  patch: Partial<
+    Pick<NotebookEntry, "categoryIds" | "userNote" | "fullBodyEn" | "fullBodyTh" | "mastered">
+  >,
 ): void {
   const list = loadNotebook();
   const i = list.findIndex((e) => e.id === id);
