@@ -69,7 +69,11 @@ body {
 }
 
 .ep-comp-step-in {
-  animation: ep-comp-step-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* backwards, not both/forwards — see .ep-page-shell above for why holding the
+   * end-keyframe transform breaks `position: fixed` descendants (e.g. the
+   * Add to Notebook modal rendered inside reading/vocab exam steps).
+   */
+  animation: ep-comp-step-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -225,7 +229,15 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   .ep-page-shell {
-    animation: ep-page-shell-enter var(--ep-duration-page) var(--ep-ease-out-expo) both;
+    /* fill-mode must NOT be "both"/"forwards": holding the end keyframe keeps
+     * `transform: translateY(0)` applied forever, which (even at 0px) creates a
+     * new containing block for `position: fixed` descendants — breaking every
+     * fixed-position modal/overlay on the page (they get positioned relative to
+     * this shell's full scroll height instead of the viewport). "backwards"
+     * still prevents a flash of the pre-animation state but reverts to the
+     * shell's normal (transform-less) style once the animation finishes.
+     */
+    animation: ep-page-shell-enter var(--ep-duration-page) var(--ep-ease-out-expo) backwards;
   }
 }
 
