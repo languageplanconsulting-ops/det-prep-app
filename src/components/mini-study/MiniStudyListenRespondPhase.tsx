@@ -147,6 +147,7 @@ export function MiniStudyListenRespondPhase({ session }: Props) {
         <div className="mt-3 flex items-center gap-3">
           <button
             type="button"
+            data-no-sfx
             onClick={playAudio}
             disabled={audioLoading}
             className="rounded-lg bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition disabled:opacity-50"

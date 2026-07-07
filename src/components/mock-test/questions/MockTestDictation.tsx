@@ -163,6 +163,7 @@ export function MockTestDictation({
           </p>
           <button
             type="button"
+            data-no-sfx
             disabled={submitting || browserTtsActive}
             onClick={playBrowserTts}
             className="rounded-[4px] border-2 border-black bg-white px-3 py-2 text-xs font-black shadow-[2px_2px_0_0_#000] disabled:opacity-50"

@@ -368,6 +368,7 @@ export function MiniListeningStep({
         </p>
         <button
           type="button"
+          data-no-sfx
           disabled={loadingTts || playing || playsLeft <= 0 || submitting}
           onClick={handlePlay}
           aria-label="เล่นเสียง"

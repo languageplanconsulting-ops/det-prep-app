@@ -305,6 +305,7 @@ export function DictationSessionClient({
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl bg-white p-4 ring-1 ring-slate-200">
             <button
               type="button"
+              data-no-sfx
               onClick={togglePlay}
               className="inline-flex items-center gap-2 rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00] hover:opacity-90"
             >
@@ -312,6 +313,7 @@ export function DictationSessionClient({
             </button>
             <button
               type="button"
+              data-no-sfx
               onClick={replayFive}
               className="inline-flex items-center gap-2 rounded-xl bg-[#FFCC00] px-5 py-2.5 text-sm font-extrabold text-[#004AAD] hover:opacity-90"
             >
@@ -395,6 +397,7 @@ export function DictationSessionClient({
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
+            data-no-sfx
             onClick={togglePlay}
             className="border-4 border-black bg-ep-blue px-4 py-2 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
           >
@@ -402,6 +405,7 @@ export function DictationSessionClient({
           </button>
           <button
             type="button"
+            data-no-sfx
             onClick={replayFive}
             className="border-4 border-black bg-ep-yellow px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
           >

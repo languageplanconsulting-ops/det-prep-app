@@ -410,7 +410,7 @@ export default function DiagnosticTestPage() {
               <p style={{ margin: "0 0 16px", fontSize: 13.5, color: "#64748b" }}>กดฟัง (ฟังได้สูงสุด 3 ครั้งต่อประโยค) แล้วพิมพ์ประโยคที่ได้ยินให้ครบทุกคำ สะกดให้ถูกต้อง</p>
               {DICTATION.map((s, i) => (
                 <div key={i} style={{ marginBottom: 14 }}>
-                  <button onClick={() => playDict(i)} disabled={replays[i] >= 3} className="pc-press" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: replays[i] >= 3 ? "#eef0f3" : "#e7eefb", color: replays[i] >= 3 ? "#999" : NAVY, border: "none", borderRadius: 12, padding: "10px 16px", fontSize: 13, fontWeight: 500, cursor: replays[i] >= 3 ? "default" : "pointer", fontFamily: SANS, transition: "transform .1s ease" }}>▶ ฟังประโยค {i + 1} (เหลือ {Math.max(0, 3 - replays[i])} ครั้ง)</button>
+                  <button data-no-sfx onClick={() => playDict(i)} disabled={replays[i] >= 3} className="pc-press" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: replays[i] >= 3 ? "#eef0f3" : "#e7eefb", color: replays[i] >= 3 ? "#999" : NAVY, border: "none", borderRadius: 12, padding: "10px 16px", fontSize: 13, fontWeight: 500, cursor: replays[i] >= 3 ? "default" : "pointer", fontFamily: SANS, transition: "transform .1s ease" }}>▶ ฟังประโยค {i + 1} (เหลือ {Math.max(0, 3 - replays[i])} ครั้ง)</button>
                   <textarea {...noAuto} value={dict[i]} onChange={(e) => setDict((d) => d.map((v, k) => (k === i ? e.target.value : v)))} rows={2} style={{ width: "100%", boxSizing: "border-box", marginTop: 8, border: "1.5px solid #e2e8f0", borderRadius: 14, padding: 12, fontSize: 14, fontFamily: SANS, resize: "vertical" }} placeholder="พิมพ์สิ่งที่ได้ยิน…" />
                 </div>
               ))}
@@ -598,7 +598,7 @@ function SpeakingStep({ onDone, onSkip, onBack, speak }: { onDone: (r: SkillResu
       <p style={{ margin: "0 0 14px", fontSize: 13.5, lineHeight: 1.6, color: "#64748b" }}>กดฟังโจทย์ แล้วกดอัดเสียงพูดประมาณ 90 วินาที — พูดให้เป็นธรรมชาติ พูดต่อเนื่องอย่างน้อย 15 คำ แล้วกดส่งเพื่อรับคะแนน</p>
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "8px 0 4px" }}>
-        <button onClick={speak} className="pc-press" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#e7eefb", color: NAVY, border: "none", borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: SANS }}>▶ ฟังโจทย์</button>
+        <button data-no-sfx onClick={speak} className="pc-press" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#e7eefb", color: NAVY, border: "none", borderRadius: 12, padding: "9px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: SANS }}>▶ ฟังโจทย์</button>
         <button
           onClick={recording ? stop : start} disabled={phase === "transcribing"} className={`pc-press${recording ? " pc-rec" : ""}`}
           aria-label={recording ? "หยุดอัดเสียง" : "เริ่มอัดเสียง"}
