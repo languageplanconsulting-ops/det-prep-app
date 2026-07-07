@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HighlightedReadingText } from "@/components/reading/ReadingExam";
 import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import { shuffleMcOptions } from "@/lib/reading-utils";
@@ -77,13 +77,21 @@ export function VocabularyReadingMockExam({
   const [internalStep, setInternalStep] = useState(0);
   const [internalAnswers, setInternalAnswers] = useState<string[]>([]);
   const [localSubmitting, setLocalSubmitting] = useState(false);
+  /** Vocab blank: chosen option shown (green/red) in its box before auto-advance. */
+  const [vocabPick, setVocabPick] = useState<string | null>(null);
+  const [vocabRevealed, setVocabRevealed] = useState(false);
+  const vocabAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const step = aggregateMode ? internalStep : completedSteps;
   const block = blocks[step];
   const p2Correct = String(exam.missingParagraph?.correctAnswer ?? exam.passage.p2 ?? "");
   const missingSelectionStep = aggregateMode ? 6 : 5;
   const vocabAnswers = aggregateMode
-    ? Array.from({ length: 6 }).map((_, idx) => internalAnswers[idx] ?? `[BLANK ${idx + 1}]`)
+    ? Array.from({ length: 6 }).map((_, idx) => {
+        if (idx < internalAnswers.length) return internalAnswers[idx] ?? "";
+        if (idx === step && vocabRevealed && vocabPick) return vocabPick;
+        return "";
+      })
     : (exam.vocabularyQuestions ?? []).slice(0, 6).map((q) => q.correctAnswer);
   const vocabAnswersForDisplay =
     aggregateMode && step >= missingSelectionStep ? correctVocabAnswers : vocabAnswers;
@@ -104,6 +112,17 @@ export function VocabularyReadingMockExam({
       setLocalSubmitting(false);
     }
   }, [submitting]);
+
+  useEffect(() => {
+    setVocabPick(null);
+    setVocabRevealed(false);
+  }, [step]);
+
+  useEffect(() => {
+    return () => {
+      if (vocabAdvanceTimer.current) clearTimeout(vocabAdvanceTimer.current);
+    };
+  }, []);
 
   const shuffled = useMemo(() => {
     if (!block) return { shuffled: [] as string[], correctIndex: 0 };
@@ -158,6 +177,17 @@ export function VocabularyReadingMockExam({
     if (submitting || localSubmitting) return;
     const revealStep = aggregateMode ? 6 : 5;
     if (step < revealStep) {
+      if (aggregateMode) {
+        if (vocabRevealed) return;
+        if (opt === block.correctAnswer) sfxCorrect();
+        else sfxWrong();
+        setVocabPick(opt);
+        setVocabRevealed(true);
+        vocabAdvanceTimer.current = setTimeout(() => {
+          commitChoice(opt);
+        }, 900);
+        return;
+      }
       submitChoice(opt);
       return;
     }
@@ -198,7 +228,12 @@ export function VocabularyReadingMockExam({
           <div className="space-y-4 text-sm leading-relaxed text-neutral-800">
           <p className="whitespace-pre-wrap">
             {aggregateMode ? (
-              renderMockVocabBlanksAsBoxes(exam.passage.p1, vocabAnswersForDisplay, step >= missingSelectionStep)
+              renderMockVocabBlanksAsBoxes(
+                exam.passage.p1,
+                vocabAnswersForDisplay,
+                correctVocabAnswers,
+                step >= missingSelectionStep,
+              )
             ) : (
               <HighlightedReadingText
                 text={p1Display}
@@ -231,7 +266,12 @@ export function VocabularyReadingMockExam({
           )}
           <p className="whitespace-pre-wrap">
             {aggregateMode ? (
-              renderMockVocabBlanksAsBoxes(exam.passage.p3, vocabAnswersForDisplay, step >= missingSelectionStep)
+              renderMockVocabBlanksAsBoxes(
+                exam.passage.p3,
+                vocabAnswersForDisplay,
+                correctVocabAnswers,
+                step >= missingSelectionStep,
+              )
             ) : (
               <HighlightedReadingText
                 text={p3Display}
@@ -248,22 +288,33 @@ export function VocabularyReadingMockExam({
             <p className="ep-stat text-xs font-bold uppercase text-neutral-500">{labels[step]}</p>
             <p className="mt-2 text-base font-bold text-neutral-900">{block.question}</p>
             <ul className="mt-4 space-y-2">
-              {shuffled.shuffled.map((opt) => (
-                <li key={opt.slice(0, 48) + opt.length}>
-                  <button
-                    type="button"
-                    onClick={() => onOptionClick(opt)}
-                    disabled={submitting || localSubmitting}
-                    className={`w-full border-4 border-black px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition hover:bg-ep-yellow/30 ${
-                      step === (aggregateMode ? 6 : 5) && missingReveal && missingPick === opt
-                        ? "bg-ep-yellow/50"
-                        : "bg-white"
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                </li>
-              ))}
+              {shuffled.shuffled.map((opt) => {
+                const isVocabStep = aggregateMode && step < missingSelectionStep;
+                const vocabOptionClass =
+                  isVocabStep && vocabRevealed && vocabPick === opt
+                    ? opt === block.correctAnswer
+                      ? "bg-[#dcfce7]"
+                      : "bg-[#fee2e2]"
+                    : "bg-white";
+                return (
+                  <li key={opt.slice(0, 48) + opt.length}>
+                    <button
+                      type="button"
+                      onClick={() => onOptionClick(opt)}
+                      disabled={submitting || localSubmitting || (isVocabStep && vocabRevealed)}
+                      className={`w-full border-4 border-black px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition hover:bg-ep-yellow/30 disabled:hover:bg-inherit ${
+                        isVocabStep
+                          ? vocabOptionClass
+                          : step === (aggregateMode ? 6 : 5) && missingReveal && missingPick === opt
+                            ? "bg-ep-yellow/50"
+                            : "bg-white"
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
             {step === (aggregateMode ? 6 : 5) && missingReveal && missingPick ? (
               <button
@@ -298,7 +349,12 @@ export function VocabularyReadingMockExam({
   );
 }
 
-function renderMockVocabBlanksAsBoxes(text: string, answers: string[] = [], lockedCorrect = false) {
+function renderMockVocabBlanksAsBoxes(
+  text: string,
+  answers: string[] = [],
+  correctAnswers: string[] = [],
+  lockedCorrect = false,
+) {
   const re = /\[BLANK\s*(\d+)\]/gi;
   const out: any[] = [];
   let last = 0;
@@ -313,14 +369,25 @@ function renderMockVocabBlanksAsBoxes(text: string, answers: string[] = [], lock
     const blankNum = match[1] ?? "";
     const idxNum = Number(blankNum) - 1;
     const picked = idxNum >= 0 ? String(answers[idxNum] ?? "").trim() : "";
+    const correctWord = idxNum >= 0 ? String(correctAnswers[idxNum] ?? "").trim() : "";
+
+    let toneClass = "border-dashed border-neutral-400 bg-neutral-100 text-neutral-400";
+    let display = "____";
+    if (lockedCorrect) {
+      toneClass = "border-black bg-[#dcfce7] text-[#166534]";
+      display = correctWord || display;
+    } else if (picked) {
+      const isCorrect = !!correctWord && picked.toLowerCase() === correctWord.toLowerCase();
+      toneClass = isCorrect ? "border-black bg-[#dcfce7] text-[#166534]" : "border-black bg-[#fee2e2] text-[#991b1b]";
+      display = picked;
+    }
+
     out.push(
       <span
         key={`b-${idx}-${blankNum}`}
-        className={`mx-0.5 inline-flex items-center justify-center rounded-[8px] border-4 border-black px-2 py-1 font-black tracking-widest shadow-[3px_3px_0_0_#000] ${
-          lockedCorrect ? "bg-[#dcfce7] text-[#166534]" : "bg-[#dbffd8] text-[#0f7a16]"
-        }`}
+        className={`mx-0.5 inline-flex min-w-[3.5rem] items-center justify-center rounded-[8px] border-4 px-2 py-1 font-black tracking-widest shadow-[3px_3px_0_0_#000] ${toneClass}`}
       >
-        {picked || `____${blankNum}`}
+        {display}
       </span>,
     );
     last = idx + match[0]!.length;
