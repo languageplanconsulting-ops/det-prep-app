@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
+import { sfxCelebrate, sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
+import { XP, awardXp } from "@/lib/gamification";
 import { CAMPUS_VOCAB_SCENARIOS, campusVocabScenario, type CampusVocabBlank } from "@/lib/campus-vocab";
 import { fitbPrefix, fitbRemainderLength, scoreFitb, type MissingWord } from "@/lib/fitb-lesson-scoring";
 import { speakLesson } from "@/lib/lesson-audio";
@@ -29,6 +32,7 @@ export function CampusVocabLessonRunner({ scenarioId }: { scenarioId: string }) 
   const [correctCount, setCorrectCount] = useState(0);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState(false);
+  const rewarded = useRef(false);
 
   const blank: CampusVocabBlank | null = scenario?.blanks[index] ?? null;
   const word: MissingWord | null = blank
@@ -65,11 +69,15 @@ export function CampusVocabLessonRunner({ scenarioId }: { scenarioId: string }) 
     if (!word) return;
     setChecked(true);
     if (scoreFitb([fitbPrefix(word) + typed], [word]).marks[0]!.grade === "exact") {
+      sfxCorrect();
       setCorrectCount((c) => c + 1);
+    } else {
+      sfxWrong();
     }
   }
 
   function goNext() {
+    sfxTransition();
     if (scenario && index + 1 < scenario.blanks.length) {
       setIndex((i) => i + 1);
     } else {
@@ -79,10 +87,15 @@ export function CampusVocabLessonRunner({ scenarioId }: { scenarioId: string }) 
 
   function finish() {
     setPhase("done");
-    const total = scenario?.blanks.length ?? 3;
-    const pct = total ? Math.round((correctCount / total) * 100) : 0;
-    saveUnitScore(uid, TOPIC, TIER, scenarioIndex, pct).catch(() => {});
-    if (scenario) markItemSeen(uid, itemKey("campusvocab", scenario.id), "campusvocab", "manual_browse").catch(() => {});
+    if (!rewarded.current) {
+      rewarded.current = true;
+      sfxCelebrate("md");
+      const total = scenario?.blanks.length ?? 3;
+      const pct = total ? Math.round((correctCount / total) * 100) : 0;
+      saveUnitScore(uid, TOPIC, TIER, scenarioIndex, pct).catch(() => {});
+      awardXp(uid, XP.auto(pct)).catch(() => {});
+      if (scenario) markItemSeen(uid, itemKey("campusvocab", scenario.id), "campusvocab", "manual_browse").catch(() => {});
+    }
   }
 
   async function saveToNotebook() {
@@ -108,15 +121,19 @@ export function CampusVocabLessonRunner({ scenarioId }: { scenarioId: string }) 
     const total = scenario.blanks.length;
     const pct = total ? Math.round((correctCount / total) * 100) : 0;
     return (
-      <div className="py-8 text-center">
-        <p className="text-2xl font-bold">{pct === 100 ? "เก่งมาก ครบทุกคำ! 🎉" : "จบเรื่องนี้แล้ว!"}</p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">เติมถูก {correctCount} จาก {total} คำ — ลองเรื่องอื่นเพื่อฝึกคำศัพท์เพิ่มได้เลย</p>
-        <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6">
+      <div className="py-8">
+        <CelebrateMascot
+          title={pct === 100 ? "เก่งมาก ครบทุกคำ! 🎉" : "จบเรื่องนี้แล้ว!"}
+          subtitle={`เติมถูก ${correctCount} จาก ${total} คำ — ลองเรื่องอื่นเพื่อฝึกคำศัพท์เพิ่มได้เลย`}
+        />
+        <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6 text-center">
           <p className="text-4xl font-black text-[#004AAD]">{pct}%</p>
         </div>
-        <Link href="/practice/lessons/campus-vocab" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
-          เสร็จแล้ว · กลับไปเลือกเรื่อง
-        </Link>
+        <div className="text-center">
+          <Link href="/practice/lessons/campus-vocab" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
+            เสร็จแล้ว · กลับไปเลือกเรื่อง
+          </Link>
+        </div>
       </div>
     );
   }
@@ -149,7 +166,7 @@ export function CampusVocabLessonRunner({ scenarioId }: { scenarioId: string }) 
   }
 
   return (
-    <div>
+    <div key={index} className="ep-step-slide-in">
       <div className="mb-4 flex items-center justify-between text-xs font-bold text-slate-500">
         <span>คำที่ {index + 1} / {scenario.blanks.length}</span>
         <span>ถูก {correctCount}</span>

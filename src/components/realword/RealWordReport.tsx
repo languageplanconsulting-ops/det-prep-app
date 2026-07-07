@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { sfxTransition } from "@/lib/exam-sfx";
 import {
   REALWORD_DIFFICULTY_LABEL,
   REALWORD_MAX_SCORE,
+  REALWORD_SET_COUNT,
 } from "@/lib/realword-constants";
 import { realWordCounts, realWordRunScore } from "@/lib/realword-scoring";
 import {
@@ -15,7 +17,7 @@ import {
   normalizeCategoryIds,
 } from "@/lib/notebook-storage";
 import { playBlinkBeep } from "@/lib/play-blink-beep";
-import type { RealWordDifficulty, RealWordSet } from "@/types/realword";
+import type { RealWordDifficulty, RealWordRoundNum, RealWordSet } from "@/types/realword";
 
 function getScoreTone(scorePercent: number): {
   label: string;
@@ -49,19 +51,27 @@ function getScoreTone(scorePercent: number): {
 
 export function RealWordReport({
   wordSet,
+  round,
   difficulty,
+  setNumber,
   selected,
   hubHref,
   onRedeemNow,
 }: {
   wordSet: RealWordSet;
+  round: RealWordRoundNum;
   difficulty: RealWordDifficulty;
+  setNumber: number;
   selected: Set<number>;
   hubHref: string;
   onRedeemNow: () => void;
 }) {
   useRevealSfx();
   const maxScore = REALWORD_MAX_SCORE[difficulty];
+  const nextSetHref =
+    setNumber < REALWORD_SET_COUNT
+      ? `/practice/literacy/real-word/round/${round}/${difficulty}/${setNumber + 1}`
+      : null;
   const { R, UR, M } = realWordCounts({ words: wordSet.words, selectedIndices: selected });
   const score = realWordRunScore(UR, M, R, maxScore);
   const scorePercent = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
@@ -292,10 +302,19 @@ export function RealWordReport({
         <Link
           href={hubHref}
           onClick={redeemLater}
-          className="inline-flex flex-1 items-center justify-center border-4 border-black bg-ep-blue py-4 text-center text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
+          className="inline-flex flex-1 items-center justify-center border-4 border-black bg-white py-4 text-center text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] hover:bg-neutral-50"
         >
           Redeem later
         </Link>
+        {nextSetHref ? (
+          <Link
+            href={nextSetHref}
+            onClick={() => sfxTransition()}
+            className="inline-flex flex-1 items-center justify-center border-4 border-black bg-ep-blue py-4 text-center text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
+          >
+            Next set →
+          </Link>
+        ) : null}
       </div>
     </div>
   );

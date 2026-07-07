@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { PassageWords, type PassageHighlight } from "@/components/lessons/PassageWords";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
+import { MascotLoader } from "@/components/ui/MascotLoader";
+import { sfxCelebrate, sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
+import { XP, awardXp } from "@/lib/gamification";
 import { useLessonUserId } from "@/lib/lesson-user";
 import { fetchSeenKeys, filterUnseen, itemKey, markItemSeen } from "@/lib/lesson-seen";
 import { clearUnitResume, loadUnitResume, saveUnitResume, saveUnitScore } from "@/lib/lessons-progress";
@@ -39,7 +43,13 @@ export function MissingParagraphLessonRunner({ tier, unit }: { tier: MissingPara
     };
   }, [uid]);
 
-  if (!seenKeys) return <div className="py-16 text-center text-sm text-slate-400">กำลังโหลด…</div>;
+  if (!seenKeys) {
+    return (
+      <div className="flex justify-center py-10">
+        <MascotLoader label="กำลังโหลด…" />
+      </div>
+    );
+  }
 
   const items = filterUnseen(missingParagraphUnit(tier, unit), (l) => itemKey("missingparagraph", l.id), seenKeys);
   if (!items.length) {
@@ -68,6 +78,7 @@ function Player({ tier, unit, items, uid }: { tier: MissingParagraphTier; unit: 
   const [matched, setMatched] = useState<Set<number>>(new Set());
   const [selectedEn, setSelectedEn] = useState<number | null>(null);
   const [wrongFlash, setWrongFlash] = useState<{ en: number; th: number } | null>(null);
+  const rewarded = useRef(false);
 
   const item = items[index]!;
   const displayOptions = useMemo(() => shuffled(item.options), [item.id]);
@@ -109,7 +120,12 @@ function Player({ tier, unit, items, uid }: { tier: MissingParagraphTier; unit: 
   function check() {
     if (picked === null) return;
     setChecked(true);
-    if (displayOptions[picked]!.correct) setCompleted((c) => c + 1);
+    if (displayOptions[picked]!.correct) {
+      sfxCorrect();
+      setCompleted((c) => c + 1);
+    } else {
+      sfxWrong();
+    }
   }
 
   function tapEn(i: number) {
@@ -119,9 +135,11 @@ function Player({ tier, unit, items, uid }: { tier: MissingParagraphTier; unit: 
   function tapTh(i: number) {
     if (matched.has(i) || selectedEn === null) return;
     if (selectedEn === i) {
+      sfxCorrect();
       setMatched((s) => new Set(s).add(i));
       setSelectedEn(null);
     } else {
+      sfxWrong();
       setWrongFlash({ en: selectedEn, th: i });
       setTimeout(() => setWrongFlash(null), 420);
       setSelectedEn(null);
@@ -147,6 +165,7 @@ function Player({ tier, unit, items, uid }: { tier: MissingParagraphTier; unit: 
   }
 
   function next() {
+    sfxTransition();
     markItemSeen(uid, itemKey("missingparagraph", item.id), "missingparagraph", "manual_browse").catch(() => {});
     if (index + 1 >= total) return finish();
     saveUnitResume(TOPIC, tier, unit, { index: index + 1, a: completed });
@@ -155,24 +174,33 @@ function Player({ tier, unit, items, uid }: { tier: MissingParagraphTier; unit: 
 
   function finish() {
     setFinished(true);
-    const pct = total ? Math.round((completed / total) * 100) : 0;
-    saveUnitScore(uid, TOPIC, tier, unit, pct).catch(() => {});
-    clearUnitResume(TOPIC, tier, unit);
+    if (!rewarded.current) {
+      rewarded.current = true;
+      sfxCelebrate("md");
+      const pct = total ? Math.round((completed / total) * 100) : 0;
+      saveUnitScore(uid, TOPIC, tier, unit, pct).catch(() => {});
+      awardXp(uid, XP.auto(pct)).catch(() => {});
+      clearUnitResume(TOPIC, tier, unit);
+    }
   }
 
   if (finished) {
     const pct = total ? Math.round((completed / total) * 100) : 0;
     return (
-      <div className="py-8 text-center">
-        <p className="text-2xl font-bold">เก่งมาก!</p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">คุณฝึกจับใจความและจำคำศัพท์จากบทอ่านแล้ว ลองอ่านบทความจริงด้วยวิธีนี้ดูนะ</p>
-        <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6">
+      <div className="py-8">
+        <CelebrateMascot
+          title="เก่งมาก!"
+          subtitle="คุณฝึกจับใจความและจำคำศัพท์จากบทอ่านแล้ว ลองอ่านบทความจริงด้วยวิธีนี้ดูนะ"
+        />
+        <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6 text-center">
           <p className="text-4xl font-black text-[#004AAD]">{pct}%</p>
           <p className="mt-1 text-sm text-slate-600">หาย่อหน้าที่หายไปถูก {completed} จาก {total} เรื่อง</p>
         </div>
-        <Link href="/practice/lessons/reading-skills" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
-          เสร็จแล้ว · กลับไปเลือกด่าน
-        </Link>
+        <div className="text-center">
+          <Link href="/practice/lessons/reading-skills" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
+            เสร็จแล้ว · กลับไปเลือกด่าน
+          </Link>
+        </div>
       </div>
     );
   }
@@ -181,7 +209,7 @@ function Player({ tier, unit, items, uid }: { tier: MissingParagraphTier; unit: 
   const allMatched = matched.size === item.keywords.length;
 
   return (
-    <div>
+    <div key={index} className="ep-step-slide-in">
       <div className="mb-4 flex items-center justify-between text-xs font-bold text-slate-500">
         <span>ข้อ {index + 1} / {total}</span>
         <span>ผ่านแล้ว {completed}</span>

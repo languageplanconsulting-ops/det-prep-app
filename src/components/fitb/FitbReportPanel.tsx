@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
+import { sfxTransition } from "@/lib/exam-sfx";
 import { playNotebookSavedSound } from "@/lib/notebook-save-feedback";
-import { FITB_DIFFICULTY_LABEL, fitbMaxScore } from "@/lib/fitb-constants";
+import { FITB_DIFFICULTY_LABEL, FITB_SET_COUNT, fitbMaxScore } from "@/lib/fitb-constants";
 import { FITB_CLUE_SCORE_FACTOR } from "@/lib/fitb-scoring";
 import {
   NOTEBOOK_BUILTIN,
@@ -53,6 +54,10 @@ export function FitbReportPanel({
   const flawless = allExact && noClues;
   const complete = allExact;
   const hubHref = `/practice/literacy/fill-in-blank/round/${round}/${difficulty}`;
+  const nextSetHref =
+    setNumber < FITB_SET_COUNT
+      ? `/practice/literacy/fill-in-blank/round/${round}/${difficulty}/${setNumber + 1}`
+      : null;
 
   const flashRedeemButton = () => {
     playBlinkBeep();
@@ -198,11 +203,20 @@ export function FitbReportPanel({
             <Link
               href={hubHref}
               onClick={() => playBlinkBeep()}
-              className="inline-flex items-center border-4 border-black bg-ep-blue px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
+              className="inline-flex items-center border-4 border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] hover:bg-neutral-50"
             >
               Done
             </Link>
           )}
+          {nextSetHref ? (
+            <Link
+              href={nextSetHref}
+              onClick={() => sfxTransition()}
+              className="inline-flex items-center border-4 border-black bg-ep-blue px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
+            >
+              Next set →
+            </Link>
+          ) : null}
         </div>
       </div>
     </div>

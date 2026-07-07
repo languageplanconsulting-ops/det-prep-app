@@ -65,6 +65,7 @@ export function RealWordSessionGate({
       setId={`rw-r${round}-${difficulty}-s${setNumber}`}
     >
       <RealWordSessionClient
+        key={set.setId}
         round={round}
         wordSet={set}
         difficulty={difficulty}

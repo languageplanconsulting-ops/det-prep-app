@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
+import { MascotLoader } from "@/components/ui/MascotLoader";
+import { sfxCelebrate, sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
+import { XP, awardXp } from "@/lib/gamification";
 import { speakLesson } from "@/lib/lesson-audio";
 import { useLessonUserId } from "@/lib/lesson-user";
 import { fetchSeenKeys, filterUnseen, itemKey, markItemSeen } from "@/lib/lesson-seen";
@@ -48,7 +52,11 @@ export function DictationLessonRunner({ tier, unit }: { tier: DictationTier; uni
   }, [uid]);
 
   if (!seenKeys) {
-    return <div className="py-16 text-center text-sm text-slate-400">กำลังโหลด…</div>;
+    return (
+      <div className="flex justify-center py-10">
+        <MascotLoader label="กำลังโหลด…" />
+      </div>
+    );
   }
 
   const items = filterUnseen(dictationUnit(tier, unit), (l) => itemKey("dictation", l.id), seenKeys);
@@ -149,10 +157,12 @@ function Player({
     markItemSeen(uid, itemKey("dictation", lesson.id), "dictation", "manual_browse").catch(() => {});
     const ok = checkDictation(placedTokens, correctSeq);
     if (ok) {
+      sfxCorrect();
       setStreak((s) => s + 1);
       setCorrectCount((c) => c + 1);
       setPhase("correct");
     } else {
+      sfxWrong();
       setStreak(0);
       setPhase("wrong");
     }
@@ -174,6 +184,7 @@ function Player({
   }
 
   function next() {
+    sfxTransition();
     if (index + 1 >= total) return finish();
     const n = index + 1;
     saveUnitResume("dictation", tier, unit, { index: n, a: correctCount });
@@ -185,8 +196,10 @@ function Player({
     setFinished(true);
     if (!rewarded.current) {
       rewarded.current = true;
+      sfxCelebrate("md");
       const pct = Math.round((correctCount / total) * 100);
       saveUnitScore(uid, "dictation", tier, unit, pct).catch(() => {});
+      awardXp(uid, XP.auto(pct)).catch(() => {});
       clearUnitResume("dictation", tier, unit);
     }
   }
@@ -194,21 +207,23 @@ function Player({
   if (finished) {
     const pct = Math.round((correctCount / total) * 100);
     return (
-      <div className="py-8 text-center">
-        <p className="text-2xl font-bold">{pct >= 80 ? "เก่งมาก! 🎉" : "ทำได้ดีมาก!"}</p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-          การเรียงคำช่วยให้เห็นว่าประโยคที่ถูกต้องหน้าตาเป็นยังไง ฟังเสียงบ่อย ๆ แล้วลองพูดตาม จะจำโครงประโยคได้เร็วขึ้น
-        </p>
-        <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6">
+      <div className="py-8">
+        <CelebrateMascot
+          title={pct >= 80 ? "เก่งมาก! 🎉" : "ทำได้ดีมาก!"}
+          subtitle="การเรียงคำช่วยให้เห็นว่าประโยคที่ถูกต้องหน้าตาเป็นยังไง ฟังเสียงบ่อย ๆ แล้วลองพูดตาม จะจำโครงประโยคได้เร็วขึ้น"
+        />
+        <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6 text-center">
           <p className="text-4xl font-black text-[#004AAD]">{pct}%</p>
           <p className="mt-1 text-sm text-slate-600">เรียงถูก {correctCount} จาก {total} ประโยค</p>
         </div>
-        <Link
-          href="/practice/lessons/dictation"
-          className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]"
-        >
-          เสร็จแล้ว · กลับไปบทเรียน
-        </Link>
+        <div className="text-center">
+          <Link
+            href="/practice/lessons/dictation"
+            className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]"
+          >
+            เสร็จแล้ว · กลับไปบทเรียน
+          </Link>
+        </div>
       </div>
     );
   }
@@ -216,7 +231,7 @@ function Player({
   const canCheck = allFilled && phase === "solving";
 
   return (
-    <div>
+    <div key={index} className="ep-step-slide-in">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-slate-500">ข้อ {index + 1} / {total}</span>

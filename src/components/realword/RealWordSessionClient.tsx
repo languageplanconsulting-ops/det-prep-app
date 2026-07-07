@@ -1,10 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { RealWordGame } from "@/components/realword/RealWordGame";
 import { RealWordReport } from "@/components/realword/RealWordReport";
+import { sfxTransition } from "@/lib/exam-sfx";
+import { XP, awardXp } from "@/lib/gamification";
+import { useLessonUserId } from "@/lib/lesson-user";
+import { REALWORD_MAX_SCORE } from "@/lib/realword-constants";
 import { saveRealWordProgress } from "@/lib/realword-storage";
+import { realWordCounts, realWordRunScore } from "@/lib/realword-scoring";
 import type { RealWordDifficulty, RealWordRoundNum, RealWordSet } from "@/types/realword";
 
 function shuffleWordSet(wordSet: RealWordSet): RealWordSet {
@@ -30,9 +35,11 @@ export function RealWordSessionClient({
   /** Usually the set list for this round + difficulty. */
   hubHref: string;
 }) {
+  const uid = useLessonUserId();
   const [phase, setPhase] = useState<"game" | "report">("game");
   const [sessionWordSet, setSessionWordSet] = useState<RealWordSet>(() => shuffleWordSet(wordSet));
   const [selected, setSelected] = useState<Set<number>>(() => new Set());
+  const rewarded = useRef(false);
 
   const toggle = (i: number) => {
     setSelected((prev) => {
@@ -51,10 +58,19 @@ export function RealWordSessionClient({
       words: sessionWordSet.words,
       selectedIndices: selected,
     });
+    if (!rewarded.current) {
+      rewarded.current = true;
+      const maxScore = REALWORD_MAX_SCORE[difficulty];
+      const { R, UR, M } = realWordCounts({ words: sessionWordSet.words, selectedIndices: selected });
+      const score = realWordRunScore(UR, M, R, maxScore);
+      const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+      awardXp(uid, XP.auto(pct)).catch(() => {});
+    }
     setPhase("report");
   };
 
   const redeemNow = () => {
+    sfxTransition();
     setSelected(new Set());
     setSessionWordSet(shuffleWordSet(wordSet));
     setPhase("game");
@@ -69,13 +85,17 @@ export function RealWordSessionClient({
         >
           ← Sets
         </Link>
-        <RealWordReport
-          wordSet={sessionWordSet}
-          difficulty={difficulty}
-          selected={selected}
-          hubHref={hubHref}
-          onRedeemNow={redeemNow}
-        />
+        <div key={phase} className="ep-step-slide-in">
+          <RealWordReport
+            wordSet={sessionWordSet}
+            round={round}
+            difficulty={difficulty}
+            setNumber={setNumber}
+            selected={selected}
+            hubHref={hubHref}
+            onRedeemNow={redeemNow}
+          />
+        </div>
       </div>
     );
   }
@@ -91,7 +111,9 @@ export function RealWordSessionClient({
         </Link>
         <p className="max-w-xs text-right text-xs font-bold text-neutral-600">{sessionWordSet.setId}</p>
       </div>
-      <RealWordGame wordSet={sessionWordSet} selected={selected} onToggle={toggle} onSubmit={submit} />
+      <div key={phase} className="ep-step-slide-in">
+        <RealWordGame wordSet={sessionWordSet} selected={selected} onToggle={toggle} onSubmit={submit} />
+      </div>
     </div>
   );
 }

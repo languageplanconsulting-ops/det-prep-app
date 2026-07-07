@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
+import { MascotLoader } from "@/components/ui/MascotLoader";
+import { sfxCelebrate, sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
+import { XP, awardXp } from "@/lib/gamification";
 import { speakLesson } from "@/lib/lesson-audio";
 import { useLessonUserId } from "@/lib/lesson-user";
 import { fetchSeenKeys, filterUnseen, itemKey, markItemSeen } from "@/lib/lesson-seen";
@@ -31,7 +35,11 @@ export function RealWordLessonRunner({ tier, unit }: { tier: RealWordTier; unit:
   }, [uid]);
 
   if (!seenKeys) {
-    return <div className="py-16 text-center text-sm text-slate-400">กำลังโหลด…</div>;
+    return (
+      <div className="flex justify-center py-10">
+        <MascotLoader label="กำลังโหลด…" />
+      </div>
+    );
   }
 
   const items = filterUnseen(realWordUnit(tier, unit), (l) => itemKey("realword_lesson", l.id), seenKeys);
@@ -107,9 +115,11 @@ function Player({
     const correct = userSaysCorrect === !shownWrong;
     setJudged(correct);
     if (correct) {
+      sfxCorrect();
       setCombo((c) => c + 1);
       if (!shownWrong) setPassedCount((p) => p + 1);
     } else {
+      sfxWrong();
       setCombo(0);
     }
     speakLesson(item.word).play();
@@ -145,6 +155,7 @@ function Player({
   }
 
   function next() {
+    sfxTransition();
     if (index + 1 >= total) return finish();
     saveUnitResume("realword", tier, unit, { index: index + 1, a: passedCount });
     setIndex((i) => i + 1);
@@ -155,8 +166,10 @@ function Player({
     setFinished(true);
     if (!rewarded.current) {
       rewarded.current = true;
+      sfxCelebrate("md");
       const pct = total ? Math.round((passedCount / total) * 100) : 0;
       saveUnitScore(uid, "realword", tier, unit, pct).catch(() => {});
+      awardXp(uid, XP.auto(pct)).catch(() => {});
       clearUnitResume("realword", tier, unit);
     }
   }
@@ -164,27 +177,29 @@ function Player({
   if (finished) {
     const pct = total ? Math.round((passedCount / total) * 100) : 0;
     return (
-      <div className="py-8 text-center">
-        <p className="text-2xl font-bold">{pct >= 80 ? "สุดยอด! 🎉" : "เก่งมาก!"}</p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-          คุณจับผิดการสะกดและเรียนคำใหม่ได้เยี่ยม ยิ่งฝึกยิ่งจำแม่น!
-        </p>
+      <div className="py-8">
+        <CelebrateMascot
+          title={pct >= 80 ? "สุดยอด! 🎉" : "เก่งมาก!"}
+          subtitle="คุณจับผิดการสะกดและเรียนคำใหม่ได้เยี่ยม ยิ่งฝึกยิ่งจำแม่น!"
+        />
         <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6">
           <p className="text-4xl font-black text-[#004AAD]">{pct}%</p>
           <p className="mt-1 text-sm text-slate-600">ทำถูก {passedCount} จาก {total} คำ</p>
         </div>
-        <Link
-          href="/practice/lessons/real-word"
-          className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]"
-        >
-          เสร็จแล้ว · กลับไปเลือกด่าน
-        </Link>
+        <div className="text-center">
+          <Link
+            href="/practice/lessons/real-word"
+            className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]"
+          >
+            เสร็จแล้ว · กลับไปเลือกด่าน
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div key={index} className="ep-step-slide-in">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-slate-500">คำที่ {index + 1} / {total}</span>

@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
+import { MascotLoader } from "@/components/ui/MascotLoader";
+import { sfxCelebrate, sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
+import { XP, awardXp } from "@/lib/gamification";
 import { splitTemplate } from "@/lib/cloze-template";
 import { fitbPrefix, fitbRemainderLength, scoreFitb, type MissingWord } from "@/lib/fitb-lesson-scoring";
 import { speakLesson } from "@/lib/lesson-audio";
@@ -26,7 +30,13 @@ export function ReadWriteLessonRunner({ tier, unit }: { tier: ReadWriteTier; uni
     };
   }, [uid]);
 
-  if (!seenKeys) return <div className="py-16 text-center text-sm text-slate-400">กำลังโหลด…</div>;
+  if (!seenKeys) {
+    return (
+      <div className="flex justify-center py-10">
+        <MascotLoader label="กำลังโหลด…" />
+      </div>
+    );
+  }
 
   const items = filterUnseen(readWriteUnit(tier, unit), (l) => itemKey("readwrite", l.id), seenKeys);
   if (!items.length) {
@@ -62,6 +72,7 @@ function Player({ tier, unit, items, uid }: { tier: ReadWriteTier; unit: number;
 
   const item = items[index]!;
   const isFill = item.mode === "fill";
+  const rewarded = useRef(false);
 
   const fillWords = useMemo<MissingWord[]>(
     () => item.blanks.map((b) => ({ correctWord: b.answer, prefix_length: b.prefixLength ?? 2, explanationThai: b.ruleTh })),
@@ -113,8 +124,11 @@ function Player({ tier, unit, items, uid }: { tier: ReadWriteTier; unit: number;
     markItemSeen(uid, itemKey("readwrite", item.id), "readwrite", "manual_browse").catch(() => {});
     setChecked(true);
     if (item.blanks.every((b, i) => picks[i] === b.answer)) {
+      sfxCorrect();
       setCompleted((c) => c + 1);
       setPhase("review");
+    } else {
+      sfxWrong();
     }
   }
 
@@ -124,8 +138,11 @@ function Player({ tier, unit, items, uid }: { tier: ReadWriteTier; unit: number;
     const score = scoreFitb(full, fillWords);
     setFillRevealed(true);
     if (score.correct === score.total) {
+      sfxCorrect();
       setCompleted((c) => c + 1);
       setPhase("review");
+    } else {
+      sfxWrong();
     }
   }
 
@@ -173,6 +190,7 @@ function Player({ tier, unit, items, uid }: { tier: ReadWriteTier; unit: number;
   }
 
   function next() {
+    sfxTransition();
     if (index + 1 >= total) return finish();
     saveUnitResume(TOPIC, tier, unit, { index: index + 1, a: completed });
     setIndex(index + 1);
@@ -180,30 +198,39 @@ function Player({ tier, unit, items, uid }: { tier: ReadWriteTier; unit: number;
 
   function finish() {
     setFinished(true);
-    const pct = total ? Math.round((completed / total) * 100) : 0;
-    saveUnitScore(uid, TOPIC, tier, unit, pct).catch(() => {});
-    clearUnitResume(TOPIC, tier, unit);
+    if (!rewarded.current) {
+      rewarded.current = true;
+      sfxCelebrate("md");
+      const pct = total ? Math.round((completed / total) * 100) : 0;
+      saveUnitScore(uid, TOPIC, tier, unit, pct).catch(() => {});
+      awardXp(uid, XP.auto(pct)).catch(() => {});
+      clearUnitResume(TOPIC, tier, unit);
+    }
   }
 
   if (finished) {
     const pct = total ? Math.round((completed / total) * 100) : 0;
     return (
-      <div className="py-8 text-center">
-        <p className="text-2xl font-bold">เยี่ยมมาก!</p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">คุณได้เห็นโครงเรียงความที่ดี พร้อมเหตุผลของทุกคำที่เลือก ลองนำโครงและสำนวนเหล่านี้ไปเขียนด้วยหัวข้อของคุณเอง</p>
+      <div className="py-8">
+        <CelebrateMascot
+          title="เยี่ยมมาก!"
+          subtitle="คุณได้เห็นโครงเรียงความที่ดี พร้อมเหตุผลของทุกคำที่เลือก ลองนำโครงและสำนวนเหล่านี้ไปเขียนด้วยหัวข้อของคุณเอง"
+        />
         <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6">
           <p className="text-4xl font-black text-[#004AAD]">{pct}%</p>
           <p className="mt-1 text-sm text-slate-600">เขียนถูกครบ {completed} จาก {total} เรียงความ</p>
         </div>
-        <Link href="/practice/lessons/how-to-write" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
-          เสร็จแล้ว · กลับไปเลือกด่าน
-        </Link>
+        <div className="text-center">
+          <Link href="/practice/lessons/how-to-write" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
+            เสร็จแล้ว · กลับไปเลือกด่าน
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div key={index} className="ep-step-slide-in">
       <div className="mb-4 flex items-center justify-between text-xs font-bold text-slate-500">
         <span>ข้อ {index + 1} / {total}</span>
         <span>ผ่านแล้ว {completed}</span>

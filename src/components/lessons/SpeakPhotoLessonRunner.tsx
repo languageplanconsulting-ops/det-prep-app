@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
+import { MascotLoader } from "@/components/ui/MascotLoader";
+import { sfxCelebrate, sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
+import { XP, awardXp } from "@/lib/gamification";
 import { splitTemplate } from "@/lib/cloze-template";
 import { speakLesson } from "@/lib/lesson-audio";
 import { getPhoto, photoCredit } from "@/lib/lesson-photo-bank";
@@ -28,7 +32,13 @@ export function SpeakPhotoLessonRunner({ tier, unit }: { tier: SpeakPhotoTier; u
     };
   }, [uid]);
 
-  if (!seenKeys) return <div className="py-16 text-center text-sm text-slate-400">กำลังโหลด…</div>;
+  if (!seenKeys) {
+    return (
+      <div className="flex justify-center py-10">
+        <MascotLoader label="กำลังโหลด…" />
+      </div>
+    );
+  }
 
   const items = filterUnseen(speakPhotoUnit(tier, unit), (l) => itemKey("speakphoto", l.id), seenKeys);
   if (!items.length) {
@@ -61,6 +71,7 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
 
   const [vocabOpen, setVocabOpen] = useState<SpeakPhotoVocab | null>(null);
   const [savedWords, setSavedWords] = useState<Set<string>>(new Set());
+  const rewarded = useRef(false);
 
   const item = items[index]!;
   const photo = getPhoto(item.imageId);
@@ -113,7 +124,12 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
 
   function checkCloze() {
     setChecked(true);
-    if (item.blanks.every((b, i) => picks[i] === b.answer)) setPhase("speak");
+    if (item.blanks.every((b, i) => picks[i] === b.answer)) {
+      sfxCorrect();
+      setPhase("speak");
+    } else {
+      sfxWrong();
+    }
   }
 
   async function onRecording(r: { base64: string; mimeType: string }) {
@@ -129,7 +145,13 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
       const json = (await res.json().catch(() => ({}))) as { transcript?: string };
       const transcript = json.transcript ?? "";
       setHeardText(transcript);
-      setResult(pronunciationScore(item.answer, transcript));
+      const scored = pronunciationScore(item.answer, transcript);
+      setResult(scored);
+      if (scored.pct >= PRONUNCIATION_PASS) {
+        sfxCorrect();
+      } else {
+        sfxWrong();
+      }
     } catch {
       setHeardText("");
       setResult({ pct: 0, words: [], missedIdx: [] });
@@ -154,6 +176,7 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
   }
 
   function next() {
+    sfxTransition();
     const passedNow = passedCount + (passed ? 1 : 0);
     if (passed) setPassedCount((c) => c + 1);
     if (index + 1 >= total) return finish(passedNow);
@@ -162,6 +185,7 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
   }
 
   function skip() {
+    sfxTransition();
     if (index + 1 >= total) return finish(passedCount);
     saveUnitResume(TOPIC, tier, unit, { index: index + 1, a: passedCount });
     setIndex(index + 1);
@@ -169,30 +193,39 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
 
   function finish(finalPassed: number) {
     setFinished(true);
-    const pct = total ? Math.round((finalPassed / total) * 100) : 0;
-    saveUnitScore(uid, TOPIC, tier, unit, pct).catch(() => {});
-    clearUnitResume(TOPIC, tier, unit);
+    if (!rewarded.current) {
+      rewarded.current = true;
+      sfxCelebrate("md");
+      const pct = total ? Math.round((finalPassed / total) * 100) : 0;
+      saveUnitScore(uid, TOPIC, tier, unit, pct).catch(() => {});
+      awardXp(uid, XP.auto(pct)).catch(() => {});
+      clearUnitResume(TOPIC, tier, unit);
+    }
   }
 
   if (finished) {
     const pct = total ? Math.round((passedCount / total) * 100) : 0;
     return (
-      <div className="py-8 text-center">
-        <p className="text-2xl font-bold">เยี่ยมมาก!</p>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">คุณได้ฝึกพูดบรรยายภาพเป็นภาษาอังกฤษแล้ว ลองบรรยายภาพอื่น ๆ รอบตัวคุณดูนะ</p>
-        <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6">
+      <div className="py-8">
+        <CelebrateMascot
+          title="เยี่ยมมาก!"
+          subtitle="คุณได้ฝึกพูดบรรยายภาพเป็นภาษาอังกฤษแล้ว ลองบรรยายภาพอื่น ๆ รอบตัวคุณดูนะ"
+        />
+        <div className="mx-auto mt-6 w-full max-w-xs rounded-2xl bg-slate-50 p-6 text-center">
           <p className="text-4xl font-black text-[#004AAD]">{pct}%</p>
           <p className="mt-1 text-sm text-slate-600">ผ่านครบ {passedCount} จาก {total} ภาพ</p>
         </div>
-        <Link href="/practice/lessons/how-to-speak" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
-          เสร็จแล้ว · กลับไปเลือกด่าน
-        </Link>
+        <div className="text-center">
+          <Link href="/practice/lessons/how-to-speak" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
+            เสร็จแล้ว · กลับไปเลือกด่าน
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div key={index} className="ep-step-slide-in">
       <div className="mb-4 flex items-center justify-between text-xs font-bold text-slate-500">
         <div className="flex items-center gap-2">
           <span>ข้อ {index + 1} / {total}</span>

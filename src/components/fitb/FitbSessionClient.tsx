@@ -11,8 +11,11 @@ import {
   fitbRemainderLength,
   gradeFitbBlank,
 } from "@/lib/fitb-scoring";
+import { fitbMaxScore } from "@/lib/fitb-constants";
 import { splitFitbPassage } from "@/lib/fitb-passage";
-import { sfxCorrect, sfxWrong } from "@/lib/exam-sfx";
+import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
+import { XP, awardXp } from "@/lib/gamification";
+import { useLessonUserId } from "@/lib/lesson-user";
 import { playBlinkBeep } from "@/lib/play-blink-beep";
 import { getFitbProgress, saveFitbProgress } from "@/lib/fitb-storage";
 import type { FitbBlankGrade, FitbDifficulty, FitbRoundNum, FitbSet } from "@/types/fitb";
@@ -49,11 +52,13 @@ export function FitbSessionClient({
   startWithRedeem: boolean;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
+  const uid = useLessonUserId();
   const soft = true;
 
   const n = set.missingWords.length;
   const hubHref = `/practice/literacy/fill-in-blank/round/${round}/${difficulty}`;
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const rewarded = useRef(false);
 
   const [phase, setPhase] = useState<Phase>("quiz");
   const [locked, setLocked] = useState<boolean[]>(() => new Array(n).fill(false));
@@ -219,11 +224,17 @@ export function FitbSessionClient({
       userAnswers: ua,
       clueUsed: [...clueUsed],
     });
+    if (!rewarded.current) {
+      rewarded.current = true;
+      const pct = Math.round((score / fitbMaxScore(difficulty)) * 100);
+      awardXp(uid, XP.auto(pct)).catch(() => {});
+    }
     setPhase("report");
   };
 
   const onRedeemNow = () => {
     playBlinkBeep();
+    sfxTransition();
     const q = locked.map((ok, i) => (ok ? -1 : i)).filter((i) => i >= 0);
     setInputs(new Array(n).fill(""));
     setClueVisible(new Array(n).fill(false));
@@ -280,6 +291,7 @@ export function FitbSessionClient({
         </div>
       ) : null}
 
+      <div key={phase} className="ep-step-slide-in">
       {phase === "quiz" ? (
         <>
           <div className="mb-3 border-4 border-black bg-white p-1 shadow-[4px_4px_0_0_#000]">
@@ -424,6 +436,7 @@ export function FitbSessionClient({
           onRedeemNow={onRedeemNow}
         />
       )}
+      </div>
     </div>
   );
 }

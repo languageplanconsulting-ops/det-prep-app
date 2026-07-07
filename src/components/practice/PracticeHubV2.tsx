@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { StudyPlanCalendarCard } from "@/components/dashboard/StudyPlanCalendarCard";
 import { RandomPracticePicker } from "@/components/practice/RandomPracticePicker";
+import { XpTierBadge } from "@/components/ui/XpTierBadge";
 import { daysUntil, setExamDate, usePracticeHeroStats } from "@/hooks/usePracticeHeroStats";
 
 /**
@@ -541,6 +542,7 @@ export function PracticeHubV2({
               <p className="px-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-700">
                 Admin preview · not visible to users yet
               </p>
+              <XpTierBadge />
               <RandomPracticePicker />
               <StudyPlanCalendarCard />
               <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
