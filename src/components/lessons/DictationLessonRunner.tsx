@@ -98,14 +98,21 @@ function Player({
   const [finished, setFinished] = useState(false);
   const rewarded = useRef(false);
   const player = useRef<{ play: () => void } | null>(null);
+  // Guards the auto-play timeout below against a click on the manual play
+  // button landing inside the 350ms window — without this, both the timeout
+  // and the click call .play(), firing two overlapping synthesis requests.
+  const autoplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const lesson = items[index]!;
 
   useEffect(() => {
     const p = speakLesson(lesson.answer);
     player.current = p;
-    const t = setTimeout(() => p.play(), 350);
-    return () => clearTimeout(t);
+    autoplayTimer.current = setTimeout(() => { autoplayTimer.current = null; p.play(); }, 350);
+    return () => {
+      if (autoplayTimer.current) clearTimeout(autoplayTimer.current);
+      autoplayTimer.current = null;
+    };
   }, [lesson.answer]);
 
   useEffect(() => {
@@ -253,7 +260,10 @@ function Player({
 
       <button
         type="button"
-        onClick={() => player.current?.play()}
+        onClick={() => {
+          if (autoplayTimer.current) { clearTimeout(autoplayTimer.current); autoplayTimer.current = null; }
+          player.current?.play();
+        }}
         className="mb-4 flex w-full items-center gap-3 rounded-2xl bg-blue-50 p-4 text-left transition hover:bg-blue-100"
       >
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-xl shadow-sm">🔊</span>

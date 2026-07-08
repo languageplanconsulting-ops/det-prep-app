@@ -72,6 +72,13 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
   const [vocabOpen, setVocabOpen] = useState<SpeakPhotoVocab | null>(null);
   const [savedWords, setSavedWords] = useState<Set<string>>(new Set());
   const rewarded = useRef(false);
+  // Auto-play (below) and the manual replay button used to each call
+  // speakLesson(...).play() independently, creating a SEPARATE player (and
+  // separate <audio> element) per call — a click landing inside the 350ms
+  // auto-play window fired two independent playbacks that genuinely
+  // overlapped. Share one player instance and guard the pending timer instead.
+  const player = useRef<{ play: () => void } | null>(null);
+  const autoplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const item = items[index]!;
   const photo = getPhoto(item.imageId);
@@ -96,8 +103,13 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
 
   useEffect(() => {
     if (phase !== "speak") return;
-    const t = setTimeout(() => speakLesson(item.answer).play(), 350);
-    return () => clearTimeout(t);
+    const p = speakLesson(item.answer);
+    player.current = p;
+    autoplayTimer.current = setTimeout(() => { autoplayTimer.current = null; p.play(); }, 350);
+    return () => {
+      if (autoplayTimer.current) clearTimeout(autoplayTimer.current);
+      autoplayTimer.current = null;
+    };
   }, [phase, item.answer]);
 
   const wrongBlanks = useMemo(() => {
@@ -295,7 +307,14 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
         <>
           <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
             <p className="text-lg font-bold text-slate-900">{item.answer}</p>
-            <button type="button" onClick={() => speakLesson(item.answer).play()} className="mx-auto mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-800">
+            <button
+              type="button"
+              onClick={() => {
+                if (autoplayTimer.current) { clearTimeout(autoplayTimer.current); autoplayTimer.current = null; }
+                player.current?.play();
+              }}
+              className="mx-auto mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-800"
+            >
               <span>🔊</span> ฟังตัวอย่างอีกครั้ง
             </button>
           </div>
