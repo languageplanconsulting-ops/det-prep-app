@@ -11,6 +11,7 @@ import {
 import {
   getVocabPassageProgress,
   getVocabVisibleSetByNumber,
+  hydrateVocabProgressFromServer,
 } from "@/lib/vocab-storage";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import type { VocabPassageUnit, VocabRoundNum, VocabSessionLevel, VocabSet } from "@/types/vocab";
@@ -25,10 +26,15 @@ export function VocabSetPassageList({
   setNumber: number;
 }) {
   const [set, setSet] = useState<VocabSet | null | undefined>(undefined);
+  const [, forceRerender] = useState(0);
 
   useEffect(() => {
     setSet(getVocabVisibleSetByNumber(setNumber, round) ?? null);
   }, [round, setNumber]);
+
+  useEffect(() => {
+    void hydrateVocabProgressFromServer().then(() => forceRerender((n) => n + 1));
+  }, []);
 
   const maxScore = VOCAB_SESSION_MAX[sessionLevel];
   const hubHref = `/practice/comprehension/vocabulary/round/${round}`;

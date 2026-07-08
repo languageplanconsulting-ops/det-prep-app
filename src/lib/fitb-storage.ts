@@ -3,6 +3,8 @@ import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import { FITB_DIFFICULTIES, FITB_ROUND_NUMBERS, FITB_SET_COUNT, fitbMaxScore } from "@/lib/fitb-constants";
 import { calculateFitbDetScore, gradesToExactLocks } from "@/lib/fitb-scoring";
 import { buildDefaultFitbBank } from "@/lib/fitb-default-data";
+import { buildContentKey, parseContentKey } from "@/lib/practice-attempts-contentkey";
+import { fetchPracticeAttempts, postPracticeAttempt } from "@/lib/practice-attempts-sync";
 import type {
   FitbBlankGrade,
   FitbDifficulty,
@@ -362,7 +364,54 @@ export function saveFitbProgress(args: {
   m[k] = next;
   localStorage.setItem(FITB_PROGRESS_KEY, JSON.stringify(m));
   emitFitbUpdate();
+  void postPracticeAttempt({
+    taskType: "fill_in_blanks",
+    scorePct: maxScore > 0 ? (score / maxScore) * 100 : 0,
+    detail: {
+      correct: blankOk.filter(Boolean).length,
+      total: blankOk.length,
+      contentKey: buildContentKey("fitb", difficulty, round, setNumber),
+    },
+  });
   return next;
+}
+
+/** Pull in fill-in-blank scores achieved on mobile/other browsers (best score wins). */
+export async function hydrateFitbProgressFromServer(): Promise<void> {
+  const attempts = await fetchPracticeAttempts("fill_in_blanks");
+  if (attempts.length === 0) return;
+  const m = readFitbProgressMap();
+  let changed = false;
+  for (const a of attempts) {
+    const ck = a.detail?.contentKey;
+    if (typeof ck !== "string") continue;
+    const parsed = parseContentKey(ck);
+    if (!parsed || parsed.skill !== "fitb" || !isRound(parsed.round)) continue;
+    const difficulty = parsed.difficulty as FitbDifficulty;
+    if (!FITB_DIFFICULTIES.includes(difficulty)) continue;
+    const setNumber = parsed.setNum;
+    const maxScore = fitbMaxScore(difficulty);
+    const attainedScore = Math.round(((a.score_pct ?? 0) / 100) * maxScore);
+    const k = progressKey(parsed.round, difficulty, setNumber);
+    const prev = m[k];
+    if (!prev || attainedScore > prev.bestScore) {
+      m[k] = {
+        bestScore: Math.max(prev?.bestScore ?? 0, attainedScore),
+        maxScore,
+        lastBlankOk: prev?.lastBlankOk ?? null,
+        lastGrades: prev?.lastGrades,
+        lastUserAnswers: prev?.lastUserAnswers,
+        lastClueUsed: prev?.lastClueUsed,
+        updatedAt: prev?.updatedAt ?? a.created_at,
+        userId: prev?.userId,
+      };
+      changed = true;
+    }
+  }
+  if (changed) {
+    localStorage.setItem(FITB_PROGRESS_KEY, JSON.stringify(m));
+    emitFitbUpdate();
+  }
 }
 
 export function mergeFitbBankFromAdmin(

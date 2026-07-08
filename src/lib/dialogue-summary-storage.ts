@@ -5,6 +5,8 @@ import {
   DIALOGUE_SUMMARY_SET_COUNT,
 } from "@/lib/dialogue-summary-constants";
 import { emptyDialogueSummaryFullBank } from "@/lib/dialogue-summary-default-data";
+import { buildContentKey, parseContentKey } from "@/lib/practice-attempts-contentkey";
+import { fetchPracticeAttempts, postPracticeAttempt } from "@/lib/practice-attempts-sync";
 import type {
   DialogueSummaryDifficulty,
   DialogueSummaryExam,
@@ -273,7 +275,46 @@ export function saveDialogueSummaryBestScore(args: {
   m[k] = next;
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(m));
   emitDialogueSummaryUpdate();
+  void postPracticeAttempt({
+    taskType: "dialogue_summary",
+    scorePct: (score160 / 160) * 100,
+    detail: {
+      via: "dialogue_summary",
+      contentKey: buildContentKey("dialogue_summary", difficulty, round, setNumber),
+    },
+  });
   return next;
+}
+
+/** Pull in dialogue-summary scores achieved on mobile/other browsers (best score wins). */
+export async function hydrateDialogueSummaryProgressFromServer(): Promise<void> {
+  const attempts = await fetchPracticeAttempts("dialogue_summary");
+  if (attempts.length === 0) return;
+  const m = loadDialogueSummaryProgressMap();
+  let changed = false;
+  for (const a of attempts) {
+    const ck = a.detail?.contentKey;
+    if (typeof ck !== "string") continue;
+    const parsed = parseContentKey(ck);
+    if (!parsed || parsed.skill !== "dialogue_summary" || !isRound(parsed.round)) continue;
+    const difficulty = parsed.difficulty as DialogueSummaryDifficulty;
+    if (!DIALOGUE_SUMMARY_DIFFICULTIES.includes(difficulty)) continue;
+    const setNumber = parsed.setNum;
+    const attainedScore160 = Math.round(((a.score_pct ?? 0) / 100) * 160);
+    const k = progressKey(parsed.round, difficulty, setNumber);
+    const prev = m[k];
+    if (!prev || attainedScore160 > prev.bestScore160) {
+      m[k] = {
+        bestScore160: Math.max(prev?.bestScore160 ?? 0, attainedScore160),
+        updatedAt: prev?.updatedAt ?? a.created_at,
+      };
+      changed = true;
+    }
+  }
+  if (changed) {
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(m));
+    emitDialogueSummaryUpdate();
+  }
 }
 
 export function mergeDialogueSummaryBankFromAdmin(text: string): { count: number } {

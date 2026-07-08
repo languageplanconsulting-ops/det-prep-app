@@ -10,7 +10,11 @@ import {
   REALWORD_DIFFICULTY_LABEL,
   REALWORD_MAX_SCORE,
 } from "@/lib/realword-constants";
-import { getRealWordProgress, loadRealWordVisibleBank } from "@/lib/realword-storage";
+import {
+  getRealWordProgress,
+  hydrateRealWordProgressFromServer,
+  loadRealWordVisibleBank,
+} from "@/lib/realword-storage";
 import { defaultRealWordFullBank } from "@/lib/realword-default-data";
 import type { RealWordDifficulty, RealWordRoundNum } from "@/types/realword";
 
@@ -43,6 +47,12 @@ export function RealWordDifficultySetsPage({
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("ep-realword-storage", onStorage);
     };
+  }, []);
+
+  // Merges server scores into localStorage and fires "ep-realword-storage" on
+  // change, which the listener above already re-renders this page for.
+  useEffect(() => {
+    void hydrateRealWordProgressFromServer();
   }, []);
 
   if (soft) {

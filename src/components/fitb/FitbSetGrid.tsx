@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { FITB_MAX_SCORE, fitbMaxScore } from "@/lib/fitb-constants";
-import { getFitbProgress, loadFitbVisibleBank } from "@/lib/fitb-storage";
+import { getFitbProgress, hydrateFitbProgressFromServer, loadFitbVisibleBank } from "@/lib/fitb-storage";
 import type { FitbDifficulty, FitbRoundNum } from "@/types/fitb";
 
 function isComplete(
@@ -34,10 +34,15 @@ export function FitbSetGrid({
   bankVersion: number;
 }) {
   const [rows, setRows] = useState(() => loadFitbVisibleBank()[round][difficulty]);
+  const [, forceRerender] = useState(0);
 
   useEffect(() => {
     setRows(loadFitbVisibleBank()[round][difficulty]);
   }, [round, difficulty, bankVersion]);
+
+  useEffect(() => {
+    void hydrateFitbProgressFromServer().then(() => forceRerender((n) => n + 1));
+  }, []);
 
   const cap = FITB_MAX_SCORE[difficulty];
 

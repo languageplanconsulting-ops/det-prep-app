@@ -8,6 +8,8 @@ import {
 } from "@/lib/realword-constants";
 import { defaultRealWordFullBank } from "@/lib/realword-default-data";
 import { realWordCounts, realWordRunScore } from "@/lib/realword-scoring";
+import { buildContentKey, parseContentKey } from "@/lib/practice-attempts-contentkey";
+import { fetchPracticeAttempts, postPracticeAttempt } from "@/lib/practice-attempts-sync";
 import type {
   RealWordDifficulty,
   RealWordFullBank,
@@ -329,7 +331,51 @@ export function saveRealWordProgress(args: {
   m[k] = next;
   localStorage.setItem(REALWORD_PROGRESS_KEY, JSON.stringify(m));
   emitRealWordUpdate();
+  void postPracticeAttempt({
+    taskType: "real_english_word",
+    scorePct: maxScore > 0 ? (score / maxScore) * 100 : 0,
+    detail: {
+      hits: R,
+      wrong: M,
+      totalReal: UR + R,
+      contentKey: buildContentKey("realword", difficulty, round, setNumber),
+    },
+  });
   return next;
+}
+
+/** Pull in real-word scores achieved on mobile/other browsers (best score wins). */
+export async function hydrateRealWordProgressFromServer(): Promise<void> {
+  const attempts = await fetchPracticeAttempts("real_english_word");
+  if (attempts.length === 0) return;
+  const m = readRealWordProgressMap();
+  let changed = false;
+  for (const a of attempts) {
+    const ck = a.detail?.contentKey;
+    if (typeof ck !== "string") continue;
+    const parsed = parseContentKey(ck);
+    if (!parsed || parsed.skill !== "realword" || !isRound(parsed.round)) continue;
+    const difficulty = parsed.difficulty as RealWordDifficulty;
+    if (!REALWORD_DIFFICULTIES.includes(difficulty)) continue;
+    const setNumber = parsed.setNum;
+    const maxScore = REALWORD_MAX_SCORE[difficulty];
+    const attainedScore = Math.round(((a.score_pct ?? 0) / 100) * maxScore);
+    const k = progressKey(parsed.round, difficulty, setNumber);
+    const prev = m[k];
+    if (!prev || attainedScore > prev.bestScore) {
+      m[k] = {
+        bestScore: Math.max(prev?.bestScore ?? 0, attainedScore),
+        maxScore,
+        updatedAt: prev?.updatedAt ?? a.created_at,
+        userId: prev?.userId,
+      };
+      changed = true;
+    }
+  }
+  if (changed) {
+    localStorage.setItem(REALWORD_PROGRESS_KEY, JSON.stringify(m));
+    emitRealWordUpdate();
+  }
 }
 
 export function mergeRealWordBankFromAdmin(

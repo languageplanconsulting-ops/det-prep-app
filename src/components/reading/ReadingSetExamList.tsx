@@ -10,6 +10,7 @@ import {
 import {
   getReadingExamProgress,
   getReadingVisibleSetByNumber,
+  hydrateReadingProgressFromServer,
 } from "@/lib/reading-storage";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import type { ReadingDifficulty, ReadingRoundNum, ReadingSet } from "@/types/reading";
@@ -24,10 +25,17 @@ export function ReadingSetExamList({
   setNumber: number;
 }) {
   const [set, setSet] = useState<ReadingSet | null | undefined>(undefined);
+  const [, forceRerender] = useState(0);
 
   useEffect(() => {
     setSet(getReadingVisibleSetByNumber(round, difficulty, setNumber) ?? null);
   }, [round, difficulty, setNumber]);
+
+  // Merge in scores achieved on mobile/other devices, then re-render so the
+  // (unmemoized) getReadingExamProgress() calls below pick up fresh data.
+  useEffect(() => {
+    void hydrateReadingProgressFromServer().then(() => forceRerender((n) => n + 1));
+  }, []);
 
   const maxScore = READING_DIFFICULTY_MAX[difficulty];
 

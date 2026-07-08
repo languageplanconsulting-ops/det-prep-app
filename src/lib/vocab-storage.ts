@@ -1,10 +1,17 @@
 import { normalizeVocabSetsIncoming, parseVocabSetsJson } from "@/lib/vocab-admin";
 import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
-import { VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
+import { VOCAB_ROUND_NUMBERS, VOCAB_SESSION_MAX } from "@/lib/vocab-constants";
 import {
   emptyVocabFullBank,
   isBuiltInPlaceholderVocabSet,
 } from "@/lib/vocab-default-data";
+import {
+  buildContentKey,
+  packSubIndexed,
+  parseContentKey,
+  unpackSubIndexed,
+} from "@/lib/practice-attempts-contentkey";
+import { fetchPracticeAttempts, postPracticeAttempt } from "@/lib/practice-attempts-sync";
 import type {
   VocabFullBank,
   VocabPassageUnit,
@@ -297,7 +304,51 @@ export function saveVocabAttempt(args: {
   m[k] = next;
   localStorage.setItem(VOCAB_PROGRESS_KEY, JSON.stringify(m));
   emitVocabUpdate();
+  void postPracticeAttempt({
+    taskType: "vocabulary_reading",
+    scorePct: maxScore > 0 ? (attainedScore / maxScore) * 100 : 0,
+    detail: {
+      via: "vocab_passage",
+      contentKey: buildContentKey("vocab", sessionLevel, round, packSubIndexed(setNumber, passageNumber)),
+    },
+  });
   return next;
+}
+
+/** Pull in vocab scores achieved on mobile/other browsers (best score wins). */
+export async function hydrateVocabProgressFromServer(): Promise<void> {
+  const attempts = await fetchPracticeAttempts("vocabulary_reading");
+  if (attempts.length === 0) return;
+  const m = readVocabProgressMap();
+  let changed = false;
+  for (const a of attempts) {
+    const ck = a.detail?.contentKey;
+    if (typeof ck !== "string") continue;
+    const parsed = parseContentKey(ck);
+    if (!parsed || parsed.skill !== "vocab" || !isRound(parsed.round)) continue;
+    const sessionLevel = parsed.difficulty as VocabSessionLevel;
+    if (!VOCAB_SESSION_LEVELS.includes(sessionLevel)) continue;
+    const { setNumber, subNumber: passageNumber } = unpackSubIndexed(parsed.setNum);
+    const maxScore = VOCAB_SESSION_MAX[sessionLevel];
+    const attainedScore = Math.round(((a.score_pct ?? 0) / 100) * maxScore);
+    const k = progressKey(parsed.round, sessionLevel, setNumber, passageNumber);
+    const prev = m[k];
+    if (!prev || attainedScore > prev.bestScore) {
+      m[k] = {
+        bestScore: Math.max(prev?.bestScore ?? 0, attainedScore),
+        maxScore,
+        lastScore: prev?.lastScore ?? attainedScore,
+        lastCorrectCount: prev?.lastCorrectCount ?? 0,
+        updatedAt: prev?.updatedAt ?? a.created_at,
+        userId: prev?.userId,
+      };
+      changed = true;
+    }
+  }
+  if (changed) {
+    localStorage.setItem(VOCAB_PROGRESS_KEY, JSON.stringify(m));
+    emitVocabUpdate();
+  }
 }
 
 export function mergeVocabSetsFromAdmin(incoming: VocabSet[], round: VocabRoundNum): VocabFullBank {

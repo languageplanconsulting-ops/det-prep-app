@@ -10,6 +10,7 @@ import {
 } from "@/lib/dialogue-summary-constants";
 import {
   getDialogueSummaryProgress,
+  hydrateDialogueSummaryProgressFromServer,
   loadDialogueSummaryVisibleBank,
 } from "@/lib/dialogue-summary-storage";
 import type { DialogueSummaryDifficulty, DialogueSummaryRoundNum } from "@/types/dialogue-summary";
@@ -33,6 +34,12 @@ export function DialogueSummaryDifficultySetsPage({
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("ep-dialogue-summary-storage", onStorage);
     };
+  }, []);
+
+  // Merges server scores into localStorage and fires "ep-dialogue-summary-storage"
+  // on change, which the listener above already re-renders this page for.
+  useEffect(() => {
+    void hydrateDialogueSummaryProgressFromServer();
   }, []);
 
   if (soft) {

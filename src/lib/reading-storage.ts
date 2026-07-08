@@ -4,10 +4,18 @@ import {
 } from "@/lib/reading-admin";
 import {
   READING_DIFFICULTIES,
+  READING_DIFFICULTY_MAX,
   READING_ROUND_NUMBERS,
 } from "@/lib/reading-constants";
 import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
 import { defaultReadingFullBank, emptyReadingFullBank } from "@/lib/reading-default-data";
+import {
+  buildContentKey,
+  packSubIndexed,
+  parseContentKey,
+  unpackSubIndexed,
+} from "@/lib/practice-attempts-contentkey";
+import { fetchPracticeAttempts, postPracticeAttempt } from "@/lib/practice-attempts-sync";
 import type {
   ReadingDifficulty,
   ReadingExamUnit,
@@ -335,7 +343,56 @@ export function saveReadingAttempt(args: {
   m[k] = next;
   localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(m));
   emitReadingUpdate();
+  void postPracticeAttempt({
+    taskType: "reading_comprehension",
+    scorePct: maxScore > 0 ? (attainedScore / maxScore) * 100 : 0,
+    detail: {
+      correct: correctCount,
+      total: 4,
+      contentKey: buildContentKey("reading", difficulty, round, packSubIndexed(setNumber, examNumber)),
+    },
+  });
   return next;
+}
+
+/**
+ * Pull in exam scores achieved on the mobile app (or another browser) — merges
+ * into the local progress map (best score wins) so the set-list thumbnails
+ * reflect cross-device progress, not just this browser's localStorage.
+ */
+export async function hydrateReadingProgressFromServer(): Promise<void> {
+  const attempts = await fetchPracticeAttempts("reading_comprehension");
+  if (attempts.length === 0) return;
+  const m = readReadingProgressMap();
+  let changed = false;
+  for (const a of attempts) {
+    const ck = a.detail?.contentKey;
+    if (typeof ck !== "string") continue;
+    const parsed = parseContentKey(ck);
+    if (!parsed || parsed.skill !== "reading" || !isRound(parsed.round)) continue;
+    const difficulty = parsed.difficulty as ReadingDifficulty;
+    if (!READING_DIFFICULTIES.includes(difficulty)) continue;
+    const { setNumber, subNumber: examNumber } = unpackSubIndexed(parsed.setNum);
+    const maxScore = READING_DIFFICULTY_MAX[difficulty];
+    const attainedScore = Math.round(((a.score_pct ?? 0) / 100) * maxScore);
+    const k = progressExamKey(parsed.round, difficulty, setNumber, examNumber);
+    const prev = m[k];
+    if (!prev || attainedScore > prev.bestScore) {
+      m[k] = {
+        bestScore: Math.max(prev?.bestScore ?? 0, attainedScore),
+        maxScore,
+        lastScore: prev?.lastScore ?? attainedScore,
+        lastCorrectCount: prev?.lastCorrectCount ?? 0,
+        updatedAt: prev?.updatedAt ?? a.created_at,
+        userId: prev?.userId,
+      };
+      changed = true;
+    }
+  }
+  if (changed) {
+    localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(m));
+    emitReadingUpdate();
+  }
 }
 
 export function mergeReadingSetsFromAdmin(
