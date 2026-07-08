@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import type { NotebookEntry } from "@/types/writing";
 
+// Per-user data — must never be cached/shared across requests.
+export const dynamic = "force-dynamic";
+
 function isNotebookEntryLike(o: unknown): o is NotebookEntry {
   if (!o || typeof o !== "object") return false;
   const r = o as Record<string, unknown>;

@@ -20,7 +20,19 @@ function readBrowserCookie(name: string): string | null {
   return m ? decodeURIComponent(m[1]) : null;
 }
 
+// Env vars (the properly-deployed config) always win when present. The
+// localStorage/cookie overrides below exist only to bootstrap a browser when
+// NEXT_PUBLIC_* is genuinely missing from the build — if either ever took
+// priority over a correctly-configured env, one browser (wherever the
+// override was set, even by accident) would silently keep talking to a
+// DIFFERENT Supabase project forever, independent of every other browser or
+// device signed into the same account.
 function resolvePublicConfig(): { url: string; anon: string } | null {
+  const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const envAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  if (envUrl && envAnon) {
+    return { url: envUrl, anon: envAnon };
+  }
   if (typeof window !== "undefined") {
     const ru = getRuntimeSupabaseUrl();
     const ra = getRuntimeSupabaseAnonKey();
@@ -32,11 +44,6 @@ function resolvePublicConfig(): { url: string; anon: string } | null {
     if (cu && ca) {
       return { url: cu, anon: ca };
     }
-  }
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
-  if (url && anon) {
-    return { url, anon };
   }
   return null;
 }

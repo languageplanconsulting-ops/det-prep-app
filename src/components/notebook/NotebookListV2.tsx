@@ -501,7 +501,7 @@ export function NotebookListV2() {
               >
                 <p className="text-sm font-bold text-slate-900">🧩 เกมจับคู่</p>
                 <p className="mt-1 text-xs text-slate-500">
-                  ลากคำศัพท์ไปจับคู่กับความหมาย (สูงสุด 20 คำ)
+                  แตะคำศัพท์แล้วแตะความหมายที่ตรงกัน (สูงสุด 20 คำ)
                 </p>
               </button>
               <button

@@ -15,19 +15,25 @@ export function decodeCookiePart(s: string | undefined): string | null {
 }
 
 /**
- * Resolves Supabase URL + anon: cookies (from Admin → Supabase or legacy setup) first, then env.
- * Cookie values are set via POST /api/setup/supabase (URL-encoded).
+ * Resolves Supabase URL + anon: env vars (the properly-deployed config) first,
+ * falling back to cookies (from Admin → Supabase / legacy bootstrap setup)
+ * ONLY when env vars are missing entirely. Cookie values are set via
+ * POST /api/setup/supabase and persist for a year — if they ever took
+ * priority over env vars, a single browser that once had them set (even by
+ * accident, e.g. during initial setup) would silently keep talking to a
+ * DIFFERENT Supabase project than every other browser/device forever,
+ * which reads as "my data is never the same across browsers."
  */
 export function mergePublicSupabaseConfig(
   rawCookieUrl: string | undefined,
   rawCookieAnon: string | undefined,
 ): { url: string; anon: string } | null {
   const url =
-    decodeCookiePart(rawCookieUrl)?.trim() ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
+    decodeCookiePart(rawCookieUrl)?.trim();
   const anon =
-    decodeCookiePart(rawCookieAnon)?.trim() ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
+    decodeCookiePart(rawCookieAnon)?.trim();
   if (!url || !anon) return null;
   return { url, anon };
 }
