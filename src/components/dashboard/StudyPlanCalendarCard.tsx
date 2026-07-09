@@ -7,6 +7,7 @@ import {
   bumpTierForCatchUp, computeMissedRecent, computeStreak, generateCalendar,
   type CalendarDay,
 } from "@/lib/study-plan/schedule";
+import { EXAM_DATE_CHANGE_EVENT } from "@/hooks/usePracticeHeroStats";
 
 type ScheduleRow = {
   exam_date: string;
@@ -144,7 +145,11 @@ export function StudyPlanCalendarCard() {
           cadenceDays, defaultDurationMinutes: duration, isFreeform: isFreeformDraft,
         }),
       });
-      if (res.ok) { setEditing(false); await load(); }
+      if (res.ok) {
+        setEditing(false);
+        await load();
+        window.dispatchEvent(new Event(EXAM_DATE_CHANGE_EVENT));
+      }
     } finally {
       setSaving(false);
     }

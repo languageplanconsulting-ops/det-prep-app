@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { StudyPlanCalendarCard } from "@/components/dashboard/StudyPlanCalendarCard";
 import { RandomPracticePicker } from "@/components/practice/RandomPracticePicker";
 import { XpTierBadge } from "@/components/ui/XpTierBadge";
@@ -153,6 +153,7 @@ export function PracticeHubV2({
 }: PracticeHubV2Props) {
   const conversationLocked = !!conversationGate && !conversationGate.allowed;
   const stats = usePracticeHeroStats();
+  const [editingExamDate, setEditingExamDate] = useState(false);
   const examDays = daysUntil(stats.examDate);
   const gapToTarget =
     stats.lastScore != null && stats.targetScore != null
@@ -247,8 +248,8 @@ export function PracticeHubV2({
               )}
             </div>
 
-            {/* Countdown — real exam date (user-set) or a prompt to set it */}
-            {examDays != null ? (
+            {/* Countdown — real exam date (synced with the Study Plan card + mobile) or a prompt to set it */}
+            {examDays != null && !editingExamDate ? (
               <div className="rounded-xl bg-[#004AAD] px-6 py-4 text-center text-white sm:min-w-[150px]">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">เหลือถึงวันสอบ</p>
                 <p className="mt-1 text-4xl font-bold leading-none text-[#FFCC00]">
@@ -257,7 +258,7 @@ export function PracticeHubV2({
                 <p className="mt-1 text-xs text-white/80">วัน</p>
                 <button
                   type="button"
-                  onClick={() => setExamDate(null)}
+                  onClick={() => setEditingExamDate(true)}
                   className="mt-1 text-[10px] text-white/60 underline"
                 >
                   แก้วันสอบ
@@ -270,7 +271,11 @@ export function PracticeHubV2({
                 <input
                   type="date"
                   className="mt-1 text-[11px]"
-                  onChange={(e) => e.target.value && setExamDate(e.target.value)}
+                  onChange={(e) => {
+                    if (!e.target.value) return;
+                    void setExamDate(e.target.value);
+                    setEditingExamDate(false);
+                  }}
                 />
               </label>
             )}
@@ -536,7 +541,6 @@ export function PracticeHubV2({
 
         {/* ═══════════ RIGHT SIDEBAR ═══════════ */}
         <aside className="order-1 space-y-4 lg:order-2">
-          {/* Admin preview: schedule.exam_date here is a separate source of truth from the hero's localStorage exam date above — reconcile before going live for everyone. */}
           {isAdmin || previewEligible ? (
             <div className="space-y-3 rounded-2xl bg-[#FFCC00]/15 p-3 ring-2 ring-[#FFCC00]">
               <p className="px-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-700">
