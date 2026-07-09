@@ -317,9 +317,9 @@ export function MockFixedReportBrandedViewV2({
           <div className="relative flex-1 rounded-2xl rounded-tl-sm border border-[#004AAD]/10 bg-white px-3.5 py-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
             <span className="absolute -left-[7px] top-3.5 h-0 w-0 border-y-[6px] border-r-[7px] border-y-transparent border-r-white" />
             <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-2.5 py-[5px] text-[10px] font-extrabold uppercase leading-none tracking-wide text-[#004AAD]">
-              <span className="text-[11px] leading-none">✨</span>Tips from P&apos;Doy
+              <span className="text-[11px] leading-none">✨</span>เคล็ดลับจากพี่ดอย
             </span>
-            <ul className="space-y-1 text-[13px] leading-6 text-slate-800">
+            <ul className="space-y-2 text-[13px] leading-6 text-slate-800">
               {recommendations.map((r) => (
                 <li key={r}>• {r}</li>
               ))}

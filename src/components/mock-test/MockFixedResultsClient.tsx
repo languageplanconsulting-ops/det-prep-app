@@ -41,6 +41,65 @@ function avg(list: number[]): number {
   return list.reduce((a, b) => a + b, 0) / list.length;
 }
 
+/** Detailed, technique-level Thai coaching copy per fixed-mock task type — พี่ดอย's voice. */
+const TASK_ADVICE_TH: Record<string, { emoji: string; label: string; tip: string }> = {
+  fill_in_blanks: {
+    emoji: "📝",
+    label: "เติมคำในช่องว่าง",
+    tip: "ส่วนใหญ่พลาดเพราะไวยากรณ์ ไม่ใช่คำศัพท์ — เช็กรูปกริยา (-ed, -s, -ing), การใช้ comma, และคำเชื่อมประโยคให้ดี อ่านทั้งประโยคก่อนเดาคำเสมอ อย่าตัดสินจากคำใกล้เคียงตัวเดียว",
+  },
+  dictation: {
+    emoji: "🎧",
+    label: "ฟังแล้วพิมพ์ตาม (Dictation)",
+    tip: "เก็บคะแนนง่ายที่สุดถ้าระวัง 3 จุด: การเติม -ed/-es ท้ายคำกริยา, ตำแหน่ง comma ตรงจังหวะที่ผู้พูดหยุด, และคำที่ออกเสียงคล้ายกันแต่สะกดต่างกัน (there/their, its/it's)",
+  },
+  real_english_word: {
+    emoji: "🔤",
+    label: "แยกคำจริง/คำปลอม",
+    tip: "อาศัยคลังคำศัพท์ที่คุ้นตาเป็นหลัก ยิ่งเจอคำหลากหลายมากเท่าไหร่ ยิ่งแยกคำปลอมได้ไวขึ้น ฝึกอ่านคำศัพท์ใหม่ ๆ ทุกวัน แม้เป็นคำที่ไม่คุ้น จะช่วยให้สายตาจับความผิดปกติของคำปลอมได้เร็วขึ้น",
+  },
+  vocabulary_reading: {
+    emoji: "📖",
+    label: "คำศัพท์ + การอ่าน",
+    tip: "ฝึกแยก main idea (ใจความหลัก) ออกจาก specific idea (รายละเอียดย่อย) ในแต่ละย่อหน้าให้ได้ก่อน แล้วค่อยโฟกัสคำศัพท์ที่ไม่รู้จัก คำศัพท์อังกฤษมีมากกว่า 100,000 คำ เก็บทีละนิดทุกวันจะส่งผลบวกกับทุกทักษะ ไม่ใช่แค่ส่วนนี้",
+  },
+  write_about_photo: {
+    emoji: "📸",
+    label: "เขียนบรรยายภาพ",
+    tip: "เตรียมโครงประโยคที่ใช้ซ้ำได้ไว้ล่วงหน้า เช่น บอกว่ามีใคร/อะไรอยู่ตรงไหน กำลังทำอะไร บรรยากาศเป็นอย่างไร — มีโครงพร้อมจะเขียนได้เร็วและครบใจความภายในเวลาจำกัด",
+  },
+  speak_about_photo: {
+    emoji: "🎤",
+    label: "พูดบรรยายภาพ",
+    tip: "หลักการเดียวกับเขียนบรรยายภาพ แต่ต้องพูดให้ลื่นไหลใน 1 นาที เตรียมโครงประโยคที่คุ้นปาก แล้วฝึกพูดจับเวลาจริงบ่อย ๆ จะช่วยลดอาการติดขัดตอนสอบจริง",
+  },
+  read_and_write: {
+    emoji: "📄",
+    label: "อ่านแล้วเขียนสรุป",
+    tip: "ต้องจับใจความให้ไวแล้วเรียบเรียงเป็นคำพูดของตัวเอง ไม่ใช่ก็อปประโยคจากโจทย์มาตรง ๆ ฝึกอ่านจบแล้วสรุปเป็นประโยคสั้น ๆ ของตัวเองทันทีทุกครั้งจะช่วยให้ทำได้เร็วขึ้น",
+  },
+  read_then_speak: {
+    emoji: "📑",
+    label: "อ่านแล้วพูดด้วยคำตัวเอง",
+    tip: "เหมือนอ่านแล้วเขียน แต่ต้องพูดออกมาแทน ระวังอย่าท่องประโยคจากโจทย์ตรง ๆ เพราะระบบจะให้คะแนนต่ำ ฝึกจับใจความแล้วพูดด้วยคำศัพท์ของตัวเองให้เป็นธรรมชาติ",
+  },
+  interactive_conversation_mcq: {
+    emoji: "💬",
+    label: "บทสนทนาโต้ตอบ (เลือกตอบ)",
+    tip: "เน้นจำ scenario และคำศัพท์ที่ใช้บ่อยในชีวิตมหาวิทยาลัยหรือที่ทำงาน ฟังให้เข้าใจสถานการณ์ทั้งหมดก่อน แล้วเลือกคำตอบที่เข้ากับบริบทที่สุด ไม่ใช่แค่คำตอบที่ฟังดูถูกหลักไวยากรณ์อย่างเดียว",
+  },
+  interactive_speaking: {
+    emoji: "🎙️",
+    label: "พูดโต้ตอบสด",
+    tip: "ต้องตอบให้เป็นธรรมชาติและต่อเนื่อง ไม่ใช่ตอบสั้น ๆ ประโยคเดียวจบ ฝึกขยายความอย่างน้อย 2-3 ประโยคทุกคำถามพร้อมยกตัวอย่างประกอบ จะช่วยให้ระบบประเมินได้แม่นยำขึ้นมาก",
+  },
+  conversation_summary: {
+    emoji: "🧾",
+    label: "สรุปบทสนทนา",
+    tip: "ต้องจับให้ครบ 3 อย่าง: ใจความหลักของบทสนทนา รายละเอียดสำคัญ และข้อสรุป/คำแนะนำท้ายบทสนทนา ฝึกฟังแล้วจดสั้น ๆ ทั้ง 3 จุดนี้ทุกครั้งจะช่วยสรุปได้ครบไม่หลุดประเด็น",
+  },
+};
+
 export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const [row, setRow] = useState<FixedResult | null>(null);
@@ -94,33 +153,27 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   }));
   const sortedHigh = [...taskAverages].sort((a, b) => b.average - a.average).slice(0, 3);
   const sortedLow = [...taskAverages].sort((a, b) => a.average - b.average).slice(0, 3);
-  const lowTasks = new Set(sortedLow.map((x) => x.task));
 
   const recommendations: string[] = [];
-  if (lowTasks.has("vocabulary_reading") || lowTasks.has("conversation_summary") || lowTasks.has("fill_in_blanks")) {
-    recommendations.push("Focus on vocabulary.");
-  }
-  if (lowTasks.has("dictation") && lowTasks.has("fill_in_blanks")) {
+  const scoreGap = desiredScore - totalScore;
+  if (scoreGap > 0) {
     recommendations.push(
-      "Revise grammar. Many people think this is vocabulary, but these tasks are strongly grammar-focused.",
+      `ตอนนี้คุณได้ ${totalScore} คะแนน ห่างจากเป้าหมาย ${desiredScore} อยู่ ${scoreGap} คะแนน — เก็บ 2 จุดที่อ่อนที่สุดให้ได้ก่อน คะแนนรวมจะขยับขึ้นเร็วที่สุดครับ`,
+    );
+  } else {
+    recommendations.push(
+      `ทำได้ถึงเป้าหมาย ${desiredScore} คะแนนแล้วครับ เก่งมาก! ลองตั้งเป้าใหม่ให้สูงขึ้นอีกนิดเพื่อพัฒนาต่อไป`,
     );
   }
-  if (
-    sortedLow.some((x) =>
-      [
-        "write_about_photo",
-        "speak_about_photo",
-        "read_and_write",
-        "read_then_speak",
-        "interactive_speaking",
-        "conversation_summary",
-      ].includes(x.task),
-    )
-  ) {
-    recommendations.push("Focus on overall production score (speaking + writing).");
+  for (const { task, average } of sortedLow.slice(0, 2)) {
+    const advice = TASK_ADVICE_TH[task];
+    if (!advice) continue;
+    recommendations.push(`${advice.emoji} ${advice.label} (เฉลี่ย ${average}/160) — ${advice.tip}`);
   }
-  if (!recommendations.length) {
-    recommendations.push("Keep balancing all skills and review your lowest two task types first.");
+  if (recommendations.length <= 1) {
+    recommendations.push(
+      "คะแนนค่อนข้างสมดุลทุกทักษะแล้ว ลองฝึกแบบสุ่มทุกประเภทต่อไปเรื่อย ๆ เพื่อรักษาระดับและขยับขึ้นทีละนิดครับ",
+    );
   }
 
   const listening = Math.round(Number(row.actual_listening ?? 0));
