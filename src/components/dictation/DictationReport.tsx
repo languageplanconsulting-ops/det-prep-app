@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
@@ -235,6 +236,10 @@ export function DictationReport({
     // ── Plan A (clear comparison) + optional Plan B (guided fix) — admins only ──
     return (
       <div className="min-w-0 max-w-full space-y-4">
+        <CelebrateMascot
+          title={missed.length === 0 ? "เป๊ะเลย! 🎉" : "ทำได้ดีมาก!"}
+        />
+
         {/* score */}
         <div className="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
           <div className="flex flex-wrap items-center justify-between gap-3">

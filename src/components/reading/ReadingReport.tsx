@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useRevealSfx } from "@/hooks/useRevealSfx";
+import { useEffect, useState } from "react";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
-import { sfxTransition } from "@/lib/exam-sfx";
+import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import {
   READING_DIFFICULTY_LABEL,
   READING_DIFFICULTY_MAX,
@@ -46,7 +46,9 @@ export function ReadingReport({
   setListHref: string;
   nextExamHref: string | null;
 }) {
-  useRevealSfx();
+  useEffect(() => {
+    sfxCelebrate("md");
+  }, []);
   const maxScore = READING_DIFFICULTY_MAX[difficulty];
   const correctCount = rows.filter((r) => r.isCorrect).length;
   const score = Math.round((correctCount / 4) * maxScore);
@@ -61,6 +63,7 @@ export function ReadingReport({
 
   return (
     <div className="space-y-8">
+      <CelebrateMascot title={correctCount === 4 ? "เต็ม 4/4! 🎉" : "ทำได้ดีมาก!"} />
       <CoachBubble>{coachText}</CoachBubble>
       <header className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-6 shadow-[4px_4px_0_0_#000]">
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">

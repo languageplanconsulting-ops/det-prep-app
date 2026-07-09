@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
-import { useRevealSfx } from "@/hooks/useRevealSfx";
-import { sfxTransition } from "@/lib/exam-sfx";
+import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import { playNotebookSavedSound } from "@/lib/notebook-save-feedback";
 import { FITB_DIFFICULTY_LABEL, FITB_SET_COUNT, fitbMaxScore } from "@/lib/fitb-constants";
 import { FITB_CLUE_SCORE_FACTOR } from "@/lib/fitb-scoring";
@@ -43,7 +43,9 @@ export function FitbReportPanel({
   detScore: number;
   onRedeemNow: () => void;
 }) {
-  useRevealSfx();
+  useEffect(() => {
+    sfxCelebrate("md");
+  }, []);
   const redeemRef = useRef<HTMLButtonElement>(null);
   const [wordToast, setWordToast] = useState(false);
   const [dismissed, setDismissed] = useState<Set<number>>(() => new Set());
@@ -106,6 +108,7 @@ export function FitbReportPanel({
 
   return (
     <div className="space-y-6 border-t-4 border-black pt-6">
+      <CelebrateMascot title={flawless ? "เป๊ะทุกช่อง! 🎉" : "ทำได้ดีมาก!"} />
       <CoachBubble>{coachText}</CoachBubble>
       {wordToast ? (
         <div

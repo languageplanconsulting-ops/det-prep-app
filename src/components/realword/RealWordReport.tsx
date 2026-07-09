@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useRevealSfx } from "@/hooks/useRevealSfx";
+import { useEffect, useState } from "react";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
-import { sfxTransition } from "@/lib/exam-sfx";
+import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import {
   REALWORD_DIFFICULTY_LABEL,
   REALWORD_MAX_SCORE,
@@ -77,7 +77,9 @@ export function RealWordReport({
   hubHref: string;
   onRedeemNow: () => void;
 }) {
-  useRevealSfx();
+  useEffect(() => {
+    sfxCelebrate("md");
+  }, []);
   const maxScore = REALWORD_MAX_SCORE[difficulty];
   const nextSetHref =
     setNumber < REALWORD_SET_COUNT
@@ -120,6 +122,7 @@ export function RealWordReport({
 
   return (
     <div className="space-y-8">
+      <CelebrateMascot title={scorePercent >= 85 ? "เก่งมากเลย! 🎉" : "ทำได้ดีมาก!"} />
       <CoachBubble>{coachMessage(scorePercent, UR, R, M)}</CoachBubble>
       <section className={`ep-brutal overflow-hidden rounded-sm border-4 border-black p-0 shadow-[5px_5px_0_0_#000] ${tone.panelClass}`}>
         <div className="grid gap-0 lg:grid-cols-[1.35fr_0.95fr]">

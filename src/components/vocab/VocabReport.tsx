@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRevealSfx } from "@/hooks/useRevealSfx";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
-import { sfxTransition } from "@/lib/exam-sfx";
+import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import {
   VOCAB_SESSION_LABEL,
   VOCAB_SESSION_MAX,
@@ -45,7 +45,9 @@ export function VocabReport({
   bankHref: string;
   nextPassageHref: string | null;
 }) {
-  useRevealSfx();
+  useEffect(() => {
+    sfxCelebrate("md");
+  }, []);
   const maxScore = VOCAB_SESSION_MAX[sessionLevel];
   const correctCount = rows.filter((r) => r.isCorrect).length;
   const score = Math.round((correctCount / 6) * maxScore);
@@ -72,6 +74,7 @@ export function VocabReport({
             </p>
           </header>
 
+          <CelebrateMascot title={correctCount === 6 ? "เต็ม 6/6! 🎉" : "ทำได้ดีมาก!"} />
           <CoachBubble>{coachText}</CoachBubble>
 
           <section className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#000]">
