@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
+import { staggerIn } from "@/components/ui/StaggerIn";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import {
   REALWORD_DIFFICULTY_LABEL,
@@ -210,14 +211,18 @@ export function RealWordReport({
               </div>
             ) : (
               <ul className="flex flex-wrap gap-2">
-                {missedReal.map((w) => (
-                  <li
-                    key={w.word}
-                    className="border-4 border-amber-700 bg-amber-50 px-3 py-2 text-sm font-black text-neutral-900 shadow-[2px_2px_0_0_#000]"
-                  >
-                    {w.word}
-                  </li>
-                ))}
+                {missedReal.map((w, i) => {
+                  const stagger = staggerIn(i);
+                  return (
+                    <li
+                      key={w.word}
+                      className={`border-4 border-amber-700 bg-amber-50 px-3 py-2 text-sm font-black text-neutral-900 shadow-[2px_2px_0_0_#000] ${stagger.className}`}
+                      style={stagger.style}
+                    >
+                      {w.word}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
@@ -238,14 +243,18 @@ export function RealWordReport({
               </div>
             ) : (
               <ul className="flex flex-wrap gap-2">
-                {pickedFake.map((w, i) => (
-                  <li
-                    key={`${w.word}-fake-${i}`}
-                    className="border-4 border-red-700 bg-red-50 px-3 py-2 text-sm font-black text-red-900 shadow-[2px_2px_0_0_#000]"
-                  >
-                    {w.word}
-                  </li>
-                ))}
+                {pickedFake.map((w, i) => {
+                  const stagger = staggerIn(i);
+                  return (
+                    <li
+                      key={`${w.word}-fake-${i}`}
+                      className={`border-4 border-red-700 bg-red-50 px-3 py-2 text-sm font-black text-red-900 shadow-[2px_2px_0_0_#000] ${stagger.className}`}
+                      style={stagger.style}
+                    >
+                      {w.word}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
@@ -265,12 +274,14 @@ export function RealWordReport({
           </div>
         </div>
         <ul className="mt-5 grid gap-4 lg:grid-cols-2">
-          {realWords.map((w) => {
+          {realWords.map((w, i) => {
             const done = added.has(w.word.toLowerCase());
+            const stagger = staggerIn(i);
             return (
               <li
                 key={w.word}
-                className="border-4 border-black bg-[linear-gradient(180deg,#fafafa_0%,#f5f5f5_100%)] p-4 shadow-[3px_3px_0_0_#000]"
+                className={`border-4 border-black bg-[linear-gradient(180deg,#fafafa_0%,#f5f5f5_100%)] p-4 shadow-[3px_3px_0_0_#000] ${stagger.className}`}
+                style={stagger.style}
               >
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-xl font-black text-neutral-900">{w.word}</p>

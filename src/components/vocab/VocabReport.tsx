@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
+import { staggerIn } from "@/components/ui/StaggerIn";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import {
   VOCAB_SESSION_LABEL,
@@ -82,14 +83,17 @@ export function VocabReport({
               Question review
             </h2>
             <ul className="mt-6 space-y-6">
-              {rows.map((r) => (
+              {rows.map((r, i) => {
+                const stagger = staggerIn(i);
+                return (
                 <li
                   key={r.blankIndex}
                   className={`ep-brutal-reading rounded-sm border-4 p-5 shadow-[4px_4px_0_0_#000] ${
                     r.isCorrect
                       ? "border-emerald-600 bg-emerald-50/90"
                       : "border-red-600 bg-red-50/90"
-                  }`}
+                  } ${stagger.className}`}
+                  style={stagger.style}
                 >
                   <p
                     className={`ep-stat text-xs font-bold uppercase tracking-[0.2em] ${
@@ -132,7 +136,8 @@ export function VocabReport({
                     <p className="mt-2 whitespace-pre-wrap text-neutral-800">{r.explanationThai}</p>
                   </div>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           </section>
 
@@ -148,6 +153,7 @@ export function VocabReport({
                   setNumber={setNumber}
                   passageNumber={passageNumber}
                   entry={cw}
+                  index={i}
                 />
               ))}
             </ul>
@@ -194,11 +200,13 @@ function WordNotebookRow({
   setNumber,
   passageNumber,
   entry,
+  index,
 }: {
   round: VocabRoundNum;
   setNumber: number;
   passageNumber: number;
   entry: VocabPassageUnit["correctWords"][number];
+  index: number;
 }) {
   const [saved, setSaved] = useState(() =>
     isVocabWordNotebookSaved(round, setNumber, passageNumber, entry.word),
@@ -236,11 +244,13 @@ function WordNotebookRow({
     }
   };
 
+  const stagger = staggerIn(index);
   return (
     <li
       className={`relative ep-brutal-reading rounded-sm border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000] ${
         showAddedCelebration ? "mb-1 pb-16 sm:pb-14" : ""
-      }`}
+      } ${stagger.className}`}
+      style={stagger.style}
     >
       <p className="text-lg font-black text-neutral-900">{entry.word}</p>
       <p className="mt-2 text-sm text-neutral-700">

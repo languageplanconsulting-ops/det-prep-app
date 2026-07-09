@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
+import { staggerIn } from "@/components/ui/StaggerIn";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { DICTATION_SET_COUNT } from "@/lib/dictation-constants";
@@ -302,14 +303,17 @@ export function DictationReport({
               🎯 จุดที่พลาด ({missed.length})
             </p>
             <ul className="space-y-1.5 text-sm">
-              {missed.slice(0, 6).map((w, idx) => (
-                <li key={idx} className="flex gap-2">
-                  <span className="font-bold text-rose-500">✗</span>
-                  <span>
-                    <strong>{w.word}</strong>
-                  </span>
-                </li>
-              ))}
+              {missed.slice(0, 6).map((w, idx) => {
+                const stagger = staggerIn(idx);
+                return (
+                  <li key={idx} className={`flex gap-2 ${stagger.className}`} style={stagger.style}>
+                    <span className="font-bold text-rose-500">✗</span>
+                    <span>
+                      <strong>{w.word}</strong>
+                    </span>
+                  </li>
+                );
+              })}
               {missed.length > 6 ? (
                 <li className="text-xs text-slate-400">…และอีก {missed.length - 6} คำ</li>
               ) : null}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
+import { staggerIn } from "@/components/ui/StaggerIn";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import {
   READING_DIFFICULTY_LABEL,
@@ -108,14 +109,17 @@ export function ReadingReport({
           Green cards are correct answers; red cards need review. Compare your choice to the key.
         </p>
         <ul className="mt-5 space-y-5">
-          {rows.map((r) => (
+          {rows.map((r, i) => {
+            const stagger = staggerIn(i);
+            return (
             <li
               key={r.key}
               className={`overflow-hidden rounded-sm border-4 shadow-[4px_4px_0_0_#000] ${
                 r.isCorrect
                   ? "border-emerald-700 bg-emerald-50/90"
                   : "border-red-600 bg-red-50/90"
-              }`}
+              } ${stagger.className}`}
+              style={stagger.style}
             >
               <div
                 className={`flex flex-wrap items-center justify-between gap-2 border-b-4 border-black px-4 py-2 ${
@@ -171,7 +175,8 @@ export function ReadingReport({
                 ) : null}
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       </section>
 
@@ -187,7 +192,7 @@ export function ReadingReport({
           </p>
         ) : (
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-            {vocabList.map((v) => (
+            {vocabList.map((v, i) => (
               <VocabRow
                 key={v.word + setNumber + examNumber + v.meaningEn}
                 round={round}
@@ -195,6 +200,7 @@ export function ReadingReport({
                 setNumber={setNumber}
                 examNumber={examNumber}
                 v={v}
+                index={i}
               />
             ))}
           </ul>
@@ -256,12 +262,14 @@ function VocabRow({
   setNumber,
   examNumber,
   v,
+  index,
 }: {
   round: ReadingRoundNum;
   difficulty: ReadingDifficulty;
   setNumber: number;
   examNumber: number;
   v: ReadingExamUnit["highlightedVocab"][number];
+  index: number;
 }) {
   const [saved, setSaved] = useState(() =>
     isReadingVocabKeySaved(round, difficulty, setNumber, examNumber, v.word),
@@ -300,8 +308,12 @@ function VocabRow({
     setKnown(true);
   };
 
+  const stagger = staggerIn(index);
   return (
-    <li className="flex flex-col gap-2 rounded-sm border-4 border-black bg-neutral-50 p-4 shadow-[3px_3px_0_0_#000]">
+    <li
+      className={`flex flex-col gap-2 rounded-sm border-4 border-black bg-neutral-50 p-4 shadow-[3px_3px_0_0_#000] ${stagger.className}`}
+      style={stagger.style}
+    >
       <p className="text-lg font-black text-neutral-900">{v.word}</p>
       <p className="text-sm font-semibold text-neutral-800">{v.meaningEn}</p>
       <p className="text-sm text-neutral-600">{v.meaningTh}</p>

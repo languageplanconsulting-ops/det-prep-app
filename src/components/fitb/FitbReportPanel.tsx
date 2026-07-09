@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
+import { staggerIn } from "@/components/ui/StaggerIn";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import { playNotebookSavedSound } from "@/lib/notebook-save-feedback";
 import { FITB_DIFFICULTY_LABEL, FITB_SET_COUNT, fitbMaxScore } from "@/lib/fitb-constants";
@@ -142,8 +143,13 @@ export function FitbReportPanel({
             const user = userAnswers[i]?.trim() || "—";
             const close = g === "close";
             const bg = ok ? "bg-emerald-50" : close ? "bg-amber-50" : "bg-red-50";
+            const stagger = staggerIn(i);
             return (
-              <li key={i} className={`border-4 border-black p-4 shadow-[3px_3px_0_0_#000] ${bg}`}>
+              <li
+                key={i}
+                className={`border-4 border-black p-4 shadow-[3px_3px_0_0_#000] ${bg} ${stagger.className}`}
+                style={stagger.style}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <p className="text-sm font-black">
                     Blank {i + 1}:{" "}
