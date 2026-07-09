@@ -3,10 +3,6 @@
     {
       "path": "/api/cron/repair-subscriptions",
       "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/study-plan-reminders",
-      "schedule": "0 * * * *"
     }
   ]
 }
