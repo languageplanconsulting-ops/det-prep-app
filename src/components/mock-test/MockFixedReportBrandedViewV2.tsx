@@ -6,10 +6,8 @@ import { sfxCelebrate } from "@/lib/exam-sfx";
 import type { FixedMockScoredRow } from "@/lib/mock-test/fixed-mock-score-buckets";
 
 /**
- * MockFixedReportBrandedViewV2 — soft-modern admin-only redesign of the mock
- * results report (Cagan + Krug). IDENTICAL prop contract to the original
- * MockFixedReportBrandedView, so it consumes the same already-fetched data.
- * Rendered only for admins from MockFixedResultsClient; users keep the original.
+ * MockFixedReportBrandedViewV2 — soft-modern redesign of the mock results
+ * report (Cagan + Krug). This is the report every user sees.
  */
 
 type FixedStepItem = {
@@ -177,13 +175,6 @@ export function MockFixedReportBrandedViewV2({
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
-      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-[#fff7d1] px-3 py-2 text-xs ring-1 ring-[#FFCC00]">
-        <span className="rounded bg-[#004AAD] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FFCC00]">
-          Admin preview
-        </span>
-        <span className="font-semibold text-slate-700">Mock results V2 · ผู้ใช้จริงยังเห็นหน้าเดิม</span>
-      </div>
-
       {/* Score hero */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
         <div className="flex flex-col items-center gap-5 sm:flex-row sm:justify-between">

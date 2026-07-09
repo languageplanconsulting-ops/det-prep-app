@@ -140,7 +140,17 @@ function fallbackHeuristicScore160(taskType: string, answer: unknown, correct: u
   }
   if (taskType === "vocabulary_reading") {
     const score = Number((answer as { averageScore0To100?: unknown })?.averageScore0To100);
-    return Number.isFinite(score) ? normalize160((score / 100) * 160) : 0;
+    if (!Number.isFinite(score)) {
+      // Should be unreachable now that QuestionRouter always forces aggregate
+      // mode for the fixed mock — log loudly instead of silently scoring 0,
+      // since this is 55% of the Reading skill bucket.
+      console.error(
+        "[mock-fixed-submit-step] vocabulary_reading answer missing averageScore0To100 (non-aggregate/malformed payload) — scoring 0",
+        JSON.stringify(answer),
+      );
+      return 0;
+    }
+    return normalize160((score / 100) * 160);
   }
   if (taskType === "real_english_word") {
     const correctRealWords = Number(

@@ -272,6 +272,11 @@ export function validateFixedRows(rows: FixedSetUploadRow[]): { rows: FixedSetUp
       if (!isMcBlock(c.mainIdea)) {
         return { rows: [], error: "Step 8 requires valid mainIdea block" };
       }
+      // The fixed mock always submits step 8 as ONE combined answer (a single
+      // submit-step call) — require/auto-set the flag QuestionRouter reads to
+      // pick aggregate mode, so content authored/edited without it can never
+      // silently truncate scoring to just the first sub-question.
+      c.mock_combined_mode = true;
     }
     if (row.step_index === 13 && row.task_type === "interactive_conversation_mcq") {
       const c = row.content as Record<string, unknown>;

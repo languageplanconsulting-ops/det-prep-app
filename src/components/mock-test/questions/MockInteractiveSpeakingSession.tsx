@@ -237,6 +237,9 @@ export function MockInteractiveSpeakingSession({
           "Recording not supported in this browser. Type your answer below.",
         );
         setRecLeft(0);
+        // No mic path exists at all — go straight to review so Continue/Submit
+        // is reachable instead of leaving a typable box with no way forward.
+        setPhase("review");
         return;
       }
 
@@ -284,6 +287,9 @@ export function MockInteractiveSpeakingSession({
               );
               setListening(false);
               setBrowserSttActive(false);
+              // Recognition won't retry itself out of a permission denial —
+              // move to review so Continue/Submit is reachable with what's typed.
+              setPhase("review");
             }
           };
 
@@ -328,6 +334,7 @@ export function MockInteractiveSpeakingSession({
       if (!canUpload) {
         setError("Speech recognition failed. Type your answer below.");
         setRecLeft(0);
+        setPhase("review");
         return;
       }
       setBrowserSttActive(false);
@@ -385,6 +392,7 @@ export function MockInteractiveSpeakingSession({
           "Microphone unavailable. Type your answer in the box below.",
         );
         setRecLeft(0);
+        setPhase("review");
       }
     })();
   }, []);

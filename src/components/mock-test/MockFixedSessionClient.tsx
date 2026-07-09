@@ -259,13 +259,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     setSubmittingStep(true);
     // Prevent double-submit from double-click / fast taps.
     // If the server already has this step, we will reload and continue.
-    const res = await fetch(`/api/mock-test/fixed/session/${sessionId}/submit-step`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ stepIndex: current.step_index, answer }),
-    });
-    const json = (await res.json()) as {
+    type SubmitStepResponse = {
       complete?: boolean;
       error?: string;
       singleStepPreview?: boolean;
@@ -273,6 +267,30 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       stepIndex?: number;
       taskType?: string;
     };
+    let res: Response;
+    let json: SubmitStepResponse;
+    try {
+      const ctl = new AbortController();
+      const t = window.setTimeout(() => ctl.abort(), 30000);
+      res = await fetch(`/api/mock-test/fixed/session/${sessionId}/submit-step`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ stepIndex: current.step_index, answer }),
+        signal: ctl.signal,
+      });
+      window.clearTimeout(t);
+      json = (await res.json()) as SubmitStepResponse;
+    } catch {
+      // Network drop / timeout — indeterminate whether the server actually
+      // committed the step. Reload the session so the UI reflects the true
+      // current_step instead of leaving Submit disabled forever with no
+      // feedback (mirrors the "Step already submitted" reconciliation below).
+      setSubmittingStep(false);
+      setError("Connection issue while submitting — reloaded your progress. Please try again.");
+      await load("adapting");
+      return;
+    }
     if (!res.ok || json.error) {
       if (json.error === "Step already submitted") {
         // Step is already recorded; reload session so UI can move on.
@@ -591,6 +609,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
                   key={question.id}
                   question={question}
                   submitting={submittingStep}
+                  forceAggregateVocab
                   onSpeakPhotoReady={() => {
                     if (skipTimerMode) return;
                     if (current?.task_type !== "speak_about_photo") return;
@@ -730,6 +749,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
                 key={question.id}
                 question={question}
                 submitting={submittingStep}
+                forceAggregateVocab
                 onSpeakPhotoReady={() => {
                   if (skipTimerMode) return;
                   if (current?.task_type !== "speak_about_photo") return;

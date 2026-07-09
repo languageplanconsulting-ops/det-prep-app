@@ -7,9 +7,6 @@ import { useRouter } from "next/navigation";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import type { FixedMockScoredRow } from "@/lib/mock-test/fixed-mock-score-buckets";
 
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
-
-import { MockFixedReportBrandedView } from "./MockFixedReportBrandedView";
 import { MockFixedReportBrandedViewV2 } from "./MockFixedReportBrandedViewV2";
 
 type FixedStepItem = {
@@ -46,8 +43,6 @@ function avg(list: number[]): number {
 
 export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   const router = useRouter();
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const showV2 = true;
   const [row, setRow] = useState<FixedResult | null>(null);
   const [stepItems, setStepItems] = useState<FixedStepItem[]>([]);
   const [dashboardSavedAt, setDashboardSavedAt] = useState<string | null>(null);
@@ -55,19 +50,31 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   const [dashboardError, setDashboardError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
       const res = await fetch(`/api/mock-test/fixed/results/${sessionId}/report`, {
         credentials: "same-origin",
         cache: "no-store",
       });
-      if (!res.ok) return;
+      if (cancelled) return;
+      if (!res.ok) {
+        // Result row doesn't exist yet (e.g. a bookmarked/shared link, back
+        // navigation, or a second tab landing here before grading committed)
+        // — results-loading knows how to poll/wait, so send the user there
+        // instead of stranding them on an infinite "Loading result...".
+        router.replace(`/mock-test/fixed/results-loading/${sessionId}`);
+        return;
+      }
       const json = (await res.json()) as { result?: FixedResult; stepItems?: FixedStepItem[] };
       const next = (json.result ?? null) as FixedResult | null;
       setRow(next);
       setStepItems(json.stepItems ?? []);
       setDashboardSavedAt(next?.dashboard_saved_at ?? null);
     })();
-  }, [sessionId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, router]);
 
   if (!row) return <div className="p-8 text-center font-bold">Loading result...</div>;
 
@@ -121,11 +128,9 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   const reading = Math.round(Number(row.actual_reading ?? 0));
   const writing = Math.round(Number(row.actual_writing ?? 0));
 
-  const ReportView = showV2 ? MockFixedReportBrandedViewV2 : MockFixedReportBrandedView;
-
   return (
     <>
-      <ReportView
+      <MockFixedReportBrandedViewV2
         sessionId={sessionId}
         total={totalScore}
         listening={listening}

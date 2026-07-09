@@ -8,6 +8,7 @@ import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
 import { countBillableMockFixedSessions, mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
 import { isMockTestAvailableNow } from "@/lib/mock-test/mock-test-availability";
+import { abandonStaleFixedMockSessions } from "@/lib/mock-test/session-integrity";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRequestSupabase } from "@/lib/supabase-request-client";
@@ -189,6 +190,14 @@ export async function POST(req: Request) {
     if (!consumed.ok) {
       return NextResponse.json({ error: "No extra mock add-on credit available" }, { status: 403 });
     }
+  }
+
+  // Close out any session left dangling from a previous attempt (tab closed,
+  // app killed/backgrounded mid-exam on mobile) so at most one in_progress
+  // row ever exists per user — otherwise they accumulate indefinitely with
+  // no cleanup path, unlike the legacy adaptive mock flow.
+  if (!isAdmin) {
+    await abandonStaleFixedMockSessions(supabase, user.id);
   }
 
   const { data, error } = await supabase

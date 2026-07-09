@@ -23,6 +23,13 @@ type Props = {
   /** Phase 4 composite: how many sub-questions already recorded (0…9). */
   phaseProgress?: number;
   submitting?: boolean;
+  /**
+   * The fixed 20-step mock always submits vocabulary_reading as a single
+   * combined step (one submit-step call), never phaseProgress-style — force
+   * aggregate mode regardless of the content's mock_combined_mode flag so a
+   * missing/edited flag can never silently truncate step 8 to one sub-answer.
+   */
+  forceAggregateVocab?: boolean;
   onDictationAudioFinished?: () => void;
   onSpeakPhotoReady?: () => void;
   onSubmit: (answer: unknown) => void;
@@ -32,6 +39,7 @@ export function QuestionRouter({
   question,
   phaseProgress = 0,
   submitting = false,
+  forceAggregateVocab = false,
   onDictationAudioFinished,
   onSpeakPhotoReady,
   onSubmit,
@@ -77,7 +85,7 @@ export function QuestionRouter({
         <VocabularyReadingMockExam
           content={c}
           completedSteps={phaseProgress}
-          aggregateMode={c.mock_combined_mode === true}
+          aggregateMode={forceAggregateVocab || c.mock_combined_mode === true}
           submitting={submitting}
           onSubmit={onSubmit}
         />
@@ -173,7 +181,16 @@ export function QuestionRouter({
         <EssayWriting content={c} submitting={submitting} onSubmit={(text) => onSubmit({ text })} />
       );
     default:
-      return <p className="text-sm">Unsupported question type.</p>;
+      return (
+        <div className="space-y-3 rounded-[4px] border-4 border-red-800 bg-red-50 p-4">
+          <p className="text-sm font-bold text-red-900">
+            This question couldn&apos;t load (unsupported type: {String(question.question_type)}).
+          </p>
+          <p className="text-xs text-red-800">
+            Please use &quot;รายงานปัญหา&quot; so we can fix this — your progress up to here is saved.
+          </p>
+        </div>
+      );
   }
 }
 
