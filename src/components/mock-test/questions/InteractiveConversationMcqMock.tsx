@@ -58,7 +58,7 @@ export function InteractiveConversationMcqMock({
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [pick, setPick] = useState<string | null>(null);
-  const [scenarioUnlocked, setScenarioUnlocked] = useState(partA.length === 0);
+  const [scenarioUnlocked, setScenarioUnlocked] = useState(true);
   const [scenarioTtsLoading, setScenarioTtsLoading] = useState(false);
   const [scenarioTtsError, setScenarioTtsError] = useState<string | null>(null);
   const [generatedScenarioAudioUrl, setGeneratedScenarioAudioUrl] = useState<string | null>(null);
@@ -113,7 +113,9 @@ export function InteractiveConversationMcqMock({
   }
 
   const audioSrc = String(current.question_audio_url ?? generatedAudioUrl ?? "");
-  const canAnswer = hasListened || Boolean(ttsError);
+  // Question/scenario text is always readable (see below) — audio is optional support,
+  // not a gate, so answering never depends on having listened first.
+  const canAnswer = true;
   const isPhaseA = idx < partA.length;
   const phase = isPhaseA ? "A" : "B";
   const phaseIdx = phase === "A" ? idx + 1 : idx - partA.length + 1;
@@ -228,8 +230,10 @@ export function InteractiveConversationMcqMock({
         </p>
       )}
 
-      {isPhaseA && !scenarioUnlocked ? (
+      {isPhaseA ? (
         <section className="rounded-[4px] border-4 border-black bg-white p-4">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-neutral-500">Scenario</p>
+          <p className="text-sm font-bold text-neutral-900">{scenarioText}</p>
           {(scenarioAudioUrl || generatedScenarioAudioUrl) && !scenarioAudioFailed ? (
             <audio
               ref={scenarioAudioRef}
@@ -237,20 +241,16 @@ export function InteractiveConversationMcqMock({
               src={scenarioAudioUrl || generatedScenarioAudioUrl || ""}
               preload="none"
               onError={() => setScenarioAudioFailed(true)}
-              onEnded={() => setScenarioUnlocked(true)}
             />
           ) : null}
           <button
             type="button"
             disabled={submitting || scenarioTtsLoading}
             onClick={() => void playScenarioAudio()}
-            className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+            className="mt-3 w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-2.5 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
           >
-            {scenarioTtsLoading ? "Generating scenario audio..." : "Listen to scenario first"}
+            {scenarioTtsLoading ? "Generating scenario audio..." : "🔊 Listen to scenario (optional)"}
           </button>
-          <p className="mt-2 text-xs font-bold text-neutral-600">
-            Scenario text/transcript is hidden. Complete listening first to unlock first 3 questions.
-          </p>
           {scenarioTtsError ? <p className="mt-1 text-xs font-bold text-red-700">{scenarioTtsError}</p> : null}
           {(scenarioAudioFailed || scenarioTtsError) && scenarioText && isBrowserTtsSupported() ? (
             <div className="mt-2 rounded-[4px] border-2 border-black bg-yellow-50 p-2">
@@ -268,128 +268,107 @@ export function InteractiveConversationMcqMock({
             </div>
           ) : null}
         </section>
-      ) : (
-        <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
-          <section className="rounded-[4px] border-4 border-black bg-neutral-50 p-3">
-            {audioSrc && !audioFailed ? (
-              <audio
-                ref={audioRef}
-                key={audioSrc}
-                src={audioSrc}
-                preload="none"
-                onError={() => setAudioFailed(true)}
-                onEnded={() => setHasListened(true)}
-              />
-            ) : null}
-            {!canAnswer ? (
-              <>
-                <button
-                  type="button"
-                  disabled={submitting || ttsLoading}
-                  onClick={async () => {
-                    setHasListened(false);
-                    setTtsError(null);
+      ) : null}
+      <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
+        <section className="rounded-[4px] border-4 border-black bg-neutral-50 p-3">
+          {audioSrc && !audioFailed ? (
+            <audio ref={audioRef} key={audioSrc} src={audioSrc} preload="none" onError={() => setAudioFailed(true)} />
+          ) : null}
+          <button
+            type="button"
+            disabled={submitting || ttsLoading}
+            onClick={async () => {
+              setTtsError(null);
+              try {
+                if (audioSrc) {
+                  if (!audioRef.current) return;
+                  audioRef.current.currentTime = 0;
+                  await audioRef.current.play();
+                  return;
+                }
+                setTtsLoading(true);
+                const res = await fetch("/api/speech-synthesize", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ text: current.question_en }),
+                });
+                const j = (await res.json().catch(() => ({}))) as { audioBase64?: string; mimeType?: string };
+                if (j.audioBase64 && j.mimeType) {
+                  const url = `data:${j.mimeType};base64,${j.audioBase64}`;
+                  setGeneratedAudioUrl(url);
+                  window.setTimeout(() => {
                     try {
-                      if (audioSrc) {
-                        if (!audioRef.current) return;
-                        audioRef.current.currentTime = 0;
-                        await audioRef.current.play();
-                        return;
-                      }
-                      setTtsLoading(true);
-                      const res = await fetch("/api/speech-synthesize", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ text: current.question_en }),
-                      });
-                      const j = (await res.json().catch(() => ({}))) as { audioBase64?: string; mimeType?: string };
-                      if (j.audioBase64 && j.mimeType) {
-                        const url = `data:${j.mimeType};base64,${j.audioBase64}`;
-                        setGeneratedAudioUrl(url);
-                        window.setTimeout(() => {
-                          try {
-                            if (!audioRef.current) return;
-                            audioRef.current.currentTime = 0;
-                            void audioRef.current.play();
-                          } catch {
-                            /* ignore */
-                          }
-                        }, 50);
-                        return;
-                      }
-                      setTtsError("Could not generate audio for this question.");
+                      if (!audioRef.current) return;
+                      audioRef.current.currentTime = 0;
+                      void audioRef.current.play();
                     } catch {
-                      setTtsError("Could not generate audio for this question.");
-                    } finally {
-                      setTtsLoading(false);
+                      /* ignore */
                     }
-                  }}
-                  className="w-full rounded-[4px] border-4 border-black bg-ep-blue py-3 text-sm font-black text-white shadow-[4px_4px_0_0_#000] disabled:opacity-50"
-                >
-                  {ttsLoading ? "Generating audio..." : "Play question audio"}
-                </button>
-                <p className="mt-2 text-xs font-bold text-neutral-600">Listen first, then answer.</p>
-                {ttsError ? <p className="mt-1 text-xs font-bold text-red-700">{ttsError}</p> : null}
-                {(audioFailed || ttsError) && current.question_en && isBrowserTtsSupported() ? (
-                  <div className="mt-2 rounded-[4px] border-2 border-black bg-yellow-50 p-2">
-                    <p className="mb-1 text-[11px] font-bold text-neutral-700">
-                      Hosted audio unavailable — use browser voice as backup.
-                    </p>
-                    <button
-                      type="button"
-                      disabled={submitting || browserTtsActive}
-                      onClick={playBrowserTtsForQuestion}
-                      className="rounded-[4px] border-2 border-black bg-white px-3 py-1.5 text-[11px] font-black shadow-[2px_2px_0_0_#000] disabled:opacity-50"
-                    >
-                      {browserTtsActive ? "🔊 Speaking…" : "🔊 Read question (browser voice)"}
-                    </button>
-                  </div>
-                ) : null}
-              </>
-            ) : (
-              <p className="rounded-[4px] border-4 border-black bg-emerald-50 p-3 text-xs font-black text-emerald-800">
-                Audio finished. You can answer now.
+                  }, 50);
+                  return;
+                }
+                setTtsError("Could not generate audio for this question.");
+              } catch {
+                setTtsError("Could not generate audio for this question.");
+              } finally {
+                setTtsLoading(false);
+              }
+            }}
+            className="w-full rounded-[4px] border-4 border-black bg-ep-blue py-3 text-sm font-black text-white shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+          >
+            {ttsLoading ? "Generating audio..." : "🔊 Play question audio (optional)"}
+          </button>
+          {ttsError ? <p className="mt-1 text-xs font-bold text-red-700">{ttsError}</p> : null}
+          {(audioFailed || ttsError) && current.question_en && isBrowserTtsSupported() ? (
+            <div className="mt-2 rounded-[4px] border-2 border-black bg-yellow-50 p-2">
+              <p className="mb-1 text-[11px] font-bold text-neutral-700">
+                Hosted audio unavailable — use browser voice as backup.
               </p>
-            )}
-          </section>
-
-          <section className="rounded-[4px] border-4 border-black bg-white p-4">
-            {canAnswer && isPhaseA ? (
-              <p className="rounded-[4px] border-2 border-[#004AAD] bg-[#004AAD]/5 p-3 text-sm font-bold">
-                {current.question_en}
-              </p>
-            ) : null}
-            {canAnswer && !isPhaseA ? (
-              <p className="rounded-[4px] border-2 border-[#004AAD]/30 bg-[#004AAD]/5 p-3 text-xs font-bold text-[#004AAD]">
-                Audio-only prompt loaded. Choose the best response below.
-              </p>
-            ) : null}
-            <div className="mt-3 space-y-3">
-              {(Array.isArray(current.options) ? current.options : []).map((o, optionIdx) => (
-                <button
-                  key={o}
-                  type="button"
-                  onClick={() => setPick(o)}
-                  disabled={submitting || !canAnswer}
-                  className={`w-full rounded-[6px] border-4 border-black px-4 py-3 text-left text-sm leading-relaxed shadow-[4px_4px_0_0_#000] ${
-                    pick === o ? "bg-[#FFCC00]" : "bg-white"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[4px] border-2 border-black bg-neutral-100 text-xs font-black">
-                      {String.fromCharCode(65 + optionIdx)}
-                    </span>
-                    <span className="font-semibold">{o}</span>
-                  </div>
-                </button>
-              ))}
+              <button
+                type="button"
+                disabled={submitting || browserTtsActive}
+                onClick={playBrowserTtsForQuestion}
+                className="rounded-[4px] border-2 border-black bg-white px-3 py-1.5 text-[11px] font-black shadow-[2px_2px_0_0_#000] disabled:opacity-50"
+              >
+                {browserTtsActive ? "🔊 Speaking…" : "🔊 Read question (browser voice)"}
+              </button>
             </div>
-          </section>
-        </div>
-      )}
+          ) : null}
+        </section>
+
+        <section className="rounded-[4px] border-4 border-black bg-white p-4">
+          <p
+            className={`rounded-[4px] border-2 p-3 text-sm font-bold ${
+              isPhaseA ? "border-[#004AAD] bg-[#004AAD]/5" : "border-[#004AAD]/30 bg-[#004AAD]/5 text-[#004AAD]"
+            }`}
+          >
+            {current.question_en}
+          </p>
+          <div className="mt-3 space-y-3">
+            {(Array.isArray(current.options) ? current.options : []).map((o, optionIdx) => (
+              <button
+                key={o}
+                type="button"
+                onClick={() => setPick(o)}
+                disabled={submitting}
+                className={`w-full rounded-[6px] border-4 border-black px-4 py-3 text-left text-sm leading-relaxed shadow-[4px_4px_0_0_#000] ${
+                  pick === o ? "bg-[#FFCC00]" : "bg-white"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[4px] border-2 border-black bg-neutral-100 text-xs font-black">
+                    {String.fromCharCode(65 + optionIdx)}
+                  </span>
+                  <span className="font-semibold">{o}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
       <button
         type="button"
-        disabled={submitting || (isPhaseA && !scenarioUnlocked) || !pick || !canAnswer}
+        disabled={submitting || !pick}
         onClick={submitPick}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
       >

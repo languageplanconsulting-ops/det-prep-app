@@ -13,6 +13,7 @@ import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { getRequestAuthUser } from "@/lib/supabase-request-client";
 import { getAdminAccess } from "@/lib/admin-auth";
+import { recordDataCollectionSubmission } from "@/lib/data-collection";
 
 export const maxDuration = 120;
 
@@ -154,6 +155,18 @@ export async function POST(req: Request) {
         console.error("[speaking-partner-report] weakness history update failed:", weaknessErr);
       }
     }
+
+    await recordDataCollectionSubmission({
+      userId,
+      examType: "speaking_partner",
+      attemptId,
+      promptTitle: topicSeedEn,
+      promptText: report.questionPromptEn ?? null,
+      submittedText: turns.map((t) => t.transcript.trim()).filter(Boolean).join("\n\n"),
+      wordCount,
+      score160: report.score160,
+      report,
+    });
 
     return NextResponse.json(report);
   } catch (e) {

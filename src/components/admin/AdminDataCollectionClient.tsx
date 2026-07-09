@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AdminReportPreview } from "@/components/admin/AdminReportPreview";
 
 type SubmissionRow = {
   id: string;
@@ -28,7 +29,7 @@ type Snapshot = {
 type ViewMode = "full" | "text" | "export";
 
 const VIEWS: Array<{ key: ViewMode; label: string }> = [
-  { key: "full", label: "รายงานเต็ม" },
+  { key: "full", label: "รายงานจริง (เหมือนที่ลูกค้าเห็น)" },
   { key: "text", label: "ข้อความ + คะแนน" },
   { key: "export", label: "Export (ดิบ)" },
 ];
@@ -43,56 +44,10 @@ function fmtDate(iso: string): string {
   });
 }
 
-/** Pull readable text out of the varied report shapes (bilingual {en,th} safe). */
-function loc(v: unknown): string {
-  if (v == null) return "";
-  if (typeof v === "string") return v;
-  if (typeof v === "number" || typeof v === "boolean") return String(v);
-  if (typeof v === "object") {
-    const o = v as Record<string, unknown>;
-    if (typeof o.th === "string") return o.th;
-    if (typeof o.en === "string") return o.en;
-  }
-  return "";
-}
-
 function ScorePill({ score }: { score: number | null }) {
   if (score == null) return <span className="text-slate-400">—</span>;
   const tone = score >= 120 ? "bg-emerald-100 text-emerald-700" : score >= 90 ? "bg-amber-100 text-amber-700" : "bg-rose-100 text-rose-700";
   return <span className={`rounded-md px-2 py-0.5 font-mono text-sm font-bold ${tone}`}>{score}/160</span>;
-}
-
-function FullReport({ report }: { report: Record<string, unknown> }) {
-  const breakdown = Array.isArray(report.breakdown) ? (report.breakdown as Record<string, unknown>[]) : [];
-  const overall = loc(report.overallFeedback) || loc(report.summary) || loc(report.feedback);
-  return (
-    <div className="mt-3 space-y-3 text-sm">
-      {overall ? (
-        <div className="rounded-lg bg-slate-50 p-3 text-slate-700">{overall}</div>
-      ) : null}
-      {breakdown.length ? (
-        <div className="space-y-2">
-          {breakdown.map((b, i) => (
-            <div key={i} className="rounded-lg border border-slate-200 p-3">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-800">{loc(b.criterion) || loc(b.name) || `เกณฑ์ ${i + 1}`}</span>
-                {b.score != null ? <span className="font-mono text-xs text-[#004AAD]">{loc(b.score)}</span> : null}
-              </div>
-              {loc(b.summary) || loc(b.comment) ? (
-                <p className="mt-1 text-slate-600">{loc(b.summary) || loc(b.comment)}</p>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      ) : null}
-      <details className="rounded-lg border border-slate-200">
-        <summary className="cursor-pointer px-3 py-2 text-xs font-semibold text-slate-500">JSON ดิบทั้งหมด</summary>
-        <pre className="overflow-x-auto px-3 pb-3 text-[11px] leading-relaxed text-slate-600">
-          {JSON.stringify(report, null, 2)}
-        </pre>
-      </details>
-    </div>
-  );
 }
 
 export function AdminDataCollectionClient() {
@@ -247,7 +202,11 @@ export function AdminDataCollectionClient() {
                   <div className="mt-3 border-t border-slate-100 pt-3">
                     <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">ข้อความที่ส่ง</p>
                     <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{r.submittedText}</p>
-                    {view === "full" ? <FullReport report={r.report} /> : null}
+                    {view === "full" ? (
+                      <div className="mt-3 -mx-4 overflow-hidden rounded-lg border border-slate-200">
+                        <AdminReportPreview examType={r.examType} report={r.report} />
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>

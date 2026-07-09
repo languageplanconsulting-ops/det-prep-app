@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
+import { AdminReportPreview } from "@/components/admin/AdminReportPreview";
 import { useAdminToast } from "@/components/admin/AdminToast";
 import {
   extractReportCard,
@@ -98,6 +99,15 @@ function notebookPayloadLine(payload: unknown): {
   const preview = [bodyEn, bodyTh].join("\n").trim().slice(0, 500);
   return { source, title, preview };
 }
+
+/** exercise_type values whose report_payload can be rendered with a real report component. */
+const REPORT_PREVIEW_EXAM_TYPES = new Set([
+  "read_then_write",
+  "read_then_speak",
+  "write_about_photo",
+  "speak_about_photo",
+  "interactive_speaking",
+]);
 
 export function SubscriptionDetailClient() {
   const params = useParams();
@@ -1591,42 +1601,58 @@ export function SubscriptionDetailClient() {
                           {isOpen ? (
                             <tr>
                               <td colSpan={8} className="border-b border-neutral-200 bg-neutral-50 p-3">
-                                <div className="grid gap-3 lg:grid-cols-2">
+                                {REPORT_PREVIEW_EXAM_TYPES.has(String(row.exercise_type)) &&
+                                row.report_payload &&
+                                typeof row.report_payload === "object" ? (
                                   <div className="rounded-sm border-2 border-black bg-white p-3">
                                     <p className="text-[11px] font-black uppercase tracking-wide text-[#004AAD]">
-                                      {submissionCard?.title ?? "Learner submission"}
+                                      Full report — exactly what the client sees
                                     </p>
-                                    {submissionCard?.meta?.length ? (
-                                      <p className="mt-1 text-[10px] font-bold text-neutral-500">
-                                        {submissionCard.meta.filter(Boolean).join(" · ")}
+                                    <div className="mt-2 overflow-hidden rounded-sm border border-neutral-200">
+                                      <AdminReportPreview
+                                        examType={String(row.exercise_type)}
+                                        report={row.report_payload as Record<string, unknown>}
+                                      />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="grid gap-3 lg:grid-cols-2">
+                                    <div className="rounded-sm border-2 border-black bg-white p-3">
+                                      <p className="text-[11px] font-black uppercase tracking-wide text-[#004AAD]">
+                                        {submissionCard?.title ?? "Learner submission"}
                                       </p>
-                                    ) : null}
-                                    <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-neutral-800">
-                                      {submissionCard?.body ?? "No saved submission snapshot for this session."}
-                                    </p>
+                                      {submissionCard?.meta?.length ? (
+                                        <p className="mt-1 text-[10px] font-bold text-neutral-500">
+                                          {submissionCard.meta.filter(Boolean).join(" · ")}
+                                        </p>
+                                      ) : null}
+                                      <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-neutral-800">
+                                        {submissionCard?.body ?? "No saved submission snapshot for this session."}
+                                      </p>
+                                    </div>
+                                    <div className="rounded-sm border-2 border-black bg-white p-3">
+                                      <p className="text-[11px] font-black uppercase tracking-wide text-[#004AAD]">
+                                        Saved report snapshot
+                                      </p>
+                                      <p className="mt-2 text-sm font-black text-neutral-900">
+                                        Score: <span className="text-[#004AAD]">{reportCard?.score ?? "—"}</span>
+                                      </p>
+                                      <p className="mt-2 text-xs leading-relaxed text-neutral-800">
+                                        {reportCard?.summary || "No compact report summary was saved for this session."}
+                                      </p>
+                                      {reportCard?.bullets?.length ? (
+                                        <ul className="mt-3 space-y-1 text-xs text-neutral-800">
+                                          {reportCard.bullets.map((bullet, index) => (
+                                            <li key={`${sessionId}-bullet-${index}`} className="flex gap-2">
+                                              <span className="font-black text-[#004AAD]">{index + 1}.</span>
+                                              <span>{bullet}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      ) : null}
+                                    </div>
                                   </div>
-                                  <div className="rounded-sm border-2 border-black bg-white p-3">
-                                    <p className="text-[11px] font-black uppercase tracking-wide text-[#004AAD]">
-                                      Saved report snapshot
-                                    </p>
-                                    <p className="mt-2 text-sm font-black text-neutral-900">
-                                      Score: <span className="text-[#004AAD]">{reportCard?.score ?? "—"}</span>
-                                    </p>
-                                    <p className="mt-2 text-xs leading-relaxed text-neutral-800">
-                                      {reportCard?.summary || "No compact report summary was saved for this session."}
-                                    </p>
-                                    {reportCard?.bullets?.length ? (
-                                      <ul className="mt-3 space-y-1 text-xs text-neutral-800">
-                                        {reportCard.bullets.map((bullet, index) => (
-                                          <li key={`${sessionId}-bullet-${index}`} className="flex gap-2">
-                                            <span className="font-black text-[#004AAD]">{index + 1}.</span>
-                                            <span>{bullet}</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    ) : null}
-                                  </div>
-                                </div>
+                                )}
                               </td>
                             </tr>
                           ) : null}
