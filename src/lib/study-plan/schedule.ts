@@ -37,6 +37,13 @@ export type CalendarDay = {
 const FINAL_STRETCH_DAYS = 14;
 /** How many mock-test days to place per 7-day window once in the final stretch. */
 const MOCK_TESTS_PER_WEEK = 2;
+/**
+ * Days SINCE startDate at which we place a one-off "check-in" mock test.
+ * NOT the same concept as FINAL_STRETCH_DAYS even though the number is the
+ * same 14 — FINAL_STRETCH_DAYS counts backward from the exam date, this
+ * counts forward from the start date. Don't conflate the two.
+ */
+const CHECK_IN_DAY_OFFSET = 14;
 
 function toUtcDay(iso: string): number {
   return Math.floor(Date.parse(`${iso}T00:00:00Z`) / 86_400_000);
@@ -58,6 +65,7 @@ export function generateCalendar(input: ScheduleInput): CalendarDay[] {
 
   const days: CalendarDay[] = [];
   let stretchStudyDayIndex = 0;
+  let checkInDayPlaced = false;
 
   for (let d = startDay; d <= examDay; d++) {
     const offset = d - startDay;
@@ -71,9 +79,28 @@ export function generateCalendar(input: ScheduleInput): CalendarDay[] {
       stretchStudyDayIndex++;
     }
 
+    // Additive "check-in" mock test: the study day closest to (but not
+    // before) CHECK_IN_DAY_OFFSET days since startDate. Never fires inside
+    // the final-stretch window (that already gets 2 mocks/week) or for
+    // freeform plans (no exam-date escalation at all).
+    let isCheckInDay = false;
+    if (
+      !input.isFreeform &&
+      !checkInDayPlaced &&
+      isStudyDay &&
+      !inFinalStretch &&
+      offset >= CHECK_IN_DAY_OFFSET
+    ) {
+      isCheckInDay = true;
+      checkInDayPlaced = true;
+      isMockTestDay = true;
+    }
+
     let reason: string | null = null;
     if (input.isFreeform) {
       reason = isStudyDay ? "วันฝึกตามความถี่ที่ตั้งไว้ — ไม่ผูกกับวันสอบ ฝึกเมื่อไหร่ก็นับ" : null;
+    } else if (isCheckInDay) {
+      reason = "เช็คจุดยืนหลังฝึกมา 2 สัปดาห์ — ลองทำข้อสอบจำลองดูว่าตอนนี้อยู่ระดับไหน";
     } else if (isMockTestDay) {
       reason = `เหลือ ${daysUntilExam} วันก่อนสอบ — ช่วงนี้ควรฝึกทำข้อสอบจำลองให้ชินกับรูปแบบจริง`;
     } else if (isStudyDay) {

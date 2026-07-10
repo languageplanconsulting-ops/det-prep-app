@@ -200,6 +200,21 @@ export function getSetLimit(tier: Tier, skill: ContentSkill): number {
 }
 
 /**
+ * Maps a practice-content skill id (PracticeSkillId in lib/practice-content/types) to the
+ * ContentSkill category SET_LIMITS/canAccessSkill understand. Kept here (not in
+ * practice-content) so this stays a pure, dependency-free source of truth. `dialogue_summary`
+ * has no entry — it's AI-credit-gated (see chargeAiCreditForUser), not set-limited.
+ */
+export const CONTENT_SKILL_FOR_PRACTICE_SKILL: Record<string, ContentSkill> = {
+  dictation: "literacy",
+  fitb: "literacy",
+  realword: "literacy",
+  reading: "comprehension",
+  vocab: "vocabulary",
+  conversation: "conversation",
+};
+
+/**
  * @param currentUsage — total AI calls used in the current month (all 5 types combined), except free tier should pass 0 or unused.
  * @param lifetimeUsed — for free tier only: true after the single lifetime credit is consumed.
  */

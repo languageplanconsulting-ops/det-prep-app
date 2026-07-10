@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import type { Tier } from "@/lib/access-control";
+import { setActiveDailyQueue } from "@/lib/daily-queue-session";
+import { buildRandomQueue, defaultDifficultyFor } from "@/lib/practice-queue-builder";
 import {
   bumpTierForCatchUp, computeMissedRecent, computeStreak, generateCalendar,
   type CalendarDay,
 } from "@/lib/study-plan/schedule";
 import { EXAM_DATE_CHANGE_EVENT } from "@/hooks/usePracticeHeroStats";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 
 type ScheduleRow = {
   exam_date: string;
@@ -24,6 +29,19 @@ type WeaknessReport = {
 };
 
 type DayActivity = { date: string; attempts: number; avgScorePct: number; vocabSaved: number };
+
+type ImprovementCohort = {
+  taskType: string;
+  taskLabel: string;
+  difficulty: string;
+  difficultyLabel: string;
+  attempts: number;
+  beforeAvgScorePct: number;
+  afterAvgScorePct: number;
+  deltaPoints: number;
+  message: string;
+};
+type ImprovementReport = { cohorts: ImprovementCohort[] };
 
 const EXAM_PRESETS = [
   { label: "1 เดือน", days: 30 },
@@ -92,12 +110,14 @@ function CardShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function StudyPlanCalendarCard() {
+export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [schedule, setSchedule] = useState<ScheduleRow | null>(null);
   const [completions, setCompletions] = useState<{ completion_date: string }[]>([]);
   const [activity, setActivity] = useState<DayActivity[]>([]);
   const [weakness, setWeakness] = useState<WeaknessReport | null>(null);
+  const [improvement, setImprovement] = useState<ImprovementReport | null>(null);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
@@ -107,6 +127,10 @@ export function StudyPlanCalendarCard() {
   const [duration, setDuration] = useState<5 | 10 | 20 | 30>(10);
   const [isFreeformDraft, setIsFreeformDraft] = useState(false);
 
+  const [pickingStart, setPickingStart] = useState(false);
+  const [startDuration, setStartDuration] = useState<5 | 10 | 20 | 30>(10);
+  const [starting, setStarting] = useState(false);
+
   const load = useCallback(async () => {
     const res = await fetch("/api/study-plan/schedule", { credentials: "same-origin", cache: "no-store" });
     if (!res.ok) { setLoading(false); return; }
@@ -114,9 +138,10 @@ export function StudyPlanCalendarCard() {
     setSchedule(json.schedule);
     if (json.schedule) {
       const since = addDaysIso(todayIso(), -14);
-      const [compRes, weakRes] = await Promise.all([
+      const [compRes, weakRes, improvementRes] = await Promise.all([
         fetch(`/api/study-plan/completions?since=${since}`, { credentials: "same-origin", cache: "no-store" }),
         fetch("/api/study-plan/weakness", { credentials: "same-origin", cache: "no-store" }),
+        fetch("/api/study-plan/improvement", { credentials: "same-origin", cache: "no-store" }),
       ]);
       if (compRes.ok) {
         const compJson = (await compRes.json()) as { completions: { completion_date: string }[]; activity: DayActivity[] };
@@ -124,12 +149,19 @@ export function StudyPlanCalendarCard() {
         setActivity(compJson.activity ?? []);
       }
       if (weakRes.ok) setWeakness((await weakRes.json()) as WeaknessReport);
+      if (improvementRes.ok) setImprovement((await improvementRes.json()) as ImprovementReport);
     }
     setLoading(false);
   }, []);
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  useEffect(() => {
+    const onExamDateChange = () => void load();
+    window.addEventListener(EXAM_DATE_CHANGE_EVENT, onExamDateChange);
+    return () => window.removeEventListener(EXAM_DATE_CHANGE_EVENT, onExamDateChange);
   }, [load]);
 
   async function submitPlan() {
@@ -183,11 +215,49 @@ export function StudyPlanCalendarCard() {
   const todayEntry = days.find((d) => d.date === today) ?? null;
   const todaysActivity = activityByDate.get(today) ?? null;
   const weakSkills = (weakness?.autoGraded ?? []).filter((s) => s.isWeak && s.attempts >= 3);
+  const topImprovement = improvement?.cohorts?.[0] ?? null;
   const streak = computeStreak(activityDates, today);
   const missedRecent = computeMissedRecent(days, activityDates, today);
   const isCatchUp = missedRecent >= 2 && !!todayEntry?.isStudyDay && !todayEntry.isMockTestDay;
   const catchUpTier = isCatchUp && todayEntry?.recommendedTier && todayEntry.recommendedTier !== 60
     ? bumpTierForCatchUp(todayEntry.recommendedTier) : null;
+  const catchUpWeakSpot = weakSkills[0] ?? null;
+  const catchUpWeakLabel = catchUpWeakSpot
+    ? `${catchUpWeakSpot.taskType} ระดับ${catchUpWeakSpot.difficulty} (${catchUpWeakSpot.avgScorePct}%)`
+    : weakness?.weakestDimension
+      ? `${weakness.weakestDimension.dimension} (${weakness.weakestDimension.avgScorePercent}%)`
+      : null;
+  const suggestedDuration: 5 | 10 | 20 | 30 =
+    catchUpTier ??
+    (todayEntry?.recommendedTier && todayEntry.recommendedTier !== 60 ? todayEntry.recommendedTier : null) ??
+    schedule?.default_duration_minutes ??
+    10;
+
+  function openStartPicker() {
+    setStartDuration(suggestedDuration);
+    setPickingStart(true);
+  }
+
+  async function startTodaySession() {
+    setStarting(true);
+    try {
+      const queue = await buildRandomQueue(defaultDifficultyFor(effectiveTier), startDuration);
+      if (queue.length === 0) {
+        router.push("/practice");
+        return;
+      }
+      setActiveDailyQueue({
+        hrefs: queue.map((q) => q.href),
+        index: 0,
+        tierMinutes: startDuration,
+        dateIso: today,
+      });
+      router.push(queue[0].href);
+    } finally {
+      setStarting(false);
+      setPickingStart(false);
+    }
+  }
 
   const weekDates = Array.from({ length: 7 }, (_, i) => addDaysIso(today, -i));
   const weekActs = weekDates.map((d) => activityByDate.get(d)).filter((a): a is DayActivity => !!a);
@@ -328,9 +398,22 @@ export function StudyPlanCalendarCard() {
       {!schedule.is_freeform && !weakness?.latestPrediction && (
         <p className="mb-3 text-sm text-slate-400">ยังไม่เคยวัดระดับ — ลองทำ Mini Diagnosis เพื่อดูคะแนนที่คาดการณ์</p>
       )}
+
+      {topImprovement && (
+        <div className="mb-3 rounded-xl bg-emerald-50 p-3 ring-1 ring-emerald-200">
+          <CelebrateMascot
+            title={`${topImprovement.taskLabel} (ระดับ${topImprovement.difficultyLabel}) ดีขึ้น +${topImprovement.deltaPoints} แต้ม!`}
+            subtitle={`${topImprovement.beforeAvgScorePct}% → ${topImprovement.afterAvgScorePct}% · ${topImprovement.message}`}
+          />
+        </div>
+      )}
+
       {isCatchUp && (
         <div className="mb-3 rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-900 ring-1 ring-amber-200">
-          💪 พลาดไป {missedRecent} วันในสัปดาห์นี้ — ไม่เป็นไร วันนี้แนะนำเพิ่มเป็น {catchUpTier ?? schedule.default_duration_minutes} นาทีเพื่อตามให้ทัน
+          💪 พลาดไป {missedRecent} วันในสัปดาห์นี้ — ไม่เป็นไร วันนี้แนะนำเพิ่มเป็น {catchUpTier ?? schedule.default_duration_minutes} นาที
+          {catchUpWeakLabel
+            ? ` และจุดที่ยังอ่อนคือ ${catchUpWeakLabel} — วันนี้แนะนำโฟกัสตรงนี้เพิ่มเติมเพื่อตามให้ทัน`
+            : " เพื่อตามให้ทัน"}
         </div>
       )}
 
@@ -385,20 +468,68 @@ export function StudyPlanCalendarCard() {
 
       {todayEntry?.reason && !selectedEntry && <p className="mb-3 text-xs text-slate-400">{todayEntry.reason}</p>}
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Link
-          href={todayEntry?.isMockTestDay ? "/mock-test" : "/practice"}
-          className="inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-xs font-bold text-[#FFCC00] shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98]"
-        >
-          {todayEntry?.isMockTestDay ? "ลองข้อสอบจำลองวันนี้ →" : todayEntry?.isStudyDay ? "เริ่มฝึกวันนี้ →" : "ไปหน้าฝึกซ้อม →"}
-        </Link>
-        <Link
-          href="/practice"
-          className="text-xs font-bold text-slate-400 transition-colors duration-150 hover:text-[#004AAD]"
-        >
-          เลือกฝึกเอง ไม่ต้องพึ่งแผน →
-        </Link>
-      </div>
+      {todayEntry?.isMockTestDay ? (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Link
+            href="/mock-test"
+            className="inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-xs font-bold text-[#FFCC00] shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98]"
+          >
+            ลองข้อสอบจำลองวันนี้ →
+          </Link>
+          <Link
+            href="/practice"
+            className="text-xs font-bold text-slate-400 transition-colors duration-150 hover:text-[#004AAD]"
+          >
+            เลือกฝึกเอง ไม่ต้องพึ่งแผน →
+          </Link>
+        </div>
+      ) : pickingStart ? (
+        <div className="mb-4">
+          <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            มีเวลากี่นาที
+          </p>
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {DURATION_OPTIONS.map((m) => (
+              <PillOption key={m} active={startDuration === m} onClick={() => setStartDuration(m)}>
+                {m} นาที
+              </PillOption>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={starting}
+              onClick={() => void startTodaySession()}
+              className="rounded-xl bg-[#004AAD] px-5 py-2.5 text-xs font-bold text-[#FFCC00] shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] disabled:opacity-40"
+            >
+              {starting ? "กำลังเตรียมชุดฝึก…" : "เริ่มเลย →"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setPickingStart(false)}
+              className="rounded-xl bg-slate-50 px-5 py-2.5 text-xs font-bold text-slate-600 transition-colors duration-200 hover:bg-slate-100"
+            >
+              ยกเลิก
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={openStartPicker}
+            className="inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-xs font-bold text-[#FFCC00] shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98]"
+          >
+            {todayEntry?.isStudyDay ? "เริ่มฝึกวันนี้ →" : "ไปหน้าฝึกซ้อม →"}
+          </button>
+          <Link
+            href="/practice"
+            className="text-xs font-bold text-slate-400 transition-colors duration-150 hover:text-[#004AAD]"
+          >
+            เลือกฝึกเอง ไม่ต้องพึ่งแผน →
+          </Link>
+        </div>
+      )}
 
       <div className="mb-4 rounded-xl bg-slate-50 p-3">
         <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">วันนี้ทำอะไรไปบ้าง</p>

@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
 
+import { getAdminAccess } from "@/lib/admin-auth";
+import {
+  canAccessDifficulty,
+  canAccessFeature,
+  getUpgradeMessage,
+  type Difficulty,
+} from "@/lib/access-control";
+import { readAuthoritativeProfile } from "@/lib/authoritative-profile";
+import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import {
   listLaneSetNumbers,
   resolvePracticeSet,
@@ -13,6 +22,11 @@ import type { ReadingDifficulty, ReadingRoundNum } from "@/types/reading";
 import type { VocabRoundNum } from "@/types/vocab";
 import { getSiteUrl } from "@/lib/site-metadata";
 import { getRequestAuthUser } from "@/lib/supabase-request-client";
+
+const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
+function parseDifficulty(raw: string | undefined): Difficulty | null {
+  return raw && (DIFFICULTIES as string[]).includes(raw) ? (raw as Difficulty) : null;
+}
 
 const SKILLS: PracticeSkillId[] = [
   "dictation",
@@ -68,6 +82,38 @@ export async function GET(request: Request) {
 
   if (metaOnly && (!Number.isInteger(set) || set < 1)) {
     return NextResponse.json({ error: "Query set is required for meta" }, { status: 400 });
+  }
+
+  const adminAccess = await getAdminAccess();
+  const profile = adminAccess.ok
+    ? null
+    : await readAuthoritativeProfile(user.id, supabase, "tier, tier_expires_at, vip_granted_by_course");
+  const tier = adminAccess.ok
+    ? "vip"
+    : resolveEffectiveTierFromProfile({
+        tier: profile?.tier,
+        tier_expires_at: (profile?.tier_expires_at as string | null | undefined) ?? null,
+        vip_granted_by_course: profile?.vip_granted_by_course === true,
+      });
+
+  const parsedDifficulty = parseDifficulty(difficulty);
+  if (parsedDifficulty) {
+    const difficultyAccess = canAccessDifficulty(tier, parsedDifficulty);
+    if (!difficultyAccess.allowed) {
+      return NextResponse.json(
+        {
+          error: `ระดับความยาก "${parsedDifficulty}" เปิดใช้ตั้งแต่แพ็กเกจ ${difficultyAccess.upgradeRequired} ขึ้นไป — อัปเกรดเพื่อฝึกระดับนี้`,
+          upgradeRequired: difficultyAccess.upgradeRequired,
+        },
+        { status: 403 },
+      );
+    }
+  }
+  if (skill === "conversation" && !canAccessFeature(tier, "conversation")) {
+    return NextResponse.json(
+      { error: getUpgradeMessage(tier, "conversation") },
+      { status: 403 },
+    );
   }
 
   try {

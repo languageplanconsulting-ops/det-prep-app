@@ -2,16 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  buildPracticeHref,
-  DURATION_TO_COUNT,
-  RANDOM_SKILLS,
-  randomRound,
-  pickOne,
-  type RandomDifficulty,
-} from "@/lib/practice-random";
-
-type QueueItem = { key: string; emoji: string; label: string; href: string };
+import { canAccessDifficulty, type Tier } from "@/lib/access-control";
+import { buildRandomQueue, defaultDifficultyFor, type QueueItem } from "@/lib/practice-queue-builder";
+import { type RandomDifficulty } from "@/lib/practice-random";
 
 const DIFFICULTIES: { id: RandomDifficulty; th: string }[] = [
   { id: "easy", th: "ง่าย" },
@@ -21,41 +14,10 @@ const DIFFICULTIES: { id: RandomDifficulty; th: string }[] = [
 
 const DURATIONS: (5 | 10 | 20 | 30)[] = [5, 10, 20, 30];
 
-async function fetchSetNumbers(
-  skillId: string,
-  round: number,
-  difficulty: RandomDifficulty,
-): Promise<number[]> {
-  const res = await fetch(
-    `/api/practice/content/set?skill=${skillId}&round=${round}&difficulty=${difficulty}&list=1`,
-    { credentials: "same-origin" },
-  );
-  if (!res.ok) return [];
-  const json = (await res.json()) as { setNumbers?: number[] };
-  return json.setNumbers ?? [];
-}
-
-async function pickOneSession(
-  difficulty: RandomDifficulty,
-  usedHrefs: Set<string>,
-): Promise<QueueItem | null> {
-  for (let attempt = 0; attempt < 6; attempt++) {
-    const skill = pickOne(RANDOM_SKILLS);
-    const round = randomRound();
-    const setNumbers = await fetchSetNumbers(skill.id, round, difficulty);
-    if (setNumbers.length === 0) continue;
-    const setNumber = pickOne(setNumbers);
-    const href = buildPracticeHref(skill.id, round, difficulty, setNumber);
-    if (usedHrefs.has(href)) continue;
-    return { key: href, emoji: skill.emoji, label: skill.label, href };
-  }
-  return null;
-}
-
-export function RandomPracticePicker() {
+export function RandomPracticePicker({ effectiveTier }: { effectiveTier: Tier }) {
   const [mounted, setMounted] = useState(false);
   const [mode, setMode] = useState<"exam" | "lesson">("exam");
-  const [difficulty, setDifficulty] = useState<RandomDifficulty>("medium");
+  const [difficulty, setDifficulty] = useState<RandomDifficulty>(() => defaultDifficultyFor(effectiveTier));
   const [duration, setDuration] = useState<5 | 10 | 20 | 30>(10);
   const [loading, setLoading] = useState(false);
   const [queue, setQueue] = useState<QueueItem[]>([]);
@@ -69,16 +31,7 @@ export function RandomPracticePicker() {
     setLoading(true);
     setQueue([]);
     try {
-      const count = DURATION_TO_COUNT[duration];
-      const used = new Set<string>();
-      const picked: QueueItem[] = [];
-      for (let i = 0; i < count; i++) {
-        const item = await pickOneSession(difficulty, used);
-        if (!item) continue;
-        used.add(item.href);
-        picked.push(item);
-      }
-      setQueue(picked);
+      setQueue(await buildRandomQueue(difficulty, duration));
     } finally {
       setLoading(false);
     }
@@ -129,20 +82,34 @@ export function RandomPracticePicker() {
             ระดับความยาก
           </p>
           <div className="mb-3 flex flex-wrap gap-1.5">
-            {DIFFICULTIES.map((d) => (
-              <button
-                key={d.id}
-                type="button"
-                onClick={() => setDifficulty(d.id)}
-                className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
-                  difficulty === d.id
-                    ? "bg-[#004AAD] text-white"
-                    : "bg-white/70 text-indigo-700 hover:bg-white"
-                }`}
-              >
-                {d.th}
-              </button>
-            ))}
+            {DIFFICULTIES.map((d) => {
+              const unlocked = canAccessDifficulty(effectiveTier, d.id).allowed;
+              if (!unlocked) {
+                return (
+                  <span
+                    key={d.id}
+                    className="cursor-not-allowed rounded-full bg-white/40 px-3 py-1.5 text-xs font-bold text-indigo-300"
+                    title="อัปเกรดแพ็กเกจเพื่อปลดล็อกระดับนี้"
+                  >
+                    {d.th} 🔒
+                  </span>
+                );
+              }
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setDifficulty(d.id)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
+                    difficulty === d.id
+                      ? "bg-[#004AAD] text-white"
+                      : "bg-white/70 text-indigo-700 hover:bg-white"
+                  }`}
+                >
+                  {d.th}
+                </button>
+              );
+            })}
           </div>
 
           <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-indigo-500">

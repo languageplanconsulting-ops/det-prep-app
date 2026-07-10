@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
+import type { Tier } from "@/lib/access-control";
 import { StudyPlanCalendarCard } from "@/components/dashboard/StudyPlanCalendarCard";
 import { RandomPracticePicker } from "@/components/practice/RandomPracticePicker";
 import { XpTierBadge } from "@/components/ui/XpTierBadge";
 import { daysUntil, setExamDate, usePracticeHeroStats } from "@/hooks/usePracticeHeroStats";
+import { usePracticeTimeWidget, type TimeWindow } from "@/hooks/usePracticeTimeWidget";
 
 /**
  * PracticeHubV2 — soft-modern redesign of the practice hub (Cagan + Krug).
@@ -23,11 +25,8 @@ import { daysUntil, setExamDate, usePracticeHeroStats } from "@/hooks/usePractic
 type SkillGate = { allowed: boolean } | null;
 
 export type PracticeHubV2Props = {
-  effectiveTier: string;
+  effectiveTier: Tier;
   isVip: boolean;
-  isAdmin: boolean;
-  /** DB admin OR a code-only admin login — see useEffectiveTier. */
-  previewEligible: boolean;
   showMiniStudy: boolean;
   /** mirror of canAccessSkill(effectiveTier, "conversation") from the page */
   conversationGate: SkillGate;
@@ -141,8 +140,7 @@ function CoachTip({ children }: { children: ReactNode }) {
 /* ── main component ──────────────────────────────────────────────────── */
 
 export function PracticeHubV2({
-  isAdmin,
-  previewEligible,
+  effectiveTier,
   showMiniStudy,
   conversationGate,
   onReadingIntro,
@@ -154,6 +152,8 @@ export function PracticeHubV2({
   const conversationLocked = !!conversationGate && !conversationGate.allowed;
   const stats = usePracticeHeroStats();
   const [editingExamDate, setEditingExamDate] = useState(false);
+  const [timeWindow, setTimeWindow] = useState<TimeWindow>("week");
+  const timeStats = usePracticeTimeWidget(timeWindow);
   const examDays = daysUntil(stats.examDate);
   const gapToTarget =
     stats.lastScore != null && stats.targetScore != null
@@ -541,14 +541,10 @@ export function PracticeHubV2({
 
         {/* ═══════════ RIGHT SIDEBAR ═══════════ */}
         <aside className="order-1 space-y-4 lg:order-2">
-          {isAdmin || previewEligible ? (
-            <div className="space-y-3 rounded-2xl bg-[#FFCC00]/15 p-3 ring-2 ring-[#FFCC00]">
-              <p className="px-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-700">
-                Admin preview · not visible to users yet
-              </p>
+          <div className="space-y-3">
               <XpTierBadge />
-              <RandomPracticePicker />
-              <StudyPlanCalendarCard />
+              <RandomPracticePicker effectiveTier={effectiveTier} />
+              <StudyPlanCalendarCard effectiveTier={effectiveTier} />
               <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
                 <p className="text-sm font-bold text-slate-900">📘 บทเรียน (ported from mobile)</p>
                 <p className="mt-1 text-xs text-slate-500">เนื้อหา + ความคืบหน้าซิงก์กับแอปมือถือ</p>
@@ -591,8 +587,7 @@ export function PracticeHubV2({
                   </Link>
                 </div>
               </div>
-            </div>
-          ) : null}
+          </div>
 
           {/* compact persistent status (real) */}
           <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
@@ -640,44 +635,131 @@ export function PracticeHubV2({
             </div>
           </div>
 
-          {/* time graph (demo) */}
+          {/* time graph (real) */}
           <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-semibold text-slate-500">⏱ เวลาฝึก</p>
               <div className="flex gap-1 text-[10px]">
-                <span className="rounded bg-slate-100 px-1.5 py-0.5">วัน</span>
-                <span className="rounded bg-[#004AAD] px-1.5 py-0.5 text-white">
-                  สัปดาห์
-                </span>
-                <span className="rounded bg-slate-100 px-1.5 py-0.5">เดือน</span>
-                <span className="rounded bg-slate-100 px-1.5 py-0.5">ปี</span>
+                {(
+                  [
+                    ["day", "วัน"],
+                    ["week", "สัปดาห์"],
+                    ["month", "เดือน"],
+                    ["year", "ปี"],
+                  ] as [TimeWindow, string][]
+                ).map(([w, label]) => (
+                  <button
+                    key={w}
+                    type="button"
+                    onClick={() => setTimeWindow(w)}
+                    className={`rounded px-1.5 py-0.5 font-semibold transition ${
+                      timeWindow === w
+                        ? "bg-[#004AAD] text-white"
+                        : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
             <p className="text-xl font-bold text-[#004AAD]">
-              {stats.weeklyMinutes == null
-                ? "—"
-                : stats.weeklyMinutes >= 60
-                  ? `${Math.floor(stats.weeklyMinutes / 60)} ชม ${stats.weeklyMinutes % 60} น`
-                  : `${stats.weeklyMinutes} น`}
+              {timeStats.loading
+                ? "…"
+                : timeStats.totalMinutes == null
+                  ? "—"
+                  : timeStats.totalMinutes >= 60
+                    ? `${Math.floor(timeStats.totalMinutes / 60)} ชม ${timeStats.totalMinutes % 60} น`
+                    : `${timeStats.totalMinutes} น`}
             </p>
             <p className="mb-2 text-[10px] text-slate-500">
-              เฉลี่ย {Math.round((stats.weeklyMinutes ?? 0) / 7)} น/วัน
+              {timeWindow === "day"
+                ? "วันนี้"
+                : `เฉลี่ย ${
+                    timeStats.minutesByDay.length > 0
+                      ? Math.round(
+                          timeStats.minutesByDay.reduce((a, b) => a + b, 0) /
+                            timeStats.minutesByDay.length,
+                        )
+                      : 0
+                  } น/วัน`}
             </p>
-            <svg viewBox="0 0 280 80" className="h-auto w-full">
-              <path
-                d="M 15 60 L 55 30 L 95 50 L 135 20 L 175 40 L 215 15 L 255 25 L 255 75 L 15 75 Z"
-                fill="#004AAD"
-                fillOpacity="0.10"
-              />
-              <path
-                d="M 15 60 L 55 30 L 95 50 L 135 20 L 175 40 L 215 15 L 255 25"
-                fill="none"
-                stroke="#004AAD"
-                strokeWidth="2.5"
-                strokeLinejoin="round"
-              />
-              <circle cx="255" cy="25" r="4" fill="#FFCC00" stroke="#004AAD" strokeWidth="2" />
-            </svg>
+            {(() => {
+              const data = timeStats.minutesByDay;
+              const w = 280;
+              const h = 80;
+              const padX = 15;
+              const baseY = 60;
+              const maxVal = Math.max(1, ...data);
+              const points =
+                data.length > 1
+                  ? data.map((v, i) => {
+                      const x = padX + (i * (w - 2 * padX)) / (data.length - 1);
+                      const y = baseY - (v / maxVal) * (baseY - 15);
+                      return [x, y] as [number, number];
+                    })
+                  : [[padX, baseY] as [number, number]];
+              const linePath = points
+                .map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`)
+                .join(" ");
+              const lastPt = points[points.length - 1];
+              const areaPath =
+                points.length > 1
+                  ? `${linePath} L ${lastPt[0].toFixed(1)} 75 L ${points[0][0].toFixed(1)} 75 Z`
+                  : "";
+              return (
+                <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full">
+                  {areaPath ? <path d={areaPath} fill="#004AAD" fillOpacity="0.10" /> : null}
+                  {points.length > 1 ? (
+                    <path
+                      d={linePath}
+                      fill="none"
+                      stroke="#004AAD"
+                      strokeWidth="2.5"
+                      strokeLinejoin="round"
+                    />
+                  ) : null}
+                  <circle
+                    cx={lastPt[0]}
+                    cy={lastPt[1]}
+                    r="4"
+                    fill="#FFCC00"
+                    stroke="#004AAD"
+                    strokeWidth="2"
+                  />
+                </svg>
+              );
+            })()}
+            {timeStats.skills.some((s) => s.minutes > 0) ? (
+              <div className="mt-3 space-y-1.5 border-t border-slate-100 pt-3">
+                {timeStats.skills
+                  .filter((s) => s.minutes > 0)
+                  .map((s) => {
+                    const total = timeStats.skills.reduce((a, b) => a + b.minutes, 0) || 1;
+                    const pct = Math.round((s.minutes / total) * 100);
+                    return (
+                      <div key={s.skill} className="flex items-center gap-2 text-[10px]">
+                        <span className="w-20 shrink-0 truncate text-slate-500">{s.label}</span>
+                        <div className="h-1.5 flex-1 rounded-full bg-slate-100">
+                          <div
+                            className="h-full rounded-full bg-[#004AAD]"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        <span className="w-10 shrink-0 text-right font-semibold text-slate-600">
+                          {s.minutes >= 60
+                            ? `${Math.floor(s.minutes / 60)}ชม`
+                            : `${Math.round(s.minutes)}น`}
+                        </span>
+                      </div>
+                    );
+                  })}
+              </div>
+            ) : !timeStats.loading ? (
+              <p className="mt-3 border-t border-slate-100 pt-3 text-[10px] text-slate-400">
+                ยังไม่มีข้อมูลการฝึกในช่วงนี้
+              </p>
+            ) : null}
           </div>
 
           {/* how-to (3 steps) */}

@@ -9,6 +9,7 @@ import { DashboardVipAnnouncement } from "@/components/dashboard/DashboardVipAnn
 import { StudyPlanCalendarCard } from "@/components/dashboard/StudyPlanCalendarCard";
 import { PracticeTimeBySkillPie } from "@/components/practice/PracticeTimeBySkillPie";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
   buildPracticePulseStats,
   lastNLocalDayKeys,
@@ -22,6 +23,7 @@ function formatMin(n: number) {
 const EMPTY_CHART: PracticePulseChartPoint[] = [];
 
 export function PracticePageOverview() {
+  const { effectiveTier } = useEffectiveTier();
   const [today, setToday] = useState(0);
   const [weekly, setWeekly] = useState(0);
   const [total, setTotal] = useState(0);
@@ -146,7 +148,7 @@ export function PracticePageOverview() {
         </BrutalPanel>
       </div>
 
-      <StudyPlanCalendarCard />
+      <StudyPlanCalendarCard effectiveTier={effectiveTier} />
 
       <PracticeTimeBySkillPie />
 

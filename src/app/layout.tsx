@@ -10,6 +10,7 @@ import { MainNav } from "@/components/layout/MainNav";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { PlanExpiryNotice } from "@/components/billing/PlanExpiryNotice";
+import { DailyQueueBanner } from "@/components/practice/DailyQueueBanner";
 import { BugReportWidget } from "@/components/support/BugReportWidget";
 import { SoundToggle } from "@/components/ui/SoundToggle";
 import { VipApiCreditNotebookNotice } from "@/components/vip/VipApiCreditNotebookNotice";
@@ -54,6 +55,7 @@ export default function RootLayout({
           <PlanExpiryNotice />
           <BugReportWidget />
           <SoundToggle />
+          <DailyQueueBanner />
           <PageTransition>{children}</PageTransition>
         </EffectiveTierProvider>
       </body>

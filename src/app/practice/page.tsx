@@ -118,10 +118,8 @@ const READ_AND_WRITE_HREF = "/practice/production/read-and-write";
 
 export default function PracticeHubPage() {
   const router = useRouter();
-  const { effectiveTier, isAdmin, previewEligible } = useEffectiveTier();
+  const { effectiveTier } = useEffectiveTier();
   const showMiniStudy = true;
-  // V2 redesign is admin-only. Use the same signal as showMiniStudy so BOTH
-  // DB-role admins and code/preview admins see it (isAdmin alone misses the latter).
   const showV2 = true;
   const vipAiGate = useVipAiFeedbackGate();
   const isVip = effectiveTier === "vip";
@@ -273,8 +271,6 @@ export default function PracticeHubPage() {
         <PracticeHubV2
           effectiveTier={effectiveTier}
           isVip={isVip}
-          isAdmin={isAdmin}
-          previewEligible={previewEligible}
           showMiniStudy={showMiniStudy}
           conversationGate={canAccessSkill(effectiveTier, "conversation")}
           onReadingIntro={() => setReadingIntroOpen(true)}

@@ -21,8 +21,12 @@ const SKILL_LABELS: Record<(typeof SKILL_ORDER)[number], string> = {
 /**
  * Aggregates ended study sessions with recorded duration (visible tab time while in a test).
  * Not filtered by `completed` so partial attempts still count toward time-on-task.
+ *
+ * Query (optional): `since` — ISO datetime. When present, only sessions with
+ * `ended_at >= since` are included (used to scope the breakdown to a trailing
+ * window, e.g. today / 7d / 30d / 365d). Omit for all-time totals.
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const supabase = await createRouteHandlerSupabase();
     const {
@@ -32,12 +36,27 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data, error } = await supabase
+    const url = new URL(req.url);
+    const sinceRaw = url.searchParams.get("since")?.trim();
+    let since: string | null = null;
+    if (sinceRaw) {
+      const d = new Date(sinceRaw);
+      if (Number.isNaN(d.getTime())) {
+        return NextResponse.json({ error: "Invalid since" }, { status: 400 });
+      }
+      since = d.toISOString();
+    }
+
+    let query = supabase
       .from("study_sessions")
       .select("skill, duration_seconds")
       .eq("user_id", user.id)
       .not("ended_at", "is", null)
       .gt("duration_seconds", 0);
+    if (since) {
+      query = query.gte("ended_at", since);
+    }
+    const { data, error } = await query;
 
     if (error) {
       console.error("[study/time-by-skill]", error.message);
