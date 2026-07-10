@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { DictationRandomPicker } from "@/components/dictation/DictationRandomPicker";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
@@ -11,6 +12,7 @@ import { DICTATION_ROUND_NUMBERS } from "@/lib/dictation-constants";
 import {
   ensureDictationBankReady,
   getDictationRoundStats,
+  hydrateDictationProgressFromServer,
 } from "@/lib/dictation-storage";
 import type { DictationRoundNum } from "@/types/dictation";
 
@@ -32,6 +34,7 @@ export function DictationRoundsHub() {
 
   useEffect(() => {
     void ensureDictationBankReady().then(() => setBankReady(true));
+    void hydrateDictationProgressFromServer().then(() => setV((n) => n + 1));
   }, []);
 
   useEffect(() => {
@@ -109,6 +112,8 @@ export function DictationRoundsHub() {
             </div>
           </div>
         </div>
+
+        <DictationRandomPicker />
 
         <RoundsExplainer />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">

@@ -9,6 +9,30 @@ export type RandomizableSkill =
 
 export type RandomDifficulty = "easy" | "medium" | "hard";
 
+/** UI-only pooling choice — "any" must never be persisted as a difficulty value (see buildContentKey). */
+export type RandomDifficultyOrAny = RandomDifficulty | "any";
+
+const ALL_DIFFICULTIES: RandomDifficulty[] = ["easy", "medium", "hard"];
+
+/** Resolve a per-item difficulty: "any" rolls a fresh random pick each call. */
+export function resolveDifficulty(choice: RandomDifficultyOrAny): RandomDifficulty {
+  return choice === "any" ? pickOne(ALL_DIFFICULTIES) : choice;
+}
+
+/** Single-skill randomizer duration options — separate from DURATION_TO_COUNT's cross-skill scale. */
+export type SingleSkillDuration = 5 | 10 | 15 | 20 | "unlimited";
+
+/** Roughly "how many sets fit in this much time" for a single-skill queue. */
+export const SINGLE_SKILL_DURATION_TO_COUNT: Record<Exclude<SingleSkillDuration, "unlimited">, number> = {
+  5: 1,
+  10: 2,
+  15: 3,
+  20: 4,
+};
+
+/** "Unlimited" rolls this many up front, then the learner can keep asking for more. */
+export const UNLIMITED_INITIAL_BATCH = 5;
+
 export const RANDOM_SKILLS: { id: RandomizableSkill; label: string; emoji: string }[] = [
   { id: "dictation", label: "Dictation · ฟังแล้วพิมพ์ตาม", emoji: "🎧" },
   { id: "fitb", label: "Fill in the blank · เติมคำที่หาย", emoji: "✏️" },

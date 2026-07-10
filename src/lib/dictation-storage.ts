@@ -16,6 +16,8 @@ import {
   DICTATION_ROUND_NUMBERS,
   DICTATION_SET_COUNT,
 } from "@/lib/dictation-constants";
+import { buildContentKey, parseContentKey } from "@/lib/practice-attempts-contentkey";
+import { fetchPracticeAttempts, postPracticeAttempt } from "@/lib/practice-attempts-sync";
 import type {
   DictationDifficulty,
   DictationFullBank,
@@ -483,7 +485,49 @@ export function saveDictationAttempt(args: {
   m[k] = next;
   localStorage.setItem(DICTATION_PROGRESS_KEY, JSON.stringify(m));
   emitDictationUpdate();
+  void postPracticeAttempt({
+    taskType: "dictation",
+    scorePct: maxScore > 0 ? (attainedScore / maxScore) * 100 : 0,
+    detail: {
+      contentKey: buildContentKey("dictation", difficulty, round, setNumber),
+    },
+  });
   return next;
+}
+
+/** Pull in dictation scores achieved on mobile/other browsers (best score wins). */
+export async function hydrateDictationProgressFromServer(): Promise<void> {
+  const attempts = await fetchPracticeAttempts("dictation");
+  if (attempts.length === 0) return;
+  const m = readDictationProgressMap();
+  let changed = false;
+  for (const a of attempts) {
+    const ck = a.detail?.contentKey;
+    if (typeof ck !== "string") continue;
+    const parsed = parseContentKey(ck);
+    if (!parsed || parsed.skill !== "dictation" || !isRound(parsed.round)) continue;
+    const difficulty = parsed.difficulty as DictationDifficulty;
+    if (!DICTATION_DIFFICULTIES.includes(difficulty)) continue;
+    const setNumber = parsed.setNum;
+    const maxScore = DICTATION_MAX_SCORE[difficulty];
+    const attainedScore = Math.round(((a.score_pct ?? 0) / 100) * maxScore);
+    const k = progressKey(parsed.round, difficulty, setNumber);
+    const prev = m[k];
+    if (!prev || attainedScore > prev.bestScore) {
+      m[k] = {
+        bestScore: Math.max(prev?.bestScore ?? 0, attainedScore),
+        maxScore,
+        lastScore: prev?.lastScore ?? attainedScore,
+        updatedAt: prev?.updatedAt ?? a.created_at,
+        userId: prev?.userId,
+      };
+      changed = true;
+    }
+  }
+  if (changed) {
+    localStorage.setItem(DICTATION_PROGRESS_KEY, JSON.stringify(m));
+    emitDictationUpdate();
+  }
 }
 
 export async function mergeDictationBankFromAdmin(

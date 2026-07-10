@@ -3,7 +3,7 @@
  * contentKey()) so a set completed on either platform is recognizable on the other via
  * the practice_attempts.detail.contentKey field.
  */
-export type PracticeSkill = "reading" | "vocab" | "fitb" | "realword" | "dialogue_summary";
+export type PracticeSkill = "reading" | "vocab" | "fitb" | "realword" | "dialogue_summary" | "dictation";
 
 export function buildContentKey(
   skill: PracticeSkill,

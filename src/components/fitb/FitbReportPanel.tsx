@@ -33,6 +33,8 @@ export function FitbReportPanel({
   clueUsed,
   detScore,
   onRedeemNow,
+  hideRedeemLater,
+  onAdvance,
 }: {
   set: FitbSet;
   round: FitbRoundNum;
@@ -43,6 +45,10 @@ export function FitbReportPanel({
   clueUsed: boolean[];
   detScore: number;
   onRedeemNow: () => void;
+  /** Queue mode: hide the no-completion-required exit link. */
+  hideRedeemLater?: boolean;
+  /** Queue mode: once complete, advance the runner's queue instead of linking to the next sequential set. */
+  onAdvance?: () => void;
 }) {
   useEffect(() => {
     sfxCelebrate("md");
@@ -206,32 +212,44 @@ export function FitbReportPanel({
               >
                 Try again (redeem)
               </button>
+              {!hideRedeemLater ? (
+                <Link
+                  href={hubHref}
+                  onClick={() => playBlinkBeep()}
+                  className="inline-flex items-center border-4 border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] hover:bg-neutral-50"
+                >
+                  Redeem later
+                </Link>
+              ) : null}
+            </>
+          ) : onAdvance ? (
+            <button
+              type="button"
+              onClick={onAdvance}
+              className="inline-flex items-center border-4 border-black bg-ep-blue px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
+            >
+              Next question →
+            </button>
+          ) : (
+            <>
               <Link
                 href={hubHref}
                 onClick={() => playBlinkBeep()}
                 className="inline-flex items-center border-4 border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] hover:bg-neutral-50"
               >
-                Redeem later
+                Done
               </Link>
+              {nextSetHref ? (
+                <Link
+                  href={nextSetHref}
+                  onClick={() => sfxTransition()}
+                  className="inline-flex items-center border-4 border-black bg-ep-blue px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
+                >
+                  Next set →
+                </Link>
+              ) : null}
             </>
-          ) : (
-            <Link
-              href={hubHref}
-              onClick={() => playBlinkBeep()}
-              className="inline-flex items-center border-4 border-black bg-white px-5 py-3 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] hover:bg-neutral-50"
-            >
-              Done
-            </Link>
           )}
-          {nextSetHref ? (
-            <Link
-              href={nextSetHref}
-              onClick={() => sfxTransition()}
-              className="inline-flex items-center border-4 border-black bg-ep-blue px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
-            >
-              Next set →
-            </Link>
-          ) : null}
         </div>
       </div>
     </div>

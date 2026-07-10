@@ -44,12 +44,17 @@ export function FitbSessionClient({
   difficulty,
   setNumber,
   startWithRedeem,
+  hideRedeemLater,
+  onAdvance,
 }: {
   set: FitbSet;
   round: FitbRoundNum;
   difficulty: FitbDifficulty;
   setNumber: number;
   startWithRedeem: boolean;
+  /** Queue mode passthrough — see FitbReportPanel. */
+  hideRedeemLater?: boolean;
+  onAdvance?: () => void;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
   const uid = useLessonUserId();
@@ -434,6 +439,8 @@ export function FitbSessionClient({
           clueUsed={clueUsed}
           detScore={detScore}
           onRedeemNow={onRedeemNow}
+          hideRedeemLater={hideRedeemLater}
+          onAdvance={onAdvance}
         />
       )}
       </div>

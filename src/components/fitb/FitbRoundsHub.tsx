@@ -69,6 +69,20 @@ export function FitbRoundsHub() {
             </>
           }
         />
+        <Link
+          href="/practice/literacy/fill-in-blank/random"
+          className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-indigo-50 to-sky-50 p-5 ring-1 ring-indigo-100 transition-all duration-200 hover:shadow-md"
+        >
+          <span className="text-xl">🎲</span>
+          <div className="flex-1">
+            <h3 className="text-sm font-bold text-indigo-950">ทำข้อสอบที่เราเลือกให้ · Fill in the blank</h3>
+            <p className="text-[11px] text-indigo-700">
+              เลือกระดับ + เวลาที่มี · ผิดตรงไหนต้องทำให้ถูก 100% ก่อนไปข้อถัดไป
+            </p>
+          </div>
+          <span className="text-indigo-400">→</span>
+        </Link>
+
         <RoundsExplainer />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {FITB_ROUND_NUMBERS.map((round) => (
