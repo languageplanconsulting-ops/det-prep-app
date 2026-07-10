@@ -61,6 +61,16 @@ type ExamCreditCard = {
 
 const TIER_REFRESH_EVENT = "ep-refresh-tier";
 
+// Admin / unlimited plans come back from the API as Number.MAX_SAFE_INTEGER
+// (9007199254740991). No real quota is anywhere near this, so anything at or
+// above the threshold is treated as "unlimited" and shown as ไม่จำกัด instead
+// of the raw number.
+const UNLIMITED_THRESHOLD = 1_000_000;
+const isUnlimitedQuota = (value: number) =>
+  !Number.isFinite(value) || value >= UNLIMITED_THRESHOLD;
+const formatQuota = (value: number) =>
+  isUnlimitedQuota(value) ? "ไม่จำกัด" : value.toLocaleString("en-US");
+
 function formatExpiry(expiresAt: string | null, tier: Tier): string {
   if (!expiresAt) return tier === "free" || tier === "vip" ? "ไม่มีวันหมดอายุ" : "—";
   const date = new Date(expiresAt);
@@ -100,8 +110,13 @@ function quotaTone(remaining: number, limit: number) {
 }
 
 function CreditCard({ card }: { card: ExamCreditCard }) {
-  const tone = quotaTone(card.remaining, card.limit);
-  const pct = card.limit > 0 ? Math.min(100, Math.round((card.used / card.limit) * 100)) : 0;
+  const unlimited = isUnlimitedQuota(card.remaining) || isUnlimitedQuota(card.limit);
+  const remainingText = unlimited ? "ไม่จำกัด" : formatQuota(card.remaining);
+  const tone = quotaTone(unlimited ? card.limit : card.remaining, card.limit);
+  const pct =
+    !unlimited && card.limit > 0
+      ? Math.min(100, Math.round((card.used / card.limit) * 100))
+      : 0;
 
   return (
     <div className={`rounded-[24px] border-2 p-5 shadow-[6px_6px_0_0_#111] transition-all duration-500 ${tone.card}`}>
@@ -113,7 +128,7 @@ function CreditCard({ card }: { card: ExamCreditCard }) {
           <h2 className="mt-2 text-2xl font-black tracking-tight text-neutral-900">{card.label}</h2>
         </div>
         <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] ${tone.chip}`}>
-          เหลือ {card.remaining}
+          เหลือ {remainingText}
         </span>
       </div>
 
@@ -121,8 +136,10 @@ function CreditCard({ card }: { card: ExamCreditCard }) {
         <div className="rounded-2xl border border-black/10 bg-white/75 p-3">
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-500">คงเหลือ</p>
           <p className="mt-1 text-3xl font-black tabular-nums text-neutral-900">
-            {card.remaining}
-            <span className="ml-1 text-sm text-neutral-400">/ {card.limit}</span>
+            {remainingText}
+            {!unlimited && (
+              <span className="ml-1 text-sm text-neutral-400">/ {formatQuota(card.limit)}</span>
+            )}
           </p>
         </div>
         <div className="rounded-2xl border border-black/10 bg-white/75 p-3">
