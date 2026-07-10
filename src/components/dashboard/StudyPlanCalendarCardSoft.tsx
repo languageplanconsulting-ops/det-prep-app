@@ -18,7 +18,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { sfxCelebrate, sfxTap, sfxTransition } from "@/lib/exam-sfx";
-import { DAILY_SKILL_META, type DailyPlanItem, type DailyPlanSkill, type DailyTier, type DailyTrack } from "@/lib/study-plan/daily-plan";
+import { LESSON_TOPICS, lessonTopicHref } from "@/lib/lessons/topics";
+import {
+  buildDailyPlanItems,
+  DAILY_SKILL_META,
+  planTotalCount,
+  type DailyPlanItem,
+  type DailyPlanSkill,
+  type DailyTier,
+  type DailyTrack,
+} from "@/lib/study-plan/daily-plan";
 import type { DayProgress, SkillTrend } from "@/lib/study-plan/daily-progress";
 import { generateCalendar, type CalendarDay } from "@/lib/study-plan/schedule";
 
@@ -155,6 +164,7 @@ export function StudyPlanCalendarCardSoft({
   const [dayDetail, setDayDetail] = useState<DailyDetailResponse | null>(null);
   const [dayLoading, setDayLoading] = useState(true);
   const [savingDayPlan, setSavingDayPlan] = useState(false);
+  const [dayPlanError, setDayPlanError] = useState<string | null>(null);
 
   const [trends, setTrends] = useState<SkillTrend[]>([]);
 
@@ -201,6 +211,7 @@ export function StudyPlanCalendarCardSoft({
 
   const loadDayDetail = useCallback(async (date: string) => {
     setDayLoading(true);
+    setDayPlanError(null);
     try {
       const res = await fetch(`/api/study-plan/daily?date=${date}`, { credentials: "same-origin", cache: "no-store" });
       if (res.ok) {
@@ -274,6 +285,32 @@ export function StudyPlanCalendarCardSoft({
   async function updateDayPlan(track: DailyTrack, durationMinutes: DailyTier) {
     sfxTransition();
     setSavingDayPlan(true);
+    setDayPlanError(null);
+
+    // Optimistically switch the view right away. This picker only renders when the day has
+    // ZERO logged attempts (canEditDayPlan), so the correct progress for the new plan is simply
+    // all-groups-at-0 — no server round-trip needed to render it, and the plan items themselves
+    // are deterministic from tier+track (buildDailyPlanItems). This keeps the exam/lesson toggle
+    // instant AND lets the lesson track work even if persistence is unavailable.
+    const optimisticItems = buildDailyPlanItems(durationMinutes, track);
+    const optimisticProgress: DayProgress = {
+      groups: optimisticItems.map((it) => ({ skill: it.skill, count: it.count, done: 0, complete: false })),
+      total: planTotalCount(optimisticItems),
+      totalDone: 0,
+      complete: false,
+    };
+    setDayDetail({
+      plan: {
+        date: selectedDate,
+        track,
+        tier: durationMinutes,
+        items: optimisticItems,
+        total: optimisticProgress.total,
+        persisted: false,
+      },
+      progress: optimisticProgress,
+    });
+
     try {
       const res = await fetch("/api/study-plan/daily", {
         method: "POST",
@@ -300,7 +337,14 @@ export function StudyPlanCalendarCardSoft({
               : d,
           ),
         );
+      } else {
+        // The view already switched (optimistic), so this is not a hard failure — only the
+        // *pinning* of the choice failed (e.g. the backing table not yet deployed), meaning it
+        // won't be remembered after a reload. Say exactly that instead of a scary "failed".
+        setDayPlanError("เลือกได้เลย แต่ตอนนี้ยังจำค่าไว้ข้ามรอบไม่ได้");
       }
+    } catch {
+      setDayPlanError("เลือกได้เลย แต่ยังบันทึกค่าไว้ไม่ได้ — เช็คการเชื่อมต่ออินเทอร์เน็ต");
     } finally {
       setSavingDayPlan(false);
     }
@@ -436,7 +480,7 @@ export function StudyPlanCalendarCardSoft({
                   key={cell.date}
                   type="button"
                   onClick={() => selectDay(cell.date)}
-                  className={`relative aspect-square rounded-xl border-2 transition hover:brightness-95 sm:rounded-2xl ${container} ${
+                  className={`relative flex aspect-square flex-col items-center justify-center gap-0.5 rounded-xl border-2 transition hover:brightness-95 sm:rounded-2xl ${container} ${
                     !cell.inMonth ? "opacity-50" : ""
                   } ${isSelected && !isToday ? "ring-2 ring-ep-blue" : ""}`}
                 >
@@ -445,27 +489,19 @@ export function StudyPlanCalendarCardSoft({
                       วันนี้
                     </span>
                   )}
-                  <span className={`grid h-full w-full place-items-center font-mono text-[11px] sm:text-sm ${numClass}`}>
-                    {dayNum}
-                  </span>
+                  {/* Number + status badge stack in normal flex flow (not absolute-over-centered)
+                      so a 2-digit day + a badge (fraction/emoji) never render on top of each other. */}
+                  <span className={`font-mono text-[11px] leading-none sm:text-sm ${numClass}`}>{dayNum}</span>
                   {kind === "complete" && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[10px] text-ep-green sm:bottom-1 sm:text-[13px]">
-                      ✓
-                    </span>
+                    <span className="text-[9px] leading-none text-ep-green sm:text-[11px]">✓</span>
                   )}
                   {kind === "partial" && rangeInfo && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 font-mono text-[8px] font-bold text-amber-600 sm:bottom-1 sm:text-[9px]">
+                    <span className="font-mono text-[7px] font-bold leading-none text-amber-600 sm:text-[8px]">
                       {rangeInfo.totalDone}/{rangeInfo.total}
                     </span>
                   )}
-                  {kind === "mock" && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[9px] sm:bottom-1 sm:text-[11px]">
-                      📝
-                    </span>
-                  )}
-                  {kind === "upcoming" && (
-                    <span className="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-ep-blue/50" />
-                  )}
+                  {kind === "mock" && <span className="text-[8px] leading-none sm:text-[10px]">📝</span>}
+                  {kind === "upcoming" && <span className="h-1.5 w-1.5 rounded-full bg-ep-blue/50" />}
                 </button>
               );
             })}
@@ -539,6 +575,7 @@ export function StudyPlanCalendarCardSoft({
                       ))}
                     </div>
                   </div>
+                  {dayPlanError && <p className="text-xs font-bold text-rose-500">⚠️ {dayPlanError}</p>}
                 </div>
               ) : (
                 <p className="mt-3 text-xs font-semibold text-slate-500">
@@ -547,17 +584,35 @@ export function StudyPlanCalendarCardSoft({
               )}
 
               {dayDetail.plan.track === "lesson" ? (
-                <Link
-                  href="/practice/mini-study"
-                  onClick={() => sfxTransition()}
-                  className="mt-5 flex items-center justify-between gap-3 rounded-2xl bg-ep-blue px-5 py-4 text-white shadow-md transition hover:opacity-90 hover:shadow-lg active:scale-[0.98]"
-                >
-                  <div>
-                    <p className="font-display text-base font-extrabold">📘 ไปเรียนบทเรียนกันเลย</p>
-                    <p className="mt-0.5 text-xs text-white/80">เทคนิค + เนื้อหาแยกทักษะจากพี่ดอย</p>
+                <div className="mt-5">
+                  <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    เลือกบทเรียนที่อยากฝึก
+                  </p>
+                  <div className="space-y-2">
+                    {LESSON_TOPICS.map((t) => (
+                      <Link
+                        key={t.slug}
+                        href={lessonTopicHref(t.slug)}
+                        onClick={() => sfxTransition()}
+                        className="flex items-center gap-3 rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 transition hover:border-ep-blue/40 hover:bg-white active:scale-[0.99]"
+                      >
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl">
+                          {t.emoji}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-display text-sm font-bold leading-tight text-slate-900 sm:text-base">
+                            {t.th}
+                          </p>
+                          <p className="mt-0.5 truncate text-[12px] text-slate-500">{t.descTh}</p>
+                        </div>
+                        <span className="shrink-0 text-lg text-slate-300">→</span>
+                      </Link>
+                    ))}
                   </div>
-                  <span className="text-xl">→</span>
-                </Link>
+                  <p className="mt-3 text-[11px] text-slate-400">
+                    เทคนิค + เนื้อหาแยกทักษะจากพี่ดอย · ความคืบหน้าซิงก์กับแอปมือถือ
+                  </p>
+                </div>
               ) : (
                 <>
                   <p className="mt-4 text-sm leading-relaxed text-slate-700 sm:text-[15px]">

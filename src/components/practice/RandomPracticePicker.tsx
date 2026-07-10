@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { canAccessDifficulty, type Tier } from "@/lib/access-control";
 import { buildRandomQueue, defaultDifficultyFor, type QueueItem } from "@/lib/practice-queue-builder";
 import { type RandomDifficulty } from "@/lib/practice-random";
+import { LESSON_TOPICS, lessonTopicHref } from "@/lib/lessons/topics";
 
 const DIFFICULTIES: { id: RandomDifficulty; th: string }[] = [
   { id: "easy", th: "ง่าย" },
@@ -73,9 +74,24 @@ export function RandomPracticePicker({ effectiveTier }: { effectiveTier: Tier })
       </div>
 
       {mode === "lesson" ? (
-        <p className="rounded-xl bg-white/70 px-3 py-3 text-center text-xs font-semibold text-indigo-700">
-          บทเรียนแบบเลือกกำลังจะมาเร็ว ๆ นี้ — ตอนนี้ใช้ &quot;ข้อสอบจริง&quot; ไปก่อนนะครับ
-        </p>
+        <>
+          <p className="mb-2 text-[11px] font-semibold text-indigo-700">
+            เลือกบทเรียนที่อยากฝึก — เนื้อหาและความคืบหน้าซิงก์กับแอปมือถือ
+          </p>
+          <div className="space-y-1.5">
+            {LESSON_TOPICS.map((t) => (
+              <Link
+                key={t.slug}
+                href={lessonTopicHref(t.slug)}
+                className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2.5 text-xs font-semibold text-slate-800 transition-all duration-150 hover:translate-x-0.5 hover:bg-white hover:shadow-sm"
+              >
+                <span className="text-base">{t.emoji}</span>
+                <span className="flex-1 truncate">{t.th}</span>
+                <span className="text-indigo-400">→</span>
+              </Link>
+            ))}
+          </div>
+        </>
       ) : (
         <>
           <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-indigo-500">
