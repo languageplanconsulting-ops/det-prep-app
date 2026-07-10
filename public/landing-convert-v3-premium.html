@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>English Plan — ติว DET สำหรับคนไทย</title>
+<meta name="description" content="Duolingo English Test สำหรับคนไทย — เริ่มจากรู้ว่าอ่อนตรงไหน แล้วเก็บให้ตรงจุด" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-yellow': '#FFCC00',
+          ink: '#0B1220',
+          'ink-2': '#0F1830',
+        },
+        fontFamily: {
+          sans: ['"IBM Plex Sans Thai"', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          display: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  :root { color-scheme: light; }
+  html { scroll-behavior: smooth; }
+  body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+  .font-display { font-family: "Chakra Petch", system-ui, sans-serif; }
+  .glow-blue { box-shadow: 0 0 80px rgba(0,74,173,.55), 0 0 24px rgba(0,74,173,.35); }
+  .glow-blue-soft { box-shadow: 0 0 60px rgba(0,74,173,.35); }
+  .hairline { border-color: rgba(11,18,32,.10); }
+  .hairline-dark { border-color: rgba(255,255,255,.10); }
+
+  /* Hero number fade/count-up */
+  .hero-num { opacity: 0; transform: translateY(8px); transition: opacity .9s ease, transform .9s ease; }
+  .hero-num.in { opacity: 1; transform: none; }
+
+  .bar { transition: width 1.1s cubic-bezier(.22,.61,.36,1); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .hero-num { opacity: 1 !important; transform: none !important; transition: none; }
+    .bar { transition: none !important; }
+  }
+</style>
+</head>
+
+<body class="font-sans bg-white text-ink antialiased">
+
+<!-- ░░ PREVIEW RIBBON (strippable) ░░ -->
+<div class="w-full bg-black text-white/80 text-[12px] font-mono">
+  <div class="mx-auto max-w-6xl px-5 py-2 flex items-center justify-between gap-4">
+    <a href="/landing-convert-index.html" class="hover:text-white transition">← Preview hub</a>
+    <span class="text-white/50">V3 · Speak/Superhuman — พรีเมียม</span>
+  </div>
+</div>
+
+<!-- ═══════════════════ HERO (DARK) ═══════════════════ -->
+<header class="relative bg-ink text-white overflow-hidden">
+  <!-- faint focal light behind numbers -->
+  <div aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[420px] w-[420px] rounded-full glow-blue opacity-70"></div>
+
+  <!-- top bar -->
+  <nav class="relative z-10 mx-auto max-w-6xl px-6 pt-8 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="grid h-8 w-8 place-items-center rounded-md bg-ep-blue font-display font-bold text-[13px] tracking-tight">EP</span>
+      <span class="font-display font-semibold tracking-tight text-[15px] text-white/90">ENGLISH PLAN</span>
+    </div>
+    <div class="flex items-center gap-6 text-[14px]">
+      <a href="/about" class="hidden sm:inline text-white/60 hover:text-white transition">เกี่ยวกับเรา</a>
+      <a href="/login" class="text-white/80 hover:text-white transition">เข้าสู่ระบบ</a>
+    </div>
+  </nav>
+
+  <div class="relative z-10 mx-auto max-w-6xl px-6 pt-20 pb-24 sm:pt-28 sm:pb-32 text-center">
+    <p class="font-mono text-[12px] tracking-[0.22em] uppercase text-white/45">
+      Duolingo English Test · สำหรับคนไทย
+    </p>
+
+    <h1 class="mt-7 font-display font-bold leading-[1.08] tracking-tight text-[34px] sm:text-[56px] max-w-3xl mx-auto">
+      ขึ้นให้ถึงเป้า<br class="sm:hidden" /> — เร็วกว่าฝึกมั่ว ๆ
+    </h1>
+
+    <p class="mt-5 text-white/60 text-[16px] sm:text-[18px] font-light max-w-xl mx-auto">
+      เริ่มจากรู้ว่าอ่อนตรงไหน แล้วเก็บให้ตรงจุด
+    </p>
+
+    <!-- GIANT GLOWING SCORE VISUAL -->
+    <div class="mt-14 sm:mt-16 flex items-center justify-center gap-5 sm:gap-9 font-mono font-semibold select-none">
+      <span id="numFrom" class="hero-num text-white/35 text-[56px] sm:text-[92px] leading-none">95</span>
+      <span class="hero-num text-ep-blue text-[40px] sm:text-[64px] leading-none" style="transition-delay:.15s" aria-hidden="true">→</span>
+      <span id="numTo" class="hero-num text-white text-[64px] sm:text-[112px] leading-none" style="transition-delay:.3s; text-shadow: 0 0 46px rgba(0,74,173,.65);">130</span>
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-16 flex flex-col items-center gap-4">
+      <a href="/explore"
+         class="group inline-flex items-center gap-2 rounded-full bg-white text-ink font-semibold text-[16px] px-8 py-4 hover:bg-ep-yellow transition-colors duration-200">
+        เช็กระดับของคุณฟรี
+        <span class="transition-transform group-hover:translate-x-0.5">→</span>
+      </a>
+      <p class="font-mono text-[12px] text-white/40 tracking-wide">ฟรี · ไม่ต้องใส่บัตร</p>
+    </div>
+  </div>
+
+  <!-- hairline to light -->
+  <div class="relative z-10 border-t hairline-dark"></div>
+</header>
+
+<main>
+
+  <!-- ═══════════════════ 01 · THE PROBLEM ═══════════════════ -->
+  <section class="bg-white">
+    <div class="mx-auto max-w-4xl px-6 py-24 sm:py-32">
+      <div class="flex items-baseline gap-4 mb-10">
+        <span class="font-mono text-[13px] text-ep-blue tracking-widest">01</span>
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink/35">The problem</span>
+      </div>
+      <p class="font-display text-[26px] sm:text-[40px] leading-[1.25] tracking-tight text-ink/90 max-w-3xl">
+        คนคะแนนน้อยส่วนใหญ่ไม่ได้อ่อนทุกอย่าง —
+        <span class="text-ep-blue">แค่ไม่รู้ว่าอ่อนตรงไหน</span>
+      </p>
+    </div>
+    <div class="mx-auto max-w-4xl px-6"><div class="border-t hairline"></div></div>
+  </section>
+
+  <!-- ═══════════════════ 02 · MOCK REPORT ═══════════════════ -->
+  <section class="bg-[#f7f8fa]">
+    <div class="mx-auto max-w-5xl px-6 py-24 sm:py-32">
+      <div class="flex items-baseline gap-4 mb-12">
+        <span class="font-mono text-[13px] text-ep-blue tracking-widest">02</span>
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink/35">Mock report</span>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-10 items-center">
+        <!-- copy -->
+        <div class="lg:col-span-4">
+          <h2 class="font-display font-semibold text-[26px] sm:text-[32px] leading-tight tracking-tight">
+            เห็นภาพรวมทั้ง 4 ทักษะ ในหน้าเดียว
+          </h2>
+          <p class="mt-5 text-ink/55 text-[15px] leading-relaxed">
+            Mock test · 20 ข้อ ~1 ชม. เหมือนสอบจริง — บอก 2 ทักษะที่ฉุดคะแนน
+          </p>
+          <div class="mt-7 inline-flex items-center gap-2 rounded-md bg-ep-blue/5 px-4 py-2.5 border hairline">
+            <span class="h-1.5 w-1.5 rounded-full bg-ep-yellow"></span>
+            <span class="text-[14px] font-medium text-ep-blue">เก็บ Writing + Speaking ก่อน</span>
+          </div>
+        </div>
+
+        <!-- report card (premium data viz, dark) -->
+        <div class="lg:col-span-8">
+          <div class="rounded-2xl bg-ink text-white p-7 sm:p-9 glow-blue-soft">
+            <div class="flex items-end justify-between border-b hairline-dark pb-6">
+              <div>
+                <p class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/40">คะแนนรวม</p>
+                <p class="mt-1 font-mono font-semibold text-[44px] sm:text-[56px] leading-none">108<span class="text-white/30 text-[24px] sm:text-[28px]">/160</span></p>
+              </div>
+              <span class="font-mono text-[11px] text-white/35">MOCK · 20 ข้อ</span>
+            </div>
+
+            <div class="mt-7 space-y-5">
+              <!-- Writing (weak) -->
+              <div>
+                <div class="flex items-center justify-between text-[13px] mb-2">
+                  <span class="flex items-center gap-2">Writing <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-ep-yellow/15 text-ep-yellow tracking-wide">จุดอ่อน</span></span>
+                  <span class="font-mono text-white/80">85</span>
+                </div>
+                <div class="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                  <div class="bar h-full rounded-full bg-ep-yellow" data-w="53%" style="width:0"></div>
+                </div>
+              </div>
+              <!-- Speaking (weak) -->
+              <div>
+                <div class="flex items-center justify-between text-[13px] mb-2">
+                  <span class="flex items-center gap-2">Speaking <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-ep-yellow/15 text-ep-yellow tracking-wide">จุดอ่อน</span></span>
+                  <span class="font-mono text-white/80">95</span>
+                </div>
+                <div class="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                  <div class="bar h-full rounded-full bg-ep-yellow" data-w="59%" style="width:0"></div>
+                </div>
+              </div>
+              <!-- Reading -->
+              <div>
+                <div class="flex items-center justify-between text-[13px] mb-2">
+                  <span>Reading</span>
+                  <span class="font-mono text-white/80">120</span>
+                </div>
+                <div class="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                  <div class="bar h-full rounded-full bg-ep-blue" data-w="75%" style="width:0"></div>
+                </div>
+              </div>
+              <!-- Listening -->
+              <div>
+                <div class="flex items-center justify-between text-[13px] mb-2">
+                  <span>Listening</span>
+                  <span class="font-mono text-white/80">130</span>
+                </div>
+                <div class="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                  <div class="bar h-full rounded-full bg-ep-blue" data-w="81%" style="width:0"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ 03 · FEEDBACK ═══════════════════ -->
+  <section class="bg-white">
+    <div class="mx-auto max-w-5xl px-6 py-24 sm:py-32">
+      <div class="flex items-baseline gap-4 mb-12">
+        <span class="font-mono text-[13px] text-ep-blue tracking-widest">03</span>
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink/35">Feedback</span>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-10 items-start">
+        <div class="lg:col-span-4">
+          <h2 class="font-display font-semibold text-[26px] sm:text-[32px] leading-tight tracking-tight">
+            ฟีดแบ็กรายข้อ<br />เป็นภาษาไทย
+          </h2>
+          <p class="mt-5 text-ink/55 text-[15px] leading-relaxed">
+            ระบบตรวจให้ของ English Plan อ่านคำตอบจริง ชี้จุดที่ควรแก้ ไม่ใช่แค่ให้คะแนน
+          </p>
+          <p class="mt-6 text-[15px] leading-relaxed text-ink/80 border-l-2 border-ep-yellow pl-4">
+            แก้ <span class="font-mono">helped</span> → <span class="font-mono">helps</span> แล้ว Flow ขึ้นทันที
+          </p>
+        </div>
+
+        <!-- showcase card -->
+        <div class="lg:col-span-8">
+          <div class="rounded-2xl border hairline bg-[#f7f8fa] overflow-hidden">
+            <div class="px-6 sm:px-8 pt-7 pb-6 border-b hairline">
+              <p class="font-mono text-[11px] tracking-[0.18em] uppercase text-ink/40">Speaking · prompt</p>
+              <p class="mt-2 text-[16px] text-ink/85 leading-snug">Describe a habit that helps you stay productive.</p>
+            </div>
+
+            <div class="px-6 sm:px-8 py-7">
+              <p class="text-[15px] leading-[1.9] text-ink/80">
+                A daily walk in the morning
+                <span class="relative inline-block">
+                  <span class="line-through text-ink/35 decoration-ep-yellow decoration-2">helped</span>
+                  <span class="ml-1.5 font-medium text-ep-blue">helps</span>
+                </span>
+                me stay sharp, and it also lets me
+                <span class="relative inline-block">
+                  <span class="line-through text-ink/35 decoration-ep-yellow decoration-2">concentrate</span>
+                  <span class="ml-1.5 font-medium text-ep-blue">boosts my focus</span>
+                </span>
+                before I start work.
+              </p>
+
+              <div class="mt-7 flex items-center justify-between">
+                <span class="font-mono text-[11px] tracking-widest uppercase text-ink/40">Predicted band</span>
+                <span class="font-mono font-semibold text-[20px] text-ink">120–130</span>
+              </div>
+
+              <!-- slim score bars -->
+              <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                <div>
+                  <div class="flex justify-between text-[12px] mb-1.5"><span class="text-ink/60">Grammar</span><span class="font-mono text-ink/80">92</span></div>
+                  <div class="h-1 rounded-full bg-ink/10 overflow-hidden"><div class="bar h-full rounded-full bg-ep-blue" data-w="92%" style="width:0"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-[12px] mb-1.5"><span class="text-ink/60">Vocabulary</span><span class="font-mono text-ink/80">88</span></div>
+                  <div class="h-1 rounded-full bg-ink/10 overflow-hidden"><div class="bar h-full rounded-full bg-ep-blue" data-w="88%" style="width:0"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-[12px] mb-1.5"><span class="text-ep-blue font-medium">Flow</span><span class="font-mono text-ep-blue">79</span></div>
+                  <div class="h-1 rounded-full bg-ink/10 overflow-hidden"><div class="bar h-full rounded-full bg-ep-yellow" data-w="79%" style="width:0"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-[12px] mb-1.5"><span class="text-ink/60">Task</span><span class="font-mono text-ink/80">90</span></div>
+                  <div class="h-1 rounded-full bg-ink/10 overflow-hidden"><div class="bar h-full rounded-full bg-ep-blue" data-w="90%" style="width:0"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mx-auto max-w-5xl px-6"><div class="border-t hairline"></div></div>
+  </section>
+
+  <!-- ═══════════════════ 04 · TOOLS ═══════════════════ -->
+  <section class="bg-white">
+    <div class="mx-auto max-w-4xl px-6 py-24 sm:py-32">
+      <div class="flex items-baseline gap-4 mb-12">
+        <span class="font-mono text-[13px] text-ep-blue tracking-widest">04</span>
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink/35">Tools</span>
+      </div>
+
+      <ul class="divide-y hairline border-y hairline">
+        <li class="flex items-baseline gap-5 py-6">
+          <span class="font-mono text-[13px] text-ink/30 w-6 shrink-0">01</span>
+          <span class="text-[17px] sm:text-[19px] text-ink/85">เช็กระดับฟรี</span>
+        </li>
+        <li class="flex items-baseline gap-5 py-6">
+          <span class="font-mono text-[13px] text-ink/30 w-6 shrink-0">02</span>
+          <span class="text-[17px] sm:text-[19px] text-ink/85">Mock test <span class="text-ink/45 text-[15px]">— บอก 2 ทักษะที่ฉุดคะแนน</span></span>
+        </li>
+        <li class="flex items-baseline gap-5 py-6">
+          <span class="font-mono text-[13px] text-ink/30 w-6 shrink-0">03</span>
+          <span class="text-[17px] sm:text-[19px] text-ink/85">ฟีดแบ็กรายข้อภาษาไทย</span>
+        </li>
+        <li class="flex items-baseline gap-5 py-6">
+          <span class="font-mono text-[13px] text-ink/30 w-6 shrink-0">04</span>
+          <span class="text-[17px] sm:text-[19px] text-ink/85">เทคนิคเพิ่มคะแนนสั้น ๆ</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ 05 · EXAM COVERAGE ═══════════════════ -->
+  <section class="bg-ink text-white">
+    <div class="mx-auto max-w-5xl px-6 py-24 sm:py-32">
+      <div class="flex items-baseline gap-4 mb-14">
+        <span class="font-mono text-[13px] text-ep-yellow tracking-widest">05</span>
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-white/35">Exam coverage</span>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-y-12 gap-x-6">
+        <div>
+          <p class="font-mono font-semibold text-[44px] sm:text-[56px] leading-none text-white">5</p>
+          <p class="mt-3 text-[14px] text-white/55">Production</p>
+        </div>
+        <div>
+          <p class="font-mono font-semibold text-[44px] sm:text-[56px] leading-none text-white">2</p>
+          <p class="mt-3 text-[14px] text-white/55">Comprehension</p>
+        </div>
+        <div>
+          <p class="font-mono font-semibold text-[44px] sm:text-[56px] leading-none text-white">3</p>
+          <p class="mt-3 text-[14px] text-white/55">Literacy</p>
+        </div>
+        <div>
+          <p class="font-mono font-semibold text-[44px] sm:text-[56px] leading-none text-white">2</p>
+          <p class="mt-3 text-[14px] text-white/55">Conversation</p>
+        </div>
+      </div>
+
+      <div class="mt-16 pt-8 border-t hairline-dark">
+        <p class="font-display text-[20px] sm:text-[24px] tracking-tight text-white/90">
+          ครบทุกแบบที่ DET ออกจริง
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ SOCIAL PROOF ═══════════════════ -->
+  <section class="bg-[#f7f8fa]">
+    <div class="mx-auto max-w-5xl px-6 py-24 sm:py-32">
+      <p class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink/35 mb-12">Results</p>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <figure class="rounded-2xl bg-white border hairline p-8 flex flex-col">
+          <div class="flex items-baseline gap-3 font-mono font-semibold text-[28px] tracking-tight">
+            <span class="text-ink/40">95</span>
+            <span class="text-ep-blue text-[20px]">→</span>
+            <span class="text-ink">115</span>
+          </div>
+          <blockquote class="mt-6 text-[16px] leading-relaxed text-ink/75 flex-1">
+            “ได้ฟีดแบ็กที่บอกตรง ๆ ว่าต้องปรับอะไร มั่นใจขึ้นเยอะ”
+          </blockquote>
+          <figcaption class="mt-6 text-[13px] text-ink/45">— พิมพ์</figcaption>
+        </figure>
+
+        <figure class="rounded-2xl bg-white border hairline p-8 flex flex-col">
+          <div class="flex items-baseline gap-3 font-mono font-semibold text-[28px] tracking-tight">
+            <span class="text-ink">115</span>
+            <span class="text-ep-blue text-[20px]">·</span>
+            <span class="text-ink/50 text-[20px]">กำลังไป</span>
+            <span class="text-ink">130</span>
+          </div>
+          <blockquote class="mt-6 text-[16px] leading-relaxed text-ink/75 flex-1">
+            “อธิบายภาษาไทย + ฟีดแบ็กบอกวิธีอัปคะแนน Production ได้เร็ว”
+          </blockquote>
+          <figcaption class="mt-6 text-[13px] text-ink/45">— ลิลลี่</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ FAST TRACK (understated) ═══════════════════ -->
+  <section class="bg-white">
+    <div class="mx-auto max-w-5xl px-6">
+      <a href="/?fastTrack=1"
+         class="group flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 rounded-2xl border hairline bg-white px-7 sm:px-9 py-7 hover:border-ep-blue/40 transition-colors">
+        <div class="flex items-center gap-4">
+          <span class="h-2 w-2 rounded-full bg-ep-yellow shrink-0"></span>
+          <span class="text-[16px] sm:text-[17px] text-ink/85">
+            นักเรียนคอร์ส Duolingo Fast Track — <span class="font-medium text-ink">VIP 6 เดือนฟรี</span>
+          </span>
+        </div>
+        <span class="font-mono text-[13px] text-ep-blue whitespace-nowrap group-hover:translate-x-0.5 transition-transform">รับสิทธิ์ →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ PRICING ═══════════════════ -->
+  <section class="bg-white">
+    <div class="mx-auto max-w-6xl px-6 py-24 sm:py-32">
+      <div class="flex items-baseline gap-4 mb-3">
+        <span class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink/35">Pricing</span>
+      </div>
+      <h2 class="font-display font-semibold text-[28px] sm:text-[36px] tracking-tight">
+        เลือกให้พอดีกับเป้าคะแนน
+      </h2>
+
+      <div class="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+
+        <!-- FREE -->
+        <div class="flex flex-col rounded-2xl border hairline bg-white p-7">
+          <p class="text-[15px] font-medium text-ink/80">ฟรี</p>
+          <p class="mt-4 font-mono font-semibold text-[32px] leading-none">฿0</p>
+          <p class="mt-2 font-mono text-[12px] text-ink/40">ตลอดไป</p>
+          <ul class="mt-6 space-y-2.5 text-[14px] text-ink/60 flex-1">
+            <li>เช็กระดับฟรี</li>
+            <li>ตัวอย่างฟีดแบ็ก</li>
+          </ul>
+          <a href="/explore" class="mt-7 inline-flex justify-center rounded-full border hairline text-ink font-medium text-[15px] px-5 py-3 hover:border-ep-blue/50 hover:text-ep-blue transition">
+            เริ่มฟรี
+          </a>
+        </div>
+
+        <!-- BASIC -->
+        <div class="flex flex-col rounded-2xl border hairline bg-white p-7">
+          <p class="text-[15px] font-medium text-ink/80">Basic</p>
+          <p class="mt-4 font-mono font-semibold text-[32px] leading-none">฿399</p>
+          <p class="mt-2 font-mono text-[12px] text-ink/40">/ 30 วัน</p>
+          <ul class="mt-6 space-y-2.5 text-[14px] text-ink/60 flex-1">
+            <li>ฟีดแบ็ก <span class="font-mono text-ink/80">12</span></li>
+            <li>Mock <span class="font-mono text-ink/80">2</span></li>
+          </ul>
+          <a href="/signup?next=/pricing?plan=basic" class="mt-7 inline-flex justify-center rounded-full border hairline text-ink font-medium text-[15px] px-5 py-3 hover:border-ep-blue/50 hover:text-ep-blue transition">
+            สมัคร + จ่าย QR พร้อมเพย์
+          </a>
+        </div>
+
+        <!-- PREMIUM (featured) -->
+        <div class="relative flex flex-col rounded-2xl bg-ink text-white p-7 glow-blue-soft">
+          <span class="absolute -top-3 left-7 font-mono text-[11px] tracking-widest uppercase bg-ep-yellow text-ink px-3 py-1 rounded-full">แนะนำ</span>
+          <p class="text-[15px] font-medium text-white/90">Premium</p>
+          <p class="mt-4 font-mono font-semibold text-[32px] leading-none">฿699</p>
+          <p class="mt-2 font-mono text-[12px] text-white/40">/ 30 วัน</p>
+          <ul class="mt-6 space-y-2.5 text-[14px] text-white/70 flex-1">
+            <li>ฟีดแบ็ก <span class="font-mono text-white">30</span></li>
+            <li>Mock <span class="font-mono text-white">4</span></li>
+            <li>มินิเลสซัน</li>
+          </ul>
+          <a href="/signup?next=/pricing?plan=premium" class="mt-7 inline-flex justify-center rounded-full bg-white text-ink font-semibold text-[15px] px-5 py-3 hover:bg-ep-yellow transition">
+            สมัคร + จ่าย QR พร้อมเพย์
+          </a>
+        </div>
+
+        <!-- VIP -->
+        <div class="flex flex-col rounded-2xl border hairline bg-white p-7">
+          <p class="text-[15px] font-medium text-ink/80">VIP</p>
+          <p class="mt-4 font-mono font-semibold text-[32px] leading-none">฿999</p>
+          <p class="mt-2 font-mono text-[12px] text-ink/40">/ 30 วัน</p>
+          <ul class="mt-6 space-y-2.5 text-[14px] text-ink/60 flex-1">
+            <li>ฟีดแบ็ก <span class="font-mono text-ink/80">60</span></li>
+            <li>Mock <span class="font-mono text-ink/80">6</span></li>
+            <li>ไม่จำกัด</li>
+            <li>มินิเลสซันครบ</li>
+          </ul>
+          <a href="/signup?next=/pricing?plan=vip" class="mt-7 inline-flex justify-center rounded-full border hairline text-ink font-medium text-[15px] px-5 py-3 hover:border-ep-blue/50 hover:text-ep-blue transition">
+            สมัคร + จ่าย QR พร้อมเพย์
+          </a>
+        </div>
+      </div>
+
+      <p class="mt-8 font-mono text-[12px] text-ink/40 text-center">ซื้อ 30 วัน ไม่ตัดเงินอัตโนมัติ</p>
+
+      <p class="mt-6 text-center text-[14px] text-ink/55">
+        ยังไม่พร้อมจ่าย? <a href="/mini-diagnosis/start" class="text-ep-blue font-medium hover:underline underline-offset-4">ลองเช็กระดับฟรี →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ FINAL CTA (DARK) ═══════════════════ -->
+  <section class="relative bg-ink text-white overflow-hidden">
+    <div aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full glow-blue opacity-60"></div>
+    <div class="relative z-10 mx-auto max-w-3xl px-6 py-28 sm:py-36 text-center">
+      <h2 class="font-display font-bold text-[30px] sm:text-[46px] leading-[1.12] tracking-tight">
+        เริ่มจากรู้ว่าตัวเองอ่อนตรงไหน
+      </h2>
+      <div class="mt-12 flex flex-col items-center gap-4">
+        <a href="/explore"
+           class="group inline-flex items-center gap-2 rounded-full bg-white text-ink font-semibold text-[16px] px-9 py-4 hover:bg-ep-yellow transition-colors">
+          เช็กระดับของคุณฟรี
+          <span class="transition-transform group-hover:translate-x-0.5">→</span>
+        </a>
+        <p class="font-mono text-[12px] text-white/40">ฟรี · ไม่ต้องใส่บัตร</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════ RATIONALE (strippable) ═══════════════════ -->
+<aside class="bg-[#f2f3f5]">
+  <div class="mx-auto max-w-4xl px-6 py-12">
+    <p class="font-mono text-[11px] tracking-[0.2em] uppercase text-ink/35 mb-3">ทำไมออกแบบแบบนี้</p>
+    <p class="text-[13px] leading-relaxed text-ink/55">
+      แรงบันดาลใจจาก <span class="font-medium text-ink/70">Speak</span> (ฮีโร่ดำล้วน + โฟกัสวิชวลเดียว, ตัวเลขใหญ่, คำน้อย)
+      และ <span class="font-medium text-ink/70">Superhuman</span> (ความยับยั้งชั่งใจแบบพรีเมียม, ไทป์เฉียบ, whitespace เยอะ, สีเหลืองใช้จุดเล็ก ๆ แบบ luxury accent)
+      เพื่อวางตำแหน่ง English Plan เป็นตัวเลือกจริงจังที่คุ้มค่ากับราคา
+      สิ่งที่ตัดออก: gradient ทั้งหมด (ใช้พื้นทึบ + เงา glow แทน), อีโมจิเยอะ ๆ, บล็อกฟีเจอร์ยาว ๆ, และคำโฆษณาซ้ำซ้อน —
+      เหลือเฉพาะตัวเลข ผลลัพธ์ และ CTA เดียวที่ชัด
+    </p>
+  </div>
+</aside>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="bg-ink text-white">
+  <div class="mx-auto max-w-6xl px-6 py-14">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8">
+      <div class="flex items-center gap-3">
+        <span class="grid h-8 w-8 place-items-center rounded-md bg-ep-blue font-display font-bold text-[13px]">EP</span>
+        <div>
+          <p class="font-display font-semibold tracking-tight text-[15px] leading-none">ENGLISH PLAN</p>
+          <p class="mt-1.5 text-[12px] text-white/45">ติว DET สำหรับคนไทย</p>
+        </div>
+      </div>
+      <nav class="flex flex-wrap items-center gap-x-8 gap-y-3 text-[14px]">
+        <a href="/about" class="text-white/60 hover:text-white transition">เกี่ยวกับเรา</a>
+        <a href="/login" class="text-white/60 hover:text-white transition">เข้าสู่ระบบ</a>
+        <a href="/?fastTrack=1" class="text-white/60 hover:text-white transition">นักเรียนคอร์ส</a>
+      </nav>
+    </div>
+    <div class="mt-10 pt-6 border-t hairline-dark">
+      <p class="font-mono text-[11px] text-white/30 tracking-wide">EP · ENGLISH PLAN · © 2026</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Hero numbers: fade in + optional count-up
+    var from = document.getElementById('numFrom');
+    var to = document.getElementById('numTo');
+    var heroNums = document.querySelectorAll('.hero-num');
+
+    function reveal() {
+      heroNums.forEach(function (el) { el.classList.add('in'); });
+      if (!reduce) {
+        countUp(from, 95, 900, 0);
+        countUp(to, 130, 1100, 300);
+      }
+    }
+
+    function countUp(el, target, dur, delay) {
+      if (!el) return;
+      var start = performance.now() + delay;
+      function frame(now) {
+        var t = (now - start) / dur;
+        if (t < 0) { requestAnimationFrame(frame); return; }
+        if (t > 1) t = 1;
+        var eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.round(target * eased).toString();
+        if (t < 1) requestAnimationFrame(frame);
+        else el.textContent = target.toString();
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // trigger hero on load (slight delay so fonts settle)
+    window.addEventListener('load', function () { setTimeout(reveal, 120); });
+
+    // Bars: animate width when scrolled into view
+    var bars = document.querySelectorAll('.bar');
+    if ('IntersectionObserver' in window && !reduce) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            var b = e.target;
+            b.style.width = b.getAttribute('data-w') || '0';
+            io.unobserve(b);
+          }
+        });
+      }, { threshold: 0.4 });
+      bars.forEach(function (b) { io.observe(b); });
+    } else {
+      bars.forEach(function (b) { b.style.width = b.getAttribute('data-w') || '0'; });
+    }
+  })();
+</script>
+
+</body>
+</html>

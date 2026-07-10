@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>English Plan · เห็นเลยว่าต้องแก้ประโยคไหน คำไหน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-yellow': '#FFCC00',
+          'ep-green': '#16a34a',
+          'ep-amber': '#d97706',
+        },
+        fontFamily: {
+          sans: ['IBM Plex Sans Thai', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+          head: ['Bai Jamjuree', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'IBM Plex Sans Thai', sans-serif; background: #ffffff; }
+  h1, h2 { font-family: 'Bai Jamjuree', sans-serif; }
+  .font-mono, .num { font-family: 'JetBrains Mono', monospace; }
+
+  /* Correction semantics */
+  .u-wrong {
+    text-decoration: underline wavy #dc2626 2px;
+    text-underline-offset: 4px;
+    background: rgba(220,38,38,0.06);
+    border-radius: 3px;
+    padding: 0 1px;
+    cursor: help;
+  }
+  .u-amber {
+    text-decoration: underline wavy #d97706 2px;
+    text-underline-offset: 4px;
+    background: rgba(217,119,6,0.07);
+    border-radius: 3px;
+    padding: 0 1px;
+    cursor: help;
+  }
+  .u-fixed { color: #16a34a; font-weight: 600; }
+  .strike { text-decoration: line-through; color: #dc2626; }
+
+  /* Blinking cursor */
+  .caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    background: #004AAD;
+    vertical-align: -0.15em;
+    margin-left: 1px;
+    animation: blink 1.05s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Popover gentle float */
+  .pop-float { animation: floaty 3.4s ease-in-out infinite; }
+  @keyframes floaty {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  /* Score bar fill-in */
+  .bar-fill { animation: grow 1.2s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes grow { from { width: 0; } }
+
+  .card-shadow { box-shadow: 0 1px 2px rgba(16,24,40,0.05), 0 12px 32px -12px rgba(16,24,40,0.18); }
+  .card-shadow-lg { box-shadow: 0 2px 4px rgba(16,24,40,0.06), 0 28px 60px -18px rgba(0,74,173,0.28); }
+</style>
+</head>
+<body class="text-slate-800 antialiased">
+
+<!-- PREVIEW RIBBON (strippable) -->
+<div class="bg-slate-900 text-slate-200 text-xs">
+  <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
+    <a href="/landing-convert-index.html" class="hover:text-white transition-colors">&larr; Preview hub</a>
+    <span class="font-mono text-slate-400">V2 · Grammarly — โชว์ของจริง</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+  <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-ep-blue text-ep-yellow font-head font-bold grid place-items-center text-sm">EP</div>
+      <span class="font-head font-semibold text-ep-blue tracking-tight">English Plan</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="/login" class="hidden sm:inline text-sm text-slate-600 hover:text-ep-blue px-3 py-2 transition-colors">เข้าสู่ระบบ</a>
+      <a href="/explore" class="text-sm font-semibold bg-ep-blue text-white px-4 py-2 rounded-lg hover:bg-[#003a86] transition-colors">เช็กระดับฟรี</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="border-b border-slate-100">
+  <div class="max-w-6xl mx-auto px-4 py-12 md:py-16 grid lg:grid-cols-[minmax(0,44%)_minmax(0,56%)] gap-10 lg:gap-8 items-center">
+
+    <!-- LEFT: headline + CTA -->
+    <div>
+      <div class="inline-flex items-center gap-2 text-xs font-semibold text-ep-blue bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5 mb-5">
+        <span class="w-1.5 h-1.5 rounded-full bg-ep-blue"></span>
+        ติว Duolingo English Test (DET) · สำหรับคนไทย
+      </div>
+      <h1 class="text-3xl md:text-4xl lg:text-[2.65rem] leading-[1.15] font-bold text-slate-900">
+        เห็นเลยว่าต้องแก้<br class="hidden md:block" />
+        <span class="text-ep-blue">ประโยคไหน คำไหน</span>
+      </h1>
+      <p class="mt-4 text-base md:text-lg text-slate-600 leading-relaxed">
+        ไม่ใช่แค่บอกถูก/ผิด — English Plan บอก<strong class="text-slate-800">วิธีแก้ให้คะแนนขึ้น</strong> เป็นภาษาไทย
+      </p>
+      <div class="mt-7 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <a href="/explore" class="w-full sm:w-auto text-center bg-ep-blue text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-[#003a86] transition-colors card-shadow">
+          เช็กระดับของคุณฟรี
+        </a>
+        <a href="/mini-diagnosis/start" class="w-full sm:w-auto text-center text-ep-blue font-semibold px-5 py-3.5 rounded-xl border border-slate-200 hover:border-ep-blue transition-colors">
+          ลองเช็กระดับฟรี
+        </a>
+      </div>
+      <p class="mt-4 text-sm text-slate-500 flex items-center gap-2">
+        <svg class="w-4 h-4 text-ep-green" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clip-rule="evenodd"/></svg>
+        <span class="font-mono">ฟรี</span> · ไม่ต้องใส่บัตร
+      </p>
+    </div>
+
+    <!-- RIGHT: LIVE FEEDBACK PRODUCT CARD (the star) -->
+    <div class="relative">
+      <!-- ambient yellow accent block behind -->
+      <div class="absolute -top-4 -right-3 w-24 h-24 bg-ep-yellow rounded-2xl -z-10 hidden md:block"></div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 card-shadow-lg overflow-hidden">
+        <!-- browser chrome -->
+        <div class="flex items-center gap-3 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+          <div class="flex gap-1.5">
+            <span class="w-3 h-3 rounded-full bg-red-400"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+            <span class="w-3 h-3 rounded-full bg-green-400"></span>
+          </div>
+          <div class="flex-1 mx-1 bg-white border border-slate-200 rounded-md px-3 py-1 text-[11px] font-mono text-slate-400 truncate">
+            english-plan · feedback
+          </div>
+        </div>
+
+        <!-- body -->
+        <div class="p-5 relative">
+          <!-- question -->
+          <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-1">Writing · Describe</p>
+          <p class="text-sm font-medium text-slate-700 mb-4 leading-snug">
+            “Describe a habit that helps you stay productive.”
+          </p>
+
+          <!-- answer with inline underlines -->
+          <div class="relative text-[15px] leading-[1.85] text-slate-800 bg-slate-50/60 border border-slate-100 rounded-xl p-4 mb-4">
+            I always wake up early. I make a list of things to do. This habit
+            <span class="u-wrong">helped</span> me finish my work on time. Also, I drink coffee
+            because it is <span class="u-amber">good for concentrate.</span><span class="caret"></span>
+
+            <!-- floating popover: pointing at "helped" -->
+            <div class="pop-float absolute left-2 sm:left-6 top-[3.9rem] z-20 w-[13.5rem] bg-white rounded-xl border border-red-200 card-shadow p-3">
+              <div class="flex items-center gap-1.5 mb-1">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                <span class="text-[11px] font-semibold text-red-600 uppercase tracking-wide">tense</span>
+              </div>
+              <p class="text-[12.5px] text-slate-600 leading-snug">
+                ควรเป็น <span class="u-fixed">helps</span> <span class="text-slate-400">(นิสัยที่ทำประจำ)</span>
+              </p>
+              <!-- pointer -->
+              <div class="absolute -top-1.5 left-6 w-3 h-3 bg-white border-l border-t border-red-200 rotate-45"></div>
+            </div>
+          </div>
+
+          <!-- amber hint (inline chip) -->
+          <div class="flex items-start gap-2 mb-4 text-[13px]">
+            <span class="mt-0.5 w-2 h-2 rounded-full bg-ep-amber shrink-0"></span>
+            <p class="text-slate-600">
+              <span class="text-ep-amber font-semibold">good for concentrate</span>
+              → <span class="u-fixed">which boosts my focus</span>
+              <span class="text-slate-400">(ลื่นกว่า)</span>
+            </p>
+          </div>
+
+          <!-- band + score bars -->
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold text-slate-500">คาดว่าอยู่ช่วง</span>
+            <span class="text-sm font-mono font-bold text-ep-blue bg-blue-50 border border-blue-100 rounded-md px-2.5 py-0.5">120–130</span>
+          </div>
+
+          <div class="space-y-2.5">
+            <!-- Grammar -->
+            <div>
+              <div class="flex justify-between text-[12px] mb-1">
+                <span class="text-slate-600">Grammar</span>
+                <span class="font-mono font-semibold text-slate-800">92</span>
+              </div>
+              <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-ep-green rounded-full bar-fill" style="width:92%"></div>
+              </div>
+            </div>
+            <!-- Vocabulary -->
+            <div>
+              <div class="flex justify-between text-[12px] mb-1">
+                <span class="text-slate-600">Vocabulary</span>
+                <span class="font-mono font-semibold text-slate-800">88</span>
+              </div>
+              <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-ep-green rounded-full bar-fill" style="width:88%"></div>
+              </div>
+            </div>
+            <!-- Flow (warn) -->
+            <div>
+              <div class="flex justify-between text-[12px] mb-1">
+                <span class="text-ep-amber font-medium">Flow &amp; Coherence</span>
+                <span class="font-mono font-semibold text-ep-amber">79</span>
+              </div>
+              <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-ep-amber rounded-full bar-fill" style="width:79%"></div>
+              </div>
+            </div>
+            <!-- Task Response -->
+            <div>
+              <div class="flex justify-between text-[12px] mb-1">
+                <span class="text-slate-600">Task Response</span>
+                <span class="font-mono font-semibold text-slate-800">90</span>
+              </div>
+              <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-ep-green rounded-full bar-fill" style="width:90%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thai note block -->
+          <div class="mt-4 flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl p-3">
+            <div class="w-6 h-6 rounded-lg bg-ep-blue text-ep-yellow grid place-items-center text-[10px] font-head font-bold shrink-0">EP</div>
+            <p class="text-[12.5px] text-slate-700 leading-snug">
+              <span class="font-semibold text-ep-blue">โน้ตจาก English Plan:</span>
+              แก้ <span class="strike">helped</span> → <span class="u-fixed">helps</span> แล้ว Flow ขึ้นทันที
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ 4 TOOLS ROW ============ -->
+<section class="border-b border-slate-100 bg-slate-50/50">
+  <div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="bg-white border border-slate-200 rounded-xl px-4 py-3.5 flex items-center gap-3">
+        <span class="text-xl">🎯</span>
+        <span class="text-[13px] font-medium text-slate-700 leading-tight">เช็กระดับฟรี</span>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl px-4 py-3.5 flex items-center gap-3">
+        <span class="text-xl">📝</span>
+        <span class="text-[13px] font-medium text-slate-700 leading-tight">Mock test <span class="text-slate-400">(บอก 2 ทักษะที่ฉุดคะแนน)</span></span>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl px-4 py-3.5 flex items-center gap-3">
+        <span class="text-xl">🔍</span>
+        <span class="text-[13px] font-medium text-slate-700 leading-tight">ฟีดแบ็กรายข้อภาษาไทย</span>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl px-4 py-3.5 flex items-center gap-3">
+        <span class="text-xl">💡</span>
+        <span class="text-[13px] font-medium text-slate-700 leading-tight">เทคนิคเพิ่มคะแนนสั้น ๆ</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MOCK REPORT PANEL ============ -->
+<section class="border-b border-slate-100">
+  <div class="max-w-6xl mx-auto px-4 py-14 md:py-16 grid lg:grid-cols-2 gap-10 items-center">
+
+    <!-- copy -->
+    <div class="order-2 lg:order-1">
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 leading-snug">
+        Mock test บอก<span class="text-ep-blue">จุดอ่อน</span>ให้เห็นชัด
+      </h2>
+      <p class="mt-3 text-slate-600 leading-relaxed">
+        เก็บ Writing + Speaking ก่อน — 2 ทักษะนี้ฉุดคะแนนรวม
+      </p>
+      <div class="mt-5 inline-flex items-center gap-2 text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2">
+        <svg class="w-4 h-4 text-ep-blue" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.3.7l2.5 2.5a1 1 0 001.4-1.4L11 9.6V6z" clip-rule="evenodd"/></svg>
+        <span class="font-mono">20</span> ข้อ · <span class="font-mono">~1</span> ชม. เหมือนสอบจริง
+      </div>
+    </div>
+
+    <!-- mock report product card -->
+    <div class="order-1 lg:order-2">
+      <div class="bg-white rounded-2xl border border-slate-200 card-shadow-lg overflow-hidden">
+        <!-- chrome -->
+        <div class="flex items-center gap-3 px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+          <div class="flex gap-1.5">
+            <span class="w-3 h-3 rounded-full bg-red-400"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+            <span class="w-3 h-3 rounded-full bg-green-400"></span>
+          </div>
+          <div class="flex-1 mx-1 bg-white border border-slate-200 rounded-md px-3 py-1 text-[11px] font-mono text-slate-400 truncate">
+            english-plan · mock-report
+          </div>
+        </div>
+
+        <div class="p-5">
+          <!-- total -->
+          <div class="flex items-end justify-between mb-5">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">คะแนนรวม (Mock)</p>
+              <p class="font-mono text-4xl font-bold text-ep-blue leading-none mt-1">108<span class="text-lg text-slate-300">/160</span></p>
+            </div>
+            <span class="text-[11px] font-semibold text-ep-amber bg-amber-50 border border-amber-200 rounded-full px-3 py-1">มีจุดอ่อน 2 ทักษะ</span>
+          </div>
+
+          <!-- 4 skills -->
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Writing weak -->
+            <div class="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[12px] font-semibold text-slate-700">Writing</span>
+                <span class="text-[10px] font-semibold text-ep-amber bg-white border border-amber-200 rounded px-1.5 py-0.5">จุดอ่อน</span>
+              </div>
+              <p class="font-mono text-2xl font-bold text-ep-amber leading-none">85</p>
+            </div>
+            <!-- Speaking weak -->
+            <div class="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[12px] font-semibold text-slate-700">Speaking</span>
+                <span class="text-[10px] font-semibold text-ep-amber bg-white border border-amber-200 rounded px-1.5 py-0.5">จุดอ่อน</span>
+              </div>
+              <p class="font-mono text-2xl font-bold text-ep-amber leading-none">95</p>
+            </div>
+            <!-- Reading ok -->
+            <div class="rounded-xl border border-slate-200 bg-white p-3">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[12px] font-semibold text-slate-700">Reading</span>
+                <span class="text-[10px] font-semibold text-ep-green">ดี</span>
+              </div>
+              <p class="font-mono text-2xl font-bold text-slate-800 leading-none">120</p>
+            </div>
+            <!-- Listening ok -->
+            <div class="rounded-xl border border-slate-200 bg-white p-3">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[12px] font-semibold text-slate-700">Listening</span>
+                <span class="text-[10px] font-semibold text-ep-green">ดี</span>
+              </div>
+              <p class="font-mono text-2xl font-bold text-slate-800 leading-none">130</p>
+            </div>
+          </div>
+
+          <!-- note -->
+          <div class="mt-4 flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl p-3">
+            <div class="w-6 h-6 rounded-lg bg-ep-blue text-ep-yellow grid place-items-center text-[10px] font-head font-bold shrink-0">EP</div>
+            <p class="text-[12.5px] text-slate-700 leading-snug">
+              <span class="font-semibold text-ep-blue">โฟกัสตรงนี้:</span>
+              เก็บ Writing + Speaking ก่อน — 2 ทักษะนี้ฉุดคะแนนรวมมากสุด
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ EXAM COVERAGE GRID ============ -->
+<section class="border-b border-slate-100 bg-slate-50/50">
+  <div class="max-w-6xl mx-auto px-4 py-14 md:py-16">
+    <div class="text-center mb-8">
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900">ครบทุกแบบที่ DET ออกจริง</h2>
+      <p class="mt-2 text-slate-600">ตรวจ / ให้คะแนนทันที</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Production -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 card-shadow">
+        <div class="w-10 h-10 rounded-xl bg-ep-blue text-white grid place-items-center text-lg mb-3">✍️</div>
+        <p class="font-head font-semibold text-slate-900">Production</p>
+        <p class="text-[13px] text-slate-500 mt-0.5">เขียน–พูด</p>
+        <div class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-ep-blue bg-blue-50 rounded-full px-2.5 py-1">
+          <span class="font-mono">5</span> แบบ
+        </div>
+      </div>
+      <!-- Comprehension -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 card-shadow">
+        <div class="w-10 h-10 rounded-xl bg-ep-blue text-white grid place-items-center text-lg mb-3">📖</div>
+        <p class="font-head font-semibold text-slate-900">Comprehension</p>
+        <p class="text-[13px] text-slate-500 mt-0.5">การอ่าน</p>
+        <div class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-ep-blue bg-blue-50 rounded-full px-2.5 py-1">
+          <span class="font-mono">2</span> แบบ
+        </div>
+      </div>
+      <!-- Literacy -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 card-shadow">
+        <div class="w-10 h-10 rounded-xl bg-ep-blue text-white grid place-items-center text-lg mb-3">🔤</div>
+        <p class="font-head font-semibold text-slate-900">Literacy</p>
+        <p class="text-[13px] text-slate-500 mt-0.5">สะกด–ฟัง</p>
+        <div class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-ep-blue bg-blue-50 rounded-full px-2.5 py-1">
+          <span class="font-mono">3</span> แบบ
+        </div>
+      </div>
+      <!-- Conversation -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-5 card-shadow">
+        <div class="w-10 h-10 rounded-xl bg-ep-blue text-white grid place-items-center text-lg mb-3">🎧</div>
+        <p class="font-head font-semibold text-slate-900">Conversation</p>
+        <p class="text-[13px] text-slate-500 mt-0.5">ฟังสนทนา</p>
+        <div class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-ep-blue bg-blue-50 rounded-full px-2.5 py-1">
+          <span class="font-mono">2</span> แบบ
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOCIAL PROOF ============ -->
+<section class="border-b border-slate-100">
+  <div class="max-w-6xl mx-auto px-4 py-14 md:py-16">
+    <div class="grid md:grid-cols-2 gap-5">
+      <!-- พิมพ์ -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 card-shadow">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-11 h-11 rounded-full bg-ep-blue text-white grid place-items-center font-head font-bold">พ</div>
+          <div>
+            <p class="font-semibold text-slate-900">พิมพ์</p>
+            <p class="text-sm font-mono text-ep-green font-semibold">95 → 115</p>
+          </div>
+        </div>
+        <p class="text-slate-700 leading-relaxed">
+          “พอได้ฟีดแบ็กที่บอกตรง ๆ ว่าต้องปรับอะไร มั่นใจขึ้นเยอะ”
+        </p>
+      </div>
+      <!-- ลิลลี่ -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 card-shadow">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-11 h-11 rounded-full bg-ep-yellow text-ep-blue grid place-items-center font-head font-bold">ล</div>
+          <div>
+            <p class="font-semibold text-slate-900">ลิลลี่</p>
+            <p class="text-sm font-mono text-ep-blue font-semibold">115 · กำลังไป 130</p>
+          </div>
+        </div>
+        <p class="text-slate-700 leading-relaxed">
+          “เว็บอื่นอธิบายอังกฤษล้วน งงไปหมด ที่นี่อธิบายภาษาไทย + ฟีดแบ็กบอกวิธีอัปคะแนน Production ได้เร็ว”
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAST TRACK BAR ============ -->
+<section class="border-b border-slate-100">
+  <div class="max-w-6xl mx-auto px-4 py-6">
+    <a href="/?fastTrack=1" class="block group">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-ep-blue rounded-2xl px-6 py-5">
+        <div class="flex items-center gap-3 text-center sm:text-left">
+          <span class="text-2xl">🚀</span>
+          <p class="text-white font-medium">
+            นักเรียนคอร์ส <span class="font-semibold">Duolingo Fast Track</span> รับ <span class="text-ep-yellow font-semibold">VIP 6 เดือนฟรี</span>
+          </p>
+        </div>
+        <span class="shrink-0 inline-flex items-center gap-1.5 bg-ep-yellow text-ep-blue font-semibold text-sm px-4 py-2 rounded-lg group-hover:brightness-95 transition">
+          รับสิทธิ์ <span aria-hidden="true">→</span>
+        </span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="border-b border-slate-100 bg-slate-50/50">
+  <div class="max-w-6xl mx-auto px-4 py-14 md:py-16">
+    <div class="text-center mb-9">
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900">เลือกแพ็กที่ใช่</h2>
+      <p class="mt-2 text-slate-600">ซื้อ <span class="font-mono">30</span> วัน ไม่ตัดเงินอัตโนมัติ</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+
+      <!-- FREE -->
+      <div class="flex flex-col bg-white border border-slate-200 rounded-2xl p-6">
+        <p class="font-head font-semibold text-slate-900">ฟรี</p>
+        <p class="mt-2 font-mono text-3xl font-bold text-slate-900">฿0<span class="text-sm font-normal text-slate-400"> ตลอดไป</span></p>
+        <ul class="mt-4 space-y-2 text-sm text-slate-600 flex-1">
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> เช็กระดับฟรี</li>
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> ลองทำข้อสอบตัวอย่าง</li>
+        </ul>
+        <a href="/explore" class="mt-5 text-center font-semibold text-ep-blue border border-slate-200 rounded-xl py-2.5 hover:border-ep-blue transition-colors">
+          เริ่มฟรี
+        </a>
+      </div>
+
+      <!-- BASIC -->
+      <div class="flex flex-col bg-white border border-slate-200 rounded-2xl p-6">
+        <p class="font-head font-semibold text-slate-900">Basic</p>
+        <p class="mt-2 font-mono text-3xl font-bold text-slate-900">฿399<span class="text-sm font-normal text-slate-400">/30วัน</span></p>
+        <ul class="mt-4 space-y-2 text-sm text-slate-600 flex-1">
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> ฟีดแบ็ก <span class="font-mono">12</span>/เดือน</li>
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> Mock <span class="font-mono">2</span></li>
+        </ul>
+        <a href="/signup?next=/pricing?plan=basic" class="mt-5 text-center font-semibold text-white bg-ep-blue rounded-xl py-2.5 hover:bg-[#003a86] transition-colors">
+          สมัคร + จ่าย QR พร้อมเพย์
+        </a>
+      </div>
+
+      <!-- PREMIUM (popular) -->
+      <div class="flex flex-col bg-white rounded-2xl p-6 border-2 border-ep-blue relative card-shadow-lg">
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-ep-yellow text-ep-blue text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">ยอดนิยม</span>
+        <p class="font-head font-semibold text-ep-blue">Premium</p>
+        <p class="mt-2 font-mono text-3xl font-bold text-slate-900">฿699<span class="text-sm font-normal text-slate-400">/30วัน</span></p>
+        <ul class="mt-4 space-y-2 text-sm text-slate-600 flex-1">
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> ฟีดแบ็ก <span class="font-mono">30</span>/เดือน</li>
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> Mock <span class="font-mono">4</span></li>
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> มินิเลสซัน</li>
+        </ul>
+        <a href="/signup?next=/pricing?plan=premium" class="mt-5 text-center font-semibold text-white bg-ep-blue rounded-xl py-2.5 hover:bg-[#003a86] transition-colors">
+          สมัคร + จ่าย QR พร้อมเพย์
+        </a>
+      </div>
+
+      <!-- VIP -->
+      <div class="flex flex-col bg-white border border-slate-200 rounded-2xl p-6">
+        <p class="font-head font-semibold text-slate-900">VIP</p>
+        <p class="mt-2 font-mono text-3xl font-bold text-slate-900">฿999<span class="text-sm font-normal text-slate-400">/30วัน</span></p>
+        <ul class="mt-4 space-y-2 text-sm text-slate-600 flex-1">
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> ฟีดแบ็ก <span class="font-mono">60</span>/เดือน</li>
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> Mock <span class="font-mono">6</span></li>
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> ไม่จำกัด</li>
+          <li class="flex gap-2"><span class="text-ep-green">✓</span> มินิเลสซันครบ</li>
+        </ul>
+        <a href="/signup?next=/pricing?plan=vip" class="mt-5 text-center font-semibold text-white bg-ep-blue rounded-xl py-2.5 hover:bg-[#003a86] transition-colors">
+          สมัคร + จ่าย QR พร้อมเพย์
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="border-b border-slate-100">
+  <div class="max-w-6xl mx-auto px-4 py-16 text-center">
+    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 leading-snug">
+      เริ่มจากรู้ว่าตัวเอง<span class="text-ep-blue">อ่อนตรงไหน</span>
+    </h2>
+    <p class="mt-3 text-slate-600">ฟรี ไม่ต้องใส่บัตร</p>
+    <a href="/explore" class="mt-7 inline-block bg-ep-blue text-white font-semibold px-8 py-4 rounded-xl hover:bg-[#003a86] transition-colors card-shadow">
+      เช็กระดับของคุณฟรี
+    </a>
+  </div>
+</section>
+
+<!-- ============ RATIONALE NOTE (strippable) ============ -->
+<section class="bg-slate-50 border-b border-slate-100">
+  <div class="max-w-3xl mx-auto px-4 py-6">
+    <p class="text-[12.5px] text-slate-400 leading-relaxed">
+      <span class="font-semibold text-slate-500">ทำไมออกแบบแบบนี้:</span>
+      แรงบันดาลใจจากหน้าเว็บ Grammarly ที่โชว์ “ตัวโปรดักต์กำลังแก้ข้อความจริง” ตรงกลางหน้าแรก
+      แทนที่จะเล่าด้วยคำโฆษณา — ผู้ใช้เข้าใจใน 2 วินาที. เราจึงทำ Hero เป็น product panel ที่มี browser chrome + ขีดเส้นใต้สีแดง/เหลือง + popover ลอย
+      ให้เห็นระบบตรวจ “ทำงานอยู่จริง”. สิ่งที่ตัดออก: ย่อหน้าอธิบายยาว ๆ, hero image ตกแต่ง, และ CSS gradient (ใช้สีทึบล้วนตามกติกา) —
+      เนื้อหาถูกบีบให้อยู่ใน product shot ให้มากที่สุด. บล็อกนี้ถอดออกได้ตอนนำไปใช้จริง.
+    </p>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="bg-white">
+  <div class="max-w-6xl mx-auto px-4 py-10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-ep-blue text-ep-yellow font-head font-bold grid place-items-center text-sm">EP</div>
+        <div>
+          <p class="font-head font-semibold text-ep-blue leading-none">ENGLISH PLAN</p>
+          <p class="text-xs text-slate-400 mt-1">ติว DET สำหรับคนไทย</p>
+        </div>
+      </div>
+      <nav class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-600">
+        <a href="/about" class="hover:text-ep-blue transition-colors">เกี่ยวกับเรา</a>
+        <a href="/login" class="hover:text-ep-blue transition-colors">เข้าสู่ระบบ</a>
+        <a href="/?fastTrack=1" class="hover:text-ep-blue transition-colors">นักเรียนคอร์ส</a>
+      </nav>
+    </div>
+    <p class="mt-6 pt-6 border-t border-slate-100 text-xs text-slate-400">
+      © <span class="font-mono">2026</span> English Plan · ระบบตรวจให้ฟีดแบ็กเป็นภาษาไทย จากฐานข้อมูลคำตอบที่เก็บมา 6 ปี
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

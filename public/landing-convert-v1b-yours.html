@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>English Plan · V1 สนุก เป็นมิตร (แบรนด์ EP)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Thai+2:wght@500;600;700;800&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-blue-dark': '#003A87',
+          'ep-yellow': '#FFCC00',
+          'ep-green': '#0FA47F',
+          'ep-green-dark': '#0B7A5E',
+          'ep-soft': '#EAF1FF',
+        },
+        fontFamily: {
+          sans: ['IBM Plex Sans Thai', 'sans-serif'],
+          display: ['Baloo Thai 2', 'IBM Plex Sans Thai', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        borderRadius: {
+          'blob': '2rem',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html, body { overflow-x: hidden; }
+  body { font-family: 'IBM Plex Sans Thai', sans-serif; background: #ffffff; }
+  h1, h2, .font-display { font-family: 'Baloo Thai 2', 'IBM Plex Sans Thai', sans-serif; }
+  .font-mono, .num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  /* 3D press button */
+  .btn3d {
+    box-shadow: 0 5px 0 var(--btn-shadow, #003A87);
+    transition: transform .06s ease, box-shadow .06s ease;
+  }
+  .btn3d:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 var(--btn-shadow, #003A87);
+  }
+  .btn-blue   { --btn-shadow:#003A87; }
+  .btn-green  { --btn-shadow:#0B7A5E; }
+  .btn-yellow { --btn-shadow:#C79E00; }
+  .btn-white  { --btn-shadow:#D6E2F7; }
+
+  /* card bottom shadow */
+  .card3d { box-shadow: 0 6px 0 rgba(0,74,173,0.12); }
+  .card3d-strong { box-shadow: 0 8px 0 rgba(0,74,173,0.18); }
+
+  /* weak-skill pulse */
+  @keyframes weakpulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,90,90,0.55); }
+    50%     { box-shadow: 0 0 0 8px rgba(255,90,90,0); }
+  }
+  .pulse-weak { animation: weakpulse 1.8s ease-out infinite; }
+  @keyframes weakpulseAmber {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,180,0,0.55); }
+    50%     { box-shadow: 0 0 0 8px rgba(255,180,0,0); }
+  }
+  .pulse-amber { animation: weakpulseAmber 1.8s ease-out infinite; }
+
+  /* score bar fill on view */
+  .bar-fill { transition: width 1.2s cubic-bezier(.2,.8,.2,1); }
+
+  /* gentle mascot bob */
+  @keyframes bob { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-8px);} }
+  .bob { animation: bob 4s ease-in-out infinite; }
+
+  /* thought bubble pop */
+  @keyframes popin { 0%{ transform: scale(.7); opacity:0;} 100%{ transform: scale(1); opacity:1;} }
+  .popin { animation: popin .5s .3s ease-out both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-weak, .pulse-amber, .bob, .popin, .bar-fill { animation: none !important; transition: none !important; }
+  }
+
+  .dashed-blob {
+    background: #EAF1FF;
+  }
+</style>
+</head>
+<body class="text-slate-800">
+
+<!-- PREVIEW RIBBON (strip on port) -->
+<div class="w-full bg-slate-900 text-white text-[13px]">
+  <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
+    <a href="/landing-convert-index.html" class="font-medium text-slate-200 hover:text-white whitespace-nowrap">← Preview hub</a>
+    <span class="font-mono text-[11px] sm:text-[12px] text-slate-300 truncate">V1 (ปรับเป็นแบรนด์ EP) — สนุก เป็นมิตร</span>
+  </div>
+</div>
+
+<!-- STICKY TOP NAV -->
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b-2 border-ep-soft">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-ep-blue text-white grid place-items-center font-mono font-extrabold text-sm">EP</div>
+      <span class="font-display font-extrabold text-lg text-ep-blue leading-none">English Plan</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="/login" class="hidden sm:inline-flex px-4 py-2 rounded-2xl font-semibold text-ep-blue hover:bg-ep-soft">เข้าสู่ระบบ</a>
+      <a href="/explore" class="btn3d btn-yellow inline-flex items-center px-4 sm:px-5 py-2.5 rounded-2xl bg-ep-yellow text-slate-900 font-display font-extrabold text-sm">เช็กระดับฟรี</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ HERO ============ -->
+<section class="bg-white">
+  <div class="max-w-6xl mx-auto px-4 pt-10 pb-14 sm:pt-16 sm:pb-20">
+    <div class="grid md:grid-cols-2 gap-10 md:gap-8 items-center">
+      <!-- copy -->
+      <div class="order-2 md:order-1">
+        <span class="inline-flex items-center gap-2 rounded-full bg-ep-soft text-ep-blue font-bold text-[13px] px-4 py-2">
+          <span class="text-base">🇹🇭</span> ติว Duolingo English Test (DET) · สำหรับคนไทย
+        </span>
+        <h1 class="mt-5 font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] text-slate-900" style="text-wrap:balance;">
+          รู้ว่า<span class="text-ep-blue">อ่อนตรงไหน</span><br />คะแนนถึงจะขึ้น
+        </h1>
+        <p class="mt-4 text-lg text-slate-600 max-w-md">
+          เช็กจุดอ่อนก่อน แล้วค่อยฝึกให้ตรงจุด — ไม่ต้องฝึกมั่ว
+        </p>
+
+        <div class="mt-7 flex flex-col sm:flex-row gap-3">
+          <a href="/explore" class="btn3d btn-yellow inline-flex items-center justify-center px-7 py-4 rounded-2xl bg-ep-yellow text-slate-900 font-display font-extrabold text-lg">
+            เช็กระดับของคุณฟรี — เริ่มเลย
+          </a>
+          <a href="/mini-diagnosis/start" class="btn3d btn-white inline-flex items-center justify-center px-7 py-4 rounded-2xl bg-white text-ep-blue border-2 border-ep-soft font-display font-bold text-lg">
+            ลองเช็กระดับฟรี
+          </a>
+        </div>
+
+        <p class="mt-4 text-sm font-semibold text-slate-500 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span class="inline-flex items-center gap-1"><span class="text-ep-green">✓</span> ฟรี</span>
+          <span class="inline-flex items-center gap-1"><span class="text-ep-green">✓</span> ไม่ต้องใส่บัตร</span>
+          <span class="inline-flex items-center gap-1"><span class="text-ep-green">✓</span> เห็นจุดอ่อนก่อนค่อยตัดสินใจ</span>
+        </p>
+      </div>
+
+      <!-- mascot blob -->
+      <div class="order-1 md:order-2 flex justify-center md:justify-end">
+        <div class="relative w-full max-w-sm">
+          <!-- thought bubble -->
+          <div class="popin absolute -top-2 right-2 sm:right-6 z-20">
+            <div class="relative bg-white border-2 border-ep-soft card3d rounded-3xl px-5 py-3">
+              <span class="font-display font-extrabold text-ep-blue text-lg sm:text-xl">อ่อนตรงไหนนะ?</span>
+              <span class="absolute -bottom-2 left-8 w-4 h-4 bg-white border-b-2 border-r-2 border-ep-soft rotate-45"></span>
+            </div>
+          </div>
+          <!-- blob -->
+          <div class="dashed-blob rounded-[2.5rem] aspect-square grid place-items-end overflow-hidden relative">
+            <span class="absolute top-6 left-6 w-10 h-10 rounded-full bg-ep-yellow/60"></span>
+            <span class="absolute bottom-16 left-8 w-6 h-6 rounded-full bg-ep-green/40"></span>
+            <img src="/mascot-doy.png" alt="พี่ดอย มาสคอต English Plan" class="bob relative z-10 w-[86%] max-w-[320px] object-contain object-bottom drop-shadow-xl" />
+          </div>
+          <!-- floating score chip -->
+          <div class="absolute -bottom-4 -left-2 sm:left-4 bg-ep-yellow rounded-2xl card3d px-4 py-2 rotate-[-6deg]">
+            <span class="font-display font-extrabold text-slate-900 text-sm"><span class="font-mono">+20</span> คะแนน</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROBLEM ============ -->
+<section class="bg-ep-blue">
+  <div class="max-w-4xl mx-auto px-4 py-12 sm:py-16 text-center">
+    <p class="font-display font-extrabold text-2xl sm:text-3xl lg:text-4xl text-white leading-snug" style="text-wrap:balance;">
+      ไม่ใช่เพราะไม่ขยัน — แต่เพราะ<span class="text-ep-yellow">ไม่รู้ว่าตัวเองอ่อนตรงไหน</span> เลยฝึกมั่ว ๆ เสียเวลา
+    </p>
+  </div>
+</section>
+
+<!-- ============ 4 TOOLS ============ -->
+<section class="bg-white">
+  <div class="max-w-6xl mx-auto px-4 py-14 sm:py-20">
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-center text-slate-900">เครื่องมือที่ทำให้คะแนนขึ้นจริง</h2>
+    <p class="mt-2 text-center text-slate-500">เลือกฝึกเฉพาะที่คุณอ่อน ไม่ต้องเดา</p>
+
+    <div class="mt-10 grid sm:grid-cols-2 gap-5">
+      <!-- tile 1 -->
+      <div class="rounded-[2rem] bg-white border-2 border-ep-soft card3d p-6 flex items-start gap-4">
+        <span class="text-4xl leading-none">🎯</span>
+        <div>
+          <h3 class="font-display font-extrabold text-xl text-slate-900">เช็กระดับฟรี <span class="font-sans font-medium text-sm text-slate-400">(Mini Diagnosis)</span></h3>
+          <p class="mt-1 text-slate-600">รู้ว่าอยู่ระดับไหน ต้องเก็บทักษะไหนก่อน</p>
+        </div>
+      </div>
+
+      <!-- tile 2 — FEATURED -->
+      <div class="relative rounded-[2rem] bg-ep-blue card3d-strong p-6 flex items-start gap-4 text-white">
+        <span class="absolute -top-3 right-5 bg-ep-yellow text-slate-900 font-display font-extrabold text-xs px-3 py-1 rounded-full">เด่นสุด ⭐</span>
+        <span class="text-4xl leading-none">📝</span>
+        <div>
+          <h3 class="font-display font-extrabold text-xl">ข้อสอบเสมือนจริง <span class="font-sans font-medium text-sm text-blue-200">(Mock Test)</span></h3>
+          <p class="mt-1 text-blue-100">20 ข้อ ~1 ชม. · คะแนน <span class="num font-bold text-white">0–160</span> แยก 4 ทักษะ บอก 2 ทักษะที่ฉุดคะแนน</p>
+        </div>
+      </div>
+
+      <!-- tile 3 -->
+      <div class="rounded-[2rem] bg-white border-2 border-ep-soft card3d p-6 flex items-start gap-4">
+        <span class="text-4xl leading-none">🔍</span>
+        <div>
+          <h3 class="font-display font-extrabold text-xl text-slate-900">ฟีดแบ็กรายข้อ <span class="text-ep-blue">เป็นภาษาไทย</span></h3>
+          <p class="mt-1 text-slate-600">บอกว่าต้องแก้ประโยคไหน คำไหน ให้ชัด ๆ</p>
+        </div>
+      </div>
+
+      <!-- tile 4 -->
+      <div class="rounded-[2rem] bg-white border-2 border-ep-soft card3d p-6 flex items-start gap-4">
+        <span class="text-4xl leading-none">💡</span>
+        <div>
+          <h3 class="font-display font-extrabold text-xl text-slate-900">เทคนิคเพิ่มคะแนนสั้น ๆ</h3>
+          <p class="mt-1 text-slate-600"><span class="num font-semibold">comma</span>, <span class="num font-semibold">-ed / -s</span> เก็บคะแนนที่หล่นง่ายคืนเร็ว</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEEDBACK PROOF ============ -->
+<section class="bg-ep-soft">
+  <div class="max-w-3xl mx-auto px-4 py-14 sm:py-20">
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-center text-slate-900">ฟีดแบ็กหน้าตาแบบนี้</h2>
+    <p class="mt-2 text-center text-slate-500">ตรวจให้ทีละประโยค บอกว่าแก้ตรงไหน</p>
+
+    <div class="mt-8 rounded-[2rem] bg-white card3d-strong p-6 sm:p-8">
+      <!-- question -->
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-400">คำถาม</p>
+      <p class="mt-1 font-mono text-[15px] text-slate-800">“Describe a habit that helps you stay productive.”</p>
+
+      <!-- answer with highlights -->
+      <div class="mt-5 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-[15px] leading-relaxed text-slate-700 font-mono">
+        This habit
+        <span class="relative inline-block bg-red-100 text-red-700 rounded px-1 font-semibold line-through decoration-red-400">helped</span>
+        me focus every morning, and it is really good for
+        <span class="relative inline-block bg-amber-100 text-amber-700 rounded px-1 font-semibold">concentrate</span>.
+      </div>
+
+      <!-- fix chips -->
+      <div class="mt-3 flex flex-col sm:flex-row gap-2">
+        <div class="flex-1 rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-sm">
+          <span class="num font-bold text-red-600">helped</span>
+          <span class="text-slate-500">→</span>
+          <span class="num font-bold text-ep-green">helps</span>
+          <span class="text-slate-500 text-[13px]">(tense)</span>
+        </div>
+        <div class="flex-1 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-sm">
+          <span class="num font-bold text-amber-600">good for concentrate</span>
+          <span class="text-slate-500">→</span>
+          <span class="num font-bold text-ep-green">boosts my focus</span>
+        </div>
+      </div>
+
+      <!-- band -->
+      <div class="mt-6 flex items-center gap-3">
+        <span class="text-sm font-semibold text-slate-500">ระดับประมาณ</span>
+        <span class="num font-extrabold text-2xl text-ep-blue">120–130</span>
+      </div>
+
+      <!-- 4 mini score bars -->
+      <div class="mt-4 grid grid-cols-2 gap-x-6 gap-y-3">
+        <!-- grammar -->
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="font-semibold text-slate-600">Grammar</span><span class="num font-bold text-slate-800">92</span></div>
+          <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="bar-fill h-full rounded-full bg-ep-green" data-w="92%" style="width:0%"></div></div>
+        </div>
+        <!-- vocab -->
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="font-semibold text-slate-600">Vocabulary</span><span class="num font-bold text-slate-800">88</span></div>
+          <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="bar-fill h-full rounded-full bg-ep-green" data-w="88%" style="width:0%"></div></div>
+        </div>
+        <!-- flow (warn) -->
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="font-semibold text-amber-600">Flow ⚠</span><span class="num font-bold text-amber-600">79</span></div>
+          <div class="h-2.5 rounded-full bg-amber-100 overflow-hidden"><div class="bar-fill h-full rounded-full bg-amber-400" data-w="79%" style="width:0%"></div></div>
+        </div>
+        <!-- task -->
+        <div>
+          <div class="flex justify-between text-sm mb-1"><span class="font-semibold text-slate-600">Task Response</span><span class="num font-bold text-slate-800">90</span></div>
+          <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="bar-fill h-full rounded-full bg-ep-green" data-w="90%" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- thai note -->
+      <div class="mt-6 rounded-2xl bg-ep-soft p-4 flex gap-3">
+        <span class="text-2xl leading-none">💬</span>
+        <p class="text-[15px] text-slate-700 leading-relaxed">
+          ประโยคที่ 3 ใช้ <span class="num font-bold text-red-600">helped</span> ผิด tense ควรเป็น <span class="num font-bold text-ep-green">helps</span> — แก้แล้ว Flow ขึ้นทันที
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MOCK REPORT ============ -->
+<section class="bg-white">
+  <div class="max-w-3xl mx-auto px-4 py-14 sm:py-20">
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-center text-slate-900">รายงาน Mock Test</h2>
+    <p class="mt-2 text-center text-slate-500">เห็นทันทีว่า 2 ทักษะไหนกำลังฉุดคะแนน</p>
+
+    <div class="mt-8 rounded-[2rem] bg-white border-2 border-ep-soft card3d-strong p-6 sm:p-8">
+      <!-- total -->
+      <div class="flex items-end justify-center gap-3">
+        <span class="text-sm font-semibold text-slate-500 mb-2">คะแนนรวม</span>
+        <span class="num font-extrabold text-5xl text-ep-blue leading-none">108</span>
+        <span class="num font-bold text-2xl text-slate-400 mb-1">/160</span>
+      </div>
+
+      <!-- skills chart -->
+      <div class="mt-8 flex flex-col gap-4">
+        <!-- writing weak -->
+        <div>
+          <div class="flex justify-between items-center text-sm mb-1">
+            <span class="font-semibold text-slate-700 flex items-center gap-2">Writing <span class="text-[11px] font-bold text-red-600 bg-red-100 rounded-full px-2 py-0.5">จุดอ่อน</span></span>
+            <span class="num font-bold text-red-600">85</span>
+          </div>
+          <div class="h-4 rounded-full bg-slate-100 overflow-hidden pulse-weak">
+            <div class="bar-fill h-full rounded-full bg-red-500" data-w="53%" style="width:0%"></div>
+          </div>
+        </div>
+        <!-- speaking weak -->
+        <div>
+          <div class="flex justify-between items-center text-sm mb-1">
+            <span class="font-semibold text-slate-700 flex items-center gap-2">Speaking <span class="text-[11px] font-bold text-amber-600 bg-amber-100 rounded-full px-2 py-0.5">จุดอ่อน</span></span>
+            <span class="num font-bold text-amber-600">95</span>
+          </div>
+          <div class="h-4 rounded-full bg-slate-100 overflow-hidden pulse-amber">
+            <div class="bar-fill h-full rounded-full bg-amber-400" data-w="59%" style="width:0%"></div>
+          </div>
+        </div>
+        <!-- reading -->
+        <div>
+          <div class="flex justify-between items-center text-sm mb-1">
+            <span class="font-semibold text-slate-700">Reading</span>
+            <span class="num font-bold text-ep-green">120</span>
+          </div>
+          <div class="h-4 rounded-full bg-slate-100 overflow-hidden">
+            <div class="bar-fill h-full rounded-full bg-ep-green" data-w="75%" style="width:0%"></div>
+          </div>
+        </div>
+        <!-- listening -->
+        <div>
+          <div class="flex justify-between items-center text-sm mb-1">
+            <span class="font-semibold text-slate-700">Listening</span>
+            <span class="num font-bold text-ep-green">130</span>
+          </div>
+          <div class="h-4 rounded-full bg-slate-100 overflow-hidden">
+            <div class="bar-fill h-full rounded-full bg-ep-green" data-w="81%" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- note -->
+      <div class="mt-7 rounded-2xl bg-ep-blue p-4 flex gap-3 text-white">
+        <span class="text-2xl leading-none">🎯</span>
+        <p class="text-[15px] leading-relaxed">
+          เก็บ <span class="font-bold text-ep-yellow">Writing + Speaking</span> ก่อน — 2 ทักษะนี้กำลังฉุดคะแนนรวมอยู่
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXAM COVERAGE ============ -->
+<section class="bg-ep-soft">
+  <div class="max-w-5xl mx-auto px-4 py-14 sm:py-20">
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-center text-slate-900">ครบทุกแบบที่ DET ออกจริง</h2>
+    <p class="mt-2 text-center text-slate-500">เลือกฝึกเฉพาะที่คุณอ่อนได้</p>
+
+    <div class="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- production -->
+      <div class="rounded-[1.5rem] bg-white card3d p-5 text-center">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-ep-blue text-white grid place-items-center text-2xl">✍️</div>
+        <p class="mt-3 font-display font-extrabold text-slate-900">Production</p>
+        <p class="text-sm text-slate-500">เขียน–พูด</p>
+        <p class="num font-extrabold text-ep-blue text-lg mt-2">5 แบบ</p>
+      </div>
+      <!-- comprehension -->
+      <div class="rounded-[1.5rem] bg-white card3d p-5 text-center">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-ep-green text-white grid place-items-center text-2xl">📖</div>
+        <p class="mt-3 font-display font-extrabold text-slate-900">Comprehension</p>
+        <p class="text-sm text-slate-500">การอ่าน</p>
+        <p class="num font-extrabold text-ep-green-dark text-lg mt-2">2 แบบ</p>
+      </div>
+      <!-- literacy -->
+      <div class="rounded-[1.5rem] bg-white card3d p-5 text-center">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-ep-yellow text-slate-900 grid place-items-center text-2xl">🔤</div>
+        <p class="mt-3 font-display font-extrabold text-slate-900">Literacy</p>
+        <p class="text-sm text-slate-500">สะกด–ฟัง</p>
+        <p class="num font-extrabold text-[#B8860B] text-lg mt-2">3 แบบ</p>
+      </div>
+      <!-- conversation -->
+      <div class="rounded-[1.5rem] bg-white card3d p-5 text-center">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-ep-blue text-white grid place-items-center text-2xl">🎧</div>
+        <p class="mt-3 font-display font-extrabold text-slate-900">Conversation</p>
+        <p class="text-sm text-slate-500">ฟังสนทนา</p>
+        <p class="num font-extrabold text-ep-blue text-lg mt-2">2 แบบ</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOCIAL PROOF ============ -->
+<section class="bg-white">
+  <div class="max-w-4xl mx-auto px-4 py-14 sm:py-20">
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-center text-slate-900">คนไทยที่คะแนนขึ้นจริง</h2>
+
+    <div class="mt-10 grid md:grid-cols-2 gap-5">
+      <!-- review 1 -->
+      <div class="rounded-[2rem] bg-ep-soft p-6 card3d">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-ep-blue text-white grid place-items-center font-display font-extrabold text-lg">พ</div>
+          <div>
+            <p class="font-display font-extrabold text-slate-900 leading-none">พิมพ์</p>
+            <div class="mt-1 flex items-center gap-1.5">
+              <span class="num font-bold text-slate-400 text-sm">95</span>
+              <span class="text-ep-green">→</span>
+              <span class="num font-extrabold text-ep-green bg-white rounded-lg px-2 py-0.5 text-sm">115</span>
+            </div>
+          </div>
+        </div>
+        <p class="mt-4 text-slate-700 leading-relaxed">“ตอนแรกกังวล Writing / Speaking มาก พอได้ฟีดแบ็กที่บอกตรง ๆ ว่าต้องปรับอะไร มั่นใจขึ้นเยอะ”</p>
+      </div>
+
+      <!-- review 2 -->
+      <div class="rounded-[2rem] bg-ep-soft p-6 card3d">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-ep-green text-white grid place-items-center font-display font-extrabold text-lg">ล</div>
+          <div>
+            <p class="font-display font-extrabold text-slate-900 leading-none">ลิลลี่</p>
+            <div class="mt-1 flex items-center gap-1.5">
+              <span class="num font-extrabold text-ep-green bg-white rounded-lg px-2 py-0.5 text-sm">115</span>
+              <span class="text-sm text-slate-500">· กำลังไป <span class="num font-bold">130</span></span>
+            </div>
+          </div>
+        </div>
+        <p class="mt-4 text-slate-700 leading-relaxed">“เว็บอื่นอธิบายอังกฤษล้วน งงไปหมด ที่นี่ข้อสอบเยอะ + อธิบายภาษาไทย ฟีดแบ็กบอกวิธีอัปคะแนน Production ได้เร็ว”</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAST TRACK ============ -->
+<section class="bg-white">
+  <div class="max-w-4xl mx-auto px-4 pb-14 sm:pb-20">
+    <div class="rounded-[2rem] bg-ep-yellow p-6 sm:p-8 card3d flex flex-col sm:flex-row items-center gap-5 justify-between">
+      <div class="flex items-start gap-4">
+        <span class="text-4xl leading-none">🎁</span>
+        <div>
+          <h3 class="font-display font-extrabold text-2xl text-slate-900">เรียนคอร์ส Duolingo Fast Track อยู่ไหม?</h3>
+          <p class="mt-1 text-slate-800 font-semibold">รับ VIP เต็ม <span class="num">6</span> เดือนฟรี</p>
+        </div>
+      </div>
+      <a href="/?fastTrack=1" class="btn3d btn-blue whitespace-nowrap inline-flex items-center justify-center px-6 py-4 rounded-2xl bg-ep-blue text-white font-display font-extrabold text-lg">
+        รับสิทธิ์นักเรียนคอร์ส
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="bg-ep-soft">
+  <div class="max-w-6xl mx-auto px-4 py-14 sm:py-20">
+    <h2 class="font-display font-extrabold text-3xl sm:text-4xl text-center text-slate-900">เริ่มฟรี · อัปเกรดเมื่อพร้อม</h2>
+    <p class="mt-2 text-center text-slate-500">ทุกแผนซื้อ <span class="num font-semibold">30</span> วัน ไม่ตัดเงินอัตโนมัติ</p>
+
+    <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+      <!-- free -->
+      <div class="rounded-[1.75rem] bg-white card3d p-6 flex flex-col">
+        <p class="font-display font-extrabold text-xl text-slate-900">ฟรี</p>
+        <p class="mt-3 flex items-baseline gap-1"><span class="num font-extrabold text-4xl text-slate-900">฿0</span></p>
+        <p class="text-sm text-slate-500">ตลอดไป</p>
+        <ul class="mt-4 text-sm text-slate-600 space-y-1.5 flex-1">
+          <li>✓ เช็กระดับฟรี</li>
+          <li>✓ ลองข้อสอบตัวอย่าง</li>
+        </ul>
+        <a href="/explore" class="btn3d btn-white mt-5 inline-flex items-center justify-center px-4 py-3 rounded-2xl bg-white border-2 border-ep-soft text-ep-blue font-display font-bold">
+          เริ่มฟรี
+        </a>
+      </div>
+
+      <!-- basic -->
+      <div class="rounded-[1.75rem] bg-white card3d p-6 flex flex-col">
+        <p class="font-display font-extrabold text-xl text-slate-900">Basic</p>
+        <p class="mt-3 flex items-baseline gap-1"><span class="num font-extrabold text-4xl text-slate-900">฿399</span><span class="num text-slate-400 text-sm">/30วัน</span></p>
+        <ul class="mt-4 text-sm text-slate-600 space-y-1.5 flex-1">
+          <li>✓ ฟีดแบ็ก <span class="num font-semibold">12</span>/เดือน</li>
+          <li>✓ Mock <span class="num font-semibold">2</span></li>
+        </ul>
+        <a href="/signup?next=/pricing?plan=basic" class="btn3d btn-blue mt-5 inline-flex items-center justify-center px-4 py-3 rounded-2xl bg-ep-blue text-white font-display font-bold text-sm">
+          สมัคร + จ่าย QR พร้อมเพย์
+        </a>
+      </div>
+
+      <!-- premium — POPULAR -->
+      <div class="relative rounded-[1.75rem] bg-ep-blue card3d-strong p-6 flex flex-col text-white ring-4 ring-ep-yellow">
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-ep-yellow text-slate-900 font-display font-extrabold text-xs px-3 py-1 rounded-full whitespace-nowrap">ยอดนิยม ⭐</span>
+        <p class="font-display font-extrabold text-xl">Premium</p>
+        <p class="mt-3 flex items-baseline gap-1"><span class="num font-extrabold text-4xl text-white">฿699</span><span class="num text-blue-200 text-sm">/30วัน</span></p>
+        <ul class="mt-4 text-sm text-blue-50 space-y-1.5 flex-1">
+          <li>✓ ฟีดแบ็ก <span class="num font-semibold text-white">30</span>/เดือน</li>
+          <li>✓ Mock <span class="num font-semibold text-white">4</span></li>
+          <li>✓ มินิเลสซัน</li>
+        </ul>
+        <a href="/signup?next=/pricing?plan=premium" class="btn3d btn-yellow mt-5 inline-flex items-center justify-center px-4 py-3 rounded-2xl bg-ep-yellow text-slate-900 font-display font-extrabold text-sm">
+          สมัคร + จ่าย QR พร้อมเพย์
+        </a>
+      </div>
+
+      <!-- vip -->
+      <div class="rounded-[1.75rem] bg-white card3d p-6 flex flex-col">
+        <p class="font-display font-extrabold text-xl text-slate-900">VIP</p>
+        <p class="mt-3 flex items-baseline gap-1"><span class="num font-extrabold text-4xl text-slate-900">฿999</span><span class="num text-slate-400 text-sm">/30วัน</span></p>
+        <ul class="mt-4 text-sm text-slate-600 space-y-1.5 flex-1">
+          <li>✓ ฟีดแบ็ก <span class="num font-semibold">60</span>/เดือน</li>
+          <li>✓ Mock <span class="num font-semibold">6</span></li>
+          <li>✓ ฝึกไม่จำกัด</li>
+          <li>✓ มินิเลสซันครบ</li>
+        </ul>
+        <a href="/signup?next=/pricing?plan=vip" class="btn3d btn-blue mt-5 inline-flex items-center justify-center px-4 py-3 rounded-2xl bg-ep-blue text-white font-display font-bold text-sm">
+          สมัคร + จ่าย QR พร้อมเพย์
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="bg-white">
+  <div class="max-w-3xl mx-auto px-4 py-16 sm:py-24 text-center">
+    <div class="text-5xl">🚀</div>
+    <h2 class="mt-4 font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-slate-900 leading-tight" style="text-wrap:balance;">
+      เริ่มจากรู้ว่าตัวเอง<span class="text-ep-blue">อ่อนตรงไหน</span>
+    </h2>
+    <p class="mt-3 text-lg text-slate-600">ฟรี ไม่ต้องใส่บัตร</p>
+    <a href="/explore" class="btn3d btn-yellow mt-7 inline-flex items-center justify-center px-8 py-5 rounded-2xl bg-ep-yellow text-slate-900 font-display font-extrabold text-xl">
+      เช็กระดับของคุณฟรี — เริ่มเลย
+    </a>
+  </div>
+</section>
+
+<!-- rationale note (strip on port) -->
+<div class="bg-slate-50 border-t border-slate-200">
+  <div class="max-w-3xl mx-auto px-4 py-6">
+    <p class="text-xs leading-relaxed text-slate-400">
+      <span class="font-semibold text-slate-500">ทำไมออกแบบแบบนี้:</span>
+      สไตล์ “เล่นสนุก เป็นมิตร” แต่เป็นแบรนด์ English Plan เอง — มาสคอตพี่ดอย (คาแรกเตอร์ของเราเอง), ปุ่ม 3D สีน้ำเงิน/เหลืองของแบรนด์, ชิป “+คะแนน” (DET 0–160), และแถบทักษะที่ “เติมเต็ม” ให้เห็นภาพทันที — ตั้งใจเลี่ยงสีเขียวไลม์และคำว่า XP เพื่อไม่ให้ชนแบรนด์อื่น
+      เราตัดพารากราฟยาว ๆ ทิ้งเกือบหมด แทนที่ด้วยไทล์ 1 บรรทัด + การ์ดฟีดแบ็ก/รายงานที่เล่าเรื่องด้วยภาพ เพื่อให้หน้าเพจ “แทบไม่ต้องอ่าน” ก็เข้าใจ
+      (บล็อกนี้มีไว้ลบตอนพอร์ตขึ้นจริง)
+    </p>
+  </div>
+</div>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="bg-slate-900 text-slate-300">
+  <div class="max-w-6xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-ep-blue text-white grid place-items-center font-mono font-extrabold text-sm">EP</div>
+      <div>
+        <p class="font-display font-extrabold text-white leading-none">ENGLISH PLAN</p>
+        <p class="text-sm text-slate-400 mt-1">ติว DET สำหรับคนไทย</p>
+      </div>
+    </div>
+    <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-semibold text-sm">
+      <a href="/about" class="hover:text-white">เกี่ยวกับเรา</a>
+      <a href="/login" class="hover:text-white">เข้าสู่ระบบ</a>
+      <a href="/?fastTrack=1" class="hover:text-white">นักเรียนคอร์ส</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+  // Fill score bars when they scroll into view
+  (function () {
+    var bars = document.querySelectorAll('.bar-fill');
+    if (!('IntersectionObserver' in window)) {
+      bars.forEach(function (b) { b.style.width = b.getAttribute('data-w'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          var el = e.target;
+          el.style.width = el.getAttribute('data-w');
+          io.unobserve(el);
+        }
+      });
+    }, { threshold: 0.4 });
+    bars.forEach(function (b) { io.observe(b); });
+  })();
+</script>
+
+</body>
+</html>

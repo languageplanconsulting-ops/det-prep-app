@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>English Plan · ปฏิทินฝึกรายวัน (Duolingo style)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Thai+2:wght@500;600;700;800&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          'ep-blue': '#004AAD',
+          'ep-blue-dark': '#003A87',
+          'ep-yellow': '#FFCC00',
+          'ep-green': '#0FA47F',
+          'ep-green-dark': '#0B7A5E',
+          'ep-soft': '#EAF1FF',
+          'ep-amber': '#B45A00',
+        },
+        fontFamily: {
+          sans: ['IBM Plex Sans Thai', 'sans-serif'],
+          display: ['Baloo Thai 2', 'IBM Plex Sans Thai', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html, body { overflow-x: hidden; }
+  body { font-family: 'IBM Plex Sans Thai', sans-serif; background: #f7f9fc; }
+  h1, h2, h3, .font-display { font-family: 'Baloo Thai 2', 'IBM Plex Sans Thai', sans-serif; }
+  .font-mono, .num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  .btn3d {
+    box-shadow: 0 5px 0 var(--btn-shadow, #003A87);
+    transition: transform .06s ease, box-shadow .06s ease;
+  }
+  .btn3d:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 var(--btn-shadow, #003A87);
+  }
+  .btn3d-sm { box-shadow: 0 3px 0 var(--btn-shadow, #003A87); }
+  .btn3d-sm:active { transform: translateY(3px); box-shadow: 0 0 0 var(--btn-shadow); }
+  .btn-blue   { --btn-shadow:#003A87; }
+  .btn-green  { --btn-shadow:#0B7A5E; }
+  .btn-yellow { --btn-shadow:#C79E00; }
+  .btn-white  { --btn-shadow:#D6E2F7; }
+
+  .card3d { box-shadow: 0 6px 0 rgba(0,74,173,0.10); }
+  .card3d-strong { box-shadow: 0 8px 0 rgba(0,74,173,0.16); }
+
+  @keyframes bob { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-6px);} }
+  .bob { animation: bob 4s ease-in-out infinite; }
+
+  @keyframes popin { 0%{ transform: scale(.85); opacity:0;} 100%{ transform: scale(1); opacity:1;} }
+  .popin { animation: popin .35s ease-out both; }
+
+  @keyframes ringpulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,204,0,0.55); }
+    50%     { box-shadow: 0 0 0 6px rgba(255,204,0,0); }
+  }
+  .ring-pulse { animation: ringpulse 1.8s ease-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bob, .popin, .ring-pulse { animation: none !important; }
+  }
+
+  .bar-fill { transition: width 1s cubic-bezier(.2,.8,.2,1); }
+</style>
+</head>
+<body class="text-slate-800">
+
+<!-- PREVIEW RIBBON (strip on port) -->
+<div class="w-full bg-slate-900 text-white text-[13px]">
+  <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
+    <a href="/landing-convert-index.html" class="font-medium text-slate-200 hover:text-white whitespace-nowrap">← Preview hub</a>
+    <span class="font-mono text-[11px] sm:text-[12px] text-slate-300 truncate">Calendar · Duolingo style — ปฏิทินฝึกรายวัน</span>
+  </div>
+</div>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+
+  <!-- ============ HEADER ============ -->
+  <div class="flex items-start justify-between gap-4 mb-7">
+    <div>
+      <p class="text-[12px] font-bold uppercase tracking-wider text-ep-blue mb-1">Study plan</p>
+      <h1 class="font-display font-extrabold text-3xl sm:text-4xl text-slate-900 leading-tight">ปฏิทินการเรียนของฉัน</h1>
+      <p class="mt-2 text-slate-500 max-w-md text-sm sm:text-base">
+        ตั้งวันสอบ แล้วเราจัดชุดฝึกให้ทุกวัน — ทำครบทีละหมวด เก็บให้ครบทั้งวัน
+      </p>
+      <div class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-ep-yellow/90 px-3.5 py-1.5 card3d">
+        <span class="text-base">🔥</span>
+        <span class="font-display font-extrabold text-sm text-slate-900">ซ้อมต่อเนื่อง <span class="num">5</span> วัน</span>
+      </div>
+    </div>
+    <img src="/mascot-doy.png" alt="พี่ดอย" class="bob hidden sm:block w-20 h-20 object-contain drop-shadow-md shrink-0" />
+  </div>
+
+  <div class="grid lg:grid-cols-[1fr_1.15fr] gap-6 items-start">
+
+    <!-- ============ BIG CALENDAR ============ -->
+    <section class="bg-white rounded-3xl card3d-strong p-5 sm:p-6">
+      <div class="flex items-center justify-between mb-5">
+        <button type="button" class="w-9 h-9 rounded-xl bg-ep-soft text-ep-blue font-bold grid place-items-center hover:bg-blue-100 transition">‹</button>
+        <h2 class="font-display font-extrabold text-xl sm:text-2xl text-slate-900">กรกฎาคม 2026</h2>
+        <button type="button" class="w-9 h-9 rounded-xl bg-ep-soft text-ep-blue font-bold grid place-items-center hover:bg-blue-100 transition">›</button>
+      </div>
+
+      <!-- weekday header -->
+      <div class="grid grid-cols-7 gap-1.5 sm:gap-2 mb-2">
+        <div class="text-center text-[11px] font-bold text-slate-400 py-1">อา</div>
+        <div class="text-center text-[11px] font-bold text-slate-400 py-1">จ</div>
+        <div class="text-center text-[11px] font-bold text-slate-400 py-1">อ</div>
+        <div class="text-center text-[11px] font-bold text-slate-400 py-1">พ</div>
+        <div class="text-center text-[11px] font-bold text-slate-400 py-1">พฤ</div>
+        <div class="text-center text-[11px] font-bold text-slate-400 py-1">ศ</div>
+        <div class="text-center text-[11px] font-bold text-slate-400 py-1">ส</div>
+      </div>
+
+      <!-- day grid -->
+      <div class="grid grid-cols-7 gap-1.5 sm:gap-2">
+        <!-- leading blanks (Jul 1 2026 = Wed) -->
+        <div></div><div></div><div></div>
+
+        <!-- 1 -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-green/10 border-2 border-ep-green/40 grid place-items-center relative group hover:bg-ep-green/15 transition">
+          <span class="num text-sm font-bold text-ep-green-dark">1</span>
+          <span class="absolute bottom-1.5 text-ep-green text-[13px]">✓</span>
+        </button>
+        <!-- 2 -->
+        <button type="button" class="aspect-square rounded-2xl bg-slate-50 border-2 border-slate-100 grid place-items-center hover:bg-slate-100 transition">
+          <span class="num text-sm font-semibold text-slate-400">2</span>
+        </button>
+        <!-- 3 done -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-green/10 border-2 border-ep-green/40 grid place-items-center relative hover:bg-ep-green/15 transition">
+          <span class="num text-sm font-bold text-ep-green-dark">3</span>
+          <span class="absolute bottom-1.5 text-ep-green text-[13px]">✓</span>
+        </button>
+        <!-- 4 planned dot -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-soft/60 border-2 border-ep-soft grid place-items-center relative hover:bg-ep-soft transition">
+          <span class="num text-sm font-semibold text-ep-blue/70">4</span>
+          <span class="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-ep-blue/50"></span>
+        </button>
+        <!-- 5 done -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-green/10 border-2 border-ep-green/40 grid place-items-center relative hover:bg-ep-green/15 transition">
+          <span class="num text-sm font-bold text-ep-green-dark">5</span>
+          <span class="absolute bottom-1.5 text-ep-green text-[13px]">✓</span>
+        </button>
+        <!-- 6 rest -->
+        <button type="button" class="aspect-square rounded-2xl bg-slate-50 border-2 border-slate-100 grid place-items-center hover:bg-slate-100 transition">
+          <span class="num text-sm font-semibold text-slate-400">6</span>
+        </button>
+        <!-- 7 done -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-green/10 border-2 border-ep-green/40 grid place-items-center relative hover:bg-ep-green/15 transition">
+          <span class="num text-sm font-bold text-ep-green-dark">7</span>
+          <span class="absolute bottom-1.5 text-ep-green text-[13px]">✓</span>
+        </button>
+
+        <!-- 8 done -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-green/10 border-2 border-ep-green/40 grid place-items-center relative hover:bg-ep-green/15 transition">
+          <span class="num text-sm font-bold text-ep-green-dark">8</span>
+          <span class="absolute bottom-1.5 text-ep-green text-[13px]">✓</span>
+        </button>
+        <!-- 9 partial -->
+        <button type="button" class="aspect-square rounded-2xl bg-amber-50 border-2 border-amber-300 grid place-items-center relative hover:bg-amber-100 transition">
+          <span class="num text-sm font-bold text-amber-700">9</span>
+          <span class="absolute bottom-1 num text-[9px] font-bold text-amber-600">2/6</span>
+        </button>
+        <!-- 10 TODAY + partial, selected -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-yellow/25 border-[3px] border-ep-yellow ring-pulse grid place-items-center relative shadow-md scale-[1.04]">
+          <span class="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-display font-extrabold bg-ep-yellow text-slate-900 px-1.5 rounded-full whitespace-nowrap">วันนี้</span>
+          <span class="num text-base font-extrabold text-slate-900">10</span>
+          <span class="absolute bottom-1 num text-[9px] font-bold text-ep-blue">3/8</span>
+        </button>
+        <!-- 11 mock day -->
+        <button type="button" class="aspect-square rounded-2xl bg-amber-100/70 border-2 border-amber-300 grid place-items-center relative hover:bg-amber-100 transition">
+          <span class="num text-sm font-bold text-amber-700">11</span>
+          <span class="absolute bottom-1 text-[11px]">📝</span>
+        </button>
+        <!-- 12 planned -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-soft/60 border-2 border-ep-soft grid place-items-center relative hover:bg-ep-soft transition">
+          <span class="num text-sm font-semibold text-ep-blue/70">12</span>
+          <span class="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-ep-blue/50"></span>
+        </button>
+        <!-- 13 planned -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-soft/60 border-2 border-ep-soft grid place-items-center relative hover:bg-ep-soft transition">
+          <span class="num text-sm font-semibold text-ep-blue/70">13</span>
+          <span class="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-ep-blue/50"></span>
+        </button>
+        <!-- 14 rest -->
+        <button type="button" class="aspect-square rounded-2xl bg-slate-50 border-2 border-slate-100 grid place-items-center hover:bg-slate-100 transition">
+          <span class="num text-sm font-semibold text-slate-400">14</span>
+        </button>
+
+        <!-- 15-18 planned / rest (fill remainder lightly) -->
+        <button type="button" class="aspect-square rounded-2xl bg-ep-soft/60 border-2 border-ep-soft grid place-items-center relative hover:bg-ep-soft transition">
+          <span class="num text-sm font-semibold text-ep-blue/70">15</span>
+          <span class="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-ep-blue/50"></span>
+        </button>
+        <button type="button" class="aspect-square rounded-2xl bg-slate-50 border-2 border-slate-100 grid place-items-center hover:bg-slate-100 transition">
+          <span class="num text-sm font-semibold text-slate-400">16</span>
+        </button>
+        <button type="button" class="aspect-square rounded-2xl bg-ep-soft/60 border-2 border-ep-soft grid place-items-center relative hover:bg-ep-soft transition">
+          <span class="num text-sm font-semibold text-ep-blue/70">17</span>
+          <span class="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-ep-blue/50"></span>
+        </button>
+        <button type="button" class="aspect-square rounded-2xl bg-slate-50 border-2 border-slate-100 grid place-items-center hover:bg-slate-100 transition">
+          <span class="num text-sm font-semibold text-slate-400">18</span>
+        </button>
+        <button type="button" class="aspect-square rounded-2xl bg-ep-soft/60 border-2 border-ep-soft grid place-items-center relative hover:bg-ep-soft transition">
+          <span class="num text-sm font-semibold text-ep-blue/70">19</span>
+          <span class="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-ep-blue/50"></span>
+        </button>
+        <button type="button" class="aspect-square rounded-2xl bg-slate-50 border-2 border-slate-100 grid place-items-center hover:bg-slate-100 transition">
+          <span class="num text-sm font-semibold text-slate-400">20</span>
+        </button>
+        <button type="button" class="aspect-square rounded-2xl bg-ep-soft/60 border-2 border-ep-soft grid place-items-center relative hover:bg-ep-soft transition">
+          <span class="num text-sm font-semibold text-ep-blue/70">21</span>
+          <span class="absolute bottom-1.5 w-1.5 h-1.5 rounded-full bg-ep-blue/50"></span>
+        </button>
+      </div>
+
+      <!-- LEGEND -->
+      <div class="mt-6 pt-5 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-2.5 text-[12px] text-slate-600">
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md bg-ep-green/15 border-2 border-ep-green/50 grid place-items-center text-ep-green text-[9px] shrink-0">✓</span>
+          ครบแล้ว
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md bg-amber-50 border-2 border-amber-300 shrink-0"></span>
+          ทำค้างไว้
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md bg-ep-yellow/25 border-2 border-ep-yellow shrink-0"></span>
+          วันนี้
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md bg-ep-soft border-2 border-ep-soft shrink-0"></span>
+          วันฝึกที่จะถึง
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-4 h-4 rounded-md bg-amber-100 border-2 border-amber-300 grid place-items-center text-[8px] shrink-0">📝</span>
+          วัน Mock
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SELECTED-DAY DETAIL (centerpiece) ============ -->
+    <section class="bg-white rounded-3xl card3d-strong p-5 sm:p-7 popin">
+      <div class="flex items-center justify-between gap-2 mb-1">
+        <p class="font-display font-extrabold text-lg sm:text-xl text-slate-900">วันนี้ · พฤ 10 ก.ค.</p>
+        <span class="rounded-full bg-ep-soft px-3 py-1 text-[11px] font-bold text-ep-blue whitespace-nowrap">20 นาที</span>
+      </div>
+
+      <p class="mt-3 text-sm sm:text-[15px] text-slate-700 leading-relaxed">
+        ทำไปแล้ว <span class="num font-extrabold text-ep-blue">3/8</span> ข้อ · เก็บ <span class="font-semibold">🎧 ตามคำบอก</span> ครบแล้ว เหลืออีก <span class="font-semibold text-amber-600">4 หมวด</span>
+      </p>
+
+      <!-- progress bar -->
+      <div class="mt-3 h-3 rounded-full bg-slate-100 overflow-hidden">
+        <div class="bar-fill h-full rounded-full bg-ep-blue" style="width:37%"></div>
+      </div>
+      <p class="mt-1.5 text-right num text-[11px] font-bold text-ep-blue">37%</p>
+
+      <!-- do-all -->
+      <a href="/practice" class="btn3d btn-yellow mt-5 flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-ep-yellow text-slate-900 font-display font-extrabold text-base sm:text-lg w-full">
+        ▶ ทำทั้งหมดเลย <span class="num font-mono text-sm sm:text-base">(เหลือ 5 ข้อ ~12 นาที)</span>
+      </a>
+
+      <p class="mt-4 mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">หรือเลือกทำทีละหมวด</p>
+
+      <!-- SKILL GROUP CARDS -->
+      <div class="space-y-2.5">
+
+        <!-- Dictation — DONE -->
+        <div class="flex items-center gap-3 rounded-2xl border-2 border-ep-green/30 bg-ep-green/5 px-4 py-3">
+          <div class="w-11 h-11 rounded-xl bg-ep-green/15 grid place-items-center text-xl shrink-0">🎧</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-display font-bold text-slate-900 text-sm sm:text-base leading-tight">ตามคำบอก <span class="num text-slate-400 font-mono text-xs">×3</span></p>
+            <p class="mt-0.5 text-[12px] font-bold text-ep-green-dark flex items-center gap-1">
+              <span>✓</span> เสร็จแล้ว
+            </p>
+          </div>
+          <a href="/practice" class="btn3d-sm btn-white shrink-0 rounded-xl bg-white border-2 border-ep-soft text-ep-blue font-display font-bold text-xs sm:text-sm px-3.5 py-2.5">ทบทวน</a>
+        </div>
+
+        <!-- FITB — PARTIAL -->
+        <div class="flex items-center gap-3 rounded-2xl border-2 border-amber-300 bg-amber-50 px-4 py-3 relative overflow-hidden">
+          <div class="w-11 h-11 rounded-xl bg-amber-100 grid place-items-center text-xl shrink-0">✏️</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-display font-bold text-slate-900 text-sm sm:text-base leading-tight">เติมคำในช่องว่าง <span class="num text-slate-400 font-mono text-xs">×2</span></p>
+            <p class="mt-0.5 text-[12px] font-bold text-amber-700">◐ <span class="num">1/2</span> ทำต่อ</p>
+          </div>
+          <a href="/practice" class="btn3d-sm btn-blue shrink-0 rounded-xl bg-ep-blue text-white font-display font-bold text-xs sm:text-sm px-3.5 py-2.5">ทำต่อ →</a>
+        </div>
+
+        <!-- Vocab — not started -->
+        <div class="flex items-center gap-3 rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3">
+          <div class="w-11 h-11 rounded-xl bg-white grid place-items-center text-xl shrink-0">📚</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-display font-bold text-slate-900 text-sm sm:text-base leading-tight">ศัพท์ <span class="num text-slate-400 font-mono text-xs">×1</span></p>
+            <p class="mt-0.5 text-[12px] font-semibold text-slate-400">ยังไม่ทำ</p>
+          </div>
+          <a href="/practice" class="btn3d-sm btn-blue shrink-0 rounded-xl bg-ep-blue text-white font-display font-bold text-xs sm:text-sm px-3.5 py-2.5">เริ่ม</a>
+        </div>
+
+        <!-- Reading — not started -->
+        <div class="flex items-center gap-3 rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3">
+          <div class="w-11 h-11 rounded-xl bg-white grid place-items-center text-xl shrink-0">📖</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-display font-bold text-slate-900 text-sm sm:text-base leading-tight">การอ่าน <span class="num text-slate-400 font-mono text-xs">×1</span></p>
+            <p class="mt-0.5 text-[12px] font-semibold text-slate-400">ยังไม่ทำ</p>
+          </div>
+          <a href="/practice" class="btn3d-sm btn-blue shrink-0 rounded-xl bg-ep-blue text-white font-display font-bold text-xs sm:text-sm px-3.5 py-2.5">เริ่ม</a>
+        </div>
+
+        <!-- Real word — not started -->
+        <div class="flex items-center gap-3 rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3">
+          <div class="w-11 h-11 rounded-xl bg-white grid place-items-center text-xl shrink-0">🔤</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-display font-bold text-slate-900 text-sm sm:text-base leading-tight">คำจริง <span class="num text-slate-400 font-mono text-xs">×1</span></p>
+            <p class="mt-0.5 text-[12px] font-semibold text-slate-400">ยังไม่ทำ</p>
+          </div>
+          <a href="/practice" class="btn3d-sm btn-blue shrink-0 rounded-xl bg-ep-blue text-white font-display font-bold text-xs sm:text-sm px-3.5 py-2.5">เริ่ม</a>
+        </div>
+
+      </div>
+
+      <!-- helper notes -->
+      <p class="mt-5 text-[12.5px] text-slate-500 leading-relaxed">
+        ทำทีเดียวหมด หรือเลือกทำทีละหมวดก็ได้ · ค้างไว้แล้วกลับมาทำต่อได้ตลอด
+      </p>
+      <p class="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-400">
+        <span>🔄</span> ซิงค์กับแอปมือถืออัตโนมัติ
+      </p>
+    </section>
+
+  </div>
+
+  <!-- rationale footer (strip on port) -->
+  <div class="mt-10 rounded-2xl bg-slate-100/70 border border-slate-200 px-5 py-4">
+    <p class="text-[12px] leading-relaxed text-slate-500">
+      <span class="font-bold text-slate-600">ทำไมออกแบบแบบนี้:</span>
+      เดิมทีระบบนับว่า &quot;วันนี้เสร็จแล้ว&quot; (เขียว ✓) ทันทีที่ทำแบบฝึกหัด<b>แค่ 1 ข้อ</b> — ทำให้ผู้เรียนเข้าใจผิดว่าครบวันแล้วทั้งที่ยังเหลืออีกหลายหมวด
+      เวอร์ชันนี้ติดตามความคืบหน้า<b>แยกทีละหมวดทักษะ</b> ตามชุดฝึกที่กำหนดไว้ของวันนั้น แสดงสถานะ &quot;ทำค้างไว้&quot; ตามจริงแทนสีเขียวหลอก ๆ
+      ทำต่อเมื่อไหร่ก็ได้ และซิงค์กับแอปมือถือ (จาก <span class="font-mono">practice_attempts</span> ที่ทั้งสองแอปบันทึกร่วมกันอยู่แล้ว)
+      สไตล์หน้าตาใช้โทน Duolingo-friendly เดียวกับ landing V1 (ปรับแบรนด์แล้ว) — น้ำเงิน/เหลืองของ English Plan เท่านั้น ไม่มีสีเขียวไลม์ ไม่มีคำว่า XP
+      (บล็อกนี้มีไว้ลบตอนพอร์ตขึ้นจริง)
+    </p>
+  </div>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!--
+  Landing revamp 2026 — conversion-focused directions hub.
+  Audits the current live landing (AdminLandingPageClient.tsx) + links 4 full redesign previews,
+  each drawing from a real high-converting reference site in the language/edtech space.
+  Preview-only. Real routes so it feels live. No "AI" wording. ep-blue #004AAD / ep-yellow #FFCC00.
+-->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Landing revamp — เลือกทิศทางใหม่ · English Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { 'ep-blue': '#004AAD', 'ep-yellow': '#FFCC00' },
+      fontFamily: { sans: ['"IBM Plex Sans Thai"','sans-serif'], mono: ['"JetBrains Mono"','monospace'] },
+    }}}
+  </script>
+  <style>
+    body{font-family:'IBM Plex Sans Thai',sans-serif;line-height:1.7;color:#111827}
+    .mono{font-family:'JetBrains Mono',monospace}
+  </style>
+</head>
+<body class="bg-[#f5f7fb] antialiased">
+
+  <header class="bg-ep-blue text-white">
+    <div class="max-w-5xl mx-auto px-6 py-10 sm:py-14">
+      <p class="mono text-xs font-bold uppercase tracking-widest text-ep-yellow">English Plan · Landing revamp 2026</p>
+      <h1 class="mt-2 text-3xl sm:text-4xl font-bold leading-tight">หน้าแรกใหม่ — เลือกทิศทางที่ใช่</h1>
+      <p class="mt-3 max-w-2xl text-blue-100 text-sm sm:text-base">
+        หน้าแรกตอนนี้ “แน่นและตัวหนังสือเยอะ” เลยไม่ค่อยเปลี่ยนคนแปลกหน้าให้เป็นลูกค้า
+        ด้านล่างคือการรื้อทั้งหน้า 4 แบบ แต่ละแบบดึงวิธีทำให้คนสมัครมาจากเว็บระดับโลกในวงการเดียวกัน — เปิดดู แล้วเลือกอันที่ใช่
+      </p>
+    </div>
+  </header>
+
+  <!-- AUDIT -->
+  <section class="max-w-5xl mx-auto px-6 py-12">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-900">หน้าปัจจุบันมีอะไรบ้าง — และทำไมมันหนักไป</h2>
+    <p class="mt-2 text-sm text-gray-500 max-w-2xl">เดินทีละส่วนตามที่เห็นจริงในหน้าตอนนี้ (13 บล็อก เลื่อนยาวมาก) พร้อมปัญหาของแต่ละส่วน</p>
+
+    <div class="mt-6 overflow-x-auto rounded-2xl border border-gray-200 bg-white">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-gray-50 text-gray-500">
+          <tr>
+            <th class="px-4 py-3 font-semibold w-8">#</th>
+            <th class="px-4 py-3 font-semibold">ส่วนที่เห็นตอนนี้</th>
+            <th class="px-4 py-3 font-semibold">ปัญหาต่อการเปลี่ยนเป็นลูกค้า</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-gray-700">
+          <tr><td class="px-4 py-3 mono text-gray-400">1</td><td class="px-4 py-3 font-medium">แถบเมนูบน (nav)</td><td class="px-4 py-3 text-gray-500">เมนู 5 อัน + 2 ปุ่ม ตั้งแต่ยังไม่ทันเลื่อน — ตัวเลือกเยอะเกินจำเป็น</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">2</td><td class="px-4 py-3 font-medium">Hero “รู้ว่าอ่อนตรงไหน”</td><td class="px-4 py-3 text-gray-500">พาดหัวดี แต่คำโปรยยาว 3 บรรทัด อ่านเยอะก่อนถึงปุ่ม</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">3</td><td class="px-4 py-3 font-medium">กล่องปัญหา “ทำไมฝึกแล้วไม่ขึ้น”</td><td class="px-4 py-3 text-gray-500">โอเค แต่เป็นกล่องเทา ๆ ไม่มีภาพ</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">4</td><td class="px-4 py-3 font-medium">เครื่องมือ 4 อย่าง</td><td class="px-4 py-3 text-gray-500">การ์ดละ 3 บรรทัด ตัวอักษรแน่น อ่านเป็นพืด</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">5</td><td class="px-4 py-3 font-medium">ตัวอย่างฟีดแบ็ก (สไลด์)</td><td class="px-4 py-3 text-emerald-600">ส่วนที่ดีที่สุด — เห็นของจริง ควรดันขึ้นมาเด่น</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">6</td><td class="px-4 py-3 font-medium">Mock test (พื้นดำ)</td><td class="px-4 py-3 text-emerald-600">ภาพผลสอบชัดดี — จุดแข็งอีกจุด</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">7</td><td class="px-4 py-3 font-medium">ข้อสอบครบทุกแบบ (4 กลุ่ม, 12 แบบ)</td><td class="px-4 py-3 text-red-500">หนักสุด — รายการยาว + คำอธิบายเยอะมาก คนอ่านไม่ไหว</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">8</td><td class="px-4 py-3 font-medium">รีวิวนักเรียน 2 คน</td><td class="px-4 py-3 text-gray-500">เนื้อหาดี แต่กล่องเทาแบน ๆ ไม่สะดุดตา</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">9</td><td class="px-4 py-3 font-medium">กล่องคอร์ส Fast Track (VIP ฟรี)</td><td class="px-4 py-3 text-gray-500">โอเค</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">10</td><td class="px-4 py-3 font-medium">ราคา 4 แพ็กเกจ</td><td class="px-4 py-3 text-gray-500">4 คอลัมน์ + footnote + ลิงก์ย่อยเยอะ ในหน้าเดียว</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">11</td><td class="px-4 py-3 font-medium">CTA ปิดท้าย</td><td class="px-4 py-3 text-gray-500">ซ้ำปุ่มเดิม (ไป /explore) เป็นครั้งที่ 4–5</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">12</td><td class="px-4 py-3 font-medium">บทความ “บันทึกของครู”</td><td class="px-4 py-3 text-gray-500">ทำให้หน้ายิ่งยาว — ควรเป็นแค่ลิงก์เล็ก ๆ</td></tr>
+          <tr><td class="px-4 py-3 mono text-gray-400">13</td><td class="px-4 py-3 font-medium">Footer</td><td class="px-4 py-3 text-gray-500">โอเค</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-6 grid gap-4 sm:grid-cols-3">
+      <div class="rounded-2xl bg-white border border-gray-200 p-5">
+        <p class="mono text-2xl font-bold text-ep-blue">13</p>
+        <p class="mt-1 text-sm text-gray-600">บล็อกเรียงต่อกัน = เลื่อนยาว คนหลุดกลางทาง</p>
+      </div>
+      <div class="rounded-2xl bg-white border border-gray-200 p-5">
+        <p class="mono text-2xl font-bold text-ep-blue">~90%</p>
+        <p class="mt-1 text-sm text-gray-600">ของหน้าคือตัวหนังสือ ไม่ใช่ภาพ/ของจริง</p>
+      </div>
+      <div class="rounded-2xl bg-white border border-gray-200 p-5">
+        <p class="mono text-2xl font-bold text-ep-blue">1 อย่าง</p>
+        <p class="mt-1 text-sm text-gray-600">สิ่งที่อยากให้คนทำ (เช็กระดับฟรี) ควรเด่นสุด — ตอนนี้จมอยู่ในทะเลข้อความ</p>
+      </div>
+    </div>
+
+    <div class="mt-6 rounded-2xl border-2 border-ep-yellow bg-yellow-50 p-5">
+      <p class="text-sm text-gray-800"><b>สรุปทิศทางรื้อใหม่:</b> ตัดข้อความให้เหลือแก่น · ดันของจริง (ฟีดแบ็ก + ผล Mock) ขึ้นเป็นพระเอก · เหลือปุ่มหลักปุ่มเดียวชัด ๆ · ย่อ “ข้อสอบ 12 แบบ” ให้เป็นภาพสแกนง่าย · ทำให้ดู <b>เป็นคนออกแบบ ไม่ใช่เทมเพลต</b></p>
+    </div>
+  </section>
+
+  <!-- VERSIONS -->
+  <section class="max-w-5xl mx-auto px-6 pb-16">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-900">4 ทิศทาง — แต่ละแบบเรียนจากเว็บที่เปลี่ยนคนเป็นลูกค้าเก่งระดับโลก</h2>
+    <p class="mt-2 text-sm text-gray-500">เนื้อหา/ฟีเจอร์/ราคาเหมือนกันทุกแบบ ต่างกันที่ “คาแรกเตอร์แบรนด์” และวิธีเล่า — เลือกจากความรู้สึกที่อยากให้คนแปลกหน้าได้รับ</p>
+
+    <div class="mt-8 grid gap-6 sm:grid-cols-2">
+
+      <!-- V1 -->
+      <a href="/landing-convert-v1b-yours.html" class="group block rounded-3xl border-2 border-ep-yellow bg-white p-6 transition hover:shadow-lg hover:-translate-y-0.5">
+        <div class="flex items-center justify-between">
+          <span class="mono text-xs font-bold uppercase tracking-widest text-ep-blue">Version 1 ★</span>
+          <span class="rounded-full bg-yellow-50 px-3 py-1 text-[11px] font-semibold text-amber-700">สไตล์เล่นสนุก · เป็นแบรนด์ EP</span>
+        </div>
+        <h3 class="mt-3 text-2xl font-bold text-gray-900">สนุก เป็นมิตร ไม่น่ากลัว</h3>
+        <p class="mt-2 text-sm text-gray-600">มาสคอตนำ · ปุ่มใหญ่ปุ่มเดียว · ตัวหนังสือน้อยมาก · คะแนนวิ่งขึ้นให้เห็นภาพ — เห็นปุ๊บเข้าใจปั๊บ ไม่ต้องอ่านเยอะ</p>
+        <p class="mt-2 rounded-lg bg-yellow-50 px-3 py-2 text-[12px] text-amber-800"><b>✓ ปรับให้ไม่ชนแบรนด์อื่นแล้ว</b> — เปลี่ยนปุ่มเขียวไลม์เป็นสีน้ำเงิน/เหลืองของเรา, ตัดคำว่า XP ออก, ใช้มาสคอตพี่ดอยของเราเอง</p>
+        <div class="mt-4 flex flex-wrap gap-2 text-[11px] text-gray-500">
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">มาสคอตพี่ดอย</span>
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">Gen-Z</span>
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">คลายกังวล</span>
+        </div>
+        <span class="mt-5 inline-flex items-center gap-1 font-semibold text-ep-blue">ดูตัวอย่าง <span class="transition group-hover:translate-x-1">→</span></span>
+      </a>
+
+      <!-- V2 -->
+      <a href="/landing-convert-v2-grammarly.html" class="group block rounded-3xl border border-gray-200 bg-white p-6 transition hover:shadow-lg hover:-translate-y-0.5">
+        <div class="flex items-center justify-between">
+          <span class="mono text-xs font-bold uppercase tracking-widest text-ep-blue">Version 2</span>
+          <span class="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold text-ep-blue">แรงบันดาลใจ · Grammarly</span>
+        </div>
+        <h3 class="mt-3 text-2xl font-bold text-gray-900">โชว์ของจริง ไม่ต้องพูดเยอะ</h3>
+        <p class="mt-2 text-sm text-gray-600">เอา “ฟีดแบ็กจริง” ที่กำลังตรวจงานขึ้นเป็นพระเอกตั้งแต่บนสุด เหมือน Grammarly ที่โชว์เครื่องมือแก้ประโยคสด ๆ — คนเข้าใจคุณค่าใน 2 วินาทีโดยไม่ต้องอ่าน</p>
+        <div class="mt-4 flex flex-wrap gap-2 text-[11px] text-gray-500">
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">โชว์โปรดักต์</span>
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">น่าเชื่อถือ</span>
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">เห็นผลชัด</span>
+        </div>
+        <span class="mt-5 inline-flex items-center gap-1 font-semibold text-ep-blue">ดูตัวอย่าง <span class="transition group-hover:translate-x-1">→</span></span>
+      </a>
+
+      <!-- V3 -->
+      <a href="/landing-convert-v3-premium.html" class="group block rounded-3xl border border-gray-200 bg-white p-6 transition hover:shadow-lg hover:-translate-y-0.5">
+        <div class="flex items-center justify-between">
+          <span class="mono text-xs font-bold uppercase tracking-widest text-ep-blue">Version 3</span>
+          <span class="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold text-ep-blue">แรงบันดาลใจ · Speak / Superhuman</span>
+        </div>
+        <h3 class="mt-3 text-2xl font-bold text-gray-900">พรีเมียม มินิมอล ดูจริงจัง</h3>
+        <p class="mt-2 text-sm text-gray-600">พื้นเข้ม ตัวเลขคะแนนใหญ่ ๆ (95 → 130) พื้นที่ว่างเยอะ คำน้อยแต่ทรงพลัง เหมือนแอปพรีเมียมระดับโลก — ทำให้ English Plan ดู “คุ้มที่จ่าย”</p>
+        <div class="mt-4 flex flex-wrap gap-2 text-[11px] text-gray-500">
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">พรีเมียม</span>
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">มินิมอล</span>
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">ตัวเลขนำ</span>
+        </div>
+        <span class="mt-5 inline-flex items-center gap-1 font-semibold text-ep-blue">ดูตัวอย่าง <span class="transition group-hover:translate-x-1">→</span></span>
+      </a>
+
+      <!-- V4 -->
+      <a href="/landing-convert-v4-coach.html" class="group block rounded-3xl border border-gray-200 bg-white p-6 transition hover:shadow-lg hover:-translate-y-0.5">
+        <div class="flex items-center justify-between">
+          <span class="mono text-xs font-bold uppercase tracking-widest text-ep-blue">Version 4</span>
+          <span class="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold text-ep-blue">แรงบันดาลใจ · Headspace / Calm</span>
+        </div>
+        <h3 class="mt-3 text-2xl font-bold text-gray-900">โค้ชใจดี อบอุ่น เป็นคน</h3>
+        <p class="mt-2 text-sm text-gray-600">โทนอุ่น ๆ พี่ดอยครูจริงเป็นคนพาไป คลายกังวลก่อนลงมือ เหมือน Headspace/Calm — เหมาะกับคนไทยที่กลัวภาษาอังกฤษและไม่กล้าเริ่ม</p>
+        <div class="mt-4 flex flex-wrap gap-2 text-[11px] text-gray-500">
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">อบอุ่น เป็นมนุษย์</span>
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">ครูตัวจริง</span>
+          <span class="rounded-full bg-gray-100 px-2.5 py-1">ไว้ใจได้</span>
+        </div>
+        <span class="mt-5 inline-flex items-center gap-1 font-semibold text-ep-blue">ดูตัวอย่าง <span class="transition group-hover:translate-x-1">→</span></span>
+      </a>
+
+    </div>
+
+    <div class="mt-10 rounded-2xl bg-white border border-gray-200 p-6">
+      <h3 class="font-bold text-gray-900">เลือกยังไงดี?</h3>
+      <ul class="mt-3 space-y-2 text-sm text-gray-600">
+        <li>• อยากได้ <b>วัยรุ่น เข้าถึงง่าย ไม่น่ากลัว</b> → V1 (Duolingo)</li>
+        <li>• อยากให้คน <b>เชื่อทันทีว่าของดีจริง</b> เพราะเห็นเครื่องมือทำงาน → V2 (Grammarly)</li>
+        <li>• อยากวางแบรนด์ให้ <b>ดูพรีเมียม คุ้มค่าเงิน</b> → V3 (Speak)</li>
+        <li>• กลุ่มเป้าหมาย <b>กังวล ไม่กล้าเริ่ม อยากได้ที่ปรึกษาที่อุ่นใจ</b> → V4 (Headspace/Calm)</li>
+      </ul>
+      <p class="mt-4 text-xs text-gray-400">ทุกแบบเป็นตัวอย่างหน้า HTML — ปุ่มลิงก์ไปหน้าจริง (เช็กระดับฟรี, สมัคร, ราคา) พอเลือกได้แล้วค่อยพอร์ตเข้าโค้ดจริงแบบเปิดให้แอดมินก่อนเหมือนที่ผ่านมา</p>
+    </div>
+  </section>
+
+  <footer class="border-t border-gray-200 bg-white">
+    <div class="max-w-5xl mx-auto px-6 py-6 text-xs text-gray-400 flex items-center gap-2">
+      <span class="mono font-bold text-ep-blue">EP</span> English Plan · Landing revamp preview hub · 2026
+    </div>
+  </footer>
+
+</body>
+</html>
