@@ -12,7 +12,7 @@ import { fetchSeenKeys, filterUnseen, itemKey, markItemSeen } from "@/lib/lesson
 import { useLessonUserId } from "@/lib/lesson-user";
 import { clearUnitResume, loadUnitResume, saveUnitResume, saveUnitScore } from "@/lib/lessons-progress";
 import { addNotebookEntry } from "@/lib/notebook-storage";
-import { PRONUNCIATION_PASS, pronunciationScore, type PronunciationResult } from "@/lib/pronunciation-match";
+import { PRONUNCIATION_PASS, endingIssueHintTh, pronunciationPassed, pronunciationScore, type PronunciationResult } from "@/lib/pronunciation-match";
 import { readSpeakUnit, type ReadSpeakItem, type ReadSpeakTier, type ReadSpeakVocab } from "@/lib/readspeak-lessons";
 import { LessonRecorder } from "@/components/lessons/LessonRecorder";
 
@@ -122,7 +122,7 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
   }, [checked, picks, item.blanks]);
 
   const allPicked = picks.length > 0 && picks.every((p) => p !== null);
-  const passed = !!result && result.pct >= PRONUNCIATION_PASS;
+  const passed = !!result && pronunciationPassed(result);
 
   function pick(blank: number, option: string) {
     setPicks((p) => {
@@ -159,14 +159,14 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
       setHeardText(transcript);
       const scored = pronunciationScore(item.answer, transcript);
       setResult(scored);
-      if (scored.pct >= PRONUNCIATION_PASS) {
+      if (pronunciationPassed(scored)) {
         sfxCorrect();
       } else {
         sfxWrong();
       }
     } catch {
       setHeardText("");
-      setResult({ pct: 0, words: [], missedIdx: [] });
+      setResult({ pct: 0, words: [], missedIdx: [], endingIssues: [] });
     } finally {
       setTranscribing(false);
     }
@@ -327,8 +327,26 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
                 </div>
                 <div className={`mt-3 rounded-2xl p-6 text-center ${passed ? "bg-emerald-50" : "bg-rose-50"}`}>
                   <p className={`text-4xl font-black ${passed ? "text-emerald-600" : "text-rose-600"}`}>{result.pct}%</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-700">{passed ? "ผ่าน! ออกเสียงได้ตรงตามเกณฑ์" : `ต้องได้อย่างน้อย ${PRONUNCIATION_PASS}% ถึงจะผ่าน`}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-700">
+                    {passed
+                      ? "ผ่าน! ออกเสียงได้ตรงตามเกณฑ์"
+                      : result.endingIssues.length > 0
+                        ? "ยังออกเสียงท้ายคำไม่ครบ — ต้องพูดใหม่ให้ชัด"
+                        : `ต้องได้อย่างน้อย ${PRONUNCIATION_PASS}% ถึงจะผ่าน`}
+                  </p>
                 </div>
+                {!passed && result.endingIssues.length > 0 ? (
+                  <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-3">
+                    <p className="mb-1.5 text-xs font-black text-amber-800">🔤 อย่าลืมออกเสียงท้ายคำ (-s / -es / -ed) ให้ชัด</p>
+                    <ul className="space-y-1">
+                      {result.endingIssues.map((iss) => (
+                        <li key={iss.idx} className="text-sm font-semibold text-amber-900">
+                          • {endingIssueHintTh(iss)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 {!passed ? (
                   <button type="button" onClick={speakAgain} className="mt-4 w-full rounded-xl bg-[#004AAD] py-3 text-sm font-bold text-[#FFCC00]">
                     🎙 ลองพูดอีกครั้ง
