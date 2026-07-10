@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
@@ -14,6 +15,14 @@ function isDailyPlanSkill(v: string | null): v is DailyPlanSkill {
   return !!v && (VALID_SKILLS as string[]).includes(v);
 }
 
+function DailyRunPageFallback() {
+  return (
+    <div className="mx-auto max-w-md px-4 py-16 text-center">
+      <div className="mx-auto h-5 w-40 animate-pulse rounded bg-neutral-100" />
+    </div>
+  );
+}
+
 /**
  * Route for the inline daily-practice runner (mobile-app-parity "play the whole day's plan
  * in one flowing screen" flow). Admin/preview-gated the same way every other new feature in
@@ -21,6 +30,14 @@ function isDailyPlanSkill(v: string | null): v is DailyPlanSkill {
  * calendar's existing "เริ่มฝึกวันนี้" flow until the founder flips this on.
  */
 export default function DailyRunPage() {
+  return (
+    <Suspense fallback={<DailyRunPageFallback />}>
+      <DailyRunPageInner />
+    </Suspense>
+  );
+}
+
+function DailyRunPageInner() {
   const searchParams = useSearchParams();
   const date = searchParams.get("date");
   const skillParam = searchParams.get("skill");
