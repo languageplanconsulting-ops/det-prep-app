@@ -15,6 +15,7 @@ const baseLinks = [
   { href: "/student-overview", label: "Student Overview" },
   { href: "/notebook", label: "Notebook" },
   { href: "/practice", label: "Practice" },
+  { href: "/study-plan", label: "Calendar" },
   { href: "/mock-test/start", label: "Mock test" },
 ] as const;
 
