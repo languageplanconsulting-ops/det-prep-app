@@ -102,7 +102,7 @@ export function BugReportWidget() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-[95] rounded-full border-4 border-black bg-[#FFCC00] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[6px_6px_0_0_#111] transition hover:-translate-y-0.5 hover:bg-[#ffd633]"
+        className="ep-bug-fab fixed bottom-5 right-5 z-[95] rounded-full border-4 border-black bg-[#FFCC00] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[6px_6px_0_0_#111] transition hover:-translate-y-0.5 hover:bg-[#ffd633]"
         style={{ fontFamily: "var(--font-jetbrains), monospace" }}
       >
         รายงานปัญหา

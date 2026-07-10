@@ -16,11 +16,15 @@ export function DictationSessionClient({
   round,
   difficulty,
   setNumber,
+  onRunnerComplete,
 }: {
   item: DictationItem;
   round: DictationRoundNum;
   difficulty: DictationDifficulty;
   setNumber: number;
+  /** Fired once scoring completes, in addition to the normal report flow — used by the
+   * daily-practice runner (src/components/practice/daily-runner) to advance to the next item. */
+  onRunnerComplete?: (scorePct: number, maxScore: number) => void;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
   const soft = true;
@@ -215,6 +219,7 @@ export function DictationSessionClient({
     });
     setPhase("report");
     setReportKey((k) => k + 1);
+    onRunnerComplete?.(maxScore > 0 ? (score / maxScore) * 100 : 0, maxScore);
   };
 
   const handleFixSubmit = (merged: string, newScore: number) => {

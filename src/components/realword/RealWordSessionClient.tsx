@@ -27,6 +27,7 @@ export function RealWordSessionClient({
   difficulty,
   setNumber,
   hubHref,
+  onRunnerComplete,
 }: {
   round: RealWordRoundNum;
   wordSet: RealWordSet;
@@ -34,6 +35,9 @@ export function RealWordSessionClient({
   setNumber: number;
   /** Usually the set list for this round + difficulty. */
   hubHref: string;
+  /** Fired once scoring completes, in addition to the normal report flow — used by the
+   * daily-practice runner (src/components/practice/daily-runner) to advance to the next item. */
+  onRunnerComplete?: (scorePct: number, maxScore: number) => void;
 }) {
   const uid = useLessonUserId();
   const [phase, setPhase] = useState<"game" | "report">("game");
@@ -58,14 +62,15 @@ export function RealWordSessionClient({
       words: sessionWordSet.words,
       selectedIndices: selected,
     });
+    const maxScore = REALWORD_MAX_SCORE[difficulty];
+    const { R, UR, M } = realWordCounts({ words: sessionWordSet.words, selectedIndices: selected });
+    const score = realWordRunScore(UR, M, R, maxScore);
+    const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
     if (!rewarded.current) {
       rewarded.current = true;
-      const maxScore = REALWORD_MAX_SCORE[difficulty];
-      const { R, UR, M } = realWordCounts({ words: sessionWordSet.words, selectedIndices: selected });
-      const score = realWordRunScore(UR, M, R, maxScore);
-      const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
       awardXp(uid, XP.auto(pct)).catch(() => {});
     }
+    onRunnerComplete?.(pct, maxScore);
     setPhase("report");
   };
 

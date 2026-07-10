@@ -46,6 +46,7 @@ export function FitbSessionClient({
   startWithRedeem,
   hideRedeemLater,
   onAdvance,
+  onComplete,
 }: {
   set: FitbSet;
   round: FitbRoundNum;
@@ -55,6 +56,9 @@ export function FitbSessionClient({
   /** Queue mode passthrough — see FitbReportPanel. */
   hideRedeemLater?: boolean;
   onAdvance?: () => void;
+  /** Fired once scoring completes (independent of onAdvance), with the numeric score —
+   * used by the daily-practice runner (src/components/practice/daily-runner) to advance. */
+  onComplete?: (scorePct: number, maxScore: number) => void;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
   const uid = useLessonUserId();
@@ -229,12 +233,14 @@ export function FitbSessionClient({
       userAnswers: ua,
       clueUsed: [...clueUsed],
     });
+    const fitbMax = fitbMaxScore(difficulty);
     if (!rewarded.current) {
       rewarded.current = true;
-      const pct = Math.round((score / fitbMaxScore(difficulty)) * 100);
+      const pct = Math.round((score / fitbMax) * 100);
       awardXp(uid, XP.auto(pct)).catch(() => {});
     }
     setPhase("report");
+    onComplete?.(fitbMax > 0 ? (score / fitbMax) * 100 : 0, fitbMax);
   };
 
   const onRedeemNow = () => {

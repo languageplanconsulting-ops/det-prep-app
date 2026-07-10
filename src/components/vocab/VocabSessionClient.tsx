@@ -21,6 +21,7 @@ export function VocabSessionClient({
   passageNumber,
   passage,
   nextPassageNumber,
+  onRunnerComplete,
 }: {
   round: VocabRoundNum;
   sessionLevel: VocabSessionLevel;
@@ -28,6 +29,9 @@ export function VocabSessionClient({
   passageNumber: number;
   passage: VocabPassageUnit;
   nextPassageNumber: number | null;
+  /** Fired once scoring completes, in addition to the normal report flow — used by the
+   * daily-practice runner (src/components/practice/daily-runner) to advance to the next item. */
+  onRunnerComplete?: (scorePct: number, maxScore: number) => void;
 }) {
   const [phase, setPhase] = useState<"exam" | "report">("exam");
   const [examKey, setExamKey] = useState(0);
@@ -51,6 +55,7 @@ export function VocabSessionClient({
     });
     setResultRows(rows);
     setPhase("report");
+    onRunnerComplete?.(maxScore > 0 ? (attainedScore / maxScore) * 100 : 0, maxScore);
   };
 
   const redeem = () => {

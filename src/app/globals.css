@@ -2,9 +2,17 @@
 
 @theme inline {
   --color-ep-blue: #004aad;
+  --color-ep-blue-dark: #003a87;
   --color-ep-yellow: #ffcc00;
+  /* "Done" accent for the daily-practice calendar/runner — a teal, deliberately NOT the
+     lime green (#58CC02) associated with a certain other language app. */
+  --color-ep-green: #0fa47f;
+  --color-ep-green-dark: #0b7a5e;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  /* Rounded Thai display face (next/font "Mitr") for the daily-practice calendar/runner
+     headings only — everything else keeps --font-sans (Inter). */
+  --font-display: var(--font-baloo), var(--font-inter), ui-sans-serif, sans-serif;
   /* Slower, softer defaults for every `transition` / `duration-*` baseline */
   --default-transition-duration: 520ms;
   --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
@@ -780,4 +788,11 @@ button.ep-interactive:hover {
       transform: scale(1);
     }
   }
+}
+
+/* Hide the global "รายงานปัญหา" report FAB (BugReportWidget) while a study-plan
+   daily-queue bar is on screen, so the fixed bottom-right button never overlaps the
+   queue bar's action buttons. Toggled by DailyQueueBanner via <body data-daily-queue-active>. */
+body[data-daily-queue-active="1"] .ep-bug-fab {
+  display: none !important;
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Tier } from "@/lib/access-control";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { setActiveDailyQueue } from "@/lib/daily-queue-session";
 import { buildRandomQueue, defaultDifficultyFor } from "@/lib/practice-queue-builder";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/lib/study-plan/schedule";
 import { EXAM_DATE_CHANGE_EVENT } from "@/hooks/usePracticeHeroStats";
 import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
+import { StudyPlanCalendarCardSoft } from "@/components/dashboard/StudyPlanCalendarCardSoft";
 
 type ScheduleRow = {
   exam_date: string;
@@ -112,6 +114,8 @@ function CardShell({ children }: { children: React.ReactNode }) {
 
 export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }) {
   const router = useRouter();
+  const { isAdmin, previewEligible } = useEffectiveTier();
+  const soft = isAdmin || previewEligible;
   const [loading, setLoading] = useState(true);
   const [schedule, setSchedule] = useState<ScheduleRow | null>(null);
   const [completions, setCompletions] = useState<{ completion_date: string }[]>([]);
@@ -270,6 +274,19 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
   const selectedEntry = selectedDay ? days.find((d) => d.date === selectedDay) ?? null : null;
   const selectedActivity = selectedDay ? activityByDate.get(selectedDay) ?? null : null;
 
+  if (soft && schedule && !editing && !loading) {
+    return (
+      <StudyPlanCalendarCardSoft
+        schedule={schedule}
+        streak={streak}
+        weakSkills={weakSkills}
+        weakestDimension={weakness?.weakestDimension ?? null}
+        topImprovement={topImprovement}
+        onEditPlan={openEdit}
+      />
+    );
+  }
+
   if (loading) {
     return (
       <CardShell>
@@ -279,6 +296,81 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
   }
 
   if (!schedule || editing) {
+    if (soft) {
+      return (
+        <div className="rounded-3xl bg-white p-5 ring-1 ring-slate-200 sm:p-7">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-ep-blue">Study plan</p>
+          <h3 className="mb-1 mt-1 font-display text-xl font-extrabold text-slate-900">
+            {editing ? "แก้ไขแผน" : "สร้างแผนการเรียนถึงวันสอบ"}
+          </h3>
+          {!editing && <p className="mb-4 text-sm text-slate-500">สอบวันไหน? เดี๋ยวจัดปฏิทินฝึกให้ถึงวันสอบเลย</p>}
+
+          <p className="mb-1.5 mt-3 text-[10px] font-black uppercase tracking-widest text-slate-400">รูปแบบการฝึก</p>
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            <PillOption active={!isFreeformDraft} onClick={() => setIsFreeformDraft(false)}>
+              มีวันสอบแน่นอน
+            </PillOption>
+            <PillOption active={isFreeformDraft} onClick={() => setIsFreeformDraft(true)}>
+              ฝึกอิสระ — ไม่ตั้งวันสอบ
+            </PillOption>
+          </div>
+
+          {!isFreeformDraft && (
+            <>
+              <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">วันสอบ</p>
+              <div className="mb-4 flex flex-wrap gap-1.5">
+                {EXAM_PRESETS.map((p) => {
+                  const value = addDaysIso(todayIso(), p.days);
+                  return (
+                    <PillOption key={p.label} active={examDate === value} onClick={() => setExamDate(value)}>
+                      {p.label}
+                    </PillOption>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">ความถี่</p>
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            {CADENCE_OPTIONS.map((c) => (
+              <PillOption key={c.days} active={cadenceDays === c.days} onClick={() => setCadenceDays(c.days)}>
+                {c.th}
+              </PillOption>
+            ))}
+          </div>
+
+          <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">เวลาต่อวันตามปกติ</p>
+          <div className="mb-5 flex flex-wrap gap-1.5">
+            {DURATION_OPTIONS.map((m) => (
+              <PillOption key={m} active={duration === m} onClick={() => setDuration(m)}>
+                {m} นาที
+              </PillOption>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={(!isFreeformDraft && !examDate) || saving}
+              onClick={submitPlan}
+              className="rounded-2xl bg-ep-yellow px-6 py-3 font-display text-sm font-extrabold text-slate-900 shadow-md transition hover:shadow-lg active:scale-[0.98] disabled:opacity-40"
+            >
+              {saving ? "กำลังบันทึก…" : editing ? "บันทึกการแก้ไข" : "สร้างแผนการเรียน"}
+            </button>
+            {editing && (
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="rounded-2xl bg-slate-50 px-6 py-3 font-display text-sm font-bold text-slate-600 transition hover:bg-slate-100"
+              >
+                ยกเลิก
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
     return (
       <CardShell>
         <p className="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">Study plan</p>

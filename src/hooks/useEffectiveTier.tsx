@@ -38,6 +38,12 @@ export type EffectiveTierState = {
    */
   previewEligible: boolean;
   loading: boolean;
+  /**
+   * True once a signed-in identity is confirmed (server `/api/me` or client session).
+   * Distinguishes a logged-in FREE user from a logged-out visitor — gate login-walls on
+   * this, never on a one-shot client `getSession()` (which races/returns null on nav).
+   */
+  isAuthenticated: boolean;
   vipGrantedByCourse: boolean;
   hasStripeSubscription: boolean;
   /** Raw `profiles.tier_expires_at` for the signed-in user (ISO), or null for none/lifetime. */
@@ -53,6 +59,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [previewEligible, setPreviewEligible] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [previewTier, setPreviewTierState] = useState<Tier | null>(null);
   const [vipGrantedByCourse, setVipGrantedByCourse] = useState(false);
   const [hasStripeSubscription, setHasStripeSubscription] = useState(false);
@@ -178,6 +185,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
 
     if (serverConfirmed || effectiveUserId) {
       setCurrentBrowserUserId(effectiveUserId);
+      setIsAuthenticated(true);
       setRealTier(liveTier);
       setIsAdmin(server?.isAdmin === true || clientAdmin);
       setVipGrantedByCourse(server?.vipGrantedByCourse === true || clientVipCourse);
@@ -186,6 +194,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
     } else {
       // No identity from either source (logged out / total failure) → free + login prompt.
       setCurrentBrowserUserId(null);
+      setIsAuthenticated(false);
       setRealTier("free");
       setIsAdmin(false);
       setVipGrantedByCourse(false);
@@ -242,6 +251,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       isAdmin,
       previewEligible,
       loading,
+      isAuthenticated,
       vipGrantedByCourse,
       hasStripeSubscription,
       planExpiresAt,
@@ -251,6 +261,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
     isAdmin,
     previewEligible,
     loading,
+    isAuthenticated,
     previewTier,
     vipGrantedByCourse,
     hasStripeSubscription,

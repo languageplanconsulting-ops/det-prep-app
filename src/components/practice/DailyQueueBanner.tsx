@@ -28,6 +28,18 @@ export function DailyQueueBanner() {
     setState(getActiveDailyQueue());
   }, [pathname]);
 
+  // While the queue bar is on screen, mark <body> so the global "รายงานปัญหา" FAB
+  // (BugReportWidget, fixed bottom-right) hides instead of overlapping the bar's buttons.
+  const bannerVisible =
+    justFinished || (!!state && isOnCurrentQueueStep(state, pathname));
+  useEffect(() => {
+    if (bannerVisible) document.body.dataset.dailyQueueActive = "1";
+    else delete document.body.dataset.dailyQueueActive;
+    return () => {
+      delete document.body.dataset.dailyQueueActive;
+    };
+  }, [bannerVisible]);
+
   if (justFinished) {
     return (
       <div className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-emerald-500 bg-emerald-50/95 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur">
