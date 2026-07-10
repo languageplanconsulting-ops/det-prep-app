@@ -4,7 +4,7 @@
  * fallback on failure). Reuses the SAME /api/speech-synthesize route the
  * rest of the web app already uses (mock test, mini-study, study-plan).
  */
-import { browserSpeak } from "@/lib/browser-tts";
+import { browserSpeak, browserSpeakCancel } from "@/lib/browser-tts";
 
 const urlCache = new Map<string, string>();
 
@@ -30,15 +30,25 @@ async function synthesize(text: string): Promise<string | null> {
   }
 }
 
-export type LessonPlayer = { play: () => void };
+export type LessonPlayer = { play: () => void; remove: () => void };
 
-/** Returns a player whose play() fetches (or reuses cached) TTS and plays it, falling back to browser TTS on failure. */
+/**
+ * Returns a player whose play() fetches (or reuses cached) TTS and plays it,
+ * falling back to browser TTS on failure. remove() cancels any in-flight
+ * synthesis/playback for this specific player — without it, a slow request
+ * for a previous item's text can resolve after the caller has already moved
+ * on to a new item and start playing over/instead of the new item's audio
+ * (mirrors det-mobile's audio-play.ts Playable, which guards the same race).
+ */
 export function speakLesson(text: string): LessonPlayer {
   let audioEl: HTMLAudioElement | null = null;
+  let cancelled = false;
   return {
     play: () => {
+      cancelled = false;
       void (async () => {
         const url = await synthesize(text);
+        if (cancelled) return;
         if (url) {
           if (!audioEl) audioEl = new Audio(url);
           else if (audioEl.src !== url) audioEl.src = url;
@@ -46,12 +56,21 @@ export function speakLesson(text: string): LessonPlayer {
           try {
             await audioEl.play();
           } catch {
-            browserSpeak(text, { lang: "en-US" });
+            if (!cancelled) browserSpeak(text, { lang: "en-US" });
           }
-        } else {
+        } else if (!cancelled) {
           browserSpeak(text, { lang: "en-US" });
         }
       })();
+    },
+    remove: () => {
+      cancelled = true;
+      try {
+        audioEl?.pause();
+      } catch {
+        /* ignore */
+      }
+      browserSpeakCancel();
     },
   };
 }

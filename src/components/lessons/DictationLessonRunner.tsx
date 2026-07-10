@@ -6,7 +6,7 @@ import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { MascotLoader } from "@/components/ui/MascotLoader";
 import { sfxCelebrate, sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import { XP, awardXp } from "@/lib/gamification";
-import { speakLesson } from "@/lib/lesson-audio";
+import { speakLesson, type LessonPlayer } from "@/lib/lesson-audio";
 import { useLessonUserId } from "@/lib/lesson-user";
 import { fetchSeenKeys, filterUnseen, itemKey, markItemSeen } from "@/lib/lesson-seen";
 import {
@@ -97,7 +97,7 @@ function Player({
   const [streak, setStreak] = useState(0);
   const [finished, setFinished] = useState(false);
   const rewarded = useRef(false);
-  const player = useRef<{ play: () => void } | null>(null);
+  const player = useRef<LessonPlayer | null>(null);
   // Guards the auto-play timeout below against a click on the manual play
   // button landing inside the 350ms window — without this, both the timeout
   // and the click call .play(), firing two overlapping synthesis requests.
@@ -106,12 +106,14 @@ function Player({
   const lesson = items[index]!;
 
   useEffect(() => {
+    player.current?.remove();
     const p = speakLesson(lesson.answer);
     player.current = p;
     autoplayTimer.current = setTimeout(() => { autoplayTimer.current = null; p.play(); }, 350);
     return () => {
       if (autoplayTimer.current) clearTimeout(autoplayTimer.current);
       autoplayTimer.current = null;
+      p.remove();
     };
   }, [lesson.answer]);
 

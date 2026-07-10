@@ -7,7 +7,7 @@ import { MascotLoader } from "@/components/ui/MascotLoader";
 import { sfxCelebrate, sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import { XP, awardXp } from "@/lib/gamification";
 import { splitTemplate } from "@/lib/cloze-template";
-import { speakLesson } from "@/lib/lesson-audio";
+import { speakLesson, type LessonPlayer } from "@/lib/lesson-audio";
 import { getPhoto, photoCredit } from "@/lib/lesson-photo-bank";
 import { fetchSeenKeys, filterUnseen, itemKey, markItemSeen } from "@/lib/lesson-seen";
 import { useLessonUserId } from "@/lib/lesson-user";
@@ -77,7 +77,7 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
   // separate <audio> element) per call — a click landing inside the 350ms
   // auto-play window fired two independent playbacks that genuinely
   // overlapped. Share one player instance and guard the pending timer instead.
-  const player = useRef<{ play: () => void } | null>(null);
+  const player = useRef<LessonPlayer | null>(null);
   const autoplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const item = items[index]!;
@@ -103,12 +103,14 @@ function Player({ tier, unit, items, uid }: { tier: SpeakPhotoTier; unit: number
 
   useEffect(() => {
     if (phase !== "speak") return;
+    player.current?.remove();
     const p = speakLesson(item.answer);
     player.current = p;
     autoplayTimer.current = setTimeout(() => { autoplayTimer.current = null; p.play(); }, 350);
     return () => {
       if (autoplayTimer.current) clearTimeout(autoplayTimer.current);
       autoplayTimer.current = null;
+      p.remove();
     };
   }, [phase, item.answer]);
 
