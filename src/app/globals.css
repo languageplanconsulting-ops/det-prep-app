@@ -8,11 +8,14 @@
      lime green (#58CC02) associated with a certain other language app. */
   --color-ep-green: #0fa47f;
   --color-ep-green-dark: #0b7a5e;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Latin renders in Inter; Thai has no Inter glyphs so it falls through to IBM Plex Sans
+     Thai (the brand Thai face) per-glyph, keeping all Thai body text on-brand + consistent
+     instead of a per-device system fallback. */
+  --font-sans: var(--font-inter), var(--font-plexthai), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
-  /* Rounded Thai display face (next/font "Mitr") for the daily-practice calendar/runner
-     headings only — everything else keeps --font-sans (Inter). */
-  --font-display: var(--font-baloo), var(--font-inter), ui-sans-serif, sans-serif;
+  /* Brand display face for headings/buttons (IBM Plex Sans Thai, bold weights). Replaced
+     the earlier off-brand rounded "Mitr" face. */
+  --font-display: var(--font-plexthai), var(--font-inter), ui-sans-serif, sans-serif;
   /* Slower, softer defaults for every `transition` / `duration-*` baseline */
   --default-transition-duration: 520ms;
   --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
