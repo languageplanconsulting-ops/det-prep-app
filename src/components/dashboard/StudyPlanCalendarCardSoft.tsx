@@ -14,11 +14,19 @@
  * non-admin fallback (old horizontal-strip calendar) is untouched in that file.
  */
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { sfxCelebrate, sfxTap, sfxTransition } from "@/lib/exam-sfx";
 import { LESSON_TOPICS, lessonTopicHref } from "@/lib/lessons/topics";
+import { setActiveDailyQueue } from "@/lib/daily-queue-session";
+import {
+  buildRandomLessonQueue,
+  lessonPlanForDuration,
+  lessonPlanTotalRounds,
+  type LessonDuration,
+} from "@/lib/lessons/random-lesson-queue";
 import {
   buildDailyPlanItems,
   DAILY_SKILL_META,
@@ -151,6 +159,7 @@ export function StudyPlanCalendarCardSoft({
   topImprovement: TopImprovement;
   onEditPlan: () => void;
 }) {
+  const router = useRouter();
   const today = todayIso();
   const todayD = new Date(`${today}T00:00:00Z`);
 
@@ -595,35 +604,67 @@ export function StudyPlanCalendarCardSoft({
               </div>
 
               {dayDetail.plan.track === "lesson" ? (
-                <div className="mt-5">
-                  <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    เลือกบทเรียนที่อยากฝึก
-                  </p>
-                  <div className="space-y-2">
-                    {LESSON_TOPICS.map((t) => (
-                      <Link
-                        key={t.slug}
-                        href={lessonTopicHref(t.slug)}
-                        onClick={() => sfxTransition()}
-                        className="flex items-center gap-3 rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 transition hover:border-ep-blue/40 hover:bg-white active:scale-[0.99]"
+                (() => {
+                  const lessonTier = dayDetail.plan.tier as LessonDuration;
+                  const plan = lessonPlanForDuration(lessonTier);
+                  const totalRounds = lessonPlanTotalRounds(lessonTier);
+                  const startLessonRun = () => {
+                    const queue = buildRandomLessonQueue("easy", lessonTier);
+                    if (queue.length === 0) return;
+                    sfxTransition();
+                    setActiveDailyQueue({
+                      hrefs: queue.map((q) => q.href),
+                      index: 0,
+                      tierMinutes: lessonTier,
+                      dateIso: selectedDate,
+                    });
+                    router.push(queue[0].href);
+                  };
+                  return (
+                    <div className="mt-5">
+                      <p className="mt-4 text-sm leading-relaxed text-slate-700 sm:text-[15px]">
+                        ชุดบทเรียนวันนี้{" "}
+                        <span className="font-mono font-extrabold text-ep-blue">{totalRounds}</span> รอบ ·{" "}
+                        {lessonTier} นาที
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={startLessonRun}
+                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-ep-yellow px-6 py-4 font-display text-base font-extrabold text-slate-900 shadow-md transition hover:shadow-lg active:scale-[0.98] sm:text-lg"
                       >
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl">
-                          {t.emoji}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-display text-sm font-bold leading-tight text-slate-900 sm:text-base">
-                            {t.th}
-                          </p>
-                          <p className="mt-0.5 truncate text-[12px] text-slate-500">{t.descTh}</p>
-                        </div>
-                        <span className="shrink-0 text-lg text-slate-300">→</span>
-                      </Link>
-                    ))}
-                  </div>
-                  <p className="mt-3 text-[11px] text-slate-400">
-                    เทคนิค + เนื้อหาแยกทักษะจากพี่ดอย · ความคืบหน้าซิงก์กับแอปมือถือ
-                  </p>
-                </div>
+                        ▶ ทำทั้งหมด (สุ่มบทเรียน)
+                      </button>
+
+                      <p className="mt-4 mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        หรือเลือกทำทีละหมวด
+                      </p>
+                      <div className="space-y-2.5">
+                        {plan.map((g) => (
+                          <Link
+                            key={g.slug}
+                            href={g.href}
+                            onClick={() => sfxTransition()}
+                            className="flex items-center gap-3 rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 transition hover:border-ep-blue/40 hover:bg-white active:scale-[0.99]"
+                          >
+                            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl">
+                              {g.emoji}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate font-display text-sm font-bold leading-tight text-slate-900 sm:text-base">
+                                {g.th} <span className="font-mono text-xs text-slate-400">×{g.rounds}</span>
+                              </p>
+                            </div>
+                            <span className="shrink-0 text-lg text-slate-300">→</span>
+                          </Link>
+                        ))}
+                      </div>
+                      <p className="mt-3 text-[11px] text-slate-400">
+                        เวลามากขึ้น = บทเรียนมากขึ้น (อ้างอิงลำดับจากแอปมือถือ) · เนื้อหาซิงก์กับแอปมือถือ
+                      </p>
+                    </div>
+                  );
+                })()
               ) : (
                 <>
                   <p className="mt-4 text-sm leading-relaxed text-slate-700 sm:text-[15px]">
@@ -707,10 +748,6 @@ export function StudyPlanCalendarCardSoft({
                   </div>
                 </>
               )}
-
-              <p className="mt-5 flex items-center gap-1.5 text-[11px] text-slate-400">
-                <span>🔄</span> ซิงค์กับแอปมือถืออัตโนมัติ
-              </p>
             </>
           ) : null}
         </section>

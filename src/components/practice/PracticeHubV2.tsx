@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import type { Tier } from "@/lib/access-control";
 import { StudyPlanCalendarCard } from "@/components/dashboard/StudyPlanCalendarCard";
-import { RandomPracticePicker } from "@/components/practice/RandomPracticePicker";
 import { XpTierBadge } from "@/components/ui/XpTierBadge";
 import { daysUntil, setExamDate, usePracticeHeroStats } from "@/hooks/usePracticeHeroStats";
 import { usePracticeTimeWidget, type TimeWindow } from "@/hooks/usePracticeTimeWidget";
@@ -548,7 +547,6 @@ export function PracticeHubV2({
         <aside className="order-1 space-y-4 lg:order-2">
           <div className="space-y-3">
               <XpTierBadge />
-              <RandomPracticePicker effectiveTier={effectiveTier} />
           </div>
 
           {/* compact persistent status (real) */}
