@@ -288,17 +288,27 @@ export function StudyPlanCalendarCardSoft({
     setSavingDayPlan(true);
     setDayPlanError(null);
 
-    // Optimistically switch the view right away. This picker only renders when the day has
-    // ZERO logged attempts (canEditDayPlan), so the correct progress for the new plan is simply
-    // all-groups-at-0 — no server round-trip needed to render it, and the plan items themselves
-    // are deterministic from tier+track (buildDailyPlanItems). This keeps the exam/lesson toggle
-    // instant AND lets the lesson track work even if persistence is unavailable.
+    // Optimistically switch the view right away. Plan items are deterministic from tier+track
+    // (buildDailyPlanItems), and progress is always re-derived server-side from the day's real
+    // practice_attempts — so changing track/duration mid-day never deletes logged work, it just
+    // re-buckets it against the new plan. We carry the learner's existing per-skill `done` counts
+    // over to the new plan (clamped to each new required count) so the panel doesn't flash to 0%
+    // before the authoritative server progress arrives.
     const optimisticItems = buildDailyPlanItems(durationMinutes, track);
+    const prevDoneBySkill = new Map(
+      (dayDetail?.progress.groups ?? []).map((g) => [g.skill, g.done]),
+    );
+    const optimisticGroups = optimisticItems.map((it) => {
+      const done = Math.min(it.count, prevDoneBySkill.get(it.skill) ?? 0);
+      return { skill: it.skill, count: it.count, done, complete: done >= it.count };
+    });
+    const optimisticTotal = planTotalCount(optimisticItems);
+    const optimisticDone = optimisticGroups.reduce((s, g) => s + g.done, 0);
     const optimisticProgress: DayProgress = {
-      groups: optimisticItems.map((it) => ({ skill: it.skill, count: it.count, done: 0, complete: false })),
-      total: planTotalCount(optimisticItems),
-      totalDone: 0,
-      complete: false,
+      groups: optimisticGroups,
+      total: optimisticTotal,
+      totalDone: optimisticDone,
+      complete: optimisticTotal > 0 && optimisticGroups.every((g) => g.complete),
     };
     setDayDetail({
       plan: {
@@ -359,12 +369,6 @@ export function StudyPlanCalendarCardSoft({
 
   const daysUntilExam = Math.max(0, Math.round((Date.parse(schedule.exam_date) - Date.parse(today)) / 86_400_000));
 
-  // Gate purely on "no real progress logged yet today" — NOT on plan.persisted. A learner can
-  // have practice_attempts for today (e.g. from /practice directly) before ever POSTing a plan
-  // for this date, so plan.persisted===false does not mean it's safe to rebuild the day's items;
-  // rebuilding (e.g. switching to "lesson" track, which always has items=[]) would silently drop
-  // that progress from the day's total.
-  const canEditDayPlan = dayDetail ? dayDetail.progress.totalDone === 0 : false;
   const pct =
     dayDetail && dayDetail.progress.total > 0
       ? Math.round((dayDetail.progress.totalDone / dayDetail.progress.total) * 100)
@@ -534,55 +538,61 @@ export function StudyPlanCalendarCardSoft({
             <p className="py-10 text-center text-sm text-slate-400">กำลังโหลด…</p>
           ) : dayDetail ? (
             <>
-              {canEditDayPlan ? (
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      วันนี้อยากทำอะไร
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {TRACK_OPTIONS.map((t) => (
-                        <button
-                          key={t.value}
-                          type="button"
-                          disabled={savingDayPlan}
-                          onClick={() => void updateDayPlan(t.value, dayDetail.plan.tier)}
-                          className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors disabled:opacity-50 ${
-                            dayDetail.plan.track === t.value
-                              ? "bg-ep-blue text-white"
-                              : "bg-slate-50 text-slate-600 hover:bg-slate-100"
-                          }`}
-                        >
-                          {t.th}
-                        </button>
-                      ))}
-                    </div>
+              {/* Always-editable day plan — the learner can switch track / duration on the go for
+                  ANY date. Progress is re-derived server-side from real attempts, so changing this
+                  never discards completed work; it just re-buckets it against the new plan. */}
+              <div className="mt-4 space-y-3 rounded-2xl bg-slate-50/70 p-3.5 ring-1 ring-slate-100 sm:p-4">
+                <div>
+                  <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    วันนี้อยากทำอะไร
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {TRACK_OPTIONS.map((t) => (
+                      <button
+                        key={t.value}
+                        type="button"
+                        disabled={savingDayPlan}
+                        onClick={() => void updateDayPlan(t.value, dayDetail.plan.tier)}
+                        className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors disabled:opacity-50 ${
+                          dayDetail.plan.track === t.value
+                            ? "bg-ep-blue text-white shadow-sm"
+                            : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        {t.value === "exam" ? "🎯 " : "📘 "}
+                        {t.th}
+                      </button>
+                    ))}
                   </div>
-                  <div>
-                    <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">กี่นาที</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {DURATION_OPTIONS.map((m) => (
-                        <button
-                          key={m}
-                          type="button"
-                          disabled={savingDayPlan}
-                          onClick={() => void updateDayPlan(dayDetail.plan.track, m)}
-                          className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors disabled:opacity-50 ${
-                            dayDetail.plan.tier === m ? "bg-ep-blue text-white" : "bg-slate-50 text-slate-600 hover:bg-slate-100"
-                          }`}
-                        >
-                          {m} นาที
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  {dayPlanError && <p className="text-xs font-bold text-rose-500">⚠️ {dayPlanError}</p>}
                 </div>
-              ) : (
-                <p className="mt-3 text-xs font-semibold text-slate-500">
-                  {dayDetail.plan.track === "exam" ? "ข้อสอบจริง" : "บทเรียน"} · {dayDetail.plan.tier} นาที
-                </p>
-              )}
+                <div>
+                  <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">มีเวลากี่นาที</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DURATION_OPTIONS.map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        disabled={savingDayPlan}
+                        onClick={() => void updateDayPlan(dayDetail.plan.track, m)}
+                        className={`rounded-full px-3.5 py-2 text-xs font-bold transition-colors disabled:opacity-50 ${
+                          dayDetail.plan.tier === m
+                            ? "bg-ep-blue text-white shadow-sm"
+                            : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        {m} นาที
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {dayDetail.progress.totalDone > 0 && (
+                  <p className="text-[11px] font-semibold text-slate-500">
+                    ✅ เปลี่ยนได้ทุกเมื่อ — งานที่ทำไปแล้ววันนี้ยังถูกนับอยู่
+                  </p>
+                )}
+                {savingDayPlan && <p className="text-[11px] font-semibold text-ep-blue">กำลังอัปเดตแผน…</p>}
+                {dayPlanError && <p className="text-xs font-bold text-rose-500">⚠️ {dayPlanError}</p>}
+              </div>
 
               {dayDetail.plan.track === "lesson" ? (
                 <div className="mt-5">
