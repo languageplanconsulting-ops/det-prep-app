@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { loadSpeakingBank } from "@/lib/speaking-storage";
-import { loadWriteAboutPhotoRounds, WRITE_ABOUT_PHOTO_ROUND_NUMBERS } from "@/lib/write-about-photo-storage";
+import { fetchPhotoSpeakItems, photoSpeakRoundNumber } from "@/lib/photo-speak-api";
 import { loadInteractiveSpeakingScenarios } from "@/lib/interactive-speaking-storage";
 import {
   clearSampleUploadJob,
@@ -90,25 +90,34 @@ export function SpeakingSampleWorkspace() {
       group: `Round ${s.round ?? 1}`,
     }));
 
-    const photo: TargetOption[] = [];
-    const rounds = loadWriteAboutPhotoRounds().rounds;
-    for (const n of WRITE_ABOUT_PHOTO_ROUND_NUMBERS) {
-      for (const item of rounds[n] ?? []) {
-        photo.push({
+    setOptions(
+      (prev) =>
+        ({
+          ...prev,
+          standalone_read_then_speak: readThenSpeak,
+          standalone_interactive_speaking: interactive,
+        }) as Record<ModuleKey, TargetOption[]>,
+    );
+
+    let cancelled = false;
+    fetchPhotoSpeakItems("speak_about_photo")
+      .then((items) => {
+        if (cancelled) return;
+        const photo: TargetOption[] = items.map((item) => ({
           kind: "standalone_speak_about_photo",
           ref: item.id,
           questionType: "speak_about_photo",
-          label: truncate(`${item.titleEn || item.promptEn}`),
-          group: `Round ${n}`,
-        });
-      }
-    }
-
-    setOptions({
-      standalone_read_then_speak: readThenSpeak,
-      standalone_interactive_speaking: interactive,
-      standalone_speak_about_photo: photo,
-    } as Record<ModuleKey, TargetOption[]>);
+          label: truncate(`${item.title_en || item.prompt_en}`),
+          group: `Round ${photoSpeakRoundNumber(item.sort_order)}`,
+        }));
+        setOptions((prev) => ({ ...prev, standalone_speak_about_photo: photo }) as Record<ModuleKey, TargetOption[]>);
+      })
+      .catch(() => {
+        /* leave standalone_speak_about_photo empty on failure */
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const currentOptions = options[tab] ?? [];

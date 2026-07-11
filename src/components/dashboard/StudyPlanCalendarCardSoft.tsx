@@ -167,6 +167,7 @@ export function StudyPlanCalendarCardSoft({
   const [dayPlanError, setDayPlanError] = useState<string | null>(null);
 
   const [trends, setTrends] = useState<SkillTrend[]>([]);
+  const [lessonsOpen, setLessonsOpen] = useState(false);
 
   const firedCompletionRef = useRef<Set<string>>(new Set());
   const lastKnownCompleteRef = useRef<Map<string, boolean>>(new Map());
@@ -401,9 +402,9 @@ export function StudyPlanCalendarCardSoft({
         <button
           type="button"
           onClick={onEditPlan}
-          className="shrink-0 text-xs font-bold text-slate-400 transition-colors hover:text-ep-blue"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-ep-blue px-4 py-2 font-display text-xs font-extrabold text-white shadow-sm transition hover:shadow-md active:scale-[0.97] sm:text-sm"
         >
-          แก้ไขแผน
+          <span>⚙️</span> แก้ไขแผน
         </button>
       </div>
 
@@ -749,6 +750,63 @@ export function StudyPlanCalendarCardSoft({
           </ul>
         </div>
       )}
+
+      {/* ============ LESSONS FOR LOW-BASELINE LEARNERS (collapsible) ============ */}
+      <div className="rounded-2xl bg-white ring-1 ring-slate-200">
+        <button
+          type="button"
+          onClick={() => {
+            sfxTap();
+            setLessonsOpen((v) => !v);
+          }}
+          aria-expanded={lessonsOpen}
+          className="flex w-full items-center gap-3 px-4 py-4 text-left sm:px-5"
+        >
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ep-blue/5 text-xl">📘</span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-sm font-extrabold text-slate-900 sm:text-base">
+              บทเรียนสำหรับคนพื้นฐานน้อย
+            </span>
+            <span className="mt-0.5 block text-[12px] text-slate-500">
+              เนื้อหา + ความคืบหน้าซิงก์กับแอปมือถือ · แตะเพื่อดูบทเรียน
+            </span>
+          </span>
+          <span
+            className={`shrink-0 text-lg text-slate-400 transition-transform duration-200 ${
+              lessonsOpen ? "rotate-180" : ""
+            }`}
+          >
+            ⌄
+          </span>
+        </button>
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-out ${
+            lessonsOpen ? "max-h-[720px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="space-y-2 px-4 pb-4 sm:px-5">
+            {LESSON_TOPICS.map((t) => (
+              <Link
+                key={t.slug}
+                href={lessonTopicHref(t.slug)}
+                onClick={() => sfxTransition()}
+                className="flex items-center gap-3 rounded-2xl border-2 border-slate-100 bg-slate-50 px-4 py-3 transition hover:border-ep-blue/40 hover:bg-white active:scale-[0.99]"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl">
+                  {t.emoji}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-display text-sm font-bold leading-tight text-slate-900 sm:text-base">
+                    {t.th}
+                  </p>
+                  <p className="mt-0.5 truncate text-[12px] text-slate-500">{t.descTh}</p>
+                </div>
+                <span className="shrink-0 text-lg text-slate-300">→</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

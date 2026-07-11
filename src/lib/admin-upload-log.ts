@@ -9,8 +9,6 @@ import type { VocabRoundNum, VocabSessionLevel } from "@/types/vocab";
 import { removeConversationExamsFromAdmin } from "@/lib/conversation-storage";
 import { revertDictationSetsToDefaults } from "@/lib/dictation-storage";
 import { revertFitbAdminSlotsToDefaults } from "@/lib/fitb-storage";
-import { removePhotoSpeakItemsByIds } from "@/lib/photo-speak-storage";
-import { removeWriteAboutPhotoItemsByIds } from "@/lib/write-about-photo-storage";
 import { revertReadingSetsToDefaults } from "@/lib/reading-storage";
 import { revertDialogueSummarySlots } from "@/lib/dialogue-summary-storage";
 import { revertRealWordSetToDefault } from "@/lib/realword-storage";
@@ -59,7 +57,6 @@ export type AdminUploadRevertSpec =
     }
   | { kind: "writing"; topicIds: string[] }
   | { kind: "speaking"; topicIds: string[] }
-  | { kind: "photo"; itemIds: string[] }
   | { kind: "writeAboutPhoto"; itemIds: string[] }
   | { kind: "interactiveSpeaking"; ids: string[] };
 
@@ -296,12 +293,21 @@ export async function applyAdminUploadRevert(
       case "speaking":
         removeSpeakingTopicsByIds(spec.topicIds);
         break;
-      case "photo":
-        removePhotoSpeakItemsByIds(spec.itemIds);
+      case "writeAboutPhoto": {
+        // Items now live in Supabase (photo_speak_items), not localStorage — deactivate via
+        // the admin API instead of the old client-side-only remover.
+        const res = await fetch("/api/admin/photo-speak-items", {
+          method: "DELETE",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: spec.itemIds }),
+        });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          throw new Error(data.error || `Revert failed (${res.status})`);
+        }
         break;
-      case "writeAboutPhoto":
-        removeWriteAboutPhotoItemsByIds(spec.itemIds);
-        break;
+      }
       case "interactiveSpeaking":
         removeInteractiveSpeakingScenariosByIds(spec.ids);
         break;

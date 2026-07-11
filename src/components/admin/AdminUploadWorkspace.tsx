@@ -22,7 +22,6 @@ import { pullContentBankSnapshotFromSupabase } from "@/lib/content-bank-sync";
 import { getAllConversationExams } from "@/lib/conversation-storage";
 import { countDictationSetsInBank, ensureDictationBankReady } from "@/lib/dictation-storage";
 import { countFitbSetsInBank } from "@/lib/fitb-storage";
-import { getWriteAboutPhotoRoundCounts } from "@/lib/write-about-photo-storage";
 import { countReadingSetsInBank } from "@/lib/reading-storage";
 import { countDialogueSummarySetsInBank } from "@/lib/dialogue-summary-storage";
 import { loadInteractiveSpeakingScenarios } from "@/lib/interactive-speaking-storage";
@@ -49,15 +48,26 @@ type UploadCounts = Record<UploadKind, number> & {
   conversationMedium: number;
 };
 
-function getCounts(): UploadCounts {
+// Write/speak-about-photo items live in Supabase now, not localStorage — this count is
+// fetched separately (async) and merged into UploadCounts by the caller.
+async function fetchWriteAboutPhotoCount(): Promise<number> {
+  try {
+    const res = await fetch("/api/admin/photo-speak-items", { credentials: "same-origin" });
+    const data = (await res.json()) as { count?: number };
+    return data.count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+function getCounts(writeAboutPhoto: number): UploadCounts {
   const dictationCount = countDictationSetsInBank();
 
-  const wap = getWriteAboutPhotoRoundCounts();
   const conv = getAllConversationExams();
   return {
     writing: loadWritingTopics().length,
     speaking: loadSpeakingTopics().length,
-    writeAboutPhoto: wap[1] + wap[2] + wap[3] + wap[4] + wap[5],
+    writeAboutPhoto,
     reading: countReadingSetsInBank(),
     vocab: countVocabSetsInBank(),
     dictation: dictationCount,
@@ -112,7 +122,7 @@ export function AdminUploadWorkspace() {
       serverPublishedAt: r.serverUpdatedAt ?? null,
       error: r.ok ? null : r.error ?? null,
     });
-    setCounts(getCounts());
+    setCounts((prev) => getCounts(prev.writeAboutPhoto));
   }, []);
 
   useEffect(() => {
@@ -125,11 +135,18 @@ export function AdminUploadWorkspace() {
       applyRemoteResult(r);
     })();
 
-    const refresh = () => setCounts(getCounts());
+    const refresh = () => setCounts((prev) => getCounts(prev.writeAboutPhoto));
+    const refreshPhotoCount = () => {
+      void fetchWriteAboutPhotoCount().then((n) => {
+        if (!cancelled) setCounts((prev) => ({ ...prev, writeAboutPhoto: n }));
+      });
+    };
+    refreshPhotoCount();
     const id = window.setInterval(refresh, 2000);
+    const photoId = window.setInterval(refreshPhotoCount, 5000);
     window.addEventListener("focus", refresh);
+    window.addEventListener("focus", refreshPhotoCount);
     window.addEventListener("storage", refresh);
-    window.addEventListener("ep-write-about-photo-rounds", refresh);
     window.addEventListener("ep-writing-topics", refresh);
     window.addEventListener("ep-speaking-storage", refresh);
     window.addEventListener("ep-conversation-storage", refresh);
@@ -143,9 +160,10 @@ export function AdminUploadWorkspace() {
     return () => {
       cancelled = true;
       window.clearInterval(id);
+      window.clearInterval(photoId);
       window.removeEventListener("focus", refresh);
+      window.removeEventListener("focus", refreshPhotoCount);
       window.removeEventListener("storage", refresh);
-      window.removeEventListener("ep-write-about-photo-rounds", refresh);
       window.removeEventListener("ep-writing-topics", refresh);
       window.removeEventListener("ep-speaking-storage", refresh);
       window.removeEventListener("ep-conversation-storage", refresh);

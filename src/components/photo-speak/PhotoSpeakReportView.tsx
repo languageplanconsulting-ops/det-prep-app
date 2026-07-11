@@ -18,23 +18,13 @@ import { resolveGrammarFixDisplay } from "@/lib/grammar-fix-display";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
 import { GRADING_BADGE_OFFLINE, GRADING_BADGE_PRIMARY } from "@/lib/report-branding";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
-import { getWriteAboutPhotoRoundForItemId } from "@/lib/write-about-photo-storage";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 import type { NotebookEntry, WritingCriterionReport } from "@/types/writing";
 import type { SuggestedNotebookPremade } from "@/components/writing/AddToNotebookButton";
 
 function photoReportNav(report: PhotoSpeakAttemptReport) {
   const isWrite = report.originHub === "write-about-photo";
-  const itemRound = getWriteAboutPhotoRoundForItemId(report.topicId);
-  const writeRound = isWrite ? itemRound : undefined;
-  const speakRound = !isWrite ? itemRound : undefined;
-  const hub = isWrite
-    ? writeRound !== undefined
-      ? `/practice/production/write-about-photo/round/${writeRound}`
-      : "/practice/production/write-about-photo"
-    : speakRound !== undefined
-      ? `/practice/production/speak-about-photo/round/${speakRound}`
-      : "/practice/production/speak-about-photo";
+  const hub = isWrite ? "/practice/production/write-about-photo" : "/practice/production/speak-about-photo";
   const sessionPath = (topicId: string) =>
     isWrite
       ? `/practice/production/write-about-photo/${topicId}`

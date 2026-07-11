@@ -12,6 +12,59 @@ import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 import { recordDataCollectionSubmission } from "@/lib/data-collection";
 import { getAdminAccess } from "@/lib/admin-auth";
+import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+
+type PhotoSpeakProgressRow = {
+  latest_score160: number;
+  best_score160: number;
+  attempt_count: number;
+};
+
+async function getPhotoSpeakProgress(
+  userId: string,
+  itemId: string,
+  taskType: "write_about_photo" | "speak_about_photo",
+): Promise<PhotoSpeakProgressRow | null> {
+  const svc = createServiceRoleSupabase();
+  const { data } = await svc
+    .from("photo_speak_progress")
+    .select("latest_score160, best_score160, attempt_count")
+    .eq("user_id", userId)
+    .eq("item_id", itemId)
+    .eq("task_type", taskType)
+    .maybeSingle();
+  return data ?? null;
+}
+
+async function upsertPhotoSpeakProgress(args: {
+  userId: string;
+  itemId: string;
+  taskType: "write_about_photo" | "speak_about_photo";
+  attemptId: string;
+  score160: number;
+  existing: PhotoSpeakProgressRow | null;
+}): Promise<void> {
+  try {
+    const svc = createServiceRoleSupabase();
+    const bestScore160 = Math.max(args.existing?.best_score160 ?? 0, args.score160);
+    await svc.from("photo_speak_progress").upsert(
+      {
+        user_id: args.userId,
+        item_id: args.itemId,
+        task_type: args.taskType,
+        latest_score160: args.score160,
+        best_score160: bestScore160,
+        latest_attempt_id: args.attemptId,
+        attempt_count: (args.existing?.attempt_count ?? 0) + 1,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,item_id,task_type" },
+    );
+  } catch (err) {
+    // Never let a progress-tracking failure break the grading response the user is waiting on.
+    console.error("[photo-speak-report] progress upsert skipped:", err);
+  }
+}
 
 export const maxDuration = 120;
 
@@ -39,7 +92,6 @@ export async function POST(req: Request) {
   const imageUrl = o.imageUrl;
   const keywords = o.keywords;
   const redeemed = o.redeemed;
-  const previousScore160 = o.previousScore160;
   const originHubRaw = o.originHub;
   const originHub =
     originHubRaw === "write-about-photo"
@@ -82,16 +134,17 @@ export async function POST(req: Request) {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
     const userId = await getOptionalAuthUserId(req);
+    const taskType: "write_about_photo" | "speak_about_photo" =
+      originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
     // Admins / preview-eligible accounts don't consume real feedback credits.
     const adminBypass = (await getAdminAccess(req)).ok;
     if (userId && !adminBypass) {
-      const feedbackSurface =
-        originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
-      const credit = await getAiCreditStateForUser(userId, feedbackSurface);
+      const credit = await getAiCreditStateForUser(userId, taskType);
       if (!credit.allowed) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
       }
     }
+    const serverProgress = userId ? await getPhotoSpeakProgress(userId, itemId, taskType) : null;
     const { report, usage } = await generatePhotoSpeakReportWithGemini({
       apiKey: keys.geminiApiKey,
       anthropicApiKey: keys.anthropicApiKey,
@@ -120,21 +173,19 @@ export async function POST(req: Request) {
       });
     }
     if (userId && !adminBypass) {
-      const feedbackSurface =
-        originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
-      const charged = await chargeAiCreditForUser(userId, feedbackSurface);
+      const charged = await chargeAiCreditForUser(userId, taskType);
       if (!charged.ok) {
         return NextResponse.json({ error: "Could not apply feedback credit after grading" }, { status: 500 });
       }
+      // previousScore160 comes from our own server-tracked progress, not the client body —
+      // a client-supplied value here would let a user spoof their "previous" score to farm
+      // improvement-reward credits.
       const rewardBonus = await maybeGrantRedeemImprovementReward({
         userId,
         attemptId,
-        surface: feedbackSurface,
+        surface: taskType,
         redeemed: redeemed === true,
-        previousScore160:
-          typeof previousScore160 === "number" && Number.isFinite(previousScore160)
-            ? previousScore160
-            : null,
+        previousScore160: serverProgress?.best_score160 ?? null,
         currentScore160: report.score160,
       });
       if (rewardBonus) {
@@ -143,7 +194,7 @@ export async function POST(req: Request) {
     }
     await recordDataCollectionSubmission({
       userId,
-      examType: originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo",
+      examType: taskType,
       attemptId: typeof attemptId === "string" ? attemptId : null,
       promptTitle: typeof titleEn === "string" ? titleEn : null,
       promptText: typeof promptEn === "string" ? promptEn : null,
@@ -152,6 +203,16 @@ export async function POST(req: Request) {
       score160: report.score160,
       report,
     });
+    if (userId) {
+      await upsertPhotoSpeakProgress({
+        userId,
+        itemId,
+        taskType,
+        attemptId,
+        score160: report.score160,
+        existing: serverProgress,
+      });
+    }
     return NextResponse.json(report);
   } catch (e) {
     const message = normalizeGradingErrorMessage(e);

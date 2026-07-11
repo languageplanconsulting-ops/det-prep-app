@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DictationIntroModal } from "@/components/dictation/DictationIntroModal";
 import { FillInBlankIntroModal } from "@/components/fitb/FillInBlankIntroModal";
 import { InteractiveSpeakingIntroModal } from "@/components/interactive-speaking/InteractiveSpeakingIntroModal";
@@ -16,20 +16,22 @@ import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { canAccessSkill } from "@/lib/access-control";
 import { mockTestHubProgressLabel } from "@/lib/mock-test/mock-test-availability";
+import { fetchPhotoSpeakItems } from "@/lib/photo-speak-api";
 import {
   emitVipApiCreditNotice,
   thInteractiveSpeakingInsufficientCredits,
   VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION,
 } from "@/lib/vip-ai-feedback-quota";
 
-const hubsWithoutMock = [
+function buildHubsWithoutMock(photoSpeakLabel: string) {
+  return [
   {
     title: "Production",
     subtitle: "Writing & speaking tasks",
     items: [
       {
         label: "Write about photo",
-        progress: "5 rounds",
+        progress: photoSpeakLabel,
         href: "/practice/production/write-about-photo",
       },
       {
@@ -39,7 +41,7 @@ const hubsWithoutMock = [
       },
       {
         label: "Speak about photo",
-        progress: "5 rounds",
+        progress: photoSpeakLabel,
         href: "/practice/production/speak-about-photo",
       },
       {
@@ -108,7 +110,8 @@ const hubsWithoutMock = [
       },
     ],
   },
-] as const;
+  ];
+}
 
 const READING_SKILLS_HREF = "/practice/comprehension/reading";
 const DICTATION_HREF = "/practice/literacy/dictation";
@@ -128,6 +131,22 @@ export default function PracticeHubPage() {
   const [fitbIntroOpen, setFitbIntroOpen] = useState(false);
   const [interactiveSpeakingIntroOpen, setInteractiveSpeakingIntroOpen] = useState(false);
   const [readWriteIntroOpen, setReadWriteIntroOpen] = useState(false);
+  const [photoSpeakCount, setPhotoSpeakCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchPhotoSpeakItems("write_about_photo")
+      .then((items) => {
+        if (!cancelled) setPhotoSpeakCount(items.length);
+      })
+      .catch(() => {
+        /* keep the generic fallback label on failure */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const photoSpeakLabel = photoSpeakCount !== null ? `${photoSpeakCount} photos` : "Practice bank";
 
   const interactiveSpeakingCanStart = vipAiGate.hasBypassAccess
     ? true
@@ -213,7 +232,7 @@ export default function PracticeHubPage() {
           },
         ],
       },
-      ...hubsWithoutMock,
+      ...buildHubsWithoutMock(photoSpeakLabel),
       {
         title: "Mock test",
         subtitle: "Full exam simulation",
@@ -226,7 +245,7 @@ export default function PracticeHubPage() {
         ],
       },
     ],
-    [],
+    [photoSpeakLabel],
   );
 
   return (

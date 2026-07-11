@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
 import { WritePhotoHintPanel } from "@/components/photo-speak/WritePhotoHintPanel";
+import { PhotoAttributionCaption } from "@/components/photo-speak/PhotoAttributionCaption";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -15,20 +16,16 @@ import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import { savePhotoSpeakReport } from "@/lib/photo-speak-storage";
-import { recordSpeakAboutPhotoProgress } from "@/lib/speak-about-photo-progress";
+import {
+  fetchPhotoSpeakItems,
+  invalidatePhotoSpeakItemsCache,
+  photoSpeakRoundNumber,
+  type PhotoSpeakItemWithProgress,
+} from "@/lib/photo-speak-api";
 import {
   getSpeechRecognitionCtor,
   handleSpeechRecognitionError,
 } from "@/lib/speech-recognition-helpers";
-import {
-  findWriteAboutPhotoItem,
-  getWriteAboutPhotoRoundNumberForItem,
-} from "@/lib/write-about-photo-data";
-import {
-  getWriteAboutPhotoProgressForItem,
-  recordWriteAboutPhotoProgress,
-} from "@/lib/write-about-photo-storage";
-import { getSpeakAboutPhotoProgressForItem } from "@/lib/speak-about-photo-progress";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 
 type Mode = "write" | "speak";
@@ -62,16 +59,33 @@ export function PhotoAssessmentSession({
   const router = useRouter();
   const { effectiveTier } = useEffectiveTier();
   const soft = true;
-  const item = useMemo(() => findWriteAboutPhotoItem(itemId), [itemId]);
-  const round = item ? getWriteAboutPhotoRoundNumberForItem(item.id) : undefined;
-  const latestProgress = useMemo(
-    () =>
-      mode === "speak"
-        ? getSpeakAboutPhotoProgressForItem(itemId)
-        : getWriteAboutPhotoProgressForItem(itemId),
-    [itemId, mode],
-  );
+  const taskType = mode === "speak" ? "speak_about_photo" : "write_about_photo";
+
+  const [item, setItem] = useState<PhotoSpeakItemWithProgress | null | undefined>(undefined);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const vipGate = useVipAiFeedbackGate();
+
+  useEffect(() => {
+    let cancelled = false;
+    setItem(undefined);
+    setLoadError(null);
+    fetchPhotoSpeakItems(taskType)
+      .then((items) => {
+        if (cancelled) return;
+        setItem(items.find((it) => it.id === itemId) ?? null);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setLoadError(e instanceof Error ? e.message : "Could not load this photo task");
+        setItem(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [itemId, taskType]);
+
+  const round = item ? photoSpeakRoundNumber(item.sort_order) : undefined;
+  const latestProgress = item?.progress ?? null;
 
   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
@@ -217,17 +231,16 @@ export function PhotoAssessmentSession({
         body: JSON.stringify({
           attemptId,
           itemId: item.id,
-          titleEn: item.titleEn,
-          titleTh: item.titleTh,
-          promptEn: item.promptEn,
-          promptTh: item.promptTh,
-          imageUrl: item.imageUrl,
+          titleEn: item.title_en,
+          titleTh: item.title_th,
+          promptEn: item.prompt_en,
+          promptTh: item.prompt_th,
+          imageUrl: item.image_url,
           keywords: item.keywords,
           prepMinutes: mode === "speak" ? 1 : 0,
           transcript,
           originHub: mode === "speak" ? "speak-about-photo" : "write-about-photo",
           redeemed: startWithRedeem && Boolean(latestProgress),
-          previousScore160: startWithRedeem ? latestProgress?.latestScore160 ?? null : null,
         }),
       });
       const data = (await res.json()) as { error?: string } & Partial<PhotoSpeakAttemptReport>;
@@ -248,10 +261,10 @@ export function PhotoAssessmentSession({
           submissionPayload: {
             kind: mode === "speak" ? "speak_about_photo" : "write_about_photo",
             itemId: item.id,
-            titleEn: item.titleEn,
-            titleTh: item.titleTh,
-            promptEn: item.promptEn,
-            promptTh: item.promptTh,
+            titleEn: item.title_en,
+            titleTh: item.title_th,
+            promptEn: item.prompt_en,
+            promptTh: item.prompt_th,
             transcript,
           },
           reportPayload: report,
@@ -261,11 +274,9 @@ export function PhotoAssessmentSession({
       }
       stashReportForNavigation(report.attemptId, report);
       savePhotoSpeakReport(report);
-      if (mode === "speak") {
-        recordSpeakAboutPhotoProgress(report.topicId, report.score160, report.attemptId);
-      } else {
-        recordWriteAboutPhotoProgress(report.topicId, report.score160, report.attemptId);
-      }
+      // Progress (latest/best score) is now tracked server-side by the report route itself —
+      // just drop our cached item list so the next fetch (e.g. back on the set-list page) is fresh.
+      invalidatePhotoSpeakItemsCache(taskType);
 
       await router.push(
         mode === "speak"
@@ -280,10 +291,15 @@ export function PhotoAssessmentSession({
     }
   };
 
+  if (item === undefined) {
+    return <div className="mx-auto max-w-lg px-4 py-12 text-center text-sm text-neutral-500">Loading…</div>;
+  }
+
   if (!item) {
     return (
       <div className="mx-auto max-w-lg px-4 py-12 text-center">
         <p className="font-bold">Photo task not found.</p>
+        {loadError ? <p className="mt-2 text-sm text-red-700">{loadError}</p> : null}
         <Link
           href={
             mode === "speak"
@@ -350,8 +366,8 @@ export function PhotoAssessmentSession({
           <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">
             {mode === "speak" ? "Speak about photo" : "Write about photo"} {round ? `· Round ${round}` : ""}
           </p>
-          <h1 className="mt-2 text-2xl font-black">{item.titleEn}</h1>
-          <p className="text-sm text-neutral-600">{item.titleTh}</p>
+          <h1 className="mt-2 text-2xl font-black">{item.title_en}</h1>
+          <p className="text-sm text-neutral-600">{item.title_th}</p>
         </header>
 
         <WritePhotoHintPanel
@@ -362,13 +378,20 @@ export function PhotoAssessmentSession({
         <BrutalPanel title="Task">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={item.imageUrl}
+            src={item.image_url}
             alt=""
-            className="mb-4 max-h-56 sm:max-h-72 w-full rounded-sm border object-cover"
+            className="mb-1 max-h-56 sm:max-h-72 w-full rounded-sm border object-cover"
             referrerPolicy="no-referrer"
           />
-          <p className="text-sm font-bold text-neutral-900">{item.promptEn}</p>
-          <p className="mt-1 text-sm text-neutral-700">{item.promptTh}</p>
+          <PhotoAttributionCaption
+            license={item.license}
+            licenseVersion={item.license_version}
+            creator={item.creator}
+            provider={item.provider}
+            landingUrl={item.landing_url}
+          />
+          <p className="mt-3 text-sm font-bold text-neutral-900">{item.prompt_en}</p>
+          <p className="mt-1 text-sm text-neutral-700">{item.prompt_th}</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {!listening ? (

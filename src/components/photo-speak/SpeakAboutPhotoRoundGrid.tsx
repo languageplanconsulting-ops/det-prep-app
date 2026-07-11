@@ -4,54 +4,39 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SpeakAboutPhotoExamCard } from "@/components/photo-speak/SpeakAboutPhotoExamCard";
 import {
-  getWriteAboutPhotoSetByRound,
-  type WriteAboutPhotoRoundNum,
-} from "@/lib/write-about-photo-storage";
-import type { PhotoSpeakItem } from "@/types/photo-speak";
+  fetchPhotoSpeakItems,
+  photoSpeakRoundNumber,
+  type PhotoSpeakItemWithProgress,
+} from "@/lib/photo-speak-api";
 
-function parseRound(p: string): WriteAboutPhotoRoundNum | undefined {
+function parseRound(p: string): number | undefined {
   const n = Number(p);
-  if (n === 1 || n === 2 || n === 3 || n === 4 || n === 5) return n;
-  return undefined;
+  return Number.isInteger(n) && n >= 1 ? n : undefined;
 }
 
 export function SpeakAboutPhotoRoundGrid({ roundParam }: { roundParam: string }) {
   const round = parseRound(roundParam);
-  const [items, setItems] = useState<PhotoSpeakItem[]>([]);
+  const [items, setItems] = useState<PhotoSpeakItemWithProgress[] | null>(null);
 
   useEffect(() => {
     if (!round) return;
-    const load = () => {
-      try {
-        const raw = getWriteAboutPhotoSetByRound(round) ?? [];
-        const safe = raw.filter(
-          (it): it is PhotoSpeakItem =>
-            !!it &&
-            typeof it === "object" &&
-            typeof it.id === "string" &&
-            it.id.trim().length > 0,
-        );
-        setItems([...safe]);
-      } catch {
-        setItems([]);
-      }
-    };
-    load();
-    const onStorage = () => load();
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("ep-write-about-photo-rounds", load);
-    window.addEventListener("focus", load);
+    let cancelled = false;
+    fetchPhotoSpeakItems("speak_about_photo")
+      .then((all) => {
+        if (!cancelled) setItems(all.filter((it) => photoSpeakRoundNumber(it.sort_order) === round));
+      })
+      .catch(() => {
+        if (!cancelled) setItems([]);
+      });
     return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("ep-write-about-photo-rounds", load);
-      window.removeEventListener("focus", load);
+      cancelled = true;
     };
   }, [round]);
 
   if (!round) {
     return (
       <div className="mx-auto max-w-lg px-4 py-12 text-center">
-        <p className="font-bold">Round must be 1–5.</p>
+        <p className="font-bold">Invalid round.</p>
         <Link
           href="/practice/production/speak-about-photo"
           className="mt-4 inline-block text-ep-blue"
@@ -77,19 +62,23 @@ export function SpeakAboutPhotoRoundGrid({ roundParam }: { roundParam: string })
         <p className="ep-stat text-xs font-bold uppercase tracking-widest text-ep-blue">Round {round}</p>
         <h1 className="mt-2 text-2xl sm:text-3xl font-black">Speak about photo</h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Same photos as <strong>Write about photo</strong> (admin upload). Thumbnails stay blurred here until
-          you tap <strong>Start</strong>. After you submit, your score appears and you can open{" "}
-          <strong>Redeem</strong> to review the report if you are not at {160}/{160}.
+          Same photos as <strong>Write about photo</strong>. Thumbnails stay blurred here until you tap{" "}
+          <strong>Start</strong>. After you submit, your score appears and you can open <strong>Redeem</strong>{" "}
+          to review the report if you are not at {160}/{160}.
         </p>
       </header>
 
-      {items.length === 0 ? (
+      {items === null ? (
         <p className="rounded-sm border-2 border-dashed border-neutral-400 bg-neutral-50 p-6 text-sm text-neutral-700">
-          No photos in this round yet. An admin must add them under{" "}
-          <Link href="/admin" className="font-bold text-ep-blue underline">
-            Admin → Write &amp; speak about photo
-          </Link>{" "}
-          (same JSON as writing).
+          Loading…
+        </p>
+      ) : items.length === 0 ? (
+        <p className="rounded-sm border-2 border-dashed border-neutral-400 bg-neutral-50 p-6 text-sm text-neutral-700">
+          No photos in this round.{" "}
+          <Link href="/practice/production/speak-about-photo" className="font-bold text-ep-blue underline">
+            Back to all rounds
+          </Link>
+          .
         </p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

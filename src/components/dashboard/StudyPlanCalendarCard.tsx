@@ -453,9 +453,9 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
         <button
           type="button"
           onClick={openEdit}
-          className="text-xs font-bold text-slate-400 transition-colors duration-150 hover:text-[#004AAD]"
+          className="inline-flex items-center gap-1.5 rounded-full bg-[#004AAD] px-3.5 py-1.5 text-xs font-extrabold text-white shadow-sm transition hover:shadow-md active:scale-[0.97]"
         >
-          แก้ไขแผน
+          <span>⚙️</span> แก้ไขแผน
         </button>
       </div>
       <h3 className="mb-3 text-lg font-bold text-slate-900">แผนการเรียนของฉัน</h3>

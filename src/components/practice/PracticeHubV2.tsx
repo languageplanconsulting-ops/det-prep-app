@@ -283,6 +283,11 @@ export function PracticeHubV2({
         )}
       </div>
 
+      {/* ── STUDY-PLAN CALENDAR — full-width, directly under the outcome hero ── */}
+      <div className="mb-5">
+        <StudyPlanCalendarCard effectiveTier={effectiveTier} />
+      </div>
+
       {/* ── Strategy strip (shown once at top) ── */}
       <div className="mb-5 flex flex-wrap items-center gap-2 text-xs">
         <span className="font-semibold text-slate-600">
@@ -544,49 +549,6 @@ export function PracticeHubV2({
           <div className="space-y-3">
               <XpTierBadge />
               <RandomPracticePicker effectiveTier={effectiveTier} />
-              <StudyPlanCalendarCard effectiveTier={effectiveTier} />
-              <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <p className="text-sm font-bold text-slate-900">📘 บทเรียน (ported from mobile)</p>
-                <p className="mt-1 text-xs text-slate-500">เนื้อหา + ความคืบหน้าซิงก์กับแอปมือถือ</p>
-                <div className="mt-3 grid gap-2">
-                  <Link
-                    href="/practice/lessons/dictation"
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
-                  >
-                    🎧 ตามคำบอก (Dictation) <span className="text-slate-300">→</span>
-                  </Link>
-                  <Link
-                    href="/practice/lessons/real-word"
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
-                  >
-                    🔤 คำจริง (Real word) <span className="text-slate-300">→</span>
-                  </Link>
-                  <Link
-                    href="/practice/lessons/reading-skills"
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
-                  >
-                    🧩 ทักษะการอ่าน (Reading skills) <span className="text-slate-300">→</span>
-                  </Link>
-                  <Link
-                    href="/practice/lessons/how-to-write"
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
-                  >
-                    ✍️ บทฝึกสำหรับโจทย์เขียน (How to write) <span className="text-slate-300">→</span>
-                  </Link>
-                  <Link
-                    href="/practice/lessons/how-to-speak"
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
-                  >
-                    🎤 บทฝึกสำหรับโจทย์พูด (How to speak) <span className="text-slate-300">→</span>
-                  </Link>
-                  <Link
-                    href="/practice/lessons/campus-vocab"
-                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-800 transition hover:border-[#004AAD]"
-                  >
-                    🎓 คำศัพท์ในมหาวิทยาลัย (Campus vocab) <span className="text-slate-300">→</span>
-                  </Link>
-                </div>
-              </div>
           </div>
 
           {/* compact persistent status (real) */}

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { canAccessDifficulty, type Tier } from "@/lib/access-control";
 import { buildRandomQueue, defaultDifficultyFor, type QueueItem } from "@/lib/practice-queue-builder";
 import { type RandomDifficulty } from "@/lib/practice-random";
-import { LESSON_TOPICS, lessonTopicHref } from "@/lib/lessons/topics";
+import { buildRandomLessonQueue } from "@/lib/lessons/random-lesson-queue";
 
 const DIFFICULTIES: { id: RandomDifficulty; th: string }[] = [
   { id: "easy", th: "ง่าย" },
@@ -32,10 +32,22 @@ export function RandomPracticePicker({ effectiveTier }: { effectiveTier: Tier })
     setLoading(true);
     setQueue([]);
     try {
-      setQueue(await buildRandomQueue(difficulty, duration));
+      if (mode === "lesson") {
+        setQueue(buildRandomLessonQueue(difficulty, duration));
+      } else {
+        setQueue(await buildRandomQueue(difficulty, duration));
+      }
     } finally {
       setLoading(false);
     }
+  }
+
+  // Reset any rolled queue when switching between the exam / lesson tabs so a
+  // stale mix from the other track never lingers on screen.
+  function switchMode(next: "exam" | "lesson") {
+    if (next === mode) return;
+    setMode(next);
+    setQueue([]);
   }
 
   return (
@@ -55,7 +67,7 @@ export function RandomPracticePicker({ effectiveTier }: { effectiveTier: Tier })
       <div className="mb-3 flex gap-1.5 rounded-full bg-white/70 p-1">
         <button
           type="button"
-          onClick={() => setMode("exam")}
+          onClick={() => switchMode("exam")}
           className={`flex-1 rounded-full px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
             mode === "exam" ? "bg-[#004AAD] text-white" : "text-indigo-700 hover:bg-white"
           }`}
@@ -64,7 +76,7 @@ export function RandomPracticePicker({ effectiveTier }: { effectiveTier: Tier })
         </button>
         <button
           type="button"
-          onClick={() => setMode("lesson")}
+          onClick={() => switchMode("lesson")}
           className={`flex-1 rounded-full px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
             mode === "lesson" ? "bg-[#004AAD] text-white" : "text-indigo-700 hover:bg-white"
           }`}
@@ -73,112 +85,97 @@ export function RandomPracticePicker({ effectiveTier }: { effectiveTier: Tier })
         </button>
       </div>
 
-      {mode === "lesson" ? (
-        <>
-          <p className="mb-2 text-[11px] font-semibold text-indigo-700">
-            เลือกบทเรียนที่อยากฝึก — เนื้อหาและความคืบหน้าซิงก์กับแอปมือถือ
-          </p>
-          <div className="space-y-1.5">
-            {LESSON_TOPICS.map((t) => (
-              <Link
-                key={t.slug}
-                href={lessonTopicHref(t.slug)}
-                className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2.5 text-xs font-semibold text-slate-800 transition-all duration-150 hover:translate-x-0.5 hover:bg-white hover:shadow-sm"
-              >
-                <span className="text-base">{t.emoji}</span>
-                <span className="flex-1 truncate">{t.th}</span>
-                <span className="text-indigo-400">→</span>
-              </Link>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-indigo-500">
-            ระดับความยาก
-          </p>
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            {DIFFICULTIES.map((d) => {
-              const unlocked = canAccessDifficulty(effectiveTier, d.id).allowed;
-              if (!unlocked) {
-                return (
-                  <span
-                    key={d.id}
-                    className="cursor-not-allowed rounded-full bg-white/40 px-3 py-1.5 text-xs font-bold text-indigo-300"
-                    title="อัปเกรดแพ็กเกจเพื่อปลดล็อกระดับนี้"
-                  >
-                    {d.th} 🔒
-                  </span>
-                );
-              }
-              return (
-                <button
-                  key={d.id}
-                  type="button"
-                  onClick={() => setDifficulty(d.id)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
-                    difficulty === d.id
-                      ? "bg-[#004AAD] text-white"
-                      : "bg-white/70 text-indigo-700 hover:bg-white"
-                  }`}
-                >
-                  {d.th}
-                </button>
-              );
-            })}
-          </div>
+      {mode === "lesson" && (
+        <p className="mb-2 text-[11px] font-semibold text-indigo-700">
+          เลือกเวลาที่มี แล้วให้เราจัดชุดบทเรียนให้ — เนื้อหาซิงก์กับแอปมือถือ
+        </p>
+      )}
 
-          <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-indigo-500">
-            เวลาที่มี
-          </p>
-          <div className="mb-4 flex flex-wrap gap-1.5">
-            {DURATIONS.map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setDuration(m)}
-                className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
-                  duration === m
-                    ? "bg-[#004AAD] text-white"
-                    : "bg-white/70 text-indigo-700 hover:bg-white"
-                }`}
+      <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-indigo-500">
+        ระดับความยาก
+      </p>
+      <div className="mb-3 flex flex-wrap gap-1.5">
+        {DIFFICULTIES.map((d) => {
+          const unlocked = canAccessDifficulty(effectiveTier, d.id).allowed;
+          if (!unlocked) {
+            return (
+              <span
+                key={d.id}
+                className="cursor-not-allowed rounded-full bg-white/40 px-3 py-1.5 text-xs font-bold text-indigo-300"
+                title="อัปเกรดแพ็กเกจเพื่อปลดล็อกระดับนี้"
               >
-                {m} นาที
-              </button>
-            ))}
-          </div>
+                {d.th} 🔒
+              </span>
+            );
+          }
+          return (
+            <button
+              key={d.id}
+              type="button"
+              onClick={() => setDifficulty(d.id)}
+              className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
+                difficulty === d.id
+                  ? "bg-[#004AAD] text-white"
+                  : "bg-white/70 text-indigo-700 hover:bg-white"
+              }`}
+            >
+              {d.th}
+            </button>
+          );
+        })}
+      </div>
 
+      <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-indigo-500">
+        เวลาที่มี
+      </p>
+      <div className="mb-4 flex flex-wrap gap-1.5">
+        {DURATIONS.map((m) => (
           <button
+            key={m}
             type="button"
-            onClick={roll}
-            disabled={loading}
-            className="w-full rounded-xl bg-[#004AAD] py-2.5 text-sm font-bold text-[#FFCC00] shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] disabled:opacity-50"
+            onClick={() => setDuration(m)}
+            className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
+              duration === m
+                ? "bg-[#004AAD] text-white"
+                : "bg-white/70 text-indigo-700 hover:bg-white"
+            }`}
           >
-            {loading ? "กำลังเลือก…" : "🎲 เลือกให้เลย"}
+            {m} นาที
           </button>
+        ))}
+      </div>
 
-          {queue.length > 0 && (
-            <div className="mt-4 space-y-1.5 border-t border-indigo-100 pt-3">
-              <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-indigo-500">
-                แบบฝึกของคุณวันนี้ ({queue.length} ชุด)
-              </p>
-              {queue.map((item, i) => (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2 text-xs font-semibold text-slate-800 transition-all duration-150 hover:translate-x-0.5 hover:bg-white hover:shadow-sm"
-                >
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-700">
-                    {i + 1}
-                  </span>
-                  <span>{item.emoji}</span>
-                  <span className="flex-1 truncate">{item.label}</span>
-                  <span className="text-indigo-400">→</span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </>
+      <button
+        type="button"
+        onClick={roll}
+        disabled={loading}
+        className="w-full rounded-xl bg-[#004AAD] py-2.5 text-sm font-bold text-[#FFCC00] shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] disabled:opacity-50"
+      >
+        {loading ? "กำลังเลือก…" : "🎲 เลือกให้เลย"}
+      </button>
+
+      {queue.length > 0 && (
+        <div className="mt-4 space-y-1.5 border-t border-indigo-100 pt-3">
+          <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-indigo-500">
+            {mode === "lesson"
+              ? `บทเรียนของคุณวันนี้ (${queue.length} หมวด)`
+              : `แบบฝึกของคุณวันนี้ (${queue.length} ชุด)`}
+          </p>
+          {queue.map((item, i) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2 text-xs font-semibold text-slate-800 transition-all duration-150 hover:translate-x-0.5 hover:bg-white hover:shadow-sm"
+            >
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-700">
+                {i + 1}
+              </span>
+              <span>{item.emoji}</span>
+              <span className="flex-1 truncate">{item.label}</span>
+              <span className="text-indigo-400">→</span>
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   );

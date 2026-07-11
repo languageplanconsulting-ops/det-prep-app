@@ -1,48 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
-import {
-  getSpeakAboutPhotoProgressForItem,
-  type SpeakAboutPhotoItemProgress,
-} from "@/lib/speak-about-photo-progress";
-import type { PhotoSpeakItem } from "@/types/photo-speak";
+import type { PhotoSpeakItemWithProgress } from "@/lib/photo-speak-api";
 
 const MAX_SCORE = 160;
 
-function subscribeSpeakProgress(cb: () => void) {
-  if (typeof window === "undefined") return () => {};
-  window.addEventListener("storage", cb);
-  window.addEventListener("ep-speak-about-photo-progress", cb);
-  return () => {
-    window.removeEventListener("storage", cb);
-    window.removeEventListener("ep-speak-about-photo-progress", cb);
-  };
-}
-
-export function SpeakAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
-  const itemId = typeof item.id === "string" && item.id.trim() ? item.id : "unknown-item";
-  const imageUrl = typeof item.imageUrl === "string" ? item.imageUrl : "";
-  const titleEn = typeof item.titleEn === "string" && item.titleEn.trim() ? item.titleEn : "Untitled photo";
-  const titleTh = typeof item.titleTh === "string" ? item.titleTh : titleEn;
-  const contextEn = typeof item.contextEn === "string" ? item.contextEn : "";
-
-  const [progress, setProgress] = useState<SpeakAboutPhotoItemProgress | undefined>(undefined);
-
-  useEffect(() => {
-    setProgress(getSpeakAboutPhotoProgressForItem(itemId));
-    return subscribeSpeakProgress(() => {
-      setProgress(getSpeakAboutPhotoProgressForItem(itemId));
-    });
-  }, [itemId]);
-
+export function SpeakAboutPhotoExamCard({ item }: { item: PhotoSpeakItemWithProgress }) {
+  const progress = item.progress;
   const started = !!progress;
-  const latest = progress?.latestScore160 ?? null;
+  const latest = progress?.latest_score160 ?? null;
   const perfect = latest !== null && latest >= MAX_SCORE;
   const showRedeem = started && !perfect;
 
-  const sessionHref = `/practice/production/speak-about-photo/play?itemId=${encodeURIComponent(itemId)}`;
+  const sessionHref = `/practice/production/speak-about-photo/play?itemId=${encodeURIComponent(item.id)}`;
 
   return (
     <BrutalPanel className="h-full overflow-hidden p-0">
@@ -50,9 +21,9 @@ export function SpeakAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
         <Link href={sessionHref} className="block hover:bg-ep-yellow/10">
           <div className="relative aspect-[4/3] w-full overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {imageUrl ? (
+            {item.image_url ? (
               <img
-                src={imageUrl}
+                src={item.image_url}
                 alt=""
                 className="h-full w-full scale-105 object-cover blur-md"
                 loading="lazy"
@@ -68,11 +39,11 @@ export function SpeakAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
             </p>
           </div>
           <div className="space-y-1 p-3">
-            <p className="text-sm font-extrabold leading-tight">{titleEn}</p>
-            {contextEn ? (
-              <p className="ep-stat line-clamp-2 text-xs text-neutral-600">{contextEn}</p>
+            <p className="text-sm font-extrabold leading-tight">{item.title_en}</p>
+            {item.context_en ? (
+              <p className="ep-stat line-clamp-2 text-xs text-neutral-600">{item.context_en}</p>
             ) : (
-              <p className="ep-stat line-clamp-2 text-xs text-neutral-600">{titleTh}</p>
+              <p className="ep-stat line-clamp-2 text-xs text-neutral-600">{item.title_th}</p>
             )}
           </div>
         </Link>
@@ -95,7 +66,7 @@ export function SpeakAboutPhotoExamCard({ item }: { item: PhotoSpeakItem }) {
               </p>
               {showRedeem && progress ? (
                 <Link
-                  href={`/practice/production/speak-about-photo/report/${progress.latestAttemptId}`}
+                  href={`/practice/production/speak-about-photo/report/${progress.latest_attempt_id}`}
                   className="block border-2 border-black bg-ep-yellow py-2 text-center text-xs font-black uppercase tracking-wide shadow-[2px_2px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
                 >
                   Redeem
