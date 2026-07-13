@@ -10,8 +10,9 @@
  * days show their honest fraction (amber). See public/calendar-duolingo-preview.html for the
  * founder-approved visual reference this file ports into real Tailwind v4 tokens.
  *
- * Rendered by StudyPlanCalendarCard.tsx only when `isAdmin || previewEligible` — the
- * non-admin fallback (old horizontal-strip calendar) is untouched in that file.
+ * Rendered by StudyPlanCalendarCard.tsx for all users (promoted from an isAdmin ||
+ * previewEligible preview) — the old horizontal-strip calendar is kept in that file,
+ * unreachable, for quick rollback.
  */
 import Link from "next/link";
 import { useRouter } from "next/navigation";

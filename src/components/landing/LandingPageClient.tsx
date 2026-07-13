@@ -694,15 +694,15 @@ export function LandingPageClient({
                 name: "BASIC / เบสิก",
                 price: "฿399",
                 summaryRows: [
-                  "12 instant feedbacks / month",
+                  "18 instant feedbacks / month",
                   "Read/Vocab 15 · Literacy 20 · Convo 10",
                   "2 mock tests / month",
                 ],
                 details: [
                   {
-                    title: "instant feedback 12 ครั้ง / เดือน คืออะไร?",
+                    title: "instant feedback 18 ครั้ง / เดือน คืออะไร?",
                     body:
-                      "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 12 ครั้งต่อเดือน เลือกใช้กับข้อไหนก็ได้ตามต้องการ",
+                      "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 18 ครั้งต่อเดือน เลือกใช้กับข้อไหนก็ได้ตามต้องการ",
                   },
                   {
                     title: "Mock test 2 ครั้ง / เดือน คืออะไร?",
@@ -735,15 +735,15 @@ export function LandingPageClient({
                 name: "PREMIUM / พรีเมียม",
                 price: "฿699",
                 summaryRows: [
-                  "30 instant feedbacks / month",
+                  "45 instant feedbacks / month",
                   "Read/Vocab 30 · Literacy 50 · Convo 20",
                   "4 mock tests / month",
                 ],
                 details: [
                   {
-                    title: "instant feedback 30 ครั้ง / เดือน คืออะไร?",
+                    title: "instant feedback 45 ครั้ง / เดือน คืออะไร?",
                     body:
-                      "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 30 ครั้งต่อเดือน เลือกใช้กับข้อไหนก็ได้ตามแผนของคุณ",
+                      "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 45 ครั้งต่อเดือน เลือกใช้กับข้อไหนก็ได้ตามแผนของคุณ",
                   },
                   {
                     title: "Mock test 4 ครั้ง / เดือน คืออะไร?",
@@ -776,15 +776,15 @@ export function LandingPageClient({
                 name: "VIP / วีไอพี",
                 price: "฿999",
                 summaryRows: [
-                  "60 instant feedbacks / month",
+                  "100 instant feedbacks / month",
                   "Unlimited practice lanes",
                   "6 mock tests / month",
                 ],
                 details: [
                   {
-                    title: "instant feedback 60 ครั้ง / เดือน คืออะไร?",
+                    title: "instant feedback 100 ครั้ง / เดือน คืออะไร?",
                     body:
-                      "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 60 ครั้งต่อเดือน เลือกใช้ได้ตามต้องการ",
+                      "รับฟีดแบ็กแบบ personalized สำหรับทุกข้อสอบสาย writing/speaking เช่น write about photo, read about photo, read then speak, interactive speaking และ conversation summary รวม 100 ครั้งต่อเดือน เลือกใช้ได้ตามต้องการ",
                   },
                   {
                     title: "Unlimited practice lanes คืออะไร?",

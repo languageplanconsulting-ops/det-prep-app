@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Tier } from "@/lib/access-control";
-import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { setActiveDailyQueue } from "@/lib/daily-queue-session";
 import { buildRandomQueue, defaultDifficultyFor } from "@/lib/practice-queue-builder";
 import {
@@ -114,8 +113,11 @@ function CardShell({ children }: { children: React.ReactNode }) {
 
 export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }) {
   const router = useRouter();
-  const { isAdmin, previewEligible } = useEffectiveTier();
-  const soft = isAdmin || previewEligible;
+  // Soft (Duolingo-style month grid + lesson track) UI promoted to default for all users
+  // (was isAdmin || previewEligible) — matches the same rollout pattern already used for
+  // Dictation/FITB/Notebook. The old horizontal-strip fallback below is unreachable now but
+  // left in place for quick rollback.
+  const soft = true;
   const [loading, setLoading] = useState(true);
   const [schedule, setSchedule] = useState<ScheduleRow | null>(null);
   const [completions, setCompletions] = useState<{ completion_date: string }[]>([]);

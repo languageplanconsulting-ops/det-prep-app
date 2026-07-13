@@ -105,9 +105,9 @@ export const TIER_DIFFICULTY_ACCESS: Record<Tier, Difficulty[]> = {
 /** Shared AI credits per month (except free = lifetime pool of 1). */
 export const AI_MONTHLY_LIMIT: Record<Tier, number> = {
   free: 1,
-  basic: 12,
-  premium: 30,
-  vip: 60,
+  basic: 18,
+  premium: 45,
+  vip: 100,
 };
 
 export const AI_TYPES: readonly AIProductType[] = [
@@ -342,7 +342,7 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     color: "#0ea5e9",
     highlightsEn: [
       "Read + Vocab 15, Literacy 20, Conversation 10 / month",
-      "12 feedback credits/month (all 5 feedback types)",
+      "18 feedback credits/month (all 5 feedback types)",
       "2 Mock Tests / month",
       "Basic charts",
       "3 streak freezes / month",
@@ -356,7 +356,7 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     color: "#8b5cf6",
     highlightsEn: [
       "Read + Vocab 30, Literacy 50, Conversation 20 / month",
-      "30 feedback credits/month",
+      "45 feedback credits/month",
       "4 Mock Tests / month",
       "Full analytics charts",
       "3 streak freezes / month",
@@ -370,7 +370,7 @@ export const TIER_DISPLAY: Record<Tier, TierDisplay> = {
     color: "#eab308",
     highlightsEn: [
       "Unlimited practice sets across all four skills",
-      "60 feedback credits/month",
+      "100 feedback credits/month",
       "6 Mock Tests / month",
       "Full analytics + PDF export",
       "Notebook PDF export",

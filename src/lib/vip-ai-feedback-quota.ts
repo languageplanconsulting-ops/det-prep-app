@@ -3,7 +3,7 @@
  * Speak about photo, Dialogue summary, Interactive speaking). Resets each local-calendar Monday; does not roll over.
  */
 
-export const VIP_AI_FEEDBACK_WEEKLY_LIMIT = 15;
+export const VIP_AI_FEEDBACK_WEEKLY_LIMIT = 23;
 
 /** One full interactive speaking session costs one weekly VIP use. */
 export const VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION = 1;
