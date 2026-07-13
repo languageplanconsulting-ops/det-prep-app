@@ -7,10 +7,12 @@ export const runtime = "nodejs";
 /**
  * Bulk admin tool: re-sync ALL "Unsynced" users from Stripe in one shot.
  *
- * "Unsynced" = tier='free' + has stripe_customer_id + no stripe_subscription_id
- * + no tier_expires_at. These are Stripe payers whose webhook was missed
- * (common with PromptPay async_payment_succeeded if the event isn't enabled
- * in the Stripe Dashboard). Manually clicking "Re-sync from Stripe" per user
+ * "Unsynced" = any one-time Stripe customer (has stripe_customer_id, no
+ * stripe_subscription_id, not a course grant) whose EFFECTIVE tier is free —
+ * i.e. a payer whose webhook was missed (common with PromptPay
+ * async_payment_succeeded if the event isn't enabled in the Stripe Dashboard).
+ * This includes RETURNING customers whose earlier plan left a past expiry, which
+ * the narrower old scan missed. Manually clicking "Re-sync from Stripe" per user
  * becomes untenable at scale — this endpoint handles them all at once.
  * Same repair also runs daily via /api/cron/repair-subscriptions.
  *

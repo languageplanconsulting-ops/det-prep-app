@@ -53,6 +53,14 @@ export type EffectiveTierState = {
 const EffectiveTierContext = createContext<EffectiveTierState | null>(null);
 const TIER_REFRESH_EVENT = "ep-refresh-tier";
 
+/**
+ * Users we've already attempted a Stripe self-heal for this page load. Module-level
+ * so it survives SPA navigation (avoids re-hitting Stripe on every route change) but
+ * resets on a full reload (a fresh chance if the first attempt failed). See the
+ * `mayNeedPlanReconcile` handling in refreshProfile.
+ */
+const planReconcileAttempted = new Set<string>();
+
 export function EffectiveTierProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [realTier, setRealTier] = useState<Tier>("free");
@@ -140,6 +148,7 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
           vipGrantedByCourse?: boolean;
           hasStripeSubscription?: boolean;
           planExpiresAt?: string | null;
+          mayNeedPlanReconcile?: boolean;
         }
       | null = null;
     // Retry once on a transient network/5xx failure (an authenticated:false 200 is a
@@ -191,6 +200,35 @@ export function EffectiveTierProvider({ children }: { children: ReactNode }) {
       setVipGrantedByCourse(server?.vipGrantedByCourse === true || clientVipCourse);
       setHasStripeSubscription(server?.hasStripeSubscription === true || clientStripe);
       setPlanExpiresAt(liveExpiry);
+
+      // Self-heal a "paid but stuck in free" user: the server sees a Stripe
+      // customer with no subscription whose effective tier is free — the exact
+      // fingerprint of a missed-webhook payment (common with PromptPay async
+      // settlement). Reconcile once from Stripe and, if it grants a plan, refresh
+      // so their access appears immediately — no admin re-sync or 24h cron wait.
+      // Guarded per user per page load so it never loops or hammers Stripe.
+      if (
+        server?.mayNeedPlanReconcile === true &&
+        effectiveUserId &&
+        !planReconcileAttempted.has(effectiveUserId)
+      ) {
+        planReconcileAttempted.add(effectiveUserId);
+        void (async () => {
+          try {
+            const res = await fetch("/api/account/reconcile-plan", {
+              method: "POST",
+              credentials: "same-origin",
+              cache: "no-store",
+            });
+            const json = (await res.json().catch(() => ({}))) as { reconciled?: boolean };
+            if (json.reconciled) {
+              window.dispatchEvent(new Event(TIER_REFRESH_EVENT));
+            }
+          } catch {
+            // Best-effort — the daily repair cron and admin re-sync remain the backstop.
+          }
+        })();
+      }
     } else {
       // No identity from either source (logged out / total failure) → free + login prompt.
       setCurrentBrowserUserId(null);

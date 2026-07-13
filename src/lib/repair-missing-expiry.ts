@@ -1,9 +1,8 @@
-import type Stripe from "stripe";
-
 import { logAdminAction } from "@/lib/admin-auth";
 import { weekStartMondayIsoDate } from "@/lib/addon-credits";
+import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { getStripe } from "@/lib/stripe";
-import { fulfillOneTimePlanPurchase } from "@/lib/stripe-fulfillment";
+import { reconcileCustomerPaidSessions } from "@/lib/stripe-reconcile";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
 const REPAIR_WINDOW_DAYS = 30;
@@ -274,19 +273,28 @@ export type UnsyncedStripeRepairResult = {
 };
 
 /**
- * Repairs the "never fulfilled at all" case: the customer paid in Stripe
- * (has stripe_customer_id) but tier is still 'free' with no expiry and no
- * subscription — meaning the webhook (checkout.session.completed /
- * async_payment_succeeded / payment_intent.succeeded) never ran fulfillment
- * for them. This is the common failure mode for Thai PromptPay, where
- * payment settles asynchronously after the customer has left the checkout
- * page, and the dashboard's webhook endpoint isn't subscribed to the async
- * event types.
+ * Repairs the "never fulfilled at all" case: the customer paid in Stripe but the
+ * webhook (checkout.session.completed / async_payment_succeeded /
+ * payment_intent.succeeded) never ran fulfillment, so they read as free with the
+ * money taken. This is the common failure mode for Thai PromptPay, where payment
+ * settles asynchronously after the customer has left the checkout page and the
+ * dashboard's webhook endpoint isn't subscribed to the async event types.
  *
- * Unlike repairMissingTierExpiries / repairDowngradedPaidUsers, this reads
- * live from the Stripe API (no local trace exists yet to repair from) and
- * calls the same fulfillOneTimePlanPurchase() the webhook uses — so it's
- * exactly as idempotent (keyed on stripe_payment_intent_id).
+ * Scan = EVERY one-time Stripe customer (has stripe_customer_id, no subscription,
+ * not a course grant) whose EFFECTIVE tier is currently free.
+ *
+ * IMPORTANT — why the scan is this broad: the previous version additionally
+ * required `tier = 'free'` AND `tier_expires_at IS NULL`, which only matched
+ * FIRST-TIME payers. A RETURNING customer whose earlier plan left a (now past)
+ * `tier_expires_at` — and often a still-non-free `tier` column, since expiry is
+ * resolved at read time and never written back — then re-paid with a missed
+ * webhook was caught by NONE of the repair passes and stayed stuck until a manual
+ * per-user re-sync. Resolving effective tier in code catches both shapes.
+ *
+ * Safe on this wider net because reconcileCustomerPaidSessions only grants a plan
+ * for a paid Checkout Session whose payment_intent is NOT already in
+ * payment_history — so a legitimately-expired user who hasn't re-paid is left
+ * alone, while a genuinely-unfulfilled new payment is honored. Idempotent.
  */
 export async function repairUnsyncedStripeCustomers(
   options: { limit?: number } = {},
@@ -294,13 +302,14 @@ export async function repairUnsyncedStripeCustomers(
   const supabase = createServiceRoleSupabase();
   const cap = Math.min(options.limit ?? 100, 200);
 
-  const { data: candidates, error: scanErr } = await supabase
+  const { data: rows, error: scanErr } = await supabase
     .from("profiles")
-    .select("id, email, stripe_customer_id, vip_granted_by_course")
-    .eq("tier", "free")
+    .select(
+      "id, email, tier, tier_expires_at, stripe_customer_id, stripe_subscription_id, vip_granted_by_course",
+    )
     .not("stripe_customer_id", "is", null)
     .is("stripe_subscription_id", null)
-    .is("tier_expires_at", null)
+    .order("updated_at", { ascending: false })
     .limit(cap);
 
   if (scanErr) {
@@ -308,9 +317,16 @@ export async function repairUnsyncedStripeCustomers(
     return { scanned: 0, fixed: [], skippedNoPaidSession: 0, errors: 0 };
   }
 
-  const users = (candidates ?? []).filter((r) => r.vip_granted_by_course !== true);
+  const users = (rows ?? []).filter(
+    (r) =>
+      r.vip_granted_by_course !== true &&
+      resolveEffectiveTierFromProfile({
+        tier: r.tier,
+        tier_expires_at: (r.tier_expires_at as string | null) ?? null,
+      }) === "free",
+  );
   if (users.length === 0) {
-    return { scanned: candidates?.length ?? 0, fixed: [], skippedNoPaidSession: 0, errors: 0 };
+    return { scanned: rows?.length ?? 0, fixed: [], skippedNoPaidSession: 0, errors: 0 };
   }
 
   const stripe = getStripe();
@@ -324,31 +340,15 @@ export async function repairUnsyncedStripeCustomers(
     const email = (user.email as string | null) ?? null;
 
     try {
-      const sessions = await stripe.checkout.sessions.list({ customer: customerId, limit: 20 });
-      let foundAndFulfilled = false;
-
-      for (const session of sessions.data) {
-        const meta = session.metadata ?? {};
-        const eligible =
-          session.mode === "payment" &&
-          meta.purchaseKind === "plan" &&
-          meta.userId === userId &&
-          session.payment_status === "paid";
-        if (!eligible) continue;
-
-        const full = (await stripe.checkout.sessions.retrieve(session.id, {
-          expand: ["payment_intent", "customer"],
-        })) as Stripe.Checkout.Session;
-
-        const result = await fulfillOneTimePlanPurchase(full);
-        if (result.ok) {
-          fixed.push({ id: userId, email, tier: result.tier });
-          foundAndFulfilled = true;
-          break; // most recent paid session is enough; fulfillment is idempotent anyway
-        }
-      }
-
-      if (!foundAndFulfilled) {
+      const result = await reconcileCustomerPaidSessions({
+        stripe,
+        supabase,
+        userId,
+        customerId,
+      });
+      if (result.fulfilled) {
+        fixed.push({ id: userId, email, tier: result.fulfilledTier });
+      } else {
         skippedNoPaidSession += 1;
       }
     } catch (e) {

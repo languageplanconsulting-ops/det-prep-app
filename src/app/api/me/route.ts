@@ -51,6 +51,15 @@ export async function GET() {
       hasStripeSubscription:
         !!data?.stripe_subscription_id ||
         (!!data?.stripe_customer_id && effectiveTier !== "free" && data?.vip_granted_by_course !== true),
+      // "Paid but reads as free" fingerprint — a Stripe customer with no active
+      // subscription, not a course comp, whose effective tier is free. The client
+      // uses this to trigger a one-shot Stripe self-heal (see useEffectiveTier +
+      // /api/account/reconcile-plan) so a missed-webhook payer fixes on next load.
+      mayNeedPlanReconcile:
+        effectiveTier === "free" &&
+        !!data?.stripe_customer_id &&
+        !data?.stripe_subscription_id &&
+        data?.vip_granted_by_course !== true,
     });
   } catch {
     return NextResponse.json({ authenticated: false }, { status: 200 });
