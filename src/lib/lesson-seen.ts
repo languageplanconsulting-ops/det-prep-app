@@ -24,7 +24,8 @@ export type LessonSkillTag =
   | "mainidea"
   | "readwrite"
   | "besttitle"
-  | "vocabcomprehension";
+  | "vocabcomprehension"
+  | "grammarfitb";
 
 export type LessonSeenSource = "daily_lesson" | "manual_browse";
 

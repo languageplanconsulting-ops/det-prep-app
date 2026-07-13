@@ -62,6 +62,13 @@ export const LESSON_TOPICS: LessonTopic[] = [
     descTh: "ฟังสถานการณ์ในมหาวิทยาลัย แล้วเติมคำศัพท์เฉพาะที่หายไปให้ถูก",
     emoji: "🎓",
   },
+  {
+    slug: "grammar-fitb",
+    th: "เติมคำในช่องว่าง (ไวยากรณ์)",
+    en: "Fill-in-the-blank Grammar",
+    descTh: "ฝึกไวยากรณ์ทีละบท — ปัจจุบัน/อดีต/passive/adverb/คำเชื่อม แล้วเติมคำในย่อหน้า 5 ช่อง",
+    emoji: "✏️",
+  },
 ];
 
 /** Href to a lesson topic's runner. */
