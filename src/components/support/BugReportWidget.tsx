@@ -102,10 +102,14 @@ export function BugReportWidget() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="ep-bug-fab fixed bottom-5 right-5 z-[95] rounded-full border-4 border-black bg-[#FFCC00] px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[6px_6px_0_0_#111] transition hover:-translate-y-0.5 hover:bg-[#ffd633]"
+        aria-label="รายงานปัญหา"
+        className="ep-bug-fab fixed bottom-5 right-5 z-[95] flex h-12 w-12 items-center justify-center gap-2 rounded-full border-4 border-black bg-[#FFCC00] p-0 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[6px_6px_0_0_#111] transition hover:-translate-y-0.5 hover:bg-[#ffd633] sm:h-auto sm:w-auto sm:px-5 sm:py-3"
         style={{ fontFamily: "var(--font-jetbrains), monospace" }}
       >
-        รายงานปัญหา
+        <span aria-hidden="true" className="text-base leading-none">
+          💬
+        </span>
+        <span className="hidden sm:inline">รายงานปัญหา</span>
       </button>
 
       <IntroModalShell

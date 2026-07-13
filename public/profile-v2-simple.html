@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Profile redesign · V2 Simple Summary</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;color:#1e2433;background:#fbfbfa}
+  .mono{font-family:"JetBrains Mono",monospace}
+  .row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid #eef0ee}
+  .row:last-child{border-bottom:0}
+  .dot{width:10px;height:10px;border-radius:99px;flex-shrink:0}
+</style>
+</head>
+<body class="min-h-screen">
+<div class="px-4 py-3 text-center text-[11px] text-slate-400 mono">PROFILE · V2 “Simple Summary” — <a href="/profile-redesign-index.html" class="underline">เทียบทั้ง 3 เวอร์ชัน</a></div>
+
+<main class="mx-auto max-w-xl space-y-8 px-5 pb-20 pt-2">
+
+  <!-- header: name + one clear plan line, nothing else -->
+  <header>
+    <p class="text-sm text-slate-400">บัญชีของฉัน</p>
+    <h1 class="mt-1 text-3xl font-extrabold tracking-tight">อรุณ</h1>
+    <p class="mt-1 text-sm text-slate-500">arun.student@gmail.com</p>
+    <div class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+      <span class="rounded-full bg-ep-yellow px-3 py-1 text-[12px] font-extrabold text-slate-900">PREMIUM</span>
+      <span class="text-slate-500">ใช้ได้ถึง <b class="text-slate-800">29 ก.ค.</b> · เหลือ <b class="text-slate-800">18 วัน</b></span>
+    </div>
+  </header>
+
+  <!-- ONE at-a-glance line per resource. no cards, no meters, no percentages, no jargon.
+       "used / total" spoken plainly. this is the Krug/Hick answer to a wall of 8 cards. -->
+  <section>
+    <div class="mb-1 flex items-baseline justify-between">
+      <h2 class="text-lg font-extrabold">สิทธิ์คงเหลือเดือนนี้</h2>
+      <span class="text-xs text-slate-400">รีเซ็ตทุกวันที่ 1</span>
+    </div>
+
+    <div>
+      <div class="row">
+        <span class="dot bg-emerald-400"></span>
+        <div class="flex-1"><p class="font-bold">📖 การอ่าน</p></div>
+        <p class="mono text-right"><b>9</b><span class="text-slate-400"> เหลือจาก 12</span></p>
+      </div>
+      <div class="row">
+        <span class="dot bg-emerald-400"></span>
+        <div class="flex-1"><p class="font-bold">🔤 คำศัพท์</p></div>
+        <p class="mono text-right"><b>7</b><span class="text-slate-400"> เหลือจาก 12</span></p>
+      </div>
+      <!-- Literacy merged: one line, sub-caption names the 3 exams -->
+      <div class="row">
+        <span class="dot bg-amber-400"></span>
+        <div class="flex-1">
+          <p class="font-bold">✍️ Literacy <span class="font-normal text-slate-400">(ใช้ร่วมกัน)</span></p>
+          <p class="text-[11px] text-slate-400">ฟังแล้วพิมพ์ · เติมคำ · เลือกคำจริง</p>
+        </div>
+        <p class="mono text-right"><b>16</b><span class="text-slate-400"> เหลือจาก 30</span></p>
+      </div>
+      <div class="row">
+        <span class="dot bg-emerald-400"></span>
+        <div class="flex-1"><p class="font-bold">🎧 บทสนทนาโต้ตอบ</p></div>
+        <p class="mono text-right"><b>6</b><span class="text-slate-400"> เหลือจาก 8</span></p>
+      </div>
+      <div class="row">
+        <span class="dot bg-ep-blue"></span>
+        <div class="flex-1"><p class="font-bold">📝 Mock Test <span class="font-normal text-slate-400">(+1 add-on)</span></p></div>
+        <p class="mono text-right"><b>3</b><span class="text-slate-400"> เหลือจาก 4</span></p>
+      </div>
+      <div class="row">
+        <span class="dot bg-ep-blue"></span>
+        <div class="flex-1"><p class="font-bold">✅ เครดิตตรวจงาน <span class="font-normal text-slate-400">(พูด + เขียน)</span></p></div>
+        <p class="mono text-right"><b>48</b><span class="text-slate-400"> เหลือจาก 70</span></p>
+      </div>
+    </div>
+
+    <p class="mt-3 text-[11px] text-slate-400">🟢 เหลือเยอะ · 🟡 เริ่มน้อย · 🔵 สิทธิ์พิเศษของแพ็กเกจ</p>
+  </section>
+
+  <!-- plain-language help, shown only if needed, not a permanent "how to read" panel -->
+  <details class="rounded-2xl bg-white p-4 shadow-[0_1px_0_#eef0ee] ring-1 ring-slate-100">
+    <summary class="cursor-pointer text-sm font-bold text-slate-700">การนับสิทธิ์ทำงานยังไง?</summary>
+    <ul class="mt-3 space-y-1.5 text-sm text-slate-600">
+      <li>• การอ่าน กับ คำศัพท์ นับแยกกัน</li>
+      <li>• Literacy 3 อย่างใช้โควต้าก้อนเดียวกัน</li>
+      <li>• ซื้อ add-on แล้วระบบบวกเพิ่มให้จากสิทธิ์เดิม</li>
+    </ul>
+  </details>
+
+  <!-- actions -->
+  <div class="flex flex-wrap gap-2">
+    <a href="/pricing" class="rounded-xl bg-ep-blue px-5 py-2.5 text-sm font-extrabold text-white">ต่ออายุ / อัปเกรด</a>
+    <a href="#" class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700">ซื้อเครดิตเพิ่ม</a>
+    <a href="#" class="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-400">ออกจากระบบ</a>
+  </div>
+
+  <p class="text-center text-[11px] text-slate-400">ทำไมแบบนี้: ตัดการ์ด/เปอร์เซ็นต์/ศัพท์เทคนิคออกให้หมด · หนึ่งบรรทัดต่อหนึ่งสิทธิ์ อ่านจบใน 5 วินาที · Literacy รวมเป็นก้อนเดียว · วิธีนับซ่อนไว้ใน “ดูเพิ่ม” ไม่ใช่แผงถาวร</p>
+</main>
+</body>
+</html>

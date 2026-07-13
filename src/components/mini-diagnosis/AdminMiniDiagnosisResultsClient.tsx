@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { sfxReveal } from "@/lib/exam-sfx";
 import { ConfettiBurst } from "@/components/mini-diagnosis/steps/ui";
+import { ResultFrictionPrompt } from "@/components/mini-diagnosis/ResultFrictionPrompt";
+import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 // ─── Types (verbatim) ─────────────────────────────────────────────────────────
 
@@ -53,6 +55,15 @@ const SKILL_TH: Record<string, { th: string; icon: string; practiceNote: string 
   speaking: { th: "พูด", icon: "🗣️", practiceNote: "ฝึก Read Then Speak + Speak About Photo" },
   reading: { th: "อ่าน", icon: "📖", practiceNote: "ฝึก Reading + เติมคำในช่องว่าง" },
   writing: { th: "เขียน", icon: "✍️", practiceNote: "ฝึก Write About Photo + Read & Write" },
+};
+
+// Same skill→href routing as MockFixedReportBrandedViewV2's SKILL_ROUTE, so the
+// "start practicing" CTA sends users to the exact same destination pages.
+const SKILL_PRACTICE_HREF: Record<string, string> = {
+  writing: "/practice/production/write-about-photo",
+  listening: "/practice/literacy/dictation",
+  reading: "/practice/comprehension/reading",
+  speaking: "/practice/production/speak-about-photo",
 };
 
 function breakdownLabel(key: string) {
@@ -314,6 +325,111 @@ function StepReviewCard({ item, response }: { item: StepItem; response: Response
   );
 }
 
+// ─── Save-result conversion card (anonymous free-trial users only) ────────────
+//
+// Shown only after the user has already seen their real, personalized result — value
+// before the ask (UX Value Loop). Converts the CURRENT anonymous session to a permanent
+// account in place via /api/mini-diagnosis/claim, so this exact result stays attached;
+// nothing to re-fetch or migrate.
+
+function SaveResultCard() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErr("");
+    if (password.length < 8) {
+      setErr("รหัสผ่านอย่างน้อย 8 ตัวอักษร");
+      return;
+    }
+    setBusy(true);
+    const res = await fetch("/api/mini-diagnosis/claim", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+    });
+    const json = (await res.json().catch(() => ({}))) as { error?: string };
+    if (!res.ok) {
+      setBusy(false);
+      setErr(json.error ?? "บันทึกไม่สำเร็จ กรุณาลองใหม่");
+      return;
+    }
+    // Pull the now-permanent identity (is_anonymous: false) into the client's local
+    // session so nav/logout stop treating this as a throwaway trial session.
+    const supabase = getBrowserSupabase();
+    await supabase?.auth.refreshSession().catch(() => null);
+    setBusy(false);
+    setSaved(true);
+  };
+
+  if (saved) {
+    return (
+      <section className="rounded-3xl border border-emerald-100 bg-emerald-50/70 p-5 text-center shadow-sm">
+        <p className="text-sm font-bold text-emerald-700">บันทึกผลของคุณแล้ว ✓</p>
+        <p className="mt-1 text-xs leading-relaxed text-slate-600">
+          เข้าสู่ระบบด้วยอีเมลนี้ได้ทุกเมื่อเพื่อดูผลย้อนหลังและติดตามพัฒนาการ
+        </p>
+        <Link
+          href="/profile"
+          className="mt-3 inline-block text-xs font-semibold text-ep-blue underline-offset-2 hover:underline"
+        >
+          ไปหน้าโปรไฟล์ →
+        </Link>
+      </section>
+    );
+  }
+
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p className="text-sm font-bold text-slate-800">บันทึกผลนี้ไว้ก่อนที่จะหายไป</p>
+      <ul className="mt-2.5 space-y-1.5 text-xs leading-relaxed text-slate-600">
+        <li className="flex items-start gap-1.5">
+          <span className="mt-0.5 text-ep-blue">•</span>
+          <span>ดูผลนี้ย้อนหลังได้ทุกเมื่อ และติดตามพัฒนาการครั้งถัดไป</span>
+        </li>
+        <li className="flex items-start gap-1.5">
+          <span className="mt-0.5 text-ep-blue">•</span>
+          <span>ฟรี — ไม่ต้องผูกบัตร ใช้แค่อีเมล + รหัสผ่าน</span>
+        </li>
+      </ul>
+      <form onSubmit={(e) => void onSubmit(e)} className="mt-4 space-y-2.5">
+        {err ? <p className="text-xs font-semibold text-rose-600">{err}</p> : null}
+        <input
+          type="email"
+          autoComplete="email"
+          required
+          placeholder="อีเมลของคุณ"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-ep-blue"
+        />
+        <input
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          placeholder="ตั้งรหัสผ่าน (8 ตัวขึ้นไป)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-ep-blue"
+        />
+        <button
+          type="submit"
+          disabled={busy}
+          className="w-full rounded-xl bg-ep-blue py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800 active:scale-[0.98] disabled:opacity-50"
+        >
+          {busy ? "กำลังบันทึก…" : "บันทึกผลของฉัน"}
+        </button>
+      </form>
+    </section>
+  );
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: string }) {
@@ -322,7 +438,17 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
   const [loadError, setLoadError] = useState<string | null>(null);
   const [displayTotal, setDisplayTotal] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const revealPlayed = useRef(false);
+
+  useEffect(() => {
+    const supabase = getBrowserSupabase();
+    if (!supabase) return;
+    void (async () => {
+      const { data } = await supabase.auth.getUser();
+      setIsAnonymous(data.user?.is_anonymous === true);
+    })();
+  }, []);
 
   const loadReport = async () => {
     try {
@@ -537,9 +663,13 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
           </div>
         </section>
 
+        {/* save-result conversion — shown only to anonymous free-trial users, only AFTER
+            they've already seen their real result above (value before the ask) */}
+        {isAnonymous ? <SaveResultCard /> : null}
+
         {/* single clear next action */}
         <Link
-          href="/practice"
+          href={SKILL_PRACTICE_HREF[weakest.key] ?? "/practice"}
           className="flex items-center justify-center gap-2 rounded-2xl bg-ep-blue px-6 py-4 text-base font-bold text-white shadow-sm transition active:scale-[0.99]"
         >
           เริ่มฝึก{weakMeta.th}เลย →
@@ -631,6 +761,9 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
           นี่คือแบบทดสอบขนาดสั้น ความแม่นของคะแนนจะไม่เท่า full mock test —
           ใช้ผลนี้เพื่อดูว่าเด่นด้านไหนและควรแก้จุดไหนก่อน
         </p>
+
+        {/* one open question about friction — universal, optional, dismissible */}
+        <ResultFrictionPrompt />
 
         {/* quiet secondary row */}
         <div className="flex items-center justify-center gap-4 pb-6 text-xs">

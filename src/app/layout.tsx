@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, IBM_Plex_Sans_Thai } from "next/font/google";
 import { LoginWelcomeModalGate } from "@/components/auth/LoginWelcomeModalGate";
 import { JulyAnnouncementModal } from "@/components/announcements/JulyAnnouncementModal";
+import { WeeklyLimitRemovedModal } from "@/components/announcements/WeeklyLimitRemovedModal";
 import { AdminSoftSkin } from "@/components/admin/AdminSoftSkin";
 import { ActivityTracker } from "@/components/analytics/ActivityTracker";
 import { PreviewBanner } from "@/components/admin/PreviewBanner";
@@ -63,6 +64,7 @@ export default function RootLayout({
           <MainNav />
           <LoginWelcomeModalGate />
           <JulyAnnouncementModal />
+          <WeeklyLimitRemovedModal />
           <VipApiCreditNotebookNotice />
           <PlanExpiryNotice />
           <BugReportWidget />

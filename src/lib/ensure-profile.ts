@@ -6,6 +6,16 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+/**
+ * Anonymous Supabase users (see mini-diagnosis session route) have no email. `profiles.email`
+ * is `unique not null`, so falling back to `""` would collide on the SECOND anonymous signup.
+ * A per-user placeholder keeps the constraint happy and reads clearly as anonymous in the DB.
+ * Overwritten with a real email once the user converts (see /api/mini-diagnosis/claim).
+ */
+function placeholderEmailFor(userId: string): string {
+  return `anon-${userId}@anonymous.det.local`;
+}
+
 export async function ensureProfileForAuthUser(params: {
   userId: string;
   email: string;
@@ -16,7 +26,7 @@ export async function ensureProfileForAuthUser(params: {
   role?: string | null;
 }) {
   const supabase = createServiceRoleSupabase();
-  const normalizedEmail = normalizeEmail(params.email);
+  const normalizedEmail = normalizeEmail(params.email) || placeholderEmailFor(params.userId);
   const nextFullName = params.fullName?.trim() || null;
   const nextAvatarUrl = params.avatarUrl?.trim() || null;
 

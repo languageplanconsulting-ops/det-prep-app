@@ -12,7 +12,6 @@ const baseLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/profile", label: "Profile" },
-  { href: "/student-overview", label: "Student Overview" },
   { href: "/notebook", label: "Notebook" },
   { href: "/practice", label: "Practice" },
   { href: "/study-plan", label: "Calendar" },
@@ -81,7 +80,9 @@ export function MainNav() {
     }
     const sync = async () => {
       const { data } = await supabase.auth.getSession();
-      setHomeHasSession(!!data.session);
+      // An anonymous session (mini-diagnosis free trial) shouldn't swap Sign in/Create
+      // account for a Profile link — the visitor never chose to create an account.
+      setHomeHasSession(!!data.session && data.session.user?.is_anonymous !== true);
     };
     void sync();
     const { data: sub } = supabase.auth.onAuthStateChange(() => {

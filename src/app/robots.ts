@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
           "/duolingo-english-test",
           "/duolingo-english-test/",
         ],
-        disallow: ["/admin/", "/api/", "/profile", "/notebook", "/student-overview"],
+        disallow: ["/admin/", "/api/", "/profile", "/notebook"],
       },
     ],
     sitemap: absoluteUrl("/sitemap.xml"),

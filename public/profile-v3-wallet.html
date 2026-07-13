@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Profile redesign · V3 Credits Wallet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<style>
+  body{font-family:"IBM Plex Sans Thai",sans-serif;color:#0f172a;background:#eef1f6}
+  .mono{font-family:"JetBrains Mono",monospace}
+  .tile{background:#fff;border-radius:16px;border:1px solid #e5e8ef}
+  .bar{height:6px;border-radius:99px;background:#edf0f5;overflow:hidden}
+  .bar>span{display:block;height:100%;border-radius:99px}
+</style>
+</head>
+<body class="min-h-screen">
+<div class="px-4 py-3 text-center text-[11px] text-slate-400 mono">PROFILE · V3 “Credits Wallet” — <a href="/profile-redesign-index.html" class="underline">เทียบทั้ง 3 เวอร์ชัน</a></div>
+
+<main class="mx-auto max-w-2xl space-y-4 px-4 pb-16">
+
+  <!-- WALLET hero: plan + expiry + the ONE number that matters most this month -->
+  <section class="overflow-hidden rounded-3xl bg-ep-blue p-6 text-white shadow-[0_16px_40px_rgba(0,74,173,.35)]">
+    <div class="flex items-start justify-between">
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-widest text-white/60">แพ็กเกจ</p>
+        <p class="text-2xl font-extrabold">Premium</p>
+      </div>
+      <span class="rounded-full bg-ep-yellow px-3 py-1 text-[11px] font-extrabold text-slate-900">ใช้งานอยู่</span>
+    </div>
+    <div class="mt-5 flex items-end justify-between">
+      <div>
+        <p class="text-[11px] text-white/60">หมดอายุ</p>
+        <p class="mono text-lg font-extrabold">29 ก.ค. 2569</p>
+      </div>
+      <div class="text-right">
+        <p class="text-[11px] text-white/60">เหลือ</p>
+        <p class="mono text-3xl font-extrabold">18<span class="text-base font-semibold text-white/70"> วัน</span></p>
+      </div>
+    </div>
+    <div class="mt-3 h-1.5 rounded-full bg-white/20"><div class="h-1.5 rounded-full bg-ep-yellow" style="width:60%"></div></div>
+    <p class="mt-1 truncate text-[11px] text-white/50">arun.student@gmail.com</p>
+  </section>
+
+  <!-- two headline balances (Mock + Feedback) get big tiles; these are what users ask about -->
+  <div class="grid grid-cols-2 gap-4">
+    <div class="tile p-4">
+      <p class="text-xs font-bold text-slate-500">📝 Mock Test</p>
+      <p class="mono mt-1 text-3xl font-extrabold text-ep-blue">3</p>
+      <p class="text-[11px] text-slate-400">แพ็กเกจ 2 · add-on 1 · จาก 4</p>
+    </div>
+    <div class="tile p-4">
+      <p class="text-xs font-bold text-slate-500">✅ เครดิตตรวจงาน</p>
+      <p class="mono mt-1 text-3xl font-extrabold text-ep-blue">48</p>
+      <p class="text-[11px] text-slate-400">แพ็กเกจ 38 · add-on 10 · จาก 70</p>
+    </div>
+  </div>
+
+  <!-- practice quotas as slim wallet rows: label · fill-as-you-use bar · remaining/total -->
+  <section class="tile p-5">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="font-extrabold">สิทธิ์ฝึกทำข้อสอบ</h2>
+      <span class="text-[11px] text-slate-400">ใช้แล้ว 22 · เหลือ 38</span>
+    </div>
+
+    <div class="space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="w-40 shrink-0 text-sm font-bold">📖 การอ่าน</span>
+        <div class="bar flex-1"><span class="bg-emerald-400" style="width:25%"></span></div>
+        <span class="mono w-16 shrink-0 text-right text-sm"><b>9</b><span class="text-slate-400">/12</span></span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="w-40 shrink-0 text-sm font-bold">🔤 คำศัพท์</span>
+        <div class="bar flex-1"><span class="bg-emerald-400" style="width:42%"></span></div>
+        <span class="mono w-16 shrink-0 text-right text-sm"><b>7</b><span class="text-slate-400">/12</span></span>
+      </div>
+      <!-- Literacy: one row, expandable to show the 3 sub-exams share it -->
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="w-40 shrink-0 text-sm font-bold">✍️ Literacy <span class="text-slate-400">·รวม</span></span>
+          <div class="bar flex-1"><span class="bg-amber-400" style="width:47%"></span></div>
+          <span class="mono w-16 shrink-0 text-right text-sm"><b>16</b><span class="text-slate-400">/30</span></span>
+        </div>
+        <p class="ml-40 mt-1 pl-3 text-[11px] text-slate-400">โควต้าเดียว: ฟังแล้วพิมพ์ · เติมคำ · เลือกคำจริง</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="w-40 shrink-0 text-sm font-bold">🎧 บทสนทนาโต้ตอบ</span>
+        <div class="bar flex-1"><span class="bg-emerald-400" style="width:25%"></span></div>
+        <span class="mono w-16 shrink-0 text-right text-sm"><b>6</b><span class="text-slate-400">/8</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- add-on / top-up strip: gives the wallet an obvious action -->
+  <section class="tile flex flex-wrap items-center justify-between gap-3 p-5">
+    <div>
+      <p class="font-extrabold">ต้องการสิทธิ์เพิ่ม?</p>
+      <p class="text-xs text-slate-500">เติมเครดิตตรวจงานหรือ Mock แยกได้ โดยไม่ต้องเปลี่ยนแพ็กเกจ</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="#" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700">เติมเครดิต</a>
+      <a href="/pricing" class="rounded-xl bg-ep-yellow px-4 py-2 text-sm font-extrabold text-slate-900">อัปเกรด</a>
+    </div>
+  </section>
+
+  <!-- account actions -->
+  <section class="tile divide-y divide-slate-100">
+    <a href="#" class="flex items-center justify-between px-5 py-3.5 text-sm font-semibold hover:bg-slate-50">จัดการแพ็กเกจ <span class="text-slate-300">›</span></a>
+    <a href="#" class="flex items-center justify-between px-5 py-3.5 text-sm font-semibold hover:bg-slate-50">เปลี่ยนรหัสผ่าน <span class="text-slate-300">›</span></a>
+    <a href="#" class="flex items-center justify-between px-5 py-3.5 text-sm font-semibold text-rose-600 hover:bg-slate-50">ออกจากระบบ <span class="text-rose-300">›</span></a>
+  </section>
+
+  <p class="px-2 text-center text-[11px] text-slate-400">ทำไมแบบนี้: มองสิทธิ์เป็น “กระเป๋าเครดิต” · ยอดสำคัญที่สุด (วันเหลือ · Mock · เครดิตตรวจงาน) เด่นบนสุด · แถบเต็มตามการใช้งาน · Literacy รวมก้อนเดียว · มีปุ่มเติม/อัปเกรดชัดเจน</p>
+</main>
+</body>
+</html>

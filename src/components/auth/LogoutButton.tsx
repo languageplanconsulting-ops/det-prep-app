@@ -17,7 +17,10 @@ export function LogoutButton() {
     const sync = () => {
       void (async () => {
         const { data } = await supabase.auth.getSession();
-        setShow(!!data.session);
+        // Anonymous sessions (mini-diagnosis free trial) aren't a "logged in" state from the
+        // user's point of view — showing Logout here would let a curious tap destroy their
+        // only route back to a result they never chose to create an account for.
+        setShow(!!data.session && data.session.user?.is_anonymous !== true);
       })();
     };
     sync();

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Profile redesign · เทียบ 3 เวอร์ชัน</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<script>tailwind.config={theme:{extend:{colors:{'ep-blue':'#004AAD','ep-yellow':'#FFCC00'}}}}</script>
+<style>body{font-family:"IBM Plex Sans Thai",sans-serif;color:#0f172a;background:#f5f7fb}.mono{font-family:"JetBrains Mono",monospace}</style>
+</head>
+<body class="min-h-screen">
+<main class="mx-auto max-w-5xl px-5 py-10">
+  <p class="mono text-xs font-bold uppercase tracking-widest text-ep-blue">Profile page · redesign</p>
+  <h1 class="mt-2 text-3xl font-extrabold tracking-tight">หน้า Profile — 3 เวอร์ชันให้เลือก</h1>
+  <p class="mt-2 max-w-2xl text-sm text-slate-600">ลูกค้าบอกว่าหน้าเดิม “งง อ่านไม่รู้เรื่อง” เพราะมันเป็นหน้าคิดบิล/โควต้า 8 การ์ดที่หน้าตาเหมือนกันหมด, แยก Literacy เป็น 3 การ์ด (เหมือนมีสิทธิ์ 3 เท่า), แถบ % เดินสวนทางกับคำว่า “เหลือ”, และไม่มีความก้าวหน้าของผู้เรียนเลย ทั้ง 3 เวอร์ชันนี้แก้ปัญหาเดียวกัน แต่คนละสไตล์</p>
+
+  <div class="mt-8 grid gap-5 md:grid-cols-3">
+
+    <a href="/profile-v1-progress.html" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-ep-blue hover:shadow-md">
+      <span class="mono text-xs font-bold text-slate-400">V1</span>
+      <h2 class="mt-1 text-lg font-extrabold group-hover:text-ep-blue">Progress + Plan</h2>
+      <p class="mt-1 text-sm text-slate-600">ทำให้เป็น “หน้าโปรไฟล์จริง” — ทักทายด้วยชื่อ, โชว์ streak/คะแนน Mock/XP ก่อน แล้วค่อยสรุปสิทธิ์</p>
+      <p class="mt-3 text-[11px] font-semibold text-slate-400">เหมาะถ้า: อยากดึงผู้เรียนให้ผูกพัน + กลับมาฝึกต่อ</p>
+      <span class="mt-3 inline-block rounded-full bg-ep-blue/10 px-3 py-1 text-xs font-bold text-ep-blue">ดูเวอร์ชันนี้ →</span>
+    </a>
+
+    <a href="/profile-v2-simple.html" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-ep-blue hover:shadow-md">
+      <span class="mono text-xs font-bold text-slate-400">V2</span>
+      <h2 class="mt-1 text-lg font-extrabold group-hover:text-ep-blue">Simple Summary</h2>
+      <p class="mt-1 text-sm text-slate-600">ตัดการ์ด เปอร์เซ็นต์ ศัพท์เทคนิคออกให้หมด — หนึ่งบรรทัดต่อหนึ่งสิทธิ์ อ่านจบใน 5 วินาที</p>
+      <p class="mt-3 text-[11px] font-semibold text-slate-400">เหมาะถ้า: อยากให้ “เข้าใจทันที” ที่สุด แก้คำบ่นเรื่องงงตรงจุด</p>
+      <span class="mt-3 inline-block rounded-full bg-ep-blue/10 px-3 py-1 text-xs font-bold text-ep-blue">ดูเวอร์ชันนี้ →</span>
+    </a>
+
+    <a href="/profile-v3-wallet.html" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-ep-blue hover:shadow-md">
+      <span class="mono text-xs font-bold text-slate-400">V3</span>
+      <h2 class="mt-1 text-lg font-extrabold group-hover:text-ep-blue">Credits Wallet</h2>
+      <p class="mt-1 text-sm text-slate-600">มองสิทธิ์เป็น “กระเป๋าเครดิต” — วันเหลือ/Mock/เครดิตตรวจงานเด่นบนสุด + ปุ่มเติมสิทธิ์ชัด</p>
+      <p class="mt-3 text-[11px] font-semibold text-slate-400">เหมาะถ้า: อยากผลักการเติมเครดิต/อัปเกรด (รายได้)</p>
+      <span class="mt-3 inline-block rounded-full bg-ep-blue/10 px-3 py-1 text-xs font-bold text-ep-blue">ดูเวอร์ชันนี้ →</span>
+    </a>
+  </div>
+
+  <!-- what all three fix, mapped to the 10 issues -->
+  <section class="mt-10 rounded-2xl border border-slate-200 bg-white p-6">
+    <h3 class="text-base font-extrabold">ปัญหา 10 ข้อของหน้าเดิม → แก้ยังไงในทั้ง 3 เวอร์ชัน</h3>
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full min-w-[560px] text-left text-sm">
+        <thead class="text-[11px] uppercase tracking-wide text-slate-400">
+          <tr><th class="py-2 pr-4">ปัญหาเดิม</th><th class="py-2">วิธีแก้</th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 align-top">
+          <tr><td class="py-2 pr-4 font-semibold">1. เป็นหน้าคิดบิล ไม่ใช่โปรไฟล์</td><td class="py-2 text-slate-600">V1 เพิ่มความก้าวหน้าผู้เรียนขึ้นก่อน · V2/V3 เริ่มด้วยชื่อ+แพ็กเกจบรรทัดเดียว</td></tr>
+          <tr><td class="py-2 pr-4 font-semibold">2. Literacy แยก 3 การ์ด (ตัวเลขเดียวกัน)</td><td class="py-2 text-slate-600">รวมเป็นก้อนเดียว มีคำอธิบายว่าใช้ร่วมกันสำหรับ 3 ข้อสอบ</td></tr>
+          <tr><td class="py-2 pr-4 font-semibold">3. 8 การ์ดหน้าเหมือนกัน อ่านยาก</td><td class="py-2 text-slate-600">ลดเหลือรายการ/แถวเรียบ ๆ + จัดกลุ่ม + ดัน 2 สิทธิ์สำคัญให้เด่น</td></tr>
+          <tr><td class="py-2 pr-4 font-semibold">4. แถบ % เดินสวนคำว่า “เหลือ”</td><td class="py-2 text-slate-600">แถบเต็มขึ้นตามการใช้งาน + ป้าย “เหลือ X / total” ตรงไปตรงมา</td></tr>
+          <tr><td class="py-2 pr-4 font-semibold">5. สีแดงทำผู้ใช้ฟรีตกใจ</td><td class="py-2 text-slate-600">ใช้สีสงบ (เขียว/เหลือง/น้ำเงิน) สื่อสถานะ ไม่ใช่สัญญาณเตือนภัย</td></tr>
+          <tr><td class="py-2 pr-4 font-semibold">6. มีแผง “วิธีอ่านหน้านี้” = หน้าซับซ้อนเกิน</td><td class="py-2 text-slate-600">เอาออก/ย่อเป็น “ดูเพิ่ม” เพราะหน้าเข้าใจได้เองแล้ว</td></tr>
+          <tr><td class="py-2 pr-4 font-semibold">7. สถิติที่ 3 “ตรวจได้ 8 รายการ” ไร้ความหมาย</td><td class="py-2 text-slate-600">แทนด้วยวันเหลือ / คะแนน Mock / XP ที่ผู้ใช้สนใจจริง</td></tr>
+          <tr><td class="py-2 pr-4 font-semibold">8. ไม่มีความก้าวหน้าการเรียนเลย</td><td class="py-2 text-slate-600">V1 เพิ่ม streak + Mock ล่าสุด + จุดที่ควรฝึกต่อ</td></tr>
+          <tr><td class="py-2 pr-4 font-semibold">9. ไม่มีปุ่มจัดการบัญชี</td><td class="py-2 text-slate-600">เพิ่ม จัดการแพ็กเกจ · เติมเครดิต · เปลี่ยนรหัส · ออกจากระบบ</td></tr>
+          <tr><td class="py-2 pr-4 font-semibold">10. ชื่อแพ็กเกจซ้ำ 3 ที่ + error เงียบ</td><td class="py-2 text-slate-600">โชว์แพ็กเกจครั้งเดียว (เวอร์ชันจริงจะเพิ่มแจ้งเตือนเมื่อโหลดยอดไม่สำเร็จ)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-4 text-[11px] text-slate-400">หมายเหตุ: ตัวเลขในเดโมเป็นข้อมูลตัวอย่าง (ผู้ใช้ Premium) · เมื่อเลือกเวอร์ชันแล้วจะพอร์ตเข้า <span class="mono">src/app/profile/page.tsx</span> โดยต่อ API/ตรรกะสิทธิ์เดิมทั้งหมด (admin-gated ก่อนเหมือนงานรีวแวมป์ที่ผ่านมา)</p>
+  </section>
+</main>
+</body>
+</html>

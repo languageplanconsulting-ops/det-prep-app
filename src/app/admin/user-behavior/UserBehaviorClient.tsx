@@ -93,6 +93,20 @@ function JourneyRow({ j }: { j: SessionJourney }) {
         >
           {j.isSignedIn ? "FREE USER" : "ANON"}
         </span>
+        {j.isSignedIn ? (
+          <span
+            className={`rounded-[3px] px-1.5 py-0.5 text-[10px] font-bold ${
+              j.hasPlan ? "bg-emerald-200 text-emerald-900" : "bg-rose-200 text-rose-900"
+            }`}
+            title={
+              j.hasPlan
+                ? "This user has created a calendar study plan"
+                : "This user has NOT created a calendar plan yet"
+            }
+          >
+            {j.hasPlan ? "PLAN ✓" : "NO PLAN"}
+          </span>
+        ) : null}
         <span className="font-mono text-neutral-500">{j.visitorId.slice(0, 14)}…</span>
         <span className="text-neutral-600">{j.events} events · {j.pages} pages</span>
         {j.device ? <span className="text-neutral-400">{j.device}</span> : null}
@@ -197,6 +211,15 @@ export function UserBehaviorClient() {
           <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <Card label="Visitors" value={data.totals.visitors} sub={`${data.windowDays}d`} />
             <Card label="Free users" value={data.totals.signedInFree} sub="signed in, unpaid" />
+            <Card
+              label="Made a plan"
+              value={data.totals.plansCreated}
+              sub={
+                data.totals.signedInFree > 0
+                  ? `${Math.round((data.totals.plansCreated / data.totals.signedInFree) * 100)}% of signed-in`
+                  : "signed-in visitors"
+              }
+            />
             <Card label="Anonymous" value={data.totals.anonymous} sub="logged out" />
             <Card label="Events" value={data.totals.events} />
             <Card label="Page views" value={data.totals.pageViews} />
@@ -240,7 +263,10 @@ export function UserBehaviorClient() {
               <div className="mt-6">
                 <h2 className="text-lg font-extrabold tracking-tight">Recent journeys</h2>
                 <p className="mb-3 text-xs text-neutral-500">
-                  Click a row to expand the page trail. Newest first.
+                  Click a row to expand the page trail. Newest first. Signed-in users show a{" "}
+                  <span className="font-bold text-emerald-700">PLAN ✓</span> /{" "}
+                  <span className="font-bold text-rose-700">NO PLAN</span> badge for whether they&apos;ve
+                  built their calendar study plan.
                 </p>
                 <div className="space-y-2">
                   {data.recentJourneys.map((j, i) => (

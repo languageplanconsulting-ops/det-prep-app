@@ -37,6 +37,8 @@ export type SessionJourney = {
   lastAt: string;
   lastPath: string | null;
   trail: string[];
+  /** Signed-in visitor has saved a calendar study plan (study_plan_schedules row). */
+  hasPlan: boolean;
 };
 
 export type UserBehaviorSnapshot = {
@@ -49,6 +51,8 @@ export type UserBehaviorSnapshot = {
     anonymous: number;
     pageViews: number;
     clicks: number;
+    /** Signed-in visitors in this window who have created a calendar plan. */
+    plansCreated: number;
   };
   topPages: CountRow[];
   topClicks: CountRow[];
@@ -115,6 +119,21 @@ export async function fetchUserBehaviorData(windowDays = 30): Promise<UserBehavi
   const rows = (data ?? []) as RawEvent[];
   if (rows.length === 0) return emptySnapshot(windowDays, true);
 
+  // Users who have saved a calendar study plan (one row per user in
+  // study_plan_schedules). Used to flag journeys where the signed-in visitor
+  // has / hasn't set up their plan yet. A missing table is treated as "nobody".
+  const planUserIds = new Set<string>();
+  {
+    const { data: planRows, error: planErr } = await supabase
+      .from("study_plan_schedules")
+      .select("user_id");
+    if (!planErr) {
+      for (const r of (planRows ?? []) as Array<{ user_id: string | null }>) {
+        if (r.user_id) planUserIds.add(r.user_id);
+      }
+    }
+  }
+
   const visitors = new Set<string>();
   const signedIn = new Set<string>();
   const anon = new Set<string>();
@@ -176,10 +195,18 @@ export async function fetchUserBehaviorData(windowDays = 30): Promise<UserBehavi
       lastAt: last.created_at,
       lastPath: lastPath ?? null,
       trail: pageEvs.map((e) => e.path as string).slice(-12),
+      hasPlan: Boolean(last.user_id && planUserIds.has(last.user_id)),
     });
   }
 
   journeys.sort((a, b) => new Date(b.lastAt).getTime() - new Date(a.lastAt).getTime());
+
+  // Signed-in visitors in this window who have a saved calendar plan.
+  // `signedIn` keys look like "u:<user_id>".
+  let plansCreated = 0;
+  for (const key of signedIn) {
+    if (planUserIds.has(key.slice(2))) plansCreated += 1;
+  }
 
   return {
     deployed: true,
@@ -191,6 +218,7 @@ export async function fetchUserBehaviorData(windowDays = 30): Promise<UserBehavi
       anonymous: anon.size,
       pageViews,
       clicks,
+      plansCreated,
     },
     topPages: toRows(pages, 20),
     topClicks: toRows(clickMap, 25),
@@ -207,7 +235,15 @@ function emptySnapshot(windowDays: number, deployed: boolean): UserBehaviorSnaps
   return {
     deployed,
     windowDays,
-    totals: { events: 0, visitors: 0, signedInFree: 0, anonymous: 0, pageViews: 0, clicks: 0 },
+    totals: {
+      events: 0,
+      visitors: 0,
+      signedInFree: 0,
+      anonymous: 0,
+      pageViews: 0,
+      clicks: 0,
+      plansCreated: 0,
+    },
     topPages: [],
     topClicks: [],
     namedEvents: [],

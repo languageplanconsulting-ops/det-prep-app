@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { MINI_DIAGNOSIS_DURATION_LABEL } from "@/lib/mini-diagnosis/sequence";
+import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 type SetRow = {
   id: string;
@@ -140,6 +141,20 @@ export function AdminMiniDiagnosisStartClient() {
 
   useEffect(() => {
     void (async () => {
+      // Give first-timers the free result before asking for an account (UX Value Loop —
+      // value has to come back on first use, not after a signup wall). A silent anonymous
+      // session lets them start immediately; /mini-diagnosis/claim upgrades it to a real
+      // account later, on the results page, once they've seen what they'd be saving.
+      const supabase = getBrowserSupabase();
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) {
+          // Best-effort: if anonymous sign-ins are disabled on this Supabase project, this
+          // silently fails and the fetch below 401s into the existing AuthWallPanel fallback.
+          await supabase.auth.signInAnonymously().catch(() => null);
+        }
+      }
+
       const res = await fetch("/api/mini-diagnosis/sets", {
         credentials: "same-origin",
         cache: "no-store",
@@ -311,7 +326,7 @@ export function AdminMiniDiagnosisStartClient() {
                       disabled={startingId === set.id}
                       className="shrink-0 rounded-2xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#003a8c] active:scale-[0.97] disabled:opacity-50"
                     >
-                      {startingId === set.id ? "กำลังเริ่ม…" : "Start diagnosis"}
+                      {startingId === set.id ? "กำลังเริ่ม…" : "เริ่มทำ"}
                     </button>
                   </div>
                 ))
@@ -390,19 +405,12 @@ export function AdminMiniDiagnosisStartClient() {
               <h2 className="mt-1 text-2xl font-black text-neutral-900">
                 ใช้เวลาประมาณ 15–17 นาที
               </h2>
-              <p className="mt-0.5 text-sm text-neutral-500">
-                This mini test takes about 15–17 minutes
-              </p>
             </div>
 
             <div className="px-7 py-6 space-y-4">
               <p className="text-sm leading-relaxed text-neutral-700">
                 ระบบจะเริ่มจับเวลาและพาคุณทำต่อเนื่องหลายส่วน
                 ถ้าพร้อมแล้วค่อยเริ่ม เพื่อให้ได้ผลประเมินที่แม่นขึ้น
-              </p>
-              <p className="text-sm leading-relaxed text-neutral-500">
-                The test runs through multiple timed sections. Please start only when you
-                are ready so your result is accurate.
               </p>
 
               {/* set name chip */}

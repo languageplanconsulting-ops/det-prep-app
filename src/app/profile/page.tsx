@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { VIPBadge } from "@/components/ui/VIPBadge";
@@ -16,6 +17,21 @@ import { getPackageSummary } from "@/lib/package-copy";
 import { getNonApiReminderSnapshot } from "@/lib/non-api-practice-usage";
 import { mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
+import { loadStats, tierProgress } from "@/lib/gamification";
+
+// The 2-weakest-skills → practice-route map, kept in sync with the Mock report
+// (MockFixedReportBrandedViewV2). Used by the redesigned profile to point a
+// learner straight at what to work on next.
+const SKILL_ROUTE: Record<string, { label: string; emoji: string; href: string }> = {
+  writing: { label: "การเขียน", emoji: "✍️", href: "/practice/production/write-about-photo" },
+  listening: { label: "การฟัง", emoji: "👂", href: "/practice/literacy/dictation" },
+  reading: { label: "การอ่าน", emoji: "📖", href: "/practice/comprehension/reading" },
+  speaking: { label: "การพูด", emoji: "🗣️", href: "/practice/production/speak-about-photo" },
+};
+
+/** Fill-as-you-use percentage: the bar fills toward the limit as usage grows. */
+const fillPct = (used: number, limit: number) =>
+  limit > 0 ? Math.min(100, Math.max(0, Math.round((used / limit) * 100))) : 0;
 
 type QuotaResponse = {
   expiresAt?: string | null;
@@ -182,7 +198,36 @@ export default function ProfilePage() {
   const [aiLimitOverride, setAiLimitOverride] = useState<number | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [practiceTick, setPracticeTick] = useState(0);
-  const { effectiveTier, loading, vipGrantedByCourse } = useEffectiveTier();
+  const { effectiveTier, loading, vipGrantedByCourse, isAdmin, previewEligible } =
+    useEffectiveTier();
+  // Admin-gated redesign (same rollout pattern as every prior revamp): admins /
+  // preview-eligible see the new "Progress + Plan" layout; real users keep the
+  // original until it's promoted.
+  const soft = isAdmin || previewEligible;
+  const router = useRouter();
+
+  // Learner progress + display name — loaded only for the soft layout, from the
+  // same real sources the Practice Hub / Mock report / XP badge already use.
+  const [fullName, setFullName] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{
+    loaded: boolean;
+    streak: number;
+    xpTotal: number;
+    tierName: string;
+    tierEmoji: string;
+    lastMock: number | null;
+    mockDelta: number | null;
+    weakest: Array<{ label: string; emoji: string; href: string }>;
+  }>({
+    loaded: false,
+    streak: 0,
+    xpTotal: 0,
+    tierName: "",
+    tierEmoji: "",
+    lastMock: null,
+    mockDelta: null,
+    weakest: [],
+  });
 
   const loadAccountSummary = useCallback(async () => {
     const supabase = getBrowserSupabase();
@@ -278,6 +323,86 @@ export default function ProfilePage() {
       window.removeEventListener(TIER_REFRESH_EVENT, handleRefresh);
     };
   }, [loadAccountSummary]);
+
+  // Soft-layout only: pull display name, XP/streak, and the latest Mock score +
+  // 2 weakest skills. Gated on `soft` so real users never trigger these reads.
+  useEffect(() => {
+    if (!soft) return;
+    let alive = true;
+    void (async () => {
+      const supabase = getBrowserSupabase();
+      if (!supabase) return;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      let name: string | null = (user.user_metadata?.full_name as string | undefined) ?? null;
+      const [{ data: prof }, stats, { data: rows }] = await Promise.all([
+        supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+        loadStats(user.id),
+        supabase
+          .from("mock_fixed_results")
+          .select(
+            "actual_total, actual_reading, actual_writing, actual_speaking, actual_listening, created_at",
+          )
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(2),
+      ]);
+      if (prof?.full_name) name = prof.full_name as string;
+
+      const mrows = (rows ?? []) as Array<{
+        actual_total: number | null;
+        actual_reading: number | null;
+        actual_writing: number | null;
+        actual_speaking: number | null;
+        actual_listening: number | null;
+      }>;
+      let lastMock: number | null = null;
+      let mockDelta: number | null = null;
+      let weakest: Array<{ label: string; emoji: string; href: string }> = [];
+      if (mrows[0]) {
+        lastMock = Math.round(Number(mrows[0].actual_total ?? 0));
+        weakest = (
+          [
+            ["writing", Number(mrows[0].actual_writing ?? 0)],
+            ["listening", Number(mrows[0].actual_listening ?? 0)],
+            ["reading", Number(mrows[0].actual_reading ?? 0)],
+            ["speaking", Number(mrows[0].actual_speaking ?? 0)],
+          ] as Array<[string, number]>
+        )
+          .sort((a, b) => a[1] - b[1])
+          .slice(0, 2)
+          .map(([key]) => SKILL_ROUTE[key]);
+        if (mrows[1]) mockDelta = lastMock - Math.round(Number(mrows[1].actual_total ?? 0));
+      }
+
+      const tp = tierProgress(stats.tierXp);
+      if (!alive) return;
+      setFullName(name);
+      setProgress({
+        loaded: true,
+        streak: stats.streak,
+        xpTotal: stats.xpTotal,
+        tierName: tp.tier.name,
+        tierEmoji: tp.tier.emoji,
+        lastMock,
+        mockDelta,
+        weakest,
+      });
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [soft]);
+
+  const signOut = useCallback(async () => {
+    const supabase = getBrowserSupabase();
+    if (supabase) await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }, [router]);
 
   const aiLimit = aiLimitOverride ?? AI_MONTHLY_LIMIT[effectiveTier];
   const mockLimit = MOCK_TEST_MONTHLY_LIMIT[effectiveTier];
@@ -422,6 +547,240 @@ export default function ProfilePage() {
     mockUsed,
     practiceTick,
   ]);
+
+  // Dictation + Fill-in-the-Blank + Real Word share ONE Literacy pool on paid
+  // plans (sharesPool: true → identical numbers), so the redesign shows it once
+  // instead of three duplicate cards. On free they are separate lifetime tries,
+  // so we sum them.
+  const softLiteracy = useMemo(() => {
+    const d = getNonApiReminderSnapshot("dictation", effectiveTier);
+    const f = getNonApiReminderSnapshot("fitb", effectiveTier);
+    const r = getNonApiReminderSnapshot("realword", effectiveTier);
+    const limit = d.sharesPool ? d.limit : d.limit + f.limit + r.limit;
+    const used = d.sharesPool ? d.used : d.used + f.used + r.used;
+    return { limit, used, remaining: Math.max(0, limit - used) };
+    // practiceTick forces a recompute when local practice storage changes.
+  }, [effectiveTier, practiceTick]);
+
+  if (soft) {
+    const displayName = fullName || email?.split("@")[0] || "ผู้เรียน";
+    const initial = displayName.charAt(0).toUpperCase();
+    const byId = (id: string) => examCredits.find((c) => c.id === id);
+    const usageRows = [
+      { emoji: "📖", label: "การอ่าน (Reading)", data: byId("reading") },
+      { emoji: "🔤", label: "คำศัพท์ (Vocabulary)", data: byId("vocabulary") },
+      {
+        emoji: "✍️",
+        label: "Literacy — ใช้โควต้าร่วมกัน",
+        data: {
+          remaining: softLiteracy.remaining,
+          limit: softLiteracy.limit,
+          used: softLiteracy.used,
+        },
+        sub: "โควต้าเดียวใช้ร่วมกันสำหรับ · ฟังแล้วพิมพ์ · เติมคำ · เลือกคำจริง",
+      },
+      { emoji: "🎧", label: "บทสนทนาโต้ตอบ (Listening)", data: byId("conversation") },
+    ];
+
+    const planNameTh = loading ? "…" : TIER_DISPLAY[effectiveTier].nameTh;
+    const planNameEn = loading ? "" : TIER_DISPLAY[effectiveTier].nameEn;
+    const hasExpiry = daysLeft != null;
+    const expiryBarPct =
+      daysLeft != null ? Math.min(100, Math.max(2, Math.round((daysLeft / 30) * 100))) : 0;
+
+    const usageBar = (used: number, limit: number, unlimited: boolean) => (
+      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#eef2f7]">
+        <div
+          className="h-full rounded-full bg-[#004AAD]"
+          style={{ width: unlimited ? "0%" : `${fillPct(used, limit)}%` }}
+        />
+      </div>
+    );
+
+    return (
+      <main className="mx-auto max-w-3xl space-y-5 px-4 py-8">
+        {/* ── who you are + learning progress ── */}
+        <section className="overflow-hidden rounded-[20px] bg-white ring-1 ring-slate-200">
+          <div className="flex items-center gap-4 border-b border-slate-100 p-5">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#004AAD] text-2xl font-black text-white">
+              {initial}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-lg font-black leading-tight text-slate-900">สวัสดี, {displayName} 👋</p>
+              <p className="truncate text-sm text-slate-500">{email ?? "—"}</p>
+            </div>
+            <span className="shrink-0 rounded-full bg-[#FFCC00] px-3 py-1 text-[11px] font-black uppercase text-slate-900">
+              {planNameEn || planNameTh}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 divide-x divide-slate-100">
+            <div className="p-4 text-center">
+              <p className="text-2xl font-black text-[#004AAD]" style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
+                {progress.loaded ? progress.streak : "…"}
+              </p>
+              <p className="mt-0.5 text-[11px] font-semibold text-slate-500">วันติดต่อกัน 🔥</p>
+            </div>
+            <div className="p-4 text-center">
+              <p className="text-2xl font-black text-[#004AAD]" style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
+                {!progress.loaded ? "…" : progress.lastMock == null ? "—" : progress.lastMock}
+                {progress.loaded && progress.lastMock != null ? (
+                  <span className="text-sm text-slate-400">/160</span>
+                ) : null}
+              </p>
+              <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
+                Mock ล่าสุด
+                {progress.mockDelta != null && progress.mockDelta !== 0 ? (
+                  <span className={progress.mockDelta > 0 ? "text-emerald-600" : "text-rose-600"}>
+                    {" "}
+                    {progress.mockDelta > 0 ? "+" : ""}
+                    {progress.mockDelta}
+                  </span>
+                ) : null}
+              </p>
+            </div>
+            <div className="p-4 text-center">
+              <p className="text-2xl font-black text-[#004AAD]" style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
+                {progress.loaded ? progress.xpTotal.toLocaleString("en-US") : "…"}
+              </p>
+              <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
+                แต้มสะสม{progress.loaded && progress.tierName ? ` · ${progress.tierEmoji}${progress.tierName}` : ""}
+              </p>
+            </div>
+          </div>
+
+          {progress.weakest.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-slate-100 bg-slate-50 px-5 py-3 text-xs text-slate-600">
+              <span>จุดที่ควรฝึกต่อ:</span>
+              {progress.weakest.map((w) => (
+                <Link key={w.href} href={w.href} className="font-bold text-[#004AAD] underline">
+                  {w.emoji} {w.label}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+        </section>
+
+        {/* ── plan at a glance (shown once) ── */}
+        <section className="rounded-[20px] bg-white p-5 ring-1 ring-slate-200">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">แพ็กเกจปัจจุบัน</p>
+              <p className="text-xl font-black text-slate-900">
+                {planNameTh}
+                {planNameEn ? <span className="text-slate-400"> · {planNameEn}</span> : null}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-black text-[#004AAD]" style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
+                {hasExpiry && daysLeft! > 0
+                  ? `เหลือ ${daysLeft} วัน`
+                  : vipGrantedByCourse || !expiresAt
+                    ? "ไม่มีวันหมดอายุ"
+                    : "หมดอายุแล้ว"}
+              </p>
+              <p className="text-xs text-slate-500">
+                {loadingStats ? "…" : hasExpiry ? `หมดอายุ ${formatExpiry(expiresAt, effectiveTier)}` : packageDurationText}
+              </p>
+            </div>
+          </div>
+          {hasExpiry ? (
+            <div className="mt-3 h-2 rounded-full bg-slate-100">
+              <div className="h-2 rounded-full bg-[#004AAD]" style={{ width: `${expiryBarPct}%` }} />
+            </div>
+          ) : null}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/pricing" className="rounded-xl bg-[#FFCC00] px-4 py-2 text-sm font-black text-slate-900">
+              ต่ออายุ / อัปเกรด
+            </Link>
+            <Link href="/pricing" className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">
+              ซื้อเครดิตเพิ่ม
+            </Link>
+          </div>
+        </section>
+
+        {/* ── usage: grouped, merged Literacy, fill-as-you-use bars ── */}
+        <section className="rounded-[20px] bg-white p-5 ring-1 ring-slate-200">
+          <div className="mb-1 flex items-center justify-between">
+            <h2 className="text-base font-black text-slate-900">สิทธิ์คงเหลือเดือนนี้</h2>
+          </div>
+          <p className="mb-4 text-xs text-slate-500">แถบจะเต็มขึ้นเมื่อคุณใช้งาน — ส่วนที่ว่างคือสิทธิ์ที่ยังเหลือ</p>
+
+          <div className="space-y-4">
+            {usageRows.map((row) => {
+              const remaining = Number(row.data?.remaining ?? 0);
+              const limit = Number(row.data?.limit ?? 0);
+              const used = Number(row.data?.used ?? 0);
+              const unlimited = isUnlimitedQuota(remaining) || isUnlimitedQuota(limit);
+              return (
+                <div key={row.label} className={row.sub ? "rounded-2xl bg-slate-50 p-3" : undefined}>
+                  <div className="flex items-baseline justify-between text-sm">
+                    <span className="font-bold text-slate-900">
+                      {row.emoji} {row.label}
+                    </span>
+                    <span className="text-slate-500" style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
+                      {unlimited ? (
+                        "ไม่จำกัด"
+                      ) : (
+                        <>
+                          เหลือ <b className="text-slate-900">{formatQuota(remaining)}</b> / {formatQuota(limit)}
+                        </>
+                      )}
+                    </span>
+                  </div>
+                  {usageBar(used, limit, unlimited)}
+                  {row.sub ? <p className="mt-2 text-[11px] text-slate-500">{row.sub}</p> : null}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* the two premium resources get a highlighted tile each */}
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border-2 border-[#004AAD]/20 bg-[#004AAD]/[.04] p-4">
+              <p className="text-sm font-black text-slate-900">📝 Mock Test เต็มรูปแบบ</p>
+              <p className="mt-1 text-2xl font-black text-[#004AAD]" style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
+                {isUnlimitedQuota(mockRemaining) ? "ไม่จำกัด" : formatQuota(mockRemaining)}
+                <span className="text-sm font-semibold text-slate-400"> ครั้ง</span>
+              </p>
+              <p className="text-[11px] text-slate-500">
+                {mockAddonRemaining > 0
+                  ? `แพ็กเกจ ${mockPlanRemaining ?? Math.max(0, mockLimit - mockUsed)} · add-on ${mockAddonRemaining}`
+                  : "ตามแพ็กเกจของคุณในรอบนี้"}
+              </p>
+            </div>
+            <div className="rounded-2xl border-2 border-[#004AAD]/20 bg-[#004AAD]/[.04] p-4">
+              <p className="text-sm font-black text-slate-900">✅ เครดิตตรวจงาน</p>
+              <p className="mt-1 text-2xl font-black text-[#004AAD]" style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
+                {isUnlimitedQuota(aiRemaining) ? "ไม่จำกัด" : formatQuota(aiRemaining)}
+                <span className="text-sm font-semibold text-slate-400"> เครดิต</span>
+              </p>
+              <p className="text-[11px] text-slate-500">
+                {aiAddonRemaining > 0 ? `รวม add-on อีก ${aiAddonRemaining} เครดิต` : "สำหรับข้อสอบพูด + เขียน"}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── real account actions ── */}
+        <section className="divide-y divide-slate-100 overflow-hidden rounded-[20px] bg-white ring-1 ring-slate-200">
+          <Link href="/pricing" className="flex items-center justify-between px-5 py-4 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+            จัดการแพ็กเกจ <span className="text-slate-300">›</span>
+          </Link>
+          <Link href="/forgot-password" className="flex items-center justify-between px-5 py-4 text-sm font-semibold text-slate-800 hover:bg-slate-50">
+            เปลี่ยนรหัสผ่าน <span className="text-slate-300">›</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => void signOut()}
+            className="flex w-full items-center justify-between px-5 py-4 text-left text-sm font-semibold text-rose-600 hover:bg-slate-50"
+          >
+            ออกจากระบบ <span className="text-rose-300">›</span>
+          </button>
+        </section>
+      </main>
+    );
+  }
 
   const heroStats = [
     {
