@@ -49,7 +49,12 @@ export function ReadWriteLessonRunner({ tier, unit }: { tier: ReadWriteTier; uni
       </div>
     );
   }
-  return <Player tier={tier} unit={unit} items={items} uid={uid} />;
+  // Key by the resolved item set: the seen-set (and thus `items`) resolves in
+  // two phases (local cache, then DB once `uid` loads), so items[0] can change
+  // right after mount. Remounting keeps the player's lazy first-item state in
+  // sync with the item it's actually showing. See DictationLessonRunner.
+  const playerKey = items.map((l) => l.id).join(",");
+  return <Player key={playerKey} tier={tier} unit={unit} items={items} uid={uid} />;
 }
 
 function Player({ tier, unit, items, uid }: { tier: ReadWriteTier; unit: number; items: ReadWriteItem[]; uid: string | null }) {

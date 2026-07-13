@@ -72,7 +72,17 @@ export function DictationLessonRunner({ tier, unit }: { tier: DictationTier; uni
     );
   }
 
-  return <Player tier={tier} unit={unit} items={items} uid={uid} />;
+  // The signed-in user's seen-set resolves in two phases — the local cache
+  // first (while `uid` is still null), then merged with the DB once `useLessonUserId`
+  // loads the real id. That second phase can change which items survive
+  // `filterUnseen`, so `items` (and thus items[0]) changes identity right after
+  // mount. Key the player by the resolved item set so that change REMOUNTS it
+  // with freshly-initialized state. Without this, the player's lazy first-item
+  // state (the shuffled word-bank tiles) stays frozen on the old first item
+  // while `lesson`/audio update to the new first item — the audio you hear and
+  // the word tiles you see belong to two different sentences.
+  const playerKey = items.map((l) => l.id).join(",");
+  return <Player key={playerKey} tier={tier} unit={unit} items={items} uid={uid} />;
 }
 
 function Player({
