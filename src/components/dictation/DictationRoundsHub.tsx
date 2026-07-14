@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { DictationRandomPicker } from "@/components/dictation/DictationRandomPicker";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
@@ -115,7 +114,6 @@ export function DictationRoundsHub() {
         </div>
 
         <TimedRandomLauncher skill="dictation" />
-        <DictationRandomPicker />
 
         <RoundsExplainer />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
