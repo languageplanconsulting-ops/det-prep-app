@@ -40,13 +40,6 @@ export function GrammarFitbHub() {
   const doneEx = GRAMMAR_LEVEL_ORDER.reduce((n, l) => n + levelDone(scores, l), 0);
   const pct = totalEx ? Math.round((doneEx / totalEx) * 100) : 0;
 
-  // A level unlocks once every exercise in the PREVIOUS level is complete.
-  const unlockedUpTo: Record<GrammarDifficulty, boolean> = { easy: true, medium: false, hard: false };
-  const easyTotal = exercisesForLevel("easy").length;
-  const mediumTotal = exercisesForLevel("medium").length;
-  unlockedUpTo.medium = easyTotal > 0 && levelDone(scores, "easy") >= easyTotal;
-  unlockedUpTo.hard = unlockedUpTo.medium && mediumTotal > 0 && levelDone(scores, "medium") >= mediumTotal;
-
   return (
     <div className="mx-auto max-w-3xl px-4 py-7 sm:px-6">
       <div className="flex items-center gap-4 rounded-2xl bg-slate-900 p-6 text-white shadow-sm">
@@ -54,7 +47,7 @@ export function GrammarFitbHub() {
           <p className="text-[11px] font-black uppercase tracking-wide text-[#FFCC00]">บทเรียน · เติมคำในช่องว่าง (ไวยากรณ์)</p>
           <p className="mt-2 text-xl font-black leading-tight">เดินทางฝึกไวยากรณ์ 3 ระดับ</p>
           <p className="mt-2 text-xs text-slate-300">
-            {totalEx} ข้อ (5 ช่อง/ข้อ) · แต่ละระดับคละไวยากรณ์ทั้ง {GRAMMAR_TOPICS.length} เรื่อง · ต้องทำครบ 100% ถึงปลดล็อกระดับถัดไป
+            {totalEx} ข้อ (5 ช่อง/ข้อ) · แต่ละระดับคละไวยากรณ์ทั้ง {GRAMMAR_TOPICS.length} เรื่อง · เลือกระดับไหนก่อนก็ได้
           </p>
         </div>
         <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-full border-[5px] border-[#FFCC00] bg-white/5 text-center">
@@ -65,8 +58,8 @@ export function GrammarFitbHub() {
 
       <p className="mt-4 rounded-xl bg-indigo-50 p-3.5 text-xs font-semibold leading-relaxed text-indigo-900">
         โจทย์ Fill-in-the-Blank ใน Duolingo English Test คละไวยากรณ์หลายเรื่องในข้อเดียวกัน — ทั้ง tense, passive, adverb,
-        คำเชื่อม จึงต้องฝึก “จับสัญญาณ” ว่าแต่ละช่องต้องใช้กฎไหน แต่ละระดับด้านล่างปรับคำศัพท์ตามเป้าหมายคะแนน DET
-        (B1/B2/C1) ผ่านทุกข้อ 100% เพื่อปลดล็อกระดับถัดไป
+        คำเชื่อม จึงต้องฝึก “จับสัญญาณ” ว่าแต่ละช่องต้องใช้กฎไหน แต่ละระดับด้านล่างปรับคำศัพท์ตามเป้าหมายคะแนน DET (B1/B2/C1)
+        — จะเริ่มจากด่านไหนก่อนก็ได้ตามใจ
       </p>
 
       <div className="relative mt-8 flex flex-col items-center gap-3 pb-4">
@@ -78,51 +71,32 @@ export function GrammarFitbHub() {
           const total = exercisesForLevel(level).length;
           const done = levelDone(scores, level);
           const isComplete = total > 0 && done >= total;
-          const isUnlocked = unlockedUpTo[level];
-          const card = (
-            <div
-              className={`relative z-10 flex w-full items-center gap-4 rounded-2xl border-2 p-5 shadow-sm transition ${
-                isComplete
-                  ? "border-emerald-400 bg-emerald-50"
-                  : isUnlocked
-                    ? "border-[#FFCC00] bg-white hover:shadow-md active:scale-[0.99]"
-                    : "border-slate-200 bg-slate-100 opacity-70"
-              }`}
-            >
+          return (
+            <Link key={level} href={`/practice/lessons/grammar-fitb/${level}`} className="w-full">
               <div
-                className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-full border-4 text-sm font-black ${
-                  isComplete
-                    ? "border-emerald-500 bg-emerald-500 text-white"
-                    : isUnlocked
-                      ? "border-[#004AAD] bg-[#004AAD] text-[#FFCC00]"
-                      : "border-slate-300 bg-slate-200 text-slate-400"
+                className={`relative z-10 flex w-full items-center gap-4 rounded-2xl border-2 p-5 shadow-sm transition hover:shadow-md active:scale-[0.99] ${
+                  isComplete ? "border-emerald-400 bg-emerald-50" : "border-[#FFCC00] bg-white"
                 }`}
               >
-                {isComplete ? "✓" : isUnlocked ? meta.cefr : "🔒"}
+                <div
+                  className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-full border-4 text-sm font-black ${
+                    isComplete ? "border-emerald-500 bg-emerald-500 text-white" : "border-[#004AAD] bg-[#004AAD] text-[#FFCC00]"
+                  }`}
+                >
+                  {isComplete ? "✓" : meta.cefr}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-lg font-black text-slate-900">
+                    ด่านที่ {idx + 1} · {meta.th} <span className="font-bold text-slate-400">({meta.cefr})</span>
+                  </p>
+                  <p className="mt-0.5 text-[12px] font-bold text-slate-500">เป้าหมาย DET {meta.scoreBand}</p>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <span className={`text-sm font-black ${isComplete ? "text-emerald-600" : "text-[#004AAD]"}`}>{done}/{total}</span>
+                  <span className="text-xl text-slate-300">›</span>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-lg font-black text-slate-900">
-                  ด่านที่ {idx + 1} · {meta.th} <span className="font-bold text-slate-400">({meta.cefr})</span>
-                </p>
-                <p className="mt-0.5 text-[12px] font-bold text-slate-500">เป้าหมาย DET {meta.scoreBand}</p>
-                {!isUnlocked ? (
-                  <p className="mt-1 text-[11px] font-bold text-rose-500">ทำระดับก่อนหน้าให้ครบ 100% ก่อนถึงจะปลดล็อก</p>
-                ) : null}
-              </div>
-              <div className="flex shrink-0 flex-col items-end gap-1">
-                <span className={`text-sm font-black ${isComplete ? "text-emerald-600" : "text-[#004AAD]"}`}>{done}/{total}</span>
-                {isUnlocked ? <span className="text-xl text-slate-300">›</span> : null}
-              </div>
-            </div>
-          );
-          return (
-            <div key={level} className="w-full">
-              {isUnlocked ? (
-                <Link href={`/practice/lessons/grammar-fitb/${level}`}>{card}</Link>
-              ) : (
-                <div className="cursor-not-allowed">{card}</div>
-              )}
-            </div>
+            </Link>
           );
         })}
       </div>
@@ -138,7 +112,7 @@ export function GrammarFitbHub() {
         </div>
       </div>
 
-      <p className="mt-6 text-center text-xs text-slate-400">แต่ละด่านต้องเติมถูก 100% ทุกข้อ (แก้ข้อที่ผิดจนกว่าจะถูก) เพื่อปลดล็อกด่านถัดไป</p>
+      <p className="mt-6 text-center text-xs text-slate-400">แต่ละข้อต้องเติมถูกครบ 100% ถึงจะนับว่าผ่าน (แก้ข้อที่ผิดจนกว่าจะถูก)</p>
     </div>
   );
 }
