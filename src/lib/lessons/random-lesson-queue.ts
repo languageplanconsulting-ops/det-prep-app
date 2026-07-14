@@ -54,6 +54,7 @@ const COMPOSITION: Record<LessonDuration, { slug: string; rounds: number }[]> = 
     { slug: "how-to-speak", rounds: 1 },
     { slug: "real-word", rounds: 1 },
     { slug: "campus-vocab", rounds: 1 },
+    { slug: "grammar-fitb", rounds: 1 },
   ],
   20: [
     { slug: "dictation", rounds: 3 },
@@ -62,6 +63,7 @@ const COMPOSITION: Record<LessonDuration, { slug: string; rounds: number }[]> = 
     { slug: "how-to-speak", rounds: 1 },
     { slug: "real-word", rounds: 1 },
     { slug: "campus-vocab", rounds: 1 },
+    { slug: "grammar-fitb", rounds: 2 },
   ],
   30: [
     { slug: "dictation", rounds: 3 },
@@ -70,6 +72,7 @@ const COMPOSITION: Record<LessonDuration, { slug: string; rounds: number }[]> = 
     { slug: "how-to-speak", rounds: 2 },
     { slug: "real-word", rounds: 2 },
     { slug: "campus-vocab", rounds: 1 },
+    { slug: "grammar-fitb", rounds: 2 },
   ],
 };
 
