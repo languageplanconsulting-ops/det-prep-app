@@ -66,7 +66,7 @@ export const LESSON_TOPICS: LessonTopic[] = [
     slug: "grammar-fitb",
     th: "เติมคำในช่องว่าง (ไวยากรณ์)",
     en: "Fill-in-the-blank Grammar",
-    descTh: "ฝึกไวยากรณ์ทีละบท — ปัจจุบัน/อดีต/passive/adverb/คำเชื่อม แล้วเติมคำในย่อหน้า 5 ช่อง",
+    descTh: "เดินทาง 3 ด่าน (ง่าย/ปานกลาง/ยาก) คละไวยากรณ์ปนกัน เติมให้ถูก 100% เพื่อปลดล็อกด่านถัดไป",
     emoji: "✏️",
   },
 ];
