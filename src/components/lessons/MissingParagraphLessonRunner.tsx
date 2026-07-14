@@ -18,6 +18,7 @@ import {
 } from "@/lib/missing-paragraph-lessons";
 import { phraseWordRange } from "@/lib/passage-text";
 import { addNotebookEntry } from "@/lib/notebook-storage";
+import { OverlayBackdrop } from "@/components/ui/OverlayBackdrop";
 
 const TOPIC = "missingparagraph";
 type Phase = "read" | "match";
@@ -375,8 +376,8 @@ function Player({ tier, unit, items, uid }: { tier: MissingParagraphTier; unit: 
       )}
 
       {openKeyword ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center" onClick={() => setOpenKeyword(null)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-5" onClick={(e) => e.stopPropagation()}>
+        <OverlayBackdrop onDismiss={() => setOpenKeyword(null)} className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5">
             <p className="text-lg font-black text-slate-900">{openKeyword.phrase}</p>
             <p className="mt-1 text-sm font-bold text-[#004AAD]">{openKeyword.th}</p>
             <p className="mt-4 text-[11px] font-black uppercase tracking-wide text-slate-400">ทำไมถึงเป็นคำใบ้สำคัญ?</p>
@@ -394,7 +395,7 @@ function Player({ tier, unit, items, uid }: { tier: MissingParagraphTier; unit: 
               ปิด
             </button>
           </div>
-        </div>
+        </OverlayBackdrop>
       ) : null}
     </div>
   );

@@ -7,8 +7,9 @@
  * every level with a live countdown.
  */
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
+import { OverlayBackdrop } from "@/components/ui/OverlayBackdrop";
 import { sfxTap, sfxTransition } from "@/lib/exam-sfx";
 import {
   TIMED_DIFFICULTIES,
@@ -24,22 +25,10 @@ export function TimedRandomLauncher({ skill }: { skill: DailyPlanSkill }) {
   const [open, setOpen] = useState(false);
   const [minutes, setMinutes] = useState(10);
   const [difficulty, setDifficulty] = useState<TimedDifficulty>("any");
-  // iOS Safari fires a synthesized "ghost" click ~immediately after a tap. When
-  // the tap opens this sheet, that ghost click lands on the freshly-mounted
-  // backdrop and instantly dismisses it — the sheet opens and closes in one tap,
-  // so on iPad it looks like the button does nothing. Ignore backdrop dismissals
-  // that arrive right after opening. (Desktop never synthesizes this second click.)
-  const openedAtRef = useRef(0);
 
   const openSheet = () => {
     sfxTap();
-    openedAtRef.current = Date.now();
     setOpen(true);
-  };
-
-  const requestClose = () => {
-    if (Date.now() - openedAtRef.current < 400) return;
-    setOpen(false);
   };
 
   const start = () => {
@@ -73,14 +62,11 @@ export function TimedRandomLauncher({ skill }: { skill: DailyPlanSkill }) {
 
       {/* Time-picker sheet */}
       {open && (
-        <div
+        <OverlayBackdrop
+          onDismiss={() => setOpen(false)}
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4"
-          onClick={requestClose}
         >
-          <div
-            className="ep-step-slide-in w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="ep-step-slide-in w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl">
             <div className="mb-1 flex items-center gap-2">
               <span className="text-2xl">{meta.emoji}</span>
               <h2 className="font-display text-lg font-black text-slate-900">
@@ -149,7 +135,7 @@ export function TimedRandomLauncher({ skill }: { skill: DailyPlanSkill }) {
               ไว้ก่อน
             </button>
           </div>
-        </div>
+        </OverlayBackdrop>
       )}
     </>
   );

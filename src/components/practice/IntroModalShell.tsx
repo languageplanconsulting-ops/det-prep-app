@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 
@@ -35,6 +35,19 @@ export function IntroModalShell({
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
   const [portalReady, setPortalReady] = useState(false);
+
+  // iOS Safari fires a synthesized "ghost" click ~immediately after the tap that
+  // opened this modal; it lands on the freshly-mounted backdrop and dismisses it,
+  // so on iPad the intro modal flashes shut and the tile looks dead. Ignore backdrop
+  // dismissals within 400ms of opening. (Desktop never synthesizes this second click.)
+  const openedAtRef = useRef(0);
+  useEffect(() => {
+    if (open) openedAtRef.current = Date.now();
+  }, [open]);
+  const handleBackdropDismiss = () => {
+    if (Date.now() - openedAtRef.current < 400) return;
+    onDismiss();
+  };
 
   useEffect(() => {
     setPortalReady(true);
@@ -74,7 +87,7 @@ export function IntroModalShell({
       role="dialog"
       aria-modal="true"
       aria-labelledby={labelledBy}
-      onClick={onDismiss}
+      onClick={handleBackdropDismiss}
     >
       <div className="grid h-full place-items-center">
         {soft ? (

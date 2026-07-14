@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
@@ -49,6 +49,10 @@ export function AdminFreeQuotaLockedLink({
   const router = useRouter();
   const { effectiveTier, loading } = useEffectiveTier();
   const [open, setOpen] = useState(false);
+  // iOS Safari ghost click: the tap that opens this modal synthesizes a second
+  // click that lands on the freshly-mounted backdrop and closes it. Ignore backdrop
+  // dismissals within 400ms of opening.
+  const openedAtRef = useRef(0);
 
   // ── IDENTICAL lock logic ──────────────────────────────────────────────────
   const snapshot = useMemo(() => {
@@ -61,6 +65,7 @@ export function AdminFreeQuotaLockedLink({
   const onOpen = () => {
     if (loading) return;
     if (isLocked) {
+      openedAtRef.current = Date.now();
       setOpen(true);
       return;
     }
@@ -90,7 +95,9 @@ export function AdminFreeQuotaLockedLink({
           aria-modal="true"
           aria-labelledby="admin-free-lock-title"
           onClick={(e) => {
-            if (e.target === e.currentTarget) setOpen(false);
+            if (e.target !== e.currentTarget) return;
+            if (Date.now() - openedAtRef.current < 400) return;
+            setOpen(false);
           }}
         >
           <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-black/5">

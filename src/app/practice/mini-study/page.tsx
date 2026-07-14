@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
@@ -446,6 +446,14 @@ function LessonModal({
   );
   const isOpen = modal.kind === "open";
 
+  // iOS Safari ghost click: the tap that opens this modal synthesizes a second
+  // click onto the freshly-shown backdrop, instantly closing it. Ignore backdrop
+  // dismissals within 400ms of opening.
+  const openedAtRef = useRef(0);
+  useEffect(() => {
+    if (isOpen) openedAtRef.current = Date.now();
+  }, [isOpen]);
+
   useEffect(() => {
     if (modal.kind === "open") setSnapshot(modal);
   }, [modal]);
@@ -480,7 +488,9 @@ function LessonModal({
     <div
       className={`fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4 transition-opacity duration-200 ${backdropClass}`}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target !== e.currentTarget) return;
+        if (Date.now() - openedAtRef.current < 400) return;
+        onClose();
       }}
       aria-hidden={!isOpen}
     >

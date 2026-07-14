@@ -113,6 +113,10 @@ export function AddToNotebookButton({
   const [toast, setToast] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
+  // iOS Safari ghost click: the tap that opens the dialog synthesizes a second
+  // click/mousedown onto the freshly-mounted backdrop and closes it. Ignore
+  // backdrop dismissals within 400ms of opening.
+  const openedAtRef = useRef(0);
 
   const refreshCustom = useCallback(() => {
     setCustomCats(loadCustomCategories());
@@ -199,6 +203,7 @@ export function AddToNotebookButton({
             void runSave(premadeToSlug(suggestedPremade));
             return;
           }
+          openedAtRef.current = Date.now();
           setOpen(true);
         }}
         title={
@@ -232,8 +237,10 @@ export function AddToNotebookButton({
         <div
           className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4"
           role="presentation"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setOpen(false);
+          onClick={(e) => {
+            if (e.target !== e.currentTarget) return;
+            if (Date.now() - openedAtRef.current < 400) return;
+            setOpen(false);
           }}
         >
           <div

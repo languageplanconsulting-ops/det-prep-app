@@ -15,6 +15,7 @@ import { addNotebookEntry } from "@/lib/notebook-storage";
 import { PRONUNCIATION_PASS, endingIssueHintTh, pronunciationPassed, pronunciationScore, type PronunciationResult } from "@/lib/pronunciation-match";
 import { readSpeakUnit, type ReadSpeakItem, type ReadSpeakTier, type ReadSpeakVocab } from "@/lib/readspeak-lessons";
 import { LessonRecorder } from "@/components/lessons/LessonRecorder";
+import { OverlayBackdrop } from "@/components/ui/OverlayBackdrop";
 
 const TOPIC = "readspeak";
 type Phase = "cloze" | "speak";
@@ -387,8 +388,8 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
       </div>
 
       {activeBlank !== null && phase === "cloze" ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center" onClick={() => setActiveBlank(null)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-5" onClick={(e) => e.stopPropagation()}>
+        <OverlayBackdrop onDismiss={() => setActiveBlank(null)} className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5">
             <p className="mb-3 text-sm font-black text-slate-900">เลือกคำสำหรับช่องที่ {activeBlank + 1}</p>
             <div className="flex flex-wrap gap-2">
               {(item.blanks[activeBlank]?.options ?? []).map((opt) => (
@@ -401,12 +402,12 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
               ปิด
             </button>
           </div>
-        </div>
+        </OverlayBackdrop>
       ) : null}
 
       {vocabOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center" onClick={() => setVocabOpen(null)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-5" onClick={(e) => e.stopPropagation()}>
+        <OverlayBackdrop onDismiss={() => setVocabOpen(null)} className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5">
             <div className="flex items-center justify-between">
               <p className="text-xl font-black text-slate-900">{vocabOpen.word}</p>
               <button type="button" onClick={() => speakLesson(vocabOpen.word).play()} className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-lg">🔊</button>
@@ -422,7 +423,7 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
               ปิด
             </button>
           </div>
-        </div>
+        </OverlayBackdrop>
       ) : null}
     </div>
   );
