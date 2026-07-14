@@ -23,6 +23,23 @@ import { loadLessonProgress, saveUnitScore, unitKey } from "@/lib/lessons-progre
 const TOPIC = "grammar-fitb";
 const HUB = "/practice/lessons/grammar-fitb";
 
+/** Random encouragement shown when an exercise is fully cleared (100%). */
+const ENCOURAGEMENT_LINES = [
+  "เก่งมาก! เติมถูกครบทุกช่องเลย 🎉",
+  "ยอดเยี่ยม! จับกฎได้แม่นมาก 🌟",
+  "ปังมาก! ครบ 100% แบบสวยๆ ✨",
+  "เจ๋งไปเลย! ไวยากรณ์แน่นขึ้นทุกข้อ 💪",
+  "สุดยอด! ผ่านข้อนี้แบบไม่มีที่ติ 🏆",
+  "เก่งสุดๆ ไปกันต่อเลย! 🚀",
+  "ทำได้ดีมาก! สมองจำกฎได้แล้วนะ 🧠",
+  "ปรบมือรัวๆ! เติมถูกครบทุกช่อง 👏",
+  "เยี่ยมไปเลย! ฝึกไปเรื่อยๆ จะยิ่งชัวร์ 🔥",
+  "เก่งจนพี่ดอยยิ้มเลย! เก็บครบ 100% 😄",
+];
+function randomEncouragement(): string {
+  return ENCOURAGEMENT_LINES[Math.floor(Math.random() * ENCOURAGEMENT_LINES.length)]!;
+}
+
 function isValidLevel(v: string): v is GrammarDifficulty {
   return v === "easy" || v === "medium" || v === "hard";
 }
@@ -66,6 +83,7 @@ export function GrammarLevelRunner({ level: levelParam }: { level: string }) {
   const [checked, setChecked] = useState(false);
   const [doneIdx, setDoneIdx] = useState<Set<number>>(new Set());
   const [passedThisSession, setPassedThisSession] = useState(0);
+  const [encouragement, setEncouragement] = useState("");
   const rewarded = useRef(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -97,6 +115,7 @@ export function GrammarLevelRunner({ level: levelParam }: { level: string }) {
     setInputs(new Array(n).fill(""));
     setClueVisible(new Array(n).fill(false));
     setChecked(false);
+    setEncouragement("");
   }, [exercise]);
 
   if (!level) {
@@ -187,6 +206,7 @@ export function GrammarLevelRunner({ level: levelParam }: { level: string }) {
     setLocked(nextLocked);
     if (nextLocked.every(Boolean)) {
       sfxCelebrate("md");
+      setEncouragement(randomEncouragement());
       saveUnitScore(uid, TOPIC, lvl, exOrigIdx, 100).catch(() => {});
       setDoneIdx((prev) => new Set(prev).add(exOrigIdx));
       setPassedThisSession((c) => c + 1);
@@ -434,9 +454,9 @@ export function GrammarLevelRunner({ level: levelParam }: { level: string }) {
 
         {checked && grades ? (
           <div className="mt-4 space-y-2">
-            <div className="rounded-xl bg-slate-900 px-4 py-3 text-white">
+            <div className={`rounded-xl px-4 py-3 text-white ${allLocked ? "bg-emerald-600" : "bg-slate-900"}`}>
               <p className="text-sm font-black">
-                {allLocked ? `เติมถูกครบ 5 / 5 ช่อง — ผ่าน 100%! 🎉` : `ล็อกแล้ว ${locked.filter(Boolean).length} / ${n} ช่อง — ลองใหม่เฉพาะช่องที่ผิด`}
+                {allLocked ? encouragement : `ล็อกแล้ว ${locked.filter(Boolean).length} / ${n} ช่อง — ลองใหม่เฉพาะช่องที่ผิด`}
               </p>
             </div>
             {exercise.blanks.map((blk, i) => {
