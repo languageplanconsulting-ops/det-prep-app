@@ -141,7 +141,7 @@ export function NotebookMatchingGame({
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-2">
+            <div className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto overscroll-contain pr-1">
               {left
                 .filter((w) => !done(w.id))
                 .map((w) => (
@@ -163,7 +163,7 @@ export function NotebookMatchingGame({
                   </button>
                 ))}
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto overscroll-contain pl-1">
               {right
                 .filter((w) => !done(w.id))
                 .map((w) => (

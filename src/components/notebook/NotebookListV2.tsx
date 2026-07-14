@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { NotebookMatchingGame } from "@/components/notebook/NotebookMatchingGame";
+import { NotebookVocabQuiz } from "@/components/notebook/NotebookVocabQuiz";
 import { NotebookProductionReportFullView } from "@/components/notebook/NotebookProductionReportFullView";
 import { NotebookSpeakingHighlightCard } from "@/components/notebook/NotebookSpeakingHighlightCard";
 import { tryParseNotebookProductionReport } from "@/lib/notebook-production-report-parse";
@@ -86,7 +87,7 @@ export function NotebookListV2() {
     idx: 0,
     flipped: false,
   });
-  const [reviewMode, setReviewMode] = useState<"closed" | "choice" | "flip" | "match">("closed");
+  const [reviewMode, setReviewMode] = useState<"closed" | "choice" | "flip" | "match" | "quiz">("closed");
   const [portalReady, setPortalReady] = useState(false);
 
   useEffect(() => {
@@ -503,6 +504,16 @@ export function NotebookListV2() {
                   แตะคำศัพท์แล้วแตะความหมายที่ตรงกัน (สูงสุด 20 คำ)
                 </p>
               </button>
+              <button
+                type="button"
+                onClick={() => setReviewMode("quiz")}
+                className="rounded-xl border border-slate-200 bg-white p-4 text-left hover:border-[#004AAD]"
+              >
+                <p className="text-sm font-bold text-slate-900">🎯 ทายความหมาย</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  ทายว่าคำนี้แปลว่าอะไร แบบเลือกตอบ · สูงสุด 10 ข้อ
+                </p>
+              </button>
             </div>
           </div>
         </div>,
@@ -513,6 +524,15 @@ export function NotebookListV2() {
       {/* Matching game — self-portals internally, see NotebookMatchingGame.tsx */}
       {reviewMode === "match" ? (
         <NotebookMatchingGame
+          deck={deck}
+          onMastered={(id) => setMastered(id, true)}
+          onClose={() => setReviewMode("closed")}
+        />
+      ) : null}
+
+      {/* Multiple-choice meaning quiz — self-portals internally, see NotebookVocabQuiz.tsx */}
+      {reviewMode === "quiz" ? (
+        <NotebookVocabQuiz
           deck={deck}
           onMastered={(id) => setMastered(id, true)}
           onClose={() => setReviewMode("closed")}
