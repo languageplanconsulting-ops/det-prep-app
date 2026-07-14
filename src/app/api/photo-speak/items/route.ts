@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { getRequestAuthUser } from "@/lib/supabase-request-client";
+import { getAdminAccess } from "@/lib/admin-auth";
+import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
 export const dynamic = "force-dynamic";
 
 const TASK_TYPES = new Set(["write_about_photo", "speak_about_photo"]);
+
+const ITEM_COLUMNS =
+  "id, title_en, title_th, image_url, prompt_en, prompt_th, keywords, context_en, license, license_version, license_url, creator, attribution, landing_url, provider, sort_order";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -16,15 +21,32 @@ export async function GET(req: Request) {
   }
 
   const { supabase, user } = await getRequestAuthUser(req);
+
+  // Admin-code preview: an admin signed in with the simple code (no real Supabase
+  // session — common when previewing on a second device like an iPad) has no
+  // auth.uid(), so the RLS-scoped read below would return nothing / 401. Serve the
+  // active items via the service-role client instead, with no personal progress.
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const admin = await getAdminAccess(req);
+    if (!admin.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const svc = createServiceRoleSupabase();
+    const { data: items, error } = await svc
+      .from("photo_speak_items")
+      .select(ITEM_COLUMNS)
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    const enriched = (items ?? []).map((it) => ({ ...it, progress: null }));
+    return NextResponse.json({ items: enriched });
   }
 
   const { data: items, error } = await supabase
     .from("photo_speak_items")
-    .select(
-      "id, title_en, title_th, image_url, prompt_en, prompt_th, keywords, context_en, license, license_version, license_url, creator, attribution, landing_url, provider, sort_order",
-    )
+    .select(ITEM_COLUMNS)
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
 
