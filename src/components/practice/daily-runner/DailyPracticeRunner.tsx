@@ -66,6 +66,16 @@ export function DailyPracticeRunner({
   const [finishing, setFinishing] = useState(false);
   const planTierRef = useRef<DailyTier>(10);
   const usedKeysRef = useRef<Set<string>>(new Set());
+  // Session stats for the end-of-run summary report.
+  const startAtRef = useRef<number>(0);
+  const scoresRef = useRef<number[]>([]);
+  const [doneSummary, setDoneSummary] = useState<{
+    groups: ApiGroupProgress[];
+    totalDone: number;
+    total: number;
+    avgScore: number | null;
+    minutes: number;
+  } | null>(null);
 
   // Initial load: figure out the remaining flat slot list for this run.
   useEffect(() => {
