@@ -7,6 +7,7 @@ import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
+import { TimedRandomLauncher } from "@/components/practice/TimedRandomLauncher";
 import { REALWORD_DIFFICULTIES, REALWORD_ROUND_NUMBERS } from "@/lib/realword-constants";
 import { getRealWordRoundStats, loadRealWordVisibleBank } from "@/lib/realword-storage";
 import type { RealWordRoundNum } from "@/types/realword";
@@ -68,6 +69,7 @@ export function RealWordRoundsHub() {
             </>
           }
         />
+        <TimedRandomLauncher skill="realword" />
         <RoundsExplainer />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {REALWORD_ROUND_NUMBERS.map((round) => (

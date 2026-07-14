@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
+import { TimedRandomLauncher } from "@/components/practice/TimedRandomLauncher";
 import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { FITB_ROUND_NUMBERS } from "@/lib/fitb-constants";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
@@ -83,6 +84,7 @@ export function FitbRoundsHub() {
           <span className="text-indigo-400">→</span>
         </Link>
 
+        <TimedRandomLauncher skill="fitb" />
         <RoundsExplainer />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {FITB_ROUND_NUMBERS.map((round) => (

@@ -6,6 +6,7 @@ import { DictationRandomPicker } from "@/components/dictation/DictationRandomPic
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
+import { TimedRandomLauncher } from "@/components/practice/TimedRandomLauncher";
 import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { DICTATION_ROUND_NUMBERS } from "@/lib/dictation-constants";
@@ -113,6 +114,7 @@ export function DictationRoundsHub() {
           </div>
         </div>
 
+        <TimedRandomLauncher skill="dictation" />
         <DictationRandomPicker />
 
         <RoundsExplainer />

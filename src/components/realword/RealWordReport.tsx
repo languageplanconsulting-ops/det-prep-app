@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
 import { staggerIn } from "@/components/ui/StaggerIn";
-import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
+import { sfxCelebrate, sfxReveal, sfxTransition } from "@/lib/exam-sfx";
 import {
   REALWORD_DIFFICULTY_LABEL,
   REALWORD_MAX_SCORE,
@@ -92,6 +92,10 @@ export function RealWordReport({
   const selectedCount = selected.size;
   const tone = getScoreTone(scorePercent);
   const [added, setAdded] = useState<Set<string>>(() => new Set());
+  const isPerfect = scorePercent >= 100;
+  // Cute "save these words?" popup on a perfect round — shown once on mount.
+  const [showSavePopup, setShowSavePopup] = useState(isPerfect);
+  const [savingAll, setSavingAll] = useState(false);
 
   const missedReal = wordSet.words.filter((w, i) => w.is_real && !selected.has(i));
   const pickedFake = wordSet.words.filter((w, i) => !w.is_real && selected.has(i));
@@ -112,6 +116,26 @@ export function RealWordReport({
     setAdded((prev) => new Set(prev).add(word.toLowerCase()));
   };
 
+  // Perfect-round popup fires a gentle sound once when it appears.
+  useEffect(() => {
+    if (showSavePopup) sfxReveal();
+  }, [showSavePopup]);
+
+  const saveAllRealWords = async () => {
+    setSavingAll(true);
+    sfxCelebrate("md");
+    for (const w of realWords) {
+      if (added.has(w.word.toLowerCase())) continue;
+      try {
+        await addToNotebook(w.word, w.explanationThai, w.synonyms);
+      } catch {
+        /* keep going — best effort */
+      }
+    }
+    setSavingAll(false);
+    setShowSavePopup(false);
+  };
+
   const redeemNow = () => {
     playBlinkBeep();
     onRedeemNow();
@@ -123,6 +147,42 @@ export function RealWordReport({
 
   return (
     <div className="space-y-8">
+      {showSavePopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="ep-step-slide-in w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl">
+            <div className="text-6xl">🎉</div>
+            <p className="mt-2 font-display text-xl font-black text-slate-900">เต็ม 100% เลย! สุดยอด!</p>
+            <div className="mt-3 flex items-start gap-2.5 text-left">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-lg font-extrabold text-[#FFCC00] ring-2 ring-[#FFCC00]">
+                D
+              </div>
+              <div className="rounded-2xl rounded-tl-sm bg-[#004AAD]/5 px-3.5 py-2.5 text-sm font-medium text-slate-800">
+                เก็บคำศัพท์ทั้ง {realWords.length} คำนี้ลง Notebook ไว้ทบทวนไหมครับ? จะได้จำได้แม่นๆ 📓
+              </div>
+            </div>
+            <div className="mt-5 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => void saveAllRealWords()}
+                disabled={savingAll}
+                className="w-full rounded-2xl bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-md transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
+              >
+                {savingAll ? "กำลังบันทึก…" : `บันทึกทั้งหมด (${realWords.length} คำ) 📓`}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sfxTransition();
+                  setShowSavePopup(false);
+                }}
+                className="w-full py-2 text-xs font-bold text-neutral-400 hover:text-neutral-600"
+              >
+                ไว้ก่อน ขอบคุณครับ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <CelebrateMascot title={scorePercent >= 85 ? "เก่งมากเลย! 🎉" : "ทำได้ดีมาก!"} />
       <CoachBubble>{coachMessage(scorePercent, UR, R, M)}</CoachBubble>
       <section className={`ep-brutal overflow-hidden rounded-sm border-4 border-black p-0 shadow-[5px_5px_0_0_#000] ${tone.panelClass}`}>
@@ -210,16 +270,40 @@ export function RealWordReport({
                 Clean round. You found every real word in this set.
               </div>
             ) : (
-              <ul className="flex flex-wrap gap-2">
+              <ul className="flex flex-col gap-2.5">
                 {missedReal.map((w, i) => {
                   const stagger = staggerIn(i);
+                  const done = added.has(w.word.toLowerCase());
                   return (
                     <li
                       key={w.word}
-                      className={`border-4 border-amber-700 bg-amber-50 px-3 py-2 text-sm font-black text-neutral-900 shadow-[2px_2px_0_0_#000] ${stagger.className}`}
+                      className={`border-4 border-amber-700 bg-amber-50 p-3 shadow-[2px_2px_0_0_#000] ${stagger.className}`}
                       style={stagger.style}
                     >
-                      {w.word}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-base font-black text-neutral-900">{w.word}</p>
+                          <p className="mt-0.5 text-xs font-bold text-neutral-700">
+                            <span className="text-ep-blue">TH:</span> {w.explanationThai || "—"}
+                          </p>
+                          {w.synonyms ? (
+                            <p className="mt-0.5 text-[11px] text-neutral-500">คล้าย: {w.synonyms}</p>
+                          ) : null}
+                        </div>
+                        {done ? (
+                          <span className="shrink-0 whitespace-nowrap border-2 border-emerald-700 bg-emerald-100 px-2 py-1 text-[10px] font-black text-emerald-900">
+                            ✓ บันทึกแล้ว
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => void addToNotebook(w.word, w.explanationThai, w.synonyms)}
+                            className="shrink-0 whitespace-nowrap border-2 border-black bg-ep-blue px-2.5 py-1 text-[10px] font-black uppercase text-white shadow-[2px_2px_0_0_#000] active:translate-y-px"
+                          >
+                            + Notebook
+                          </button>
+                        )}
+                      </div>
                     </li>
                   );
                 })}

@@ -334,6 +334,16 @@ export async function addNotebookEntry(
     );
   }
 
+  // Let a running timed-practice session count "new words learned today".
+  // Event name mirrors NOTEBOOK_ADDED_EVENT in @/lib/practice-timed-random.
+  if (typeof window !== "undefined") {
+    try {
+      window.dispatchEvent(new CustomEvent("ep-notebook-added", { detail: { word: full.titleEn } }));
+    } catch {
+      /* ignore */
+    }
+  }
+
   return full;
 }
 

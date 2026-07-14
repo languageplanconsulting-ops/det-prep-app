@@ -39,6 +39,11 @@ import {
 } from "@/lib/study-plan/daily-plan";
 import type { DayProgress, SkillTrend } from "@/lib/study-plan/daily-progress";
 import { generateCalendar, type CalendarDay } from "@/lib/study-plan/schedule";
+import {
+  fetchPracticeMinutes,
+  TIMED_SKILL_META,
+  type PracticeMinutesRow,
+} from "@/lib/practice-timed-random";
 
 type ScheduleInfo = {
   exam_date: string;
@@ -219,6 +224,33 @@ export function StudyPlanCalendarCardSoft({
   }, [loadRange]);
 
   const rangeByDate = useMemo(() => new Map(rangeDays.map((d) => [d.date, d])), [rangeDays]);
+
+  // Freeform "🎲 timed random practice" minutes (037_practice_minutes.sql), so an
+  // off-plan study day still shows the honest "you practised XX minutes" note.
+  const [freeformMinutes, setFreeformMinutes] = useState<PracticeMinutesRow[]>([]);
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      const rows = await fetchPracticeMinutes(gridStart);
+      if (alive) setFreeformMinutes(rows);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [gridStart]);
+
+  const freeformByDate = useMemo(() => {
+    const m = new Map<string, { minutes: number; sets: number; words: number; skills: Set<string> }>();
+    for (const r of freeformMinutes) {
+      const e = m.get(r.practice_date) ?? { minutes: 0, sets: 0, words: 0, skills: new Set<string>() };
+      e.minutes += r.minutes;
+      e.sets += r.sets_done;
+      e.words += r.words_learned;
+      e.skills.add(r.skill);
+      m.set(r.practice_date, e);
+    }
+    return m;
+  }, [freeformMinutes]);
 
   const loadDayDetail = useCallback(async (date: string) => {
     setDayLoading(true);
@@ -543,6 +575,24 @@ export function StudyPlanCalendarCardSoft({
               </span>
             )}
           </div>
+
+          {(() => {
+            const ff = freeformByDate.get(selectedDate);
+            if (!ff || ff.minutes <= 0) return null;
+            const skillLabels = Array.from(ff.skills)
+              .map((s) => TIMED_SKILL_META[s as keyof typeof TIMED_SKILL_META]?.th ?? s)
+              .join(" · ");
+            return (
+              <div className="mt-2 flex items-start gap-2 rounded-2xl bg-indigo-50 px-3.5 py-2.5 text-xs font-semibold text-indigo-800 ring-1 ring-indigo-100">
+                <span className="text-sm">🎲</span>
+                <span>
+                  วันนี้ฝึกอิสระ <strong>{ff.minutes} นาที</strong>
+                  {skillLabels ? ` · ${skillLabels}` : ""}
+                  {ff.words > 0 ? ` · เก็บคำใหม่ ${ff.words} คำ` : ""}
+                </span>
+              </div>
+            );
+          })()}
 
           {dayLoading && !dayDetail ? (
             <p className="py-10 text-center text-sm text-slate-400">กำลังโหลด…</p>

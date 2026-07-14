@@ -20,11 +20,7 @@ import type { RandomDifficulty } from "@/lib/practice-random";
 import { pickRunnerContent, type RunnerContentPick } from "@/lib/study-plan/daily-runner-content";
 import { DAILY_SKILL_META, type DailyPlanSkill, type DailyTier } from "@/lib/study-plan/daily-plan";
 
-import { DictationRunnerItem } from "@/components/practice/daily-runner/DictationRunnerItem";
-import { FitbRunnerItem } from "@/components/practice/daily-runner/FitbRunnerItem";
-import { VocabRunnerItem } from "@/components/practice/daily-runner/VocabRunnerItem";
-import { ReadingRunnerItem } from "@/components/practice/daily-runner/ReadingRunnerItem";
-import { RealWordRunnerItem } from "@/components/practice/daily-runner/RealWordRunnerItem";
+import { RunnerSlotItem } from "@/components/practice/daily-runner/RunnerSlotItem";
 
 type ApiGroupProgress = { skill: DailyPlanSkill; count: number; done: number; complete: boolean };
 type ApiProgress = { groups: ApiGroupProgress[]; total: number; totalDone: number; complete: boolean };
@@ -284,7 +280,9 @@ export function DailyPracticeRunner({
         ) : slot && pickState.status === "ready" ? (
           <RunnerSlotItem
             skill={slot.skill}
-            pick={pickState.pick}
+            round={pickState.pick.round}
+            difficulty={pickState.pick.difficulty}
+            setNumber={pickState.pick.setNumber}
             onComplete={handleSlotComplete}
           />
         ) : null}
@@ -305,64 +303,4 @@ export function DailyPracticeRunner({
       )}
     </div>
   );
-}
-
-function RunnerSlotItem({
-  skill,
-  pick,
-  onComplete,
-}: {
-  skill: DailyPlanSkill;
-  pick: RunnerContentPick;
-  onComplete: (scorePct: number, maxScore: number) => void;
-}) {
-  switch (skill) {
-    case "dictation":
-      return (
-        <DictationRunnerItem
-          round={pick.round}
-          difficulty={pick.difficulty}
-          setNumber={pick.setNumber}
-          onComplete={onComplete}
-        />
-      );
-    case "fitb":
-      return (
-        <FitbRunnerItem
-          round={pick.round}
-          difficulty={pick.difficulty}
-          setNumber={pick.setNumber}
-          onComplete={onComplete}
-        />
-      );
-    case "vocab":
-      return (
-        <VocabRunnerItem
-          round={pick.round}
-          difficulty={pick.difficulty}
-          setNumber={pick.setNumber}
-          onComplete={onComplete}
-        />
-      );
-    case "reading":
-      return (
-        <ReadingRunnerItem
-          round={pick.round}
-          difficulty={pick.difficulty}
-          setNumber={pick.setNumber}
-          onComplete={onComplete}
-        />
-      );
-    case "realword":
-      return (
-        <RealWordRunnerItem
-          round={pick.round}
-          difficulty={pick.difficulty}
-          setNumber={pick.setNumber}
-          onComplete={onComplete}
-        />
-      );
-    default:
-      return null;
-  }
 }
