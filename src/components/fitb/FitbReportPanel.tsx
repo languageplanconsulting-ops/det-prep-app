@@ -35,6 +35,7 @@ export function FitbReportPanel({
   onRedeemNow,
   hideRedeemLater,
   onAdvance,
+  inRunner = false,
 }: {
   set: FitbSet;
   round: FitbRoundNum;
@@ -49,6 +50,9 @@ export function FitbReportPanel({
   hideRedeemLater?: boolean;
   /** Queue mode: once complete, advance the runner's queue instead of linking to the next sequential set. */
   onAdvance?: () => void;
+  /** True when embedded in a daily/timed runner — hide hub/next-set links so only
+   * the runner's "ต่อไป" bar advances (prevents getting stuck looping one skill). */
+  inRunner?: boolean;
 }) {
   useEffect(() => {
     sfxCelebrate("md");
@@ -212,7 +216,7 @@ export function FitbReportPanel({
               >
                 Try again (redeem)
               </button>
-              {!hideRedeemLater ? (
+              {!hideRedeemLater && !inRunner ? (
                 <Link
                   href={hubHref}
                   onClick={() => playBlinkBeep()}
@@ -230,7 +234,7 @@ export function FitbReportPanel({
             >
               Next question →
             </button>
-          ) : (
+          ) : inRunner ? null : (
             <>
               <Link
                 href={hubHref}

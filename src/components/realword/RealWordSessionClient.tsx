@@ -81,15 +81,19 @@ export function RealWordSessionClient({
     setPhase("game");
   };
 
+  const inRunner = !!onRunnerComplete;
+
   if (phase === "report") {
     return (
       <div className="space-y-6">
-        <Link
-          href={hubHref}
-          className="inline-block text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
-        >
-          ← Sets
-        </Link>
+        {!inRunner && (
+          <Link
+            href={hubHref}
+            className="inline-block text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
+          >
+            ← Sets
+          </Link>
+        )}
         <div key={phase} className="ep-step-slide-in">
           <RealWordReport
             wordSet={sessionWordSet}
@@ -99,6 +103,7 @@ export function RealWordSessionClient({
             selected={selected}
             hubHref={hubHref}
             onRedeemNow={redeemNow}
+            inRunner={inRunner}
           />
         </div>
       </div>
@@ -108,12 +113,16 @@ export function RealWordSessionClient({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <Link
-          href={hubHref}
-          className="text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
-        >
-          ← Sets
-        </Link>
+        {!inRunner ? (
+          <Link
+            href={hubHref}
+            className="text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
+          >
+            ← Sets
+          </Link>
+        ) : (
+          <span />
+        )}
         <p className="max-w-xs text-right text-xs font-bold text-neutral-600">{sessionWordSet.setId}</p>
       </div>
       <div key={phase} className="ep-step-slide-in">

@@ -18,35 +18,64 @@ import {
 } from "@/lib/dictation-diff";
 import type { DictationDifficulty, DictationRoundNum } from "@/types/dictation";
 
-/** Word-level diff via LCS — marks which expected words the learner got. */
-function wordLevelDiff(expected: string, user: string): Array<{ word: string; ok: boolean }> {
+/** One item in the "what you typed" comparison line. */
+type WordSeg =
+  | { kind: "ok"; text: string } // user typed this word and it matches an expected word
+  | { kind: "wrong"; text: string } // user typed this word but it doesn't match (mistyped/extra)
+  | { kind: "missing"; text: string }; // expected word the user did not type
+
+/**
+ * Word-level alignment via LCS. Returns:
+ *  - `expected`: each expected word + whether the learner got it (for the "missed" list)
+ *  - `display`: the learner's OWN words in reading order, with mistyped/extra words
+ *    flagged and any missing expected words inserted — so the comparison shows what
+ *    was actually typed, not the answer key.
+ */
+function alignWords(expected: string, user: string): {
+  expected: Array<{ word: string; ok: boolean }>;
+  display: WordSeg[];
+} {
   const norm = (w: string) => w.toLowerCase().replace(/[.,!?;:"']/g, "");
-  const e = expected.trim().split(/\s+/).filter(Boolean);
-  const u = user.trim().split(/\s+/).filter(Boolean).map(norm);
-  const eN = e.map(norm);
+  const eRaw = expected.trim().split(/\s+/).filter(Boolean);
+  const uRaw = user.trim().split(/\s+/).filter(Boolean);
+  const eN = eRaw.map(norm);
+  const uN = uRaw.map(norm);
   const m = eN.length;
-  const n = u.length;
+  const n = uN.length;
   const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
   for (let i = m - 1; i >= 0; i--) {
     for (let j = n - 1; j >= 0; j--) {
-      dp[i][j] = eN[i] === u[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+      dp[i][j] = eN[i] === uN[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
     }
   }
+
   const matched = new Set<number>();
+  const display: WordSeg[] = [];
   let i = 0;
   let j = 0;
   while (i < m && j < n) {
-    if (eN[i] === u[j]) {
+    if (eN[i] === uN[j]) {
       matched.add(i);
+      display.push({ kind: "ok", text: uRaw[j] });
       i++;
       j++;
     } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+      // expected word the learner skipped
+      display.push({ kind: "missing", text: eRaw[i] });
       i++;
     } else {
+      // learner typed a word that isn't in the answer (mistyped or extra)
+      display.push({ kind: "wrong", text: uRaw[j] });
       j++;
     }
   }
-  return e.map((word, idx) => ({ word, ok: matched.has(idx) }));
+  for (; i < m; i++) display.push({ kind: "missing", text: eRaw[i] });
+  for (; j < n; j++) display.push({ kind: "wrong", text: uRaw[j] });
+
+  return {
+    expected: eRaw.map((word, idx) => ({ word, ok: matched.has(idx) })),
+    display,
+  };
 }
 
 function CharLine({ segments }: { segments: CharDisplaySegment[] }) {
@@ -163,6 +192,7 @@ export function DictationReport({
   setNumber,
   onPracticeAgain,
   onFixSubmit,
+  inRunner = false,
 }: {
   expected: string;
   userText: string;
@@ -172,6 +202,9 @@ export function DictationReport({
   setNumber: number;
   onPracticeAgain: () => void;
   onFixSubmit: (merged: string, newScore: number) => void;
+  /** True when embedded in a daily/timed runner — hide the report's own
+   * "next set" link so only the runner's "ต่อไป" bar advances the queue. */
+  inRunner?: boolean;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
   const soft = true;
@@ -196,7 +229,8 @@ export function DictationReport({
   const redeem = useMemo(() => buildRedeemSlots(expected, userText), [expected, userText]);
   const inputCount = countInputSlots(redeem.slots);
 
-  const words = useMemo(() => wordLevelDiff(expected, userText), [expected, userText]);
+  const align = useMemo(() => alignWords(expected, userText), [expected, userText]);
+  const words = align.expected;
   const missed = words.filter((w) => !w.ok);
   const correctWords = words.length - missed.length;
 
@@ -281,19 +315,40 @@ export function DictationReport({
             ✏️ เทียบกับที่คุณพิมพ์
           </p>
           <p className="rounded-xl bg-white p-4 text-lg leading-9 ring-1 ring-slate-200 [overflow-wrap:anywhere]">
-            {words.map((w, idx) =>
-              w.ok ? (
-                <span key={idx} className="text-slate-900">
-                  {w.word}{" "}
+            {align.display.map((seg, idx) => {
+              if (seg.kind === "ok") {
+                return (
+                  <span key={idx} className="text-slate-900">
+                    {seg.text}{" "}
+                  </span>
+                );
+              }
+              if (seg.kind === "wrong") {
+                return (
+                  <span
+                    key={idx}
+                    className="mx-0.5 rounded bg-rose-100 px-1 text-rose-700 line-through"
+                  >
+                    {seg.text}{" "}
+                  </span>
+                );
+              }
+              // missing expected word — show what should have been typed
+              return (
+                <span
+                  key={idx}
+                  className="mx-0.5 rounded border border-dashed border-rose-300 bg-rose-50 px-1 text-rose-600"
+                  title="คำที่ขาดไป"
+                >
+                  {seg.text}{" "}
                 </span>
-              ) : (
-                <span key={idx} className="mx-0.5 rounded bg-rose-100 px-1 text-rose-700">
-                  {w.word}{" "}
-                </span>
-              ),
-            )}
+              );
+            })}
           </p>
-          <p className="mt-1 text-[11px] text-slate-400">สีแดง = คำที่ขาดหรือพิมพ์ผิด</p>
+          <p className="mt-1 text-[11px] text-slate-400">
+            <span className="text-rose-600 line-through">ขีดฆ่า</span> = คำที่พิมพ์ผิด ·{" "}
+            <span className="rounded border border-dashed border-rose-300 px-1">กรอบประ</span> = คำที่ขาดไป
+          </p>
         </div>
 
         {/* misses list */}
@@ -356,7 +411,7 @@ export function DictationReport({
               ✍️ แก้ทีละจุดเพื่อเพิ่มคะแนน
             </button>
           ) : null}
-          {nextSetHref ? (
+          {!inRunner && nextSetHref ? (
             <Link
               href={nextSetHref}
               onClick={() => sfxTransition()}

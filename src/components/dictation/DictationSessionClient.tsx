@@ -249,20 +249,24 @@ export function DictationSessionClient({
     setPlaying(false);
   };
 
+  const inRunner = !!onRunnerComplete;
+
   if (phase === "report") {
     return (
       <div key={phase} className="ep-step-slide-in space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link
-            href={setsHref}
-            className="ep-interactive text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
-          >
-            ← Sets
-          </Link>
-          <p className="ep-stat text-xs text-neutral-500">
-            Round {round} · set {setNumber} · {item.hintText}
-          </p>
-        </div>
+        {!inRunner && (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Link
+              href={setsHref}
+              className="ep-interactive text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
+            >
+              ← Sets
+            </Link>
+            <p className="ep-stat text-xs text-neutral-500">
+              Round {round} · set {setNumber} · {item.hintText}
+            </p>
+          </div>
+        )}
         <DictationReport
           key={reportKey}
           expected={item.transcript}
@@ -273,6 +277,7 @@ export function DictationSessionClient({
           setNumber={setNumber}
           onPracticeAgain={practiceAgain}
           onFixSubmit={handleFixSubmit}
+          inRunner={inRunner}
         />
       </div>
     );
@@ -282,15 +287,17 @@ export function DictationSessionClient({
     // ── Soft-modern admin rebuild — same handlers/state, new presentation ──
     return (
       <div key={phase} className="ep-step-slide-in mx-auto max-w-2xl space-y-4">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Link href={setsHref} className="font-semibold hover:text-[#004AAD]">
-            ← ชุดข้อสอบ
-          </Link>
-          <span>·</span>
-          <Link href={hubHref} className="hover:text-[#004AAD]">
-            ทุกรอบ
-          </Link>
-        </div>
+        {!inRunner && (
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <Link href={setsHref} className="font-semibold hover:text-[#004AAD]">
+              ← ชุดข้อสอบ
+            </Link>
+            <span>·</span>
+            <Link href={hubHref} className="hover:text-[#004AAD]">
+              ทุกรอบ
+            </Link>
+          </div>
+        )}
 
         <div className="rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200 sm:p-6">
           <header className="mb-4 flex items-center justify-between gap-2">

@@ -40,6 +40,7 @@ export function VocabSessionClient({
   const maxScore = VOCAB_SESSION_MAX[sessionLevel];
   const setListHref = `/practice/comprehension/vocabulary/round/${round}/${setNumber}/${sessionLevel}`;
   const bankHref = "/practice/comprehension/vocabulary";
+  const inRunner = !!onRunnerComplete;
 
   const onComplete = (rows: VocabExamResultRow[]) => {
     const correctCount = rows.filter((r) => r.isCorrect).length;
@@ -73,12 +74,16 @@ export function VocabSessionClient({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href={setListHref}
-          className="text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
-        >
-          ← Tests in set {setNumber}
-        </Link>
+        {!inRunner ? (
+          <Link
+            href={setListHref}
+            className="text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
+          >
+            ← Tests in set {setNumber}
+          </Link>
+        ) : (
+          <span />
+        )}
         <p className="ep-stat text-xs text-neutral-500">
           Max {maxScore} pts · 6 blanks
         </p>
@@ -106,6 +111,7 @@ export function VocabSessionClient({
             setListHref={setListHref}
             bankHref={bankHref}
             nextPassageHref={nextPassageHref}
+            inRunner={inRunner}
           />
         </div>
       ) : null}

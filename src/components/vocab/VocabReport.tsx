@@ -34,6 +34,7 @@ export function VocabReport({
   setListHref,
   bankHref,
   nextPassageHref,
+  inRunner = false,
 }: {
   round: VocabRoundNum;
   sessionLevel: VocabSessionLevel;
@@ -45,6 +46,9 @@ export function VocabReport({
   setListHref: string;
   bankHref: string;
   nextPassageHref: string | null;
+  /** True when embedded in a daily/timed runner — hide next/back navigation so
+   * only the runner's "ต่อไป" bar advances. */
+  inRunner?: boolean;
 }) {
   useEffect(() => {
     sfxCelebrate("md");
@@ -160,7 +164,7 @@ export function VocabReport({
           </section>
 
           <div className="flex flex-col gap-4">
-            {nextPassageHref ? (
+            {!inRunner && nextPassageHref ? (
               <Link
                 href={nextPassageHref}
                 onClick={() => sfxTransition()}
@@ -176,18 +180,22 @@ export function VocabReport({
             >
               Redeem yourself
             </button>
-            <Link
-              href={setListHref}
-              className="ep-brutal-reading block border-4 border-black bg-neutral-100 py-3 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] transition hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_#000]"
-            >
-              Back to passages in this set
-            </Link>
-            <Link
-              href={bankHref}
-              className="ep-brutal-reading block border-4 border-black bg-white py-3 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] transition hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_#000]"
-            >
-              Back to levels
-            </Link>
+            {!inRunner && (
+              <Link
+                href={setListHref}
+                className="ep-brutal-reading block border-4 border-black bg-neutral-100 py-3 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] transition hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_#000]"
+              >
+                Back to passages in this set
+              </Link>
+            )}
+            {!inRunner && (
+              <Link
+                href={bankHref}
+                className="ep-brutal-reading block border-4 border-black bg-white py-3 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] transition hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_#000]"
+              >
+                Back to levels
+              </Link>
+            )}
           </div>
         </div>
       </div>

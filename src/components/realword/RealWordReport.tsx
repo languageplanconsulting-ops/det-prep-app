@@ -69,6 +69,7 @@ export function RealWordReport({
   selected,
   hubHref,
   onRedeemNow,
+  inRunner = false,
 }: {
   wordSet: RealWordSet;
   round: RealWordRoundNum;
@@ -77,6 +78,9 @@ export function RealWordReport({
   selected: Set<number>;
   hubHref: string;
   onRedeemNow: () => void;
+  /** True when embedded in a daily/timed runner — hide the report's own
+   * hub/next-set navigation so only the runner's "ต่อไป" bar advances. */
+  inRunner?: boolean;
 }) {
   useEffect(() => {
     sfxCelebrate("md");
@@ -406,14 +410,16 @@ export function RealWordReport({
         >
           Redeem now
         </button>
-        <Link
-          href={hubHref}
-          onClick={redeemLater}
-          className="inline-flex flex-1 items-center justify-center border-4 border-black bg-white py-4 text-center text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] hover:bg-neutral-50"
-        >
-          Redeem later
-        </Link>
-        {nextSetHref ? (
+        {!inRunner && (
+          <Link
+            href={hubHref}
+            onClick={redeemLater}
+            className="inline-flex flex-1 items-center justify-center border-4 border-black bg-white py-4 text-center text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] hover:bg-neutral-50"
+          >
+            Redeem later
+          </Link>
+        )}
+        {!inRunner && nextSetHref ? (
           <Link
             href={nextSetHref}
             onClick={() => sfxTransition()}

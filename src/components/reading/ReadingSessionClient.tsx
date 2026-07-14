@@ -39,6 +39,7 @@ export function ReadingSessionClient({
 
   const maxScore = READING_DIFFICULTY_MAX[difficulty];
   const setListHref = `/practice/comprehension/reading/round/${round}/${difficulty}/${setNumber}`;
+  const inRunner = !!onRunnerComplete;
 
   const onComplete = (rows: ReadingExamResultRow[]) => {
     const correctCount = rows.filter((r) => r.isCorrect).length;
@@ -72,12 +73,16 @@ export function ReadingSessionClient({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href={setListHref}
-          className="text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
-        >
-          ← Exams in set {setNumber}
-        </Link>
+        {!inRunner ? (
+          <Link
+            href={setListHref}
+            className="text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
+          >
+            ← Exams in set {setNumber}
+          </Link>
+        ) : (
+          <span />
+        )}
         <p className="ep-stat text-xs text-neutral-500">
           Set {setNumber} · Exam {examNumber} · Max {maxScore} pts
         </p>
@@ -104,6 +109,7 @@ export function ReadingSessionClient({
             onRedeem={redeem}
             setListHref={setListHref}
             nextExamHref={nextExamHref}
+            inRunner={inRunner}
           />
         </div>
       ) : null}

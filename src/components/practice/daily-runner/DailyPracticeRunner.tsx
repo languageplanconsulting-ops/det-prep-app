@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { Tier } from "@/lib/access-control";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
+import { CoachBubble } from "@/components/ui/CoachBubble";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import { defaultDifficultyFor } from "@/lib/practice-queue-builder";
 import type { RandomDifficulty } from "@/lib/practice-random";
@@ -121,7 +123,7 @@ export function DailyPracticeRunner({
 
   const finishRun = useCallback(async () => {
     setFinishing(true);
-    sfxCelebrate("md");
+    sfxCelebrate("lg");
     try {
       const res = await fetch(`/api/study-plan/daily?date=${date}`, {
         credentials: "same-origin",
@@ -194,12 +196,13 @@ export function DailyPracticeRunner({
 
   if (phase === "done") {
     return (
-      <div className="mx-auto flex max-w-md flex-col items-center px-4 py-16 text-center">
-        <p className="text-5xl">🎉</p>
-        <h1 className="mt-3 font-display text-2xl font-extrabold text-slate-900">เยี่ยมมาก! ทำครบแล้ว</h1>
-        <p className="mt-2 text-sm text-neutral-500">
-          {onlySkill ? "ฝึกครบตามที่ตั้งใจไว้แล้ว ทำได้ดีมาก!" : "ฝึกครบตามแผนของวันนี้แล้ว ทำได้ดีมาก!"}
-        </p>
+      <div className="mx-auto flex max-w-md flex-col items-center px-4 py-12 text-center">
+        <CelebrateMascot title="เยี่ยมมาก! ทำครบแล้ว 🎉" />
+        <CoachBubble>
+          {onlySkill
+            ? "สุดยอดไปเลยครับ! คุณฝึกครบตามที่ตั้งใจไว้แล้ว ความสม่ำเสมอแบบนี้แหละที่ทำให้คะแนนขึ้นจริง — พรุ่งนี้มาลุยต่อกันนะ! 💪"
+            : "สุดยอดไปเลยครับ! คุณฝึกครบทุกทักษะตามแผนของวันนี้แล้ว เก่งมากที่ทำจนจบ — ความสม่ำเสมอแบบนี้แหละที่พาคะแนนขึ้น เจอกันใหม่พรุ่งนี้นะ! 🌟"}
+        </CoachBubble>
         <div className="mt-6 flex w-full flex-col gap-2">
           <button
             type="button"

@@ -36,6 +36,7 @@ export function ReadingReport({
   onRedeem,
   setListHref,
   nextExamHref,
+  inRunner = false,
 }: {
   round: ReadingRoundNum;
   difficulty: ReadingDifficulty;
@@ -46,6 +47,9 @@ export function ReadingReport({
   onRedeem: () => void;
   setListHref: string;
   nextExamHref: string | null;
+  /** True when embedded in a daily/timed runner — hide next/back navigation so
+   * only the runner's "ต่อไป" bar advances. */
+  inRunner?: boolean;
 }) {
   useEffect(() => {
     sfxCelebrate("md");
@@ -208,7 +212,7 @@ export function ReadingReport({
       </section>
 
       <div className="flex flex-col gap-4">
-        {nextExamHref ? (
+        {!inRunner && nextExamHref ? (
           <Link
             href={nextExamHref}
             onClick={() => sfxTransition()}
@@ -227,18 +231,22 @@ export function ReadingReport({
         >
           Redeem yourself
         </button>
-        <Link
-          href={setListHref}
-          className="ep-brutal-reading block bg-neutral-100 py-3 text-center text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
-        >
-          Back to exams in this set
-        </Link>
-        <Link
-          href="/practice/comprehension/reading"
-          className="ep-brutal-reading block bg-white py-3 text-center text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
-        >
-          Back to levels
-        </Link>
+        {!inRunner && (
+          <Link
+            href={setListHref}
+            className="ep-brutal-reading block bg-neutral-100 py-3 text-center text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+          >
+            Back to exams in this set
+          </Link>
+        )}
+        {!inRunner && (
+          <Link
+            href="/practice/comprehension/reading"
+            className="ep-brutal-reading block bg-white py-3 text-center text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000]"
+          >
+            Back to levels
+          </Link>
+        )}
       </div>
     </div>
   );

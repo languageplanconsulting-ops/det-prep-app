@@ -63,6 +63,10 @@ export function FitbSessionClient({
   const { isAdmin, previewEligible } = useEffectiveTier();
   const uid = useLessonUserId();
   const soft = true;
+  // In a daily/timed runner (onComplete wired) the runner's own "ต่อไป" bar drives
+  // advancement — hide this session's own hub/next-set links so the user can't
+  // accidentally leave the queue and get stuck looping one skill.
+  const inRunner = !!onComplete;
 
   const n = set.missingWords.length;
   const hubHref = `/practice/literacy/fill-in-blank/round/${round}/${difficulty}`;
@@ -260,12 +264,16 @@ export function FitbSessionClient({
   return (
     <div className="flex min-h-[min(100vh,920px)] flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4">
-        <Link
-          href={hubHref}
-          className="ep-interactive text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
-        >
-          ← Sets
-        </Link>
+        {!inRunner ? (
+          <Link
+            href={hubHref}
+            className="ep-interactive text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
+          >
+            ← Sets
+          </Link>
+        ) : (
+          <span />
+        )}
         <p className="ep-stat text-xs text-neutral-500">
           {set.setId} · {set.cefrLevel} · {n} blank{n === 1 ? "" : "s"}
         </p>
@@ -447,6 +455,7 @@ export function FitbSessionClient({
           onRedeemNow={onRedeemNow}
           hideRedeemLater={hideRedeemLater}
           onAdvance={onAdvance}
+          inRunner={inRunner}
         />
       )}
       </div>
