@@ -98,6 +98,21 @@ export function DailyPracticeRunner({
         setFlatSlots(slots);
         setCurrentIndex(0);
         usedKeysRef.current = new Set();
+        startAtRef.current = Date.now();
+        scoresRef.current = [];
+        if (slots.length === 0) {
+          // Day already complete before they started — show the summary from what's on record.
+          const groups = onlySkill
+            ? json.progress.groups.filter((g) => g.skill === onlySkill)
+            : json.progress.groups;
+          setDoneSummary({
+            groups,
+            totalDone: groups.reduce((s, g) => s + g.done, 0),
+            total: groups.reduce((s, g) => s + g.count, 0),
+            avgScore: null,
+            minutes: 0,
+          });
+        }
         setPhase(slots.length === 0 ? "done" : "running");
       } catch {
         if (alive) setPhase("load-error");
@@ -141,6 +156,23 @@ export function DailyPracticeRunner({
       });
       if (res.ok) {
         const json = (await res.json()) as ApiDailyResponse;
+        const groups = onlySkill
+          ? json.progress.groups.filter((g) => g.skill === onlySkill)
+          : json.progress.groups;
+        const scores = scoresRef.current;
+        const avgScore = scores.length
+          ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+          : null;
+        const minutes = startAtRef.current
+          ? Math.max(1, Math.round((Date.now() - startAtRef.current) / 60000))
+          : 0;
+        setDoneSummary({
+          groups,
+          totalDone: groups.reduce((s, g) => s + g.done, 0),
+          total: groups.reduce((s, g) => s + g.count, 0),
+          avgScore,
+          minutes,
+        });
         if (json.progress.complete) {
           try {
             await fetch("/api/study-plan/completions", {
@@ -163,7 +195,7 @@ export function DailyPracticeRunner({
     }
     setFinishing(false);
     setPhase("done");
-  }, [date]);
+  }, [date, onlySkill]);
 
   const advance = useCallback(() => {
     setShowContinue(false);
@@ -175,8 +207,9 @@ export function DailyPracticeRunner({
     }
   }, [currentIndex, flatSlots.length, finishRun]);
 
-  const handleSlotComplete = useCallback((_scorePct: number, _maxScore: number) => {
+  const handleSlotComplete = useCallback((scorePct: number, _maxScore: number) => {
     sfxTransition();
+    if (Number.isFinite(scorePct)) scoresRef.current.push(Math.round(scorePct));
     window.setTimeout(() => setShowContinue(true), 900);
   }, []);
 
@@ -205,6 +238,7 @@ export function DailyPracticeRunner({
   }
 
   if (phase === "done") {
+    const s = doneSummary;
     return (
       <div className="mx-auto flex max-w-md flex-col items-center px-4 py-12 text-center">
         <CelebrateMascot title="เยี่ยมมาก! ทำครบแล้ว 🎉" />
@@ -213,6 +247,54 @@ export function DailyPracticeRunner({
             ? "สุดยอดไปเลยครับ! คุณฝึกครบตามที่ตั้งใจไว้แล้ว ความสม่ำเสมอแบบนี้แหละที่ทำให้คะแนนขึ้นจริง — พรุ่งนี้มาลุยต่อกันนะ! 💪"
             : "สุดยอดไปเลยครับ! คุณฝึกครบทุกทักษะตามแผนของวันนี้แล้ว เก่งมากที่ทำจนจบ — ความสม่ำเสมอแบบนี้แหละที่พาคะแนนขึ้น เจอกันใหม่พรุ่งนี้นะ! 🌟"}
         </CoachBubble>
+
+        {s && (
+          <div className="mt-6 w-full">
+            {/* headline stats */}
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="rounded-2xl bg-white p-3 text-center shadow-sm ring-1 ring-neutral-200">
+                <p className="text-xl">✅</p>
+                <p className="mt-0.5 text-2xl font-black tabular-nums text-slate-900">{s.totalDone}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400">ข้อที่ทำ</p>
+              </div>
+              <div className="rounded-2xl bg-white p-3 text-center shadow-sm ring-1 ring-neutral-200">
+                <p className="text-xl">🎯</p>
+                <p className="mt-0.5 text-2xl font-black tabular-nums text-slate-900">
+                  {s.avgScore != null ? `${s.avgScore}%` : "—"}
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400">คะแนนเฉลี่ย</p>
+              </div>
+              <div className="rounded-2xl bg-white p-3 text-center shadow-sm ring-1 ring-neutral-200">
+                <p className="text-xl">⏱️</p>
+                <p className="mt-0.5 text-2xl font-black tabular-nums text-slate-900">
+                  {s.minutes > 0 ? s.minutes : "—"}
+                </p>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-400">นาที</p>
+              </div>
+            </div>
+
+            {/* per-skill breakdown */}
+            <div className="mt-3 space-y-1.5 rounded-2xl bg-white p-3 text-left shadow-sm ring-1 ring-neutral-200">
+              {s.groups.map((g) => {
+                const gm = DAILY_SKILL_META[g.skill];
+                return (
+                  <div key={g.skill} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="font-bold text-slate-700">
+                      {gm.emoji} {gm.th}
+                    </span>
+                    <span
+                      className={`font-mono text-xs font-bold ${g.complete ? "text-emerald-600" : "text-amber-600"}`}
+                    >
+                      {g.complete ? "✓ " : ""}
+                      {g.done}/{g.count}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="mt-6 flex w-full flex-col gap-2">
           <button
             type="button"
