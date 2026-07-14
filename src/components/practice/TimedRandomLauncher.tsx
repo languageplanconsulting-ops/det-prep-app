@@ -7,7 +7,7 @@
  * every level with a live countdown.
  */
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { sfxTap, sfxTransition } from "@/lib/exam-sfx";
 import {
@@ -24,6 +24,23 @@ export function TimedRandomLauncher({ skill }: { skill: DailyPlanSkill }) {
   const [open, setOpen] = useState(false);
   const [minutes, setMinutes] = useState(10);
   const [difficulty, setDifficulty] = useState<TimedDifficulty>("any");
+  // iOS Safari fires a synthesized "ghost" click ~immediately after a tap. When
+  // the tap opens this sheet, that ghost click lands on the freshly-mounted
+  // backdrop and instantly dismisses it — the sheet opens and closes in one tap,
+  // so on iPad it looks like the button does nothing. Ignore backdrop dismissals
+  // that arrive right after opening. (Desktop never synthesizes this second click.)
+  const openedAtRef = useRef(0);
+
+  const openSheet = () => {
+    sfxTap();
+    openedAtRef.current = Date.now();
+    setOpen(true);
+  };
+
+  const requestClose = () => {
+    if (Date.now() - openedAtRef.current < 400) return;
+    setOpen(false);
+  };
 
   const start = () => {
     sfxTransition();
@@ -35,10 +52,7 @@ export function TimedRandomLauncher({ skill }: { skill: DailyPlanSkill }) {
       {/* BIG button */}
       <button
         type="button"
-        onClick={() => {
-          sfxTap();
-          setOpen(true);
-        }}
+        onClick={openSheet}
         className="group relative w-full overflow-hidden rounded-3xl bg-gradient-to-br from-[#004AAD] to-[#0066E0] px-6 py-7 text-left shadow-[0_10px_30px_-8px_rgba(0,74,173,0.55)] ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_-8px_rgba(0,74,173,0.6)] active:translate-y-0 active:scale-[0.99] sm:px-8 sm:py-8"
       >
         <span className="pointer-events-none absolute -right-6 -top-8 text-[120px] opacity-20 transition-transform duration-500 group-hover:rotate-12 sm:text-[150px]">
@@ -61,7 +75,7 @@ export function TimedRandomLauncher({ skill }: { skill: DailyPlanSkill }) {
       {open && (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4"
-          onClick={() => setOpen(false)}
+          onClick={requestClose}
         >
           <div
             className="ep-step-slide-in w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl"
