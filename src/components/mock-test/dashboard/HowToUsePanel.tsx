@@ -41,7 +41,7 @@ const CHUNKS: Array<{ n: number; title: string; body: React.ReactNode }> = [
     body: (
       <>
         หลังจบแต่ละชุดได้ Feedback แบบเฉพาะบุคคล บันทึกเก็บได้ติดตามพัฒนาการ — ปัญหาแจ้งที่{" "}
-        <b>languageplan.consulting@gmail.com</b>
+        <b>languageplanconsulting@gmail.com</b>
       </>
     ),
   },

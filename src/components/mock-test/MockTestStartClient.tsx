@@ -578,7 +578,7 @@ export function MockTestStartClient() {
               </div>
               <div className="bg-white p-4">
                 <p className="flex items-center gap-2 text-[13px] font-bold"><span className="text-[#004AAD]">④</span> ฟีดแบ็ก &amp; แจ้งปัญหา</p>
-                <p className="mt-1 text-[13px] leading-6 text-slate-600">จบแต่ละชุดได้ฟีดแบ็กเฉพาะบุคคล เก็บไว้ติดตามพัฒนาการได้ · ปัญหาแจ้ง <b>languageplan.consulting@gmail.com</b></p>
+                <p className="mt-1 text-[13px] leading-6 text-slate-600">จบแต่ละชุดได้ฟีดแบ็กเฉพาะบุคคล เก็บไว้ติดตามพัฒนาการได้ · ปัญหาแจ้ง <b>languageplanconsulting@gmail.com</b></p>
               </div>
             </div>
           </details>

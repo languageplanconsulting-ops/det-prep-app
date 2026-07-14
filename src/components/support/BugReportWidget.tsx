@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { IntroModalShell } from "@/components/practice/IntroModalShell";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
@@ -23,6 +24,112 @@ export function BugReportWidget() {
   const [submitState, setSubmitState] = useState<SubmitState>({ kind: "idle" });
 
   const hidden = pathname.startsWith("/admin");
+
+  // Draggable FAB position (persisted). null = default bottom-right anchor.
+  const FAB_STORAGE_KEY = "ep-bug-fab-pos";
+  const [fabPos, setFabPos] = useState<{ x: number; y: number } | null>(null);
+  const dragState = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+    moved: boolean;
+  } | null>(null);
+  const fabRef = useRef<HTMLButtonElement | null>(null);
+
+  // Restore saved position on mount.
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(FAB_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { x: number; y: number };
+      if (typeof parsed?.x === "number" && typeof parsed?.y === "number") {
+        setFabPos(parsed);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // Keep the button on-screen if the viewport resizes.
+  useEffect(() => {
+    if (!fabPos) return;
+    const clamp = () => {
+      const el = fabRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width - 8;
+      const maxY = window.innerHeight - rect.height - 8;
+      setFabPos((prev) =>
+        prev
+          ? {
+              x: Math.min(Math.max(prev.x, 8), Math.max(8, maxX)),
+              y: Math.min(Math.max(prev.y, 8), Math.max(8, maxY)),
+            }
+          : prev,
+      );
+    };
+    window.addEventListener("resize", clamp);
+    return () => window.removeEventListener("resize", clamp);
+  }, [fabPos]);
+
+  const handlePointerDown = useCallback((e: ReactPointerEvent<HTMLButtonElement>) => {
+    const el = fabRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    dragState.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      originX: rect.left,
+      originY: rect.top,
+      moved: false,
+    };
+    el.setPointerCapture(e.pointerId);
+  }, []);
+
+  const handlePointerMove = useCallback((e: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = dragState.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+    drag.moved = true;
+    const el = fabRef.current;
+    const width = el?.offsetWidth ?? 48;
+    const height = el?.offsetHeight ?? 48;
+    const nextX = Math.min(Math.max(drag.originX + dx, 8), window.innerWidth - width - 8);
+    const nextY = Math.min(Math.max(drag.originY + dy, 8), window.innerHeight - height - 8);
+    setFabPos({ x: nextX, y: nextY });
+  }, []);
+
+  const handlePointerUp = useCallback((e: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = dragState.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    const wasDrag = drag.moved;
+    dragState.current = null;
+    try {
+      fabRef.current?.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+    if (wasDrag) {
+      // Persist the new resting position and swallow the click that follows.
+      setFabPos((prev) => {
+        if (prev) {
+          try {
+            window.localStorage.setItem(FAB_STORAGE_KEY, JSON.stringify(prev));
+          } catch {
+            /* ignore */
+          }
+        }
+        return prev;
+      });
+    } else {
+      setOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (hidden) return;
@@ -100,13 +207,18 @@ export function BugReportWidget() {
   return (
     <>
       <button
+        ref={fabRef}
         type="button"
-        onClick={() => setOpen(true)}
-        aria-label="รายงานปัญหา"
-        className="ep-bug-fab fixed bottom-5 right-5 z-[95] flex h-12 w-12 items-center justify-center gap-2 rounded-full border-4 border-black bg-[#FFCC00] p-0 text-sm font-black uppercase tracking-[0.14em] text-black shadow-[6px_6px_0_0_#111] transition hover:-translate-y-0.5 hover:bg-[#ffd633] sm:h-auto sm:w-auto sm:px-5 sm:py-3"
-        style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        aria-label="รายงานปัญหา (ลากเพื่อย้ายได้)"
+        className={`ep-bug-fab fixed z-[95] flex h-9 w-9 touch-none select-none items-center justify-center gap-1.5 rounded-full border-2 border-black bg-[#FFCC00] p-0 font-sans text-[13px] font-bold text-black shadow-[3px_3px_0_0_#111] transition hover:-translate-y-0.5 hover:bg-[#ffd633] active:cursor-grabbing sm:h-auto sm:w-auto sm:px-3.5 sm:py-2 ${
+          fabPos ? "cursor-grab" : "bottom-5 right-5 cursor-grab"
+        }`}
+        style={fabPos ? { left: fabPos.x, top: fabPos.y } : undefined}
       >
-        <span aria-hidden="true" className="text-base leading-none">
+        <span aria-hidden="true" className="text-sm leading-none">
           💬
         </span>
         <span className="hidden sm:inline">รายงานปัญหา</span>
