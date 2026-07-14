@@ -35,9 +35,19 @@ function alignWords(expected: string, user: string): {
   expected: Array<{ word: string; ok: boolean }>;
   display: WordSeg[];
 } {
-  const norm = (w: string) => w.toLowerCase().replace(/[.,!?;:"']/g, "");
-  const eRaw = expected.trim().split(/\s+/).filter(Boolean);
-  const uRaw = user.trim().split(/\s+/).filter(Boolean);
+  // Dictation policy: the comma is the ONE punctuation mark that counts (full stops,
+  // apostrophes, etc. are ignored). So strip every mark EXCEPT the comma, and split
+  // commas out as their own tokens — that way a missing/extra comma shows up as its
+  // own red item in the word diff instead of vanishing into the attached word.
+  const norm = (w: string) => w.toLowerCase().replace(/[.!?;:"']/g, "");
+  const splitTokens = (s: string) =>
+    s
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .flatMap((w) => w.split(/(,)/).filter(Boolean));
+  const eRaw = splitTokens(expected);
+  const uRaw = splitTokens(user);
   const eN = eRaw.map(norm);
   const uN = uRaw.map(norm);
   const m = eN.length;
@@ -364,7 +374,11 @@ export function DictationReport({
                   <li key={idx} className={`flex gap-2 ${stagger.className}`} style={stagger.style}>
                     <span className="font-bold text-rose-500">✗</span>
                     <span>
-                      <strong>{w.word}</strong>
+                      {w.word === "," ? (
+                        <strong>เครื่องหมายจุลภาค “,” (comma) ที่ขาดไป</strong>
+                      ) : (
+                        <strong>{w.word}</strong>
+                      )}
                     </span>
                   </li>
                 );
