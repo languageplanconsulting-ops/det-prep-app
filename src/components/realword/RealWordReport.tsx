@@ -99,7 +99,6 @@ export function RealWordReport({
   const isPerfect = scorePercent >= 100;
   // Cute "save these words?" popup on a perfect round — shown once on mount.
   const [showSavePopup, setShowSavePopup] = useState(isPerfect);
-  const [savingAll, setSavingAll] = useState(false);
 
   const missedReal = wordSet.words.filter((w, i) => w.is_real && !selected.has(i));
   const pickedFake = wordSet.words.filter((w, i) => !w.is_real && selected.has(i));
@@ -125,21 +124,6 @@ export function RealWordReport({
     if (showSavePopup) sfxReveal();
   }, [showSavePopup]);
 
-  const saveAllRealWords = async () => {
-    setSavingAll(true);
-    sfxCelebrate("md");
-    for (const w of realWords) {
-      if (added.has(w.word.toLowerCase())) continue;
-      try {
-        await addToNotebook(w.word, w.explanationThai, w.synonyms);
-      } catch {
-        /* keep going — best effort */
-      }
-    }
-    setSavingAll(false);
-    setShowSavePopup(false);
-  };
-
   const redeemNow = () => {
     playBlinkBeep();
     onRedeemNow();
@@ -161,18 +145,41 @@ export function RealWordReport({
                 D
               </div>
               <div className="rounded-2xl rounded-tl-sm bg-[#004AAD]/5 px-3.5 py-2.5 text-sm font-medium text-slate-800">
-                เก็บคำศัพท์ทั้ง {realWords.length} คำนี้ลง Notebook ไว้ทบทวนไหมครับ? จะได้จำได้แม่นๆ 📓
+                เก็บคำที่อยากจำลง Notebook ไว้ทบทวนได้เลย — กดเพิ่มทีละคำตามนี้ 📓
               </div>
             </div>
-            <div className="mt-5 flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={() => void saveAllRealWords()}
-                disabled={savingAll}
-                className="w-full rounded-2xl bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-md transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
-              >
-                {savingAll ? "กำลังบันทึก…" : `บันทึกทั้งหมด (${realWords.length} คำ) 📓`}
-              </button>
+            <div className="mt-4 max-h-64 space-y-2 overflow-y-auto text-left">
+              {realWords.map((w) => {
+                const done = added.has(w.word.toLowerCase());
+                return (
+                  <div
+                    key={w.word}
+                    className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3.5 py-2.5"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-black text-slate-900">{w.word}</p>
+                      {w.explanationThai ? (
+                        <p className="truncate text-xs text-neutral-500">{w.explanationThai}</p>
+                      ) : null}
+                    </div>
+                    {done ? (
+                      <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-black text-emerald-700">
+                        ✓ เพิ่มแล้ว
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => void addToNotebook(w.word, w.explanationThai, w.synonyms)}
+                        className="shrink-0 rounded-full bg-[#004AAD] px-3 py-1.5 text-xs font-black text-[#FFCC00] transition hover:opacity-90 active:scale-95"
+                      >
+                        + Notebook
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 flex flex-col gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -181,7 +188,7 @@ export function RealWordReport({
                 }}
                 className="w-full py-2 text-xs font-bold text-neutral-400 hover:text-neutral-600"
               >
-                ไว้ก่อน ขอบคุณครับ
+                ไม่เป็นไร รู้คำพวกนี้หมดแล้ว
               </button>
             </div>
           </div>
