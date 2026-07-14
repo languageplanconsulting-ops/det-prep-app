@@ -13,6 +13,10 @@ export type DailyQueueState = {
   tierMinutes: 5 | 10 | 20 | 30;
   /** ISO "YYYY-MM-DD" the queue was started on (today), used as completion_date. */
   dateIso: string;
+  /** epoch ms when the run started — powers the "minutes practised" stat on the finish report. */
+  startedAt?: number;
+  /** per-step emoji + label, for the "topics covered" list on the finish report. */
+  items?: { emoji: string; label: string }[];
 };
 
 const STORAGE_KEY = "ep-daily-queue";

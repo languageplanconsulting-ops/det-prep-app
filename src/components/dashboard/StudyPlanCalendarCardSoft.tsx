@@ -668,6 +668,8 @@ export function StudyPlanCalendarCardSoft({
                       index: 0,
                       tierMinutes: lessonTier,
                       dateIso: selectedDate,
+                      startedAt: Date.now(),
+                      items: queue.map((q) => ({ emoji: q.emoji, label: q.label })),
                     });
                     router.push(queue[0].href);
                   };
