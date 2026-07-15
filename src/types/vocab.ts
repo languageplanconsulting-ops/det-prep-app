@@ -16,6 +16,9 @@ export interface VocabBlankQuestion {
 export interface VocabCorrectWordEntry {
   word: string;
   synonyms: string[];
+  /** Thai meaning of `word`, shown as the notebook quiz's "correct answer". Optional for
+   * older admin-pasted sets that predate this field — falls back to the synonym list. */
+  meaningTh?: string;
 }
 
 export interface VocabPassageUnit {

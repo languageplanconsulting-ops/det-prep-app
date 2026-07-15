@@ -237,7 +237,7 @@ function WordNotebookRow({
         source: "vocabulary-comprehension",
         categoryIds: normalizeCategoryIds([NOTEBOOK_BUILTIN.all, NOTEBOOK_BUILTIN.vocabulary]),
         titleEn: entry.word,
-        titleTh: entry.word,
+        titleTh: entry.meaningTh?.trim() || synText,
         bodyEn: `Synonyms: ${synText}`,
         bodyTh: `คำเหมือน/ใกล้เคียง: ${synText}`,
         userNote: "",

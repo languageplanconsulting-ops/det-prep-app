@@ -30,7 +30,15 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function meaningOf(w: NotebookEntry): string {
-  return (w.titleTh || w.bodyTh || w.bodyEn || "").trim();
+  const wordEn = w.titleEn?.trim().toLowerCase() ?? "";
+  // Some older saved entries mistakenly stored the English word itself as the
+  // "Thai meaning" — skip any candidate that's just the word repeated back.
+  const candidates = [w.titleTh, w.bodyTh, w.bodyEn];
+  for (const c of candidates) {
+    const trimmed = (c ?? "").trim();
+    if (trimmed && trimmed.toLowerCase() !== wordEn) return trimmed;
+  }
+  return "";
 }
 
 type Question = { word: NotebookEntry; choices: string[]; answer: string };

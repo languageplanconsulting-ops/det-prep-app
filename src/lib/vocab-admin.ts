@@ -60,6 +60,7 @@ function parseCorrectWord(raw: unknown, ctx: string): VocabCorrectWordEntry {
   return {
     word: expectString(raw, "word", ctx),
     synonyms,
+    meaningTh: expectStringOpt(raw, "meaningTh"),
   };
 }
 

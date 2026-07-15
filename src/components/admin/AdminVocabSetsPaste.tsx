@@ -356,13 +356,17 @@ export function AdminVocabSetsPaste() {
         <code className="ep-stat text-xs">[BLANK 1]</code>…<code className="ep-stat text-xs">[BLANK N]</code>{" "}
         markers matching the lengths of{" "}
         <code className="ep-stat text-xs">blanks</code> and <code className="ep-stat text-xs">correctWords</code>.
+        Each <code className="ep-stat text-xs">correctWords</code> entry should include{" "}
+        <code className="ep-stat text-xs">meaningTh</code> (the word&apos;s Thai meaning) — it&apos;s shown as the
+        answer when learners quiz themselves on saved notebook vocab. Without it, the quiz falls back to the
+        English synonym list instead of a real Thai translation.
         Max {VOCAB_MAX_PASSAGES_PER_SET} passages per slot.
       </p>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={12}
-        placeholder='[ { "passageNumber": 1, "titleEn": "Campus Life", "passageText": "… [BLANK] …", "blanks": [ … ], "correctWords": [ … ] } ]'
+        placeholder='[ { "passageNumber": 1, "titleEn": "Campus Life", "passageText": "… [BLANK] …", "blanks": [ … ], "correctWords": [ { "word": "…", "synonyms": [ "…" ], "meaningTh": "…" } ] } ]'
         className="w-full border-2 border-black bg-neutral-50 p-3 ep-stat text-xs"
         spellCheck={false}
       />

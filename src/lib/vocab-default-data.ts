@@ -52,12 +52,12 @@ function makePassage(
       },
     ],
     correctWords: [
-      { word: "morning", synonyms: ["dawn", "daybreak", "AM"] },
-      { word: "forest", synonyms: ["woods", "woodland", "grove"] },
-      { word: "trail", synonyms: ["path", "track", "route"] },
-      { word: "stream", synonyms: ["brook", "creek", "rivulet"] },
-      { word: "loudly", synonyms: ["noisily", "clearly", "strongly"] },
-      { word: "sunlight", synonyms: ["sunshine", "daylight", "rays"] },
+      { word: "morning", synonyms: ["dawn", "daybreak", "AM"], meaningTh: "ตอนเช้า" },
+      { word: "forest", synonyms: ["woods", "woodland", "grove"], meaningTh: "ป่า" },
+      { word: "trail", synonyms: ["path", "track", "route"], meaningTh: "เส้นทางเดิน" },
+      { word: "stream", synonyms: ["brook", "creek", "rivulet"], meaningTh: "ลำธาร" },
+      { word: "loudly", synonyms: ["noisily", "clearly", "strongly"], meaningTh: "อย่างดัง" },
+      { word: "sunlight", synonyms: ["sunshine", "daylight", "rays"], meaningTh: "แสงแดด" },
     ],
   };
 }
