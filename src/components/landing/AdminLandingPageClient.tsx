@@ -728,7 +728,7 @@ export function AdminLandingPageClient({
               href="/explore"
               className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-ep-yellow px-8 py-3.5 text-base font-bold text-gray-900 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-yellow-400"
             >
-              ลองใช้ฟังก์ชันเหล่านี้ด้วยตัวเองฟรี — ไม่ต้องใส่บัตร
+              ลองใช้ฟังก์ชันเหล่านี้ด้วยตัวเอง
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -1021,7 +1021,7 @@ export function AdminLandingPageClient({
                   href="/explore"
                   className="inline-flex items-center gap-2 rounded-xl bg-ep-yellow px-6 py-2.5 text-sm font-bold text-gray-900 transition-colors hover:bg-yellow-400"
                 >
-                  ลองทักษะนี้เองฟรี →
+                  ลองทักษะนี้ด้วยตัวเอง →
                 </Link>
                 <p className="text-center text-xs text-gray-500">
                   กด <span className="rounded bg-white/10 px-1.5 py-0.5 font-mono">Esc</span> หรือคลิกรอบ ๆ เพื่อปิด
