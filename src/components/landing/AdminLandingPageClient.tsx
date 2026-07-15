@@ -405,7 +405,7 @@ export function AdminLandingPageClient({
           </Link>
           <div className="hidden items-center gap-6 text-sm text-gray-500 md:flex">
             <a href="#tools" className="transition-colors hover:text-ep-blue">มีอะไรให้ใช้</a>
-            <a href="#demos" className="transition-colors hover:text-ep-blue">ดูของจริง</a>
+            <a href="#demos" className="transition-colors hover:text-ep-blue">ฟังก์ชันในแอป</a>
             <a href="#feedback" className="transition-colors hover:text-ep-blue">ฟีดแบ็ก</a>
             <a href="#mock" className="transition-colors hover:text-ep-blue">Mock test</a>
             <a href="#exams" className="transition-colors hover:text-ep-blue">ข้อสอบ</a>
@@ -670,15 +670,15 @@ export function AdminLandingPageClient({
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ep-yellow opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-ep-yellow" />
               </span>
-              ดูของจริง ไม่ใช่ภาพโฆษณา
+              ฟังก์ชันจริงในแอป
             </span>
           </div>
           <h2 className="mb-3 text-center text-2xl font-bold leading-tight sm:text-3xl">
-            เห็นทุกทักษะทำงานจริง<span className="text-ep-yellow"> ก่อนจ่ายสักบาท</span>
+            แอปนี้ช่วยให้คะแนนนักเรียน<span className="text-ep-yellow">เพิ่มขึ้นได้อย่างไร?</span>
           </h2>
           <p className="mx-auto mb-10 max-w-2xl text-center text-sm leading-relaxed text-gray-300 sm:text-base">
-            พี่ดอยพาทำจริงทีละขั้นในทุกแบบข้อสอบ — <b className="text-white">เลือกดูทักษะที่คุณกลัวที่สุด</b>{" "}
-            แล้วตัดสินใจเองว่านี่ใช่ที่ที่จะทำให้คะแนนขึ้นไหม
+            แต่ละฟังก์ชันถูกออกแบบมาแก้ปัญหาคนละจุด — <b className="text-white">เลือกดูทักษะที่คุณกังวลที่สุด</b>{" "}
+            แล้วดูว่าพี่ดอยอธิบายวิธีแก้จุดนั้นยังไง
           </p>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -711,7 +711,7 @@ export function AdminLandingPageClient({
                 </div>
                 <p className="relative mt-2 text-sm leading-relaxed text-gray-300">{v.tease}</p>
                 <span className="relative mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-ep-yellow">
-                  ดูวิธีใช้จริง — สอนละเอียดทีละขั้น
+                  ดูฟังก์ชันนี้ทำงานยังไง
                   <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -721,14 +721,14 @@ export function AdminLandingPageClient({
           </div>
 
           <p className="mx-auto mt-10 max-w-xl text-center text-xs leading-relaxed text-gray-400">
-            ✓ เห็นหน้าจอจริง ✓ ฟีดแบ็กจริง ✓ ครูสอนจริง — เพราะของดีไม่ต้องกลัวให้ดู
+            ✓ หน้าจอจริงจากแอป ✓ ฟีดแบ็กจริงจากระบบ ✓ อธิบายโดยพี่ดอยเอง ทีละฟังก์ชัน
           </p>
           <div className="mt-6 text-center">
             <Link
               href="/explore"
               className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-ep-yellow px-8 py-3.5 text-base font-bold text-gray-900 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-yellow-400"
             >
-              ลองด้วยตัวเองฟรี — ไม่ต้องใส่บัตร
+              ลองใช้ฟังก์ชันเหล่านี้ด้วยตัวเองฟรี — ไม่ต้องใส่บัตร
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
