@@ -165,11 +165,121 @@ const PRICING = [
   },
 ];
 
+type DemoVideo = {
+  file: string;
+  icon: string;
+  title: string;
+  th: string;
+  group: string;
+  tease: string;
+  ring: string;
+  chip: string;
+  glow: string;
+};
+
+// Full-length narrated tutorials live on Google Drive (too heavy to ship in-repo).
+// Paste each Drive share link here — use the "/preview" form so it embeds/plays,
+// e.g. https://drive.google.com/file/d/FILE_ID/preview
+// Any skill left as "" simply hides its "watch the full tutorial" button.
+const FULL_TUTORIAL_URLS: Record<string, string> = {
+  writing: "https://drive.google.com/file/d/1HDgdrkcObs0-K-ImUB1axrEZd-kZt7Wo/preview",
+  speaking: "https://drive.google.com/file/d/1KkFB3KA2HIXA3qor4Tq05umB8lU6saIu/preview",
+  conversation: "https://drive.google.com/file/d/12HSzA6hh-jbf0rk4U0ZiGeMm1jEQg24a/preview",
+  reading: "https://drive.google.com/file/d/19ejFpj-P0C92OCNMPO5aF2BF1gGDk3PM/preview",
+  dictation: "https://drive.google.com/file/d/1NtPRohqbWTGG0_k3C6HVZ-Nowi6LeRzi/preview",
+  "real-word": "https://drive.google.com/file/d/1K-upkFeEHxBecSgMQHAEaRI6wfA3Z7xv/preview",
+  "fill-in-the-blanks": "https://drive.google.com/file/d/1TfyPw94DGovyKqnRvSJEb_PLn8JLD-Af/preview",
+};
+
+// Real narrated screen-walkthroughs — one per DET task. Ordered by the skills
+// Thai test-takers fear most first (Production → Conversation → Reading → Literacy),
+// so the anxious visitor sees their own weak spot demoed before they scroll past.
+const DEMO_VIDEOS: DemoVideo[] = [
+  {
+    file: "writing",
+    icon: "📝",
+    title: "เขียน",
+    th: "Writing",
+    group: "เขียน–พูด",
+    tease: "เขียนตอบจริง แล้วดูฟีดแบ็กชี้ทีละประโยคว่าต้องแก้ตรงไหน",
+    ring: "hover:border-ep-blue/60",
+    chip: "text-ep-blue",
+    glow: "from-blue-500/15",
+  },
+  {
+    file: "speaking",
+    icon: "🗣️",
+    title: "พูด",
+    th: "Speaking",
+    group: "เขียน–พูด",
+    tease: "พูดตอบภาพ แล้วเห็นคะแนนแยกไวยากรณ์ · คำศัพท์ · ความลื่นไหล",
+    ring: "hover:border-ep-blue/60",
+    chip: "text-ep-blue",
+    glow: "from-blue-500/15",
+  },
+  {
+    file: "conversation",
+    icon: "🎧",
+    title: "สนทนา",
+    th: "Conversation",
+    group: "ฟังสนทนา",
+    tease: "ฟังบทสนทนาเร็ว ๆ แบบในมหาลัย แล้วตอบคำถามให้ทัน",
+    ring: "hover:border-violet-400/60",
+    chip: "text-violet-600",
+    glow: "from-violet-500/15",
+  },
+  {
+    file: "reading",
+    icon: "📚",
+    title: "การอ่าน",
+    th: "Reading",
+    group: "การอ่าน",
+    tease: "จับใจความให้ทันเวลา พร้อมเทคนิคอ่านเร็วที่ใช้ได้จริง",
+    ring: "hover:border-amber-400/60",
+    chip: "text-amber-600",
+    glow: "from-amber-400/20",
+  },
+  {
+    file: "dictation",
+    icon: "⌨️",
+    title: "ฟังแล้วพิมพ์",
+    th: "Dictation",
+    group: "สะกด–ฟังจับคำ",
+    tease: "ฟังเสียงแล้วพิมพ์ตาม — เก็บคะแนนพื้นฐานที่คนส่วนใหญ่ทำหล่น",
+    ring: "hover:border-emerald-400/60",
+    chip: "text-emerald-600",
+    glow: "from-emerald-500/15",
+  },
+  {
+    file: "real-word",
+    icon: "✅",
+    title: "คำจริง",
+    th: "Real word",
+    group: "สะกด–ฟังจับคำ",
+    tease: "แยกคำจริงออกจากคำหลอกให้ไว รู้ผลทันทีทุกข้อ",
+    ring: "hover:border-emerald-400/60",
+    chip: "text-emerald-600",
+    glow: "from-emerald-500/15",
+  },
+  {
+    file: "fill-in-the-blanks",
+    icon: "✏️",
+    title: "เติมคำในช่องว่าง",
+    th: "Fill in the blanks",
+    group: "สะกด–ฟังจับคำ",
+    tease: "เติมคำให้ถูกบริบท พร้อมเหตุผลว่าทำไมคำนี้ถึงใช่",
+    ring: "hover:border-emerald-400/60",
+    chip: "text-emerald-600",
+    glow: "from-emerald-500/15",
+  },
+];
+
 export function AdminLandingPageClient({
   initialFastTrackOpen = false,
 }: {
   initialFastTrackOpen?: boolean;
 }) {
+  const [openVideo, setOpenVideo] = useState<DemoVideo | null>(null);
   const [fastTrackOpen, setFastTrackOpen] = useState(initialFastTrackOpen);
   const [ftEmail, setFtEmail] = useState("");
   const [ftName, setFtName] = useState("");
@@ -209,6 +319,20 @@ export function AdminLandingPageClient({
       window.removeEventListener("resize", onScroll);
     };
   }, []);
+
+  useEffect(() => {
+    if (!openVideo) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenVideo(null);
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [openVideo]);
 
   const submitFastTrack = useCallback(async () => {
     setFtLoading(true);
@@ -281,6 +405,7 @@ export function AdminLandingPageClient({
           </Link>
           <div className="hidden items-center gap-6 text-sm text-gray-500 md:flex">
             <a href="#tools" className="transition-colors hover:text-ep-blue">มีอะไรให้ใช้</a>
+            <a href="#demos" className="transition-colors hover:text-ep-blue">ดูของจริง</a>
             <a href="#feedback" className="transition-colors hover:text-ep-blue">ฟีดแบ็ก</a>
             <a href="#mock" className="transition-colors hover:text-ep-blue">Mock test</a>
             <a href="#exams" className="transition-colors hover:text-ep-blue">ข้อสอบ</a>
@@ -536,6 +661,82 @@ export function AdminLandingPageClient({
         </div>
       </section>
 
+      {/* SEE-IT-IN-ACTION — real narrated walkthroughs of every task */}
+      <section id="demos" className="bg-gray-900 px-5 py-16 text-white sm:py-20">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-3 text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-ep-yellow">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ep-yellow opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-ep-yellow" />
+              </span>
+              ดูของจริง ไม่ใช่ภาพโฆษณา
+            </span>
+          </div>
+          <h2 className="mb-3 text-center text-2xl font-bold leading-tight sm:text-3xl">
+            เห็นทุกทักษะทำงานจริง<span className="text-ep-yellow"> ก่อนจ่ายสักบาท</span>
+          </h2>
+          <p className="mx-auto mb-10 max-w-2xl text-center text-sm leading-relaxed text-gray-300 sm:text-base">
+            พี่ดอยพาทำจริงทีละขั้นในทุกแบบข้อสอบ — <b className="text-white">เลือกดูทักษะที่คุณกลัวที่สุด</b>{" "}
+            แล้วตัดสินใจเองว่านี่ใช่ที่ที่จะทำให้คะแนนขึ้นไหม
+          </p>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {DEMO_VIDEOS.map((v) => (
+              <button
+                key={v.file}
+                type="button"
+                onClick={() => setOpenVideo(v)}
+                className={cn(
+                  "group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-left transition-all hover:-translate-y-1 hover:bg-white/[0.07]",
+                  v.ring,
+                )}
+              >
+                <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent opacity-0 transition-opacity group-hover:opacity-100", v.glow)} />
+                <div className="relative flex items-center justify-between">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-2xl">
+                    {v.icon}
+                  </span>
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-gray-900 shadow-lg transition-transform group-hover:scale-110">
+                    <svg className="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </span>
+                </div>
+                <div className="relative mt-4">
+                  <h3 className="text-base font-bold text-white">{v.title}</h3>
+                  <p className={cn("text-[11px] font-semibold uppercase tracking-wide", v.chip)}>
+                    {v.th} · {v.group}
+                  </p>
+                </div>
+                <p className="relative mt-2 text-sm leading-relaxed text-gray-300">{v.tease}</p>
+                <span className="relative mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-ep-yellow">
+                  ดูวิธีใช้จริง — สอนละเอียดทีละขั้น
+                  <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <p className="mx-auto mt-10 max-w-xl text-center text-xs leading-relaxed text-gray-400">
+            ✓ เห็นหน้าจอจริง ✓ ฟีดแบ็กจริง ✓ ครูสอนจริง — เพราะของดีไม่ต้องกลัวให้ดู
+          </p>
+          <div className="mt-6 text-center">
+            <Link
+              href="/explore"
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-ep-yellow px-8 py-3.5 text-base font-bold text-gray-900 shadow-lg transition-all hover:-translate-y-0.5 hover:bg-yellow-400"
+            >
+              ลองด้วยตัวเองฟรี — ไม่ต้องใส่บัตร
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* SOCIAL PROOF — student reviews */}
       <section className="mx-auto max-w-4xl px-5 pb-16">
         <p className="mb-5 text-center text-sm font-semibold text-gray-500">เสียงจากนักเรียน</p>
@@ -767,6 +968,66 @@ export function AdminLandingPageClient({
             >
               เริ่ม
             </Link>
+          </div>
+        </div>
+      ) : null}
+
+      {/* DEMO VIDEO LIGHTBOX */}
+      {openVideo ? (
+        <div
+          className="fixed inset-0 z-[2100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal
+          aria-label={`ตัวอย่างการใช้งาน ${openVideo.title}`}
+          onClick={() => setOpenVideo(null)}
+        >
+          <div
+            className="w-full max-w-4xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-xl">
+                  {openVideo.icon}
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-white">{openVideo.title}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                    {openVideo.th} · วิธีใช้จริง
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpenVideo(null)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-lg font-bold text-white transition-colors hover:bg-white/10"
+                aria-label="ปิด"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
+              <iframe
+                key={openVideo.file}
+                src={FULL_TUTORIAL_URLS[openVideo.file]}
+                className="aspect-video w-full bg-black"
+                allow="autoplay"
+                allowFullScreen
+              />
+            </div>
+            <div className="mt-4 flex flex-col items-center gap-3">
+              <div className="flex flex-col items-center gap-1">
+                <Link
+                  href="/explore"
+                  className="inline-flex items-center gap-2 rounded-xl bg-ep-yellow px-6 py-2.5 text-sm font-bold text-gray-900 transition-colors hover:bg-yellow-400"
+                >
+                  ลองทักษะนี้เองฟรี →
+                </Link>
+                <p className="text-center text-xs text-gray-500">
+                  กด <span className="rounded bg-white/10 px-1.5 py-0.5 font-mono">Esc</span> หรือคลิกรอบ ๆ เพื่อปิด
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       ) : null}
