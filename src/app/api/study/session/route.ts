@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createRequestSupabase } from "@/lib/supabase-request-client";
+import { MAX_STUDY_SESSION_SECONDS } from "@/lib/study-session-limits";
 
 const SKILLS = new Set([
   "literacy",
@@ -107,7 +108,12 @@ export async function PATCH(req: Request) {
       );
     }
 
-    const duration = Math.max(0, Math.floor(body.duration_seconds));
+    // Clamp: time-on-task is visible-tab seconds, so a left-open tab can report
+    // absurd values. No single exercise legitimately exceeds the ceiling.
+    const duration = Math.min(
+      Math.max(0, Math.floor(body.duration_seconds)),
+      MAX_STUDY_SESSION_SECONDS,
+    );
 
     const { data: row, error: fetchErr } = await supabase
       .from("study_sessions")
@@ -302,6 +308,9 @@ export async function PUT(req: Request) {
     } else if (duration === 0 || duration == null) {
       duration = wallSeconds;
     }
+    // Clamp runaway durations (left-open tab / never-sleeping device) so a
+    // single session can't distort daily totals. See study-session-limits.
+    duration = Math.min(duration, MAX_STUDY_SESSION_SECONDS);
 
     const updatePayload: {
       ended_at: string;

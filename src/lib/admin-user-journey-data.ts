@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+import { MAX_STUDY_SESSION_SECONDS } from "@/lib/study-session-limits";
 
 /**
  * "User journey" admin data: for each learner, how much TIME they spent on each
@@ -45,16 +46,8 @@ type SessionRow = {
   set_id: string | null;
 };
 
-/**
- * A single exercise's time-on-task is tracked client-side as accumulated
- * *visible* tab seconds, so a tab left open and idle (or a device that never
- * sleeps) can balloon one session to many hours — we've seen a single
- * fill-in-blank session reach ~62h. Counting that verbatim makes a day exceed
- * 24h and drowns out real study time, so we clamp every session to a generous
- * ceiling. 90 minutes comfortably covers any legit single exercise (including a
- * full mock test) while discarding runaway idle time.
- */
-export const SESSION_SECONDS_CAP = 90 * 60;
+/** Per-session ceiling (see study-session-limits for the rationale). */
+const SESSION_SECONDS_CAP = MAX_STUDY_SESSION_SECONDS;
 
 /** Raw recorded seconds (uncapped), for showing "actually X on screen". */
 function rawSecondsOf(row: { duration_seconds: number | null }): number {

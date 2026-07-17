@@ -1,5 +1,17 @@
+import { STUDY_IDLE_PAUSE_MS } from "@/lib/study-session-limits";
+
 const ACTIVE_SESSION_KEY = "active_session";
 const SESSION_API = "/api/study/session";
+
+/** User-interaction events that keep the study clock running. */
+const ACTIVITY_EVENTS = [
+  "pointerdown",
+  "keydown",
+  "mousemove",
+  "wheel",
+  "touchstart",
+  "scroll",
+] as const;
 
 export type StudySkill =
   | "literacy"
@@ -102,19 +114,24 @@ export class StudyTracker {
   /** Start of the current visible segment (when tab is visible). */
   private visibleSegmentStart = 0;
   private onVisibilityChange: (() => void) | null = null;
+  /** Timestamp (ms) of the last real user interaction. */
+  private lastActivityAt = 0;
+  /** True while the clock is paused for inactivity (tab visible but idle). */
+  private idle = false;
+  private onActivity: (() => void) | null = null;
 
   getSessionId(): string | null {
     return this.sessionId;
   }
 
   /**
-   * Active visible study time in seconds (tab visible only).
+   * Active visible study time in seconds (tab visible AND not idle only).
    */
   getElapsedSeconds(): number {
     if (typeof document === "undefined") {
       return Math.floor(this.visibleMsAtPause / 1000);
     }
-    if (document.visibilityState === "hidden") {
+    if (this.idle || document.visibilityState === "hidden") {
       return Math.floor(this.visibleMsAtPause / 1000);
     }
     return Math.floor(
@@ -154,15 +171,28 @@ export class StudyTracker {
 
     this.visibleMsAtPause = 0;
     this.visibleSegmentStart = Date.now();
+    this.lastActivityAt = Date.now();
+    this.idle = false;
 
     this.onVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
         this.pauseVisibleClock();
       } else {
-        this.resumeVisibleClock();
+        // Returning to the tab counts as activity.
+        this.lastActivityAt = Date.now();
+        if (this.idle) this.resumeFromIdle();
+        else this.resumeVisibleClock();
       }
     };
     document.addEventListener("visibilitychange", this.onVisibilityChange);
+
+    this.onActivity = () => {
+      this.lastActivityAt = Date.now();
+      if (this.idle) this.resumeFromIdle();
+    };
+    for (const ev of ACTIVITY_EVENTS) {
+      window.addEventListener(ev, this.onActivity, { passive: true });
+    }
 
     this.tickIntervalId = setInterval(() => {
       void this.pushDuration();
@@ -176,10 +206,17 @@ export class StudyTracker {
       clearInterval(this.tickIntervalId);
       this.tickIntervalId = null;
     }
+    // When already idle the active segment was folded in at pause; adding the
+    // segment again here would count the idle gap.
+    if (this.idle) return;
     this.visibleMsAtPause += Date.now() - this.visibleSegmentStart;
   }
 
   private resumeVisibleClock(): void {
+    if (this.idle) {
+      this.visibleSegmentStart = Date.now();
+      return;
+    }
     this.visibleSegmentStart = Date.now();
     if (this.tickIntervalId !== null) {
       clearInterval(this.tickIntervalId);
@@ -190,8 +227,48 @@ export class StudyTracker {
     void this.pushDuration();
   }
 
+  /** Freeze the clock at the last interaction; stop accruing idle time. */
+  private pauseForIdle(): void {
+    if (this.idle) return;
+    const activeMs = Math.max(0, this.lastActivityAt - this.visibleSegmentStart);
+    this.visibleMsAtPause += activeMs;
+    this.idle = true;
+    if (this.tickIntervalId !== null) {
+      clearInterval(this.tickIntervalId);
+      this.tickIntervalId = null;
+    }
+    void this.pushDuration();
+  }
+
+  /** Resume counting after the learner interacts again. */
+  private resumeFromIdle(): void {
+    if (!this.idle) return;
+    this.idle = false;
+    this.visibleSegmentStart = Date.now();
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+      return;
+    }
+    if (this.tickIntervalId !== null) {
+      clearInterval(this.tickIntervalId);
+    }
+    this.tickIntervalId = setInterval(() => {
+      void this.pushDuration();
+    }, 5000);
+  }
+
   private async pushDuration(): Promise<void> {
     if (!this.sessionId) return;
+    // Pause the clock if the learner has gone idle (tab visible but no
+    // interaction for a while) — an abandoned open tab stops accruing time.
+    if (
+      !this.idle &&
+      typeof document !== "undefined" &&
+      document.visibilityState === "visible" &&
+      Date.now() - this.lastActivityAt > STUDY_IDLE_PAUSE_MS
+    ) {
+      this.pauseForIdle();
+      return;
+    }
     const seconds = this.getElapsedSeconds();
     try {
       const res = await fetch(SESSION_API, {
@@ -220,6 +297,12 @@ export class StudyTracker {
       document.removeEventListener("visibilitychange", this.onVisibilityChange);
       this.onVisibilityChange = null;
     }
+    if (this.onActivity) {
+      for (const ev of ACTIVITY_EVENTS) {
+        window.removeEventListener(ev, this.onActivity);
+      }
+      this.onActivity = null;
+    }
     if (this.tickIntervalId !== null) {
       clearInterval(this.tickIntervalId);
       this.tickIntervalId = null;
@@ -243,6 +326,12 @@ export class StudyTracker {
     if (this.onVisibilityChange) {
       document.removeEventListener("visibilitychange", this.onVisibilityChange);
       this.onVisibilityChange = null;
+    }
+    if (this.onActivity) {
+      for (const ev of ACTIVITY_EVENTS) {
+        window.removeEventListener(ev, this.onActivity);
+      }
+      this.onActivity = null;
     }
     if (this.tickIntervalId !== null) {
       clearInterval(this.tickIntervalId);
