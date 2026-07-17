@@ -627,14 +627,20 @@ export function MockInteractiveSpeakingSession({
           </button>
 
           {phase === "record" && (
-            <span className="text-xs font-black tabular-nums text-[#004AAD]">
+            <span
+              className={`rounded-full border-2 border-black px-2.5 py-1 text-xs font-black tabular-nums shadow-[2px_2px_0_0_#000] ${
+                listening
+                  ? recLeft <= 10
+                    ? "bg-red-500 text-white"
+                    : "bg-[#FFCC00] text-neutral-900"
+                  : "bg-white text-[#004AAD]"
+              }`}
+            >
               {listening
-                ? browserSttActive
-                  ? "🔴 Live captions"
-                  : "⏺ Recording"
+                ? `🔴 ${recLeft}s`
                 : transcribing
                   ? "Processing…"
-                  : `${recLeft}s left`}
+                  : `⏱ ${recLeft}s`}
             </span>
           )}
         </div>

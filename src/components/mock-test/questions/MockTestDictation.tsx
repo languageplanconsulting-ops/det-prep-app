@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { synthesizeSpeechWithRetry } from "@/lib/admin-batch-speech";
 import { browserSpeak, browserSpeakCancel, isBrowserTtsSupported } from "@/lib/browser-tts";
@@ -44,6 +44,11 @@ export function MockTestDictation({
   const [playFinishedNotified, setPlayFinishedNotified] = useState(false);
   const [audioFailed, setAudioFailed] = useState(false);
   const [browserTtsActive, setBrowserTtsActive] = useState(false);
+  // Cap the learner to at most 3 listens (like the real Duolingo English Test).
+  const MAX_PLAYS = 3;
+  const [plays, setPlays] = useState(0);
+  const playsLeft = Math.max(0, MAX_PLAYS - plays);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // Cancel any in-flight browser speech when the question changes / component unmounts.
   useEffect(() => {
@@ -54,6 +59,8 @@ export function MockTestDictation({
 
   const playBrowserTts = () => {
     if (!refSentence) return;
+    if (playsLeft <= 0) return;
+    setPlays((n) => n + 1);
     setBrowserTtsActive(true);
     const started = browserSpeak(refSentence, {
       lang: "en-US",
@@ -139,22 +146,43 @@ export function MockTestDictation({
         <p className="rounded-[4px] border-4 border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>
       ) : null}
       {playSrc && !audioFailed ? (
-        <audio
-          controls
-          autoPlay
-          className="w-full"
-          src={playSrc}
-          key={playSrc}
-          onError={() => setAudioFailed(true)}
-          onEnded={() => {
-            if (!playFinishedNotified) {
-              onAudioPlaybackFinished?.();
-              setPlayFinishedNotified(true);
-            }
-          }}
-        >
-          <track kind="captions" />
-        </audio>
+        <div className="space-y-1.5">
+          <audio
+            ref={audioRef}
+            className="hidden"
+            src={playSrc}
+            key={playSrc}
+            onError={() => setAudioFailed(true)}
+            onEnded={() => {
+              if (!playFinishedNotified) {
+                onAudioPlaybackFinished?.();
+                setPlayFinishedNotified(true);
+              }
+            }}
+          >
+            <track kind="captions" />
+          </audio>
+          <button
+            type="button"
+            data-no-sfx
+            disabled={submitting || playsLeft <= 0}
+            onClick={() => {
+              if (playsLeft <= 0) return;
+              setPlays((n) => n + 1);
+              const a = audioRef.current;
+              if (a) {
+                a.currentTime = 0;
+                void a.play();
+              }
+            }}
+            className="flex w-full items-center justify-center gap-2 rounded-[4px] border-4 border-black bg-white px-3 py-3 text-sm font-black shadow-[4px_4px_0_0_#000] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {playsLeft > 0 ? `🔊 เล่นเสียง (เหลือ ${playsLeft} ครั้ง)` : "🔒 ฟังครบ 3 ครั้งแล้ว"}
+          </button>
+          <p className="text-center text-[11px] font-bold text-neutral-500">
+            ฟังได้สูงสุด 3 ครั้ง · Up to 3 plays
+          </p>
+        </div>
       ) : null}
       {(audioFailed || status === "error") && refSentence && isBrowserTtsSupported() ? (
         <div className="space-y-2 rounded-[4px] border-4 border-black bg-yellow-50 p-3">
@@ -164,11 +192,11 @@ export function MockTestDictation({
           <button
             type="button"
             data-no-sfx
-            disabled={submitting || browserTtsActive}
+            disabled={submitting || browserTtsActive || playsLeft <= 0}
             onClick={playBrowserTts}
             className="rounded-[4px] border-2 border-black bg-white px-3 py-2 text-xs font-black shadow-[2px_2px_0_0_#000] disabled:opacity-50"
           >
-            {browserTtsActive ? "🔊 Speaking…" : "🔊 Read aloud (browser voice)"}
+            {playsLeft <= 0 ? "🔒 ฟังครบ 3 ครั้งแล้ว" : browserTtsActive ? "🔊 Speaking…" : `🔊 Read aloud (เหลือ ${playsLeft} ครั้ง)`}
           </button>
         </div>
       ) : null}

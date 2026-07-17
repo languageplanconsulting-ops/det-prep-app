@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 type Props = {
   content: Record<string, unknown>;
@@ -28,10 +28,10 @@ function shuffle<T>(arr: T[]): T[] {
 type JudgeWord = { word: string; isReal: boolean; level?: string; correctSpelling?: string };
 
 /**
- * New "true / false" real-word format: shows N words, each either correctly
- * spelled or misspelled, and the learner judges each one. Score = 16 (or
- * score_per_correct) per correct judgment, capped at max_score (default 160).
- * Emits a pre-computed `score160` — the server passes it through unchanged.
+ * New "true / false" real-word format: shows the words ONE BY ONE on a big
+ * animated card, and the learner judges each ("✓ ถูก" correctly spelled /
+ * "✗ ผิด" misspelled). Score = score_per_correct (default 16) per correct
+ * judgment, capped at max_score (default 160). Emits a pre-computed `score160`.
  */
 function RealWordTrueFalse({
   words,
@@ -46,78 +46,82 @@ function RealWordTrueFalse({
 }) {
   const perCorrect = Math.max(1, Number(content.score_per_correct ?? 16) || 16);
   const maxScore = Math.max(20, Number(content.max_score ?? 160) || 160);
-  const instruction =
-    typeof content.instruction_th === "string" && content.instruction_th.trim()
-      ? content.instruction_th
-      : "แต่ละคำสะกดถูกต้องหรือไม่?";
 
-  // Present the words in a stable shuffled order.
   const ordered = useMemo(() => shuffle(words), [words]);
-  const [picks, setPicks] = useState<Record<number, boolean>>({}); // index -> user says "real"
+  const [idx, setIdx] = useState(0);
+  const picksRef = useRef<boolean[]>([]);
 
-  const answeredCount = Object.keys(picks).length;
-  const allAnswered = answeredCount >= ordered.length;
-
-  const submit = () => {
+  const finish = (allPicks: boolean[]) => {
     let correct = 0;
     const review = ordered.map((w, i) => {
-      const userSaysReal = picks[i];
+      const userSaysReal = allPicks[i];
       const isCorrect = userSaysReal === w.isReal;
       if (isCorrect) correct += 1;
       return { word: w.word, level: w.level ?? null, isReal: w.isReal, userSaysReal: userSaysReal ?? null, isCorrect, correctSpelling: w.correctSpelling ?? null };
     });
     const score160 = Math.max(0, Math.min(maxScore, correct * perCorrect));
-    onSubmit({
-      score160,
-      detail: { format: "true_false", per_correct: perCorrect, total: ordered.length, correct, review },
-    });
+    onSubmit({ score160, detail: { format: "true_false", per_correct: perCorrect, total: ordered.length, correct, review } });
   };
 
+  const choose = (real: boolean) => {
+    if (submitting) return;
+    const next = [...picksRef.current];
+    next[idx] = real;
+    picksRef.current = next;
+    if (idx + 1 >= ordered.length) finish(next);
+    else setIdx(idx + 1);
+  };
+
+  const w = ordered[idx];
+  const progress = ordered.length ? (idx / ordered.length) * 100 : 0;
+
   return (
-    <div className="space-y-4">
-      <p className="text-sm font-black text-[#004AAD]">Real English Word — Spelling check</p>
-      <p className="text-xs text-neutral-600">
-        {instruction} · แต่ละข้อถูก = +{perCorrect} คะแนน (เต็ม {maxScore})
-      </p>
-      <div className="space-y-2">
-        {ordered.map((w, i) => {
-          const pick = picks[i];
-          return (
-            <div
-              key={`${w.word}-${i}`}
-              className="flex items-center gap-2 rounded-[4px] border-4 border-black bg-white px-3 py-2 shadow-[4px_4px_0_0_#000]"
-              style={{ animation: `rew-tile-in 0.30s ease-out ${Math.min(i * 0.04, 0.5)}s both` }}
-            >
-              <span className="flex-1 text-base font-black text-neutral-900">{w.word}</span>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={() => setPicks((p) => ({ ...p, [i]: true }))}
-                className={`rounded-[4px] border-2 border-black px-3 py-1.5 text-xs font-black ${pick === true ? "bg-[#16a34a] text-white" : "bg-white text-neutral-900"}`}
-              >
-                ✓ ถูก
-              </button>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={() => setPicks((p) => ({ ...p, [i]: false }))}
-                className={`rounded-[4px] border-2 border-black px-3 py-1.5 text-xs font-black ${pick === false ? "bg-[#dc2626] text-white" : "bg-white text-neutral-900"}`}
-              >
-                ✗ ผิด
-              </button>
-            </div>
-          );
-        })}
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-black text-[#004AAD]">Real English Word — สะกดถูกไหม?</p>
+        <span className="text-xs font-black text-neutral-600">{idx + 1} / {ordered.length}</span>
       </div>
-      <style>{`@keyframes rew-tile-in { from { opacity: 0; transform: translateY(10px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
-      <button
-        type="button"
-        disabled={submitting || !allAnswered}
-        onClick={submit}
-        className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+
+      {/* progress bar */}
+      <div className="h-3 w-full overflow-hidden rounded-full border-2 border-black bg-white">
+        <div className="h-full bg-[#FFCC00] transition-[width] duration-300" style={{ width: `${progress}%` }} />
+      </div>
+
+      {/* big animated word card — remounts per word for the pop-in animation */}
+      <div
+        key={idx}
+        className="flex min-h-[168px] flex-col items-center justify-center gap-3 rounded-[10px] border-4 border-black bg-white px-4 py-8 shadow-[6px_6px_0_0_#000]"
+        style={{ animation: "rew-card-in 0.34s cubic-bezier(0.34,1.56,0.64,1) both" }}
       >
-        {submitting ? "Submitting..." : allAnswered ? "Submit real-word score" : `ตอบให้ครบ (${answeredCount}/${ordered.length})`}
-      </button>
+        {w.level ? (
+          <span className="rounded-full border-2 border-black bg-[#FFCC00] px-3 py-0.5 text-[11px] font-black uppercase tracking-wide text-neutral-900">
+            {w.level}
+          </span>
+        ) : null}
+        <span className="text-center text-4xl font-black tracking-tight text-neutral-900">{w.word}</span>
+        <span className="text-xs font-bold text-neutral-500">คำนี้สะกดถูกต้องหรือไม่?</span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          disabled={submitting}
+          onClick={() => choose(true)}
+          className="rounded-[8px] border-4 border-black bg-[#16a34a] py-4 text-base font-black text-white shadow-[4px_4px_0_0_#000] transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#000] disabled:opacity-50"
+        >
+          ✓ ถูก
+        </button>
+        <button
+          type="button"
+          disabled={submitting}
+          onClick={() => choose(false)}
+          className="rounded-[8px] border-4 border-black bg-[#dc2626] py-4 text-base font-black text-white shadow-[4px_4px_0_0_#000] transition-transform active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_0_#000] disabled:opacity-50"
+        >
+          ✗ ผิด
+        </button>
+      </div>
+
+      <style>{`@keyframes rew-card-in { 0% { opacity: 0; transform: translateY(16px) scale(0.94) rotate(-1deg); } 100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); } }`}</style>
     </div>
   );
 }
