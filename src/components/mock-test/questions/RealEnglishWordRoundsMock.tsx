@@ -25,7 +25,116 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
+type JudgeWord = { word: string; isReal: boolean; level?: string; correctSpelling?: string };
+
+/**
+ * New "true / false" real-word format: shows N words, each either correctly
+ * spelled or misspelled, and the learner judges each one. Score = 16 (or
+ * score_per_correct) per correct judgment, capped at max_score (default 160).
+ * Emits a pre-computed `score160` — the server passes it through unchanged.
+ */
+function RealWordTrueFalse({
+  words,
+  content,
+  onSubmit,
+  submitting,
+}: {
+  words: JudgeWord[];
+  content: Record<string, unknown>;
+  onSubmit: Props["onSubmit"];
+  submitting: boolean;
+}) {
+  const perCorrect = Math.max(1, Number(content.score_per_correct ?? 16) || 16);
+  const maxScore = Math.max(20, Number(content.max_score ?? 160) || 160);
+  const instruction =
+    typeof content.instruction_th === "string" && content.instruction_th.trim()
+      ? content.instruction_th
+      : "แต่ละคำสะกดถูกต้องหรือไม่?";
+
+  // Present the words in a stable shuffled order.
+  const ordered = useMemo(() => shuffle(words), [words]);
+  const [picks, setPicks] = useState<Record<number, boolean>>({}); // index -> user says "real"
+
+  const answeredCount = Object.keys(picks).length;
+  const allAnswered = answeredCount >= ordered.length;
+
+  const submit = () => {
+    let correct = 0;
+    const review = ordered.map((w, i) => {
+      const userSaysReal = picks[i];
+      const isCorrect = userSaysReal === w.isReal;
+      if (isCorrect) correct += 1;
+      return { word: w.word, level: w.level ?? null, isReal: w.isReal, userSaysReal: userSaysReal ?? null, isCorrect, correctSpelling: w.correctSpelling ?? null };
+    });
+    const score160 = Math.max(0, Math.min(maxScore, correct * perCorrect));
+    onSubmit({
+      score160,
+      detail: { format: "true_false", per_correct: perCorrect, total: ordered.length, correct, review },
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm font-black text-[#004AAD]">Real English Word — Spelling check</p>
+      <p className="text-xs text-neutral-600">
+        {instruction} · แต่ละข้อถูก = +{perCorrect} คะแนน (เต็ม {maxScore})
+      </p>
+      <div className="space-y-2">
+        {ordered.map((w, i) => {
+          const pick = picks[i];
+          return (
+            <div
+              key={`${w.word}-${i}`}
+              className="flex items-center gap-2 rounded-[4px] border-4 border-black bg-white px-3 py-2 shadow-[4px_4px_0_0_#000]"
+              style={{ animation: `rew-tile-in 0.30s ease-out ${Math.min(i * 0.04, 0.5)}s both` }}
+            >
+              <span className="flex-1 text-base font-black text-neutral-900">{w.word}</span>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => setPicks((p) => ({ ...p, [i]: true }))}
+                className={`rounded-[4px] border-2 border-black px-3 py-1.5 text-xs font-black ${pick === true ? "bg-[#16a34a] text-white" : "bg-white text-neutral-900"}`}
+              >
+                ✓ ถูก
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => setPicks((p) => ({ ...p, [i]: false }))}
+                className={`rounded-[4px] border-2 border-black px-3 py-1.5 text-xs font-black ${pick === false ? "bg-[#dc2626] text-white" : "bg-white text-neutral-900"}`}
+              >
+                ✗ ผิด
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <style>{`@keyframes rew-tile-in { from { opacity: 0; transform: translateY(10px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
+      <button
+        type="button"
+        disabled={submitting || !allAnswered}
+        onClick={submit}
+        className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:opacity-50"
+      >
+        {submitting ? "Submitting..." : allAnswered ? "Submit real-word score" : `ตอบให้ครบ (${answeredCount}/${ordered.length})`}
+      </button>
+    </div>
+  );
+}
+
 export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = false }: Props) {
+  // New true/false spelling-judgment format (used by Mock 26+).
+  const judgeWords = useMemo<JudgeWord[]>(() => {
+    if (content.format !== "true_false" && !Array.isArray(content.words)) return [];
+    const raw = Array.isArray(content.words) ? content.words : [];
+    return raw
+      .map((w) => {
+        const o = (w ?? {}) as Record<string, unknown>;
+        return { word: String(o.word ?? "").trim(), isReal: Boolean(o.isReal), level: o.level ? String(o.level) : undefined, correctSpelling: o.correctSpelling ? String(o.correctSpelling) : undefined };
+      })
+      .filter((w) => w.word.length > 0);
+  }, [content.format, content.words]);
+
   const realWords = useMemo(
     () =>
       (Array.isArray(content.real_words) ? content.real_words : [])
@@ -76,6 +185,11 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [score, setScore] = useState(0);
   const [roundSelections, setRoundSelections] = useState<Array<{ selected: string[]; realWords: string[]; fakeWords: string[] }>>([]);
+
+  // Branch to the new spelling-judgment format when present (after all hooks).
+  if (judgeWords.length) {
+    return <RealWordTrueFalse words={judgeWords} content={content} onSubmit={onSubmit} submitting={submitting} />;
+  }
 
   const round = rounds[roundIdx];
   if (!rounds.length || !round) {
