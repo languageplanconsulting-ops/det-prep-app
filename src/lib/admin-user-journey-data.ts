@@ -45,9 +45,26 @@ type SessionRow = {
   set_id: string | null;
 };
 
-function secondsOf(row: { duration_seconds: number | null }): number {
+/**
+ * A single exercise's time-on-task is tracked client-side as accumulated
+ * *visible* tab seconds, so a tab left open and idle (or a device that never
+ * sleeps) can balloon one session to many hours — we've seen a single
+ * fill-in-blank session reach ~62h. Counting that verbatim makes a day exceed
+ * 24h and drowns out real study time, so we clamp every session to a generous
+ * ceiling. 90 minutes comfortably covers any legit single exercise (including a
+ * full mock test) while discarding runaway idle time.
+ */
+export const SESSION_SECONDS_CAP = 90 * 60;
+
+/** Raw recorded seconds (uncapped), for showing "actually X on screen". */
+function rawSecondsOf(row: { duration_seconds: number | null }): number {
   const n = Number(row.duration_seconds);
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+
+/** Seconds that count toward totals — clamped to SESSION_SECONDS_CAP. */
+function secondsOf(row: { duration_seconds: number | null }): number {
+  return Math.min(rawSecondsOf(row), SESSION_SECONDS_CAP);
 }
 
 // ---------------------------------------------------------------------------
@@ -182,7 +199,12 @@ export type JourneySession = {
   endedAt: string | null;
   exerciseType: string;
   skill: string | null;
+  /** Seconds counted toward totals (clamped to SESSION_SECONDS_CAP). */
   seconds: number;
+  /** Raw recorded seconds before clamping (equals `seconds` unless capped). */
+  rawSeconds: number;
+  /** True when rawSeconds exceeded the cap (an abandoned / idle session). */
+  capped: boolean;
   completed: boolean;
   score: number | null;
   difficulty: string | null;
@@ -260,6 +282,7 @@ export async function fetchUserJourneyDetail(
     const dateKey = started ? bangkokDateKey(started) : "unknown";
     const ex = (row.exercise_type ?? "unknown").trim() || "unknown";
     const sec = secondsOf(row);
+    const raw = rawSecondsOf(row);
     const completed = row.completed === true;
 
     sessionCount += 1;
@@ -298,6 +321,8 @@ export async function fetchUserJourneyDetail(
       exerciseType: ex,
       skill: row.skill ?? null,
       seconds: sec,
+      rawSeconds: raw,
+      capped: raw > sec,
       completed,
       score: typeof row.score === "number" ? row.score : null,
       difficulty: row.difficulty ?? null,

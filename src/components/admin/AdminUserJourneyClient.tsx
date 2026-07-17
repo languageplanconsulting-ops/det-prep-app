@@ -29,6 +29,8 @@ type JourneySession = {
   exerciseType: string;
   skill: string | null;
   seconds: number;
+  rawSeconds: number;
+  capped: boolean;
   completed: boolean;
   score: number | null;
   difficulty: string | null;
@@ -311,6 +313,14 @@ function DayCard({ day, defaultOpen }: { day: JourneyDay; defaultOpen: boolean }
                     >
                       {s.completed ? "✅" : "◦"}
                     </span>
+                    {s.capped ? (
+                      <span
+                        className="shrink-0 text-xs"
+                        title={`Left open for ${fmtDuration(s.rawSeconds)} — counted as ${fmtDuration(s.seconds)}`}
+                      >
+                        ⚠️
+                      </span>
+                    ) : null}
                     <span className="w-14 shrink-0 text-right font-mono text-[11px] font-bold text-neutral-600">
                       {s.seconds > 0 ? fmtDuration(s.seconds) : "—"}
                     </span>
