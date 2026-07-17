@@ -74,6 +74,19 @@ const TASK_ICON: Record<string, string> = {
   real_english_word: "🔤",
 };
 
+/** Task types graded by an LLM server-side — these submits can take a while,
+ *  so the client waits longer before treating a submit as timed out. */
+const AI_GRADED_TASKS = new Set<string>([
+  "write_about_photo",
+  "speak_about_photo",
+  "read_then_speak",
+  "read_and_write",
+  "read_then_write",
+  "conversation_summary",
+  "interactive_speaking",
+  "essay",
+]);
+
 export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   const router = useRouter();
   const [session, setSession] = useState<SessionPayload | null>(null);
@@ -87,6 +100,9 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     score: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Recoverable, non-blocking message (e.g. a slow submit reconciled). Unlike
+  // `error` it never replaces the whole screen — the learner keeps going.
+  const [notice, setNotice] = useState<string | null>(null);
   const [dictationTimerStarted, setDictationTimerStarted] = useState(true);
   const [speakPhotoTimerStarted, setSpeakPhotoTimerStarted] = useState(true);
   const timer = usePhaseTimer();
@@ -182,6 +198,13 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
+  // Auto-dismiss the recoverable notice so it doesn't linger over later steps.
+  useEffect(() => {
+    if (!notice) return;
+    const t = window.setTimeout(() => setNotice(null), 9000);
+    return () => window.clearTimeout(t);
+  }, [notice]);
+
   useEffect(() => {
     if (!current) return;
     if (skipTimerMode) return;
@@ -270,8 +293,19 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     let res: Response;
     let json: SubmitStepResponse;
     try {
+      // AI-graded steps (photo write/speak, read-then-speak/write, essay,
+      // conversation summary) run an LLM grader server-side and routinely take
+      // longer than a plain answer, so give them a much larger budget. A 30s
+      // abort here was the root cause of the "photo writing got stuck" bug: the
+      // client gave up mid-grade, reloaded to the not-yet-advanced step, and
+      // then collided with the server once it committed.
+      const isAiGraded =
+        current.is_ai_graded === true || AI_GRADED_TASKS.has(current.task_type);
       const ctl = new AbortController();
-      const t = window.setTimeout(() => ctl.abort(), 30000);
+      const t = window.setTimeout(
+        () => ctl.abort(),
+        isAiGraded ? 120000 : 30000,
+      );
       res = await fetch(`/api/mock-test/fixed/session/${sessionId}/submit-step`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -283,12 +317,14 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       json = (await res.json()) as SubmitStepResponse;
     } catch {
       // Network drop / timeout — indeterminate whether the server actually
-      // committed the step. Reload the session so the UI reflects the true
-      // current_step instead of leaving Submit disabled forever with no
-      // feedback (mirrors the "Step already submitted" reconciliation below).
+      // committed the step. Reload so the UI reflects the true current_step,
+      // then show a NON-blocking notice (never the full-screen error) so the
+      // learner can either continue on the next step or resubmit this one.
       setSubmittingStep(false);
-      setError("Connection issue while submitting — reloaded your progress. Please try again.");
       await load("adapting");
+      setNotice(
+        "การส่งใช้เวลานานผิดปกติ เราโหลดความคืบหน้าให้ใหม่แล้ว — ถ้าคำตอบถูกบันทึกคุณจะอยู่ข้อถัดไป ถ้ายังอยู่ข้อเดิมให้กดส่งอีกครั้ง",
+      );
       return;
     }
     if (!res.ok || json.error) {
@@ -296,11 +332,22 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
         // Step is already recorded; reload session so UI can move on.
         await load("adapting");
         setError(null);
+        setNotice(null);
         return;
       }
-      if ((json.error ?? "").startsWith("Invalid step order.")) {
+      // Any step-pointer conflict (409): the server already moved on — a slow
+      // AI submit that committed after the client gave up, another tab, a retry.
+      // Reconcile by reloading to the true current step and let the learner
+      // continue. This must never dead-end the screen.
+      if (
+        res.status === 409 ||
+        (json.error ?? "").startsWith("Invalid step order") ||
+        (json.error ?? "").startsWith("Session changed during submit")
+      ) {
         await load("adapting");
-        setError("This step was already advanced in another tab or request. We reloaded your session to keep you on the correct step.");
+        setNotice(
+          "เราบันทึกคำตอบก่อนหน้าและพาคุณมายังข้อที่ถูกต้องแล้ว ทำต่อได้เลย",
+        );
         return;
       }
       setSubmittingStep(false);
@@ -541,6 +588,21 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
             )}
           </div>
         </div>
+
+        {notice ? (
+          <div className="mt-3 flex items-start gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 shadow-sm">
+            <span className="text-lg leading-none">💡</span>
+            <p className="flex-1 text-[13px] font-semibold leading-5 text-amber-900">{notice}</p>
+            <button
+              type="button"
+              onClick={() => setNotice(null)}
+              className="shrink-0 rounded-lg px-2 py-0.5 text-sm font-bold text-amber-700 hover:bg-amber-100"
+              aria-label="ปิด"
+            >
+              ✕
+            </button>
+          </div>
+        ) : null}
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[230px_minmax(0,1fr)]">
           {/* Journey rail — all 20 steps in true order */}
