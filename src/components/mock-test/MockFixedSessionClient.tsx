@@ -149,12 +149,6 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     }));
   }, [session, stepIndex]);
 
-  const minutesLeft = useMemo(() => {
-    const items = (session?.mock_fixed_set_items ?? []).filter((it) => it.step_index >= stepIndex);
-    const sec = items.reduce((s, it) => s + (it.time_limit_sec || 0) + (it.rest_after_step_sec || 0), 0);
-    return Math.max(1, Math.round(sec / 60));
-  }, [session, stepIndex]);
-
   const load = async (reason: typeof loadingReason = "init", opts?: { silent?: boolean }) => {
     // Silent = background reconcile after an optimistic advance: no full-screen
     // spinner, no error overlay (the answer is already saved server-side).
@@ -646,7 +640,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
                 ))}
               </ol>
               <div className="mt-3 border-t border-slate-100 pt-2 text-[12px] text-slate-500">
-                เหลืออีก ~{minutesLeft} นาที · 📈 ทำต่อไปเรื่อย ๆ นะ
+                📈 ทำต่อไปเรื่อย ๆ นะ
               </div>
             </div>
           </aside>
