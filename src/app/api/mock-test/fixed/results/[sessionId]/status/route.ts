@@ -1,8 +1,44 @@
 import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
+import {
+  captureGradingRequest,
+  finalizeMockFixedResultIfReady,
+  gradePendingStepsAndFinalize,
+} from "@/lib/mock-test/fixed-step-grading";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRequestSupabase } from "@/lib/supabase-request-client";
+
+/** How long a completed session may sit with pending AI grades before this
+ *  poller stops waiting for the background tasks and grades inline itself. */
+const PENDING_GRADE_GRACE_MS = 45_000;
+
+/**
+ * Results are finalized asynchronously: AI-graded steps commit instantly during
+ * the test and their LLM grades land in the background. This poller (the
+ * results-loading screen hits it every 5s) is both the readiness check and the
+ * safety net — if a background grade died, it re-grades inline after a grace
+ * period so the learner never waits forever and the report always aggregates
+ * real scores.
+ */
+async function resolveReady(
+  req: Request,
+  session: { id: string; status: string; completed_at?: string | null },
+  hasResult: boolean,
+): Promise<boolean> {
+  if (hasResult) return true;
+  if (session.status !== "completed") return false;
+
+  // Cheap path: all grades landed — just materialize the result row.
+  if (await finalizeMockFixedResultIfReady(session.id)) return true;
+
+  const completedAtMs = session.completed_at ? new Date(session.completed_at).getTime() : 0;
+  const waitedMs = completedAtMs > 0 ? Date.now() - completedAtMs : Number.POSITIVE_INFINITY;
+  if (waitedMs > PENDING_GRADE_GRACE_MS) {
+    return gradePendingStepsAndFinalize(session.id, captureGradingRequest(req));
+  }
+  return false;
+}
 
 export async function GET(req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
@@ -13,7 +49,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ sessionI
 
     const { data: session, error: sessionErr } = await supabase
       .from("mock_fixed_sessions")
-      .select("id,user_id,targets,status")
+      .select("id,user_id,targets,status,completed_at")
       .eq("id", sessionId)
       .maybeSingle();
     if (sessionErr || !session) {
@@ -30,7 +66,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ sessionI
     const targets = (session.targets ?? {}) as Record<string, unknown>;
     const adminPreviewMode = targets.adminPreviewMode === true;
     return NextResponse.json({
-      ready: Boolean(result?.id),
+      ready: await resolveReady(req, session, Boolean(result?.id)),
       adminPreviewMode,
       sessionStatus: session.status,
     });
@@ -44,7 +80,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ sessionI
 
   const { data: session, error: sessionErr } = await supabase
     .from("mock_fixed_sessions")
-    .select("id,user_id,targets,status")
+    .select("id,user_id,targets,status,completed_at")
     .eq("id", sessionId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -63,7 +99,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ sessionI
   const targets = (session.targets ?? {}) as Record<string, unknown>;
   const adminPreviewMode = targets.adminPreviewMode === true;
   return NextResponse.json({
-    ready: Boolean(result?.id),
+    ready: await resolveReady(req, session, Boolean(result?.id)),
     adminPreviewMode,
     sessionStatus: session.status,
   });
