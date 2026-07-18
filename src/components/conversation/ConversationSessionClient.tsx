@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ConversationAnswerReveal from "@/components/conversation/ConversationAnswerReveal";
 import { ConversationReportPanel } from "@/components/conversation/ConversationReportPanel";
 import { ConversationSpeakerButton } from "@/components/conversation/ConversationSpeakerButton";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
@@ -78,7 +79,6 @@ export function ConversationSessionClient({
   scenarioPicksRef.current = scenarioPicks;
   mainPicksRef.current = mainPicks;
 
-  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Only reset main dialogue UI when moving to a different main step (not on unrelated re-renders). */
   const mainStepResetKeyRef = useRef<string | null>(null);
   const redeemHydrateSignatureRef = useRef<string | null>(null);
@@ -130,12 +130,6 @@ export function ConversationSessionClient({
     },
     [],
   );
-
-  useEffect(() => {
-    return () => {
-      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-    };
-  }, []);
 
   useEffect(() => {
     ensureSpeechVoices(() => {});
@@ -302,16 +296,16 @@ export function ConversationSessionClient({
       return nt;
     });
 
-    const isLastMain = mainWalkIndex >= mainStepsInPlay.length - 1;
-    if (isLastMain) {
-      setAwaitingReportCta(true);
-      return;
-    }
+    // The answer is revealed immediately; the learner reads why before moving on,
+    // so advancing is now driven by the CTA under the reveal rather than a timer.
+    if (mainWalkIndex >= mainStepsInPlay.length - 1) setAwaitingReportCta(true);
+  };
 
-    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-    advanceTimerRef.current = setTimeout(() => {
-      setMainWalkIndex((w) => w + 1);
-    }, 420);
+  const advanceToNextMainLine = () => {
+    playBlinkBeep();
+    setMainOptionsUnlocked(false);
+    setMainDialogueTextVisible(false);
+    setMainWalkIndex((w) => w + 1);
   };
 
   const startRedeem = () => {
@@ -493,15 +487,25 @@ export function ConversationSessionClient({
                     <ul className="mt-4 grid gap-2">
                       {exam.scenarioQuestions[si].options.map((opt, j) => {
                         const picked = scenarioPicks[si];
+                        const answered = picked != null;
                         const isPicked = picked === j;
+                        const isAnswer = exam.scenarioQuestions[si].correctIndex === j;
+                        // Once answered the row is locked and colour-coded, so the
+                        // learner can see their pick against the right answer.
+                        const tone = !answered
+                          ? "bg-white hover:bg-ep-yellow/25"
+                          : isAnswer
+                            ? "bg-emerald-300"
+                            : isPicked
+                              ? "bg-rose-300"
+                              : "bg-white opacity-60";
                         return (
                           <li key={j}>
                             <button
                               type="button"
+                              disabled={answered}
                               onClick={() => submitScenarioPick(si, j)}
-                              className={`ep-btn-luxury w-full border-4 border-black px-3 py-3 text-left text-sm font-bold shadow-[2px_2px_0_0_#000] ${
-                                isPicked ? "bg-ep-blue text-white" : "bg-white hover:bg-ep-yellow/25"
-                              }`}
+                              className={`ep-btn-luxury w-full border-4 border-black px-3 py-3 text-left text-sm font-bold shadow-[2px_2px_0_0_#000] disabled:cursor-default ${tone}`}
                             >
                               <span className="ep-stat opacity-80">{j + 1}.</span> {opt}
                             </button>
@@ -509,6 +513,14 @@ export function ConversationSessionClient({
                         );
                       })}
                     </ul>
+                    {scenarioPicks[si] != null ? (
+                      <ConversationAnswerReveal
+                        options={exam.scenarioQuestions[si].options}
+                        picked={scenarioPicks[si]!}
+                        correctIndex={exam.scenarioQuestions[si].correctIndex}
+                        explanation={exam.scenarioQuestions[si].explanation}
+                      />
+                    ) : null}
                   </li>
                 ))}
               </ul>
@@ -602,25 +614,42 @@ export function ConversationSessionClient({
                 ))}
               </ul>
             ) : null}
-            {mainPickedLast && awaitingReportCta ? (
-              <div className="ep-luxury-option-in mt-6 space-y-4 border-4 border-ep-blue/40 bg-ep-yellow/10 p-4 shadow-[3px_3px_0_0_#000]">
-                <p className="text-[10px] font-bold uppercase text-ep-blue">Spoken line</p>
-                <p className="text-sm leading-relaxed text-neutral-900">
-                  {exam.mainQuestions[mainIndex].transcript}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => goToReport([...scenarioPicksRef.current], [...mainPicksRef.current])}
-                  className="ep-btn-luxury w-full border-4 border-black bg-ep-blue py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#000] hover:opacity-95"
-                >
-                  See my report
-                </button>
-              </div>
-            ) : null}
-            {mainPickedLast && !awaitingReportCta ? (
-              <p className="ep-luxury-option-in mt-4 text-center text-xs font-bold text-ep-blue">
-                Moving to the next line…
-              </p>
+            {mainPickedLast ? (
+              <ConversationAnswerReveal
+                options={exam.mainQuestions[mainIndex].options}
+                picked={mainPicks[mainIndex]!}
+                correctIndex={exam.mainQuestions[mainIndex].correctIndex}
+                explanation={exam.mainQuestions[mainIndex].explanation}
+                footer={
+                  <>
+                    <p className="text-[10px] font-black uppercase tracking-wide text-neutral-500">
+                      Spoken line
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-neutral-900">
+                      {exam.mainQuestions[mainIndex].transcript}
+                    </p>
+                    {awaitingReportCta ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          goToReport([...scenarioPicksRef.current], [...mainPicksRef.current])
+                        }
+                        className="ep-btn-luxury mt-4 w-full border-4 border-black bg-ep-blue py-3 text-sm font-black uppercase text-white shadow-[4px_4px_0_0_#000] hover:opacity-95"
+                      >
+                        See my report
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={advanceToNextMainLine}
+                        className="ep-btn-luxury mt-4 w-full border-4 border-black bg-ep-yellow py-3 text-sm font-black uppercase shadow-[4px_4px_0_0_#000] hover:bg-ep-yellow/90"
+                      >
+                        Next line →
+                      </button>
+                    )}
+                  </>
+                }
+              />
             ) : null}
           </div>
         ) : null}

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Conversation answer reveal — preview</title>
+<style>
+  :root { --ep-blue:#1f4fd8; --ep-yellow:#ffd93d; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:28px 16px 64px; background:#f5f5f4; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#171717; }
+  .wrap { max-width: 460px; margin: 0 auto; }
+  h1 { font-size:15px; text-transform:uppercase; letter-spacing:.08em; margin:0 0 4px; }
+  .sub { font-size:12px; color:#666; margin:0 0 24px; }
+  .card { border:4px solid #000; background:#fff; padding:16px; box-shadow:4px 4px 0 0 #000; margin-bottom:28px; }
+  .kicker { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; color:var(--ep-blue); margin:0; }
+  .line { font-size:14px; font-weight:700; margin:8px 0 14px; }
+  .opt { width:100%; border:4px solid #000; padding:11px; text-align:left; font-size:14px; font-weight:700;
+         box-shadow:2px 2px 0 0 #000; background:#fff; margin-bottom:8px; font-family:inherit; }
+  .opt .n { color:#737373; font-variant-numeric:tabular-nums; }
+  .opt.correct { background:#6ee7b7; }
+  .opt.wrong { background:#fda4af; }
+  .opt.dim { opacity:.6; }
+  .reveal { border:4px solid #000; padding:16px; box-shadow:4px 4px 0 0 #000; margin-top:16px; }
+  .reveal.ok { background:#ecfdf5; }
+  .reveal.no { background:#fff1f2; }
+  .head { display:flex; align-items:center; gap:12px; }
+  .badge { width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+           border:4px solid #000; font-size:18px; font-weight:900; box-shadow:2px 2px 0 0 #000; }
+  .badge.ok { background:#34d399; } .badge.no { background:#fb7185; }
+  .verdict { font-size:14px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; margin:0; }
+  .verdict.ok { color:#065f46; } .verdict.no { color:#881337; }
+  .box { border:4px solid #000; padding:8px 12px; box-shadow:2px 2px 0 0 #000; margin-top:8px; }
+  .box .lbl { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; margin:0; }
+  .box .val { font-size:14px; font-weight:700; margin:4px 0 0; }
+  .lbl.mine { color:#be123c; } .lbl.right { color:#047857; }
+  .why { margin-top:16px; border-top:4px dashed rgba(0,0,0,.25); padding-top:12px; }
+  .why .lbl { font-size:10px; font-weight:900; text-transform:uppercase; color:#737373; margin:0; }
+  .why p { font-size:14px; line-height:1.65; margin:4px 0 0; color:#262626; }
+  .cta { width:100%; border:4px solid #000; padding:12px; font-size:14px; font-weight:900;
+         text-transform:uppercase; box-shadow:4px 4px 0 0 #000; margin-top:16px; font-family:inherit; background:var(--ep-yellow); }
+  .cta.blue { background:var(--ep-blue); color:#fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Answer reveal — interactive conversation</h1>
+  <p class="sub">Shown the moment the learner answers. Same treatment det-mobile already uses.</p>
+
+  <!-- WRONG -->
+  <div class="card">
+    <p class="kicker">Dialogue 2/5 · ตอบผิด</p>
+    <p class="line">🔊 “I see. What makes you feel that leadership may be a weak area for you?”</p>
+    <button class="opt dim"><span class="n">1.</span> I feel that leadership is a weak area in most applications.</button>
+    <button class="opt wrong"><span class="n">2.</span> I plan to run for a leadership position next semester.</button>
+    <button class="opt correct"><span class="n">3.</span> I’ve joined several clubs, but I was rarely the one making decisions.</button>
+    <button class="opt dim"><span class="n">4.</span> I think my strongest area is actually my academic writing and research work.</button>
+
+    <div class="reveal no">
+      <div class="head"><span class="badge no">✕</span><p class="verdict no">ยังไม่ถูก</p></div>
+      <div class="box" style="background:rgba(255,255,255,.7)">
+        <p class="lbl mine">คำตอบของคุณ</p>
+        <p class="val"><span class="n">2.</span> I plan to run for a leadership position next semester.</p>
+      </div>
+      <div class="box" style="background:#fff">
+        <p class="lbl right">คำตอบที่ถูก</p>
+        <p class="val"><span class="n">3.</span> I’ve joined several clubs, but I was rarely the one making decisions.</p>
+      </div>
+      <div class="why">
+        <p class="lbl">ทำไม</p>
+        <p>คำถามขึ้นต้นด้วย What makes you feel จึงต้องตอบด้วยเหตุผล ข้อ 3 อธิบายชัดว่าเข้าชมรมแล้วแต่ไม่ค่อยได้เป็นคนตัดสินใจ ข้อ 1 หยิบวลี leadership is a weak area จากคำถามมาพูดซ้ำ แต่ไม่ได้ให้เหตุผลของตัวเอง ข้อ 2 ตอบเรื่องแผนในอนาคตแทนเหตุผลในปัจจุบัน ข้อ 4 เปลี่ยนไปพูดถึงจุดแข็ง ซึ่งไม่ใช่สิ่งที่ถูกถาม</p>
+      </div>
+      <p class="lbl" style="margin-top:16px;color:#737373">Spoken line</p>
+      <p style="font-size:14px;margin:4px 0 0">I see. What makes you feel that leadership may be a weak area for you?</p>
+      <button class="cta">Next line →</button>
+    </div>
+  </div>
+
+  <!-- CORRECT -->
+  <div class="card">
+    <p class="kicker">Dialogue 5/5 · ตอบถูก</p>
+    <p class="line">🔊 “Right. What matters now is how effectively you explain the kinds of responsibility you have already taken on.”</p>
+    <div class="reveal ok">
+      <div class="head"><span class="badge ok">✓</span><p class="verdict ok">ถูกต้อง</p></div>
+      <div class="why">
+        <p class="lbl">ทำไม</p>
+        <p>เป็นช่วงปิดบทสนทนา จึงควรรับคำแนะนำและบอกขั้นตอนถัดไป ข้อ 2 ขอบคุณและระบุชัดว่าจะไปปรับเรียงความ ข้อ 1 ย้อนกลับไปพูดถึงปัญหาที่เพิ่งคุยจบไปแล้ว ข้อ 3 เปิดประเด็นใหม่ในจังหวะที่ควรจบ ข้อ 4 หยิบคำว่า effectively จากประโยคของอาจารย์มาใช้ แต่กลายเป็นความเห็นกว้าง ๆ</p>
+      </div>
+      <button class="cta blue">See my report</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

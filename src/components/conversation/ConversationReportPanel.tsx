@@ -233,7 +233,9 @@ export function ConversationReportPanel({
                       );
                     })}
                   </ul>
-                  <p className="mt-3 text-sm leading-relaxed text-neutral-800">{mq.explanation}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-neutral-800">
+                    {conversationExplanationThai(mq.explanation)}
+                  </p>
                 </li>
               );
             })}
