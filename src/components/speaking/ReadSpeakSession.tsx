@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SpeakingHintPanel } from "@/components/speaking/SpeakingHintPanel";
+import {
+  SpeakingNotesCard,
+  SpeakingNotesEditor,
+  useSpeakingPatternNotes,
+} from "@/components/speaking/SpeakingPatternNotes";
 import { TeacherSamplePlayer } from "@/components/speaking-samples/TeacherSamplePlayer";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
@@ -59,6 +64,12 @@ export function ReadSpeakSession({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [questionScoreTick, setQuestionScoreTick] = useState(0);
+
+  const isVip = effectiveTier === "vip";
+  const notesApi = useSpeakingPatternNotes(
+    selectedQuestion ? `${topicId}:${selectedQuestion.id}` : null,
+  );
+  const [editingNotes, setEditingNotes] = useState(false);
 
   const recRef = useRef<SpeechRecognitionInstance | null>(null);
   const listeningRef = useRef(false);
@@ -193,6 +204,7 @@ export function ReadSpeakSession({
   const selectQuestion = (q: SpeakingQuestion) => {
     setSelectedQuestion(q);
     setPhase("prep-pick");
+    setEditingNotes(false);
     setTranscript("");
     finalTranscriptRef.current = "";
     stopRecognition();
@@ -319,6 +331,7 @@ export function ReadSpeakSession({
       </header>
 
       {phase === "prep-pick" && selectedQuestion ? (
+        <>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-[10px] font-bold uppercase tracking-widest text-ep-blue">เตรียมตัว · คำถามของคุณ</p>
           <div className="mt-2 rounded-xl bg-slate-50 p-3.5">
@@ -357,9 +370,12 @@ export function ReadSpeakSession({
             </button>
           </div>
         </div>
+        {isVip ? <SpeakingNotesEditor api={notesApi} /> : null}
+        </>
       ) : null}
 
       {phase === "prep-run" && selectedQuestion ? (
+        <>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
           <p className="text-[10px] font-bold uppercase tracking-widest text-ep-blue">กำลังเตรียมตัว</p>
           <p className="mt-2 text-sm font-bold text-slate-800">{selectedQuestion.promptEn}</p>
@@ -375,6 +391,8 @@ export function ReadSpeakSession({
             พร้อมพูดแล้ว →
           </button>
         </div>
+        {isVip ? <SpeakingNotesEditor api={notesApi} /> : null}
+        </>
       ) : null}
 
       {phase === "pick-question" ? (
@@ -425,6 +443,24 @@ export function ReadSpeakSession({
             <p className="text-sm font-bold text-slate-900">{selectedQuestion.promptEn}</p>
             <p className="mt-1 text-sm text-slate-600">{selectedQuestion.promptTh}</p>
           </div>
+
+          {isVip ? (
+            editingNotes ? (
+              <div className="mt-3">
+                <SpeakingNotesEditor api={notesApi} onDone={() => setEditingNotes(false)} />
+              </div>
+            ) : notesApi.hasNotes ? (
+              <SpeakingNotesCard api={notesApi} onEdit={() => setEditingNotes(true)} />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setEditingNotes(true)}
+                className="mt-3 w-full rounded-xl border border-dashed border-[#004AAD]/30 bg-[#004AAD]/[0.03] py-2.5 text-xs font-bold text-[#004AAD] hover:bg-[#004AAD]/[0.07]"
+              >
+                📝 จดโน้ตลงแพตเทิร์นก่อนพูด
+              </button>
+            )
+          ) : null}
 
           <TeacherSamplePlayer
             target={{

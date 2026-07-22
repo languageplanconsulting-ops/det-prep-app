@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SPEAKING_PATTERN_PARTS, patternPartSentence } from "@/lib/speaking-pattern";
 
 /**
  * SpeakingHintPanel — course-only ("Fast Track" VIP) answer-pattern scaffold for
@@ -14,12 +15,10 @@ import Link from "next/link";
 
 type Step = { en: string; th: string };
 
-const PARTS: Step[] = [
-  { en: "Throughout my life, I have ______. However, today I will describe ______.", th: "PART 1 · เปิดกว้าง → เข้าหัวข้อ" },
-  { en: "To start, ______. The reason why ______ was that ______. In terms of ______, ______.", th: "PART 2 · เล่ารายละเอียด (what / where / when / why / how)" },
-  { en: "Moving on to why ______. First of all, ______. Secondly, ______. Lastly, ______. For example, ______.", th: "PART 3 · เหตุผล 3 ข้อ + ตัวอย่าง" },
-  { en: "In the future, I would ______. If I could ______, I would ______.", th: "PART 4 · สรุป / อนาคต" },
-];
+const PARTS: Step[] = SPEAKING_PATTERN_PARTS.map((p) => ({
+  en: patternPartSentence(p),
+  th: p.th,
+}));
 
 const TRANSITIONS = [
   "However", "On the other hand", "Moreover", "In addition", "Additionally",
