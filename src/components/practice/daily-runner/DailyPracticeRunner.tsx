@@ -19,7 +19,11 @@ import { CoachBubble } from "@/components/ui/CoachBubble";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
 import { defaultDifficultyFor } from "@/lib/practice-queue-builder";
 import type { RandomDifficulty } from "@/lib/practice-random";
-import { pickRunnerContent, type RunnerContentPick } from "@/lib/study-plan/daily-runner-content";
+import {
+  pickRunnerContent,
+  type RunnerContentPick,
+  type RunnerPickFailure,
+} from "@/lib/study-plan/daily-runner-content";
 import { DAILY_SKILL_META, type DailyPlanSkill, type DailyTier } from "@/lib/study-plan/daily-plan";
 
 import { RunnerSlotItem } from "@/components/practice/daily-runner/RunnerSlotItem";
@@ -33,7 +37,10 @@ type Slot = { skill: DailyPlanSkill };
 
 type Phase = "loading" | "load-error" | "running" | "done";
 
-type PickState = { status: "loading" } | { status: "error" } | { status: "ready"; pick: RunnerContentPick };
+type PickState =
+  | { status: "loading" }
+  | { status: "error"; reason: RunnerPickFailure }
+  | { status: "ready"; pick: RunnerContentPick };
 
 /** Remaining work only — done groups (or groups outside `onlySkill`) contribute no slots. */
 function computeFlatSlots(progress: ApiProgress, onlySkill: DailyPlanSkill | undefined): Slot[] {
@@ -131,13 +138,13 @@ export function DailyPracticeRunner({
     let alive = true;
     setPickState({ status: "loading" });
     (async () => {
-      const picked = await pickRunnerContent(slot.skill, difficulty, usedKeysRef.current);
+      const result = await pickRunnerContent(slot.skill, difficulty, usedKeysRef.current);
       if (!alive) return;
-      if (picked) {
-        usedKeysRef.current.add(picked.contentKey);
-        setPickState({ status: "ready", pick: picked });
+      if (result.ok) {
+        usedKeysRef.current.add(result.pick.contentKey);
+        setPickState({ status: "ready", pick: result.pick });
       } else {
-        setPickState({ status: "error" });
+        setPickState({ status: "error", reason: result.reason });
       }
     })();
     return () => {
@@ -363,14 +370,37 @@ export function DailyPracticeRunner({
           </div>
         ) : slot && pickState.status === "error" ? (
           <div className="rounded-2xl bg-white p-8 text-center ring-1 ring-neutral-200">
-            <p className="text-sm font-bold text-neutral-500">ไม่พบข้อสอบสำหรับข้อนี้</p>
-            <button
-              type="button"
-              onClick={advance}
-              className="mt-3 rounded-xl bg-ep-blue px-5 py-2.5 text-xs font-bold text-white transition hover:opacity-90"
-            >
-              ข้ามข้อนี้ →
-            </button>
+            <p className="text-sm font-bold text-neutral-500">
+              {pickState.reason === "unauthenticated"
+                ? "เซสชันหมดอายุ — กรุณาเข้าสู่ระบบใหม่อีกครั้งครับ"
+                : pickState.reason === "locked"
+                  ? "ระดับนี้เปิดให้เฉพาะแพ็กเกจที่สูงขึ้นครับ"
+                  : "ไม่พบข้อสอบสำหรับข้อนี้"}
+            </p>
+            {pickState.reason === "unauthenticated" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  sfxTransition();
+                  router.push(
+                    `/login?redirect=${encodeURIComponent(
+                      `${window.location.pathname}${window.location.search}`,
+                    )}`,
+                  );
+                }}
+                className="mt-3 rounded-xl bg-ep-blue px-5 py-2.5 text-xs font-bold text-white transition hover:opacity-90"
+              >
+                เข้าสู่ระบบ →
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={advance}
+                className="mt-3 rounded-xl bg-ep-blue px-5 py-2.5 text-xs font-bold text-white transition hover:opacity-90"
+              >
+                ข้ามข้อนี้ →
+              </button>
+            )}
           </div>
         ) : slot && pickState.status === "ready" ? (
           <RunnerSlotItem

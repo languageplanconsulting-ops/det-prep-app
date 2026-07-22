@@ -21,8 +21,11 @@ import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
 import { CoachBubble } from "@/components/ui/CoachBubble";
 import { RunnerSlotItem } from "@/components/practice/daily-runner/RunnerSlotItem";
 import { sfxCelebrate, sfxTransition } from "@/lib/exam-sfx";
-import { pickOne, type RandomDifficulty } from "@/lib/practice-random";
-import { pickRunnerContent, type RunnerContentPick } from "@/lib/study-plan/daily-runner-content";
+import {
+  pickRunnerContent,
+  type RunnerContentPick,
+  type RunnerPickFailure,
+} from "@/lib/study-plan/daily-runner-content";
 import type { DailyPlanSkill } from "@/lib/study-plan/daily-plan";
 import {
   NOTEBOOK_ADDED_EVENT,
@@ -34,10 +37,8 @@ import {
 
 type PickState =
   | { status: "loading" }
-  | { status: "error" }
+  | { status: "error"; reason: RunnerPickFailure }
   | { status: "ready"; pick: RunnerContentPick };
-
-const ALL_DIFFICULTIES: RandomDifficulty[] = ["easy", "medium", "hard"];
 
 function fmtClock(totalSeconds: number): string {
   const s = Math.max(0, totalSeconds);
@@ -97,34 +98,27 @@ export function TimedRandomSession({
     return () => window.clearInterval(id);
   }, [phase, durationMin]);
 
-  const resolveDiff = useCallback((): RandomDifficulty => {
-    return difficulty === "any" ? pickOne(ALL_DIFFICULTIES) : difficulty;
-  }, [difficulty]);
-
-  // Resolve content for the current set whenever we advance.
+  // Resolve content for the current set whenever we advance. pickRunnerContent walks every
+  // level the learner can open when difficulty is "any", so a locked level never dead-ends us.
   useEffect(() => {
     if (phase !== "running") return;
     let alive = true;
     setPickState({ status: "loading" });
     (async () => {
-      // Try a few difficulty rolls so "any" still finds content if one level is locked/empty.
-      let picked: RunnerContentPick | null = null;
-      for (let i = 0; i < 3 && !picked; i++) {
-        picked = await pickRunnerContent(skill, resolveDiff(), usedKeysRef.current);
-      }
+      const result = await pickRunnerContent(skill, difficulty, usedKeysRef.current);
       if (!alive) return;
-      if (picked) {
-        usedKeysRef.current.add(picked.contentKey);
-        setPickState({ status: "ready", pick: picked });
+      if (result.ok) {
+        usedKeysRef.current.add(result.pick.contentKey);
+        setPickState({ status: "ready", pick: result.pick });
       } else {
-        setPickState({ status: "error" });
+        setPickState({ status: "error", reason: result.reason });
       }
     })();
     return () => {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, skill, resolveDiff, bumpState]);
+  }, [phase, skill, difficulty, bumpState]);
 
   const finishRun = useCallback(async () => {
     setPhase("finishing");
@@ -258,14 +252,68 @@ export function TimedRandomSession({
           </div>
         ) : pickState.status === "error" ? (
           <div className="rounded-2xl bg-white p-8 text-center ring-1 ring-neutral-200">
-            <p className="text-sm font-bold text-neutral-500">ยังไม่มีข้อสอบสำหรับระดับนี้</p>
-            <button
-              type="button"
-              onClick={() => (timeUp ? void finishRun() : rollNext())}
-              className="mt-3 rounded-xl bg-ep-blue px-5 py-2.5 text-xs font-bold text-white transition hover:opacity-90"
-            >
-              {timeUp ? "จบการฝึก" : "สุ่มใหม่ →"}
-            </button>
+            {pickState.reason === "unauthenticated" ? (
+              <>
+                <p className="text-2xl">🔒</p>
+                <p className="mt-2 text-sm font-bold text-neutral-700">
+                  ต้องเข้าสู่ระบบก่อนถึงจะสุ่มข้อสอบให้ได้ครับ
+                </p>
+                <p className="mt-1 text-xs text-neutral-500">
+                  เข้าสู่ระบบแล้วระบบจะพากลับมาที่หน้านี้ให้เลย
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sfxTransition();
+                    router.push(
+                      `/login?redirect=${encodeURIComponent(
+                        `${window.location.pathname}${window.location.search}`,
+                      )}`,
+                    );
+                  }}
+                  className="mt-4 rounded-xl bg-ep-blue px-5 py-2.5 text-xs font-bold text-white transition hover:opacity-90"
+                >
+                  เข้าสู่ระบบ →
+                </button>
+              </>
+            ) : pickState.reason === "locked" ? (
+              <>
+                <p className="text-2xl">⭐</p>
+                <p className="mt-2 text-sm font-bold text-neutral-700">
+                  ระดับนี้เปิดให้เฉพาะแพ็กเกจที่สูงขึ้นครับ
+                </p>
+                <p className="mt-1 text-xs text-neutral-500">
+                  เลือก “ง่าย” เพื่อฝึกต่อได้เลย หรืออัปเกรดเพื่อปลดระดับกลาง/ยาก
+                </p>
+                <div className="mt-4 flex flex-col gap-2">
+                  <Link
+                    href={hubHref}
+                    onClick={() => sfxTransition()}
+                    className="rounded-xl bg-ep-blue px-5 py-2.5 text-xs font-bold text-white transition hover:opacity-90"
+                  >
+                    เลือกระดับใหม่ →
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    onClick={() => sfxTransition()}
+                    className="text-xs font-bold text-neutral-400 transition-colors hover:text-ep-blue"
+                  >
+                    ดูแพ็กเกจ
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-bold text-neutral-500">ยังไม่มีข้อสอบสำหรับระดับนี้</p>
+                <button
+                  type="button"
+                  onClick={() => (timeUp ? void finishRun() : rollNext())}
+                  className="mt-3 rounded-xl bg-ep-blue px-5 py-2.5 text-xs font-bold text-white transition hover:opacity-90"
+                >
+                  {timeUp ? "จบการฝึก" : "สุ่มใหม่ →"}
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <RunnerSlotItem
