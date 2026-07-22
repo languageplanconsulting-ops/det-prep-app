@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SPEAKING_PATTERN_PARTS, patternPartSentence } from "@/lib/speaking-pattern";
+import { SPEAKING_PATTERNS, patternPartSentence } from "@/lib/speaking-pattern";
 
 /**
  * SpeakingHintPanel — course-only ("Fast Track" VIP) answer-pattern scaffold for
@@ -14,10 +14,13 @@ import { SPEAKING_PATTERN_PARTS, patternPartSentence } from "@/lib/speaking-patt
  */
 
 type Step = { en: string; th: string };
+type PatternBlock = { label: string; useWhen: string; signal: string; steps: Step[] };
 
-const PARTS: Step[] = SPEAKING_PATTERN_PARTS.map((p) => ({
-  en: patternPartSentence(p),
-  th: p.th,
+const PATTERN_BLOCKS: PatternBlock[] = SPEAKING_PATTERNS.map((pattern) => ({
+  label: pattern.label,
+  useWhen: pattern.useWhen,
+  signal: pattern.signal,
+  steps: pattern.parts.map((p) => ({ en: patternPartSentence(p), th: p.th })),
 }));
 
 const TRANSITIONS = [
@@ -140,16 +143,29 @@ export function SpeakingHintPanel({ unlocked }: { unlocked: boolean }) {
         </span>
         <p className="text-sm font-bold text-slate-800">แพตเทิร์นพูด 1–3 นาที จากพี่ดอย</p>
       </div>
-      <p className="mt-1.5 text-xs leading-6 text-slate-500">พูดตามโครง 4 พาร์ต → ครบ ลื่น และตรงเวลา</p>
+      <p className="mt-1.5 text-xs leading-6 text-slate-500">
+        เลือกโครงให้ตรงกับโจทย์ → พูดตามพาร์ต → ครบ ลื่น และตรงเวลา
+      </p>
 
-      {/* 4-part scaffold */}
-      <div className="mt-3 space-y-2">
-        {PARTS.map((p, i) => (
-          <div key={i} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3">
-            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xs font-bold text-white">{i + 1}</span>
-            <div className="min-w-0">
-              <p className="font-mono text-sm font-semibold leading-6 text-slate-900 break-words">{p.en}</p>
-              <p className="mt-0.5 text-xs text-slate-500">{p.th}</p>
+      {/* One scaffold per pattern (เล่า/บรรยาย · แสดงความเห็น) */}
+      <div className="mt-3 space-y-4">
+        {PATTERN_BLOCKS.map((block) => (
+          <div key={block.label}>
+            <div className="flex flex-wrap items-baseline gap-x-2">
+              <p className="text-sm font-bold text-[#004AAD]">{block.label}</p>
+              <p className="text-[11px] text-slate-400">{block.signal}</p>
+            </div>
+            <p className="mt-0.5 text-[11px] text-slate-500">{block.useWhen}</p>
+            <div className="mt-2 space-y-2">
+              {block.steps.map((p, i) => (
+                <div key={i} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xs font-bold text-white">{i + 1}</span>
+                  <div className="min-w-0">
+                    <p className="font-mono text-sm font-semibold leading-6 text-slate-900 break-words">{p.en}</p>
+                    <p className="mt-0.5 text-xs text-slate-500">{p.th}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
