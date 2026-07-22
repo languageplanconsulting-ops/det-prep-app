@@ -42,6 +42,23 @@ export interface CriterionBreakdownPoint extends BilingualLine {
   topicTh?: string;
 }
 
+/** One model sentence the learner could have said to close the gap to 100%. */
+export interface CriterionPerfectExample {
+  id: string;
+  en: string;
+  th: string;
+}
+
+/**
+ * "What is still missing to reach 100%" for a criterion scored below 100.
+ * Absent when the criterion already scored 100.
+ */
+export interface CriterionToPerfect {
+  missingEn: string;
+  missingTh: string;
+  examples: CriterionPerfectExample[];
+}
+
 export interface WritingCriterionReport {
   id: string;
   weight: number;
@@ -49,6 +66,7 @@ export interface WritingCriterionReport {
   pointsOn160: number;
   summary: BilingualLine;
   breakdown: CriterionBreakdownPoint[];
+  toPerfect?: CriterionToPerfect;
 }
 
 export interface ImprovementPoint extends BilingualLine {

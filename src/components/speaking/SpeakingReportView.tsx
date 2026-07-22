@@ -6,6 +6,7 @@ import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
 import { AiRewardBonusNotice } from "@/components/production/AiRewardBonusNotice";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { CriterionToPerfectPanel } from "@/components/reports/CriterionToPerfectPanel";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
 import { SpeakingFullReportNotebookButton } from "@/components/speaking/SpeakingFullReportNotebookButton";
 import { SpeakingVocabularyUpgradePanel } from "@/components/speaking/SpeakingVocabularyUpgradePanel";
@@ -115,6 +116,15 @@ function SpeakingCriterionBlock({
           </li>
         ))}
       </ul>
+      <CriterionToPerfectPanel
+        report={report}
+        titleEn={titleEn}
+        titleTh={titleTh}
+        attemptId={attemptId}
+        entrySource="speaking-read-and-speak"
+        suggestedPremade={suggestedPremade}
+        uiLocale={uiLocale}
+      />
     </BrutalPanel>
   );
 }

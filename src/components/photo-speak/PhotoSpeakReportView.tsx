@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
+import { CriterionToPerfectPanel } from "@/components/reports/CriterionToPerfectPanel";
 import { FullReportNotebookButton } from "@/components/writing/FullReportNotebookButton";
 import {
   buildPhotoSpeakReportNotebookFullBodies,
@@ -116,6 +117,15 @@ function PhotoCriterionBlock({
           </li>
         ))}
       </ul>
+      <CriterionToPerfectPanel
+        report={report}
+        titleEn={titleEn}
+        titleTh={titleTh}
+        attemptId={attemptId}
+        entrySource={entrySource}
+        suggestedPremade={suggestedPremade}
+        uiLocale="th"
+      />
     </BrutalPanel>
   );
 }

@@ -2,7 +2,7 @@ import { findTextSpan } from "@/lib/find-text-span";
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
-import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
+import type { CriterionToPerfect, ImprovementPoint, WritingCriterionReport } from "@/types/writing";
 import type {
   SpeakingAttemptReport,
   SpeakingRoundNum,
@@ -11,6 +11,13 @@ import type {
 } from "@/types/speaking";
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
+import {
+  COHERENCE_RUBRIC_PROMPT,
+  TO_PERFECT_JSON_SHAPE,
+  mapCriterionToPerfect,
+  taskRubricPrompt,
+  toPerfectRulePrompt,
+} from "@/lib/speaking-rubric-prompt";
 
 function pointsOn160(percent: number, weight: number): number {
   return Math.round(percent * weight * 1.6 * 10) / 10;
@@ -45,6 +52,7 @@ function criterion(
     topicEn?: string;
     topicTh?: string;
   }[],
+  toPerfect?: CriterionToPerfect,
 ): WritingCriterionReport {
   return {
     id,
@@ -52,6 +60,7 @@ function criterion(
     scorePercent,
     pointsOn160: pointsOn160(scorePercent, weight),
     summary,
+    ...(scorePercent < 100 && toPerfect ? { toPerfect } : {}),
     breakdown: breakdown.map((b, idx) => ({
       id: `${id}-b${idx + 1}`,
       en: b.en,
@@ -129,12 +138,11 @@ Grammar: ~30% A1–A2 issues; ~50% B1–B2 subord/tense; ~70% no clear mistakes;
 
 Vocabulary: C1/B2 used well vs mistakes vs thin range (see standard DET bands).
 
-Coherence (ความต่อเนื่อง):
-- ALWAYS recommend specific transitional / linking words in the coherence feedback (e.g. first, then, next, after that, however, because, for example, in addition, finally) — name at least one concrete transition the learner could have added, tied to their own wording.
-- If the learner did NOT use transitional words to connect their ideas, treat it as a real coherence weakness and lower the coherence score accordingly — do NOT award a high coherence score when linking words are absent.
-- Spoken self-correction: if the learner hesitates, repeats, or restarts but then repairs to a CORRECT form, do NOT deduct for the hesitation or the repair itself (this is natural spoken repair and should be treated as correct). Only deduct when the FINAL repaired form is still wrong — then apply the normal grammar / coherence criteria to that final form.
+${COHERENCE_RUBRIC_PROMPT}
 
-Task relevancy: personal on-topic vs generalized vs off-topic.
+${toPerfectRulePrompt(scoreText, true)}
+
+${taskRubricPrompt()}
 
 IMPORTANT — task score boost:
 - Output taskScorePercent as your BASE task score (0–100) before any personal bonus.
@@ -222,6 +230,7 @@ function buildUserPayload(
             suggestionTh: "string",
           },
         ],
+        toPerfect: TO_PERFECT_JSON_SHAPE,
         improvementPoints: [
           { en: "string", th: "string", category: "grammar|vocabulary|coherence|task|general" },
         ],
@@ -348,6 +357,10 @@ export async function generateSpeakingReportWithGemini(params: {
         };
       });
 
+  // "What is still missing to reach 100%" + model sentences, per criterion.
+  const toPerfectRaw = (raw.toPerfect ?? {}) as Record<string, unknown>;
+  const mapToPerfect = mapCriterionToPerfect;
+
   const grammar = criterion(
     "grammar",
     SPEAKING_RUBRIC_WEIGHTS.grammar,
@@ -357,6 +370,7 @@ export async function generateSpeakingReportWithGemini(params: {
       th: String(raw.grammarSummaryTh ?? ""),
     },
     mapBreak(raw.grammarBreakdown),
+    mapToPerfect("grammar", toPerfectRaw.grammar),
   );
 
   const vocabulary = criterion(
@@ -368,6 +382,7 @@ export async function generateSpeakingReportWithGemini(params: {
       th: String(raw.vocabularySummaryTh ?? ""),
     },
     mapBreak(raw.vocabularyBreakdown),
+    mapToPerfect("vocabulary", toPerfectRaw.vocabulary),
   );
 
   const coherence = criterion(
@@ -379,6 +394,7 @@ export async function generateSpeakingReportWithGemini(params: {
       th: String(raw.coherenceSummaryTh ?? ""),
     },
     mapBreak(raw.coherenceBreakdown),
+    mapToPerfect("coherence", toPerfectRaw.coherence),
   );
 
   const taskRelevancy = criterion(
@@ -390,6 +406,7 @@ export async function generateSpeakingReportWithGemini(params: {
       th: String(raw.taskSummaryTh ?? ""),
     },
     mapBreak(raw.taskBreakdown),
+    mapToPerfect("task", toPerfectRaw.task),
   );
 
   const normalized = transcript.replace(/\s+/g, " ").trim();

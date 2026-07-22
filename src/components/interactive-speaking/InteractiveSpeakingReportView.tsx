@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
+import { CriterionToPerfectPanel } from "@/components/reports/CriterionToPerfectPanel";
 import { ProductionReportLandingHero } from "@/components/production/ProductionReportLandingHero";
 import { AiRewardBonusNotice } from "@/components/production/AiRewardBonusNotice";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -90,6 +91,15 @@ function CriterionBlock({
           </li>
         ))}
       </ul>
+      <CriterionToPerfectPanel
+        report={report}
+        titleEn={titleEn}
+        titleTh={titleTh}
+        attemptId={attemptId}
+        entrySource="interactive-speaking"
+        suggestedPremade={suggestedPremade}
+        uiLocale="th"
+      />
     </BrutalPanel>
   );
 }

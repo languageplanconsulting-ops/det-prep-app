@@ -2,7 +2,14 @@ import { findTextSpan } from "@/lib/find-text-span";
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
 import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
-import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
+import type { CriterionToPerfect, ImprovementPoint, WritingCriterionReport } from "@/types/writing";
+import {
+  COHERENCE_RUBRIC_PROMPT,
+  TO_PERFECT_JSON_SHAPE,
+  mapCriterionToPerfect,
+  taskRubricPrompt,
+  toPerfectRulePrompt,
+} from "@/lib/speaking-rubric-prompt";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 import type { SpeakingTranscriptHighlight, SpeakingVocabularyUpgrade } from "@/types/speaking";
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
@@ -49,6 +56,7 @@ function criterion(
     topicEn?: string;
     topicTh?: string;
   }[],
+  toPerfect?: CriterionToPerfect,
 ): WritingCriterionReport {
   return {
     id,
@@ -56,6 +64,7 @@ function criterion(
     scorePercent,
     pointsOn160: pointsOn160(scorePercent, weight),
     summary,
+    ...(scorePercent < 100 && toPerfect ? { toPerfect } : {}),
     breakdown: breakdown.map((b, idx) => ({
       id: `${id}-b${idx + 1}`,
       en: b.en,
@@ -109,7 +118,9 @@ WORKFLOW (mandatory):
 Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
 Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
 
-Coherence (ความต่อเนื่อง): ALWAYS recommend specific transitional / linking words in the coherence feedback (e.g. first, then, next, however, because, for example, in addition, finally), naming at least one concrete transition tied to the learner's own wording. If the learner did NOT use transitional words to connect their ideas, treat it as a real coherence weakness and lower the coherence score accordingly — do not award a high coherence score when linking words are absent.
+${COHERENCE_RUBRIC_PROMPT}
+
+${toPerfectRulePrompt("punctuatedTranscript", true)}
 
 For EACH criterion summary, include (A) brief assessment and (B) a line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" plus a concrete action tied to THIS learner's wording.
 
@@ -120,7 +131,7 @@ Priority for feedback:
 - grammarBreakdown should contain up to 8 concrete fixes where possible.
 - Keep grammar suggestions natural and score-focused, not overly formal.
 
-Task relevancy: weight whether the learner addresses the photo prompt AND keyword tags.
+${taskRubricPrompt("the answer addresses the photo prompt AND the keyword tags given for this photo")}
 
 Task score boost: output taskScorePercent as BASE (0–100). Set taskPersonalExperienceBoost true for authentic personal OR hypothetical personal experience ("If I were…", "I would…", etc.). Server adds +10 to task (cap 100)—note in taskSummary.
 
@@ -207,6 +218,7 @@ function buildUserPayload(
             suggestionTh: "string",
           },
         ],
+        toPerfect: TO_PERFECT_JSON_SHAPE,
         improvementPoints: [
           { en: "string", th: "string", category: "grammar|vocabulary|coherence|task|general" },
         ],
@@ -373,6 +385,8 @@ export async function generatePhotoSpeakReportWithGemini(params: {
     });
   }
 
+  const toPerfectRaw = (raw.toPerfect ?? {}) as Record<string, unknown>;
+
   const grammar = criterion(
     "grammar",
     SPEAKING_RUBRIC_WEIGHTS.grammar,
@@ -382,6 +396,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       th: String(raw.grammarSummaryTh ?? ""),
     },
     grammarBreakdown,
+    mapCriterionToPerfect("grammar", toPerfectRaw.grammar),
   );
 
   const vocabulary = criterion(
@@ -393,6 +408,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       th: String(raw.vocabularySummaryTh ?? ""),
     },
     mapBreak(raw.vocabularyBreakdown),
+    mapCriterionToPerfect("vocabulary", toPerfectRaw.vocabulary),
   );
 
   const coherence = criterion(
@@ -404,6 +420,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       th: String(raw.coherenceSummaryTh ?? ""),
     },
     coherenceBreakdown,
+    mapCriterionToPerfect("coherence", toPerfectRaw.coherence),
   );
 
   const taskRelevancy = criterion(
@@ -415,6 +432,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       th: String(raw.taskSummaryTh ?? ""),
     },
     mapBreak(raw.taskBreakdown),
+    mapCriterionToPerfect("task", toPerfectRaw.task),
   );
 
   const normalized = transcript.replace(/\s+/g, " ").trim();

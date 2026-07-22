@@ -11,7 +11,14 @@ import type {
   InteractiveSpeakingRecapRow,
   InteractiveSpeakingTurnRecord,
 } from "@/types/interactive-speaking";
-import type { ImprovementPoint, WritingCriterionReport } from "@/types/writing";
+import type { CriterionToPerfect, ImprovementPoint, WritingCriterionReport } from "@/types/writing";
+import {
+  COHERENCE_RUBRIC_PROMPT,
+  TO_PERFECT_JSON_SHAPE,
+  mapCriterionToPerfect,
+  taskRubricPrompt,
+  toPerfectRulePrompt,
+} from "@/lib/speaking-rubric-prompt";
 import type { SpeakingTranscriptHighlight, SpeakingVocabularyUpgrade } from "@/types/speaking";
 
 function pointsOn160(percent: number, weight: number): number {
@@ -47,6 +54,7 @@ function criterion(
     topicEn?: string;
     topicTh?: string;
   }[],
+  toPerfect?: CriterionToPerfect,
 ): WritingCriterionReport {
   return {
     id,
@@ -54,6 +62,7 @@ function criterion(
     scorePercent,
     pointsOn160: pointsOn160(scorePercent, weight),
     summary,
+    ...(scorePercent < 100 && toPerfect ? { toPerfect } : {}),
     breakdown: breakdown.map((b, idx) => ({
       id: `${id}-b${idx + 1}`,
       en: b.en,
@@ -88,12 +97,11 @@ Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
 
 PUNCTUATION POLICY (mandatory): transcripts are from speech recognition — the learner SPOKE, not typed. Completely disregard punctuation, capitalization, sentence boundaries, AND spelling when scoring — the transcript's exact spelling and casing were chosen by the speech-recognition engine, not the learner. Never raise or lower ANY subscore because of them, and never list a punctuation, capitalization, or spelling issue in a breakdown or improvement point.
 
-Coherence (ความต่อเนื่อง):
-- ALWAYS recommend specific transitional / linking words in the coherence feedback (e.g. first, then, next, however, because, for example, in addition, finally), naming at least one concrete transition tied to the learner's own wording.
-- If the learner did NOT use transitional words to connect ideas, treat it as a real coherence weakness and lower the coherence score accordingly.
-- Spoken self-correction: if the learner hesitates, repeats, or restarts but then repairs to a CORRECT form, do NOT deduct for the hesitation or the repair itself — only deduct when the FINAL repaired form is still wrong.
+${COHERENCE_RUBRIC_PROMPT}
 
-Task relevancy: how well they engaged with each question and stayed on topic across the scenario.
+${toPerfectRulePrompt("punctuated answer", false)}
+
+${taskRubricPrompt("every question in the scenario is engaged with and answered on topic, not just the first one")}
 
 Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, taskBreakdown) — EVERY item MUST have:
 - excerpt: exact short quote from the punctuated answer containing the issue.
@@ -182,6 +190,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
         coherenceSummaryTh: "string",
         taskSummaryEn: "string",
         taskSummaryTh: "string",
+        toPerfect: TO_PERFECT_JSON_SHAPE,
         grammarBreakdown: [{}],
         vocabularyBreakdown: [{}],
         coherenceBreakdown: [{}],
@@ -245,12 +254,15 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
         };
       });
 
+  const toPerfectRaw = (raw.toPerfect ?? {}) as Record<string, unknown>;
+
   const grammar = criterion(
     "grammar",
     SPEAKING_RUBRIC_WEIGHTS.grammar,
     g,
     { en: String(raw.grammarSummaryEn ?? ""), th: String(raw.grammarSummaryTh ?? "") },
     mapBreak(raw.grammarBreakdown),
+    mapCriterionToPerfect("grammar", toPerfectRaw.grammar),
   );
   const vocabulary = criterion(
     "vocabulary",
@@ -258,6 +270,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
     v,
     { en: String(raw.vocabularySummaryEn ?? ""), th: String(raw.vocabularySummaryTh ?? "") },
     mapBreak(raw.vocabularyBreakdown),
+    mapCriterionToPerfect("vocabulary", toPerfectRaw.vocabulary),
   );
   const coherence = criterion(
     "coherence",
@@ -265,6 +278,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
     c,
     { en: String(raw.coherenceSummaryEn ?? ""), th: String(raw.coherenceSummaryTh ?? "") },
     mapBreak(raw.coherenceBreakdown),
+    mapCriterionToPerfect("coherence", toPerfectRaw.coherence),
   );
   const taskRelevancy = criterion(
     "task",
@@ -272,6 +286,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
     t,
     { en: String(raw.taskSummaryEn ?? ""), th: String(raw.taskSummaryTh ?? "") },
     mapBreak(raw.taskBreakdown),
+    mapCriterionToPerfect("task", toPerfectRaw.task),
   );
 
   const vocabularyUpgradeSuggestions: SpeakingVocabularyUpgrade[] = asArr(raw.vocabularyUpgradeSuggestions)
