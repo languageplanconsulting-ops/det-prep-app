@@ -9,15 +9,26 @@ export type ReadWriteTier = "easy" | "medium" | "advanced";
 export type ReadWriteMode = "choose" | "fill";
 export type ReadWriteBlankKind = "grammar" | "vocabulary";
 
+/** "choose" = tap a dropdown option · "type" = prefix hint + one box per missing letter */
+export type ReadWriteBlankMode = "choose" | "type";
+
 export type ReadWriteBlank = {
   answer: string;
   options?: string[];
   prefixLength?: number;
   kind?: ReadWriteBlankKind;
+  mode?: ReadWriteBlankMode;
+  /** Thai meaning of the word — the tap-to-reveal hint on a typed blank. */
+  meaningTh?: string;
   synonyms?: string[];
   ruleEn: string;
   ruleTh: string;
 };
+
+/** Blanks predate `mode`; fall back to the old "has options = dropdown" rule. */
+export function readWriteBlankMode(b: ReadWriteBlank): ReadWriteBlankMode {
+  return b.mode ?? (b.options?.length ? "choose" : "type");
+}
 
 export type ReadWriteVocab = { word: string; en: string; th: string };
 

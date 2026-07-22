@@ -13,8 +13,10 @@ import { useLessonUserId } from "@/lib/lesson-user";
 import { clearUnitResume, loadUnitResume, saveUnitResume, saveUnitScore } from "@/lib/lessons-progress";
 import { addNotebookEntry } from "@/lib/notebook-storage";
 import { getPhoto, photoCredit } from "@/lib/lesson-photo-bank";
-import { photoWriteUnit, type PhotoWriteItem, type PhotoWriteTier, type PhotoWriteVocab } from "@/lib/photo-write-lessons";
+import { photoWriteBlankMode, photoWriteUnit, type PhotoWriteItem, type PhotoWriteTier, type PhotoWriteVocab } from "@/lib/photo-write-lessons";
 import { OverlayBackdrop } from "@/components/ui/OverlayBackdrop";
+import { fitbPrefix, fitbRemainderLength, scoreFitb, type MissingWord } from "@/lib/fitb-lesson-scoring";
+import { TypedBlank, TypedBlankHints } from "./TypedBlank";
 
 const TOPIC = "photowrite";
 type Phase = "cloze" | "review";
@@ -67,6 +69,8 @@ function Player({ tier, unit, items, uid }: { tier: PhotoWriteTier; unit: number
   const [picks, setPicks] = useState<(string | null)[]>([]);
   const [activeBlank, setActiveBlank] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
+  const [typed, setTyped] = useState<string[]>([]);
+  const [hintsShown, setHintsShown] = useState<Set<number>>(new Set());
   const [vocabOpen, setVocabOpen] = useState<PhotoWriteVocab | null>(null);
   const [savedWords, setSavedWords] = useState<Set<string>>(new Set());
 
@@ -74,11 +78,25 @@ function Player({ tier, unit, items, uid }: { tier: PhotoWriteTier; unit: number
   const photo = getPhoto(item.imageId);
   const rewarded = useRef(false);
 
+  // A caption now mixes both blank kinds: tap-a-word dropdowns for grammar and
+  // type-the-remainder boxes for vocabulary.
+  const modes = useMemo(() => item.blanks.map(photoWriteBlankMode), [item.blanks]);
+  const fillWords = useMemo<MissingWord[]>(
+    () => item.blanks.map((b) => ({ correctWord: b.answer, prefix_length: b.prefixLength ?? 2, explanationThai: b.meaningTh ?? b.ruleTh })),
+    [item.blanks],
+  );
+  const hints = useMemo(
+    () => item.blanks.map((b, i) => ({ blank: i, th: b.meaningTh ?? b.ruleTh })).filter((h, i) => modes[i] === "type" && !!h.th),
+    [item.blanks, modes],
+  );
+
   useEffect(() => {
     setPhase("cloze");
     setPicks(new Array(item.blanks.length).fill(null));
     setActiveBlank(null);
     setChecked(false);
+    setTyped(new Array(item.blanks.length).fill(""));
+    setHintsShown(new Set());
   }, [index]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -90,16 +108,28 @@ function Player({ tier, unit, items, uid }: { tier: PhotoWriteTier; unit: number
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /** Typed blanks are graded by the FITB scorer; dropdown blanks are exact-match. */
+  const submitted = useMemo(
+    () => fillWords.map((w, i) => (modes[i] === "type" ? fitbPrefix(w) + (typed[i] ?? "") : w.correctWord)),
+    [fillWords, modes, typed],
+  );
+  const typedMarks = useMemo(() => (checked ? scoreFitb(submitted, fillWords).marks : null), [checked, submitted, fillWords]);
+
   const wrongBlanks = useMemo(() => {
-    if (!checked) return new Set<number>();
     const s = new Set<number>();
+    if (!checked) return s;
     item.blanks.forEach((b, i) => {
-      if (picks[i] !== b.answer) s.add(i);
+      const ok = modes[i] === "choose" ? picks[i] === b.answer : typedMarks?.[i]?.grade === "exact";
+      if (!ok) s.add(i);
     });
     return s;
-  }, [checked, picks, item.blanks]);
+  }, [checked, picks, typedMarks, item.blanks, modes]);
 
-  const allPicked = picks.length > 0 && picks.every((p) => p !== null);
+  const allAnswered =
+    item.blanks.length > 0 &&
+    item.blanks.every((_, i) =>
+      modes[i] === "choose" ? picks[i] !== null : fitbRemainderLength(fillWords[i]!) === 0 || (typed[i] ?? "").length > 0,
+    );
 
   function pick(blank: number, option: string) {
     setPicks((p) => {
@@ -108,19 +138,37 @@ function Player({ tier, unit, items, uid }: { tier: PhotoWriteTier; unit: number
       return n;
     });
     setActiveBlank(null);
-    if (checked) setChecked(false);
+  }
+
+  function toggleHint(blank: number) {
+    setHintsShown((s) => {
+      const n = new Set(s);
+      if (n.has(blank)) n.delete(blank);
+      else n.add(blank);
+      return n;
+    });
   }
 
   function check() {
     markItemSeen(uid, itemKey("photowrite", item.id), "photowrite", "manual_browse").catch(() => {});
     setChecked(true);
-    if (item.blanks.every((b, i) => picks[i] === b.answer)) {
+    const marks = scoreFitb(submitted, fillWords).marks;
+    const allOk = item.blanks.every((b, i) => (modes[i] === "choose" ? picks[i] === b.answer : marks[i]?.grade === "exact"));
+    if (allOk) {
       sfxCorrect();
       setCompleted((c) => c + 1);
       setPhase("review");
     } else {
       sfxWrong();
     }
+  }
+
+  /** Keep what was right, clear only the blanks that were wrong. */
+  function retry() {
+    const wrong = wrongBlanks;
+    setTyped((p) => p.map((v, i) => (modes[i] === "type" && wrong.has(i) ? "" : v)));
+    setPicks((p) => p.map((v, i) => (modes[i] === "choose" && wrong.has(i) ? null : v)));
+    setChecked(false);
   }
 
   async function saveVocab(v: PhotoWriteVocab) {
@@ -201,33 +249,49 @@ function Player({ tier, unit, items, uid }: { tier: PhotoWriteTier; unit: number
 
       {phase === "cloze" ? (
         <>
-          <p className="mb-2 rounded-xl bg-blue-50 p-3 text-xs font-semibold text-[#004AAD]">ดูภาพ แล้วแตะช่องว่างเพื่อเลือกคำที่บรรยายภาพได้ถูกต้อง</p>
+          <p className="mb-2 rounded-xl bg-blue-50 p-3 text-xs font-semibold text-[#004AAD]">ดูภาพ แล้วเติมคำบรรยายให้ครบ — ช่องสีน้ำเงินให้พิมพ์คำศัพท์ (มีตัวอักษรขึ้นต้นให้) ส่วนช่องประให้แตะเลือกคำ</p>
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="flex flex-wrap items-center gap-y-2 text-[15px] leading-8 text-slate-800">
-              {splitTemplate(item.template).map((part, pi) =>
-                "text" in part ? (
-                  <span key={pi}>{part.text}</span>
-                ) : (
+            <div className="flex flex-wrap items-center gap-y-3 text-[15px] leading-8 text-slate-800">
+              {splitTemplate(item.template).map((part, pi) => {
+                if ("text" in part) return <span key={pi}>{part.text}</span>;
+                const b = part.blank;
+                if (modes[b] === "type") {
+                  return (
+                    <TypedBlank
+                      key={pi}
+                      word={fillWords[b]!}
+                      value={typed[b] ?? ""}
+                      disabled={checked}
+                      grade={checked ? (typedMarks?.[b]?.grade === "exact" ? "exact" : "wrong") : undefined}
+                      label={`ช่องที่ ${b + 1}`}
+                      onChange={(v) => setTyped((p) => { const n = [...p]; n[b] = v; return n; })}
+                    />
+                  );
+                }
+                return (
                   <button
                     key={pi}
                     type="button"
-                    onClick={() => setActiveBlank(activeBlank === part.blank ? null : part.blank)}
+                    disabled={checked}
+                    onClick={() => setActiveBlank(activeBlank === b ? null : b)}
                     className={`mx-0.5 rounded-md border-[1.5px] px-2 py-0.5 text-sm font-bold ${
-                      checked && wrongBlanks.has(part.blank)
+                      checked && wrongBlanks.has(b)
                         ? "border-rose-500 bg-rose-50"
                         : checked
                           ? "border-emerald-500 bg-emerald-50"
-                          : picks[part.blank]
+                          : picks[b]
                             ? "border-[#004AAD] bg-blue-50"
                             : "border-dashed border-[#004AAD] bg-blue-50 text-[#004AAD]"
                     }`}
                   >
-                    {picks[part.blank] ?? "แตะเลือก ▾"}
+                    {picks[b] ?? "แตะเลือก ▾"}
                   </button>
-                ),
-              )}
+                );
+              })}
             </div>
           </div>
+
+          {!checked ? <TypedBlankHints hints={hints} shown={hintsShown} onToggle={toggleHint} /> : null}
 
           {checked && wrongBlanks.size > 0 ? (
             <div className="mt-4 rounded-xl border border-rose-500 bg-rose-50 p-4">
@@ -238,7 +302,7 @@ function Player({ tier, unit, items, uid }: { tier: PhotoWriteTier; unit: number
                   <div key={i} className="mb-2 rounded-lg border border-slate-200 bg-white p-3">
                     <span className="inline-block rounded-full bg-slate-900 px-2.5 py-0.5 text-[11px] font-black text-white">ช่องที่ {i + 1} · เฉลย: {b.answer}</span>
                     <p className="mt-1.5 text-sm text-slate-800">{b.ruleEn}</p>
-                    <p className="mt-1 text-sm text-slate-600">{b.ruleTh}</p>
+                    <p className="mt-1 text-sm text-slate-600">{b.meaningTh ?? b.ruleTh}</p>
                   </div>
                 );
               })}
@@ -270,14 +334,18 @@ function Player({ tier, unit, items, uid }: { tier: PhotoWriteTier; unit: number
           <button type="button" onClick={next} className="w-full rounded-xl bg-slate-900 py-3 text-sm font-bold text-white">
             {index + 1 >= total ? "ดูสรุป →" : "ภาพถัดไป →"}
           </button>
+        ) : checked ? (
+          <button type="button" onClick={retry} className="w-full rounded-xl bg-[#004AAD] py-3 text-sm font-bold text-[#FFCC00]">
+            แก้แล้วลองใหม่
+          </button>
         ) : (
-          <button type="button" disabled={!allPicked} onClick={check} className="w-full rounded-xl bg-[#004AAD] py-3 text-sm font-bold text-[#FFCC00] disabled:opacity-40">
-            {allPicked ? "ตรวจคำตอบ" : "เลือกคำให้ครบก่อน"}
+          <button type="button" disabled={!allAnswered} onClick={check} className="w-full rounded-xl bg-[#004AAD] py-3 text-sm font-bold text-[#FFCC00] disabled:opacity-40">
+            {allAnswered ? "ตรวจคำตอบ" : "เติมให้ครบก่อน"}
           </button>
         )}
       </div>
 
-      {activeBlank !== null && phase === "cloze" ? (
+      {activeBlank !== null && phase === "cloze" && modes[activeBlank] === "choose" ? (
         <OverlayBackdrop onDismiss={() => setActiveBlank(null)} className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
           <div className="w-full max-w-md rounded-2xl bg-white p-5">
             <p className="mb-3 text-sm font-black text-slate-900">เลือกคำสำหรับช่องที่ {activeBlank + 1}</p>

@@ -6,12 +6,25 @@ import { PHOTOWRITE_ITEMS } from "./photo-write-lessons-data";
 
 export type PhotoWriteTier = "easy" | "medium" | "advanced";
 
+/** "choose" = tap a dropdown option · "type" = prefix hint + one box per missing letter */
+export type PhotoWriteBlankMode = "choose" | "type";
+
 export type PhotoWriteBlank = {
   answer: string;
-  options: string[];
+  options?: string[];
+  prefixLength?: number;
+  kind?: "grammar" | "vocabulary";
+  mode?: PhotoWriteBlankMode;
+  /** Thai meaning of the word — the tap-to-reveal hint on a typed blank. */
+  meaningTh?: string;
   ruleEn: string;
   ruleTh: string;
 };
+
+/** Blanks predate `mode`; fall back to the old "has options = dropdown" rule. */
+export function photoWriteBlankMode(b: PhotoWriteBlank): PhotoWriteBlankMode {
+  return b.mode ?? (b.options?.length ? "choose" : "type");
+}
 
 export type PhotoWriteVocab = { word: string; en: string; th: string };
 
