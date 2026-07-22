@@ -252,27 +252,41 @@ export async function PUT(req: Request) {
     }
 
     // Build an upgrade-only patch: only ever raise completed false→true and
-    // fill a null score; carry the latest payloads if provided.
-    const buildUpgrade = (current: SessionRow) => {
-      const patch: {
-        completed?: boolean;
-        score?: number | null;
-        submission_payload?: unknown;
-        report_payload?: unknown;
-      } = {};
+    // fill a null score. Kept separate from submission/report payloads (see
+    // applyPayloadPatch below) so a schema gap in those optional jsonb columns
+    // can never block recording the core completed/score fields.
+    const buildCoreUpgrade = (current: SessionRow) => {
+      const patch: { completed?: boolean; score?: number | null } = {};
       if (incomingCompleted === true && current.completed !== true) {
         patch.completed = true;
       }
       if (incomingScore != null && current.score == null) {
         patch.score = incomingScore;
       }
+      return patch;
+    };
+
+    // Best-effort write of the optional submission/report snapshots. Runs as
+    // its own update, independent of the completed/score write, so a missing
+    // or not-yet-migrated jsonb column degrades to "no snapshot saved" instead
+    // of silently losing the completed/score update it used to be bundled with.
+    const applyPayloadPatch = async (id: string) => {
+      const patch: { submission_payload?: unknown; report_payload?: unknown } = {};
       if (body.submission_payload !== undefined) {
         patch.submission_payload = body.submission_payload;
       }
       if (body.report_payload !== undefined) {
         patch.report_payload = body.report_payload;
       }
-      return patch;
+      if (Object.keys(patch).length === 0) return;
+      const { error } = await supabase
+        .from("study_sessions")
+        .update(patch)
+        .eq("id", id)
+        .eq("user_id", user.id);
+      if (error) {
+        console.error("[study/session] PUT payload patch (non-fatal)", error.message);
+      }
     };
 
     // Already ended (typically by an abandon-cleanup write): only allow a
@@ -281,19 +295,19 @@ export async function PUT(req: Request) {
       if (!isFinish) {
         return NextResponse.json({ ok: true });
       }
-      const patch = buildUpgrade(row);
-      if (Object.keys(patch).length === 0) {
-        return NextResponse.json({ ok: true });
+      const patch = buildCoreUpgrade(row);
+      if (Object.keys(patch).length > 0) {
+        const { error } = await supabase
+          .from("study_sessions")
+          .update(patch)
+          .eq("id", row.id)
+          .eq("user_id", user.id);
+        if (error) {
+          console.error("[study/session] PUT upgrade", error.message);
+          return NextResponse.json({ error: "Could not update session" }, { status: 500 });
+        }
       }
-      const { error } = await supabase
-        .from("study_sessions")
-        .update(patch)
-        .eq("id", row.id)
-        .eq("user_id", user.id);
-      if (error) {
-        console.error("[study/session] PUT upgrade", error.message);
-        return NextResponse.json({ error: "Could not update session" }, { status: 500 });
-      }
+      await applyPayloadPatch(row.id);
       return NextResponse.json({ ok: true });
     }
 
@@ -317,21 +331,12 @@ export async function PUT(req: Request) {
       duration_seconds: number;
       completed: boolean;
       score: number | null;
-      submission_payload?: unknown;
-      report_payload?: unknown;
     } = {
       ended_at: endedAt,
       duration_seconds: duration,
       completed: incomingCompleted === true,
       score: incomingScore,
     };
-
-    if (body.submission_payload !== undefined) {
-      updatePayload.submission_payload = body.submission_payload;
-    }
-    if (body.report_payload !== undefined) {
-      updatePayload.report_payload = body.report_payload;
-    }
 
     // Guard against a concurrent writer that ended this row first: only the
     // write that flips ended_at from null wins here.
@@ -351,7 +356,7 @@ export async function PUT(req: Request) {
     // Lost the race (another write — likely abandon cleanup — ended it first).
     // If this was the genuine finish, apply it as a monotonic upgrade instead.
     if ((!ended || ended.length === 0) && isFinish) {
-      const patch = buildUpgrade(row);
+      const patch = buildCoreUpgrade(row);
       if (Object.keys(patch).length > 0) {
         const { error: upErr } = await supabase
           .from("study_sessions")
@@ -364,6 +369,8 @@ export async function PUT(req: Request) {
         }
       }
     }
+
+    await applyPayloadPatch(row.id);
 
     return NextResponse.json({ ok: true });
   } catch (e) {
