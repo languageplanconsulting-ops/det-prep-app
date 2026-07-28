@@ -2,16 +2,20 @@
 
 import { useMemo, useState } from "react";
 
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import { mt } from "@/lib/mock-test/mock-test-styles";
 import type { ConversationSummaryTurn } from "@/lib/mock-test/conversation-summary-mock";
 
 export function ConversationSummaryFromInteractiveMock({
   content,
   submitting = false,
+  timeUp = false,
   onSubmit,
 }: {
   content: Record<string, unknown>;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — commit the summary as written. */
+  timeUp?: boolean;
   onSubmit: (payload: { text: string }) => void;
 }) {
   const turns = useMemo(
@@ -23,6 +27,7 @@ export function ConversationSummaryFromInteractiveMock({
     [content.user_turn_answers],
   );
   const [summary, setSummary] = useState("");
+  useTimeUpSubmit(timeUp, () => onSubmit({ text: summary }));
 
   if (!turns.length) {
     return <p className="text-sm font-bold text-red-800">No conversation data found from interactive step.</p>;

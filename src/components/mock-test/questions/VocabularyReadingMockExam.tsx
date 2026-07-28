@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import { HighlightedReadingText } from "@/components/reading/ReadingExam";
 import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import { shuffleMcOptions } from "@/lib/reading-utils";
@@ -52,6 +54,8 @@ type Props = {
   completedSteps: number;
   aggregateMode?: boolean;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — score the sub-questions answered so far. */
+  timeUp?: boolean;
   onSubmit: (payload: unknown) => void;
 };
 
@@ -60,6 +64,7 @@ export function VocabularyReadingMockExam({
   completedSteps,
   aggregateMode = false,
   submitting = false,
+  timeUp = false,
   onSubmit,
 }: Props) {
   const exam = content as unknown as VocabularyReadingMockContent;
@@ -81,6 +86,38 @@ export function VocabularyReadingMockExam({
   const [vocabPick, setVocabPick] = useState<string | null>(null);
   const [vocabRevealed, setVocabRevealed] = useState(false);
   const vocabAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Time up on the 8-minute reading block: hand in the sub-answers collected so
+  // far. Unanswered sub-questions simply score as wrong, which is what the real
+  // exam does when the section clock ends — the mock must not stall here.
+  useTimeUpSubmit(timeUp && aggregateMode, () => {
+    if (vocabAdvanceTimer.current) clearTimeout(vocabAdvanceTimer.current);
+    const partial = [...internalAnswers];
+    if (partial.length === internalStep) {
+      const pendingPick = internalStep < missingSelectionStep ? vocabPick : missingPick;
+      if (pendingPick) partial.push(pendingPick);
+    }
+    let correct = 0;
+    partial.forEach((picked, idx) => {
+      if (idx >= blocks.length) return;
+      if (picked && picked === blocks[idx]?.correctAnswer) correct += 1;
+    });
+    setLocalSubmitting(true);
+    onSubmit({
+      averageScore0To100: blocks.length > 0 ? (correct / blocks.length) * 100 : 0,
+      detail: {
+        total: blocks.length,
+        correct,
+        vocabCount: 6,
+        readingCount: Math.max(0, blocks.length - 6),
+        timedOutAtSubQuestion: internalStep + 1,
+      },
+      selected_answers: partial,
+      correct_answers: blocks.map((b) => b.correctAnswer),
+      question_labels: labels.slice(0, blocks.length),
+      question_prompts: blocks.map((b) => b.question),
+    });
+  });
 
   const step = aggregateMode ? internalStep : completedSteps;
   const block = blocks[step];

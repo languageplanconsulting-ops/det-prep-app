@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type SyntheticEvent } from "react";
 
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import type { MockQuestionRow } from "@/lib/mock-test/types";
 import { browserSpeak, browserSpeakCancel, isBrowserTtsSupported } from "@/lib/browser-tts";
 
@@ -30,6 +31,12 @@ type Props = {
    * missing/edited flag can never silently truncate step 8 to one sub-answer.
    */
   forceAggregateVocab?: boolean;
+  /**
+   * The step's countdown reached 00:00. Each task commits whatever the learner
+   * has so far and the sequence moves on, instead of parking them on a dead
+   * timer (see useTimeUpSubmit).
+   */
+  timeUp?: boolean;
   onDictationAudioFinished?: () => void;
   onSpeakPhotoReady?: () => void;
   onSubmit: (answer: unknown) => void;
@@ -40,6 +47,7 @@ export function QuestionRouter({
   phaseProgress = 0,
   submitting = false,
   forceAggregateVocab = false,
+  timeUp = false,
   onDictationAudioFinished,
   onSpeakPhotoReady,
   onSubmit,
@@ -52,6 +60,7 @@ export function QuestionRouter({
         <MockTestFillInBlanks
           content={c}
           submitting={submitting}
+          timeUp={timeUp}
           onSubmit={(ans) => onSubmit({ answer: ans })}
         />
       );
@@ -60,6 +69,7 @@ export function QuestionRouter({
         <MockTestDictation
           content={c}
           submitting={submitting}
+          timeUp={timeUp}
           onAudioPlaybackFinished={onDictationAudioFinished}
           onSubmit={(ans) => onSubmit({ answer: ans })}
         />
@@ -69,6 +79,7 @@ export function QuestionRouter({
         <RealEnglishWordRoundsMock
           content={c}
           submitting={submitting}
+          timeUp={timeUp}
           onSubmit={(payload) => onSubmit(payload)}
         />
       );
@@ -78,6 +89,7 @@ export function QuestionRouter({
           content={c}
           onSubmit={(ans) => onSubmit({ answer: ans })}
           submitting={submitting}
+          timeUp={timeUp}
         />
       );
     case "vocabulary_reading":
@@ -87,6 +99,7 @@ export function QuestionRouter({
           completedSteps={phaseProgress}
           aggregateMode={forceAggregateVocab || c.mock_combined_mode === true}
           submitting={submitting}
+          timeUp={timeUp}
           onSubmit={onSubmit}
         />
       );
@@ -95,6 +108,7 @@ export function QuestionRouter({
         <InteractiveListening
           content={c}
           submitting={submitting}
+          timeUp={timeUp}
           onSubmit={(ans) => onSubmit({ answer: ans })}
         />
       );
@@ -103,22 +117,24 @@ export function QuestionRouter({
         <VocabContext
           content={c}
           submitting={submitting}
+          timeUp={timeUp}
           onSubmit={(ans) => onSubmit({ answer: ans })}
         />
       );
     case "read_then_speak":
       return (
-        <ReadThenSpeakMock content={c} submitting={submitting} onSubmit={(payload) => onSubmit(payload)} />
+        <ReadThenSpeakMock content={c} submitting={submitting} timeUp={timeUp} onSubmit={(payload) => onSubmit(payload)} />
       );
     case "write_about_photo":
       return (
-        <WritePhoto content={c} submitting={submitting} onSubmit={(text) => onSubmit({ text })} />
+        <WritePhoto content={c} submitting={submitting} timeUp={timeUp} onSubmit={(text) => onSubmit({ text })} />
       );
     case "speak_about_photo":
       return (
         <SpeakAboutPhotoMock
           content={c}
           submitting={submitting}
+          timeUp={timeUp}
           onImageReady={onSpeakPhotoReady}
           onSubmit={(payload) => onSubmit(payload)}
         />
@@ -128,6 +144,7 @@ export function QuestionRouter({
         <MockInteractiveSpeakingSession
           content={c}
           submitting={submitting}
+          timeUp={timeUp}
           onSubmit={(payload) => onSubmit(payload)}
         />
       );
@@ -137,6 +154,7 @@ export function QuestionRouter({
           <InteractiveConversationMcqMock
             content={c}
             submitting={submitting}
+            timeUp={timeUp}
             onSubmit={(payload) => onSubmit(payload)}
           />
         );
@@ -145,6 +163,7 @@ export function QuestionRouter({
         <InteractiveConversationMock
           content={c}
           submitting={submitting}
+          timeUp={timeUp}
           onSubmit={(payload) => onSubmit(payload)}
         />
       );
@@ -155,6 +174,7 @@ export function QuestionRouter({
           <ConversationSummaryFromInteractiveMock
             content={c}
             submitting={submitting}
+            timeUp={timeUp}
             onSubmit={(payload) => onSubmit(payload)}
           />
         );
@@ -164,6 +184,7 @@ export function QuestionRouter({
           <ConversationSummaryMock
             content={c}
             submitting={submitting}
+            timeUp={timeUp}
             onSubmit={(payload) => onSubmit(payload)}
           />
         );
@@ -172,13 +193,14 @@ export function QuestionRouter({
         <SummarizeConv
           content={c}
           submitting={submitting}
+          timeUp={timeUp}
           onSubmit={(text) => onSubmit({ text })}
         />
       );
     case "read_and_write":
     case "essay_writing":
       return (
-        <EssayWriting content={c} submitting={submitting} onSubmit={(text) => onSubmit({ text })} />
+        <EssayWriting content={c} submitting={submitting} timeUp={timeUp} onSubmit={(text) => onSubmit({ text })} />
       );
     default:
       return (
@@ -198,12 +220,15 @@ function ReadAndSelect({
   content,
   onSubmit,
   submitting,
+  timeUp,
 }: {
   content: Record<string, unknown>;
   onSubmit: (a: string) => void;
   submitting: boolean;
+  timeUp?: boolean;
 }) {
   const [pick, setPick] = useState<string | null>(null);
+  useTimeUpSubmit(timeUp, () => onSubmit(pick ?? ""));
   const opts = (content.options as string[]) ?? [];
   return (
     <div className="space-y-4">
@@ -244,10 +269,12 @@ function InteractiveListening({
   content,
   onSubmit,
   submitting,
+  timeUp,
 }: {
   content: Record<string, unknown>;
   onSubmit: (a: unknown) => void;
   submitting: boolean;
+  timeUp?: boolean;
 }) {
   const [pick, setPick] = useState<string | null>(null);
   const [multiAnswers, setMultiAnswers] = useState<string[]>([]);
@@ -284,6 +311,28 @@ function InteractiveListening({
       onEnd: () => setBrowserTtsActive(false),
     });
   };
+  // Time up: hand in the answers picked so far (unanswered sub-questions score
+  // as wrong), so the section can never hang on a dead countdown.
+  useTimeUpSubmit(timeUp, () => {
+    if (multiQuestions.length === 0) {
+      onSubmit(pick ?? "");
+      return;
+    }
+    const finalAnswers = [...multiAnswers];
+    if (pick) finalAnswers[activeQuestion] = pick;
+    let correct = 0;
+    multiQuestions.forEach((question, idx) => {
+      if (String(question.correctAnswer ?? "") === String(finalAnswers[idx] ?? "")) correct += 1;
+    });
+    onSubmit({
+      averageScore0To100: multiQuestions.length > 0 ? (correct / multiQuestions.length) * 100 : 0,
+      detail: { total: multiQuestions.length, correct, maxPlays },
+      selected_answers: finalAnswers,
+      correct_answers: multiQuestions.map((question) => String(question.correctAnswer ?? "")),
+      question_prompts: multiQuestions.map((question) => String(question.question ?? "")),
+    });
+  });
+
   const currentMulti = multiQuestions[activeQuestion];
   const opts =
     multiQuestions.length > 0
@@ -412,12 +461,15 @@ function VocabContext({
   content,
   onSubmit,
   submitting,
+  timeUp,
 }: {
   content: Record<string, unknown>;
   onSubmit: (a: string) => void;
   submitting: boolean;
+  timeUp?: boolean;
 }) {
   const [pick, setPick] = useState<string | null>(null);
+  useTimeUpSubmit(timeUp, () => onSubmit(pick ?? ""));
   const opts = (content.options as string[]) ?? [];
   return (
     <div className="space-y-4">
@@ -495,12 +547,15 @@ function WritePhoto({
   content,
   onSubmit,
   submitting,
+  timeUp,
 }: {
   content: Record<string, unknown>;
   onSubmit: (t: string) => void;
   submitting: boolean;
+  timeUp?: boolean;
 }) {
   const [text, setText] = useState("");
+  useTimeUpSubmit(timeUp, () => onSubmit(text));
   const url = String(
     content.image_url ?? content.imageUrl ?? content.photo_url ?? content.photoUrl ?? "",
   );
@@ -534,12 +589,15 @@ function SummarizeConv({
   content,
   onSubmit,
   submitting,
+  timeUp,
 }: {
   content: Record<string, unknown>;
   onSubmit: (t: string) => void;
   submitting: boolean;
+  timeUp?: boolean;
 }) {
   const [text, setText] = useState("");
+  useTimeUpSubmit(timeUp, () => onSubmit(text));
   const url = String(content.audio_url ?? "");
   const lines = Array.isArray(content.dialogue_lines) ? (content.dialogue_lines as string[]) : [];
   return (
@@ -576,12 +634,15 @@ function EssayWriting({
   content,
   onSubmit,
   submitting,
+  timeUp,
 }: {
   content: Record<string, unknown>;
   onSubmit: (t: string) => void;
   submitting: boolean;
+  timeUp?: boolean;
 }) {
   const [text, setText] = useState("");
+  useTimeUpSubmit(timeUp, () => onSubmit(text));
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   return (
     <div className="space-y-3">

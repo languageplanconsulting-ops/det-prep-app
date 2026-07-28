@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import {
   getSpeechRecognitionCtor,
   handleSpeechRecognitionError,
@@ -14,10 +15,13 @@ function countWords(text: string): number {
 export function ReadThenSpeakMock({
   content,
   submitting = false,
+  timeUp = false,
   onSubmit,
 }: {
   content: Record<string, unknown>;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — commit the transcript as-is, even under 15 words. */
+  timeUp?: boolean;
   onSubmit: (answer: { text: string }) => void;
 }) {
   const passage = String(content.passage ?? "");
@@ -125,6 +129,14 @@ export function ReadThenSpeakMock({
 
   const wc = useMemo(() => countWords(transcript), [transcript]);
   const canSubmit = wc >= 15;
+
+  // Time up: send whatever was captured. The 15-word gate is a coaching floor
+  // for a deliberate submit — it must never leave a learner on a dead 00:00
+  // timer with a disabled button.
+  useTimeUpSubmit(timeUp, () => {
+    stopRecognition();
+    onSubmit({ text: transcript.trim() });
+  });
 
   return (
     <div className="space-y-4">

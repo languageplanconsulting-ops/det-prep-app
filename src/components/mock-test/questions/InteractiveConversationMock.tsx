@@ -2,16 +2,20 @@
 
 import { useMemo, useState } from "react";
 
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import { mt } from "@/lib/mock-test/mock-test-styles";
 import type { ConversationSummaryTurn } from "@/lib/mock-test/conversation-summary-mock";
 
 export function InteractiveConversationMock({
   content,
   submitting = false,
+  timeUp = false,
   onSubmit,
 }: {
   content: Record<string, unknown>;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — hand in the replies given so far. */
+  timeUp?: boolean;
   onSubmit: (payload: { user_turn_answers: string[]; turns: ConversationSummaryTurn[] }) => void;
 }) {
   const turns = useMemo(
@@ -21,6 +25,12 @@ export function InteractiveConversationMock({
   const [turnIdx, setTurnIdx] = useState(0);
   const [reply, setReply] = useState("");
   const [answers, setAnswers] = useState<string[]>([]);
+  useTimeUpSubmit(timeUp, () =>
+    onSubmit({
+      user_turn_answers: reply.trim() ? [...answers, reply.trim()] : answers,
+      turns,
+    }),
+  );
 
   const current = turns[turnIdx];
   if (!turns.length || !current) {

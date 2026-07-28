@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import { fitbMaxGapLetters, parseFitbBlankPrefix } from "@/lib/mock-test/fitb-content";
 import { splitFitbPassage } from "@/lib/fitb-passage";
 import { fitbExpectedPrefix, fitbRemainderLength } from "@/lib/fitb-scoring";
@@ -10,6 +11,8 @@ import type { FitbMissingWord } from "@/types/fitb";
 type Props = {
   content: Record<string, unknown>;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — commit whatever is typed so far. */
+  timeUp?: boolean;
   onSubmit: (answer: string | { answers: string[] }) => void;
 };
 
@@ -43,7 +46,7 @@ function SlotTile({ ch }: { ch?: string }) {
  * MC fill-in-the-blank: legacy full `sentence`, or prefix mode
  * (`blank_prefix` 1–6 chars + optional `sentence_before` / `sentence_after` / `blank_hint`).
  */
-export function MockTestFillInBlanks({ content, onSubmit, submitting = false }: Props) {
+export function MockTestFillInBlanks({ content, onSubmit, submitting = false, timeUp = false }: Props) {
   const missingWords = Array.isArray(content.missingWords)
     ? (content.missingWords.filter(
         (m): m is FitbMissingWord =>
@@ -61,12 +64,14 @@ export function MockTestFillInBlanks({ content, onSubmit, submitting = false }: 
         content={content}
         missingWords={missingWords}
         submitting={submitting}
+        timeUp={timeUp}
         onSubmit={onSubmit}
       />
     );
   }
 
   const [pick, setPick] = useState<string | null>(null);
+  useTimeUpSubmit(timeUp, () => onSubmit(pick ?? ""));
   const opts = (content.options as string[]) ?? [];
   const prefix = parseFitbBlankPrefix(content);
   const prefixMode = prefix != null;
@@ -134,17 +139,20 @@ function MockTestFillInBlanksPracticeLike({
   content,
   missingWords,
   submitting,
+  timeUp,
   onSubmit,
 }: {
   content: Record<string, unknown>;
   missingWords: FitbMissingWord[];
   submitting: boolean;
+  timeUp?: boolean;
   onSubmit: (answer: { answers: string[] }) => void;
 }) {
   const passage = String(content.passage ?? "");
   const segments = splitFitbPassage(passage);
   const [inputs, setInputs] = useState<string[]>(() => missingWords.map(() => ""));
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  useTimeUpSubmit(timeUp, () => onSubmit({ answers: inputs }));
 
   const updateInput = (idx: number, next: string) => {
     const remLen = fitbRemainderLength(missingWords[idx]!);

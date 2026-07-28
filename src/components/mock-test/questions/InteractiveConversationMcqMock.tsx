@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import { browserSpeak, browserSpeakCancel, isBrowserTtsSupported } from "@/lib/browser-tts";
 
 type McqTurn = {
@@ -14,10 +15,13 @@ type McqTurn = {
 export function InteractiveConversationMcqMock({
   content,
   submitting = false,
+  timeUp = false,
   onSubmit,
 }: {
   content: Record<string, unknown>;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — hand in the turns answered so far. */
+  timeUp?: boolean;
   onSubmit: (payload: {
     user_turn_answers: string[];
     turns: Array<{ question_en: string; reference_answer_en: string }>;
@@ -71,6 +75,26 @@ export function InteractiveConversationMcqMock({
   const [audioFailed, setAudioFailed] = useState(false);
   const [scenarioAudioFailed, setScenarioAudioFailed] = useState(false);
   const [browserTtsActive, setBrowserTtsActive] = useState(false);
+
+  // Time up: submit the turns already answered (plus the one selected but not
+  // yet confirmed). Step 14 reads these turns, so it must always get a payload.
+  useTimeUpSubmit(timeUp, () => {
+    const finalAnswers = pick ? [...answers, pick] : [...answers];
+    let correct = 0;
+    for (let i = 0; i < allTurns.length; i++) {
+      if (String(finalAnswers[i] ?? "").trim() === String(allTurns[i]?.correct_answer ?? "").trim()) {
+        correct += 1;
+      }
+    }
+    onSubmit({
+      user_turn_answers: finalAnswers,
+      turns: allTurns.map((t) => ({
+        question_en: t.question_en,
+        reference_answer_en: t.correct_answer,
+      })),
+      averageScore0To100: allTurns.length ? (correct / allTurns.length) * 100 : 0,
+    });
+  });
 
   // Stop any browser TTS when component/turn changes.
   useEffect(() => {

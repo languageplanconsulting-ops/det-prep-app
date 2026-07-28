@@ -2,19 +2,22 @@
 
 import { useState } from "react";
 
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import { mt } from "@/lib/mock-test/mock-test-styles";
 import type { ConversationSummaryTurn } from "@/lib/mock-test/conversation-summary-mock";
 
 type Props = {
   content: Record<string, unknown>;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — hand in the summary and replies so far. */
+  timeUp?: boolean;
   onSubmit: (payload: {
     text: string;
     user_turn_answers: string[];
   }) => void;
 };
 
-export function ConversationSummaryMock({ content, onSubmit, submitting = false }: Props) {
+export function ConversationSummaryMock({ content, onSubmit, submitting = false, timeUp = false }: Props) {
   const turns = (Array.isArray(content.turns)
     ? content.turns
     : []) as ConversationSummaryTurn[];
@@ -24,6 +27,12 @@ export function ConversationSummaryMock({ content, onSubmit, submitting = false 
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [reply, setReply] = useState("");
   const [summary, setSummary] = useState("");
+  useTimeUpSubmit(timeUp, () =>
+    onSubmit({
+      text: summary.trim(),
+      user_turn_answers: reply.trim() ? [...userAnswers, reply.trim()] : userAnswers,
+    }),
+  );
 
   const total = turns.length;
   const current = turns[turnIdx];

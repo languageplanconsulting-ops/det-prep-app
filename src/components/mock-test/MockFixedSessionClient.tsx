@@ -105,6 +105,11 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [dictationTimerStarted, setDictationTimerStarted] = useState(true);
   const [speakPhotoTimerStarted, setSpeakPhotoTimerStarted] = useState(true);
+  // Which step the countdown is currently armed for. Guards the time-up
+  // auto-submit against the frame between "session advanced" and "timer reset
+  // effect ran", where a stale expired timer would otherwise instantly submit
+  // the next question.
+  const [armedStep, setArmedStep] = useState<number | null>(null);
   const timer = usePhaseTimer();
   // Admin / preview-eligible users see the soft "Progress Journey" layout;
   // everyone else keeps the original brutalist layout byte-for-byte.
@@ -175,6 +180,20 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
         }
         return;
       }
+      // A session that is no longer in_progress can never accept another
+      // submit, so rendering its question would dead-end the learner on the
+      // first "Session already closed". Route them somewhere useful instead:
+      // finished runs go to the report pipeline, closed runs back to the hub.
+      const status = String(json.session.status ?? "");
+      if (status === "completed") {
+        router.replace(`/mock-test/fixed/results-loading/${sessionId}`);
+        return;
+      }
+      if (status === "cancelled" || status === "abandoned") {
+        router.replace(`/mock-test/start?closed=${status}`);
+        return;
+      }
+
       setSession(json.session);
       if (!silent) setLoading(false);
     } catch {
@@ -201,7 +220,11 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
 
   useEffect(() => {
     if (!current) return;
-    if (skipTimerMode) return;
+    if (skipTimerMode) {
+      setArmedStep(null);
+      return;
+    }
+    setArmedStep(current.step_index);
     if (current.task_type === "dictation") {
       setDictationTimerStarted(false);
       timer.startTimer(stepIndex, current.time_limit_sec);
@@ -239,6 +262,29 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     return () => window.clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fastPassPreviewMode, current?.step_index, loading, resting, submittingStep]);
+
+  /** True the moment this step's countdown hits 00:00 (live timing only). */
+  const timeUp =
+    !skipTimerMode &&
+    !resting &&
+    !loading &&
+    armedStep != null &&
+    armedStep === stepIndex &&
+    timer.isExpired;
+
+  // Backstop for the per-question time-up handlers: if a task somehow doesn't
+  // commit its own partial answer when the clock runs out, submit an empty one
+  // so the learner is never parked on a dead 00:00 screen. The server rejects
+  // a duplicate with "Step already submitted", which reconciles harmlessly.
+  useEffect(() => {
+    if (!timeUp) return;
+    const t = window.setTimeout(() => {
+      if (submittingStep) return;
+      void submit({ timedOut: true, answer: null });
+    }, 8000);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeUp, stepIndex, submittingStep]);
 
   const mergedContent =
     current?.task_type === "conversation_summary" && prevInteractive?.answer
@@ -322,6 +368,13 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       return;
     }
     if (!res.ok || json.error) {
+      if (json.error === "Session already closed") {
+        // Finished/cancelled elsewhere (another tab, a resumed run that already
+        // completed). load() redirects to the report or the hub — never a
+        // full-screen error the learner can't get out of.
+        await load("adapting");
+        return;
+      }
       if (json.error === "Step already submitted") {
         // Step is already recorded; reload session so UI can move on.
         await load("adapting");
@@ -665,6 +718,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
                   key={question.id}
                   question={question}
                   submitting={submittingStep}
+                  timeUp={timeUp}
                   forceAggregateVocab
                   onSpeakPhotoReady={() => {
                     if (skipTimerMode) return;
@@ -805,6 +859,7 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
                 key={question.id}
                 question={question}
                 submitting={submittingStep}
+                timeUp={timeUp}
                 forceAggregateVocab
                 onSpeakPhotoReady={() => {
                   if (skipTimerMode) return;

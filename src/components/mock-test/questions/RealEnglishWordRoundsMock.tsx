@@ -2,9 +2,13 @@
 
 import { useMemo, useRef, useState } from "react";
 
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
+
 type Props = {
   content: Record<string, unknown>;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — score what has been judged so far and move on. */
+  timeUp?: boolean;
   onSubmit: (payload: {
     score160: number;
     detail: Record<string, unknown>;
@@ -38,11 +42,13 @@ function RealWordTrueFalse({
   content,
   onSubmit,
   submitting,
+  timeUp,
 }: {
   words: JudgeWord[];
   content: Record<string, unknown>;
   onSubmit: Props["onSubmit"];
   submitting: boolean;
+  timeUp?: boolean;
 }) {
   const perCorrect = Math.max(1, Number(content.score_per_correct ?? 16) || 16);
   const maxScore = Math.max(20, Number(content.max_score ?? 160) || 160);
@@ -62,6 +68,10 @@ function RealWordTrueFalse({
     const score160 = Math.max(0, Math.min(maxScore, correct * perCorrect));
     onSubmit({ score160, detail: { format: "true_false", per_correct: perCorrect, total: ordered.length, correct, review } });
   };
+
+  // Time up: grade the words judged so far (the rest count as wrong, exactly
+  // like the real exam) instead of leaving the card stack frozen.
+  useTimeUpSubmit(timeUp, () => finish(picksRef.current));
 
   const choose = (real: boolean) => {
     if (submitting) return;
@@ -126,7 +136,7 @@ function RealWordTrueFalse({
   );
 }
 
-export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = false }: Props) {
+export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = false, timeUp = false }: Props) {
   // New true/false spelling-judgment format (used by Mock 26+).
   const judgeWords = useMemo<JudgeWord[]>(() => {
     if (content.format !== "true_false" && !Array.isArray(content.words)) return [];
@@ -190,9 +200,53 @@ export function RealEnglishWordRoundsMock({ content, onSubmit, submitting = fals
   const [score, setScore] = useState(0);
   const [roundSelections, setRoundSelections] = useState<Array<{ selected: string[]; realWords: string[]; fakeWords: string[] }>>([]);
 
+  // Time up mid-round: bank the rounds already finished plus whatever is
+  // selected right now, then hand the step in. (No-op for the true/false
+  // format below, which runs its own time-up path.)
+  useTimeUpSubmit(timeUp && judgeWords.length === 0, () => {
+    const activeRound = rounds[roundIdx];
+    let plus = 0;
+    let minus = 0;
+    if (activeRound) {
+      selected.forEach((w) => {
+        if (activeRound.realSet.has(w)) plus += scorePerCorrect;
+        else minus += fakePenalty;
+      });
+    }
+    onSubmit({
+      score160: Math.max(0, Math.min(maxScore, score + plus - minus)),
+      detail: {
+        rounds: configuredRounds,
+        per_round_sec: Number(content.round_duration_sec ?? 60) || 60,
+        score_per_correct: scorePerCorrect,
+        score_penalty_per_fake_pick: -fakePenalty,
+        max_score: maxScore,
+        timed_out_at_round: roundIdx + 1,
+      },
+      round_selections: activeRound
+        ? [
+            ...roundSelections,
+            {
+              selected: [...selected],
+              realWords: [...activeRound.realSet],
+              fakeWords: activeRound.words.filter((w) => !activeRound.realSet.has(w)),
+            },
+          ]
+        : roundSelections,
+    });
+  });
+
   // Branch to the new spelling-judgment format when present (after all hooks).
   if (judgeWords.length) {
-    return <RealWordTrueFalse words={judgeWords} content={content} onSubmit={onSubmit} submitting={submitting} />;
+    return (
+      <RealWordTrueFalse
+        words={judgeWords}
+        content={content}
+        onSubmit={onSubmit}
+        submitting={submitting}
+        timeUp={timeUp}
+      />
+    );
   }
 
   const round = rounds[roundIdx];

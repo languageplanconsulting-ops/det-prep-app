@@ -41,6 +41,20 @@ type MockAttemptRow = {
 
 type MockSetRow = { id: string; name: string; stepCount: number };
 
+type MockInProgressRow = {
+  sessionId: string;
+  setId: string;
+  currentStep: number;
+  answeredCount: number;
+  startedAt: string | null;
+};
+
+type MockPendingReportRow = {
+  sessionId: string;
+  setId: string;
+  completedAt: string | null;
+};
+
 function sortMockAttempts(list: MockAttemptRow[]) {
   return [...list].sort((a, b) => {
     const pa = a.dashboard_saved_at != null && a.dashboard_saved_at !== "" ? 1 : 0;
@@ -106,6 +120,10 @@ export function MockTestStartClient() {
   });
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  /** Half-finished runs (one per set) — the learner picks these back up mid-exam. */
+  const [inProgress, setInProgress] = useState<MockInProgressRow[]>([]);
+  /** Finished runs whose report never materialized — reachable again via the loading screen. */
+  const [pendingReports, setPendingReports] = useState<MockPendingReportRow[]>([]);
   const [adminPreviewMode, setAdminPreviewMode] = useState(false);
   const [skipTimerMode, setSkipTimerMode] = useState(false);
   const [fastPassPreviewMode, setFastPassPreviewMode] = useState(false);
@@ -159,6 +177,27 @@ export function MockTestStartClient() {
       }
 
       setHasUser(true);
+
+      // Unfinished business: half-done runs to resume, plus finished runs whose
+      // report never landed. Both are otherwise invisible from this page.
+      try {
+        const activeRes = await fetch("/api/mock-test/fixed/session", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (activeRes.ok) {
+          const activeJson = (await activeRes.json()) as {
+            inProgress?: MockInProgressRow[];
+            pendingReports?: MockPendingReportRow[];
+          };
+          setInProgress(activeJson.inProgress ?? []);
+          setPendingReports(activeJson.pendingReports ?? []);
+        }
+      } catch {
+        // Non-fatal: the page still works, the learner just doesn't see the
+        // resume shortcut (starting the same set again resumes server-side).
+      }
+
       const summaryRes = await fetch("/api/account/quota-summary", { credentials: "same-origin" });
       if (summaryRes.ok) {
         const summary = (await summaryRes.json()) as {
@@ -199,7 +238,24 @@ export function MockTestStartClient() {
   const limit = isPreviewMode && baseLimit === 0 ? 1 : baseLimit;
   const remainingCount = Math.max(0, limit - used) + mockAddonRemaining;
   const tierOk = used < limit;
-  const canStart = !!selectedSetId && (adminCanPreview || (hasUser === true && launchLive && tierOk));
+
+  /** Set when the session page bounced the learner here (run already closed). */
+  const closedNotice = useMemo(() => {
+    const closed = searchParams.get("closed");
+    if (closed === "cancelled") return "ชุดนั้นถูกยกเลิกไปแล้ว — เลือกชุดใหม่ได้เลย";
+    if (closed === "abandoned") return "ชุดนั้นค้างไว้นานเกินกำหนดจึงถูกปิด — เริ่มชุดใหม่ได้เลย";
+    return null;
+  }, [searchParams]);
+
+  const inProgressBySetId = useMemo(
+    () => Object.fromEntries(inProgress.map((row) => [row.setId, row])) as Record<string, MockInProgressRow>,
+    [inProgress],
+  );
+  const selectedInProgress = selectedSetId ? inProgressBySetId[selectedSetId] : undefined;
+  /** Resuming spends no credit, so an exhausted quota must not block it. */
+  const canStart =
+    !!selectedSetId &&
+    (adminCanPreview || (hasUser === true && launchLive && (tierOk || !!selectedInProgress)));
   const bestAttempt = useMemo(
     () =>
       attempts.reduce<MockAttemptRow | null>(
@@ -284,8 +340,18 @@ export function MockTestStartClient() {
   const canShowWelcomeCta =
     isFirstTimeUser && !!recommendedSetId && (adminCanPreview || (launchLive && tierOk));
 
-  /** Trigger the preflight on a specific set id (used by SetArchive + Welcome CTA). */
+  /**
+   * Trigger the preflight on a specific set id (used by SetArchive + Welcome CTA).
+   * A set the learner is already part-way through skips the preflight entirely
+   * and drops them straight back on the step they stopped at — no second
+   * confirmation, and no credit is spent (the run was already paid for).
+   */
   const pickSet = (setId: string) => {
+    const active = inProgressBySetId[setId];
+    if (active) {
+      router.push(`/mock-test/fixed/${active.sessionId}`);
+      return;
+    }
     setSelectedSetId(setId);
     setShowPreflight(true);
   };
@@ -487,6 +553,31 @@ export function MockTestStartClient() {
       const stats = statsBySetId[set.id];
       const done = (stats?.attemptCount ?? 0) > 0;
       const isRec = recommendedSetId === set.id;
+      const active = inProgressBySetId[set.id];
+      if (active) {
+        return (
+          <button
+            key={set.id}
+            type="button"
+            onClick={() => pickSet(set.id)}
+            className="relative rounded-2xl border border-amber-300 bg-amber-50 p-3 text-left shadow-sm ring-2 ring-amber-200 transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <span className="absolute -top-2.5 left-3 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white">
+              ค้างอยู่
+            </span>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-semibold">{set.name}</span>
+              <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                ข้อ {active.currentStep}/20
+              </span>
+            </div>
+            <p className="mt-1 text-[12px] text-amber-900">ทำไปแล้ว {active.answeredCount} ข้อ</p>
+            <p className="mt-2 border-t border-amber-200 pt-1.5 text-[11px] font-bold text-amber-700">
+              แตะเพื่อทำต่อ · ไม่ใช้เครดิตเพิ่ม
+            </p>
+          </button>
+        );
+      }
       return (
         <button
           key={set.id}
@@ -555,6 +646,75 @@ export function MockTestStartClient() {
               </div>
             </div>
           </header>
+
+          {closedNotice ? (
+            <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] font-semibold text-slate-600">
+              {closedNotice}
+            </div>
+          ) : null}
+
+          {/* Unfinished runs — always first, so a paused exam is never lost. */}
+          {inProgress.length > 0 ? (
+            <section className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 p-4 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-amber-700">ค้างอยู่</p>
+              <h2 className="mt-1 text-[17px] font-bold text-amber-950">
+                คุณมีชุดที่ทำค้างไว้ — ทำต่อได้เลย
+              </h2>
+              <p className="mt-1 text-[13px] text-amber-900">
+                ระบบเก็บคำตอบทุกข้อที่ส่งไปแล้ว · ทำต่อ<b>ไม่ใช้เครดิตเพิ่ม</b>
+              </p>
+              <div className="mt-3 space-y-2">
+                {inProgress.map((row) => (
+                  <button
+                    key={row.sessionId}
+                    type="button"
+                    onClick={() => router.push(`/mock-test/fixed/${row.sessionId}`)}
+                    className="flex w-full items-center gap-3 rounded-xl border border-amber-200 bg-white px-4 py-3 text-left transition hover:bg-amber-100/50"
+                  >
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber-500 text-[13px] font-bold text-white">
+                      {row.currentStep}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold text-slate-900">
+                        {setNameById[row.setId] ?? "Mock"}
+                      </span>
+                      <span className="block text-[12px] text-slate-500">
+                        หยุดไว้ที่ข้อ {row.currentStep}/20 · ทำแล้ว {row.answeredCount} ข้อ
+                      </span>
+                    </span>
+                    <span className="shrink-0 rounded-lg bg-[#004AAD] px-4 py-2 text-[13px] font-bold text-[#FFCC00]">
+                      ทำต่อ →
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {/* Reports that finished grading but were never opened. */}
+          {pendingReports.length > 0 ? (
+            <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">รอผลอยู่</p>
+              <h2 className="mt-1 text-[15px] font-bold text-slate-900">
+                มีชุดที่ทำจบแล้วแต่ยังไม่ได้เปิดผล
+              </h2>
+              <div className="mt-2 space-y-2">
+                {pendingReports.map((row) => (
+                  <button
+                    key={row.sessionId}
+                    type="button"
+                    onClick={() => router.push(`/mock-test/fixed/results-loading/${row.sessionId}`)}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-left transition hover:bg-slate-100"
+                  >
+                    <span className="truncate text-sm font-semibold text-slate-800">
+                      {setNameById[row.setId] ?? "Mock"}
+                    </span>
+                    <span className="shrink-0 text-[13px] font-bold text-[#004AAD]">ดูผล →</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           {/* Clear intro (condensed from HowToUsePanel) */}
           <details open className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

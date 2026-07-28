@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import {
   createBrowserSpeechRecognition,
   isBrowserSpeechRecognitionAvailable,
@@ -77,6 +78,8 @@ type Phase =
 type Props = {
   content: Record<string, unknown>;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — hand in the turns recorded so far. */
+  timeUp?: boolean;
   onSubmit: (payload: { turns: CompletedTurn[] }) => void;
 };
 
@@ -84,6 +87,7 @@ type Props = {
 export function MockInteractiveSpeakingSession({
   content,
   submitting = false,
+  timeUp = false,
   onSubmit,
 }: Props) {
   const starterEn = String(
@@ -418,6 +422,20 @@ export function MockInteractiveSpeakingSession({
     },
     [forceStopMedia],
   );
+
+  // Time up on the 8-minute step clock: hand in every completed turn plus the
+  // one being answered right now. Without this the parent's blank-answer
+  // backstop would fire and throw away the whole recording.
+  useTimeUpSubmit(timeUp, () => {
+    const trimmed = transcriptRef.current.trim();
+    const cur = currentQRef.current;
+    const turns = [...completedRef.current];
+    if (trimmed || turns.length === 0) {
+      turns.push({ questionEn: cur.en, questionTh: cur.th, transcript: trimmed });
+    }
+    forceStopMedia();
+    onSubmit({ turns });
+  });
 
   // ── submit current turn transcript, advance ──
   const runSubmit = useCallback(async () => {

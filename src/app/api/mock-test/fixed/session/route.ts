@@ -6,9 +6,16 @@ import { MOCK_TEST_MONTHLY_LIMIT, type Tier } from "@/lib/access-control";
 import { recordBusinessEvent } from "@/lib/business-events";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
-import { countBillableMockFixedSessions, mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
+import {
+  countBillableMockFixedSessions,
+  isBillableMockFixedSession,
+  mockFixedMonthStartIso,
+} from "@/lib/mock-test/mock-fixed-quota";
 import { isMockTestAvailableNow } from "@/lib/mock-test/mock-test-availability";
-import { abandonStaleFixedMockSessions } from "@/lib/mock-test/session-integrity";
+import {
+  abandonStaleFixedMockSessions,
+  mockFixedResumeCutoffIso,
+} from "@/lib/mock-test/session-integrity";
 import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRequestSupabase } from "@/lib/supabase-request-client";
@@ -33,6 +40,99 @@ function normalizePreviewStep(raw: unknown): number {
   const n = Number(raw);
   if (!Number.isFinite(n)) return 1;
   return Math.max(1, Math.min(FIXED_MOCK_STEP_COUNT, Math.round(n)));
+}
+
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+  Pragma: "no-cache",
+  Expires: "0",
+};
+
+type ResumableRow = {
+  id: string;
+  set_id: string;
+  status: string;
+  current_step: number | null;
+  responses: unknown;
+  targets: unknown;
+  started_at: string | null;
+  completed_at: string | null;
+};
+
+/**
+ * A real learner run — never an admin preview, single-step QA, fast-pass, or
+ * untimed session. `isBillableMockFixedSession` covers preview/QA/exempt runs;
+ * the extra flags catch an admin launch that only set a timing override, which
+ * must not be resumable as a normal attempt.
+ */
+function isLearnerRun(row: { targets?: unknown }): boolean {
+  if (!isBillableMockFixedSession(row.targets)) return false;
+  const t = (row.targets ?? {}) as Record<string, unknown>;
+  return t.skipTimerMode !== true && t.fastPassPreviewMode !== true;
+}
+
+/**
+ * Unfinished business for this learner:
+ *  - `inProgress`: half-done runs, newest first, one entry per set. The start
+ *    page turns these into "ทำต่อ · ข้อ N/20" so a learner who dropped out at
+ *    step 10 of Mock 2 gets straight back to step 10 of Mock 2.
+ *  - `pendingReports`: runs that finished but whose report row never
+ *    materialized (background AI grading died, tab closed during the 10-minute
+ *    processing screen). Without a link back, these are invisible forever.
+ */
+export async function GET(req: Request) {
+  const supabase = await createRequestSupabase(req);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ inProgress: [], pendingReports: [] }, { headers: NO_STORE_HEADERS });
+  }
+
+  const { data: rows } = await supabase
+    .from("mock_fixed_sessions")
+    .select("id,set_id,status,current_step,responses,targets,started_at,completed_at")
+    .eq("user_id", user.id)
+    .in("status", ["in_progress", "completed"])
+    .gte("started_at", mockFixedResumeCutoffIso())
+    .order("started_at", { ascending: false });
+
+  const all = ((rows ?? []) as ResumableRow[]).filter(isLearnerRun);
+
+  const seenSets = new Set<string>();
+  const inProgress = all
+    .filter((r) => r.status === "in_progress")
+    .filter((r) => {
+      if (seenSets.has(r.set_id)) return false;
+      seenSets.add(r.set_id);
+      return true;
+    })
+    .map((r) => ({
+      sessionId: r.id,
+      setId: r.set_id,
+      currentStep: Math.max(1, Math.min(FIXED_MOCK_STEP_COUNT, Number(r.current_step ?? 1))),
+      answeredCount: Array.isArray(r.responses) ? r.responses.length : 0,
+      startedAt: r.started_at,
+    }));
+
+  const completed = all.filter((r) => r.status === "completed");
+  let pendingReports: Array<{ sessionId: string; setId: string; completedAt: string | null }> = [];
+  if (completed.length > 0) {
+    const { data: resultRows } = await supabase
+      .from("mock_fixed_results")
+      .select("session_id")
+      .eq("user_id", user.id)
+      .in(
+        "session_id",
+        completed.map((r) => r.id),
+      );
+    const finalized = new Set((resultRows ?? []).map((r: { session_id: string }) => r.session_id));
+    pendingReports = completed
+      .filter((r) => !finalized.has(r.id))
+      .map((r) => ({ sessionId: r.id, setId: r.set_id, completedAt: r.completed_at }));
+  }
+
+  return NextResponse.json({ inProgress, pendingReports }, { headers: NO_STORE_HEADERS });
 }
 
 export async function POST(req: Request) {
@@ -152,6 +252,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Mock test is not available yet" }, { status: 403 });
   }
 
+  // ── Resume before charge ────────────────────────────────────────────────
+  // Starting a set the learner is already part-way through hands back the SAME
+  // session at its saved step. This runs BEFORE the quota/add-on block on
+  // purpose: the credit was consumed when the run began, so continuing it must
+  // never cost a second one — and must work even when the monthly quota is now
+  // exhausted. Preview/QA launches are excluded so admin flows stay predictable.
+  const wantsPreviewRun = adminPreviewMode || previewSeparateMode || fastPassPreviewMode || skipTimerMode;
+  if (!wantsPreviewRun) {
+    const { data: resumableRows } = await supabase
+      .from("mock_fixed_sessions")
+      .select("id,set_id,current_step,targets,started_at")
+      .eq("user_id", user.id)
+      .eq("set_id", body.setId)
+      .eq("status", "in_progress")
+      .gte("started_at", mockFixedResumeCutoffIso())
+      .order("started_at", { ascending: false })
+      .limit(5);
+    const resumable = (resumableRows ?? []).find((r) => isLearnerRun(r));
+    if (resumable) {
+      return NextResponse.json({
+        sessionId: resumable.id,
+        resumed: true,
+        currentStep: Math.max(1, Math.min(FIXED_MOCK_STEP_COUNT, Number(resumable.current_step ?? 1))),
+      });
+    }
+  }
+
   const monthStart = mockFixedMonthStartIso();
   const { data: sessionRows } = await supabase
     .from("mock_fixed_sessions")
@@ -192,10 +319,10 @@ export async function POST(req: Request) {
     }
   }
 
-  // Close out any session left dangling from a previous attempt (tab closed,
-  // app killed/backgrounded mid-exam on mobile) so at most one in_progress
-  // row ever exists per user — otherwise they accumulate indefinitely with
-  // no cleanup path, unlike the legacy adaptive mock flow.
+  // Sweep only sessions that aged out of the resume window. Recent half-done
+  // runs are deliberately left in_progress so the resume branch above can hand
+  // them back (a learner may have Mock 2 paused at step 10 while they start
+  // Mock 3 — both stay resumable).
   if (!isAdmin) {
     await abandonStaleFixedMockSessions(supabase, user.id);
   }

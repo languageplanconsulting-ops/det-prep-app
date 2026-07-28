@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 import { synthesizeSpeechWithRetry } from "@/lib/admin-batch-speech";
 import { browserSpeak, browserSpeakCancel, isBrowserTtsSupported } from "@/lib/browser-tts";
 
@@ -17,6 +18,8 @@ type Props = {
   onSubmit: (answer: string) => void;
   onAudioPlaybackFinished?: () => void;
   submitting?: boolean;
+  /** Step countdown hit 00:00 — commit whatever is typed so far. */
+  timeUp?: boolean;
 };
 
 /**
@@ -28,8 +31,10 @@ export function MockTestDictation({
   onSubmit,
   onAudioPlaybackFinished,
   submitting = false,
+  timeUp = false,
 }: Props) {
   const [text, setText] = useState("");
+  useTimeUpSubmit(timeUp, () => onSubmit(text));
   const refSentence = String(content.reference_sentence ?? "").trim();
   const audioUrl = String(content.audio_url ?? "").trim();
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
