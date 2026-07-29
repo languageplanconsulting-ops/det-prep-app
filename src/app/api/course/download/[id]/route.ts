@@ -1,16 +1,39 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
+import { resolveCourseAccess } from "@/lib/course-access";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 
-/** Redirects to a short-lived signed URL for a lesson handout.
- *  Admin-only for now, matching the course page itself. */
+/**
+ * Redirects to a short-lived signed URL for a lesson handout.
+ *
+ * Authorised for admins (who preview the course pre-launch) and for students
+ * who pass the same gate as the course page itself — otherwise the handout
+ * buttons on the student page would 401 the moment the route is opened up.
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const access = await getAdminAccess(request);
-  if (!access.ok) {
+  let authorised = (await getAdminAccess(request)).ok;
+
+  if (!authorised) {
+    const userClient = await createRequestSupabase(request);
+    const {
+      data: { user },
+    } = await userClient.auth.getUser();
+    if (user) {
+      const { data: profile } = await userClient
+        .from("profiles")
+        .select("role, tier, tier_expires_at, vip_granted_by_course")
+        .eq("id", user.id)
+        .maybeSingle();
+      authorised = resolveCourseAccess(profile ?? null).allowed;
+    }
+  }
+
+  if (!authorised) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

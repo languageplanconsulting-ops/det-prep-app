@@ -15,6 +15,7 @@ import { mobileApiCorsResponse } from "@/lib/mobile-api-cors";
 function requiresProtectedSession(pathname: string): boolean {
   return (
     pathname.startsWith("/admin") ||
+    pathname.startsWith("/course") ||
     pathname.startsWith("/mock-test") ||
     pathname.startsWith("/notebook") ||
     pathname.startsWith("/profile")
