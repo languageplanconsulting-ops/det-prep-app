@@ -1,0 +1,161 @@
+{
+  "slug": "duolingo-fast-track",
+  "title": "Duolingo Fast Track",
+  "source": "thinkific",
+  "sourceCourseId": "2158471",
+  "note": "Structure scraped from the Thinkific contents editor on 2026-07-28. Lesson source ids and Bunny GUIDs are filled in by scripts/thinkific-to-bunny.mjs.",
+  "chapters": [
+    {
+      "title": "ภาพรวมข้อสอบ",
+      "lessons": [
+        { "title": "ภาพรวมข้อสอบ" },
+        { "title": "Update ข้อสอบปี 2026", "freePreview": true },
+        { "title": "วิธีการใช้ APP เพื่อฝึกเพิ่มคะแนน" }
+      ]
+    },
+    {
+      "title": "Writing about a photo",
+      "lessons": [
+        { "title": "ปูพื้นฐานแกรมม่าร์" },
+        { "title": "เทคนิคการเขียนอธิบายคน + สถานที่" },
+        { "title": "เทคนิคการเขียนและคำศัพท์เกี่ยวกับสิ่งของและสถานที่" }
+      ]
+    },
+    {
+      "title": "Speak about a photo",
+      "lessons": [
+        { "title": "เทคนิคการพูดเกี่ยวกับรูปใน 1 นาที" },
+        { "title": "การฝึกพูดโดยการใช้ AI buddy และแบบฝึกหัด" },
+        { "title": "Answer Examples", "status": "draft" }
+      ]
+    },
+    {
+      "title": "Speaking (1-3 minutes)",
+      "lessons": [
+        { "title": "เทคนิคการพูดแบบในหัวข้อต่างๆ ในโจทย์ Read then speak (1นาที30)" },
+        { "title": "[โจทย์ใหม่] เทคนิคการทำโจทย์ listen and speak" },
+        { "title": "8 หัวข้อที่ออกบ่อยสุดพร้อมแตกศัพท์ + idea (part 1)" },
+        { "title": "8 หัวข้อที่ออกบ่อยสุดพร้อมแตกศัพท์ + idea (part 2)", "freePreview": true },
+        { "title": "ฝึกการพูดตามโจทย์จริง" },
+        { "title": "ฝึกการพูด listen/read then speak" },
+        { "title": "ลองพูดกับโจทย์จริงๆ" }
+      ]
+    },
+    {
+      "title": "Interactive Speaking (35 seconds) ข้อสอบใหม่ปี 2026",
+      "lessons": [
+        { "title": "เทคนิคการตอบ personal description" },
+        { "title": "เทคนิคการตอบ follow-up questions 1" },
+        { "title": "ตลุยโจทย์ 1" },
+        { "title": "ตลุยโจทย์ 2" }
+      ]
+    },
+    {
+      "title": "C-Test (Read and Complete)",
+      "lessons": [
+        { "title": "พื้นฐานการทำ C TEST" },
+        { "title": "ใช้เทคนิคทำโจทย์จริง 1" },
+        { "title": "ตลุยโจทย์ (15 ข้อ)" },
+        { "title": "ตลุยโจทย์​ (10 ข้อ)" },
+        { "title": "ตลุยโจทย์ 30 ข้อ (ปรับตามระดับ)" },
+        { "title": "รูปแบบโจทย์ C-Test แบบใหม่ 2026 (fill-in-the-blank สั้นๆ)" },
+        { "title": "เฉลยรูปแบบโจทย์ใหม่ (2026)" }
+      ]
+    },
+    {
+      "title": "Write 50 words (short essays)",
+      "lessons": [
+        { "title": "พื้นฐานการเขียนโจทย์ 5 นาทีระดับ B2-C1" },
+        { "title": "การเขียนโจทย์แบบที่ 1 (what are the reasons? what are the benefits?)" },
+        { "title": "การเขียนโจทย์แบบที่ 2 (opinion essay)" },
+        { "title": "การเขียนโจทย์แบบที่ 2 (opinion essay 2)" },
+        { "title": "การเขียนโจทย์แบบที่ 3 Descriptive Essay + useful vocab" },
+        { "title": "เพิ่มคำศัพท์สำหรับพูด เขียน สำหรับคนที่อยากได้ 130+ (โจทย์​ culture + social media)" },
+        { "title": "เพิ่มคำศัพท์ idea เกี่ยวกับ Community (travel, volunteering, environment)" },
+        { "title": "เพิ่มคำศัพท์ หมวด study abroad, favorite object, historic events" },
+        { "title": "เพิ่มคำศัพท์และ Idea เรื่อง Globalization, health, personal development" },
+        { "title": "เพิ่มคำศัพท์และ idea โจทย์ที่ต้องเล่าเรื่อง (storytelling)" }
+      ]
+    },
+    {
+      "title": "การตอบ follow-up response (writing) 3 minutes",
+      "lessons": [
+        { "title": "เทคนิค, pattern, vocabulary ที่ต้องจำ" },
+        { "title": "ตลุยโจทย์เพื่อใช้ pattern + vocab ที่เรียนมา" }
+      ]
+    },
+    {
+      "title": "Select \"Real\" English Word",
+      "lessons": [
+        { "title": "เทคนิคหา Real English Words + ฝึกตลุย 20 ชุด" },
+        { "title": "วิธีการใช้สูตรเพิ่มคำศัพท์​ (read/ listen)" },
+        { "title": "เทคนิคการเพิ่มคะแนน Choose Real English Words โดยใช้ Application 1" },
+        { "title": "เทคนิคการเพิ่มคะแนนโจทย์​ Choose Real English Words (Listen)" },
+        { "title": "แบบฝึกหัด Real Word" }
+      ]
+    },
+    {
+      "title": "Listen and Type",
+      "lessons": [
+        { "title": "เทคนิคการทำ Listen and Type และข้อระวัง" },
+        { "title": "ตลุยโจทย์ระดับง่าย" },
+        { "title": "ตะลุย กลาง-ยาก (100-115)" },
+        { "title": "ฝึกทำโจทย์ (110-120)" },
+        { "title": "ฝึกทำโจทย์ทุกระดับ (1)" },
+        { "title": "ฝึกทำโจทย์ทุกระดับ (2)" }
+      ]
+    },
+    {
+      "title": "Read Aloud",
+      "lessons": [
+        { "title": "สรุปเทคนิคการ Read Aloud พร้อมตัวอย่างการอ่าน" },
+        { "title": "ตลุยโจทย์ฝึกเทคนิค" }
+      ]
+    },
+    {
+      "title": "READING COMPREHENSION",
+      "lessons": [
+        { "title": "ประกาศก่อนเรียน Reading" },
+        { "title": "รูปแบบโจทย์และวิธีทำ (fill in the missing sentence)" },
+        { "title": "การทำโจทย์ Complete the missing sentence (แบบที่มาตอนท้ายประโยค)" },
+        { "title": "เทคนิค choose the best title" },
+        { "title": "Highlight one specific information" },
+        { "title": "Real Exam" },
+        { "title": "เพิ่ม Skill Reading" },
+        { "title": "โจทย์​ Interactive Reading จริง" },
+        { "title": "ตลุยโจทย์ Interactive Reading" }
+      ]
+    },
+    {
+      "title": "Interactive Conversation",
+      "lessons": [
+        { "title": "เทคนิคการทำ​ Interactive Conversation" },
+        { "title": "ตลุยโจทย์​ interactive conversation" },
+        { "title": "เทคนิคการเขียน Conversation Summary" }
+      ]
+    },
+    {
+      "title": "Guide ทำข้อสอบจริง",
+      "lessons": [
+        { "title": "GUIDE ทำข้อสอบจริง (1 ชั่วโมงเต็ม)", "status": "draft" },
+        { "title": "จำลองสอบจริง", "status": "draft" },
+        { "title": "ทำโจทย์จริง (PRACTICE)", "status": "draft" }
+      ]
+    },
+    {
+      "title": "Bonus Lesson for Vocabulary Skills",
+      "lessons": [
+        { "title": "แจกแบบฝึก Vocabulary for Reading", "freePreview": true },
+        { "title": "ฝึก Vocabulary ที่ออกบ่อย (เทคนิคการเดาจาก mood)" },
+        { "title": "เรียน vocabulary ระดับ C1 (125+)" },
+        { "title": "เรียน vocabulary (Phrasal Verb)" },
+        { "title": "เรียน vocabulary เกี่ยวกับ science/ profession" },
+        { "title": "เทคนิคการทำโจทย์ reading ที่วัด GRAMMAR" }
+      ]
+    },
+    {
+      "title": "ฝึกการพูด listen/read then speak",
+      "lessons": []
+    }
+  ]
+}
