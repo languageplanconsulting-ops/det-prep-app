@@ -674,6 +674,14 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
         >
           เริ่มฝึก{weakMeta.th}เลย →
         </Link>
+        {!isAnonymous ? (
+          <Link
+            href="/study-plan"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3.5 text-sm font-bold text-ep-blue ring-1 ring-ep-blue/30 transition active:scale-[0.99]"
+          >
+            📅 ปฏิทินฝึกจะเน้นจุดอ่อนนี้ให้อัตโนมัติ · ดูแผนของฉัน
+          </Link>
+        ) : null}
 
         {/* step review */}
         <section className="space-y-2.5">

@@ -254,6 +254,12 @@ export function MockFixedReportBrandedViewV2({
             </Link>
           ))}
         </div>
+        <p className="mt-3 text-xs text-white/75">
+          📅 ปฏิทินฝึกของคุณจะจัดตารางเน้นจุดอ่อนจากผลสอบนี้ให้อัตโนมัติ —{" "}
+          <Link href="/study-plan" className="font-bold text-[#FFCC00] underline underline-offset-2">
+            ดูแผนฝึกของฉัน
+          </Link>
+        </p>
       </div>
 
       {/* Targets vs actual */}

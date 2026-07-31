@@ -27,14 +27,23 @@ function formatBytes(bytes: number | null): string {
     : `${Math.round(bytes / 1024)} KB`;
 }
 
-export function CoursePlayerClient({ course }: { course: StudentCourse }) {
+export function CoursePlayerClient({
+  course,
+  initialLessonId = null,
+}: {
+  course: StudentCourse;
+  /** Deep-link target (e.g. from the study-plan calendar's ?lesson=). Falls back to resume. */
+  initialLessonId?: string | null;
+}) {
   const flatLessons = useMemo(() => course.chapters.flatMap((c) => c.lessons), [course]);
 
-  // Resume where they left off: first unfinished lesson, else the first one.
+  // Deep link wins; otherwise resume where they left off (first unfinished, else first).
   const initialId = useMemo(() => {
+    const linked = initialLessonId ? flatLessons.find((l) => l.id === initialLessonId) : null;
+    if (linked) return linked.id;
     const next = flatLessons.find((l) => !l.completed);
     return (next ?? flatLessons[0])?.id ?? null;
-  }, [flatLessons]);
+  }, [flatLessons, initialLessonId]);
 
   const [activeId, setActiveId] = useState<string | null>(initialId);
   const [completed, setCompleted] = useState<Set<string>>(
@@ -92,8 +101,10 @@ export function CoursePlayerClient({ course }: { course: StudentCourse }) {
   const isDone = active ? completed.has(active.id) : false;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-      <section className="ep-brutal rounded-sm border-black bg-white p-4">
+    // Sidebar sits left on desktop via order utilities; on mobile the player
+    // still comes first, which is what a student on a phone wants.
+    <div className="grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+      <section className="ep-brutal rounded-sm border-black bg-white p-4 lg:order-2">
         {active?.bunnyVideoGuid ? (
           <>
             <div className="relative w-full overflow-hidden border-4 border-black bg-black pt-[56.25%]">
@@ -170,7 +181,7 @@ export function CoursePlayerClient({ course }: { course: StudentCourse }) {
         )}
       </section>
 
-      <aside className="ep-brutal max-h-[80vh] overflow-y-auto rounded-sm border-black bg-white p-3">
+      <aside className="ep-brutal max-h-[80vh] overflow-y-auto rounded-sm border-black bg-white p-3 lg:order-1">
         {course.chapters.map((chapter, ci) => {
           const open = openChapters.has(chapter.id);
           const done = chapter.lessons.filter((l) => completed.has(l.id)).length;
@@ -224,9 +235,12 @@ export function CoursePlayerClient({ course }: { course: StudentCourse }) {
                           }`}
                         >
                           <span
-                            aria-hidden
-                            className={`mt-0.5 shrink-0 font-black ${
-                              finished ? "text-emerald-600" : "text-neutral-300"
+                            aria-label={finished ? "เรียนจบแล้ว" : "ยังไม่ได้เรียน"}
+                            title={finished ? "เรียนจบแล้ว" : "ยังไม่ได้เรียน"}
+                            className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-black leading-none ${
+                              finished
+                                ? "border-emerald-600 bg-emerald-500 text-white"
+                                : "border-neutral-300 bg-white text-transparent"
                             }`}
                           >
                             ✓

@@ -1,6 +1,8 @@
 import "server-only";
 
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+import { resolveCourseAccess } from "@/lib/course-access";
+import { computeTaskWeaknessVector, type TaskWeakness } from "@/lib/study-plan/weakness-vector";
 
 /**
  * Weakness aggregation for the study-plan dashboard.
@@ -41,10 +43,24 @@ export type WeaknessReport = {
   aiGraded: DimensionWeakness[];
   weakestDimension: DimensionWeakness | null;
   latestPrediction: { target: number; predicted: number } | null;
+  /**
+   * Task-type weakness vector merged from the latest mock, mini diagnosis, and
+   * practice attempts — weakest (highest priority) first. Empty when the user
+   * has no signal yet.
+   */
+  taskVector: TaskWeakness[];
+  /**
+   * Whether this user can actually open the Fast Track course. False while the
+   * course is unreleased or the user isn't VIP — the UI must then point course
+   * links at /pricing instead of a locked page.
+   */
+  courseUnlocked: boolean;
 };
 
 export async function computeWeaknessReport(userId: string): Promise<WeaknessReport> {
   const supabase = createServiceRoleSupabase();
+
+  const taskVectorPromise = computeTaskWeaknessVector(userId).catch(() => [] as TaskWeakness[]);
 
   const { data: predictionRow } = await supabase
     .from("study_plan_results")
@@ -112,5 +128,14 @@ export async function computeWeaknessReport(userId: string): Promise<WeaknessRep
     ? aiGraded.reduce((a, b) => (a.avgScorePercent <= b.avgScorePercent ? a : b))
     : null;
 
-  return { autoGraded, aiGraded, weakestDimension, latestPrediction };
+  const taskVector = await taskVectorPromise;
+
+  const { data: profileRow } = await supabase
+    .from("profiles")
+    .select("role, tier, tier_expires_at, vip_granted_by_course")
+    .eq("id", userId)
+    .maybeSingle();
+  const courseUnlocked = resolveCourseAccess(profileRow ?? null).allowed;
+
+  return { autoGraded, aiGraded, weakestDimension, latestPrediction, taskVector, courseUnlocked };
 }

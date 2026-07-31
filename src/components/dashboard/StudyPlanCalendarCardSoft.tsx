@@ -38,6 +38,9 @@ import {
   type DailyTrack,
 } from "@/lib/study-plan/daily-plan";
 import type { DayProgress, SkillTrend } from "@/lib/study-plan/daily-progress";
+import { COURSE_HREF, weaknessResourceFor } from "@/lib/study-plan/weakness-resources";
+import type { TaskWeakness } from "@/lib/study-plan/weakness-vector";
+import type { DayExtra } from "@/lib/study-plan/personal-plan";
 import { generateCalendar, type CalendarDay } from "@/lib/study-plan/schedule";
 import {
   fetchPracticeMinutes,
@@ -75,8 +78,24 @@ type RangeDaySummary = {
 };
 
 type DailyDetailResponse = {
-  plan: { date: string; track: DailyTrack; tier: DailyTier; items: DailyPlanItem[]; total: number; persisted: boolean };
+  plan: {
+    date: string;
+    track: DailyTrack;
+    tier: DailyTier;
+    items: DailyPlanItem[];
+    total: number;
+    persisted: boolean;
+    /** Why this day is shaped the way it is (weakest task + where it came from). */
+    focus?: { taskType: string; source: "mock" | "mini" | "attempts" } | null;
+  };
   progress: DayProgress;
+  extras?: DayExtra[];
+};
+
+const FOCUS_SOURCE_TH: Record<string, string> = {
+  mock: "จากผล Mock Test ล่าสุด",
+  mini: "จากผล Mini Diagnosis ล่าสุด",
+  attempts: "จากคะแนนฝึกล่าสุด",
 };
 
 const DURATION_OPTIONS: DailyTier[] = [5, 10, 20, 30];
@@ -156,6 +175,8 @@ export function StudyPlanCalendarCardSoft({
   weakSkills,
   weakestDimension,
   topImprovement,
+  taskVector = [],
+  courseUnlocked = false,
   onEditPlan,
 }: {
   schedule: ScheduleInfo;
@@ -163,6 +184,10 @@ export function StudyPlanCalendarCardSoft({
   weakSkills: WeakSkillEntry[];
   weakestDimension: WeakestDimension;
   topImprovement: TopImprovement;
+  /** Merged mock/mini/attempts weakness vector (weakest first) — drives the focus panel. */
+  taskVector?: TaskWeakness[];
+  /** False while the course is unreleased or the user isn't VIP → link to /pricing. */
+  courseUnlocked?: boolean;
   onEditPlan: () => void;
 }) {
   const router = useRouter();
@@ -188,6 +213,17 @@ export function StudyPlanCalendarCardSoft({
   const lastKnownCompleteRef = useRef<Map<string, boolean>>(new Map());
 
   const grid = useMemo(() => buildMonthGrid(viewYear, viewMonth), [viewYear, viewMonth]);
+
+  /**
+   * Top weak tasks that actually have somewhere to send the learner. Filtering
+   * BEFORE the slice (and before the panel's own visibility check) keeps the
+   * panel from rendering an empty shell when the weakest tasks have no mapped
+   * lesson/practice/course resource.
+   */
+  const weakFocusItems = useMemo(
+    () => taskVector.filter((t) => t.isWeak && weaknessResourceFor(t.taskType)).slice(0, 3),
+    [taskVector],
+  );
   const gridStart = grid[0].date;
   const gridEnd = grid[grid.length - 1].date;
 
@@ -743,6 +779,15 @@ export function StudyPlanCalendarCardSoft({
                     {dayDetail.progress.complete ? "▶ ทบทวนทั้งหมดเลย" : "▶ ทำทั้งหมดเลย"}
                   </Link>
 
+                  {dayDetail.plan.focus &&
+                    weaknessResourceFor(dayDetail.plan.focus.taskType) && (
+                      <p className="mt-3 rounded-xl bg-ep-blue/5 px-3 py-2 text-[11px] font-semibold text-ep-blue-dark">
+                        🎯 วันนี้เน้น{" "}
+                        {weaknessResourceFor(dayDetail.plan.focus.taskType)!.labelTh} ·{" "}
+                        {FOCUS_SOURCE_TH[dayDetail.plan.focus.source] ?? "จากผลล่าสุด"}
+                      </p>
+                    )}
+
                   <p className="mt-4 mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                     หรือเลือกทำทีละหมวด
                   </p>
@@ -801,6 +846,51 @@ export function StudyPlanCalendarCardSoft({
                   </div>
                 </>
               )}
+
+              {/* typed personal-plan extras: video / lesson / AI practice / diagnosis */}
+              {(dayDetail.extras?.length ?? 0) > 0 && (
+                <div className="mt-5">
+                  <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    ✨ แผนเสริมเฉพาะคุณ (จัดจากจุดอ่อนล่าสุด)
+                  </p>
+                  <div className="space-y-2.5">
+                    {(dayDetail.extras ?? []).map((x) => (
+                      <Link
+                        key={`${x.kind}:${x.href}`}
+                        href={x.href}
+                        onClick={() => sfxTransition()}
+                        className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-3 transition active:scale-[0.99] ${
+                          x.done
+                            ? "border-ep-green/30 bg-ep-green/5"
+                            : x.kind === "diagnosis"
+                              ? "border-ep-blue/30 bg-ep-blue/5 hover:bg-white"
+                              : "border-slate-100 bg-slate-50 hover:border-ep-blue/40 hover:bg-white"
+                        }`}
+                      >
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-xl">
+                          {x.emoji}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-display text-sm font-bold leading-tight text-slate-900 sm:text-base">
+                            {x.title}
+                          </p>
+                          <p className="mt-0.5 truncate text-[12px] text-slate-500">
+                            {x.done ? "✓ เสร็จแล้ว · " : ""}
+                            {x.subtitle ? `${x.subtitle} · ` : ""}~{x.minutes} นาที
+                          </p>
+                        </div>
+                        {x.locked ? (
+                          <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold text-amber-700">
+                            🔒 VIP
+                          </span>
+                        ) : (
+                          <span className="shrink-0 text-lg text-slate-300">→</span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           ) : null}
         </section>
@@ -833,7 +923,62 @@ export function StudyPlanCalendarCardSoft({
         </div>
       )}
 
-      {(weakSkills.length > 0 || weakestDimension) && (
+      {/* ============ WEAKNESS FOCUS — from latest mock / mini diagnosis ============ */}
+      {weakFocusItems.length > 0 && (
+        <div className="rounded-2xl bg-rose-50 p-4 ring-1 ring-rose-100">
+          <p className="mb-0.5 text-[10px] font-black uppercase tracking-widest text-rose-400">
+            จุดอ่อนของคุณ · แผนวันฝึกจะเน้นข้อนี้ให้อัตโนมัติ
+          </p>
+          <p className="mb-2 text-[10px] text-rose-400">
+            {FOCUS_SOURCE_TH[weakFocusItems[0].source] ?? "จากผลล่าสุดของคุณ"}
+          </p>
+          <div className="space-y-2">
+            {weakFocusItems.map((t) => {
+                const res = weaknessResourceFor(t.taskType)!;
+                return (
+                  <div key={t.taskType} className="rounded-xl bg-white/70 p-3 ring-1 ring-rose-100">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-extrabold text-rose-900">
+                        {res.emoji} {res.labelTh}
+                      </p>
+                      <span className="shrink-0 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-600">
+                        {t.score160}/160
+                      </span>
+                    </div>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px] font-bold">
+                      {res.lessonHref && (
+                        <Link
+                          href={res.lessonHref}
+                          className="rounded-full bg-ep-blue/10 px-2.5 py-1 text-ep-blue-dark hover:bg-ep-blue/20"
+                        >
+                          📘 บทเรียน
+                        </Link>
+                      )}
+                      {res.practiceHref && (
+                        <Link
+                          href={res.practiceHref}
+                          className="rounded-full bg-ep-green/10 px-2.5 py-1 text-ep-green-dark hover:bg-ep-green/20"
+                        >
+                          🏋️ ฝึกข้อสอบ
+                        </Link>
+                      )}
+                      {res.courseChapterTh && (
+                        <Link
+                          href={courseUnlocked ? COURSE_HREF : "/pricing"}
+                          className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-700 hover:bg-amber-200"
+                        >
+                          {courseUnlocked ? "🎬" : "🔒"} {res.courseChapterTh}
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
+      {(weakSkills.length > 0 || weakestDimension) && weakFocusItems.length === 0 && (
         <div className="rounded-2xl bg-rose-50 p-4 ring-1 ring-rose-100">
           <p className="mb-1.5 text-[10px] font-black uppercase tracking-widest text-rose-400">จุดที่ควรกลับมาทบทวน</p>
           <ul className="space-y-1 text-xs font-semibold text-rose-800">

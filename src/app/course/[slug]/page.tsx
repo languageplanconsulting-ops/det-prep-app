@@ -10,10 +10,13 @@ export const dynamic = "force-dynamic";
 
 export default async function StudentCoursePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ lesson?: string }>;
 }) {
   const { slug } = await params;
+  const { lesson: lessonParam } = await searchParams;
 
   const supabase = await createRouteHandlerSupabase();
   const {
@@ -78,7 +81,7 @@ export default async function StudentCoursePage({
         </p>
       </header>
 
-      <CoursePlayerClient course={course} />
+      <CoursePlayerClient course={course} initialLessonId={lessonParam ?? null} />
     </main>
   );
 }

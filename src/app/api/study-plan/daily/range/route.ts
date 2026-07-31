@@ -6,12 +6,20 @@ import {
   DAILY_SKILL_META,
   buildDailyPlanItems,
   isDailyTier,
+  normalizeDailyPlanItems,
+  personalizeExamItems,
   planTotalCount,
   type DailyPlanItem,
   type DailyPlanSkill,
   type DailyTier,
   type DailyTrack,
 } from "@/lib/study-plan/daily-plan";
+import {
+  bangkokToday,
+  dailyPrioritiesFromVector,
+  shouldPersonalizeDate,
+} from "@/lib/study-plan/personal-plan";
+import { computeTaskWeaknessVector, type TaskWeakness } from "@/lib/study-plan/weakness-vector";
 
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -104,7 +112,9 @@ export async function GET(req: Request) {
   }[]) {
     const track: DailyTrack = row.track === "lesson" ? "lesson" : "exam";
     const tier: DailyTier = isDailyTier(row.duration_minutes) ? (row.duration_minutes as DailyTier) : defaultTier;
-    const rawItems = Array.isArray(row.items) ? (row.items as DailyPlanItem[]) : [];
+    // Same normalization as /api/study-plan/daily — taking the raw jsonb here
+    // would let a malformed stored row through and yield NaN totals in the grid.
+    const rawItems = normalizeDailyPlanItems(row.items);
     const items = rawItems.length > 0 ? rawItems : buildDailyPlanItems(tier, track);
     planByDate.set(row.plan_date, { track, tier, items });
   }
@@ -112,13 +122,23 @@ export async function GET(req: Request) {
   // One batched attempts query for the whole range (service role — RLS-immune, avoids N
   // per-day round trips). created_at is timestamptz; bucket to a Bangkok (+07:00) calendar
   // date client-side so a 23:xx attempt lands on the day the learner experienced it as.
+  // Personalization priorities for VIRTUAL exam days. Shares one helper AND the
+  // same today-cutoff as /api/study-plan/daily so the month grid and the day
+  // sheet can never disagree about a day's items.
+  const today = bangkokToday();
   const svc = createServiceRoleSupabase();
-  const { data: attempts } = await svc
-    .from("practice_attempts")
-    .select("task_type, created_at")
-    .eq("user_id", user.id)
-    .gte("created_at", `${start}T00:00:00.000+07:00`)
-    .lte("created_at", `${end}T23:59:59.999+07:00`);
+  const [vector, { data: attempts }] = await Promise.all([
+    computeTaskWeaknessVector(user.id, { attemptsBefore: today }).catch(
+      () => [] as TaskWeakness[],
+    ),
+    svc
+      .from("practice_attempts")
+      .select("task_type, created_at")
+      .eq("user_id", user.id)
+      .gte("created_at", `${start}T00:00:00.000+07:00`)
+      .lte("created_at", `${end}T23:59:59.999+07:00`),
+  ]);
+  const { priorities } = dailyPrioritiesFromVector(vector);
 
   const doneCountByDateSkill = new Map<string, Map<DailyPlanSkill, number>>();
   for (const row of (attempts ?? []) as { task_type: string; created_at: string }[]) {
@@ -139,7 +159,11 @@ export async function GET(req: Request) {
     const persisted = !!plan;
     const track: DailyTrack = plan?.track ?? "exam";
     const tier: DailyTier = plan?.tier ?? defaultTier;
-    const items: DailyPlanItem[] = plan?.items ?? buildDailyPlanItems(tier, track);
+    const items: DailyPlanItem[] = plan?.items
+      ? plan.items
+      : track === "exam" && shouldPersonalizeDate(date, today)
+        ? personalizeExamItems(buildDailyPlanItems(tier, track), priorities)
+        : buildDailyPlanItems(tier, track);
 
     const perSkillDone = doneCountByDateSkill.get(date) ?? new Map<DailyPlanSkill, number>();
     let totalDone = 0;

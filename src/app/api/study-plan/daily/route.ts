@@ -4,12 +4,22 @@ import { createRequestSupabase } from "@/lib/supabase-request-client";
 import {
   buildDailyPlanItems,
   isDailyTier,
+  normalizeDailyPlanItems,
+  personalizeExamItems,
   planTotalCount,
   type DailyPlanItem,
   type DailyTier,
   type DailyTrack,
 } from "@/lib/study-plan/daily-plan";
 import { computeDayProgress, computeSkillProgressSummary } from "@/lib/study-plan/daily-progress";
+import {
+  bangkokToday,
+  computeDayExtras,
+  dailyPrioritiesFromVector,
+  shouldPersonalizeDate,
+  type DayExtra,
+} from "@/lib/study-plan/personal-plan";
+import { computeTaskWeaknessVector, type TaskWeakness } from "@/lib/study-plan/weakness-vector";
 
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -19,17 +29,7 @@ const NO_STORE_HEADERS = {
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-function normalizeItems(raw: unknown): DailyPlanItem[] {
-  if (!Array.isArray(raw)) return [];
-  const items: DailyPlanItem[] = [];
-  for (const el of raw) {
-    const o = (el ?? {}) as Record<string, unknown>;
-    if (typeof o.skill === "string" && typeof o.count === "number" && o.count > 0) {
-      items.push({ skill: o.skill as DailyPlanItem["skill"], count: o.count });
-    }
-  }
-  return items;
-}
+const normalizeItems = normalizeDailyPlanItems;
 
 /**
  * GET /api/study-plan/daily?date=YYYY-MM-DD
@@ -74,6 +74,21 @@ export async function GET(req: Request) {
     ? (sched!.default_duration_minutes as DailyTier)
     : 10;
 
+  // Computed at most once per request and reused by both personalization and the
+  // extras engine (each call costs 3 queries).
+  let vector: TaskWeakness[] | null = null;
+  const weaknessVector = async (): Promise<TaskWeakness[]> => {
+    if (!vector) {
+      // Cutoff = today: the plan for any day is derived only from data that
+      // existed before today began, so working through a day never reshapes it.
+      vector = await computeTaskWeaknessVector(user.id, {
+        attemptsBefore: bangkokToday(),
+      }).catch(() => [] as TaskWeakness[]);
+    }
+    return vector;
+  };
+
+  let focus: { taskType: string; source: string } | null = null;
   if (row) {
     track = row.track === "lesson" ? "lesson" : "exam";
     tier = isDailyTier(row.duration_minutes) ? row.duration_minutes : scheduleDefaultTier;
@@ -83,15 +98,27 @@ export async function GET(req: Request) {
     tier = scheduleDefaultTier;
     track = "exam";
     items = buildDailyPlanItems(tier, track);
+    // Virtual (not yet pinned) exam days from today onward personalize toward the
+    // newest weakness signal; saved days keep their pinned items so a started day
+    // never reshuffles, and past days keep the base sequence so their completion
+    // can't be retroactively invalidated.
+    if (track === "exam" && shouldPersonalizeDate(date)) {
+      const { priorities, focus: vectorFocus } = dailyPrioritiesFromVector(await weaknessVector());
+      items = personalizeExamItems(items, priorities);
+      focus = vectorFocus;
+    }
   }
 
-  const [progress, trends] = await Promise.all([
+  const [progress, trends, extras] = await Promise.all([
     computeDayProgress(user.id, date, items),
     computeSkillProgressSummary(user.id).catch(() => []),
+    computeDayExtras({ userId: user.id, date, tier, vector: await weaknessVector() }).catch(
+      () => [] as DayExtra[],
+    ),
   ]);
 
   return NextResponse.json(
-    { plan: { date, track, tier, items, total: planTotalCount(items), persisted }, progress, trends },
+    { plan: { date, track, tier, items, total: planTotalCount(items), persisted, focus }, progress, trends, extras },
     { headers: NO_STORE_HEADERS },
   );
 }
@@ -125,7 +152,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "durationMinutes must be 5, 10, 20, or 30" }, { status: 400, headers: NO_STORE_HEADERS });
   }
 
-  const items = buildDailyPlanItems(dur, track);
+  let items = buildDailyPlanItems(dur, track);
+  let focus: { taskType: string; source: string } | null = null;
+  let postVector: TaskWeakness[] = [];
+  if (track === "exam" && shouldPersonalizeDate(date)) {
+    postVector = await computeTaskWeaknessVector(user.id, {
+      attemptsBefore: bangkokToday(),
+    }).catch(() => [] as TaskWeakness[]);
+    const { priorities, focus: vectorFocus } = dailyPrioritiesFromVector(postVector);
+    items = personalizeExamItems(items, priorities);
+    focus = vectorFocus;
+  }
   const { error } = await supabase.from("study_plan_daily_plans").upsert(
     {
       user_id: user.id,
@@ -139,9 +176,17 @@ export async function POST(req: Request) {
   );
   if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: NO_STORE_HEADERS });
 
-  const progress = await computeDayProgress(user.id, date, items);
+  const [progress, extras] = await Promise.all([
+    computeDayProgress(user.id, date, items),
+    computeDayExtras({
+      userId: user.id,
+      date,
+      tier: dur,
+      vector: postVector.length ? postVector : undefined,
+    }).catch(() => [] as DayExtra[]),
+  ]);
   return NextResponse.json(
-    { plan: { date, track, tier: dur, items, total: planTotalCount(items), persisted: true }, progress },
+    { plan: { date, track, tier: dur, items, total: planTotalCount(items), persisted: true, focus }, progress, extras },
     { headers: NO_STORE_HEADERS },
   );
 }

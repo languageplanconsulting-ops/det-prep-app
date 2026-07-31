@@ -27,6 +27,8 @@ type WeaknessReport = {
   autoGraded: { taskType: string; difficulty: string; attempts: number; avgScorePct: number; isWeak: boolean }[];
   weakestDimension: { dimension: string; avgScorePercent: number } | null;
   latestPrediction: { target: number; predicted: number } | null;
+  taskVector?: import("@/lib/study-plan/weakness-vector").TaskWeakness[];
+  courseUnlocked?: boolean;
 };
 
 type DayActivity = { date: string; attempts: number; avgScorePct: number; vocabSaved: number };
@@ -284,6 +286,8 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
         weakSkills={weakSkills}
         weakestDimension={weakness?.weakestDimension ?? null}
         topImprovement={topImprovement}
+        taskVector={weakness?.taskVector ?? []}
+        courseUnlocked={weakness?.courseUnlocked ?? false}
         onEditPlan={openEdit}
       />
     );
