@@ -30,6 +30,8 @@ export type CourseChapterRow = {
   id: string;
   title: string;
   position: number;
+  /** DET block from migration 043. Null = inferred from the title. */
+  studyBlock: string | null;
   lessons: CourseLessonRow[];
   /** 0-100, share of this chapter's lessons completed by enrolled students. */
   progressPercent: number;
@@ -182,13 +184,32 @@ export async function getCourseSnapshot(slug: string): Promise<CourseSnapshot | 
   }
   if (!course) return null;
 
-  const { data: chapters, error: chaptersError } = await supabase
+  const { data: chaptersRaw, error: chaptersError } = await supabase
     .from("course_chapters")
-    .select("id, title, position")
+    .select("id, title, position, study_block")
     .eq("course_id", course.id)
     .order("position", { ascending: true });
+
+  // Migration 043 may not be deployed — retry without the column instead of
+  // failing the whole admin page.
+  let chapters = chaptersRaw as
+    | { id: string; title: string; position: number; study_block?: string | null }[]
+    | null;
   if (chaptersError) {
-    throw new Error(`[admin-course] chapter lookup failed: ${chaptersError.message}`);
+    const missingColumn =
+      /study_block/.test(chaptersError.message) || chaptersError.code === "42703";
+    if (!missingColumn) {
+      throw new Error(`[admin-course] chapter lookup failed: ${chaptersError.message}`);
+    }
+    const retry = await supabase
+      .from("course_chapters")
+      .select("id, title, position")
+      .eq("course_id", course.id)
+      .order("position", { ascending: true });
+    if (retry.error) {
+      throw new Error(`[admin-course] chapter lookup failed: ${retry.error.message}`);
+    }
+    chapters = retry.data;
   }
 
   const chapterIds = (chapters ?? []).map((c) => c.id);
@@ -238,6 +259,7 @@ export async function getCourseSnapshot(slug: string): Promise<CourseSnapshot | 
       id: c.id,
       title: c.title,
       position: c.position,
+      studyBlock: c.study_block ?? null,
       lessons: chapterLessons,
       progressPercent:
         chapterLessons.length === 0 ? 0 : Math.round((completed / chapterLessons.length) * 100),

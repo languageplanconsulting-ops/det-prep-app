@@ -11,7 +11,7 @@ export default async function AdminCoursePage() {
   const snapshot = await getCourseSnapshot(COURSE_SLUG);
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <main className="ep-page-shell mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header className="ep-brutal rounded-sm border-black bg-white p-6">
         <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
           Admin only
@@ -33,7 +33,14 @@ export default async function AdminCoursePage() {
           </dl>
         )}
 
-        <p className="mt-4">
+        <p className="mt-4 flex flex-wrap gap-2">
+          <Link
+            href="/admin/course/production"
+            className="inline-flex items-center rounded-[4px] border-4 border-black bg-amber-300 px-4 py-2 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            🎬 แผนถ่ายวิดีโอ
+          </Link>
           <Link
             href="/admin"
             className="inline-flex items-center rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-wide text-neutral-800 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"

@@ -6,6 +6,10 @@ export type StudentLesson = {
   id: string;
   title: string;
   position: number;
+  /** DET task from migration 044. Null = infer from the chapter. */
+  taskType: string | null;
+  /** Difficulty rung from migration 044. Null = infer from the title. */
+  level: string | null;
   bunnyVideoGuid: string | null;
   durationSeconds: number | null;
   freePreview: boolean;
@@ -18,6 +22,8 @@ export type StudentChapter = {
   id: string;
   title: string;
   position: number;
+  /** DET block from the DB. Null = infer from the title (categories.ts). */
+  studyBlock: string | null;
   lessons: StudentLesson[];
   /** 0-100 for THIS student. */
   progressPercent: number;
@@ -64,12 +70,27 @@ export async function getStudentCourse(
 
   const { data: chapters, error: chErr } = await supabase
     .from("course_chapters")
-    .select("id, title, position")
+    .select("id, title, position, study_block")
     .eq("course_id", course.id)
     .order("position", { ascending: true });
-  if (chErr) throw new Error(`[course-student] chapters failed: ${chErr.message}`);
+  // Migration 043 may not be deployed yet — fall back to a query without the
+  // column rather than breaking the page, and let the UI infer from the title.
+  let chapterRows = chapters as
+    | { id: string; title: string; position: number; study_block?: string | null }[]
+    | null;
+  if (chErr) {
+    const missingColumn = /study_block/.test(chErr.message) || chErr.code === "42703";
+    if (!missingColumn) throw new Error(`[course-student] chapters failed: ${chErr.message}`);
+    const retry = await supabase
+      .from("course_chapters")
+      .select("id, title, position")
+      .eq("course_id", course.id)
+      .order("position", { ascending: true });
+    if (retry.error) throw new Error(`[course-student] chapters failed: ${retry.error.message}`);
+    chapterRows = retry.data;
+  }
 
-  const chapterIds = (chapters ?? []).map((c) => c.id);
+  const chapterIds = (chapterRows ?? []).map((c) => c.id);
   if (chapterIds.length === 0) {
     return {
       id: course.id,
@@ -84,13 +105,32 @@ export async function getStudentCourse(
   // Students never see draft lessons, or lessons whose video never migrated.
   const { data: lessons, error: lErr } = await supabase
     .from("course_lessons")
-    .select("id, chapter_id, title, position, bunny_video_guid, duration_seconds, free_preview")
+    .select(
+      "id, chapter_id, title, position, bunny_video_guid, duration_seconds, free_preview, task_type, level",
+    )
     .in("chapter_id", chapterIds)
     .eq("status", "published")
     .order("position", { ascending: true });
-  if (lErr) throw new Error(`[course-student] lessons failed: ${lErr.message}`);
 
-  const lessonIds = (lessons ?? []).map((l) => l.id);
+  // Migration 044 may not be deployed — retry without the new columns rather
+  // than breaking the course page.
+  let lessonRows = lessons as
+    | (Record<string, unknown> & { id: string; chapter_id: string })[]
+    | null;
+  if (lErr) {
+    const missingColumn = /task_type|level/.test(lErr.message) || lErr.code === "42703";
+    if (!missingColumn) throw new Error(`[course-student] lessons failed: ${lErr.message}`);
+    const retry = await supabase
+      .from("course_lessons")
+      .select("id, chapter_id, title, position, bunny_video_guid, duration_seconds, free_preview")
+      .in("chapter_id", chapterIds)
+      .eq("status", "published")
+      .order("position", { ascending: true });
+    if (retry.error) throw new Error(`[course-student] lessons failed: ${retry.error.message}`);
+    lessonRows = retry.data;
+  }
+
+  const lessonIds = (lessonRows ?? []).map((l) => l.id);
 
   // Handouts.
   const downloadsByLesson = new Map<string, StudentLesson["downloads"]>();
@@ -141,13 +181,26 @@ export async function getStudentCourse(
   }
 
   const byChapter = new Map<string, StudentLesson[]>();
-  for (const l of lessons ?? []) {
+  for (const raw of lessonRows ?? []) {
+    const l = raw as {
+      id: string;
+      chapter_id: string;
+      title: string;
+      position: number;
+      bunny_video_guid: string | null;
+      duration_seconds: number | null;
+      free_preview: boolean;
+      task_type?: string | null;
+      level?: string | null;
+    };
     const p = progressByLesson.get(l.id);
     const list = byChapter.get(l.chapter_id) ?? [];
     list.push({
       id: l.id,
       title: l.title,
       position: l.position,
+      taskType: l.task_type ?? null,
+      level: l.level ?? null,
       bunnyVideoGuid: l.bunny_video_guid,
       durationSeconds: l.duration_seconds,
       freePreview: l.free_preview,
@@ -158,7 +211,7 @@ export async function getStudentCourse(
     byChapter.set(l.chapter_id, list);
   }
 
-  const shaped: StudentChapter[] = (chapters ?? [])
+  const shaped: StudentChapter[] = (chapterRows ?? [])
     .map((c) => {
       const ls = byChapter.get(c.id) ?? [];
       const done = ls.filter((l) => l.completed).length;
@@ -166,6 +219,7 @@ export async function getStudentCourse(
         id: c.id,
         title: c.title,
         position: c.position,
+        studyBlock: c.study_block ?? null,
         lessons: ls,
         progressPercent: ls.length === 0 ? 0 : Math.round((done / ls.length) * 100),
       };

@@ -1,0 +1,423 @@
+/**
+ * Block-by-block planner.
+ *
+ * The old planner put one video on a day and then filled the rest with a
+ * rotation of unrelated drills — so a learner could be asked to "speak about a
+ * photo" days before that lesson existed. This one finishes a block before
+ * starting the next: the block's videos, then the exercises that practise
+ * exactly what those videos taught.
+ *
+ * Everything is a single ordered stream poured into days by time budget, which
+ * gives carry-over for free: whatever does not fit today is simply the front of
+ * tomorrow's stream. Nothing is dropped.
+ */
+import {
+  EASY_TRACK,
+  gateLabel,
+  type CurriculumBlock,
+} from "@/lib/course-plan/curriculum";
+import type { TeachableVideo } from "@/lib/course-plan/planner";
+
+export type StudyItemKind = "video" | "lesson" | "exercise" | "review";
+
+export type StudyItem = {
+  id: string;
+  kind: StudyItemKind;
+  titleTh: string;
+  minutes: number;
+  blockKey: string;
+  blockTitleTh: string;
+  blockOrder: number;
+  taskType: string | null;
+  /** Deep-link into the course player. Videos only. */
+  lessonId?: string | null;
+  /** How the learner proves they are done. Exercises only. */
+  gateTh?: string;
+  /** Spread hint from the curriculum: keep at least this many days apart. */
+  spreadDays?: number;
+};
+
+export type BlockDay = {
+  date: string;
+  weekday: number;
+  weekIndex: number;
+  isStudyDay: boolean;
+  items: StudyItem[];
+  totalMinutes: number;
+  /** Blocks touched today, in order — drives the day card heading. */
+  blocks: { key: string; titleTh: string }[];
+};
+
+function toUtcDay(iso: string): number {
+  return Math.floor(Date.parse(`${iso}T00:00:00Z`) / 86_400_000);
+}
+function fromUtcDay(day: number): string {
+  return new Date(day * 86_400_000).toISOString().slice(0, 10);
+}
+function weekdayOf(iso: string): number {
+  return new Date(`${iso}T00:00:00Z`).getUTCDay();
+}
+
+/**
+ * The full ordered curriculum as one stream: block 1's videos, block 1's
+ * exercises, block 2's videos, block 2's exercises, and so on.
+ *
+ * Videos are matched to a block by task type. A video whose task type is not in
+ * the track (orientation, full-mock guides) is appended at the end rather than
+ * dropped, so nothing the learner paid for disappears from the schedule.
+ */
+export function buildItemStream(
+  courseVideos: TeachableVideo[],
+  blocks: CurriculumBlock[] = EASY_TRACK,
+): StudyItem[] {
+  const stream: StudyItem[] = [];
+  const used = new Set<string>();
+
+  for (const block of [...blocks].sort((a, b) => a.order - b.order)) {
+    const videos = courseVideos.filter(
+      (v) => v.taskType && v.taskType === block.taskType && !used.has(v.key),
+    );
+    for (const v of videos) {
+      used.add(v.key);
+      stream.push({
+        id: `v-${block.key}-${v.key}`,
+        kind: "video",
+        titleTh: v.titleTh,
+        minutes: v.minutes,
+        blockKey: block.key,
+        blockTitleTh: block.titleTh,
+        blockOrder: block.order,
+        taskType: v.taskType,
+        lessonId: v.lessonId,
+      });
+    }
+
+    for (const ex of block.exercises) {
+      stream.push({
+        id: `e-${block.key}-${ex.key}`,
+        kind: ex.isLesson ? "lesson" : "exercise",
+        titleTh: ex.titleTh,
+        minutes: ex.minutes,
+        blockKey: block.key,
+        blockTitleTh: block.titleTh,
+        blockOrder: block.order,
+        taskType: ex.taskType,
+        gateTh: gateLabel(ex.gate),
+        spreadDays: ex.spreadDays,
+      });
+    }
+  }
+
+  // Anything the track does not cover (orientation, mock guides) goes last.
+  for (const v of courseVideos) {
+    if (used.has(v.key)) continue;
+    stream.push({
+      id: `v-extra-${v.key}`,
+      kind: "video",
+      titleTh: v.titleTh,
+      minutes: v.minutes,
+      blockKey: "extra",
+      blockTitleTh: "ภาพรวม & ซ้อมจริง",
+      blockOrder: 999,
+      taskType: v.taskType,
+      lessonId: v.lessonId,
+    });
+  }
+
+  return stream;
+}
+
+export type PourSettings = {
+  startDate: string;
+  minutesPerDay: number;
+  /** Weekday numbers to study on. 0 = Sunday … 6 = Saturday. */
+  studyDays: number[];
+  weeks: number;
+};
+
+/**
+ * Pour the stream into study days.
+ *
+ * An item never splits across days, and a day never exceeds its budget, so what
+ * a learner sees is honestly what they signed up for. Items that do not fit
+ * roll forward — which is exactly the carry-over behaviour, without a separate
+ * mechanism.
+ */
+export function pourIntoDays(stream: StudyItem[], settings: PourSettings): BlockDay[] {
+  const days: BlockDay[] = [];
+  if (!settings.startDate) return days;
+
+  const start = toUtcDay(settings.startDate);
+  const totalDays = settings.weeks * 7;
+  let cursor = 0;
+  /** Last day index an item key was scheduled on, for spreadDays. */
+  const lastScheduled = new Map<string, number>();
+
+  for (let offset = 0; offset < totalDays; offset++) {
+    const date = fromUtcDay(start + offset);
+    const weekday = weekdayOf(date);
+    const weekIndex = Math.floor(offset / 7);
+
+    if (!settings.studyDays.includes(weekday)) {
+      days.push({
+        date,
+        weekday,
+        weekIndex,
+        isStudyDay: false,
+        items: [],
+        totalMinutes: 0,
+        blocks: [],
+      });
+      continue;
+    }
+
+    const items: StudyItem[] = [];
+    let budget = settings.minutesPerDay;
+    let look = cursor;
+
+    while (look < stream.length && budget > 0) {
+      const item = stream[look];
+
+      // A single item can be longer than the whole daily budget — some course
+      // videos run 30+ minutes. Videos cannot be split, so an oversized item
+      // takes a day of its own rather than blocking the queue forever.
+      const oversized = item.minutes > settings.minutesPerDay;
+      if (item.minutes > budget && !(oversized && items.length === 0)) break;
+
+      // Respect a spread hint by skipping ahead if this item ran too recently.
+      const last = lastScheduled.get(item.id);
+      if (item.spreadDays && last !== undefined && offset - last < item.spreadDays) {
+        look++;
+        continue;
+      }
+
+      items.push(item);
+      budget -= item.minutes;
+      lastScheduled.set(item.id, offset);
+      if (look === cursor) {
+        // Consumed the head of the queue — advance both, or the same item is
+        // read again next iteration and lands on the day twice.
+        cursor++;
+        look++;
+      } else {
+        stream.splice(look, 1); // pulled forward out of order — remove it
+      }
+    }
+
+    const blocks: { key: string; titleTh: string }[] = [];
+    for (const it of items) {
+      if (!blocks.some((b) => b.key === it.blockKey)) {
+        blocks.push({ key: it.blockKey, titleTh: it.blockTitleTh });
+      }
+    }
+
+    days.push({
+      date,
+      weekday,
+      weekIndex,
+      isStudyDay: true,
+      items,
+      totalMinutes: items.reduce((s, i) => s + i.minutes, 0),
+      blocks,
+    });
+  }
+
+  return days;
+}
+
+/**
+ * Split a day at the time limit — what the countdown actually enforces.
+ *
+ * `fits` is what the learner can finish inside their chosen minutes; `overflow`
+ * is what they are asked about when the timer runs out: finish now, or send it
+ * to next time.
+ */
+export function splitDayByTime(
+  items: StudyItem[],
+  minutes: number,
+): { fits: StudyItem[]; overflow: StudyItem[] } {
+  const fits: StudyItem[] = [];
+  const overflow: StudyItem[] = [];
+  let budget = minutes;
+  for (const item of items) {
+    if (item.minutes <= budget) {
+      fits.push(item);
+      budget -= item.minutes;
+    } else {
+      overflow.push(item);
+    }
+  }
+  return { fits, overflow };
+}
+
+// ---------------------------------------------------------------------------
+// Carry-over — work the learner ran out of time for
+// ---------------------------------------------------------------------------
+
+export type CarryOverEntry = {
+  /** Day the item was originally scheduled for. */
+  fromDate: string;
+  item: StudyItem;
+};
+
+export type CarryOver = {
+  entries: CarryOverEntry[];
+};
+
+export const EMPTY_CARRY_OVER: CarryOver = { entries: [] };
+
+/** Move a day's unfinished items into the carry-over queue, oldest first. */
+export function addToCarryOver(
+  carry: CarryOver,
+  fromDate: string,
+  items: StudyItem[],
+): CarryOver {
+  const existing = new Set(carry.entries.map((e) => e.item.id));
+  return {
+    entries: [
+      ...carry.entries,
+      ...items.filter((i) => !existing.has(i.id)).map((item) => ({ fromDate, item })),
+    ],
+  };
+}
+
+export function clearFromCarryOver(carry: CarryOver, itemIds: string[]): CarryOver {
+  const drop = new Set(itemIds);
+  return { entries: carry.entries.filter((e) => !drop.has(e.item.id)) };
+}
+
+export function carryOverMinutes(carry: CarryOver): number {
+  return carry.entries.reduce((s, e) => s + e.item.minutes, 0);
+}
+
+/**
+ * What to offer at the start of a session.
+ *
+ * The learner chooses: clear the backlog first, or run today's block. Choosing
+ * today keeps the backlog — and it is offered again next time, which is why the
+ * count is surfaced rather than hidden.
+ */
+export type SessionChoice = "carry_over" | "today";
+
+export function itemsForChoice(
+  choice: SessionChoice,
+  carry: CarryOver,
+  todaysItems: StudyItem[],
+  minutes: number,
+): StudyItem[] {
+  if (choice === "carry_over" && carry.entries.length > 0) {
+    const queued = carry.entries.map((e) => e.item);
+    const { fits } = splitDayByTime([...queued, ...todaysItems], minutes);
+    return fits;
+  }
+  return splitDayByTime(todaysItems, minutes).fits;
+}
+
+export const CARRY_OVER_STORAGE_KEY = "ep-course-carryover-v1";
+
+// ---------------------------------------------------------------------------
+// Totals, feasibility and drag-and-drop over the block schedule
+// ---------------------------------------------------------------------------
+
+/** Drag-and-drop edits: date → the items now assigned to that date. */
+export type BlockOverrides = Record<string, StudyItem[]>;
+
+export function applyOverrides(days: BlockDay[], overrides: BlockOverrides): BlockDay[] {
+  if (Object.keys(overrides).length === 0) return days;
+  return days.map((d) => {
+    const items = overrides[d.date];
+    if (!items) return d;
+    const blocks: { key: string; titleTh: string }[] = [];
+    for (const it of items) {
+      if (!blocks.some((b) => b.key === it.blockKey)) {
+        blocks.push({ key: it.blockKey, titleTh: it.blockTitleTh });
+      }
+    }
+    return {
+      ...d,
+      items,
+      isStudyDay: items.length > 0,
+      totalMinutes: items.reduce((s, i) => s + i.minutes, 0),
+      blocks,
+    };
+  });
+}
+
+export type BlockTotals = {
+  studyDays: number;
+  videos: number;
+  exercises: number;
+  lessons: number;
+  hours: number;
+};
+
+export function blockTotals(days: BlockDay[]): BlockTotals {
+  const all = days.flatMap((d) => d.items);
+  return {
+    studyDays: days.filter((d) => d.items.length > 0).length,
+    videos: all.filter((i) => i.kind === "video").length,
+    exercises: all.filter((i) => i.kind === "exercise").length,
+    lessons: all.filter((i) => i.kind === "lesson").length,
+    hours: Math.round(days.reduce((s, d) => s + d.totalMinutes, 0) / 60),
+  };
+}
+
+export type BlockFeasibility = {
+  coversWholeTrack: boolean;
+  scheduledItems: number;
+  totalItems: number;
+  /** Weeks needed to fit the whole track at these settings. */
+  recommendedWeeks: number;
+  busiestDayMinutes: number;
+};
+
+export function blockFeasibility(
+  days: BlockDay[],
+  settings: PourSettings,
+  stream: StudyItem[],
+): BlockFeasibility {
+  const scheduled = days.reduce((s, d) => s + d.items.length, 0);
+  const totalMinutes = stream.reduce((s, i) => s + i.minutes, 0);
+  const perWeek = Math.max(1, settings.studyDays.length);
+  const daysNeeded = Math.ceil(totalMinutes / Math.max(1, settings.minutesPerDay));
+  return {
+    coversWholeTrack: scheduled >= stream.length,
+    scheduledItems: scheduled,
+    totalItems: stream.length,
+    recommendedWeeks: Math.max(1, Math.ceil(daysNeeded / perWeek)),
+    busiestDayMinutes: days.reduce((mx, d) => Math.max(mx, d.totalMinutes), 0),
+  };
+}
+
+export function moveBlockDay(
+  days: BlockDay[],
+  overrides: BlockOverrides,
+  fromDate: string,
+  toDate: string,
+): BlockOverrides {
+  if (fromDate === toDate) return overrides;
+  const from = days.find((d) => d.date === fromDate);
+  const to = days.find((d) => d.date === toDate);
+  if (!from || !to) return overrides;
+  return { ...overrides, [fromDate]: [], [toDate]: [...to.items, ...from.items] };
+}
+
+export function moveBlockItem(
+  days: BlockDay[],
+  overrides: BlockOverrides,
+  itemId: string,
+  fromDate: string,
+  toDate: string,
+): BlockOverrides {
+  if (fromDate === toDate) return overrides;
+  const from = days.find((d) => d.date === fromDate);
+  const to = days.find((d) => d.date === toDate);
+  if (!from || !to) return overrides;
+  const item = from.items.find((i) => i.id === itemId);
+  if (!item) return overrides;
+  return {
+    ...overrides,
+    [fromDate]: from.items.filter((i) => i.id !== itemId),
+    [toDate]: [...to.items, item],
+  };
+}

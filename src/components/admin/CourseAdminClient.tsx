@@ -66,9 +66,11 @@ export function CourseAdminClient({ snapshot }: { snapshot: CourseSnapshot }) {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
+    // Sidebar sits left on desktop via order utilities; on mobile the player
+    // still comes first.
+    <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
       {/* Player + handouts */}
-      <section className="ep-brutal rounded-sm border-black bg-white p-4">
+      <section className="ep-brutal rounded-sm border-black bg-white p-4 lg:order-2">
         {activeLesson?.bunnyVideoGuid ? (
           <>
             <div className="relative w-full overflow-hidden border-4 border-black bg-black pt-[56.25%]">
@@ -135,7 +137,7 @@ export function CourseAdminClient({ snapshot }: { snapshot: CourseSnapshot }) {
       </section>
 
       {/* Chapter / lesson sidebar */}
-      <aside className="ep-brutal max-h-[80vh] overflow-y-auto rounded-sm border-black bg-white p-3">
+      <aside className="ep-brutal max-h-[80vh] overflow-y-auto rounded-sm border-black bg-white p-3 lg:order-1">
         {snapshot.chapters.map((chapter, ci) => {
           const open = openChapters.has(chapter.id);
           return (
@@ -167,6 +169,8 @@ export function CourseAdminClient({ snapshot }: { snapshot: CourseSnapshot }) {
                 </span>
               </button>
 
+              <ChapterBlockPicker chapter={chapter} />
+
               {open && (
                 <ul className="divide-y divide-neutral-200">
                   {chapter.lessons.length === 0 && (
@@ -185,6 +189,27 @@ export function CourseAdminClient({ snapshot }: { snapshot: CourseSnapshot }) {
                           }`}
                         >
                           <span className="flex gap-1.5">
+                            {/* Aggregate across students: filled once anyone has
+                                completed this lesson, hollow while nobody has. */}
+                            <span
+                              aria-label={
+                                lesson.completedCount > 0
+                                  ? `มีนักเรียนเรียนจบแล้ว ${lesson.completedCount} คน`
+                                  : "ยังไม่มีนักเรียนเรียนจบ"
+                              }
+                              title={
+                                lesson.completedCount > 0
+                                  ? `เรียนจบแล้ว ${lesson.completedCount} คน`
+                                  : "ยังไม่มีนักเรียนเรียนจบ"
+                              }
+                              className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-black leading-none ${
+                                lesson.completedCount > 0
+                                  ? "border-emerald-600 bg-emerald-500 text-white"
+                                  : "border-neutral-300 bg-white text-transparent"
+                              }`}
+                            >
+                              ✓
+                            </span>
                             <span className="shrink-0 font-bold text-neutral-400 tabular-nums">
                               {ci + 1}.{li + 1}
                             </span>
@@ -223,6 +248,66 @@ export function CourseAdminClient({ snapshot }: { snapshot: CourseSnapshot }) {
           );
         })}
       </aside>
+    </div>
+  );
+}
+
+/**
+ * Sets which DET study block a chapter teaches (migration 043).
+ *
+ * Blank = "เดาจากชื่อบท", which falls back to the title-matching rules in
+ * course-plan/categories.ts. "retired" marks chapters teaching question types
+ * Duolingo removed in July 2025 — they stay visible but are excluded from
+ * study plans.
+ */
+function ChapterBlockPicker({
+  chapter,
+}: {
+  chapter: { id: string; studyBlock: string | null };
+}) {
+  const [value, setValue] = useState(chapter.studyBlock ?? "");
+  const [msg, setMsg] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  async function save(next: string) {
+    setValue(next);
+    setSaving(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/admin/course-chapter-block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chapterId: chapter.id, studyBlock: next || null }),
+      });
+      const json = (await res.json()) as { error?: string };
+      setMsg(res.ok ? "บันทึกแล้ว" : (json.error ?? "บันทึกไม่สำเร็จ"));
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "บันทึกไม่สำเร็จ");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 border-b-2 border-black bg-neutral-50 px-3 py-2">
+      <span className="text-[10px] font-black uppercase tracking-wide text-neutral-500">
+        หมวด
+      </span>
+      <select
+        value={value}
+        disabled={saving}
+        onChange={(e) => void save(e.target.value)}
+        className="rounded-[3px] border-2 border-black bg-white px-2 py-1 text-xs font-bold disabled:opacity-50"
+      >
+        <option value="">เดาจากชื่อบท</option>
+        <option value="production">Production (พูด+เขียน)</option>
+        <option value="conversation">Conversation (ฟัง+พูด)</option>
+        <option value="comprehension">Comprehension (อ่าน+ฟัง)</option>
+        <option value="literacy">Literacy (อ่าน+เขียน)</option>
+        <option value="general">ภาพรวม / ซ้อมจริง</option>
+        <option value="retired">ข้อสอบตัดออกแล้ว</option>
+      </select>
+      {msg && <span className="text-[10px] font-bold text-neutral-600">{msg}</span>}
     </div>
   );
 }
