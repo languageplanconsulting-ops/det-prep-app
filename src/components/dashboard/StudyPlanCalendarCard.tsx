@@ -129,6 +129,15 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  /**
+   * The study plan is per-user data keyed on a real Supabase account. An
+   * admin-code session gets through the middleware to /practice (which renders
+   * this card) but carries no Supabase user, so every study-plan API answers
+   * 401. Track that explicitly instead of leaving the form up: the previous
+   * behaviour was a button that silently did nothing.
+   */
+  const [authRequired, setAuthRequired] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const [examDate, setExamDate] = useState<string | null>(null);
   const [cadenceDays, setCadenceDays] = useState(1);
@@ -141,7 +150,12 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
 
   const load = useCallback(async () => {
     const res = await fetch("/api/study-plan/schedule", { credentials: "same-origin", cache: "no-store" });
-    if (!res.ok) { setLoading(false); return; }
+    if (!res.ok) {
+      if (res.status === 401) setAuthRequired(true);
+      setLoading(false);
+      return;
+    }
+    setAuthRequired(false);
     const json = (await res.json()) as { schedule: ScheduleRow | null };
     setSchedule(json.schedule);
     if (json.schedule) {
@@ -175,6 +189,7 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
   async function submitPlan() {
     if (!isFreeformDraft && !examDate) return;
     setSaving(true);
+    setSaveError(null);
     try {
       const res = await fetch("/api/study-plan/schedule", {
         method: "POST",
@@ -189,7 +204,24 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
         setEditing(false);
         await load();
         window.dispatchEvent(new Event(EXAM_DATE_CHANGE_EVENT));
+        return;
       }
+      // Never fail silently: a button that does nothing reads as a broken app.
+      if (res.status === 401) {
+        setAuthRequired(true);
+        return;
+      }
+      const detail = await res
+        .json()
+        .then((j) => (typeof j?.error === "string" ? j.error : null))
+        .catch(() => null);
+      setSaveError(
+        detail
+          ? `บันทึกแผนไม่สำเร็จ: ${detail}`
+          : "บันทึกแผนไม่สำเร็จ ลองใหม่อีกครั้ง หรือรีเฟรชหน้านี้",
+      );
+    } catch {
+      setSaveError("เชื่อมต่อไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่อีกครั้ง");
     } finally {
       setSaving(false);
     }
@@ -301,6 +333,35 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
     );
   }
 
+  // Reachable from /practice, which admin-code sessions can enter: the plan is
+  // saved against a real account, so show the way in rather than a dead form.
+  if (authRequired) {
+    return (
+      <CardShell>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-[#004AAD]">Study plan</p>
+        <h3 className="mb-1 mt-1 text-lg font-bold text-slate-900">เข้าสู่ระบบเพื่อสร้างแผนการเรียน</h3>
+        <p className="mb-4 text-sm text-slate-500">
+          แผนการเรียนจะบันทึกไว้ในบัญชีของคุณ ใช้ได้ทั้งบนเว็บและแอปมือถือ — โค้ดแอดมินใช้ดูหน้าอื่นได้
+          แต่สร้างแผนไม่ได้ เพราะต้องผูกกับบัญชีจริง
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/login?redirect=/study-plan"
+            className="rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00] transition hover:opacity-90"
+          >
+            เข้าสู่ระบบ
+          </Link>
+          <Link
+            href="/signup"
+            className="rounded-xl bg-slate-50 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
+          >
+            สมัครฟรี
+          </Link>
+        </div>
+      </CardShell>
+    );
+  }
+
   if (!schedule || editing) {
     if (soft) {
       return (
@@ -354,6 +415,12 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
               </PillOption>
             ))}
           </div>
+
+          {saveError && (
+            <p className="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 ring-1 ring-rose-100">
+              ⚠️ {saveError}
+            </p>
+          )}
 
           <div className="flex gap-2">
             <button
@@ -428,6 +495,12 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
             </PillOption>
           ))}
         </div>
+
+        {saveError && (
+          <p className="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 ring-1 ring-rose-100">
+            ⚠️ {saveError}
+          </p>
+        )}
 
         <div className="flex gap-2">
           <button
