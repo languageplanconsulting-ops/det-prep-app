@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRequestSupabase } from "@/lib/supabase-request-client";
+import { resolvePlanIdentity } from "@/lib/study-plan/plan-identity";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import {
   DAILY_SKILL_META,
@@ -64,11 +64,9 @@ export type RangeDaySummary = {
  * (see src/lib/study-plan/daily-progress.ts for the per-day version this mirrors).
  */
 export async function GET(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
   const { searchParams } = new URL(req.url);
   const start = searchParams.get("start");
@@ -86,12 +84,12 @@ export async function GET(req: Request) {
     supabase
       .from("study_plan_schedules")
       .select("default_duration_minutes")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle(),
     supabase
       .from("study_plan_daily_plans")
       .select("plan_date, track, duration_minutes, items")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .gte("plan_date", start)
       .lte("plan_date", end),
   ]);
@@ -128,13 +126,13 @@ export async function GET(req: Request) {
   const today = bangkokToday();
   const svc = createServiceRoleSupabase();
   const [vector, { data: attempts }] = await Promise.all([
-    computeTaskWeaknessVector(user.id, { attemptsBefore: today }).catch(
+    computeTaskWeaknessVector(userId, { attemptsBefore: today }).catch(
       () => [] as TaskWeakness[],
     ),
     svc
       .from("practice_attempts")
       .select("task_type, created_at")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .gte("created_at", `${start}T00:00:00.000+07:00`)
       .lte("created_at", `${end}T23:59:59.999+07:00`),
   ]);

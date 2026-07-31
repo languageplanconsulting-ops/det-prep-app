@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRequestSupabase } from "@/lib/supabase-request-client";
+import { resolvePlanIdentity } from "@/lib/study-plan/plan-identity";
 import { computeSkillProgressSummary } from "@/lib/study-plan/daily-progress";
 
 const NO_STORE_HEADERS = {
@@ -15,12 +15,10 @@ const NO_STORE_HEADERS = {
  * practice is intentionally excluded (see computeSkillProgressSummary).
  */
 export async function GET(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
-  const trends = await computeSkillProgressSummary(user.id);
+  const trends = await computeSkillProgressSummary(userId);
   return NextResponse.json({ trends }, { headers: NO_STORE_HEADERS });
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRequestSupabase } from "@/lib/supabase-request-client";
+import { resolvePlanIdentity } from "@/lib/study-plan/plan-identity";
 import { fetchRecentActivity } from "@/lib/study-plan/activity";
 
 const NO_STORE_HEADERS = {
@@ -11,11 +11,9 @@ const NO_STORE_HEADERS = {
 
 /** GET /api/study-plan/completions?since=YYYY-MM-DD — the caller's own completions. */
 export async function GET(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
   const { searchParams } = new URL(req.url);
   const since = searchParams.get("since") ?? new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10);
@@ -24,9 +22,9 @@ export async function GET(req: Request) {
     supabase
       .from("study_plan_completions")
       .select("completion_date, tier_completed")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .gte("completion_date", since),
-    fetchRecentActivity(supabase, user.id, since).catch(() => []),
+    fetchRecentActivity(supabase, userId, since).catch(() => []),
   ]);
 
   return NextResponse.json({ completions: data ?? [], activity }, { headers: NO_STORE_HEADERS });
@@ -34,11 +32,9 @@ export async function GET(req: Request) {
 
 /** POST /api/study-plan/completions — record one completion for today's session. */
 export async function POST(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
   let body: unknown;
   try {
@@ -57,7 +53,7 @@ export async function POST(req: Request) {
   }
 
   const { error } = await supabase.from("study_plan_completions").insert({
-    user_id: user.id,
+    user_id: userId,
     completion_date: completionDate,
     tier_completed: tierCompleted,
     session_ref: typeof o.sessionRef === "string" ? o.sessionRef : null,

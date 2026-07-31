@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRequestSupabase } from "@/lib/supabase-request-client";
+import { resolvePlanIdentity } from "@/lib/study-plan/plan-identity";
 
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -10,27 +10,26 @@ const NO_STORE_HEADERS = {
 
 /** GET/POST /api/study-plan/schedule — the caller's own study_plan_schedules row. */
 export async function GET(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
   const { data } = await supabase
     .from("study_plan_schedules")
     .select("exam_date, cadence_days, default_duration_minutes, reminder_time, is_freeform")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .maybeSingle();
 
-  return NextResponse.json({ schedule: data ?? null }, { headers: NO_STORE_HEADERS });
+  return NextResponse.json(
+    { schedule: data ?? null, adminPreview: identity.isAdminPreview },
+    { headers: NO_STORE_HEADERS },
+  );
 }
 
 export async function POST(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
   let body: unknown;
   try {
@@ -56,7 +55,7 @@ export async function POST(req: Request) {
   }
 
   const { error } = await supabase.from("study_plan_schedules").upsert({
-    user_id: user.id,
+    user_id: userId,
     exam_date: examDate,
     cadence_days: cadenceDays,
     default_duration_minutes: defaultDurationMinutes,

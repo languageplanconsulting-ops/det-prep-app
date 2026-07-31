@@ -18,7 +18,7 @@ import { useEffectiveTier } from "@/hooks/useEffectiveTier";
  * showing the "please log in" screen (the calendar "re-login" bug).
  */
 export default function StudyPlanPage() {
-  const { effectiveTier, isAuthenticated, loading } = useEffectiveTier();
+  const { effectiveTier, loading } = useEffectiveTier();
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
@@ -37,29 +37,12 @@ export default function StudyPlanPage() {
           <div className="h-5 w-40 animate-pulse rounded bg-slate-100" />
           <div className="mt-3 h-24 animate-pulse rounded-xl bg-slate-100" />
         </div>
-      ) : !isAuthenticated ? (
-        <div className="rounded-2xl bg-white p-6 text-center ring-1 ring-slate-200">
-          <p className="text-2xl">🗓️</p>
-          <h2 className="mt-2 text-lg font-bold text-slate-900">เข้าสู่ระบบเพื่อสร้างแผนการเรียน</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            แผนการเรียนและปฏิทินฝึกจะบันทึกไว้ในบัญชีของคุณ ใช้ได้ทั้งบนเว็บและแอปมือถือ
-          </p>
-          <div className="mt-4 flex justify-center gap-2">
-            <Link
-              href="/login?redirect=/study-plan"
-              className="rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00] transition hover:opacity-90"
-            >
-              เข้าสู่ระบบ
-            </Link>
-            <Link
-              href="/signup"
-              className="rounded-xl bg-slate-50 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
-            >
-              สมัครฟรี
-            </Link>
-          </div>
-        </div>
       ) : (
+        // Rendered even when /api/me says "not authenticated": an admin-code
+        // session has no Supabase user but IS allowed to preview the plan (the
+        // API resolves it to the admin's own account). The card owns the
+        // signed-out state — it shows the sign-in prompt only when the API
+        // actually answers 401, so this can't lock out a valid previewer.
         <StudyPlanCalendarCard effectiveTier={effectiveTier} />
       )}
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRequestSupabase } from "@/lib/supabase-request-client";
+import { resolvePlanIdentity } from "@/lib/study-plan/plan-identity";
 import {
   buildDailyPlanItems,
   isDailyTier,
@@ -37,11 +37,9 @@ const normalizeItems = normalizeDailyPlanItems;
  * persisted until they act), plus per-skill-group progress and per-skill improvement trends.
  */
 export async function GET(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date");
@@ -52,7 +50,7 @@ export async function GET(req: Request) {
   const { data: row } = await supabase
     .from("study_plan_daily_plans")
     .select("track, duration_minutes, items")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("plan_date", date)
     .maybeSingle();
 
@@ -68,7 +66,7 @@ export async function GET(req: Request) {
   const { data: sched } = await supabase
     .from("study_plan_schedules")
     .select("default_duration_minutes")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .maybeSingle();
   const scheduleDefaultTier: DailyTier = isDailyTier(sched?.default_duration_minutes as number)
     ? (sched!.default_duration_minutes as DailyTier)
@@ -81,7 +79,7 @@ export async function GET(req: Request) {
     if (!vector) {
       // Cutoff = today: the plan for any day is derived only from data that
       // existed before today began, so working through a day never reshapes it.
-      vector = await computeTaskWeaknessVector(user.id, {
+      vector = await computeTaskWeaknessVector(userId, {
         attemptsBefore: bangkokToday(),
       }).catch(() => [] as TaskWeakness[]);
     }
@@ -110,9 +108,9 @@ export async function GET(req: Request) {
   }
 
   const [progress, trends, extras] = await Promise.all([
-    computeDayProgress(user.id, date, items),
-    computeSkillProgressSummary(user.id).catch(() => []),
-    computeDayExtras({ userId: user.id, date, tier, vector: await weaknessVector() }).catch(
+    computeDayProgress(userId, date, items),
+    computeSkillProgressSummary(userId).catch(() => []),
+    computeDayExtras({ userId, date, tier, vector: await weaknessVector() }).catch(
       () => [] as DayExtra[],
     ),
   ]);
@@ -129,11 +127,9 @@ export async function GET(req: Request) {
  * Rebuilds the fixed sequence for that tier+track and pins it so it's stable + resumable.
  */
 export async function POST(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
   let body: unknown;
   try {
@@ -156,7 +152,7 @@ export async function POST(req: Request) {
   let focus: { taskType: string; source: string } | null = null;
   let postVector: TaskWeakness[] = [];
   if (track === "exam" && shouldPersonalizeDate(date)) {
-    postVector = await computeTaskWeaknessVector(user.id, {
+    postVector = await computeTaskWeaknessVector(userId, {
       attemptsBefore: bangkokToday(),
     }).catch(() => [] as TaskWeakness[]);
     const { priorities, focus: vectorFocus } = dailyPrioritiesFromVector(postVector);
@@ -165,7 +161,7 @@ export async function POST(req: Request) {
   }
   const { error } = await supabase.from("study_plan_daily_plans").upsert(
     {
-      user_id: user.id,
+      user_id: userId,
       plan_date: date,
       track,
       duration_minutes: dur,
@@ -177,9 +173,9 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: NO_STORE_HEADERS });
 
   const [progress, extras] = await Promise.all([
-    computeDayProgress(user.id, date, items),
+    computeDayProgress(userId, date, items),
     computeDayExtras({
-      userId: user.id,
+      userId,
       date,
       tier: dur,
       vector: postVector.length ? postVector : undefined,

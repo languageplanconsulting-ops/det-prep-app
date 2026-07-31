@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getRequestAuthUser } from "@/lib/supabase-request-client";
+import { resolvePlanIdentity } from "@/lib/study-plan/plan-identity";
 import { computeImprovementReport } from "@/lib/study-plan/improvement";
 
 const NO_STORE_HEADERS = {
@@ -11,11 +11,11 @@ const NO_STORE_HEADERS = {
 
 /** GET /api/study-plan/improvement — this user's recently-improved practice cohorts, if any. */
 export async function GET(req: Request) {
-  const { user } = await getRequestAuthUser(req);
-  if (!user) {
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
   }
 
-  const report = await computeImprovementReport(user.id);
+  const report = await computeImprovementReport(identity.userId);
   return NextResponse.json(report, { headers: NO_STORE_HEADERS });
 }

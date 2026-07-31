@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRequestSupabase } from "@/lib/supabase-request-client";
+import { resolvePlanIdentity } from "@/lib/study-plan/plan-identity";
 
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -17,11 +17,9 @@ const VALID_SKILLS = new Set(["dictation", "fitb", "vocab", "reading", "realword
  * hasn't been migrated to this DB yet, so the calendar never hard-errors.
  */
 export async function GET(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
   const { searchParams } = new URL(req.url);
   const since = searchParams.get("since") ?? new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
@@ -29,7 +27,7 @@ export async function GET(req: Request) {
   const { data, error } = await supabase
     .from("study_plan_practice_minutes")
     .select("practice_date, skill, minutes, sets_done, words_learned")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .gte("practice_date", since)
     .order("practice_date", { ascending: false });
 
@@ -41,11 +39,9 @@ export async function GET(req: Request) {
 
 /** POST /api/study-plan/practice-minutes — record one finished timed-random session. */
 export async function POST(req: Request) {
-  const supabase = await createRequestSupabase(req);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const identity = await resolvePlanIdentity(req);
+  if (!identity) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: NO_STORE_HEADERS });
+  const { supabase, userId } = identity;
 
   let body: unknown;
   try {
@@ -69,7 +65,7 @@ export async function POST(req: Request) {
   };
 
   const { error } = await supabase.from("study_plan_practice_minutes").insert({
-    user_id: user.id,
+    user_id: userId,
     practice_date: practiceDate,
     skill,
     minutes: clampInt(o.minutes, 600),

@@ -96,6 +96,19 @@ function PillOption({
   );
 }
 
+/**
+ * Shown when the caller is an admin-code session: the study plan it reads and
+ * writes belongs to the admin account, not to whatever tier is being previewed.
+ * Without this the calendar looks like a student's own plan.
+ */
+function AdminPreviewBadge() {
+  return (
+    <p className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700 ring-1 ring-amber-200">
+      ⚙️ พรีวิวด้วยโค้ดแอดมิน — แผนนี้บันทึกในบัญชีแอดมิน (ไม่ใช่ของนักเรียน)
+    </p>
+  );
+}
+
 function CardShell({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -138,6 +151,8 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
    */
   const [authRequired, setAuthRequired] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  /** Signed in with an admin code: the plan shown belongs to the admin account. */
+  const [adminPreview, setAdminPreview] = useState(false);
 
   const [examDate, setExamDate] = useState<string | null>(null);
   const [cadenceDays, setCadenceDays] = useState(1);
@@ -156,7 +171,8 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
       return;
     }
     setAuthRequired(false);
-    const json = (await res.json()) as { schedule: ScheduleRow | null };
+    const json = (await res.json()) as { schedule: ScheduleRow | null; adminPreview?: boolean };
+    setAdminPreview(json.adminPreview === true);
     setSchedule(json.schedule);
     if (json.schedule) {
       const since = addDaysIso(todayIso(), -14);
@@ -312,16 +328,19 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
 
   if (soft && schedule && !editing && !loading) {
     return (
-      <StudyPlanCalendarCardSoft
-        schedule={schedule}
-        streak={streak}
-        weakSkills={weakSkills}
-        weakestDimension={weakness?.weakestDimension ?? null}
-        topImprovement={topImprovement}
-        taskVector={weakness?.taskVector ?? []}
-        courseUnlocked={weakness?.courseUnlocked ?? false}
-        onEditPlan={openEdit}
-      />
+      <>
+        {adminPreview && <AdminPreviewBadge />}
+        <StudyPlanCalendarCardSoft
+          schedule={schedule}
+          streak={streak}
+          weakSkills={weakSkills}
+          weakestDimension={weakness?.weakestDimension ?? null}
+          topImprovement={topImprovement}
+          taskVector={weakness?.taskVector ?? []}
+          courseUnlocked={weakness?.courseUnlocked ?? false}
+          onEditPlan={openEdit}
+        />
+      </>
     );
   }
 
@@ -366,6 +385,7 @@ export function StudyPlanCalendarCard({ effectiveTier }: { effectiveTier: Tier }
     if (soft) {
       return (
         <div className="rounded-3xl bg-white p-5 ring-1 ring-slate-200 sm:p-7">
+          {adminPreview && <AdminPreviewBadge />}
           <p className="text-[11px] font-bold uppercase tracking-wider text-ep-blue">Study plan</p>
           <h3 className="mb-1 mt-1 font-display text-xl font-extrabold text-slate-900">
             {editing ? "แก้ไขแผน" : "สร้างแผนการเรียนถึงวันสอบ"}
