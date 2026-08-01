@@ -17,6 +17,9 @@ import {
 } from "@/lib/course-plan/categories";
 import {
   DEFAULT_PLAN_SETTINGS,
+  clampMinutes,
+  MAX_MINUTES_PER_DAY,
+  MIN_MINUTES_PER_DAY,
   MINUTE_OPTIONS,
   OVERRIDES_STORAGE_KEY,
   PLAN_STORAGE_KEY,
@@ -25,6 +28,8 @@ import {
   type PlanSettings,
 } from "@/lib/course-plan/planner";
 import { CourseCompletion } from "@/components/course/CourseCompletion";
+import { LessonLibrary } from "@/components/course/LessonLibrary";
+import { ProgramBuilder } from "@/components/course/ProgramBuilder";
 import { SessionRunner } from "@/components/course/SessionRunner";
 import type { StudentCourse } from "@/lib/course-student-data";
 import {
@@ -43,7 +48,17 @@ import {
   pourIntoDays,
   projectBoth,
   splitDayByTime,
+  applyCustomisation,
   applyOverrides,
+  blocksInStream,
+  CUSTOMISATION_STORAGE_KEY,
+  EMPTY_CUSTOMISATION,
+  EMPTY_PROGRESS,
+  completionOf,
+  markCompleted,
+  PROGRESS_STORAGE_KEY,
+  type Progress,
+  type Customisation,
   blockFeasibility,
   blockTotals,
   moveBlockDay,
@@ -106,11 +121,13 @@ export function CoursePlanClient({
   });
   const [overrides, setOverrides] = useState<BlockOverrides>({});
   const [loaded, setLoaded] = useState(false);
-  const [openBlock, setOpenBlock] = useState<StudyBlockKey | null>("production");
   const [plannerView, setPlannerView] = useState<"week" | "month">("week");
   const [weekIndex, setWeekIndex] = useState(0);
   const [dragFrom, setDragFrom] = useState<{ date: string; itemId?: string } | null>(null);
   const [goalScore, setGoalScore] = useState(120);
+  const [minutesDraft, setMinutesDraft] = useState("20");
+  const [custom, setCustom] = useState<Customisation>(EMPTY_CUSTOMISATION);
+  const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [carryOver, setCarryOver] = useState<CarryOver>(EMPTY_CARRY_OVER);
   const [sessionOpen, setSessionOpen] = useState(false);
 
@@ -130,6 +147,10 @@ export function CoursePlanClient({
       if (o) setOverrides(JSON.parse(o));
       const c = window.localStorage.getItem(CARRY_OVER_STORAGE_KEY);
       if (c) setCarryOver(JSON.parse(c));
+      const cu = window.localStorage.getItem(CUSTOMISATION_STORAGE_KEY);
+      if (cu) setCustom({ ...EMPTY_CUSTOMISATION, ...JSON.parse(cu) });
+      const pr = window.localStorage.getItem(PROGRESS_STORAGE_KEY);
+      if (pr) setProgress({ ...EMPTY_PROGRESS, ...JSON.parse(pr) });
     } catch {
       /* corrupt or unavailable storage — fall back to defaults */
     }
@@ -152,7 +173,11 @@ export function CoursePlanClient({
             carryOver: CarryOver | null;
           };
           if (json.settings && Object.keys(json.settings).length > 0) {
-            setSettings({ ...DEFAULT_PLAN_SETTINGS, startDate: todayIso, ...json.settings });
+            const { custom: savedCustom, ...planOnly } = json.settings as Partial<PlanSettings> & {
+              custom?: Customisation;
+            };
+            setSettings({ ...DEFAULT_PLAN_SETTINGS, startDate: todayIso, ...planOnly });
+            if (savedCustom) setCustom({ ...EMPTY_CUSTOMISATION, ...savedCustom });
           }
           if (json.overrides) setOverrides(json.overrides);
           if (json.carryOver) setCarryOver(json.carryOver);
@@ -176,6 +201,8 @@ export function CoursePlanClient({
       window.localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(settings));
       window.localStorage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(overrides));
       window.localStorage.setItem(CARRY_OVER_STORAGE_KEY, JSON.stringify(carryOver));
+      window.localStorage.setItem(CUSTOMISATION_STORAGE_KEY, JSON.stringify(custom));
+      window.localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
     } catch {
       /* ignore */
     }
@@ -186,13 +213,18 @@ export function CoursePlanClient({
       void fetch("/api/course/plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ settings, overrides, carryOver }),
+        body: JSON.stringify({ settings: { ...settings, custom }, overrides, carryOver }),
       })
         .then((r) => setSyncState(r.ok ? "synced" : "offline"))
         .catch(() => setSyncState("offline"));
     }, 800);
     return () => clearTimeout(t);
-  }, [settings, overrides, carryOver, loaded, hasUser, syncState]);
+  }, [settings, overrides, carryOver, custom, progress, loaded, hasUser, syncState]);
+
+  // Keep the custom field in step when a preset is tapped or a saved plan loads.
+  useEffect(() => {
+    setMinutesDraft(String(settings.minutesPerDay));
+  }, [settings.minutesPerDay]);
 
   const weakestFirst = useMemo(() => weakness.map((w) => w.taskType), [weakness]);
 
@@ -254,10 +286,14 @@ export function CoursePlanClient({
    * drill never appears before the lesson that teaches it, and anything that
    * does not fit simply leads the next day.
    */
-  const stream = useMemo(
+  /** The curriculum as authored — every block, before the learner rearranges. */
+  const baseStream = useMemo(
     () => buildItemStream(courseVideos, undefined, rungSteps),
     [courseVideos, rungSteps],
   );
+  /** What actually runs: their chosen blocks, in their chosen order. */
+  const stream = useMemo(() => applyCustomisation(baseStream, custom), [baseStream, custom]);
+  const allBlocks = useMemo(() => blocksInStream(baseStream), [baseStream]);
   const pourSettings = useMemo(
     () => ({
       startDate: settings.startDate,
@@ -267,21 +303,33 @@ export function CoursePlanClient({
     }),
     [settings],
   );
+  /**
+   * Only what is still outstanding gets scheduled. Completing items pulls the
+   * rest of the plan forward; leaving them pushes it back. That is what makes
+   * "catch up" work without a second queue shadowing the calendar.
+   */
+  const remainingStream = useMemo(() => {
+    const done = new Set(progress.completedIds);
+    return stream.filter((i) => !done.has(i.id));
+  }, [stream, progress]);
+
   const days = useMemo(
     // pourIntoDays mutates its input when it pulls a spread item forward, so
     // hand it a copy — the memoised stream must stay intact for feasibility.
-    () => applyOverrides(pourIntoDays([...stream], pourSettings), overrides),
-    [stream, pourSettings, overrides],
+    () => applyOverrides(pourIntoDays([...remainingStream], pourSettings), overrides),
+    [remainingStream, pourSettings, overrides],
   );
   const totals = useMemo(() => blockTotals(days), [days]);
   const projection = useMemo(
-    () => projectBoth(stream, pourSettings),
-    [stream, pourSettings],
+    () => projectBoth(remainingStream, pourSettings),
+    [remainingStream, pourSettings],
   );
   const feasibility = useMemo(
-    () => blockFeasibility(days, pourSettings, stream),
-    [days, pourSettings, stream],
+    () => blockFeasibility(days, pourSettings, remainingStream),
+    [days, pourSettings, remainingStream],
   );
+  const completion = useMemo(() => completionOf(stream, progress), [stream, progress]);
+
   const weeks = useMemo(() => {
     const map = new Map<number, BlockDay[]>();
     for (const d of days) {
@@ -349,12 +397,28 @@ export function CoursePlanClient({
         </header>
 
         {/* ============ CORE COMPLETE ============ */}
-        {stream.length > 0 &&
-          feasibility.coversWholeTrack &&
-          days.every((d) => d.date >= todayIso || d.items.length === 0) &&
-          carryOver.entries.length === 0 && (
-            <CourseCompletion weakestFirst={weakestFirst} />
-          )}
+        {completion.isComplete && <CourseCompletion weakestFirst={weakestFirst} />}
+
+        {/* ============ PROGRESS ============ */}
+        {completion.total > 0 && !completion.isComplete && (
+          <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <div className="flex items-baseline justify-between gap-2">
+              <h2 className="text-sm font-black text-slate-800">ความคืบหน้าหลักสูตร</h2>
+              <p className="text-[12px] font-black text-slate-500">
+                {completion.done} / {completion.total} รายการ
+              </p>
+            </div>
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className="h-full bg-emerald-500 transition-[width] duration-500"
+                style={{ width: `${completion.percent}%` }}
+              />
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400">
+              {completion.percent}% — เหลืออีก {completion.total - completion.done} รายการ
+            </p>
+          </section>
+        )}
 
         {/* ============ TODAY ============ */}
         {(() => {
@@ -387,6 +451,49 @@ export function CoursePlanClient({
                   </button>
                 )}
               </div>
+            </section>
+          );
+        })()}
+
+        {/* ============ BEHIND? REBALANCE ============ */}
+        {(() => {
+          // "Behind" means scheduled days that have already passed still hold
+          // work. Comparing against today rather than counting the carry-over
+          // queue catches days the learner simply never opened.
+          const overdue = days.filter((d) => d.date < todayIso && d.items.length > 0);
+          const overdueItems = overdue.reduce((n, d) => n + d.items.length, 0);
+          const overdueMinutes = overdue.reduce((n, d) => n + d.totalMinutes, 0);
+          if (overdueItems === 0) return null;
+          return (
+            <section className="ep-stagger-in rounded-3xl bg-amber-50 p-5 shadow-sm ring-1 ring-amber-200">
+              <p className="text-[11px] font-black uppercase tracking-widest text-amber-600">
+                ตามไม่ทันนิดหน่อย
+              </p>
+              <h2 className="mt-1 text-lg font-black text-amber-900">
+                มีงานค้าง {overdueItems} รายการ · {overdueMinutes} นาที
+              </h2>
+              <p className="mt-1 text-[12px] text-amber-800">
+                ค้างมาจาก {overdue.length} วันที่ผ่านมา — จะไล่ตามทีละวันก็ได้
+                หรือกดปรับปฏิทินใหม่ให้เริ่มนับจากวันนี้
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  // Re-flow everything still outstanding from today. Nothing is
+                  // deleted — the plan simply restarts from where they are.
+                  setSettings((prev) => ({ ...prev, startDate: todayIso }));
+                  setOverrides({});
+                  setCarryOver(EMPTY_CARRY_OVER);
+                }}
+                className="mt-3 w-full rounded-full bg-amber-500 py-2.5 text-sm font-black text-white transition hover:bg-amber-600"
+              >
+                ↻ ปรับปฏิทินใหม่ให้เริ่มจากวันนี้
+              </button>
+              {projection.full && (
+                <p className="mt-2 text-center text-[11px] font-bold text-amber-700">
+                  กำหนดเรียนจบใหม่จะเป็นประมาณ {thaiFullDate(projection.full.date)}
+                </p>
+              )}
             </section>
           );
         })()}
@@ -475,17 +582,52 @@ export function CoursePlanClient({
               <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
                 วันละกี่นาที
               </p>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 {MINUTE_OPTIONS.map((m) => (
                   <Pill
                     key={m}
                     on={settings.minutesPerDay === m}
                     onClick={() => setSettings((s) => ({ ...s, minutesPerDay: m }))}
                   >
-                    {m} นาที
+                    {m}
                   </Pill>
                 ))}
+                {/* Presets are shortcuts, not limits — real available time
+                    rarely lands on a round number. */}
+                <span className="ml-1 flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-1">
+                  <span className="text-[10px] font-black uppercase tracking-wide text-slate-400">
+                    กำหนดเอง
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={MIN_MINUTES_PER_DAY}
+                    max={MAX_MINUTES_PER_DAY}
+                    value={minutesDraft}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      setMinutesDraft(raw);
+                      const n = Number(raw);
+                      if (raw !== "" && Number.isFinite(n) && n >= MIN_MINUTES_PER_DAY && n <= MAX_MINUTES_PER_DAY) {
+                        setSettings((s) => ({ ...s, minutesPerDay: Math.round(n) }));
+                      }
+                    }}
+                    onBlur={() => {
+                      const next = clampMinutes(Number(minutesDraft));
+                      setSettings((s) => ({ ...s, minutesPerDay: next }));
+                      setMinutesDraft(String(next));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") e.currentTarget.blur();
+                    }}
+                    className="w-16 rounded-full bg-white px-2 py-1 text-center text-xs font-black text-slate-800 ring-1 ring-slate-300"
+                  />
+                  <span className="text-[11px] font-bold text-slate-500">นาที</span>
+                </span>
               </div>
+              <p className="mt-1 text-[11px] text-slate-500">
+                ใส่กี่นาทีก็ได้ ({MIN_MINUTES_PER_DAY}–{MAX_MINUTES_PER_DAY}) — เช่น 65, 72, 92
+              </p>
             </div>
 
             <div>
@@ -538,33 +680,16 @@ export function CoursePlanClient({
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <Stat n={totals.studyDays} label="วันที่ต้องเรียน" />
-              <Stat n={totals.videos} label={`เลกเชอร์ (จาก ${courseVideos.length})`} />
+              <Stat n={totals.videos} label="เลกเชอร์" />
               <Stat n={totals.exercises} label="ชุดฝึก" />
               <Stat n={totals.hours} label="ชั่วโมงรวม" />
             </div>
 
-            {!settings.practiceOnly && courseVideos.length > 0 && (
-              <p
-                className={`rounded-xl p-3 text-xs ring-1 ${
-                  feasibility.coversWholeTrack
-                    ? "bg-emerald-50 text-emerald-800 ring-emerald-200"
-                    : "bg-amber-50 text-amber-800 ring-amber-200"
-                }`}
-              >
-                {feasibility.coversWholeTrack ? (
-                  <>
-                    ✓ แผนนี้ครบทั้งหลักสูตร <strong>{feasibility.totalItems}</strong> รายการ
-                    (เลกเชอร์ + แบบฝึก) · วันที่หนักที่สุด ~{feasibility.busiestDayMinutes} นาที
-                  </>
-                ) : (
-                  <>
-                    แผนนี้จะทำได้ <strong>{feasibility.scheduledItems}</strong> จาก{" "}
-                    <strong>{feasibility.totalItems}</strong> รายการ — ยังไม่ครบหลักสูตร
-                    <br />
-                    ถ้าเรียนวันละ {settings.minutesPerDay} นาที {settings.studyDays.length} วัน/สัปดาห์
-                    ต้องใช้ประมาณ <strong>{feasibility.recommendedWeeks} สัปดาห์</strong> จึงจะครบ
-                  </>
-                )}
+            {!settings.practiceOnly && courseVideos.length > 0 && projection.full && (
+              <p className="rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800 ring-1 ring-emerald-200">
+                ถ้าเรียนตามจังหวะนี้ — วันละ <strong>{settings.minutesPerDay} นาที</strong>{" "}
+                <strong>{settings.studyDays.length} วัน/สัปดาห์</strong> — คาดว่าจะเรียนจบหลักสูตรวันที่{" "}
+                <strong>{thaiFullDate(projection.full.date)}</strong>
               </p>
             )}
 
@@ -662,104 +787,80 @@ export function CoursePlanClient({
           </div>
         </Section>
 
-        {/* ============ 2. STUDY BLOCKS ============ */}
-        <Section n={2} title="บทเรียนตามหมวด" subtitle="แตะหมวดเพื่อดูเลกเชอร์และเอกสารข้างใน">
+        {/* ============ 2. STUDY ORDER ============ */}
+        {allBlocks.length > 0 && (
+          <Section
+            n={2}
+            title="ลำดับการเรียน"
+            subtitle={
+              custom.mode === "guided"
+                ? "เราจัดลำดับให้แล้ว — เปลี่ยนเองได้ถ้าต้องการ"
+                : "คุณกำลังจัดลำดับเอง"
+            }
+          >
+            <div className="space-y-3">
+              {/* One segmented control, not two competing cards — the section
+                  title used to say "จัดโปรแกรมเอง" while defaulting to the
+                  opposite, which read as a contradiction. */}
+              <div className="flex gap-1 rounded-full bg-slate-100 p-1">
+                {(
+                  [
+                    ["guided", "✨ ให้เราจัดให้"],
+                    ["custom", "🎛️ จัดเอง"],
+                  ] as const
+                ).map(([mode, label]) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setCustom((c) => ({ ...c, mode }))}
+                    className={`flex-1 rounded-full py-2 text-xs font-black transition ${
+                      custom.mode === mode
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {custom.mode === "guided" ? (
+                <GuidedOrder blocks={allBlocks} />
+              ) : (
+                <ProgramBuilder
+                  stream={stream}
+                  allBlocks={allBlocks}
+                  custom={custom}
+                  onChange={setCustom}
+                />
+              )}
+            </div>
+          </Section>
+        )}
+
+        {/* ============ 3. LESSON LIBRARY ============ */}
+        <Section
+          n={3}
+          title="คลังบทเรียน"
+          subtitle="แยกตามทักษะ — ค้นหาชื่อบทเรียน แล้วกดดูซ้ำได้ทุกเมื่อ"
+        >
           {!course ? (
             <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-200">
               ยังโหลดข้อมูลคอร์สไม่ได้ — ตรวจว่า migration 038 ถูก deploy แล้ว และมีคอร์ส slug{" "}
               <code>duolingo-fast-track</code>
             </p>
           ) : (
-            <div className="space-y-2">
-              {STUDY_BLOCKS.map((block) => {
-                const chapters = course.chapters.filter(
-                  (c) => blockForChapter(c.title, c.studyBlock) === block.key,
-                );
-                if (chapters.length === 0) return null;
-                const lessons = chapters.flatMap((c) => c.lessons);
-                const done = lessons.filter((l) => l.completed).length;
-                const t = TONE[block.tone];
-                const open = openBlock === block.key;
-
-                return (
-                  <div key={block.key} className={`overflow-hidden rounded-2xl ring-1 transition-shadow ${t.ring}`}>
-                    <button
-                      type="button"
-                      onClick={() => setOpenBlock(open ? null : block.key)}
-                      className={`flex w-full items-center gap-3 p-4 text-left transition-colors ${t.bg}`}
-                    >
-                      <span className="text-2xl">{block.emoji}</span>
-                      <span className="min-w-0 flex-1">
-                        <span className={`block text-base font-black ${t.text}`}>{block.th}</span>
-                        <span className="block text-[11px] text-slate-500">{block.subtitleTh}</span>
-                      </span>
-                      <span className="shrink-0 text-right">
-                        <span className={`block text-sm font-black ${t.text}`}>
-                          {done}/{lessons.length}
-                        </span>
-                        <span className="block text-[10px] text-slate-400">บทเรียน</span>
-                      </span>
-                      <span className="shrink-0 text-slate-400">{open ? "▲" : "▼"}</span>
-                    </button>
-
-                    {open && (
-                      <div className="space-y-3 bg-white p-4">
-                        {chapters.map((c) => (
-                          <div key={c.id}>
-                            <p className="mb-1 flex items-center gap-2 text-xs font-black text-slate-700">
-                              {c.title}
-                              {isRetiredChapter(c.title, c.studyBlock) && (
-                                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-black text-red-700">
-                                  ข้อสอบตัดออกแล้ว
-                                </span>
-                              )}
-                            </p>
-                            <ul className="space-y-1">
-                              {c.lessons.map((l) => (
-                                <li
-                                  key={l.id}
-                                  className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2"
-                                >
-                                  <span className={l.completed ? "text-emerald-500" : "text-slate-300"}>
-                                    {l.completed ? "✓" : "○"}
-                                  </span>
-                                  <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-slate-700">
-                                    {l.title}
-                                  </span>
-                                  {l.downloads.length > 0 && (
-                                    <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200">
-                                      📄 {l.downloads.length}
-                                    </span>
-                                  )}
-                                  {l.bunnyVideoGuid ? (
-                                    <Link
-                                      href={`/course/duolingo-fast-track?lesson=${l.id}`}
-                                      className="shrink-0 rounded-full bg-[#004AAD] px-2.5 py-1 text-[10px] font-black text-white"
-                                    >
-                                      ดู
-                                    </Link>
-                                  ) : (
-                                    <span className="shrink-0 rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-black text-slate-500">
-                                      ยังไม่มีวิดีโอ
-                                    </span>
-                                  )}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            <LessonLibrary
+              course={course}
+              stream={stream}
+              completedIds={new Set(progress.completedIds)}
+              goalScore={goalScore}
+            />
           )}
         </Section>
 
-        {/* ============ 3. PLANNER ============ */}
         <Section
-          n={3}
+          n={4}
           title="ปฏิทินการเรียน"
           subtitle="ลากวันหรือรายการไปวางวันอื่นได้ ถ้าอยากสลับ"
         >
@@ -783,68 +884,120 @@ export function CoursePlanClient({
 
           {plannerView === "week" ? (
             <>
-              <div className="mb-2 flex items-center justify-between gap-2">
+              {/* Week header: range + a one-line summary, so the week reads as a
+                  unit instead of seven disconnected boxes. */}
+              <div className="mb-2.5 flex items-center justify-between gap-2 rounded-2xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200">
                 <button
                   type="button"
+                  aria-label="สัปดาห์ก่อนหน้า"
                   disabled={weekIndex === 0}
                   onClick={() => setWeekIndex((i) => Math.max(0, i - 1))}
-                  className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200 disabled:opacity-40"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-sm font-black text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:opacity-30"
                 >
-                  ← ก่อนหน้า
+                  ←
                 </button>
-                <p className="text-sm font-black text-slate-700">
-                  สัปดาห์ที่ {weekIndex + 1} / {weeks.length}
-                </p>
+                <div className="min-w-0 text-center">
+                  <p className="truncate text-[13px] font-black text-slate-800">
+                    {(() => {
+                      const w = weeks[weekIndex] ?? [];
+                      return w.length
+                        ? `${thaiDate(w[0].date)} – ${thaiDate(w[w.length - 1].date)}`
+                        : "—";
+                    })()}
+                  </p>
+                  <p className="text-[10px] font-bold text-slate-400">
+                    สัปดาห์ที่ {weekIndex + 1} / {weeks.length}
+                    {(() => {
+                      const w = weeks[weekIndex] ?? [];
+                      const study = w.filter((d) => d.items.length > 0).length;
+                      const mins = w.reduce((n, d) => n + d.totalMinutes, 0);
+                      return study ? ` · ${study} วันเรียน · ${mins} นาที` : " · พักทั้งสัปดาห์";
+                    })()}
+                  </p>
+                </div>
                 <button
                   type="button"
+                  aria-label="สัปดาห์ถัดไป"
                   disabled={weekIndex >= weeks.length - 1}
                   onClick={() => setWeekIndex((i) => Math.min(weeks.length - 1, i + 1))}
-                  className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200 disabled:opacity-40"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-sm font-black text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:opacity-30"
                 >
-                  ถัดไป →
+                  →
                 </button>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {(weeks[weekIndex] ?? []).map((d) => (
-                  <DayCard
-                    key={d.date}
-                    day={d}
-                    onDragStart={(itemId) => setDragFrom({ date: d.date, itemId })}
-                    onDrop={() => handleDrop(d.date)}
-                    dragging={dragFrom?.date === d.date}
-                  />
-                ))}
+
+              {/* One column, chronological. Rest days collapse to a slim row —
+                  as full cards they took the same space as a study day and left
+                  the grid ragged and mostly empty. */}
+              <div className="space-y-1.5">
+                {(weeks[weekIndex] ?? []).map((d) =>
+                  d.items.length === 0 ? (
+                    <RestRow key={d.date} day={d} onDrop={() => handleDrop(d.date)} />
+                  ) : (
+                    <DayCard
+                      key={d.date}
+                      day={d}
+                      isToday={d.date === todayIso}
+                      onStart={d.date === todayIso ? () => setSessionOpen(true) : undefined}
+                      onDragStart={(itemId) => setDragFrom({ date: d.date, itemId })}
+                      onDrop={() => handleDrop(d.date)}
+                      dragging={dragFrom?.date === d.date}
+                    />
+                  ),
+                )}
               </div>
             </>
           ) : (
-            <div className="space-y-2">
-              {weeks.map((w, i) => (
-                <div key={i} className="rounded-2xl bg-white p-3 ring-1 ring-slate-200">
-                  <p className="mb-1.5 text-xs font-black text-slate-600">สัปดาห์ {i + 1}</p>
-                  <div className="flex gap-1">
-                    {w.map((d) => (
-                      <button
-                        key={d.date}
-                        type="button"
-                        onClick={() => {
-                          setWeekIndex(i);
-                          setPlannerView("week");
-                        }}
-                        title={`${thaiDate(d.date)} · ${d.totalMinutes} นาที`}
-                        className={`h-9 flex-1 rounded-md text-[10px] font-black ${
-                          d.items.length === 0
-                            ? "bg-slate-100 text-slate-300"
-                            : d.items.some((it: StudyItem) => it.kind === "video")
-                              ? "bg-amber-100 text-amber-700"
-                              : "bg-sky-100 text-sky-700"
-                        }`}
-                      >
-                        {WEEKDAY_TH[d.weekday]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            <div className="space-y-1.5">
+              {weeks.map((w, i) => {
+                const mins = w.reduce((n, d) => n + d.totalMinutes, 0);
+                const study = w.filter((d) => d.items.length > 0).length;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      setWeekIndex(i);
+                      setPlannerView("week");
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-2xl p-3 text-left ring-1 transition ${
+                      i === weekIndex
+                        ? "bg-slate-50 ring-slate-400"
+                        : "bg-white ring-slate-200 hover:ring-slate-300"
+                    }`}
+                  >
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-slate-900 text-[11px] font-black text-white">
+                      {i + 1}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[12px] font-black text-slate-700">
+                        {thaiDate(w[0].date)} – {thaiDate(w[w.length - 1].date)}
+                      </span>
+                      <span className="mt-1 flex gap-0.5">
+                        {w.map((d) => (
+                          <span
+                            key={d.date}
+                            title={`${thaiDate(d.date)} · ${d.totalMinutes} นาที`}
+                            className={`h-1.5 flex-1 rounded-full ${
+                              d.items.length === 0
+                                ? "bg-slate-150 bg-slate-100"
+                                : d.items.some((it: StudyItem) => it.kind === "video")
+                                  ? "bg-amber-400"
+                                  : "bg-sky-400"
+                            }`}
+                          />
+                        ))}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      <span className="block text-[11px] font-black text-slate-700">
+                        {study} วัน
+                      </span>
+                      <span className="block text-[10px] text-slate-400">{mins} นาที</span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </Section>
@@ -860,6 +1013,7 @@ export function CoursePlanClient({
             minutes={settings.minutesPerDay}
             onClose={() => setSessionOpen(false)}
             onFinish={(unfinished, completed) => {
+              setProgress((p) => markCompleted(p, completed.map((i) => i.id)));
               // Finished items leave the backlog; unfinished ones join it and
               // are offered again at the start of the next session.
               setCarryOver((prev) =>
@@ -990,19 +1144,54 @@ function ScoreBreakdown({
   );
 }
 
+/** A rest day: one slim muted row, still a valid drop target. */
+function RestRow({ day, onDrop }: { day: BlockDay; onDrop: () => void }) {
+  const [over, setOver] = useState(false);
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setOver(true);
+      }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setOver(false);
+        onDrop();
+      }}
+      className={`flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] transition ${
+        over
+          ? "bg-sky-50 ring-1 ring-sky-400"
+          : "bg-slate-50/70 ring-1 ring-transparent"
+      }`}
+    >
+      <span className="w-16 shrink-0 font-bold text-slate-400">
+        {WEEKDAY_FULL_TH[day.weekday]}
+      </span>
+      <span className="shrink-0 text-slate-300">·</span>
+      <span className="shrink-0 font-bold text-slate-400">{thaiDate(day.date)}</span>
+      <span className="ml-auto shrink-0 text-slate-300">วันพัก</span>
+    </div>
+  );
+}
+
 function DayCard({
   day,
+  isToday,
+  onStart,
   onDragStart,
   onDrop,
   dragging,
 }: {
   day: BlockDay;
+  isToday?: boolean;
+  /** Present on today only — starts the session straight from the calendar. */
+  onStart?: () => void;
   onDragStart: (itemId?: string) => void;
   onDrop: () => void;
   dragging: boolean;
 }) {
   const [over, setOver] = useState(false);
-  const empty = day.items.length === 0;
 
   return (
     <div
@@ -1016,71 +1205,103 @@ function DayCard({
         setOver(false);
         onDrop();
       }}
-      className={`rounded-2xl p-3 ring-1 transition ${
-        over ? "bg-sky-50 ring-sky-400" : empty ? "bg-slate-50 ring-slate-200" : "bg-white ring-slate-200"
+      className={`overflow-hidden rounded-2xl bg-white ring-1 transition ${
+        over
+          ? "ring-2 ring-sky-400"
+          : isToday
+            ? "ring-2 ring-[#004AAD]"
+            : "ring-slate-200"
       } ${dragging ? "opacity-50" : ""}`}
     >
+      {/* Header doubles as the drag handle for the whole day. */}
       <div
-        draggable={!empty}
+        draggable
         onDragStart={() => onDragStart(undefined)}
-        className={`mb-2 flex items-baseline justify-between gap-2 ${!empty ? "cursor-grab" : ""}`}
+        className={`flex cursor-grab items-center gap-2 px-3.5 py-2.5 ${
+          isToday ? "bg-[#004AAD] text-white" : "bg-slate-50"
+        }`}
       >
-        <p className="text-xs font-black text-slate-700">
-          {WEEKDAY_FULL_TH[day.weekday]} · {thaiDate(day.date)}
-        </p>
-        {!empty && <p className="text-[10px] font-bold text-slate-400">{day.totalMinutes} นาที</p>}
-      </div>
-
-      {/* Which block(s) today belongs to — the whole point of block-by-block. */}
-      {day.blocks.length > 0 && (
-        <p className="mb-1.5 truncate text-[10px] font-black uppercase tracking-wide text-[#004AAD]">
-          {day.blocks.map((b) => b.titleTh).join(" → ")}
-        </p>
-      )}
-
-      {empty ? (
-        <p className="py-3 text-center text-[11px] font-bold text-slate-300">วันพัก</p>
-      ) : (
-        <ul className="space-y-1">
-          {day.items.map((it: StudyItem) => (
-            <li
-              key={it.id}
-              draggable
-              onDragStart={(e) => {
-                e.stopPropagation();
-                onDragStart(it.id);
-              }}
-              className={`cursor-grab rounded-lg px-2.5 py-1.5 text-[11px] font-bold ${
-                it.kind === "video"
-                  ? "bg-amber-50 text-amber-800"
-                  : it.kind === "lesson"
-                    ? "bg-violet-50 text-violet-800"
-                    : it.kind === "review"
-                      ? "bg-slate-100 text-slate-500"
-                      : "bg-sky-50 text-sky-800"
+        <span className="min-w-0 flex-1">
+          <span
+            className={`block truncate text-[13px] font-black ${
+              isToday ? "text-white" : "text-slate-800"
+            }`}
+          >
+            {WEEKDAY_FULL_TH[day.weekday]} · {thaiDate(day.date)}
+            {isToday && (
+              <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-[9px] align-middle">
+                วันนี้
+              </span>
+            )}
+          </span>
+          {day.blocks.length > 0 && (
+            <span
+              className={`block truncate text-[10px] ${
+                isToday ? "text-white/70" : "text-slate-400"
               }`}
             >
-              <span className="flex items-center justify-between gap-2">
-                <span className="min-w-0 truncate">
-                  {it.kind === "video"
-                    ? "🎬"
-                    : it.kind === "lesson"
-                      ? "📘"
-                      : it.kind === "review"
-                        ? "🔁"
-                        : "🏋️"}{" "}
-                  {it.titleTh}
-                </span>
-                <span className="shrink-0 opacity-60">{it.minutes}′</span>
+              {day.blocks.map((b) => b.titleTh).join(" → ")}
+            </span>
+          )}
+        </span>
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
+            isToday ? "bg-white/20 text-white" : "bg-white text-slate-500 ring-1 ring-slate-200"
+          }`}
+        >
+          {day.totalMinutes} นาที
+        </span>
+        {onStart && (
+          <button
+            type="button"
+            aria-label="เริ่มเรียนวันนี้"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStart();
+            }}
+            onDragStart={(e) => e.preventDefault()}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-sm text-[#004AAD] shadow-sm transition hover:scale-105"
+          >
+            ▶
+          </button>
+        )}
+      </div>
+
+      <ul className="divide-y divide-slate-100">
+        {day.items.map((it: StudyItem) => (
+          <li
+            key={it.id}
+            draggable
+            onDragStart={(e) => {
+              e.stopPropagation();
+              onDragStart(it.id);
+            }}
+            className="flex cursor-grab items-center gap-2.5 px-3.5 py-2.5 transition hover:bg-slate-50"
+          >
+            {/* Fixed icon column keeps every row aligned regardless of title length. */}
+            <span
+              className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[13px] ${
+                it.kind === "video"
+                  ? "bg-amber-50"
+                  : it.kind === "lesson"
+                    ? "bg-violet-50"
+                    : "bg-sky-50"
+              }`}
+            >
+              {it.kind === "video" ? "🎬" : it.kind === "lesson" ? "📘" : "🏋️"}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[12px] font-bold text-slate-700">
+                {it.titleTh}
               </span>
-              {/* The gate: how the learner proves this one is done. */}
               {it.gateTh && (
-                <span className="mt-0.5 block text-[9px] font-bold opacity-70">{it.gateTh}</span>
+                <span className="block truncate text-[10px] text-slate-400">{it.gateTh}</span>
               )}
-            </li>
-          ))}
-        </ul>
-      )}
+            </span>
+            <span className="shrink-0 text-[10px] font-bold text-slate-400">{it.minutes}′</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -1136,6 +1357,61 @@ function Stat({ n, label }: { n: number; label: string }) {
     <div className="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-200">
       <p className="text-xl font-black text-slate-800">{n}</p>
       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</p>
+    </div>
+  );
+}
+
+/**
+ * The recommended order, summarised.
+ *
+ * A read-only list of all thirteen blocks was a wall of text that most learners
+ * will never act on, so only the first three show until asked.
+ */
+function GuidedOrder({
+  blocks,
+}: {
+  blocks: { key: string; titleTh: string; items: { minutes: number }[] }[];
+}) {
+  const [showAll, setShowAll] = useState(false);
+  const shown = showAll ? blocks : blocks.slice(0, 3);
+  const totalMinutes = blocks.reduce(
+    (s, b) => s + b.items.reduce((n, i) => n + i.minutes, 0),
+    0,
+  );
+
+  return (
+    <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+      <p className="text-[12px] font-bold text-slate-600">
+        เริ่มจากพื้นฐาน แล้วไล่ทีละทักษะ — รวม{" "}
+        <strong className="text-slate-800">{blocks.length} บท</strong> ·{" "}
+        <strong className="text-slate-800">{Math.round(totalMinutes / 60)} ชั่วโมง</strong>
+      </p>
+
+      <ol className="mt-2.5 space-y-1">
+        {shown.map((b, i) => (
+          <li key={b.key} className="flex items-center gap-2.5">
+            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-white text-[10px] font-black text-slate-500 ring-1 ring-slate-200">
+              {i + 1}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[12px] font-bold text-slate-700">
+              {b.titleTh}
+            </span>
+            <span className="shrink-0 text-[10px] text-slate-400">
+              {b.items.reduce((n, it) => n + it.minutes, 0)} นาที
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      {blocks.length > 3 && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className="mt-2.5 text-[11px] font-black text-[#004AAD]"
+        >
+          {showAll ? "ย่อรายการ" : `ดูทั้งหมด (อีก ${blocks.length - 3} บท)`}
+        </button>
+      )}
     </div>
   );
 }

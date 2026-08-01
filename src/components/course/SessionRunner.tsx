@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { InlineExercise } from "@/components/course/InlineExercise";
+import { canRunInline } from "@/lib/course-plan/exercise-content";
+
 import {
+  dayDoneCopy,
+  transitionCopy,
   fillBlankWarmup,
   RUNG_TH_SHORT,
   WARMUP_PROMPT_TH,
@@ -10,6 +15,7 @@ import {
 } from "@/lib/course-plan/curriculum";
 import {
   carryOverMinutes,
+  dedupeById,
   splitDayByTime,
   type CarryOver,
   type StudyItem,
@@ -62,10 +68,13 @@ export function SessionRunner({
     setWarmupTaken(taken);
     setPhase(hasBacklog ? "choose" : "running");
   }
-  const [queue, setQueue] = useState<StudyItem[]>(todaysItems);
+  const [queue, setQueue] = useState<StudyItem[]>(() => dedupeById(todaysItems));
   const [done, setDone] = useState<Set<string>>(new Set());
   const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
   const [overtime, setOvertime] = useState(false);
+  /** The item currently open as an inline exercise, if any. */
+  const [activeExercise, setActiveExercise] = useState<StudyItem | null>(null);
+  const [scores, setScores] = useState<Record<string, { correct: number; total: number }>>({});
   const startedRef = useRef(false);
 
   // Tick only while actually studying, so the choice screen does not burn time.
@@ -92,9 +101,9 @@ export function SessionRunner({
     if (which === "carry_over") {
       const backlog = carryOver.entries.map((e) => e.item);
       // Backlog first, then as much of today as still fits.
-      setQueue(splitDayByTime([...backlog, ...todaysItems], minutes).fits);
+      setQueue(splitDayByTime(dedupeById([...backlog, ...todaysItems]), minutes).fits);
     } else {
-      setQueue(todaysItems);
+      setQueue(dedupeById(todaysItems));
     }
     setPhase("running");
   }
@@ -119,6 +128,15 @@ export function SessionRunner({
   const ss = String(secondsLeft % 60).padStart(2, "0");
   const doneMinutes = queue.filter((i) => done.has(i.id)).reduce((s, i) => s + i.minutes, 0);
   const totalMinutes = queue.reduce((s, i) => s + i.minutes, 0);
+  const percentDone = queue.length === 0 ? 0 : Math.round((done.size / queue.length) * 100);
+  // Videos and drills counted separately, so "I watched everything but did no
+  // exercises" is visible rather than hidden inside one number.
+  const videos = queue.filter((i) => i.kind === "video");
+  const drills = queue.filter((i) => i.kind !== "video");
+  const videoTotal = videos.length;
+  const videoDone = videos.filter((i) => done.has(i.id)).length;
+  const drillTotal = drills.length;
+  const drillDone = drills.filter((i) => done.has(i.id)).length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4">
@@ -232,8 +250,26 @@ export function SessionRunner({
           </div>
         )}
 
+        {/* ---------------- an exercise, running in place ---------------- */}
+        {activeExercise && (
+          <div className="p-6">
+            <InlineExercise
+              exerciseKey={activeExercise.exerciseKey ?? ""}
+              taskType={activeExercise.taskType}
+              titleTh={activeExercise.titleTh}
+              gateTh={activeExercise.gateTh}
+              onCancel={() => setActiveExercise(null)}
+              onDone={(correct, total) => {
+                setScores((s) => ({ ...s, [activeExercise.id]: { correct, total } }));
+                setDone((prev) => new Set(prev).add(activeExercise.id));
+                setActiveExercise(null);
+              }}
+            />
+          </div>
+        )}
+
         {/* ---------------- the session ---------------- */}
-        {(phase === "running" || phase === "timeup") && (
+        {!activeExercise && (phase === "running" || phase === "timeup") && (
           <div className="p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -257,24 +293,79 @@ export function SessionRunner({
               </button>
             </div>
 
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+            {/* Percent by ITEMS, not minutes — the bar and the label used to
+                disagree, one counting time and the other things done. */}
+            <div className="mt-3 flex items-end justify-between gap-2">
+              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+                ความคืบหน้าวันนี้
+              </p>
+              <p className="text-2xl font-black leading-none text-emerald-600">
+                {percentDone}
+                <span className="text-sm">%</span>
+              </p>
+            </div>
+            <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full bg-emerald-500 transition-[width] duration-500"
-                style={{ width: `${totalMinutes ? (doneMinutes / totalMinutes) * 100 : 0}%` }}
+                style={{ width: `${percentDone}%` }}
               />
             </div>
-            <p className="mt-1 text-[11px] font-bold text-slate-400">
-              เสร็จแล้ว {done.size} / {queue.length} รายการ
+            <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-bold text-slate-400">
+              <span>
+                เสร็จแล้ว {done.size} / {queue.length} รายการ
+              </span>
+              {videoTotal > 0 && (
+                <span>
+                  🎬 คลิป {videoDone}/{videoTotal}
+                </span>
+              )}
+              {drillTotal > 0 && (
+                <span>
+                  🏋️ แบบฝึก {drillDone}/{drillTotal}
+                </span>
+              )}
+              <span>
+                {doneMinutes}/{totalMinutes} นาที
+              </span>
             </p>
 
-            <ul className="mt-4 space-y-1.5">
+            {(() => {
+              const nextItem = queue.find((i) => !done.has(i.id));
+              const lastDone = [...queue].reverse().find((i) => done.has(i.id));
+              const copy = transitionCopy(
+                lastDone ? (lastDone.kind === "review" ? "exercise" : lastDone.kind) : null,
+                nextItem ? (nextItem.kind === "review" ? "exercise" : nextItem.kind) : null,
+              );
+              if (!copy) return null;
+              return (
+                <div className="mt-4 rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200">
+                  <p className="text-[13px] font-black text-slate-800">{copy.titleTh}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500">{copy.bodyTh}</p>
+                </div>
+              );
+            })()}
+
+            <ul className="mt-3 space-y-1.5">
               {queue.map((it) => {
                 const isDone = done.has(it.id);
                 return (
                   <li key={it.id}>
                     <button
                       type="button"
-                      onClick={() => toggle(it.id)}
+                      onClick={() => {
+                        // Runnable exercises open here rather than sending the
+                        // learner off to a separate practice page.
+                        if (
+                          !isDone &&
+                          it.kind !== "video" &&
+                          it.exerciseKey &&
+                          canRunInline(it.exerciseKey, it.taskType)
+                        ) {
+                          setActiveExercise(it);
+                          return;
+                        }
+                        toggle(it.id);
+                      }}
                       className={`flex w-full items-center gap-3 rounded-xl p-3 text-left ring-1 transition ${
                         isDone
                           ? "bg-emerald-50 text-emerald-900 ring-emerald-200"
@@ -293,8 +384,17 @@ export function SessionRunner({
                           {it.kind === "video" ? "🎬" : it.kind === "lesson" ? "📘" : "🏋️"}{" "}
                           {it.titleTh}
                         </span>
-                        {it.gateTh && (
-                          <span className="mt-0.5 block text-[10px] text-slate-500">{it.gateTh}</span>
+                        {scores[it.id] ? (
+                          <span className="mt-0.5 block text-[10px] font-black text-emerald-600">
+                            ได้ {scores[it.id].correct}/{scores[it.id].total} ·{" "}
+                            {Math.round((scores[it.id].correct / scores[it.id].total) * 100)}%
+                          </span>
+                        ) : (
+                          it.gateTh && (
+                            <span className="mt-0.5 block text-[10px] text-slate-500">
+                              {it.gateTh}
+                            </span>
+                          )
                         )}
                       </span>
                       <span className="shrink-0 text-[11px] font-bold text-slate-400">
@@ -349,9 +449,13 @@ export function SessionRunner({
         {phase === "done" && (
           <div className="p-6 text-center">
             <p className="text-5xl">🎉</p>
-            <h2 className="mt-3 text-2xl font-black text-slate-900">เก่งมาก!</h2>
+            <h2 className="mt-3 text-2xl font-black text-slate-900">
+              {dayDoneCopy(percentDone).titleTh}
+            </h2>
+            <p className="mt-1 text-[12px] text-slate-500">{dayDoneCopy(percentDone).bodyTh}</p>
             <p className="mt-1 text-sm text-slate-600">
-              วันนี้ทำไป {done.size} รายการ · {doneMinutes} นาที
+              วันนี้ทำได้ <strong className="text-emerald-600">{percentDone}%</strong> ·{" "}
+              {done.size}/{queue.length} รายการ · {doneMinutes} นาที
               {warmupTaken ? " · อุ่นเครื่องเติมคำ 2 ข้อ" : ""}
             </p>
             {queue.length - done.size > 0 && (

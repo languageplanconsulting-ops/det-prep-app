@@ -17,7 +17,15 @@ import {
   EMPTY_CARRY_OVER,
   itemsForChoice,
   moveBlockDay,
+  applyCustomisation,
+  dedupeById,
   applyOverrides,
+  blocksInStream,
+  EMPTY_CUSTOMISATION,
+  EMPTY_PROGRESS,
+  completionOf,
+  markCompleted,
+  moveInOrder,
   pourIntoDays,
   projectBoth,
   projectFinish,
@@ -388,6 +396,164 @@ const scheduled = days.flatMap((d) => d.items);
   check("an empty stream yields no projection", projectFinish([], SETTINGS) === null);
   check("a practice-only plan has no video projection",
     projectBoth(stream.filter((i) => i.kind !== "video"), SETTINGS).videosOnly === null);
+}
+
+// ------------------------------------------------- arbitrary daily minutes
+{
+  const { clampMinutes, MIN_MINUTES_PER_DAY, MAX_MINUTES_PER_DAY } =
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("../src/lib/course-plan/planner") as typeof import("../src/lib/course-plan/planner");
+
+  check("clamp keeps a normal value", clampMinutes(65) === 65);
+  check("clamp rounds fractions", clampMinutes(72.4) === 72);
+  check("clamp raises below the floor", clampMinutes(1) === MIN_MINUTES_PER_DAY);
+  check("clamp caps above the ceiling", clampMinutes(10_000) === MAX_MINUTES_PER_DAY);
+  check("clamp survives NaN", Number.isFinite(clampMinutes(Number.NaN)));
+
+  // Odd budgets must schedule and stay inside their own limit.
+  for (const minutes of [7, 23, 65, 72, 92, 137]) {
+    const d = pourIntoDays([...stream], { ...SETTINGS, minutesPerDay: minutes });
+    const sched = d.flatMap((x) => x.items);
+    check(`${minutes} min/day schedules something`, sched.length > 0);
+    check(`${minutes} min/day never exceeds its own budget`,
+      d.every((x) => x.totalMinutes <= minutes || (x.items.length === 1 && x.items[0].minutes > minutes)),
+      d.filter((x) => x.totalMinutes > minutes && x.items.length > 1).map((x) => x.totalMinutes).join(","));
+    check(`${minutes} min/day never duplicates an item`,
+      new Set(sched.map((i) => i.id)).size === sched.length);
+  }
+
+  // More minutes must never finish later.
+  const a = projectFinish(stream, { ...SETTINGS, minutesPerDay: 65 });
+  const b = projectFinish(stream, { ...SETTINGS, minutesPerDay: 92 });
+  check("a bigger odd budget finishes no later", a !== null && b !== null && b.date <= a.date,
+    `${b?.date} vs ${a?.date}`);
+}
+
+// ------------------------------------------------ learner-authored programme
+{
+  const blocks = blocksInStream(stream).map((b) => b.key);
+
+  check("no customisation changes nothing",
+    JSON.stringify(applyCustomisation(stream, EMPTY_CUSTOMISATION)) === JSON.stringify(stream));
+
+  // Run the last block first.
+  const last = blocks[blocks.length - 1];
+  const reordered = applyCustomisation(stream, { ...EMPTY_CUSTOMISATION, mode: "custom" as const, blockOrder: [last] });
+  check("a chosen block runs first", reordered[0].blockKey === last, reordered[0]?.blockKey);
+  check("reordering keeps every item",
+    reordered.length === stream.length &&
+      new Set(reordered.map((i) => i.id)).size === stream.length);
+  check("unlisted blocks keep their curriculum order",
+    blocksInStream(reordered).slice(1).map((b) => b.key).join(",") ===
+      blocks.filter((k) => k !== last).join(","));
+
+  // Run only two blocks.
+  const keepTwo = blocks.slice(0, 2);
+  const only = applyCustomisation(stream, {
+    ...EMPTY_CUSTOMISATION,
+    mode: "custom" as const,
+    excludedBlocks: blocks.filter((k) => !keepTwo.includes(k)),
+  });
+  check("excluding blocks leaves only the chosen ones",
+    blocksInStream(only).map((b) => b.key).join(",") === keepTwo.join(","));
+  check("a two-block programme is shorter", only.length < stream.length);
+
+  // Excluding everything is survivable, not a crash.
+  check("excluding every block yields an empty programme",
+    applyCustomisation(stream, { ...EMPTY_CUSTOMISATION, mode: "custom" as const, excludedBlocks: blocks }).length === 0);
+  check("an empty programme pours into empty days",
+    pourIntoDays(applyCustomisation(stream, { ...EMPTY_CUSTOMISATION, mode: "custom" as const, excludedBlocks: blocks }), SETTINGS)
+      .every((d) => d.items.length === 0));
+
+  // Reorder inside one block.
+  const target = blocksInStream(stream).find((b) => b.items.length > 2)!;
+  const flipped = [...target.items.map((i) => i.id)].reverse();
+  const inner = applyCustomisation(stream, {
+    ...EMPTY_CUSTOMISATION,
+    mode: "custom" as const,
+    itemOrder: { [target.key]: flipped },
+  });
+  const innerItems = inner.filter((i) => i.blockKey === target.key).map((i) => i.id);
+  check("items inside a block follow the chosen order",
+    innerItems.join(",") === flipped.join(","), innerItems.slice(0, 3).join(","));
+  check("reordering inside a block does not move other blocks",
+    blocksInStream(inner).map((b) => b.key).join(",") === blocks.join(","));
+
+  // Combined: reorder blocks AND items, drop one.
+  const combo = applyCustomisation(stream, {
+    mode: "custom" as const,
+    blockOrder: [last, target.key],
+    excludedBlocks: [blocks[1]],
+    itemOrder: { [target.key]: flipped },
+  });
+  check("combined customisation applies all three", combo[0].blockKey === last);
+  check("combined customisation still drops the excluded block",
+    !combo.some((i) => i.blockKey === blocks[1]));
+  check("combined customisation is deterministic",
+    JSON.stringify(combo) ===
+      JSON.stringify(applyCustomisation(stream, {
+        mode: "custom" as const,
+        blockOrder: [last, target.key],
+        excludedBlocks: [blocks[1]],
+        itemOrder: { [target.key]: flipped },
+      })));
+
+  // A customised programme must still teach before it drills.
+  const poured = pourIntoDays([...combo], SETTINGS).flatMap((d) => d.items);
+  check("customised programme still schedules everything it kept",
+    poured.length === combo.length, `${poured.length}/${combo.length}`);
+
+  // moveInOrder edges
+  check("move up swaps", moveInOrder(["a", "b", "c"], "b", -1).join(",") === "b,a,c");
+  check("move down swaps", moveInOrder(["a", "b", "c"], "b", 1).join(",") === "a,c,b");
+  check("move past the top is a no-op", moveInOrder(["a", "b"], "a", -1).join(",") === "a,b");
+  check("move past the bottom is a no-op", moveInOrder(["a", "b"], "b", 1).join(",") === "a,b");
+  check("moving an unknown key is a no-op", moveInOrder(["a", "b"], "z", 1).join(",") === "a,b");
+}
+
+// -------------------------------------------------------------- completion
+{
+  // The bug this replaces: completion was inferred from the plan fitting the
+  // calendar, so a brand-new learner was congratulated on day one.
+  check("a fresh plan is NOT complete", !completionOf(stream, EMPTY_PROGRESS).isComplete);
+  check("a fresh plan reports zero done", completionOf(stream, EMPTY_PROGRESS).done === 0);
+  check("a fresh plan reports 0%", completionOf(stream, EMPTY_PROGRESS).percent === 0);
+
+  const half = markCompleted(EMPTY_PROGRESS, stream.slice(0, Math.floor(stream.length / 2)).map((i) => i.id));
+  const mid = completionOf(stream, half);
+  check("half done is not complete", !mid.isComplete);
+  check("half done reports roughly 50%", mid.percent >= 45 && mid.percent <= 55, `${mid.percent}%`);
+
+  const all = markCompleted(EMPTY_PROGRESS, stream.map((i) => i.id));
+  check("finishing everything completes", completionOf(stream, all).isComplete);
+  check("finishing everything reports 100%", completionOf(stream, all).percent === 100);
+
+  check("marking the same item twice does not double-count",
+    markCompleted(markCompleted(EMPTY_PROGRESS, ["a"]), ["a"]).completedIds.length === 1);
+  check("an empty programme is never 'complete'",
+    !completionOf([], EMPTY_PROGRESS).isComplete);
+
+  // Completing items from a DIFFERENT arrangement must not falsely complete this one.
+  check("unrelated completed ids do not count",
+    completionOf(stream, markCompleted(EMPTY_PROGRESS, ["not-a-real-id"])).done === 0);
+}
+
+// ------------------------------------------------------------------ dedupe
+{
+  const a = scheduled[0];
+  check("dedupe removes a repeat", dedupeById([a, a]).length === 1);
+  check("dedupe keeps order", dedupeById([scheduled[1], a, scheduled[1]]).map((i) => i.id).join(",") ===
+    `${scheduled[1].id},${a.id}`);
+  check("dedupe leaves distinct items alone", dedupeById(scheduled.slice(0, 4)).length === 4);
+  check("dedupe handles empty", dedupeById([]).length === 0);
+
+  // The bug: the plan now schedules only outstanding work, so a backlog item is
+  // also in today's plan. Concatenating them double-counted it.
+  const carry = addToCarryOver(EMPTY_CARRY_OVER, "2026-08-03", [a]);
+  const picked = itemsForChoice("carry_over", carry, [a, scheduled[1]], 9999);
+  check("carry-over never duplicates today's items",
+    new Set(picked.map((i) => i.id)).size === picked.length, picked.map((i) => i.id).join(","));
+  check("carry-over still includes both distinct items", picked.length === 2);
 }
 
 console.log("");

@@ -106,7 +106,13 @@ export function MainNav() {
             { href: "/login", label: "Sign in", kind: "plain" as const },
             { href: "/signup", label: "Create account", kind: "underline" as const },
           ]),
-      ...(showAdminLinks ? [{ href: "/admin", label: "Admin", kind: "dark" as const }] : []),
+      // Course home is admin-only until launch, same gate as the Admin link.
+      ...(showAdminLinks
+        ? [
+            { href: "/course", label: "คอร์ส", kind: "primary" as const },
+            { href: "/admin", label: "Admin", kind: "dark" as const },
+          ]
+        : []),
     ];
     return (
       <nav
@@ -180,12 +186,20 @@ export function MainNav() {
             </Link>
           ))}
           {showAdminLinks ? (
-            <Link
-              href="/admin"
-              className="ep-interactive rounded-sm border-2 border-black bg-neutral-900 px-2 py-1 text-sm font-semibold text-white hover:bg-neutral-800"
-            >
-              Admin
-            </Link>
+            <>
+              <Link
+                href="/course"
+                className="ep-interactive rounded-sm border-2 border-black bg-[#004AAD] px-2 py-1 text-sm font-semibold text-white hover:bg-[#003a87]"
+              >
+                คอร์ส
+              </Link>
+              <Link
+                href="/admin"
+                className="ep-interactive rounded-sm border-2 border-black bg-neutral-900 px-2 py-1 text-sm font-semibold text-white hover:bg-neutral-800"
+              >
+                Admin
+              </Link>
+            </>
           ) : null}
           {pathname.startsWith("/admin") ? null : <LogoutButton />}
         </div>
@@ -210,12 +224,20 @@ export function MainNav() {
             </Link>
           ))}
           {showAdminLinks ? (
-            <Link
-              href="/admin"
-              className="ep-interactive block w-full rounded-sm border-2 border-black bg-neutral-900 px-3 py-2 text-center text-sm font-semibold text-white"
-            >
-              Admin
-            </Link>
+            <>
+              <Link
+                href="/course"
+                className="ep-interactive block w-full rounded-sm border-2 border-black bg-[#004AAD] px-3 py-2 text-center text-sm font-semibold text-white"
+              >
+                คอร์ส
+              </Link>
+              <Link
+                href="/admin"
+                className="ep-interactive block w-full rounded-sm border-2 border-black bg-neutral-900 px-3 py-2 text-center text-sm font-semibold text-white"
+              >
+                Admin
+              </Link>
+            </>
           ) : null}
           {pathname.startsWith("/admin") ? null : <div className="pt-1">{<LogoutButton />}</div>}
         </div>

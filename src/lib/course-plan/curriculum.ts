@@ -766,3 +766,61 @@ export const RUNG_TH_SHORT: Record<RungLevel, string> = {
   medium: "กลาง",
   hard: "ยาก",
 };
+
+// ---------------------------------------------------------------------------
+// Session copy
+// ---------------------------------------------------------------------------
+
+/**
+ * What to say between one step and the next.
+ *
+ * A checklist alone gives no sense of why the next thing follows the last —
+ * the point of "watched the lesson → now prove you understood it" is lost if
+ * both are just rows with a tick box.
+ */
+export function transitionCopy(
+  from: "video" | "lesson" | "exercise" | null,
+  to: "video" | "lesson" | "exercise" | null,
+): { titleTh: string; bodyTh: string } | null {
+  if (!to) {
+    return {
+      titleTh: "จบของวันนี้แล้ว 🎉",
+      bodyTh: "พรุ่งนี้เจอกันใหม่ — ความสม่ำเสมอสำคัญกว่าการหักโหมวันเดียว",
+    };
+  }
+  if (from === null) {
+    return to === "video"
+      ? { titleTh: "เริ่มกันเลย", bodyTh: "ดูคลิปแรกก่อน แล้วค่อยลงมือทำ" }
+      : { titleTh: "เริ่มกันเลย", bodyTh: "วันนี้เน้นลงมือทำ — ค่อย ๆ ทีละข้อ" };
+  }
+  if ((from === "video" || from === "lesson") && to === "exercise") {
+    return {
+      titleTh: "ดูจบแล้ว มาลองทำดู 💪",
+      bodyTh: "ต่อไปเป็นแบบฝึกวัดว่าเข้าใจสิ่งที่เพิ่งเรียนไปจริงไหม",
+    };
+  }
+  if (from === "exercise" && to === "exercise") {
+    return { titleTh: "ดีมาก ไปต่อ ✨", bodyTh: "อีกชุดหนึ่ง — ทำต่อเนื่องแบบนี้แหละดีแล้ว" };
+  }
+  if (from === "exercise" && (to === "video" || to === "lesson")) {
+    return {
+      titleTh: "พักสมองด้วยคลิปต่อ 🎬",
+      bodyTh: "ทำแบบฝึกมาเยอะแล้ว มาดูเทคนิคใหม่กันบ้าง",
+    };
+  }
+  return { titleTh: "ไปต่อกันเลย", bodyTh: "ยังเหลืออีกนิดเดียว" };
+}
+
+/** Shown when a day is finished, keyed loosely on how much got done. */
+export function dayDoneCopy(percent: number): { titleTh: string; bodyTh: string } {
+  if (percent >= 100) {
+    return { titleTh: "ครบทุกข้อเลย! 🎉", bodyTh: "วันนี้ทำได้ตามแผนเป๊ะ ๆ เก่งมาก" };
+  }
+  if (percent >= 60) {
+    return { titleTh: "เก่งมาก 👏", bodyTh: "ทำได้เกินครึ่งแล้ว ที่เหลือยกไปวันหน้าได้" };
+  }
+  if (percent > 0) {
+    return { titleTh: "เริ่มได้แล้วก็ดีแล้ว 🙂", bodyTh: "ทำได้เท่าที่ไหว ที่เหลือเก็บไว้ครั้งหน้า" };
+  }
+  return { titleTh: "ไว้ค่อยเจอกันใหม่", bodyTh: "วันนี้ยังไม่ได้เริ่ม — พรุ่งนี้ลองใหม่ได้เสมอ" };
+}

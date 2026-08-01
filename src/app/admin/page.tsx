@@ -24,6 +24,27 @@ export default function AdminPage() {
         </p>
         <p className="mt-4 flex flex-wrap gap-2 text-sm">
           <Link
+            href="/course"
+            className="inline-flex items-center rounded-[4px] border-4 border-black bg-[#004AAD] px-4 py-2 font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            🎓 หน้าคอร์สนักเรียน →
+          </Link>
+          <Link
+            href="/admin/course"
+            className="inline-flex items-center rounded-[4px] border-4 border-black bg-emerald-100 px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            Course / คอร์สเรียน →
+          </Link>
+          <Link
+            href="/admin/course/production"
+            className="inline-flex items-center rounded-[4px] border-4 border-black bg-amber-300 px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            🎬 Video plan / แผนถ่ายวิดีโอ →
+          </Link>
+          <Link
             href="/admin/subscriptions"
             className="inline-flex items-center rounded-[4px] border-4 border-black bg-white px-4 py-2 font-black uppercase tracking-wide text-[#004AAD] shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
             style={{ fontFamily: "var(--font-jetbrains), monospace" }}

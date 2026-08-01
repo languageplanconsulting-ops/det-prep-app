@@ -12,7 +12,12 @@ import type { RungLevel, RungStep } from "@/lib/course-plan/rungs";
 export type PlanSettings = {
   /** ISO "YYYY-MM-DD" the plan starts from. */
   startDate: string;
-  minutesPerDay: 15 | 20 | 30 | 45 | 60;
+  /**
+   * Any whole number of minutes — 65, 72, 92 are all valid. Clamped by
+   * clampMinutes() rather than restricted to presets, because a learner's real
+   * available time rarely lands on a round number.
+   */
+  minutesPerDay: number;
   /** Weekday numbers to study on. 0 = Sunday … 6 = Saturday. */
   studyDays: number[];
   /** How many weeks the plan runs. */
@@ -40,7 +45,17 @@ export const WEEKDAY_FULL_TH = [
   "เสาร์",
 ];
 
-export const MINUTE_OPTIONS: PlanSettings["minutesPerDay"][] = [15, 20, 30, 45, 60];
+/** Quick-tap presets. Not a restriction — any value in range is accepted. */
+export const MINUTE_OPTIONS: number[] = [15, 20, 30, 45, 60, 90];
+
+/** Below this a session cannot hold a single item; above it is a full day. */
+export const MIN_MINUTES_PER_DAY = 5;
+export const MAX_MINUTES_PER_DAY = 480;
+
+export function clampMinutes(n: number): number {
+  if (!Number.isFinite(n)) return DEFAULT_PLAN_SETTINGS.minutesPerDay;
+  return Math.max(MIN_MINUTES_PER_DAY, Math.min(MAX_MINUTES_PER_DAY, Math.round(n)));
+}
 
 /**
  * A video the planner can schedule.

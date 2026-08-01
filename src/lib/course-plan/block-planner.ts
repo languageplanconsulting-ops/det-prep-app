@@ -34,6 +34,8 @@ export type StudyItem = {
   lessonId?: string | null;
   /** How the learner proves they are done. Exercises only. */
   gateTh?: string;
+  /** Curriculum exercise key, so the session can look up its fixed questions. */
+  exerciseKey?: string;
   /** Spread hint from the curriculum: keep at least this many days apart. */
   spreadDays?: number;
 };
@@ -133,6 +135,7 @@ export function buildItemStream(
         blockOrder: block.order,
         taskType: ex.taskType,
         gateTh: gateLabel(ex.gate),
+        exerciseKey: ex.key,
         spreadDays: ex.spreadDays,
       });
     }
@@ -342,10 +345,18 @@ export function itemsForChoice(
 ): StudyItem[] {
   if (choice === "carry_over" && carry.entries.length > 0) {
     const queued = carry.entries.map((e) => e.item);
-    const { fits } = splitDayByTime([...queued, ...todaysItems], minutes);
-    return fits;
+    // The plan now schedules only what is still outstanding, so a backlog item
+    // can also appear in today's plan. Without deduping it would be counted
+    // twice — the session showed "3/5 done" alongside "50/50 minutes".
+    return splitDayByTime(dedupeById([...queued, ...todaysItems]), minutes).fits;
   }
-  return splitDayByTime(todaysItems, minutes).fits;
+  return splitDayByTime(dedupeById(todaysItems), minutes).fits;
+}
+
+/** First occurrence wins, order preserved. */
+export function dedupeById(items: StudyItem[]): StudyItem[] {
+  const seen = new Set<string>();
+  return items.filter((i) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
 }
 
 export const CARRY_OVER_STORAGE_KEY = "ep-course-carryover-v1";
@@ -528,3 +539,168 @@ export function projectBoth(
     ),
   };
 }
+
+// ---------------------------------------------------------------------------
+// Learner-authored programme
+// ---------------------------------------------------------------------------
+
+/**
+ * The learner's own arrangement of the curriculum.
+ *
+ * Everything is optional and additive: an empty customisation means "use the
+ * track exactly as authored". That keeps the default path intact for the many
+ * learners who will never touch this, while letting anyone who wants to run
+ * Production first, skip blocks entirely, or reorder inside a block do so.
+ */
+export type Customisation = {
+  /**
+   * "guided" runs English Plan's own recommended order — the arrangement below
+   * is kept but ignored, so switching back and forth never loses their work.
+   * "custom" applies it.
+   */
+  mode: "guided" | "custom";
+  /** Block keys in the learner's order. Unlisted blocks follow, in track order. */
+  blockOrder: string[];
+  /** Block keys the learner has switched off. */
+  excludedBlocks: string[];
+  /** Per block key: item ids in the learner's order. Unlisted items follow. */
+  itemOrder: Record<string, string[]>;
+};
+
+export const EMPTY_CUSTOMISATION: Customisation = {
+  mode: "guided",
+  blockOrder: [],
+  excludedBlocks: [],
+  itemOrder: {},
+};
+
+/** Rank by position in `order`; anything unlisted sorts after, keeping its own order. */
+function rankIn(order: string[], key: string): number {
+  const i = order.indexOf(key);
+  return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+}
+
+/**
+ * Apply a customisation to an already-built stream.
+ *
+ * Runs after buildItemStream rather than inside it, so the personalisation
+ * rules (rung path, block-by-block ordering) stay in one place and this only
+ * ever rearranges or removes what those produced.
+ */
+export function applyCustomisation(
+  stream: StudyItem[],
+  custom: Customisation = EMPTY_CUSTOMISATION,
+): StudyItem[] {
+  // Guided is the default: English Plan's own order, untouched.
+  if (custom.mode !== "custom") return stream;
+
+  const excluded = new Set(custom.excludedBlocks);
+  const kept = stream.filter((i) => !excluded.has(i.blockKey));
+
+  // Group by block so within-block ordering is independent of block ordering.
+  const byBlock = new Map<string, StudyItem[]>();
+  for (const item of kept) {
+    const list = byBlock.get(item.blockKey) ?? [];
+    list.push(item);
+    byBlock.set(item.blockKey, list);
+  }
+
+  const blockKeys = [...byBlock.keys()].sort((a, b) => {
+    const ra = rankIn(custom.blockOrder, a);
+    const rb = rankIn(custom.blockOrder, b);
+    if (ra !== rb) return ra - rb;
+    // Unlisted blocks fall back to the curriculum's own order.
+    const oa = byBlock.get(a)![0]?.blockOrder ?? 0;
+    const ob = byBlock.get(b)![0]?.blockOrder ?? 0;
+    return oa - ob;
+  });
+
+  const out: StudyItem[] = [];
+  for (const key of blockKeys) {
+    const items = byBlock.get(key)!;
+    const order = custom.itemOrder[key];
+    if (!order || order.length === 0) {
+      out.push(...items);
+      continue;
+    }
+    // Stable: listed items in the learner's order, then the rest untouched.
+    const indexed = items.map((item, i) => ({ item, i }));
+    indexed.sort((a, b) => {
+      const ra = rankIn(order, a.item.id);
+      const rb = rankIn(order, b.item.id);
+      return ra !== rb ? ra - rb : a.i - b.i;
+    });
+    out.push(...indexed.map((x) => x.item));
+  }
+  return out;
+}
+
+/** Blocks present in a stream, in their current order — what the UI lists. */
+export function blocksInStream(
+  stream: StudyItem[],
+): { key: string; titleTh: string; items: StudyItem[] }[] {
+  const seen = new Map<string, { key: string; titleTh: string; items: StudyItem[] }>();
+  for (const item of stream) {
+    const hit = seen.get(item.blockKey);
+    if (hit) hit.items.push(item);
+    else seen.set(item.blockKey, { key: item.blockKey, titleTh: item.blockTitleTh, items: [item] });
+  }
+  return [...seen.values()];
+}
+
+/** Move a key one place up or down in an explicit order list. */
+export function moveInOrder(order: string[], key: string, delta: -1 | 1): string[] {
+  const list = [...order];
+  const i = list.indexOf(key);
+  if (i === -1) return list;
+  const j = i + delta;
+  if (j < 0 || j >= list.length) return list;
+  [list[i], list[j]] = [list[j], list[i]];
+  return list;
+}
+
+export const CUSTOMISATION_STORAGE_KEY = "ep-course-customisation-v1";
+
+
+// ---------------------------------------------------------------------------
+// Completion
+// ---------------------------------------------------------------------------
+
+/** Item ids the learner has actually finished, newest last. */
+export type Progress = { completedIds: string[] };
+
+export const EMPTY_PROGRESS: Progress = { completedIds: [] };
+
+export function markCompleted(progress: Progress, ids: string[]): Progress {
+  const seen = new Set(progress.completedIds);
+  return { completedIds: [...progress.completedIds, ...ids.filter((id) => !seen.has(id))] };
+}
+
+export type CompletionState = {
+  total: number;
+  done: number;
+  percent: number;
+  /** True only when every scheduled item has actually been finished. */
+  isComplete: boolean;
+};
+
+/**
+ * How far through the programme the learner really is.
+ *
+ * Deliberately based on finished items, NOT on whether the plan fits the
+ * calendar — an earlier version checked schedulability and so congratulated
+ * everyone on day one.
+ */
+export function completionOf(stream: StudyItem[], progress: Progress): CompletionState {
+  const done = new Set(progress.completedIds);
+  const total = stream.length;
+  const finished = stream.filter((i) => done.has(i.id)).length;
+  return {
+    total,
+    done: finished,
+    percent: total === 0 ? 0 : Math.round((finished / total) * 100),
+    isComplete: total > 0 && finished >= total,
+  };
+}
+
+export const PROGRESS_STORAGE_KEY = "ep-course-progress-v1";
