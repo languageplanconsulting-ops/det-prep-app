@@ -26,7 +26,7 @@ const TONE: Record<string, { bg: string; text: string; ring: string; solid: stri
 };
 
 const KIND_META: Record<JourneyDay["kind"], { emoji: string; th: string; cls: string }> = {
-  video: { emoji: "🎬", th: "เรียนคลิปใหม่", cls: "bg-amber-100 text-amber-800 ring-amber-200" },
+  video: { emoji: "🎬", th: "เรียนเลกเชอร์ใหม่", cls: "bg-amber-100 text-amber-800 ring-amber-200" },
   drill: { emoji: "🏋️", th: "ฝึกโจทย์", cls: "bg-sky-100 text-sky-800 ring-sky-200" },
   mock: { emoji: "📝", th: "สอบจำลอง", cls: "bg-rose-100 text-rose-800 ring-rose-200" },
   rest: { emoji: "😴", th: "วันพัก", cls: "bg-slate-100 text-slate-500 ring-slate-200" },
@@ -123,7 +123,7 @@ export function JourneyPreviewClient({ startDate }: { startDate: string }) {
 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
           <Stat n={journey.totals.days} label="วันทั้งหมด" />
-          <Stat n={journey.totals.videoDays} label="วันเรียนคลิป" />
+          <Stat n={journey.totals.videoDays} label="วันเรียนเลกเชอร์" />
           <Stat n={journey.totals.mockDays} label="วันสอบจำลอง" />
           <Stat n={Math.round(journey.totals.totalMinutes / 60)} label="ชั่วโมงรวม" />
           <Stat n={journey.totals.totalExercises} label="ข้อฝึกรวม" />
@@ -408,7 +408,7 @@ export function JourneyPreviewClient({ startDate }: { startDate: string }) {
           {week.video && (
             <div className="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200">
               <p className="text-[11px] font-black uppercase tracking-widest text-amber-500">
-                คลิปของสัปดาห์นี้
+                เลกเชอร์ของสัปดาห์นี้
               </p>
               <p className="mt-0.5 text-base font-black text-amber-900">🎬 {week.video.titleTh}</p>
               <p className="text-xs text-amber-700">

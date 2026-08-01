@@ -17,6 +17,7 @@ import {
   type CurriculumBlock,
 } from "@/lib/course-plan/curriculum";
 import type { TeachableVideo } from "@/lib/course-plan/planner";
+import type { RungStep } from "@/lib/course-plan/rungs";
 
 export type StudyItemKind = "video" | "lesson" | "exercise" | "review";
 
@@ -69,14 +70,43 @@ function weekdayOf(iso: string): number {
 export function buildItemStream(
   courseVideos: TeachableVideo[],
   blocks: CurriculumBlock[] = EASY_TRACK,
+  /**
+   * The learner's rung path (rungs.ts). Rungs it does not mention are ones they
+   * have already cleared, so those videos and exercises are left OUT of the
+   * schedule — a student at dictation 125 should not be walked through easy
+   * dictation again. Everything stays openable in the library; only the
+   * schedule is personal.
+   *
+   * Empty (no assessment yet) means teach the whole track, which is the right
+   * default for someone with no scores.
+   */
+  rungPath: RungStep[] = [],
 ): StudyItem[] {
   const stream: StudyItem[] = [];
   const used = new Set<string>();
+  const personalised = rungPath.length > 0;
+  const needed = new Set(rungPath.map((s) => `${s.taskType}:${s.level}`));
 
   for (const block of [...blocks].sort((a, b) => a.order - b.order)) {
-    const videos = courseVideos.filter(
-      (v) => v.taskType && v.taskType === block.taskType && !used.has(v.key),
-    );
+    // A block whose rung the learner has already cleared is skipped entirely.
+    const blockNeeded =
+      !personalised || !block.taskType || needed.has(`${block.taskType}:${block.level}`);
+
+    const videos = courseVideos.filter((v) => {
+      if (used.has(v.key)) return false;
+      // Title match wins where it is set — chapter task types are too coarse
+      // for orientation and grammar, which have no task type of their own.
+      const belongs = block.videoMatch
+        ? block.videoMatch.test(v.titleTh)
+        : Boolean(v.taskType) && v.taskType === block.taskType;
+      if (!belongs) return false;
+      // A video is kept if its own rung is on the path — a block can hold
+      // videos at several levels once the library is fully tagged.
+      if (personalised && v.taskType && !needed.has(`${v.taskType}:${v.level}`)) return false;
+      return true;
+    });
+
+    if (!blockNeeded && videos.length === 0) continue;
     for (const v of videos) {
       used.add(v.key);
       stream.push({
@@ -92,7 +122,7 @@ export function buildItemStream(
       });
     }
 
-    for (const ex of block.exercises) {
+    for (const ex of blockNeeded ? block.exercises : []) {
       stream.push({
         id: `e-${block.key}-${ex.key}`,
         kind: ex.isLesson ? "lesson" : "exercise",
@@ -109,8 +139,13 @@ export function buildItemStream(
   }
 
   // Anything the track does not cover (orientation, mock guides) goes last.
+  const trackTasks = new Set(blocks.map((b) => b.taskType).filter(Boolean));
   for (const v of courseVideos) {
     if (used.has(v.key)) continue;
+    // A video the curriculum DOES cover but the rung path excluded was skipped
+    // on purpose. Without this it would fall through and be smuggled back in
+    // as "extra", quietly undoing the personalisation.
+    if (personalised && v.taskType && trackTasks.has(v.taskType)) continue;
     stream.push({
       id: `v-extra-${v.key}`,
       kind: "video",
@@ -419,5 +454,77 @@ export function moveBlockItem(
     ...overrides,
     [fromDate]: from.items.filter((i) => i.id !== itemId),
     [toDate]: [...to.items, item],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Finish-date projection
+// ---------------------------------------------------------------------------
+
+export type FinishProjection = {
+  /** ISO date the last item lands on. */
+  date: string;
+  /** Study sessions required. */
+  studyDays: number;
+  /** Calendar days from the start, inclusive. */
+  calendarDays: number;
+  totalMinutes: number;
+};
+
+/**
+ * When a body of work actually finishes.
+ *
+ * Walks the calendar honouring the chosen weekdays rather than dividing by 7,
+ * so "Saturdays only" projects a real date instead of an optimistic one. Not
+ * capped by `weeks` — this answers "how long will this take?", which is exactly
+ * the question the plan length is supposed to be set FROM.
+ */
+export function projectFinish(
+  items: StudyItem[],
+  settings: Pick<PourSettings, "startDate" | "minutesPerDay" | "studyDays">,
+): FinishProjection | null {
+  const totalMinutes = items.reduce((s, i) => s + i.minutes, 0);
+  if (!settings.startDate || totalMinutes === 0 || settings.studyDays.length === 0) return null;
+
+  const perDay = Math.max(1, settings.minutesPerDay);
+  const studyDaysNeeded = Math.ceil(totalMinutes / perDay);
+
+  const start = toUtcDay(settings.startDate);
+  let seen = 0;
+  // Ten years is a safety stop; a real plan resolves in a few hundred days.
+  for (let offset = 0; offset < 3650; offset++) {
+    const date = fromUtcDay(start + offset);
+    if (settings.studyDays.includes(weekdayOf(date))) {
+      seen++;
+      if (seen >= studyDaysNeeded) {
+        return {
+          date,
+          studyDays: studyDaysNeeded,
+          calendarDays: offset + 1,
+          totalMinutes,
+        };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Two projections: the whole curriculum, and the videos on their own.
+ *
+ * The video-only figure answers "how long if I just watch the course?" — useful
+ * because the exercises roughly triple the calendar, and a learner deciding on
+ * a plan length deserves to see both numbers rather than only the long one.
+ */
+export function projectBoth(
+  stream: StudyItem[],
+  settings: Pick<PourSettings, "startDate" | "minutesPerDay" | "studyDays">,
+): { full: FinishProjection | null; videosOnly: FinishProjection | null } {
+  return {
+    full: projectFinish(stream, settings),
+    videosOnly: projectFinish(
+      stream.filter((i) => i.kind === "video"),
+      settings,
+    ),
   };
 }

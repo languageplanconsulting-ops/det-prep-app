@@ -3,13 +3,28 @@
 import { useEffect, useRef, useState } from "react";
 
 import {
+  fillBlankWarmup,
+  RUNG_TH_SHORT,
+  WARMUP_PROMPT_TH,
+  WARMUP_WHY_TH,
+} from "@/lib/course-plan/curriculum";
+import {
   carryOverMinutes,
   splitDayByTime,
   type CarryOver,
   type StudyItem,
 } from "@/lib/course-plan/block-planner";
 
-type Phase = "choose" | "running" | "timeup" | "done";
+type Phase = "warmup" | "choose" | "running" | "timeup" | "done";
+
+/** "1 ส.ค." — the day an unfinished item was originally scheduled for. */
+function thaiDay(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
 
 /**
  * One study session: a countdown over today's items, with the backlog offered
@@ -26,16 +41,27 @@ export function SessionRunner({
   minutes,
   onClose,
   onFinish,
+  track = "basic",
 }: {
   todaysItems: StudyItem[];
   carryOver: CarryOver;
   minutes: number;
+  /** Drives the warm-up difficulty mix. */
+  track?: "basic" | "medium" | "advanced";
   onClose: () => void;
   /** Items the learner did NOT finish — they become the new backlog. */
   onFinish: (unfinished: StudyItem[], completed: StudyItem[]) => void;
 }) {
   const hasBacklog = carryOver.entries.length > 0;
-  const [phase, setPhase] = useState<Phase>(hasBacklog ? "choose" : "running");
+  // The warm-up is offered before anything else, every lecture day.
+  const [phase, setPhase] = useState<Phase>("warmup");
+  const [warmupTaken, setWarmupTaken] = useState(false);
+  const warmup = fillBlankWarmup(track);
+
+  function afterWarmup(taken: boolean) {
+    setWarmupTaken(taken);
+    setPhase(hasBacklog ? "choose" : "running");
+  }
   const [queue, setQueue] = useState<StudyItem[]>(todaysItems);
   const [done, setDone] = useState<Set<string>>(new Set());
   const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
@@ -97,6 +123,48 @@ export function SessionRunner({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4">
       <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
+        {/* ---------------- fill-in-the-blank warm-up ---------------- */}
+        {phase === "warmup" && (
+          <div className="p-6">
+            <p className="text-[11px] font-black uppercase tracking-widest text-violet-600">
+              อุ่นเครื่องก่อนเรียน
+            </p>
+            <h2 className="mt-1 text-2xl font-black text-slate-900">{WARMUP_PROMPT_TH}</h2>
+            <p className="mt-1.5 text-sm text-slate-600">{WARMUP_WHY_TH}</p>
+
+            <ul className="mt-4 space-y-1.5">
+              {warmup.map((w, i) => (
+                <li
+                  key={i}
+                  className="flex items-center justify-between rounded-xl bg-violet-50 px-3 py-2.5 text-[13px] font-bold text-violet-900 ring-1 ring-violet-200"
+                >
+                  <span>✏️ เติมคำในช่องว่าง ข้อ {i + 1}</span>
+                  <span className="text-[11px] font-black opacity-70">
+                    ระดับ{RUNG_TH_SHORT[w.level]}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-4 space-y-2">
+              <button
+                type="button"
+                onClick={() => afterWarmup(true)}
+                className="w-full rounded-full bg-violet-600 py-3 text-sm font-black text-white"
+              >
+                เอาสิ ทำ 2 ข้อก่อน
+              </button>
+              <button
+                type="button"
+                onClick={() => afterWarmup(false)}
+                className="w-full rounded-full bg-slate-100 py-3 text-sm font-black text-slate-600"
+              >
+                ข้ามไปเรียนเลย
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ---------------- backlog choice ---------------- */}
         {phase === "choose" && (
           <div className="p-6">
@@ -114,10 +182,33 @@ export function SessionRunner({
                 onClick={() => choose("carry_over")}
                 className="w-full rounded-2xl bg-amber-50 p-4 text-left ring-1 ring-amber-200 transition hover:ring-amber-400"
               >
-                <p className="text-sm font-black text-amber-900">📌 ทำงานค้างก่อน</p>
+                <p className="text-sm font-black text-amber-900">📌 ทำแบบฝึกค้างก่อน</p>
                 <p className="mt-0.5 text-[11px] text-amber-700">
                   เคลียร์ของเก่าให้หมด แล้วค่อยต่อของวันนี้เท่าที่เวลาเหลือ
                 </p>
+
+                {/* The actual backlog, so the choice is informed rather than blind. */}
+                <ul className="mt-2.5 space-y-1 border-t border-amber-200 pt-2.5">
+                  {carryOver.entries.slice(0, 6).map((e) => (
+                    <li
+                      key={e.item.id}
+                      className="flex items-center justify-between gap-2 text-[11px] text-amber-900"
+                    >
+                      <span className="min-w-0 truncate">
+                        {e.item.kind === "video" ? "🎬" : e.item.kind === "lesson" ? "📘" : "🏋️"}{" "}
+                        {e.item.titleTh}
+                      </span>
+                      <span className="shrink-0 font-bold opacity-60">
+                        {thaiDay(e.fromDate)} · {e.item.minutes}′
+                      </span>
+                    </li>
+                  ))}
+                  {carryOver.entries.length > 6 && (
+                    <li className="text-[11px] font-bold text-amber-600">
+                      และอีก {carryOver.entries.length - 6} รายการ
+                    </li>
+                  )}
+                </ul>
               </button>
               <button
                 type="button"
@@ -261,6 +352,7 @@ export function SessionRunner({
             <h2 className="mt-3 text-2xl font-black text-slate-900">เก่งมาก!</h2>
             <p className="mt-1 text-sm text-slate-600">
               วันนี้ทำไป {done.size} รายการ · {doneMinutes} นาที
+              {warmupTaken ? " · อุ่นเครื่องเติมคำ 2 ข้อ" : ""}
             </p>
             {queue.length - done.size > 0 && (
               <p className="mt-3 rounded-xl bg-amber-50 p-3 text-[12px] text-amber-800 ring-1 ring-amber-200">

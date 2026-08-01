@@ -19,10 +19,13 @@ import {
   moveBlockDay,
   applyOverrides,
   pourIntoDays,
+  projectBoth,
+  projectFinish,
   splitDayByTime,
   type StudyItem,
 } from "../src/lib/course-plan/block-planner";
 import { EASY_TRACK } from "../src/lib/course-plan/curriculum";
+import { fullRungPlan, skillTargetsFor } from "../src/lib/course-plan/rungs";
 import type { TeachableVideo } from "../src/lib/course-plan/planner";
 
 let passed = 0;
@@ -248,6 +251,143 @@ const scheduled = days.flatMap((d) => d.items);
   const a = pourIntoDays([...stream], SETTINGS);
   const b = pourIntoDays([...stream], SETTINGS);
   check("pouring is deterministic", JSON.stringify(a) === JSON.stringify(b));
+}
+
+// ------------------------------------------------- personalisation by rung
+{
+  // Strong at dictation, weak at speaking → the dictation block must drop out
+  // of the SCHEDULE while speaking stays.
+  const path = fullRungPlan(
+    skillTargetsFor(
+      [
+        { taskType: "dictation", score160: 130 },
+        { taskType: "speak_about_photo", score160: 80 },
+      ],
+      120,
+    ),
+  );
+  const personal = buildItemStream(videos, EASY_TRACK, path);
+  const allTasks = new Set(personal.map((i) => i.taskType));
+
+  check("a cleared skill is dropped from the schedule",
+    !personal.some((i) => i.blockKey === "dictation"),
+    [...allTasks].join(","));
+  check("a weak skill stays in the schedule",
+    personal.some((i) => i.blockKey === "speak-photo"));
+  check("personalised stream is smaller than the full track",
+    personal.length < stream.length, `${personal.length} vs ${stream.length}`);
+
+  // Fairness property: stronger student, shorter schedule.
+  const weakPath = fullRungPlan(
+    skillTargetsFor([{ taskType: "dictation", score160: 80 }], 120),
+  );
+  const strongPath = fullRungPlan(
+    skillTargetsFor([{ taskType: "dictation", score160: 115 }], 120),
+  );
+  check("stronger learner gets fewer scheduled items",
+    buildItemStream(videos, EASY_TRACK, strongPath).length <
+      buildItemStream(videos, EASY_TRACK, weakPath).length);
+
+  check("no rung path means teach everything",
+    buildItemStream(videos, EASY_TRACK, []).length === stream.length);
+
+  // Untagged videos survive personalisation — nothing paid for disappears.
+  check("orientation videos are never dropped",
+    buildItemStream(videos, EASY_TRACK, path).some((i) => i.blockKey === "extra") ===
+      buildItemStream(videos, EASY_TRACK, []).some((i) => i.blockKey === "extra"));
+
+  // Block-by-block must still hold after filtering.
+  const poured = pourIntoDays([...personal], SETTINGS).flatMap((d) => d.items);
+  const firstVid = new Map<string, number>();
+  const firstDrill = new Map<string, number>();
+  poured.forEach((it, i) => {
+    if (it.kind === "video" && !firstVid.has(it.blockKey)) firstVid.set(it.blockKey, i);
+    if (it.kind !== "video" && !firstDrill.has(it.blockKey)) firstDrill.set(it.blockKey, i);
+  });
+  check("personalised plan still teaches before it drills",
+    [...firstDrill].every(([k, at]) => !firstVid.has(k) || firstVid.get(k)! < at));
+}
+
+// --------------------------------------------- real-course ordering sanity
+{
+  // Titles taken from the actual Thinkific export, so this guards the exact
+  // complaint: C-Test walkthroughs were being taught before the learner had
+  // seen what the exam even looks like.
+  const real: TeachableVideo[] = [
+    ["ภาพรวมข้อสอบ", null],
+    ["Update ข้อสอบปี 2026", null],
+    ["วิธีการใช้ APP เพื่อฝึกเพิ่มคะแนน", null],
+    ["ปูพื้นฐานแกรมม่าร์", "write_about_photo"],
+    ["เทคนิคการเขียนอธิบายคน + สถานที่", "write_about_photo"],
+    ["เทคนิคการพูดเกี่ยวกับรูปใน 1 นาที", "speak_about_photo"],
+    ["พื้นฐานการทำ C TEST", "fill_in_blanks"],
+    ["ตลุยโจทย์ (15 ข้อ)", "fill_in_blanks"],
+    ["เทคนิคการทำ Listen and Type", "dictation"],
+  ].map(([titleTh, taskType], i) => ({
+    key: `r${i}`,
+    titleTh: titleTh as string,
+    lessonId: `r${i}`,
+    status: "live" as const,
+    taskType: taskType as string | null,
+    level: "easy" as const,
+    minutes: 8,
+  }));
+
+  const st = buildItemStream(real);
+  const at = (t: string) => st.findIndex((i) => i.titleTh === t);
+
+  check("the exam overview is taught first", at("ภาพรวมข้อสอบ") === 0, `${at("ภาพรวมข้อสอบ")}`);
+  check("all three orientation clips come before any technique",
+    Math.max(at("ภาพรวมข้อสอบ"), at("Update ข้อสอบปี 2026"), at("วิธีการใช้ APP เพื่อฝึกเพิ่มคะแนน")) <
+      at("ปูพื้นฐานแกรมม่าร์"));
+  check("grammar is taught before writing technique",
+    at("ปูพื้นฐานแกรมม่าร์") < at("เทคนิคการเขียนอธิบายคน + สถานที่"));
+  check("C-Test is NOT at the start",
+    at("พื้นฐานการทำ C TEST") > at("เทคนิคการพูดเกี่ยวกับรูปใน 1 นาที"),
+    `c-test@${at("พื้นฐานการทำ C TEST")} speak@${at("เทคนิคการพูดเกี่ยวกับรูปใน 1 นาที")}`);
+  check("C-Test walkthroughs come after dictation",
+    at("ตลุยโจทย์ (15 ข้อ)") > at("เทคนิคการทำ Listen and Type"),
+    `drill@${at("ตลุยโจทย์ (15 ข้อ)")} dictation@${at("เทคนิคการทำ Listen and Type")}`);
+  check("every real video is scheduled somewhere", real.every((v) => at(v.titleTh) >= 0));
+}
+
+// -------------------------------------------------------- finish projection
+{
+  const p = projectFinish(stream, SETTINGS);
+  check("projection returns a date", p !== null);
+  check("finish date is on a chosen study weekday",
+    p !== null && SETTINGS.studyDays.includes(new Date(`${p.date}T00:00:00Z`).getUTCDay()),
+    p?.date);
+  check("finish date is on or after the start", p !== null && p.date >= SETTINGS.startDate);
+  check("study days match the minutes required",
+    p !== null && p.studyDays === Math.ceil(p.totalMinutes / SETTINGS.minutesPerDay));
+
+  // Fewer study days per week must push the date out, never pull it in.
+  const fri = projectFinish(stream, { ...SETTINGS, studyDays: [5] });
+  check("one day a week finishes later than five",
+    fri !== null && p !== null && fri.date > p.date, `${fri?.date} vs ${p?.date}`);
+  check("one day a week needs the same number of sessions",
+    fri !== null && p !== null && fri.studyDays === p.studyDays);
+
+  // More minutes a day must pull the date in.
+  const longer = projectFinish(stream, { ...SETTINGS, minutesPerDay: 60 });
+  check("longer sessions finish sooner", longer !== null && p !== null && longer.date <= p.date);
+
+  const both = projectBoth(stream, SETTINGS);
+  check("videos-only finishes before the whole curriculum",
+    both.videosOnly !== null && both.full !== null && both.videosOnly.date <= both.full.date,
+    `${both.videosOnly?.date} vs ${both.full?.date}`);
+  check("videos-only counts fewer minutes",
+    both.videosOnly !== null && both.full !== null &&
+      both.videosOnly.totalMinutes < both.full.totalMinutes);
+
+  check("no study days yields no projection",
+    projectFinish(stream, { ...SETTINGS, studyDays: [] }) === null);
+  check("no start date yields no projection",
+    projectFinish(stream, { ...SETTINGS, startDate: "" }) === null);
+  check("an empty stream yields no projection", projectFinish([], SETTINGS) === null);
+  check("a practice-only plan has no video projection",
+    projectBoth(stream.filter((i) => i.kind !== "video"), SETTINGS).videosOnly === null);
 }
 
 console.log("");

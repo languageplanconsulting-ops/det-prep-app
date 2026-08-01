@@ -24,6 +24,7 @@ import {
   WEEKDAY_TH,
   type PlanSettings,
 } from "@/lib/course-plan/planner";
+import { CourseCompletion } from "@/components/course/CourseCompletion";
 import { SessionRunner } from "@/components/course/SessionRunner";
 import type { StudentCourse } from "@/lib/course-student-data";
 import {
@@ -40,6 +41,7 @@ import {
   clearFromCarryOver,
   EMPTY_CARRY_OVER,
   pourIntoDays,
+  projectBoth,
   splitDayByTime,
   applyOverrides,
   blockFeasibility,
@@ -67,6 +69,15 @@ const SOURCE_TH: Record<TaskWeakness["source"], string> = {
   mini: "จาก Mini Diagnosis",
   attempts: "จากการฝึกล่าสุด",
 };
+
+function thaiFullDate(iso: string) {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
 
 function thaiDate(iso: string) {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString("th-TH", {
@@ -243,7 +254,10 @@ export function CoursePlanClient({
    * drill never appears before the lesson that teaches it, and anything that
    * does not fit simply leads the next day.
    */
-  const stream = useMemo(() => buildItemStream(courseVideos), [courseVideos]);
+  const stream = useMemo(
+    () => buildItemStream(courseVideos, undefined, rungSteps),
+    [courseVideos, rungSteps],
+  );
   const pourSettings = useMemo(
     () => ({
       startDate: settings.startDate,
@@ -260,6 +274,10 @@ export function CoursePlanClient({
     [stream, pourSettings, overrides],
   );
   const totals = useMemo(() => blockTotals(days), [days]);
+  const projection = useMemo(
+    () => projectBoth(stream, pourSettings),
+    [stream, pourSettings],
+  );
   const feasibility = useMemo(
     () => blockFeasibility(days, pourSettings, stream),
     [days, pourSettings, stream],
@@ -329,6 +347,14 @@ export function CoursePlanClient({
             )}
           </div>
         </header>
+
+        {/* ============ CORE COMPLETE ============ */}
+        {stream.length > 0 &&
+          feasibility.coversWholeTrack &&
+          days.every((d) => d.date >= todayIso || d.items.length === 0) &&
+          carryOver.entries.length === 0 && (
+            <CourseCompletion weakestFirst={weakestFirst} />
+          )}
 
         {/* ============ TODAY ============ */}
         {(() => {
@@ -408,7 +434,7 @@ export function CoursePlanClient({
             )}
             <p className="mt-3 rounded-xl bg-sky-50 p-3 text-[11px] text-sky-800 ring-1 ring-sky-200">
               ระดับที่คุณผ่านแล้วจะไม่ถูกใส่ในตาราง แต่{" "}
-              <strong>ยังเปิดดูได้ทุกคลิปตลอดเวลา</strong> — จ่ายเท่ากัน เข้าถึงเท่ากัน
+              <strong>ยังเปิดดูได้ทุกเลกเชอร์ตลอดเวลา</strong> — จ่ายเท่ากัน เข้าถึงเท่ากัน
               แต่แผนจะเลือกเฉพาะอันที่ทำให้คะแนนขึ้นจริง
             </p>
           </section>
@@ -417,6 +443,34 @@ export function CoursePlanClient({
         {/* ============ 1. CUSTOMIZE MY PLAN ============ */}
         <Section n={1} title="ตั้งแผนของฉัน" subtitle="เลือกเวลาและวันที่จะเรียน">
           <div className="space-y-4">
+            <div>
+              <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                เริ่มเรียนวันไหน
+              </p>
+              <input
+                type="date"
+                value={settings.startDate}
+                onChange={(e) =>
+                  setSettings((s) => ({ ...s, startDate: e.target.value || todayIso }))
+                }
+                className="rounded-xl bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700 ring-1 ring-slate-200"
+              />
+              {settings.startDate !== todayIso && (
+                <button
+                  type="button"
+                  onClick={() => setSettings((s) => ({ ...s, startDate: todayIso }))}
+                  className="ml-2 rounded-full px-2 py-1 text-[11px] font-bold text-slate-400"
+                >
+                  วันนี้
+                </button>
+              )}
+              {settings.startDate && (
+                <p className="mt-1 text-[12px] font-bold text-slate-600">
+                  เริ่ม {thaiFullDate(settings.startDate)}
+                </p>
+              )}
+            </div>
+
             <div>
               <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
                 วันละกี่นาที
@@ -484,7 +538,7 @@ export function CoursePlanClient({
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <Stat n={totals.studyDays} label="วันที่ต้องเรียน" />
-              <Stat n={totals.videos} label={`คลิป (จาก ${courseVideos.length})`} />
+              <Stat n={totals.videos} label={`เลกเชอร์ (จาก ${courseVideos.length})`} />
               <Stat n={totals.exercises} label="ชุดฝึก" />
               <Stat n={totals.hours} label="ชั่วโมงรวม" />
             </div>
@@ -500,7 +554,7 @@ export function CoursePlanClient({
                 {feasibility.coversWholeTrack ? (
                   <>
                     ✓ แผนนี้ครบทั้งหลักสูตร <strong>{feasibility.totalItems}</strong> รายการ
-                    (คลิป + แบบฝึก) · วันที่หนักที่สุด ~{feasibility.busiestDayMinutes} นาที
+                    (เลกเชอร์ + แบบฝึก) · วันที่หนักที่สุด ~{feasibility.busiestDayMinutes} นาที
                   </>
                 ) : (
                   <>
@@ -514,11 +568,74 @@ export function CoursePlanClient({
               </p>
             )}
 
+            {/* Finish projection — the honest answer to "how long will this take?",
+                with the videos-only figure alongside because the exercises
+                roughly triple the calendar. */}
+            {(projection.full || projection.videosOnly) && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-200">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600">
+                    เรียนจบแก่นเนื้อหา
+                  </p>
+                  <p className="mt-0.5 text-[11px] font-bold text-emerald-800">
+                    ยังไม่รวมฝึกเพิ่มเติมเพื่อเตรียมพร้อมก่อนสอบ
+                  </p>
+                  <p className="mt-1 text-[11px] font-bold text-emerald-700">
+                    เริ่ม {thaiFullDate(settings.startDate)}
+                  </p>
+                  <p className="text-xl font-black text-emerald-900">
+                    ถึง {projection.full ? thaiFullDate(projection.full.date) : "—"}
+                  </p>
+                  {projection.full && (
+                    <p className="mt-0.5 text-[11px] text-emerald-700">
+                      {projection.full.studyDays} วันเรียน ·{" "}
+                      {Math.ceil(projection.full.calendarDays / 7)} สัปดาห์ ·{" "}
+                      {Math.round(projection.full.totalMinutes / 60)} ชั่วโมง
+                    </p>
+                  )}
+                </div>
+                <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-200">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-sky-600">
+                    ดูเลกเชอร์ครบ
+                  </p>
+                  <p className="mt-0.5 text-[11px] font-bold text-sky-800">
+                    เฉพาะเลกเชอร์ ไม่รวมแบบฝึกในบทเรียน
+                  </p>
+                  <p className="mt-1 text-[11px] font-bold text-sky-700">
+                    เริ่ม {thaiFullDate(settings.startDate)}
+                  </p>
+                  <p className="text-xl font-black text-sky-900">
+                    ถึง {projection.videosOnly ? thaiFullDate(projection.videosOnly.date) : "—"}
+                  </p>
+                  {projection.videosOnly && (
+                    <p className="mt-0.5 text-[11px] text-sky-700">
+                      {projection.videosOnly.studyDays} วันเรียน ·{" "}
+                      {Math.ceil(projection.videosOnly.calendarDays / 7)} สัปดาห์ ·{" "}
+                      {Math.round(projection.videosOnly.totalMinutes / 60)} ชั่วโมง
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* The extra practice is self-directed and lives elsewhere — say so
+                rather than letting "เรียนจบ" imply the work is finished. */}
+            {(projection.full || projection.videosOnly) && (
+              <p className="rounded-xl bg-slate-50 p-3 text-[11px] text-slate-600 ring-1 ring-slate-200">
+                วันที่ด้านบนคือเรียนจบ <strong>แก่นเนื้อหา</strong> เท่านั้น —
+                การฝึกเพิ่มเติมก่อนสอบต้องกดเข้าไปที่{" "}
+                <Link href="/practice" className="font-black text-[#004AAD] underline">
+                  หน้าฝึกข้อสอบ
+                </Link>{" "}
+                เอง ไม่ได้นับรวมอยู่ในวันที่นี้
+              </p>
+            )}
+
             {/* practice mode */}
             <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-black text-slate-800">ไม่อยากดูคลิป?</p>
+                  <p className="text-sm font-black text-slate-800">ไม่อยากดูเลกเชอร์?</p>
                   <p className="text-[11px] text-slate-500">
                     โหมดฝึกล้วน — ข้ามวิดีโอ ใช้ปฏิทินฝึกข้อสอบ/บทเรียนแบบเดิม
                   </p>
@@ -546,7 +663,7 @@ export function CoursePlanClient({
         </Section>
 
         {/* ============ 2. STUDY BLOCKS ============ */}
-        <Section n={2} title="บทเรียนตามหมวด" subtitle="แตะหมวดเพื่อดูคลิปและเอกสารข้างใน">
+        <Section n={2} title="บทเรียนตามหมวด" subtitle="แตะหมวดเพื่อดูเลกเชอร์และเอกสารข้างใน">
           {!course ? (
             <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-200">
               ยังโหลดข้อมูลคอร์สไม่ได้ — ตรวจว่า migration 038 ถูก deploy แล้ว และมีคอร์ส slug{" "}
