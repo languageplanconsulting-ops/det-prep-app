@@ -173,7 +173,7 @@ export function InlineExercise({
   );
 }
 
-function Frame({
+export function Frame({
   title,
   progress,
   onCancel,

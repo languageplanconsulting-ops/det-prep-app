@@ -35,9 +35,15 @@ function countWords(text: string): number {
 export function ReadWriteSession({
   topicId,
   startWithRedeem = false,
+  onComplete,
+  embedded = false,
 }: {
   topicId: string;
   startWithRedeem?: boolean;
+  /** When set, the report is handed back instead of navigating to the report page — used by the course journey so the learner never leaves the session. */
+  onComplete?: (report: WritingAttemptReport) => void;
+  /** Drop the page-level back link and outer chrome when hosted inside another shell (the course session modal). */
+  embedded?: boolean;
 }) {
   const router = useRouter();
   const { effectiveTier } = useEffectiveTier();
@@ -185,7 +191,11 @@ export function ReadWriteSession({
     stashReportForNavigation(report.attemptId, report);
     saveWritingReport(report);
     recordReadWriteTopicProgress(report.topicId, report.score160, report.attemptId);
-    await router.push(`/practice/production/read-and-write/report/${report.attemptId}`);
+    if (onComplete) {
+      onComplete(report);
+    } else {
+      await router.push(`/practice/production/read-and-write/report/${report.attemptId}`);
+    }
   };
 
   const submitWithGemini = async () => {
@@ -234,14 +244,16 @@ export function ReadWriteSession({
 
   return (
     <StudySessionBoundary skill="production" exerciseType="read_then_write" setId={topicId}>
-    <div className="relative mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <div className={embedded ? "relative space-y-6" : "relative mx-auto max-w-3xl space-y-6 px-4 py-8"}>
       {submitting ? <GradingProgressLoader eyebrow="Grading your essay" /> : null}
-      <Link
-        href={`/practice/production/read-and-write/round/${topic.round ?? 1}`}
-        className="text-sm font-bold text-ep-blue hover:underline"
-      >
-        ← Topics
-      </Link>
+      {!embedded ? (
+        <Link
+          href={`/practice/production/read-and-write/round/${topic.round ?? 1}`}
+          className="text-sm font-bold text-ep-blue hover:underline"
+        >
+          ← Topics
+        </Link>
+      ) : null}
       {soft ? (
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">

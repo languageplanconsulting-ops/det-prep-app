@@ -15,6 +15,7 @@ import {
   EASY_TRACK,
   gateLabel,
   type CurriculumBlock,
+  type ExerciseGate,
 } from "@/lib/course-plan/curriculum";
 import type { TeachableVideo } from "@/lib/course-plan/planner";
 import type { RungStep } from "@/lib/course-plan/rungs";
@@ -38,6 +39,8 @@ export type StudyItem = {
   exerciseKey?: string;
   /** Spread hint from the curriculum: keep at least this many days apart. */
   spreadDays?: number;
+  /** The exercise's gate kind — decides which runner the session uses. */
+  gateKind?: ExerciseGate["kind"];
 };
 
 export type BlockDay = {
@@ -137,6 +140,7 @@ export function buildItemStream(
         gateTh: gateLabel(ex.gate),
         exerciseKey: ex.key,
         spreadDays: ex.spreadDays,
+        gateKind: ex.gate.kind,
       });
     }
   }

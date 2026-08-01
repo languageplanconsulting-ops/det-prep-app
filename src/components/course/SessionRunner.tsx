@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 import { InlineExercise } from "@/components/course/InlineExercise";
-import { canRunInline } from "@/lib/course-plan/exercise-content";
+import { LessonRunnerInline } from "@/components/course/LessonRunnerInline";
+import { ProductionExerciseRunner } from "@/components/course/ProductionExerciseRunner";
+import { canRunInline, isProductionExercise, lessonRunnerRefFor } from "@/lib/course-plan/exercise-content";
 
 import {
   dayDoneCopy,
@@ -22,6 +24,14 @@ import {
 } from "@/lib/course-plan/block-planner";
 
 type Phase = "warmup" | "choose" | "running" | "timeup" | "done";
+
+/** Can this item run in place, inside the session, instead of a plain checkbox? */
+function canRunInPlace(it: StudyItem): boolean {
+  if (!it.exerciseKey) return false;
+  if (lessonRunnerRefFor(it.exerciseKey)) return true;
+  if (isProductionExercise(it.taskType, it.gateKind)) return true;
+  return canRunInline(it.exerciseKey, it.taskType);
+}
 
 /** "1 ส.ค." — the day an unfinished item was originally scheduled for. */
 function thaiDay(iso: string): string {
@@ -251,32 +261,70 @@ export function SessionRunner({
         )}
 
         {/* ---------------- an exercise, running in place ---------------- */}
-        {activeExercise && (
-          <div className="p-6">
-            <InlineExercise
-              exerciseKey={activeExercise.exerciseKey ?? ""}
-              taskType={activeExercise.taskType}
-              titleTh={activeExercise.titleTh}
-              gateTh={activeExercise.gateTh}
-              hasNext={queue.some((i) => i.id !== activeExercise.id && !done.has(i.id))}
-              onCancel={() => setActiveExercise(null)}
-              onDone={(correct, total) => {
-                setScores((s) => ({ ...s, [activeExercise.id]: { correct, total } }));
-                const next = new Set(done);
-                next.add(activeExercise.id);
-                setDone(next);
-                setActiveExercise(null);
-                // Last outstanding item — go straight to the day summary rather
-                // than dropping back onto a fully-ticked checklist.
-                if (queue.every((i) => next.has(i.id))) {
-                  const completed = queue.filter((i) => next.has(i.id));
-                  onFinish([], completed);
-                  setPhase("done");
-                }
-              }}
-            />
-          </div>
-        )}
+        {activeExercise && (() => {
+          const hasNext = queue.some((i) => i.id !== activeExercise.id && !done.has(i.id));
+          const onExerciseDone = (correct: number, total: number) => {
+            setScores((s) => ({ ...s, [activeExercise.id]: { correct, total } }));
+            const next = new Set(done);
+            next.add(activeExercise.id);
+            setDone(next);
+            setActiveExercise(null);
+            // Last outstanding item — go straight to the day summary rather
+            // than dropping back onto a fully-ticked checklist.
+            if (queue.every((i) => next.has(i.id))) {
+              const completed = queue.filter((i) => next.has(i.id));
+              onFinish([], completed);
+              setPhase("done");
+            }
+          };
+
+          const lessonRef = activeExercise.exerciseKey
+            ? lessonRunnerRefFor(activeExercise.exerciseKey)
+            : null;
+          const isProduction = isProductionExercise(activeExercise.taskType, activeExercise.gateKind);
+
+          return (
+            <div className={isProduction ? "" : "p-6"}>
+              {lessonRef ? (
+                <div className="p-6">
+                  <LessonRunnerInline
+                    lessonRef={lessonRef}
+                    titleTh={activeExercise.titleTh}
+                    onCancel={() => setActiveExercise(null)}
+                    onDone={onExerciseDone}
+                  />
+                </div>
+              ) : isProduction ? (
+                <ProductionExerciseRunner
+                  exerciseKey={activeExercise.exerciseKey ?? ""}
+                  taskType={
+                    activeExercise.taskType as
+                      | "write_about_photo"
+                      | "speak_about_photo"
+                      | "read_and_write"
+                      | "read_then_speak"
+                  }
+                  titleTh={activeExercise.titleTh}
+                  hasNext={hasNext}
+                  onCancel={() => setActiveExercise(null)}
+                  onDone={onExerciseDone}
+                />
+              ) : (
+                <div className="p-6">
+                  <InlineExercise
+                    exerciseKey={activeExercise.exerciseKey ?? ""}
+                    taskType={activeExercise.taskType}
+                    titleTh={activeExercise.titleTh}
+                    gateTh={activeExercise.gateTh}
+                    hasNext={hasNext}
+                    onCancel={() => setActiveExercise(null)}
+                    onDone={onExerciseDone}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ---------------- the session ---------------- */}
         {!activeExercise && (phase === "running" || phase === "timeup") && (
@@ -365,12 +413,7 @@ export function SessionRunner({
                       onClick={() => {
                         // Runnable exercises open here rather than sending the
                         // learner off to a separate practice page.
-                        if (
-                          !isDone &&
-                          it.kind !== "video" &&
-                          it.exerciseKey &&
-                          canRunInline(it.exerciseKey, it.taskType)
-                        ) {
+                        if (!isDone && it.kind !== "video" && canRunInPlace(it)) {
                           setActiveExercise(it);
                           return;
                         }

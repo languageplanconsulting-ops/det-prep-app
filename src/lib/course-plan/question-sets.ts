@@ -64,36 +64,6 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "rel-6",
     "rel-7"
   ],
-  "wp-people": [
-    "wp-e1-1",
-    "wp-e1-2",
-    "wp-e1-3"
-  ],
-  "wp-objects": [
-    "wp-e1-4",
-    "wp-e1-5",
-    "wp-e1-6"
-  ],
-  "wp-places": [
-    "wp-e1-7",
-    "wp-e1-8",
-    "wp-e1-9"
-  ],
-  "sp-people": [
-    "sp-e1-1",
-    "sp-e1-2",
-    "sp-e1-3"
-  ],
-  "sp-objects": [
-    "sp-e1-4",
-    "sp-e1-5",
-    "sp-e1-6"
-  ],
-  "sp-places": [
-    "sp-e1-7",
-    "sp-e1-8",
-    "sp-e1-9"
-  ],
   "dic-easy": [
     "e1-1",
     "e1-2",
@@ -111,12 +81,14 @@ export const QUESTION_SETS: Record<string, string[]> = {
   "wt-real": [
     "rw-e1-1",
     "rw-e1-2",
-    "rw-e1-3"
+    "rw-e1-3",
+    "rw-e1-4"
   ],
   "st-real": [
     "rs-e1-1",
     "rs-e1-2",
-    "rs-e1-3"
+    "rs-e1-3",
+    "rs-e1-4"
   ],
   "is-real": [],
   "ic-set": [],
@@ -232,44 +204,34 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "m1-15"
   ],
   "mwp-people": [
-    "wp-m1-1",
-    "wp-m1-2",
-    "wp-m1-3"
+    "e79e13b9-a2b8-45b5-ac7d-227892cefc29"
   ],
   "mwp-objects": [
-    "wp-m1-4",
-    "wp-m1-5",
-    "wp-m1-6"
+    "053a66b4-f088-44cb-9f1c-a35b7cb2e49c"
   ],
   "mwp-places": [
-    "wp-m1-7",
-    "wp-m1-8",
-    "wp-m2-1"
+    "720c3ae3-e2e3-4e7b-9a6f-0905dd4e68cd"
   ],
   "msp-people": [
-    "sp-m1-1",
-    "sp-m1-2",
-    "sp-m1-3"
+    "f34b31e6-2cc1-4f5a-a0fd-a12f4f103995"
   ],
   "msp-objects": [
-    "sp-m1-4",
-    "sp-m1-5",
-    "sp-m1-6"
+    "39a36df6-2240-4412-8403-6c57a579a25c"
   ],
   "msp-places": [
-    "sp-m1-7",
-    "sp-m1-8",
-    "sp-m1-9"
+    "ec6b394c-6dcb-4344-905b-784ea551ecb0"
   ],
   "mwt-real": [
-    "rw-m1-1",
-    "rw-m1-2",
-    "rw-m1-3"
+    "arg-topic-3",
+    "arg-topic-6",
+    "arg-topic-9",
+    "arg-topic-12"
   ],
   "mst-real": [
-    "rs-m1-1",
-    "rs-m1-2",
-    "rs-m1-3"
+    "rs-r3-01::rs-r3-01-q1::3",
+    "rs-r3-01::rs-r3-01-q2::3",
+    "rs-r3-02::rs-r3-02-q1::3",
+    "rs-r3-02::rs-r3-02-q2::3"
   ],
   "mis-real": [],
   "mic-set": [],
@@ -398,44 +360,34 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "a2-1"
   ],
   "hwp-people": [
-    "wp-a1-1",
-    "wp-a1-2",
-    "wp-a1-3"
+    "fe6168d5-dbb3-44c0-8819-64628fd1c501"
   ],
   "hwp-objects": [
-    "wp-a1-4",
-    "wp-a1-5",
-    "wp-a1-6"
+    "4c9a0c50-34bc-4e32-ae45-66d8492dc209"
   ],
   "hwp-places": [
-    "wp-a1-7",
-    "wp-a1-8",
-    "wp-a1-9"
+    "7fe0090c-bcaa-422a-afc9-06c12ddbf77f"
   ],
   "hsp-people": [
-    "sp-a1-1",
-    "sp-a1-2",
-    "sp-a1-3"
+    "3d0c9f12-8221-4380-b612-76d0a3c334da"
   ],
   "hsp-objects": [
-    "sp-a1-4",
-    "sp-a1-5",
-    "sp-a1-6"
+    "84ea58b4-6ce5-431c-a94a-a7f0006ccc04"
   ],
   "hsp-places": [
-    "sp-a1-7",
-    "sp-a1-8",
-    "sp-a1-9"
+    "ed1fcfaf-617c-4d22-be6e-ae5271871c12"
   ],
   "hwt-real": [
-    "rw-a1-1",
-    "rw-a1-2",
-    "rw-a1-3"
+    "arg-topic-2",
+    "arg-topic-5",
+    "arg-topic-8",
+    "arg-topic-11"
   ],
   "hst-real": [
-    "rs-a1-1",
-    "rs-a1-2",
-    "rs-a1-3"
+    "rs-r5-01::rs-r5-01-q1::5",
+    "rs-r5-01::rs-r5-01-q2::5",
+    "rs-r5-02::rs-r5-02-q1::5",
+    "rs-r5-02::rs-r5-02-q2::5"
   ],
   "his-real": [],
   "hic-set": [],

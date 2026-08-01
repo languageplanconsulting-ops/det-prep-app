@@ -15,12 +15,23 @@ import { addNotebookEntry } from "@/lib/notebook-storage";
 import { PRONUNCIATION_PASS, endingIssueHintTh, pronunciationPassed, pronunciationScore, type PronunciationResult } from "@/lib/pronunciation-match";
 import { readSpeakUnit, type ReadSpeakItem, type ReadSpeakTier, type ReadSpeakVocab } from "@/lib/readspeak-lessons";
 import { LessonRecorder } from "@/components/lessons/LessonRecorder";
+import { ReadSpeakPatternCoach, ReadSpeakPatternTeaser } from "@/components/lessons/ReadSpeakPatternCoach";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { OverlayBackdrop } from "@/components/ui/OverlayBackdrop";
 
 const TOPIC = "readspeak";
 type Phase = "cloze" | "speak";
 
-export function ReadSpeakLessonRunner({ tier, unit }: { tier: ReadSpeakTier; unit: number }) {
+export function ReadSpeakLessonRunner({
+  tier,
+  unit,
+  onDone,
+}: {
+  tier: ReadSpeakTier;
+  unit: number;
+  /** When set, replaces the "back to hub" finish button — used by the course journey. */
+  onDone?: (pct: number) => void;
+}) {
   const uid = useLessonUserId();
   const [seenKeys, setSeenKeys] = useState<Set<string> | null>(null);
 
@@ -45,9 +56,19 @@ export function ReadSpeakLessonRunner({ tier, unit }: { tier: ReadSpeakTier; uni
     return (
       <div className="py-16 text-center">
         <p className="text-lg font-bold">คุณฝึกครบทุกข้อในด่านนี้แล้ว 🎉</p>
-        <Link href="/practice/lessons/how-to-speak" className="mt-4 inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00]">
-          กลับไปเลือกด่าน
-        </Link>
+        {onDone ? (
+          <button
+            type="button"
+            onClick={() => onDone(100)}
+            className="mt-4 inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00]"
+          >
+            ไปต่อ →
+          </button>
+        ) : (
+          <Link href="/practice/lessons/how-to-speak" className="mt-4 inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00]">
+            กลับไปเลือกด่าน
+          </Link>
+        )}
       </div>
     );
   }
@@ -56,13 +77,31 @@ export function ReadSpeakLessonRunner({ tier, unit }: { tier: ReadSpeakTier; uni
   // right after mount. Remounting keeps the player's lazy first-item state in
   // sync with the item it's actually showing. See DictationLessonRunner.
   const playerKey = items.map((l) => l.id).join(",");
-  return <Player key={playerKey} tier={tier} unit={unit} items={items} uid={uid} />;
+  return <Player key={playerKey} tier={tier} unit={unit} items={items} uid={uid} onDone={onDone} />;
 }
 
-function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number; items: ReadSpeakItem[]; uid: string | null }) {
+function Player({
+  tier,
+  unit,
+  items,
+  uid,
+  onDone,
+}: {
+  tier: ReadSpeakTier;
+  unit: number;
+  items: ReadSpeakItem[];
+  uid: string | null;
+  onDone?: (pct: number) => void;
+}) {
   const total = items.length;
   const [index, setIndex] = useState(0);
+  const { effectiveTier } = useEffectiveTier();
+  const isVip = effectiveTier === "vip";
   const [phase, setPhase] = useState<Phase>("cloze");
+  // The VIP build-the-answer drill is derived, never stored as a phase: the tier
+  // resolves asynchronously, so a phase set on mount would be computed before
+  // `isVip` is known and would never correct itself.
+  const [patternDone, setPatternDone] = useState(false);
   const [passedCount, setPassedCount] = useState(0);
   const [finished, setFinished] = useState(false);
 
@@ -89,6 +128,7 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
 
   useEffect(() => {
     setPhase("cloze");
+    setPatternDone(false);
     setPicks(new Array(item.blanks.length).fill(null));
     setActiveBlank(null);
     setChecked(false);
@@ -234,13 +274,25 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
           <p className="mt-1 text-sm text-slate-600">ผ่านครบ {passedCount} จาก {total} หัวข้อ</p>
         </div>
         <div className="text-center">
-          <Link href="/practice/lessons/how-to-speak" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
-            เสร็จแล้ว · กลับไปเลือกด่าน
-          </Link>
+          {onDone ? (
+            <button
+              type="button"
+              onClick={() => onDone(pct)}
+              className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]"
+            >
+              เสร็จแล้ว →
+            </button>
+          ) : (
+            <Link href="/practice/lessons/how-to-speak" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
+              เสร็จแล้ว · กลับไปเลือกด่าน
+            </Link>
+          )}
         </div>
       </div>
     );
   }
+
+  const showPattern = isVip && !!item.moves?.length && !patternDone && phase === "cloze";
 
   return (
     <div key={index} className="ep-step-slide-in">
@@ -248,7 +300,7 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
         <div className="flex items-center gap-2">
           <span>ข้อ {index + 1} / {total}</span>
           <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${phase === "speak" ? "bg-[#004AAD] text-white" : "bg-slate-100 text-slate-500"}`}>
-            {phase === "cloze" ? "1 · เติมคำ" : "2 · ออกเสียง"}
+            {showPattern ? "1 · ประกอบคำตอบ" : phase === "cloze" ? "2 · เติมคำ" : "3 · ออกเสียง"}
           </span>
         </div>
         <span>ผ่านแล้ว {passedCount}</span>
@@ -263,8 +315,11 @@ function Player({ tier, unit, items, uid }: { tier: ReadSpeakTier; unit: number;
         <p className="mt-1 text-xs text-slate-300">{item.topicTh}</p>
       </div>
 
-      {phase === "cloze" ? (
+      {showPattern ? (
+        <ReadSpeakPatternCoach item={item} onDone={() => setPatternDone(true)} />
+      ) : phase === "cloze" ? (
         <>
+          {!isVip && item.moves?.length ? <ReadSpeakPatternTeaser item={item} /> : null}
           <p className="mb-2 rounded-xl bg-blue-50 p-3 text-xs font-semibold text-[#004AAD]">อ่านคำตอบตัวอย่าง แล้วแตะช่องว่างเพื่อเลือกคำที่ถูก</p>
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex flex-wrap items-center gap-y-2 text-[15px] leading-8 text-slate-800">

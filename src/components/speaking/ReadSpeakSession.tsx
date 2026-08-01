@@ -16,6 +16,7 @@ import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
+import { pullContentBankSnapshotFromSupabase } from "@/lib/content-bank-sync";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import { finalizeLatestStudySession } from "@/lib/study-tracker";
@@ -39,16 +40,46 @@ export function ReadSpeakSession({
   round,
   startWithRedeem = false,
   redeemQuestionId = null,
+  presetQuestionId,
+  onComplete,
+  embedded = false,
 }: {
   topicId: string;
   round: SpeakingRoundNum;
   startWithRedeem?: boolean;
   redeemQuestionId?: string | null;
+  /** Skip the "choose a question" step and go straight to prep for this question — used when the course journey has already fixed which question this exercise runs. */
+  presetQuestionId?: string;
+  /** When set, the report is handed back instead of navigating to the report page — used by the course journey so the learner never leaves the session. */
+  onComplete?: (report: SpeakingAttemptReport) => void;
+  /** Drop the page-level back links and outer chrome when hosted inside another shell (the course session modal). */
+  embedded?: boolean;
 }) {
   const router = useRouter();
   const { effectiveTier } = useEffectiveTier();
   const vipGate = useVipAiFeedbackGate();
-  const topic = useMemo(() => getSpeakingVisibleTopicById(topicId, round), [topicId, round]);
+  const [bankRefreshTick, setBankRefreshTick] = useState(0);
+  const topic = useMemo(
+    () => getSpeakingVisibleTopicById(topicId, round),
+    [topicId, round, bankRefreshTick],
+  );
+
+  // Cold start (e.g. opened straight from the course journey, never visited the
+  // standalone speaking hub): the locally-cached topic bank can be empty. Pull
+  // once from Supabase and recompute rather than showing "Topic not found."
+  useEffect(() => {
+    if (topic || !embedded) return;
+    let cancelled = false;
+    pullContentBankSnapshotFromSupabase()
+      .then(() => {
+        if (!cancelled) setBankRefreshTick((n) => n + 1);
+      })
+      .catch((e) => console.warn("[ReadSpeakSession] topic hydration failed", e));
+    return () => {
+      cancelled = true;
+    };
+  }, [topic, embedded]);
+
   const roundBase = `/practice/production/read-and-speak/round/${round}`;
   const [prepChoice, setPrepChoice] = useState(3);
   const [phase, setPhase] = useState<
@@ -101,6 +132,16 @@ export function ReadSpeakSession({
       window.removeEventListener("storage", bump);
     };
   }, []);
+
+  // The course journey already fixed which question this exercise runs —
+  // skip straight to prep instead of showing the "choose a question" step.
+  useEffect(() => {
+    if (!topic || !presetQuestionId || phase !== "pick-question") return;
+    const q = topic.questions.find((x) => x.id === presetQuestionId);
+    if (!q) return;
+    setSelectedQuestion(q);
+    setPhase("prep-pick");
+  }, [topic, presetQuestionId, phase]);
 
   const stopRecognition = useCallback(() => {
     setListening(false);
@@ -234,7 +275,11 @@ export function ReadSpeakSession({
     }
     stashReportForNavigation(report.attemptId, report);
     saveSpeakingReport(report);
-    await router.push(`/practice/production/read-and-speak/report/${report.attemptId}`);
+    if (onComplete) {
+      onComplete(report);
+    } else {
+      await router.push(`/practice/production/read-and-speak/report/${report.attemptId}`);
+    }
   };
 
   const submitWithGemini = async () => {
@@ -295,11 +340,13 @@ export function ReadSpeakSession({
       exerciseType="read_then_speak"
       setId={`r${round}-${topicId}`}
     >
-    <div className="relative mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <div className={embedded ? "relative space-y-6" : "relative mx-auto max-w-3xl space-y-6 px-4 py-8"}>
       {submitting ? <GradingProgressLoader eyebrow="Grading your speaking" /> : null}
-      <Link href={roundBase} className="text-sm font-bold text-ep-blue hover:underline">
-        ← Round {round} topics
-      </Link>
+      {!embedded ? (
+        <Link href={roundBase} className="text-sm font-bold text-ep-blue hover:underline">
+          ← Round {round} topics
+        </Link>
+      ) : null}
       {/* Step indicator */}
       <div className="flex items-center gap-1">
         {["อ่านโจทย์", "เตรียมตัว", "พูด & ส่ง"].map((label, i) => {
@@ -542,9 +589,11 @@ export function ReadSpeakSession({
             >
               ← เลือกคำถามอื่น
             </button>
-            <Link href={roundBase} className="py-2 font-semibold text-slate-500 hover:text-[#004AAD]">
-              หัวข้ออื่นในรอบนี้
-            </Link>
+            {!embedded ? (
+              <Link href={roundBase} className="py-2 font-semibold text-slate-500 hover:text-[#004AAD]">
+                หัวข้ออื่นในรอบนี้
+              </Link>
+            ) : null}
           </div>
 
           <StickyExamCTA>

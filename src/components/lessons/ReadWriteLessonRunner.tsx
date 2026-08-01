@@ -20,7 +20,16 @@ import { TypedBlank, TypedBlankHints } from "./TypedBlank";
 const TOPIC = "readwrite";
 type Phase = "cloze" | "review";
 
-export function ReadWriteLessonRunner({ tier, unit }: { tier: ReadWriteTier; unit: number }) {
+export function ReadWriteLessonRunner({
+  tier,
+  unit,
+  onDone,
+}: {
+  tier: ReadWriteTier;
+  unit: number;
+  /** When set, replaces the "back to hub" finish button — used by the course journey. */
+  onDone?: (pct: number) => void;
+}) {
   const uid = useLessonUserId();
   const [seenKeys, setSeenKeys] = useState<Set<string> | null>(null);
 
@@ -45,9 +54,19 @@ export function ReadWriteLessonRunner({ tier, unit }: { tier: ReadWriteTier; uni
     return (
       <div className="py-16 text-center">
         <p className="text-lg font-bold">คุณฝึกครบทุกข้อในด่านนี้แล้ว 🎉</p>
-        <Link href="/practice/lessons/how-to-write" className="mt-4 inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00]">
-          กลับไปเลือกด่าน
-        </Link>
+        {onDone ? (
+          <button
+            type="button"
+            onClick={() => onDone(100)}
+            className="mt-4 inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00]"
+          >
+            ไปต่อ →
+          </button>
+        ) : (
+          <Link href="/practice/lessons/how-to-write" className="mt-4 inline-block rounded-xl bg-[#004AAD] px-5 py-2.5 text-sm font-bold text-[#FFCC00]">
+            กลับไปเลือกด่าน
+          </Link>
+        )}
       </div>
     );
   }
@@ -56,10 +75,22 @@ export function ReadWriteLessonRunner({ tier, unit }: { tier: ReadWriteTier; uni
   // right after mount. Remounting keeps the player's lazy first-item state in
   // sync with the item it's actually showing. See DictationLessonRunner.
   const playerKey = items.map((l) => l.id).join(",");
-  return <Player key={playerKey} tier={tier} unit={unit} items={items} uid={uid} />;
+  return <Player key={playerKey} tier={tier} unit={unit} items={items} uid={uid} onDone={onDone} />;
 }
 
-function Player({ tier, unit, items, uid }: { tier: ReadWriteTier; unit: number; items: ReadWriteItem[]; uid: string | null }) {
+function Player({
+  tier,
+  unit,
+  items,
+  uid,
+  onDone,
+}: {
+  tier: ReadWriteTier;
+  unit: number;
+  items: ReadWriteItem[];
+  uid: string | null;
+  onDone?: (pct: number) => void;
+}) {
   const total = items.length;
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("cloze");
@@ -244,9 +275,19 @@ function Player({ tier, unit, items, uid }: { tier: ReadWriteTier; unit: number;
           <p className="mt-1 text-sm text-slate-600">เขียนถูกครบ {completed} จาก {total} เรียงความ</p>
         </div>
         <div className="text-center">
-          <Link href="/practice/lessons/how-to-write" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
-            เสร็จแล้ว · กลับไปเลือกด่าน
-          </Link>
+          {onDone ? (
+            <button
+              type="button"
+              onClick={() => onDone(pct)}
+              className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]"
+            >
+              เสร็จแล้ว →
+            </button>
+          ) : (
+            <Link href="/practice/lessons/how-to-write" className="mt-6 inline-block rounded-xl bg-[#004AAD] px-6 py-3 text-sm font-bold text-[#FFCC00]">
+              เสร็จแล้ว · กลับไปเลือกด่าน
+            </Link>
+          )}
         </div>
       </div>
     );

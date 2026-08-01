@@ -51,10 +51,16 @@ export function PhotoAssessmentSession({
   mode,
   itemId,
   startWithRedeem = false,
+  onComplete,
+  embedded = false,
 }: {
   mode: Mode;
   itemId: string;
   startWithRedeem?: boolean;
+  /** When set, the report is handed back instead of navigating to the report page — used by the course journey so the learner never leaves the session. */
+  onComplete?: (report: PhotoSpeakAttemptReport) => void;
+  /** Drop the page-level back link and outer chrome when hosted inside another shell (the course session modal). */
+  embedded?: boolean;
 }) {
   const router = useRouter();
   const { effectiveTier } = useEffectiveTier();
@@ -278,11 +284,15 @@ export function PhotoAssessmentSession({
       // just drop our cached item list so the next fetch (e.g. back on the set-list page) is fresh.
       invalidatePhotoSpeakItemsCache(taskType);
 
-      await router.push(
-        mode === "speak"
-          ? `/practice/production/speak-about-photo/report/${report.attemptId}`
-          : `/practice/production/write-about-photo/report/${report.attemptId}`,
-      );
+      if (onComplete) {
+        onComplete(report);
+      } else {
+        await router.push(
+          mode === "speak"
+            ? `/practice/production/speak-about-photo/report/${report.attemptId}`
+            : `/practice/production/write-about-photo/report/${report.attemptId}`,
+        );
+      }
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -320,17 +330,19 @@ export function PhotoAssessmentSession({
       exerciseType={mode === "speak" ? "speak_about_photo" : "write_about_photo"}
       setId={item.id}
     >
-      <div className="relative mx-auto max-w-3xl space-y-6 px-4 py-8">
-        <Link
-          href={
-            mode === "speak"
-              ? "/practice/production/speak-about-photo"
-              : "/practice/production/write-about-photo"
-          }
-          className="text-sm font-bold text-ep-blue hover:underline"
-        >
-          {mode === "speak" ? "← Speak about photo" : "← Write about photo"}
-        </Link>
+      <div className={embedded ? "relative space-y-6" : "relative mx-auto max-w-3xl space-y-6 px-4 py-8"}>
+        {!embedded ? (
+          <Link
+            href={
+              mode === "speak"
+                ? "/practice/production/speak-about-photo"
+                : "/practice/production/write-about-photo"
+            }
+            className="text-sm font-bold text-ep-blue hover:underline"
+          >
+            {mode === "speak" ? "← Speak about photo" : "← Write about photo"}
+          </Link>
+        ) : null}
 
         {soft ? (
           <div className="flex items-start gap-3">

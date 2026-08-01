@@ -90,3 +90,75 @@ export function inlineContentFor(
 export function canRunInline(exerciseKey: string, taskType: string | null): boolean {
   return inlineContentFor(exerciseKey, taskType) !== null;
 }
+
+/**
+ * The photo-write / speak-photo / read-write / read-speak "how to" lessons
+ * (isLesson steps, plus the EASY-tier photo tasks which use the same cloze
+ * mechanic rather than a full AI report) run through their own dedicated
+ * runner components, not the generic per-item views above. Selection is a
+ * fixed {tier, unit} pair, not a randomised draw.
+ */
+export type LessonRunnerKind = "photowrite" | "speakphoto" | "readwrite" | "readspeak";
+export type LessonRunnerTier = "easy" | "medium" | "advanced";
+export type LessonRunnerRef = { kind: LessonRunnerKind; tier: LessonRunnerTier; unit: number };
+
+const LESSON_UNIT_FOR_KEY: Record<string, LessonRunnerRef> = {
+  "wp-people": { kind: "photowrite", tier: "easy", unit: 1 },
+  "wp-objects": { kind: "photowrite", tier: "easy", unit: 2 },
+  "wp-places": { kind: "photowrite", tier: "easy", unit: 3 },
+  "sp-people": { kind: "speakphoto", tier: "easy", unit: 1 },
+  "sp-objects": { kind: "speakphoto", tier: "easy", unit: 2 },
+  "sp-places": { kind: "speakphoto", tier: "easy", unit: 3 },
+
+  "wt-l1": { kind: "readwrite", tier: "easy", unit: 1 },
+  "wt-l2": { kind: "readwrite", tier: "easy", unit: 2 },
+  "wt-l3": { kind: "readwrite", tier: "easy", unit: 3 },
+  "wt-l4": { kind: "readwrite", tier: "easy", unit: 4 },
+  "mwt-l1": { kind: "readwrite", tier: "medium", unit: 1 },
+  "mwt-l2": { kind: "readwrite", tier: "medium", unit: 2 },
+  "mwt-l3": { kind: "readwrite", tier: "medium", unit: 3 },
+  "mwt-l4": { kind: "readwrite", tier: "medium", unit: 4 },
+  "hwt-l1": { kind: "readwrite", tier: "advanced", unit: 1 },
+  "hwt-l2": { kind: "readwrite", tier: "advanced", unit: 2 },
+  "hwt-l3": { kind: "readwrite", tier: "advanced", unit: 3 },
+  "hwt-l4": { kind: "readwrite", tier: "advanced", unit: 4 },
+
+  "st-l1": { kind: "readspeak", tier: "easy", unit: 1 },
+  "st-l2": { kind: "readspeak", tier: "easy", unit: 2 },
+  "st-l3": { kind: "readspeak", tier: "easy", unit: 3 },
+  "st-l4": { kind: "readspeak", tier: "easy", unit: 4 },
+  "mst-l1": { kind: "readspeak", tier: "medium", unit: 1 },
+  "mst-l2": { kind: "readspeak", tier: "medium", unit: 2 },
+  "mst-l3": { kind: "readspeak", tier: "medium", unit: 3 },
+  "mst-l4": { kind: "readspeak", tier: "medium", unit: 4 },
+  "hst-l1": { kind: "readspeak", tier: "advanced", unit: 1 },
+  "hst-l2": { kind: "readspeak", tier: "advanced", unit: 2 },
+  "hst-l3": { kind: "readspeak", tier: "advanced", unit: 3 },
+  "hst-l4": { kind: "readspeak", tier: "advanced", unit: 4 },
+};
+
+export function lessonRunnerRefFor(exerciseKey: string): LessonRunnerRef | null {
+  return LESSON_UNIT_FOR_KEY[exerciseKey] ?? null;
+}
+
+/**
+ * The four "real submission" production task types: a full Gemini-graded
+ * report, gated on a score rather than a right/wrong count. These run through
+ * ProductionExerciseRunner, which embeds the same session + report components
+ * the standalone practice pages use.
+ */
+const PRODUCTION_GATE_KINDS = new Set(["min_score", "min_score_group", "min_score_all_topics"]);
+
+export function isProductionExercise(
+  taskType: string | null,
+  gateKind: string | undefined,
+): boolean {
+  if (!taskType || !gateKind) return false;
+  if (!PRODUCTION_GATE_KINDS.has(gateKind)) return false;
+  return (
+    taskType === "write_about_photo" ||
+    taskType === "speak_about_photo" ||
+    taskType === "read_and_write" ||
+    taskType === "read_then_speak"
+  );
+}
