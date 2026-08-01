@@ -7,31 +7,41 @@
 
 /** Exercise key -> the exact item ids that exercise runs, in order. */
 export const QUESTION_SETS: Record<string, string[]> = {
-  "gr-conj": [],
-  "gr-present": [
-    "pt-e1",
-    "pt-e2",
-    "pt-e3",
-    "pt-e4",
-    "pt-e5",
-    "pt-e6",
-    "pt-e7",
-    "pt-e8",
-    "pt-e9",
-    "pt-e10"
+  "gr-conj": [
+    "cj-1",
+    "cj-2",
+    "cj-3",
+    "cj-4",
+    "cj-5",
+    "cj-6",
+    "cj-7",
+    "cj-8",
+    "cj-9",
+    "cj-10"
   ],
-  "gr-runon": [],
+  "gr-present": [
+    "sp-pat-1",
+    "sp-pat-2",
+    "sp-pat-3",
+    "sp-pat-4"
+  ],
+  "gr-runon": [
+    "ro-1",
+    "ro-2",
+    "ro-3",
+    "ro-4",
+    "ro-5",
+    "ro-6",
+    "ro-7"
+  ],
   "gr-transition": [
-    "tr-e1",
-    "tr-e2",
-    "tr-e3",
-    "tr-e4",
-    "tr-e5",
-    "tr-e6",
-    "tr-e7",
-    "tr-e8",
-    "tr-e9",
-    "tr-e10"
+    "tr-1",
+    "tr-2",
+    "tr-3",
+    "tr-4",
+    "tr-5",
+    "tr-6",
+    "tr-7"
   ],
   "gr-tense": [
     "pa-e1",
@@ -45,21 +55,29 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "pa-e9",
     "pa-e10"
   ],
-  "gr-relative": [],
+  "gr-relative": [
+    "rel-1",
+    "rel-2",
+    "rel-3",
+    "rel-4",
+    "rel-5",
+    "rel-6",
+    "rel-7"
+  ],
   "wp-people": [
     "wp-e1-1",
     "wp-e1-2",
     "wp-e1-3"
   ],
   "wp-objects": [
-    "wp-e1-1",
-    "wp-e1-2",
-    "wp-e1-3"
+    "wp-e1-4",
+    "wp-e1-5",
+    "wp-e1-6"
   ],
   "wp-places": [
-    "wp-e1-1",
-    "wp-e1-2",
-    "wp-e1-3"
+    "wp-e1-7",
+    "wp-e1-8",
+    "wp-e1-9"
   ],
   "sp-people": [
     "sp-e1-1",
@@ -67,14 +85,14 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "sp-e1-3"
   ],
   "sp-objects": [
-    "sp-e1-1",
-    "sp-e1-2",
-    "sp-e1-3"
+    "sp-e1-4",
+    "sp-e1-5",
+    "sp-e1-6"
   ],
   "sp-places": [
-    "sp-e1-1",
-    "sp-e1-2",
-    "sp-e1-3"
+    "sp-e1-7",
+    "sp-e1-8",
+    "sp-e1-9"
   ],
   "dic-easy": [
     "e1-1",
@@ -84,11 +102,11 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "e1-5"
   ],
   "dic-medium": [
-    "e1-1",
-    "e1-2",
-    "e1-3",
-    "e1-4",
-    "e1-5"
+    "e1-6",
+    "e1-7",
+    "e1-8",
+    "e1-9",
+    "e1-10"
   ],
   "wt-real": [
     "rw-e1-1",
@@ -135,31 +153,41 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "cv-4",
     "cv-5"
   ],
-  "mgr-conj": [],
-  "mgr-present": [
-    "pt-m1",
-    "pt-m2",
-    "pt-m3",
-    "pt-m4",
-    "pt-m5",
-    "pt-m6",
-    "pt-m7",
-    "pt-m8",
-    "pt-m9",
-    "pt-m10"
+  "mgr-conj": [
+    "cj-1",
+    "cj-2",
+    "cj-3",
+    "cj-4",
+    "cj-5",
+    "cj-6",
+    "cj-7",
+    "cj-8",
+    "cj-9",
+    "cj-10"
   ],
-  "mgr-runon": [],
+  "mgr-present": [
+    "sp-pat-1",
+    "sp-pat-2",
+    "sp-pat-3",
+    "sp-pat-4"
+  ],
+  "mgr-runon": [
+    "ro-1",
+    "ro-2",
+    "ro-3",
+    "ro-4",
+    "ro-5",
+    "ro-6",
+    "ro-7"
+  ],
   "mgr-transition": [
-    "tr-m1",
-    "tr-m2",
-    "tr-m3",
-    "tr-m4",
-    "tr-m5",
-    "tr-m6",
-    "tr-m7",
-    "tr-m8",
-    "tr-m9",
-    "tr-m10"
+    "tr-1",
+    "tr-2",
+    "tr-3",
+    "tr-4",
+    "tr-5",
+    "tr-6",
+    "tr-7"
   ],
   "mgr-tense": [
     "pa-m1",
@@ -173,7 +201,15 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "pa-m9",
     "pa-m10"
   ],
-  "mgr-relative": [],
+  "mgr-relative": [
+    "rel-1",
+    "rel-2",
+    "rel-3",
+    "rel-4",
+    "rel-5",
+    "rel-6",
+    "rel-7"
+  ],
   "mdic-easy": [
     "m1-1",
     "m1-2",
@@ -182,18 +218,18 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "m1-5"
   ],
   "mdic-medium": [
-    "m1-1",
-    "m1-2",
-    "m1-3",
-    "m1-4",
-    "m1-5"
+    "m1-6",
+    "m1-7",
+    "m1-8",
+    "m1-9",
+    "m1-10"
   ],
   "mdic-hard": [
-    "m1-1",
-    "m1-2",
-    "m1-3",
-    "m1-4",
-    "m1-5"
+    "m1-11",
+    "m1-12",
+    "m1-13",
+    "m1-14",
+    "m1-15"
   ],
   "mwp-people": [
     "wp-m1-1",
@@ -201,14 +237,14 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "wp-m1-3"
   ],
   "mwp-objects": [
-    "wp-m1-1",
-    "wp-m1-2",
-    "wp-m1-3"
+    "wp-m1-4",
+    "wp-m1-5",
+    "wp-m1-6"
   ],
   "mwp-places": [
-    "wp-m1-1",
-    "wp-m1-2",
-    "wp-m1-3"
+    "wp-m1-7",
+    "wp-m1-8",
+    "wp-m2-1"
   ],
   "msp-people": [
     "sp-m1-1",
@@ -216,14 +252,14 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "sp-m1-3"
   ],
   "msp-objects": [
-    "sp-m1-1",
-    "sp-m1-2",
-    "sp-m1-3"
+    "sp-m1-4",
+    "sp-m1-5",
+    "sp-m1-6"
   ],
   "msp-places": [
-    "sp-m1-1",
-    "sp-m1-2",
-    "sp-m1-3"
+    "sp-m1-7",
+    "sp-m1-8",
+    "sp-m1-9"
   ],
   "mwt-real": [
     "rw-m1-1",
@@ -245,9 +281,9 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "rwl-m1-5"
   ],
   "mrw-hard": [
-    "rwl-m1-1",
-    "rwl-m1-2",
-    "rwl-m1-3"
+    "rwl-m1-6",
+    "rwl-m1-7",
+    "rwl-m1-8"
   ],
   "mct": [
     "pt-m1",
@@ -275,31 +311,41 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "cv-4",
     "cv-5"
   ],
-  "hgr-conj": [],
-  "hgr-present": [
-    "pt-h1",
-    "pt-h2",
-    "pt-h3",
-    "pt-h4",
-    "pt-h5",
-    "pt-h6",
-    "pt-h7",
-    "pt-h8",
-    "pt-h9",
-    "pt-h10"
+  "hgr-conj": [
+    "cj-1",
+    "cj-2",
+    "cj-3",
+    "cj-4",
+    "cj-5",
+    "cj-6",
+    "cj-7",
+    "cj-8",
+    "cj-9",
+    "cj-10"
   ],
-  "hgr-runon": [],
+  "hgr-present": [
+    "sp-pat-1",
+    "sp-pat-2",
+    "sp-pat-3",
+    "sp-pat-4"
+  ],
+  "hgr-runon": [
+    "ro-1",
+    "ro-2",
+    "ro-3",
+    "ro-4",
+    "ro-5",
+    "ro-6",
+    "ro-7"
+  ],
   "hgr-transition": [
-    "tr-h1",
-    "tr-h2",
-    "tr-h3",
-    "tr-h4",
-    "tr-h5",
-    "tr-h6",
-    "tr-h7",
-    "tr-h8",
-    "tr-h9",
-    "tr-h10"
+    "tr-1",
+    "tr-2",
+    "tr-3",
+    "tr-4",
+    "tr-5",
+    "tr-6",
+    "tr-7"
   ],
   "hgr-tense": [
     "pa-h1",
@@ -313,7 +359,15 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "pa-h9",
     "pa-h10"
   ],
-  "hgr-relative": [],
+  "hgr-relative": [
+    "rel-1",
+    "rel-2",
+    "rel-3",
+    "rel-4",
+    "rel-5",
+    "rel-6",
+    "rel-7"
+  ],
   "hdic-easy": [
     "a1-1",
     "a1-2",
@@ -322,26 +376,26 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "a1-5"
   ],
   "hdic-medium": [
-    "a1-1",
-    "a1-2",
-    "a1-3",
-    "a1-4",
-    "a1-5"
+    "a1-6",
+    "a1-7",
+    "a1-8",
+    "a1-9",
+    "a1-10"
   ],
   "hdic-hard": [
-    "a1-1",
-    "a1-2",
-    "a1-3",
-    "a1-4",
-    "a1-5"
+    "a1-11",
+    "a1-12",
+    "a1-13",
+    "a1-14",
+    "a1-15"
   ],
   "hdic-advanced": [
-    "a1-1",
-    "a1-2",
-    "a1-3",
-    "a1-4",
-    "a1-5",
-    "a1-6"
+    "a1-16",
+    "a1-17",
+    "a1-18",
+    "a1-19",
+    "a1-20",
+    "a2-1"
   ],
   "hwp-people": [
     "wp-a1-1",
@@ -349,14 +403,14 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "wp-a1-3"
   ],
   "hwp-objects": [
-    "wp-a1-1",
-    "wp-a1-2",
-    "wp-a1-3"
+    "wp-a1-4",
+    "wp-a1-5",
+    "wp-a1-6"
   ],
   "hwp-places": [
-    "wp-a1-1",
-    "wp-a1-2",
-    "wp-a1-3"
+    "wp-a1-7",
+    "wp-a1-8",
+    "wp-a1-9"
   ],
   "hsp-people": [
     "sp-a1-1",
@@ -364,14 +418,14 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "sp-a1-3"
   ],
   "hsp-objects": [
-    "sp-a1-1",
-    "sp-a1-2",
-    "sp-a1-3"
+    "sp-a1-4",
+    "sp-a1-5",
+    "sp-a1-6"
   ],
   "hsp-places": [
-    "sp-a1-1",
-    "sp-a1-2",
-    "sp-a1-3"
+    "sp-a1-7",
+    "sp-a1-8",
+    "sp-a1-9"
   ],
   "hwt-real": [
     "rw-a1-1",
@@ -393,9 +447,9 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "rwl-a1-5"
   ],
   "hrw-hard": [
-    "rwl-a1-1",
-    "rwl-a1-2",
-    "rwl-a1-3"
+    "rwl-a1-6",
+    "rwl-a1-7",
+    "rwl-a1-8"
   ],
   "hct": [
     "pt-h1",
@@ -427,19 +481,10 @@ export const QUESTION_SETS: Record<string, string[]> = {
 
 /** Exercises with no items yet — see the build log for why. */
 export const UNFILLED_EXERCISES: string[] = [
-  "gr-conj",
-  "gr-runon",
-  "gr-relative",
   "is-real",
   "ic-set",
-  "mgr-conj",
-  "mgr-runon",
-  "mgr-relative",
   "mis-real",
   "mic-set",
-  "hgr-conj",
-  "hgr-runon",
-  "hgr-relative",
   "his-real",
   "hic-set"
 ];

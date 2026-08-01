@@ -24,6 +24,8 @@ import {
   type CurriculumExercise,
 } from "../src/lib/course-plan/curriculum";
 
+import { REWRITE_BANKS } from "../src/lib/course-plan/grammar-writing-bank";
+import { SPEAK_PATTERN_ITEMS } from "../src/lib/course-plan/speak-pattern-bank";
 import { DICTATION_LESSONS } from "../src/lib/dictation-lessons-data";
 import { GRAMMAR_EXERCISES } from "../src/lib/grammar-fitb-data";
 import { REALWORD_LESSON_ITEMS } from "../src/lib/realword-lesson-data";
@@ -94,12 +96,32 @@ function countFor(ex: CurriculumExercise): number {
 
 const gaps: string[] = [];
 const sets: Record<string, string[]> = {};
+/**
+ * How far into each pool we have already drawn.
+ *
+ * Without this, every exercise sharing a task+tier took the SAME first N items
+ * — so "write about people", "write about objects" and "write about places"
+ * were literally the same three prompts.
+ */
+const cursor = new Map<string, number>();
 
 function baseKey(key: string): string {
   return key.replace(/^m/, "").replace(/^h/, "");
 }
 
+/** Exercises with their own hand-authored bank, keyed by curriculum key. */
+const AUTHORED: Record<string, string[]> = {
+  ...Object.fromEntries(
+    Object.entries(REWRITE_BANKS).map(([k, items]) => [k, items.map((i) => i.id)]),
+  ),
+  "gr-present": SPEAK_PATTERN_ITEMS.map((i) => i.id),
+};
+
 function pick(block: CurriculumBlock, ex: CurriculumExercise): string[] {
+  // MEDIUM/HARD reuse the same drills under an m-/h- prefix.
+  const authored = AUTHORED[ex.key] ?? AUTHORED[baseKey(ex.key)];
+  if (authored) return authored;
+
   const bank = BANKS[ex.taskType];
   if (bank === null) {
     gaps.push(`${ex.key} (${ex.taskType}) — no item bank; runs live`);
@@ -132,7 +154,19 @@ function pick(block: CurriculumBlock, ex: CurriculumExercise): string[] {
     pool = tiered.length > 0 ? tiered : pool;
   }
 
-  const chosen = pool.slice(0, want).map((i) => i.id);
+  const poolKey = `${ex.taskType}:${block.level}:${
+    ex.taskType === "fill_in_blanks" ? baseKey(ex.key) : ""
+  }`;
+  const from = cursor.get(poolKey) ?? 0;
+  // Wrap rather than run dry when a bank is smaller than the total demand.
+  const chosen =
+    pool.length === 0
+      ? []
+      : Array.from({ length: Math.min(want, pool.length) }, (_, k) =>
+          pool[(from + k) % pool.length].id,
+        );
+  cursor.set(poolKey, from + chosen.length);
+
   if (chosen.length < want) {
     gaps.push(
       `${ex.key} — wanted ${want}, bank only had ${chosen.length} at tier "${tier}"`,

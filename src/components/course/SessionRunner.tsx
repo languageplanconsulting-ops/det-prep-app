@@ -258,11 +258,21 @@ export function SessionRunner({
               taskType={activeExercise.taskType}
               titleTh={activeExercise.titleTh}
               gateTh={activeExercise.gateTh}
+              hasNext={queue.some((i) => i.id !== activeExercise.id && !done.has(i.id))}
               onCancel={() => setActiveExercise(null)}
               onDone={(correct, total) => {
                 setScores((s) => ({ ...s, [activeExercise.id]: { correct, total } }));
-                setDone((prev) => new Set(prev).add(activeExercise.id));
+                const next = new Set(done);
+                next.add(activeExercise.id);
+                setDone(next);
                 setActiveExercise(null);
+                // Last outstanding item — go straight to the day summary rather
+                // than dropping back onto a fully-ticked checklist.
+                if (queue.every((i) => next.has(i.id))) {
+                  const completed = queue.filter((i) => next.has(i.id));
+                  onFinish([], completed);
+                  setPhase("done");
+                }
               }}
             />
           </div>

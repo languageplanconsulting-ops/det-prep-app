@@ -3,6 +3,16 @@
 import { useMemo, useState } from "react";
 
 import { inlineContentFor } from "@/lib/course-plan/exercise-content";
+import { rewriteIsCorrect, type RewriteItem } from "@/lib/course-plan/grammar-writing-bank";
+import {
+  inflectionIsCorrect,
+  type SpeakPatternItem,
+} from "@/lib/course-plan/speak-pattern-bank";
+import {
+  endingIssueHintTh,
+  pronunciationPassed,
+  pronunciationScore,
+} from "@/lib/pronunciation-match";
 
 /**
  * Runs an exercise inside the session, so a learner never leaves the course to
@@ -20,6 +30,7 @@ export function InlineExercise({
   gateTh,
   onDone,
   onCancel,
+  hasNext = true,
 }: {
   exerciseKey: string;
   taskType: string | null;
@@ -28,6 +39,8 @@ export function InlineExercise({
   /** correct / total, so the session can apply the gate. */
   onDone: (correct: number, total: number) => void;
   onCancel: () => void;
+  /** False when this is the last outstanding item of the day. */
+  hasNext?: boolean;
 }) {
   const content = useMemo(
     () => inlineContentFor(exerciseKey, taskType),
@@ -37,6 +50,8 @@ export function InlineExercise({
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [checked, setChecked] = useState<null | boolean>(null);
+  const [attempts, setAttempts] = useState(0);
+  const [gaveUp, setGaveUp] = useState(false);
   const [answer, setAnswer] = useState<string[]>([]);
 
   if (!content) {
@@ -74,9 +89,11 @@ export function InlineExercise({
         <button
           type="button"
           onClick={() => onDone(correct, total)}
-          className="w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white"
+          className={`w-full rounded-full py-3 text-sm font-black text-white ${
+            hasNext ? "bg-[#004AAD]" : "bg-emerald-600"
+          }`}
         >
-          บันทึกผล แล้วไปต่อ
+          {hasNext ? "แบบฝึกถัดไป →" : "จบของวันนี้ 🎉"}
         </button>
       </Frame>
     );
@@ -85,9 +102,23 @@ export function InlineExercise({
   function next(wasCorrect: boolean) {
     if (wasCorrect) setCorrect((c) => c + 1);
     setChecked(null);
+    setAttempts(0);
+    setGaveUp(false);
     setAnswer([]);
     setIndex((i) => i + 1);
   }
+
+  /** A wrong answer costs an attempt; three exhausts them and reveals. */
+  function grade(ok: boolean) {
+    setChecked(ok);
+    if (!ok) setAttempts((a) => a + 1);
+  }
+  const shared = {
+    attempts,
+    gaveUp,
+    onRetry: () => setChecked(null),
+    onGiveUp: () => setGaveUp(true),
+  };
 
   return (
     <Frame title={titleTh} onCancel={onCancel} progress={`${index + 1}/${total}`}>
@@ -97,7 +128,8 @@ export function InlineExercise({
           answer={answer}
           setAnswer={setAnswer}
           checked={checked}
-          onCheck={(ok) => setChecked(ok)}
+          onCheck={(ok) => grade(ok)}
+          {...shared}
           onNext={() => next(checked === true)}
         />
       )}
@@ -105,7 +137,26 @@ export function InlineExercise({
         <RealWordItemView
           item={content.items[index]}
           checked={checked}
-          onCheck={(ok) => setChecked(ok)}
+          onCheck={(ok) => grade(ok)}
+          {...shared}
+          onNext={() => next(checked === true)}
+        />
+      )}
+      {content.kind === "rewrite" && (
+        <RewriteItemView
+          item={content.items[index]}
+          checked={checked}
+          onCheck={(ok) => grade(ok)}
+          {...shared}
+          onNext={() => next(checked === true)}
+        />
+      )}
+      {content.kind === "speakPattern" && (
+        <SpeakPatternView
+          item={content.items[index]}
+          checked={checked}
+          onCheck={(ok) => grade(ok)}
+          {...shared}
           onNext={() => next(checked === true)}
         />
       )}
@@ -113,7 +164,8 @@ export function InlineExercise({
         <GrammarItemView
           item={content.items[index]}
           checked={checked}
-          onCheck={(ok) => setChecked(ok)}
+          onCheck={(ok) => grade(ok)}
+          {...shared}
           onNext={() => next(checked === true)}
         />
       )}
@@ -162,6 +214,10 @@ function DictationItem({
   checked,
   onCheck,
   onNext,
+  attempts,
+  gaveUp,
+  onRetry,
+  onGiveUp,
 }: {
   item: { answer: string; tokens: string[]; distractors: string[]; hintTh: string };
   answer: string[];
@@ -169,6 +225,10 @@ function DictationItem({
   checked: boolean | null;
   onCheck: (ok: boolean) => void;
   onNext: () => void;
+  attempts?: number;
+  gaveUp?: boolean;
+  onRetry?: () => void;
+  onGiveUp?: () => void;
 }) {
   // Distractors sit after the real tokens in a stable order — no shuffling, so
   // the same item always presents identically.
@@ -222,6 +282,10 @@ function DictationItem({
         onCheck={() => onCheck(answer.join(" ") === item.answer)}
         canCheck={answer.length > 0}
         onNext={onNext}
+        attempts={attempts}
+        gaveUp={gaveUp}
+        onRetry={onRetry}
+        onGiveUp={onGiveUp}
       />
     </div>
   );
@@ -233,11 +297,19 @@ function RealWordItemView({
   checked,
   onCheck,
   onNext,
+  attempts,
+  gaveUp,
+  onRetry,
+  onGiveUp,
 }: {
   item: { word: string; misspelling: string; meaningTh: string };
   checked: boolean | null;
   onCheck: (ok: boolean) => void;
   onNext: () => void;
+  attempts?: number;
+  gaveUp?: boolean;
+  onRetry?: () => void;
+  onGiveUp?: () => void;
 }) {
   const [picked, setPicked] = useState<string | null>(null);
   // Stable order: alphabetical, so the answer is not always in the same slot
@@ -275,6 +347,10 @@ function RealWordItemView({
         onCheck={() => onCheck(picked === item.word)}
         canCheck={picked !== null}
         onNext={onNext}
+        attempts={attempts}
+        gaveUp={gaveUp}
+        onRetry={onRetry}
+        onGiveUp={onGiveUp}
       />
     </div>
   );
@@ -286,6 +362,10 @@ function GrammarItemView({
   checked,
   onCheck,
   onNext,
+  attempts,
+  gaveUp,
+  onRetry,
+  onGiveUp,
 }: {
   item: {
     titleEn: string;
@@ -302,6 +382,10 @@ function GrammarItemView({
   checked: boolean | null;
   onCheck: (ok: boolean) => void;
   onNext: () => void;
+  attempts?: number;
+  gaveUp?: boolean;
+  onRetry?: () => void;
+  onGiveUp?: () => void;
 }) {
   const [typed, setTyped] = useState<Record<number, string>>({});
   const [hintFor, setHintFor] = useState<number | null>(null);
@@ -380,12 +464,243 @@ function GrammarItemView({
         onCheck={() => onCheck(item.blanks.every((_, i) => isRight(i)))}
         canCheck={allTyped}
         onNext={onNext}
+        attempts={attempts}
+        gaveUp={gaveUp}
+        onRetry={onRetry}
+        onGiveUp={onGiveUp}
       />
     </div>
   );
 }
 
-/** Shared check / result / next footer. */
+/** Retype the sentence with the punctuation fixed. */
+function RewriteItemView({
+  item,
+  checked,
+  onCheck,
+  onNext,
+  attempts,
+  gaveUp,
+  onRetry,
+  onGiveUp,
+}: {
+  item: RewriteItem;
+  checked: boolean | null;
+  onCheck: (ok: boolean) => void;
+  onNext: () => void;
+  attempts?: number;
+  gaveUp?: boolean;
+  onRetry?: () => void;
+  onGiveUp?: () => void;
+}) {
+  const [typed, setTyped] = useState("");
+  const [showHint, setShowHint] = useState(false);
+
+  return (
+    <div>
+      <p className="rounded-xl bg-slate-50 p-3 text-[12px] text-slate-500 ring-1 ring-slate-200">
+        พิมพ์ประโยคใหม่ให้ถูกต้อง (เครื่องหมายวรรคตอนสำคัญ)
+      </p>
+
+      <p className="mt-3 rounded-xl bg-white p-3 text-[14px] font-bold leading-relaxed text-slate-800 ring-1 ring-slate-300">
+        {item.prompt}
+      </p>
+
+      <textarea
+        value={typed}
+        disabled={checked !== null}
+        onChange={(e) => setTyped(e.target.value)}
+        rows={3}
+        placeholder="พิมพ์ประโยคที่แก้แล้ว…"
+        className="mt-3 w-full rounded-xl bg-slate-50 p-3 text-[14px] font-semibold text-slate-800 outline-none ring-1 ring-slate-200 focus:bg-white focus:ring-slate-400"
+      />
+
+      {checked === null && (
+        <button
+          type="button"
+          onClick={() => setShowHint((v) => !v)}
+          className="mt-1.5 text-[11px] font-bold text-slate-400"
+        >
+          💡 {showHint ? "ซ่อนคำใบ้" : "ขอคำใบ้"}
+        </button>
+      )}
+      {showHint && checked === null && (
+        <p className="mt-1 text-[11px] text-slate-500">{item.hintTh}</p>
+      )}
+
+      {/* The rule, as a portable pattern rather than a paragraph. */}
+      {checked !== null && (
+        <div className="mt-3 rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200">
+          <p className="text-[11px] font-black text-slate-700">{item.rule.nameTh}</p>
+          <p className="mt-1 rounded-lg bg-white px-2.5 py-1.5 font-mono text-[12px] font-bold text-[#004AAD] ring-1 ring-slate-200">
+            {item.rule.pattern}
+          </p>
+          <ul className="mt-2 space-y-0.5">
+            {item.rule.bulletsTh.map((b, i) => (
+              <li key={i} className="text-[11px] text-slate-600">
+                · {b}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[11px] text-slate-500">{item.explanationThai}</p>
+        </div>
+      )}
+
+      <Verdict
+        checked={checked}
+        correctText={item.answers[0]}
+        canCheck={typed.trim().length > 0}
+        onCheck={() => onCheck(rewriteIsCorrect(item, typed))}
+        onNext={onNext}
+        attempts={attempts}
+        gaveUp={gaveUp}
+        onRetry={onRetry}
+        onGiveUp={onGiveUp}
+      />
+    </div>
+  );
+}
+
+/**
+ * Inflect the verb, then say the whole sentence.
+ *
+ * Scoring is the app's existing pronunciation gate: 95% word match AND no
+ * dropped -s/-es/-ed. Writing the ending correctly then swallowing it aloud is
+ * exactly the habit this drill exists to catch.
+ */
+function SpeakPatternView({
+  item,
+  checked,
+  onCheck,
+  onNext,
+  attempts,
+  gaveUp,
+  onRetry,
+  onGiveUp,
+}: {
+  item: SpeakPatternItem;
+  checked: boolean | null;
+  onCheck: (ok: boolean) => void;
+  onNext: () => void;
+  attempts?: number;
+  gaveUp?: boolean;
+  onRetry?: () => void;
+  onGiveUp?: () => void;
+}) {
+  const [typed, setTyped] = useState("");
+  const [stage, setStage] = useState<"type" | "speak">("type");
+  const [spoken, setSpoken] = useState("");
+  const result = spoken ? pronunciationScore(item.fullSentence, spoken) : null;
+
+  const typedOk = inflectionIsCorrect(item, typed);
+
+  return (
+    <div>
+      <p className="rounded-xl bg-slate-50 p-3 text-[12px] text-slate-500 ring-1 ring-slate-200">
+        {item.promptTh}
+      </p>
+
+      <p className="mt-3 text-[15px] font-bold leading-relaxed text-slate-800">
+        {item.frameEn.split("__")[0]}
+        <span className="mx-1 inline-flex items-center rounded-lg bg-amber-50 px-2 py-0.5 ring-1 ring-amber-300">
+          <input
+            value={typed}
+            disabled={stage === "speak"}
+            onChange={(e) => setTyped(e.target.value)}
+            placeholder={item.baseVerb}
+            className="w-24 bg-transparent text-center text-[15px] font-black text-amber-900 outline-none"
+          />
+        </span>
+        {item.frameEn.split("__")[1]}
+      </p>
+
+      {stage === "type" && (
+        <>
+          {typed.trim().length > 0 && !typedOk && (
+            <p className="mt-2 text-[11px] font-bold text-rose-600">
+              ยังไม่ถูก — ประธานเอกพจน์ ต้องเติม -s / -es
+            </p>
+          )}
+          <button
+            type="button"
+            disabled={!typedOk}
+            onClick={() => setStage("speak")}
+            className="mt-4 w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white disabled:opacity-30"
+          >
+            ถูกแล้ว → ไปอัดเสียง
+          </button>
+        </>
+      )}
+
+      {stage === "speak" && (
+        <div className="mt-4">
+          <p className="rounded-xl bg-violet-50 p-3 text-[13px] font-bold text-violet-900 ring-1 ring-violet-200">
+            🎤 พูดประโยคนี้: “{item.fullSentence}”
+          </p>
+          <p className="mt-1.5 text-[11px] text-slate-500">
+            เสียงท้ายคำ “-s” ต้องได้ยินชัด ไม่งั้นไม่ผ่าน
+          </p>
+
+          {/* Transcript comes from the app's existing speech pipeline; typed
+              here so the drill is testable before that is wired in. */}
+          <textarea
+            value={spoken}
+            disabled={checked !== null}
+            onChange={(e) => setSpoken(e.target.value)}
+            rows={2}
+            placeholder="ผลถอดเสียงจะขึ้นตรงนี้…"
+            className="mt-2 w-full rounded-xl bg-slate-50 p-3 text-[13px] text-slate-800 outline-none ring-1 ring-slate-200 focus:bg-white focus:ring-slate-400"
+          />
+
+          {result && checked !== null && (
+            <div className="mt-2 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200">
+              <p className="text-[12px] font-black text-slate-700">
+                ตรงกัน {result.pct}% (ต้องได้ 95% ขึ้นไป)
+              </p>
+              {result.endingIssues.length > 0 && (
+                <ul className="mt-1 space-y-0.5">
+                  {result.endingIssues.map((iss, i) => (
+                    <li key={i} className="text-[11px] font-bold text-rose-600">
+                      · {endingIssueHintTh(iss)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          <div className="mt-2 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200">
+            <p className="text-[11px] font-black text-slate-700">
+              Present simple: ประธานเอกพจน์
+            </p>
+            <p className="mt-1 rounded-lg bg-white px-2.5 py-1.5 font-mono text-[12px] font-bold text-[#004AAD] ring-1 ring-slate-200">
+              He / She / It / N(เอกพจน์) + V-s
+            </p>
+            <p className="mt-1.5 text-[11px] text-slate-600">· {item.whyTh}</p>
+          </div>
+
+          <Verdict
+            checked={checked}
+            correctText={item.fullSentence}
+            canCheck={spoken.trim().length > 0}
+            onCheck={() =>
+              onCheck(Boolean(result && pronunciationPassed(result)))
+            }
+            onNext={onNext}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Shared check / result / next footer.
+ *
+ * A wrong answer does NOT reveal the solution — the learner retries. The answer
+ * only appears after three attempts, or when they explicitly give up. Showing it
+ * on the first miss turns a drill into a reading exercise.
+ */
 function Verdict({
   checked,
   correctText,
@@ -393,6 +708,10 @@ function Verdict({
   canCheck,
   onCheck,
   onNext,
+  attempts = 0,
+  gaveUp = false,
+  onRetry,
+  onGiveUp,
 }: {
   checked: boolean | null;
   correctText: string;
@@ -400,6 +719,10 @@ function Verdict({
   canCheck: boolean;
   onCheck: () => void;
   onNext: () => void;
+  attempts?: number;
+  gaveUp?: boolean;
+  onRetry?: () => void;
+  onGiveUp?: () => void;
 }) {
   if (checked === null) {
     return (
@@ -413,6 +736,38 @@ function Verdict({
       </button>
     );
   }
+
+  // Right, or out of attempts, or they asked — only then is the answer shown.
+  const reveal = checked || gaveUp || attempts >= 3;
+
+  if (!checked && !reveal) {
+    return (
+      <div className="mt-4">
+        <div className="rounded-2xl bg-rose-50 p-3.5 text-rose-900 ring-1 ring-rose-200">
+          <p className="text-sm font-black">ยังไม่ถูก — ลองใหม่อีกครั้ง</p>
+          <p className="mt-0.5 text-[11px]">
+            พยายามครั้งที่ {attempts} / 3 {attempts >= 2 ? "· อีกครั้งเดียวจะเฉลยให้" : ""}
+          </p>
+          {hintTh && <p className="mt-1 text-[11px] opacity-80">💡 {hintTh}</p>}
+        </div>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-3 w-full rounded-full bg-slate-900 py-3 text-sm font-black text-white"
+        >
+          แก้ใหม่อีกครั้ง
+        </button>
+        <button
+          type="button"
+          onClick={onGiveUp}
+          className="mt-2 w-full rounded-full py-2 text-[12px] font-bold text-slate-400"
+        >
+          ยอมแพ้ ขอดูเฉลย
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4">
       <div
@@ -422,7 +777,9 @@ function Verdict({
             : "bg-rose-50 text-rose-900 ring-rose-200"
         }`}
       >
-        <p className="text-sm font-black">{checked ? "ถูกต้อง! 🎉" : "ยังไม่ถูก"}</p>
+        <p className="text-sm font-black">
+          {checked ? "ถูกต้อง! 🎉" : gaveUp ? "เฉลย" : "ยังไม่ถูก — นี่คือเฉลย"}
+        </p>
         <p className="mt-1 text-[12px]">
           <strong>เฉลย:</strong> {correctText}
         </p>
