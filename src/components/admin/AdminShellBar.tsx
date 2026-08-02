@@ -21,6 +21,12 @@ export function AdminShellBar() {
         Admin home
       </Link>
       <Link
+        href="/admin/course"
+        className="rounded-[4px] border-2 border-black bg-emerald-100 px-3 py-1 text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-emerald-200"
+      >
+        Course
+      </Link>
+      <Link
         href="/admin/study-activity"
         className="rounded-[4px] border-2 border-black bg-white px-3 py-1 text-xs font-bold text-neutral-900 shadow-[2px_2px_0_0_#000] hover:bg-ep-yellow/30"
       >

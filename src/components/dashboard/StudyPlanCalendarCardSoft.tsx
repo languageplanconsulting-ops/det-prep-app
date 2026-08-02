@@ -39,6 +39,7 @@ import {
 } from "@/lib/study-plan/daily-plan";
 import type { DayProgress, SkillTrend } from "@/lib/study-plan/daily-progress";
 import { COURSE_HREF, weaknessResourceFor } from "@/lib/study-plan/weakness-resources";
+import { LEVEL_TH, STATUS_TH, videosForWeakness } from "@/lib/course-production";
 import type { TaskWeakness } from "@/lib/study-plan/weakness-vector";
 import type { DayExtra } from "@/lib/study-plan/personal-plan";
 import { generateCalendar, type CalendarDay } from "@/lib/study-plan/schedule";
@@ -971,6 +972,7 @@ export function StudyPlanCalendarCardSoft({
                         </Link>
                       )}
                     </div>
+                    {courseUnlocked && <PlannedVideos taskType={t.taskType} />}
                   </div>
                 );
               })}
@@ -1051,6 +1053,50 @@ export function StudyPlanCalendarCardSoft({
             ))}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The course videos planned for a weakness, newest ladder first.
+ *
+ * Rendered only when the course is unlocked (today: admin-only, see
+ * resolveCourseAccess). Videos that have not been recorded yet are shown as
+ * muted "กำลังถ่าย" chips rather than dead links — the production board at
+ * /admin/course/production is where their status is managed.
+ */
+function PlannedVideos({ taskType }: { taskType: string }) {
+  const videos = videosForWeakness(taskType);
+  if (videos.length === 0) return null;
+
+  const ready = videos.filter((v) => v.status === "live" || v.status === "uploaded");
+  const pending = videos.filter((v) => v.status !== "live" && v.status !== "uploaded");
+
+  return (
+    <div className="mt-2 border-t border-rose-100 pt-2">
+      <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-rose-300">
+        คลิปที่ตรงกับจุดอ่อนนี้
+      </p>
+      <div className="flex flex-wrap gap-1.5 text-[11px] font-bold">
+        {ready.map((v) => (
+          <Link
+            key={v.key}
+            href={COURSE_HREF}
+            className="rounded-full bg-amber-100 px-2.5 py-1 text-amber-800 hover:bg-amber-200"
+          >
+            🎬 {v.titleTh}
+          </Link>
+        ))}
+        {pending.map((v) => (
+          <span
+            key={v.key}
+            className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-400"
+            title={`ระดับ${LEVEL_TH[v.level]} · ${STATUS_TH[v.status]}`}
+          >
+            🎥 {v.titleTh} · กำลังถ่าย
+          </span>
+        ))}
       </div>
     </div>
   );

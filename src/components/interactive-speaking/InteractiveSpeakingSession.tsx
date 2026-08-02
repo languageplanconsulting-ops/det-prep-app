@@ -172,10 +172,15 @@ async function playQuestionTts(text: string): Promise<void> {
 export function InteractiveSpeakingSession({
   scenario,
   startWithRedeem = false,
+  onComplete,
+  embedded = false,
 }: {
   scenario: InteractiveSpeakingScenario;
   /** When URL has `?redeem=1`, show last score and pulse the start button. */
   startWithRedeem?: boolean;
+  /** When set (course journey), stay in place and hand the report back. */
+  onComplete?: (report: InteractiveSpeakingAttemptReport) => void;
+  embedded?: boolean;
 }) {
   const router = useRouter();
   const { isAdmin, previewEligible, effectiveTier } = useEffectiveTier();
@@ -729,6 +734,10 @@ export function InteractiveSpeakingSession({
         }
         stashReportForNavigation(report.attemptId, report);
         saveInteractiveSpeakingReport(report);
+        if (onComplete) {
+          onComplete(report);
+          return;
+        }
         await router.push(`/practice/production/interactive-speaking/report/${report.attemptId}`);
       } catch (e) {
         setSubmitError(e instanceof Error ? e.message : "Grading failed.");
@@ -825,12 +834,14 @@ export function InteractiveSpeakingSession({
       <div className={`min-h-screen ${LANDING_PAGE_GRID_BG}`}>
         <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
           <VipAiFeedbackQuotaBanner />
-          <Link
-            href="/practice/production/interactive-speaking"
-            className="mb-6 inline-flex text-sm font-bold text-ep-blue underline-offset-4 hover:underline"
-          >
-            ← Scenarios
-          </Link>
+          {!embedded ? (
+            <Link
+              href="/practice/production/interactive-speaking"
+              className="mb-6 inline-flex text-sm font-bold text-ep-blue underline-offset-4 hover:underline"
+            >
+              ← Scenarios
+            </Link>
+          ) : null}
           {soft ? (
             <div className="mb-6 flex items-start gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">

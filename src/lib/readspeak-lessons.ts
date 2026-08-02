@@ -16,15 +16,38 @@ export type ReadSpeakBlank = {
 
 export type ReadSpeakVocab = { word: string; en: string; th: string };
 
+/**
+ * The four moves of a DET speaking answer: state it, explain why, give a
+ * concrete example, close it off. Every model answer is built from these, and
+ * VIP learners get them labelled + a build-the-answer drill.
+ */
+export type ReadSpeakMoveKind = "direct" | "explain" | "example" | "conclude";
+
+export type ReadSpeakMove = { kind: ReadSpeakMoveKind; en: string; th: string };
+
+export const MOVE_LABELS: Record<ReadSpeakMoveKind, { th: string; en: string; hintTh: string }> = {
+  direct: { th: "ตอบตรงคำถาม", en: "Direct answer", hintTh: "ตอบคำถามให้ตรงในประโยคแรก อย่าเพิ่งเล่ารายละเอียด" },
+  explain: { th: "อธิบายเหตุผล", en: "Explain", hintTh: "บอกว่าทำไมถึงเป็นแบบนั้น — ใช้ because / due to / this allows for" },
+  example: { th: "ยกตัวอย่าง", en: "Provide an example", hintTh: "ยกตัวอย่างรูปธรรม — For example / For instance" },
+  conclude: { th: "สรุป", en: "Conclude", hintTh: "สรุปกลับไปที่คำถาม — Overall / Therefore / In conclusion" },
+};
+
+export const MOVE_ORDER: ReadSpeakMoveKind[] = ["direct", "explain", "example", "conclude"];
+
 export type ReadSpeakItem = {
   id: string;
   tier: ReadSpeakTier;
   level: "A2" | "B1" | "B2" | "C1";
+  /** Always phrased as a question — this is what the examiner asks. */
   topic: string;
   topicTh: string;
+  /** Recurring DET topic family (family, work, education, health, …). */
+  family?: string;
   template: string;
   blanks: ReadSpeakBlank[];
   answer: string;
+  /** The answer split into its four moves. Absent on not-yet-rewritten items. */
+  moves?: ReadSpeakMove[];
   vocab: ReadSpeakVocab[];
 };
 

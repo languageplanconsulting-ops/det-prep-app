@@ -22,6 +22,7 @@ export const SELF_STUDY_SKILLS = [
   "vocabulary_reading",
   "interactive_speaking",
   "interactive_conversation_mcq",
+  "dialogue_summary",
 ] as const;
 
 export const SUPPORT_EMAIL = "languageplanconsulting@gmail.com";

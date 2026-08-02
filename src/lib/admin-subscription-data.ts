@@ -16,17 +16,55 @@ export const TIER_MONTHLY_THB: Record<string, number> = {
 export type DerivedStatus =
   | "active"
   | "expired"
-  | "unsynced"
+  | "checkout_abandoned"
+  | "payment_unsynced"
+  | "lapsed"
+  | "needs_check"
   | "trial"
   | "free_trial";
 
-export function deriveSubscriptionStatus(p: {
-  tier: string | null;
-  tier_expires_at: string | null;
-  stripe_subscription_id: string | null;
-  stripe_customer_id: string | null;
-  vip_granted_by_course: boolean | null;
-}): DerivedStatus {
+/**
+ * How long one purchase covers the learner. This app sells one-time monthly
+ * access, so a succeeded payment should keep them paid for ~this many days.
+ * Used to tell "paid and STILL should have access" (a real webhook failure)
+ * apart from "paid, then the month simply ran out" (normal lifecycle).
+ */
+export const PURCHASE_COVERAGE_DAYS = 31;
+
+/**
+ * What `payment_history` says about a user. Derived once per page of results
+ * so status can distinguish an abandoned checkout from a real sync failure.
+ */
+export type PaymentSignal = {
+  succeededCount: number;
+  refundedCount: number;
+  lastSucceededAt: string | null;
+  lastSucceededTier: string | null;
+  lastSucceededSatang: number;
+  lastMethod: string | null;
+};
+
+export const EMPTY_PAYMENT_SIGNAL: PaymentSignal = {
+  succeededCount: 0,
+  refundedCount: 0,
+  lastSucceededAt: null,
+  lastSucceededTier: null,
+  lastSucceededSatang: 0,
+  lastMethod: null,
+};
+
+export function deriveSubscriptionStatus(
+  p: {
+    tier: string | null;
+    tier_expires_at: string | null;
+    stripe_subscription_id: string | null;
+    stripe_customer_id: string | null;
+    vip_granted_by_course: boolean | null;
+  },
+  // Omit when payment history isn't loaded — the free+Stripe-customer case then
+  // reports "needs_check" instead of guessing which kind of gap it is.
+  signal?: PaymentSignal | null,
+): DerivedStatus {
   const tier = p.tier ?? "free";
   const exp = p.tier_expires_at ? new Date(p.tier_expires_at) : null;
   const now = new Date();
@@ -40,15 +78,27 @@ export function deriveSubscriptionStatus(p: {
     return "expired";
   }
 
-  // `tier === "free"` + has a Stripe customer ID means one of two real-world cases:
-  //   (a) a paid customer was manually downgraded to free, or
-  //   (b) a fresh Stripe payment didn't sync (webhook missed it, common for
-  //       PromptPay where async_payment_succeeded must be enabled in the
-  //       Dashboard). The admin should click "Re-sync from Stripe" to repair.
-  // Previously this returned "cancelled" which was misleading — this app uses
-  // one-time payments, not subscriptions, so "cancelled" doesn't apply.
+  // `tier === "free"` + a Stripe customer ID is NOT automatically a problem.
+  // The customer object is created when checkout opens (create-checkout route),
+  // so every abandoned checkout lands here too. Split the cases by what they
+  // actually paid, otherwise real webhook failures drown in false alarms.
   if (tier === "free" && p.stripe_customer_id && !p.stripe_subscription_id) {
-    return "unsynced";
+    if (!signal) return "needs_check";
+
+    // Never completed a payment — they opened checkout and walked away.
+    if (signal.succeededCount === 0) return "checkout_abandoned";
+
+    // Paid, but the access their money bought should still be running. This is
+    // the genuine alarm: a missed webhook (common for PromptPay when
+    // async_payment_succeeded isn't enabled) or an erroneous downgrade.
+    const paidAt = signal.lastSucceededAt
+      ? new Date(signal.lastSucceededAt).getTime()
+      : 0;
+    const coverageEnds = paidAt + PURCHASE_COVERAGE_DAYS * 86400 * 1000;
+    if (coverageEnds > now.getTime()) return "payment_unsynced";
+
+    // Paid once upon a time, the month ran out. Normal, not a fault.
+    return "lapsed";
   }
 
   if (tier === "free" && !p.stripe_customer_id) {
@@ -80,6 +130,145 @@ export function derivePaymentKind(p: {
 
 export const formatBahtFromSatang = formatSatang;
 
+export type StatusSeverity = "ok" | "info" | "muted" | "critical";
+
+/**
+ * The plain-language "what actually happened" behind a status, so the admin
+ * list never shows a bare warning without saying why or what to do about it.
+ */
+export type StatusDetail = {
+  code: DerivedStatus;
+  severity: StatusSeverity;
+  /** Short label for the status cell. */
+  label: string;
+  /** One sentence naming the evidence (dates, amounts, counts). */
+  detail: string;
+  /** What the admin should do, or null when nothing is wrong. */
+  action: string | null;
+};
+
+function daysSince(iso: string): number {
+  return Math.floor((Date.now() - new Date(iso).getTime()) / (86400 * 1000));
+}
+
+function shortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function buildStatusDetail(
+  status: DerivedStatus,
+  p: {
+    tier: string | null;
+    tier_expires_at: string | null;
+    created_at: string | null;
+    vip_granted_by_course: boolean | null;
+  },
+  signal: PaymentSignal,
+): StatusDetail {
+  const tier = p.tier ?? "free";
+
+  switch (status) {
+    case "active": {
+      if (p.vip_granted_by_course && !p.tier_expires_at) {
+        return {
+          code: status,
+          severity: "ok",
+          label: "Active / ใช้งาน",
+          detail: "VIP granted with the course — never expires.",
+          action: null,
+        };
+      }
+      return {
+        code: status,
+        severity: "ok",
+        label: "Active / ใช้งาน",
+        detail: p.tier_expires_at
+          ? `${tier} access runs until ${shortDate(p.tier_expires_at)}.`
+          : `${tier} access with no expiry set.`,
+        action: null,
+      };
+    }
+
+    case "expired":
+      return {
+        code: status,
+        severity: "muted",
+        label: "Expired / หมดอายุ",
+        detail: p.tier_expires_at
+          ? `${tier} access ended ${shortDate(p.tier_expires_at)} (${daysSince(p.tier_expires_at)} days ago).`
+          : `${tier} access has expired.`,
+        action: "Normal lifecycle — nothing to fix unless they say they renewed.",
+      };
+
+    case "checkout_abandoned":
+      return {
+        code: status,
+        severity: "info",
+        label: "Never paid / ยังไม่จ่าย",
+        detail:
+          "Opened the Stripe checkout page but never completed a payment — ฿0 received, 0 payment records. The Stripe customer ID is created the moment checkout opens, so this is expected.",
+        action: "Nothing is broken. A follow-up nudge is the only action.",
+      };
+
+    case "payment_unsynced": {
+      const when = signal.lastSucceededAt;
+      const amount = formatSatang(signal.lastSucceededSatang);
+      const dupes =
+        signal.succeededCount > 1
+          ? ` ${signal.succeededCount} succeeded payment records exist — check Stripe for a double charge.`
+          : "";
+      return {
+        code: status,
+        severity: "critical",
+        label: "PAID — not applied / จ่ายแล้วไม่ได้สิทธิ์",
+        detail: when
+          ? `Paid ${amount} for ${signal.lastSucceededTier ?? "access"} on ${shortDate(when)} (${daysSince(when)} days ago) but the tier is still free. Their access should be live right now.${dupes}`
+          : `A succeeded payment exists but the tier is still free.${dupes}`,
+        action:
+          "Real problem — open the user and click 'Re-sync from Stripe' (likely a missed PromptPay async_payment_succeeded webhook).",
+      };
+    }
+
+    case "lapsed": {
+      const when = signal.lastSucceededAt;
+      return {
+        code: status,
+        severity: "muted",
+        label: "Past customer / เคยจ่าย",
+        detail: when
+          ? `Last paid ${formatSatang(signal.lastSucceededSatang)} on ${shortDate(when)} (${daysSince(when)} days ago). That month has run out, so free is correct.`
+          : "Paid in the past; the access window has run out.",
+        action: null,
+      };
+    }
+
+    case "needs_check":
+      return {
+        code: status,
+        severity: "info",
+        label: "Check payments / ต้องตรวจสอบ",
+        detail:
+          "Free tier with a Stripe customer ID; payment history wasn't loaded for this view.",
+        action: "Open the user to see the full payment history.",
+      };
+
+    default:
+      return {
+        code: status,
+        severity: "info",
+        label: "Free trial / ทดลอง",
+        detail: p.created_at
+          ? `Free user since ${shortDate(p.created_at)}. Never started a checkout.`
+          : "Free user. Never started a checkout.",
+        action: null,
+      };
+  }
+}
+
 export type SubscriptionListItem = {
   id: string;
   email: string;
@@ -92,6 +281,7 @@ export type SubscriptionListItem = {
   vip_granted_by_course: boolean;
   created_at: string | null;
   derivedStatus: DerivedStatus;
+  statusDetail: StatusDetail;
   paymentKind: PaymentKind;
   totalPaidSatang: number;
   monthlyLabel: string;
@@ -469,19 +659,44 @@ export async function fetchSubscriptionList(params: {
 
   let rows = (rawRows ?? []) as Record<string, unknown>[];
 
+  // The free + Stripe-customer rows are the only ones whose status depends on
+  // payment history. That set is tiny, so resolve their signals up front and
+  // the status filter can target the precise case instead of one vague bucket.
+  const ambiguousIds = rows
+    .filter(
+      (r) =>
+        ((r.tier as string | null) ?? "free") === "free" &&
+        !!r.stripe_customer_id &&
+        !r.stripe_subscription_id,
+    )
+    .map((r) => r.id as string);
+  const filterSignals = await fetchPaymentSignals(ambiguousIds);
+
   rows = rows.filter((r) => {
     const p = rowToProfile(r);
-    const st = deriveSubscriptionStatus(p);
+    const st = deriveSubscriptionStatus(
+      p,
+      filterSignals.get(r.id as string) ?? EMPTY_PAYMENT_SIGNAL,
+    );
     const pk = derivePaymentKind(p);
 
     if (params.status && params.status !== "all") {
       if (params.status === "active" && st !== "active") return false;
       if (params.status === "expired" && st !== "expired") return false;
+      // "unsynced"/"cancelled" are kept as legacy aliases for the real alarm.
       if (
-        (params.status === "cancelled" || params.status === "unsynced") &&
-        st !== "unsynced"
+        (params.status === "cancelled" ||
+          params.status === "unsynced" ||
+          params.status === "payment_unsynced") &&
+        st !== "payment_unsynced"
       )
         return false;
+      if (
+        params.status === "checkout_abandoned" &&
+        st !== "checkout_abandoned"
+      )
+        return false;
+      if (params.status === "lapsed" && st !== "lapsed") return false;
       if (params.status === "vip_course" && !p.vip_granted_by_course)
         return false;
       if (
@@ -555,7 +770,8 @@ export async function fetchSubscriptionList(params: {
   const listItems: SubscriptionListItem[] = pageRows.map((r) => {
     const id = r.id as string;
     const p = rowToProfile(r);
-    const st = deriveSubscriptionStatus(p);
+    const signal = paymentAgg.signals.get(id) ?? EMPTY_PAYMENT_SIGNAL;
+    const st = deriveSubscriptionStatus(p, signal);
     const pk = derivePaymentKind(p);
     const totalSat = paymentAgg.totalPaid.get(id) ?? 0;
     const tier = (r.tier as string) ?? "free";
@@ -578,6 +794,7 @@ export async function fetchSubscriptionList(params: {
       vip_granted_by_course: r.vip_granted_by_course === true,
       created_at: (r.created_at as string | null) ?? null,
       derivedStatus: st,
+      statusDetail: buildStatusDetail(st, p, signal),
       paymentKind: pk,
       totalPaidSatang: totalSat,
       monthlyLabel,
@@ -648,12 +865,13 @@ async function aggregateSessionsForUsers(ids: string[]) {
 
 async function aggregatePaymentsForUsers(ids: string[]) {
   const totalPaid = new Map<string, number>();
-  if (ids.length === 0) return { totalPaid };
+  const signals = new Map<string, PaymentSignal>();
+  if (ids.length === 0) return { totalPaid, signals };
 
   const supabase = createServiceRoleSupabase();
   const { data: pays } = await supabase
     .from("payment_history")
-    .select("user_id, amount, status")
+    .select("user_id, amount, status, tier, payment_method, created_at")
     .in("user_id", ids);
 
   for (const p of pays ?? []) {
@@ -665,22 +883,53 @@ async function aggregatePaymentsForUsers(ids: string[]) {
     } else {
       totalPaid.set(uid, (totalPaid.get(uid) ?? 0) + amt);
     }
+
+    const sig = signals.get(uid) ?? { ...EMPTY_PAYMENT_SIGNAL };
+    if (p.status === "refunded") {
+      sig.refundedCount += 1;
+    } else {
+      sig.succeededCount += 1;
+      const at = p.created_at as string | null;
+      if (at && (!sig.lastSucceededAt || new Date(at) > new Date(sig.lastSucceededAt))) {
+        sig.lastSucceededAt = at;
+        sig.lastSucceededTier = (p.tier as string | null) ?? null;
+        sig.lastSucceededSatang = amt;
+        sig.lastMethod = (p.payment_method as string | null) ?? null;
+      }
+    }
+    signals.set(uid, sig);
   }
 
-  return { totalPaid };
+  return { totalPaid, signals };
 }
 
+/**
+ * Payment signals for an arbitrary set of users, used when the status filter
+ * needs to tell the free+Stripe-customer cases apart before pagination.
+ */
+async function fetchPaymentSignals(ids: string[]) {
+  const { signals } = await aggregatePaymentsForUsers(ids);
+  return signals;
+}
+
+/**
+ * Every mock a learner actually sits is the fixed 20-step engine, which writes
+ * to `mock_fixed_results`. The legacy v1/v2 engine table `mock_test_results` is
+ * empty in production and unreachable from the UI, so counting it reported 0
+ * mocks for every user. Both are summed so historical rows still show up if the
+ * legacy table is ever backfilled.
+ */
 async function aggregateMockTestsForUsers(ids: string[]) {
   const map = new Map<string, number>();
   if (ids.length === 0) return map;
 
   const supabase = createServiceRoleSupabase();
-  const { data: rows } = await supabase
-    .from("mock_test_results")
-    .select("user_id")
-    .in("user_id", ids);
+  const [{ data: fixedRows }, { data: legacyRows }] = await Promise.all([
+    supabase.from("mock_fixed_results").select("user_id").in("user_id", ids),
+    supabase.from("mock_test_results").select("user_id").in("user_id", ids),
+  ]);
 
-  for (const r of rows ?? []) {
+  for (const r of [...(fixedRows ?? []), ...(legacyRows ?? [])]) {
     const uid = r.user_id as string;
     map.set(uid, (map.get(uid) ?? 0) + 1);
   }
@@ -759,9 +1008,9 @@ export async function fetchUserSubscriptionDetail(userId: string) {
       )
       .eq("user_id", userId),
     supabase
-      .from("mock_test_results")
+      .from("mock_fixed_results")
       .select(
-        "id, session_id, overall_score, literacy_score, comprehension_score, conversation_score, production_score, duration_seconds, created_at",
+        "id, session_id, set_id, actual_total, actual_listening, actual_speaking, actual_reading, actual_writing, target_total, created_at",
       )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
@@ -880,6 +1129,43 @@ export async function fetchUserSubscriptionDetail(userId: string) {
     (feedbackCredits ?? []).map((row) => mapExtraCreditRow(row as Record<string, unknown>)),
     vipWeekly,
   );
+  // `mock_fixed_results` stores the DET four-skill buckets and no duration, so
+  // normalise it into the shape the admin table renders and derive how long the
+  // sitting took from its session row.
+  const mockSessionSpans = new Map<string, number>();
+  const mockSessionIds = (mockResults ?? [])
+    .map((r) => (r as Record<string, unknown>).session_id as string | null)
+    .filter((id): id is string => Boolean(id));
+  if (mockSessionIds.length) {
+    const { data: mockSessions } = await supabase
+      .from("mock_fixed_sessions")
+      .select("id, started_at, completed_at")
+      .in("id", mockSessionIds);
+    for (const s of mockSessions ?? []) {
+      const started = s.started_at ? new Date(s.started_at as string).getTime() : NaN;
+      const ended = s.completed_at ? new Date(s.completed_at as string).getTime() : NaN;
+      if (Number.isFinite(started) && Number.isFinite(ended) && ended > started) {
+        mockSessionSpans.set(s.id as string, Math.round((ended - started) / 1000));
+      }
+    }
+  }
+  const mockScoreRows = (mockResults ?? []).map((row) => {
+    const r = row as Record<string, unknown>;
+    return {
+      id: r.id,
+      session_id: r.session_id,
+      set_id: r.set_id,
+      created_at: r.created_at,
+      overall_score: r.actual_total,
+      target_score: r.target_total,
+      listening_score: r.actual_listening,
+      speaking_score: r.actual_speaking,
+      reading_score: r.actual_reading,
+      writing_score: r.actual_writing,
+      duration_seconds: mockSessionSpans.get(r.session_id as string) ?? null,
+    };
+  });
+
   const mockQuota = buildAdminMockQuotaSnapshot({
     monthlyLimit: MOCK_TEST_MONTHLY_LIMIT[effectiveTier] ?? 0,
     monthlyUsed: countCurrentMonthRows((mockResults ?? []) as Record<string, unknown>[], "created_at"),
@@ -910,12 +1196,12 @@ export async function fetchUserSubscriptionDetail(userId: string) {
       favoriteSkill,
       favoritePct: favPct,
       weeklyMinutes: [...weekBuckets],
-      mockTestsTotal: (mockResults ?? []).length,
+      mockTestsTotal: mockScoreRows.length,
     },
     totalPaidSatang,
     notebookEntries: notebookEntries ?? [],
     notebookSync: notebookSync ?? [],
-    mockTestScores: mockResults ?? [],
+    mockTestScores: mockScoreRows,
     studySessionScores: [...(sessions ?? [])].sort(
       (a, b) =>
         new Date((b.started_at as string) ?? 0).getTime() -
@@ -1142,11 +1428,15 @@ export async function buildExportRows(
 
   return filtered.map((r) => {
     const id = r.id as string;
+    const p = rowToProfile(r);
+    const signal = paymentAgg.signals.get(id) ?? EMPTY_PAYMENT_SIGNAL;
+    const st = deriveSubscriptionStatus(p, signal);
     return {
       name: (r.full_name as string) ?? "",
       email: (r.email as string) ?? "",
       tier: (r.tier as string) ?? "",
-      status: deriveSubscriptionStatus(rowToProfile(r)),
+      status: st,
+      status_reason: buildStatusDetail(st, p, signal).detail,
       start_date: (r.created_at as string) ?? "",
       expiry_date: (r.tier_expires_at as string) ?? "",
       total_paid_satang: paymentAgg.totalPaid.get(id) ?? 0,

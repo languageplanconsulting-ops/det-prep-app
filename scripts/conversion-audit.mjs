@@ -61,6 +61,10 @@ const revenueTHB = payments
   .reduce((s, p) => s + (p.amount ?? 0), 0) / 100;
 
 const engagedUserIds = new Set(sessions.map((s) => s.user_id));
+const sessionCountByUser = new Map();
+for (const s of sessions) {
+  sessionCountByUser.set(s.user_id, (sessionCountByUser.get(s.user_id) ?? 0) + 1);
+}
 const completedUserIds = new Set(sessions.filter((s) => s.completed).map((s) => s.user_id));
 
 const eventUsers = (type) => new Set(events.filter((e) => e.event_type === type).map((e) => e.user_id));
@@ -84,12 +88,18 @@ hr('SEGMENTING USERS CURRENTLY SHOWING AS "free"');
 const free = profiles.filter((p) => (p.tier ?? "free") === "free");
 console.log(`Currently free: ${free.length} (${pct(free.length, total)} of all users)\n`);
 
+// NOTE on `checkout_abandoned`: a Stripe customer object is created the moment
+// checkout OPENS (see src/app/api/stripe/create-checkout/route.ts — the customer id
+// is written to profiles BEFORE the session is created). So "has stripe_customer_id
+// but never paid" is an abandoned cart, NOT a billing failure. Mirrors the same
+// split already used by deriveSubscriptionStatus in src/lib/admin-subscription-data.ts.
+// Only users with a SUCCEEDED payment that still reads as free are real alarms.
 const seg = {
-  lapsed_paid: [],        // ever paid (payment_history) but now free  => churned / day-30 lapse
-  unsynced_paid: [],      // has stripe_customer_id, no subscription, never recorded as paid OR expiry still future => webhook miss / bug
-  bug_future_expiry: [],  // free but tier_expires_at STILL in the future => login-downgrade victim
-  never_paid_engaged: [], // no payment, no stripe customer, but DID practice => real non-converter to win back
-  never_paid_ghost: [],   // signed up, never practiced, never paid => dead lead
+  lapsed_paid: [],         // ever paid (payment_history) but now free  => churned / day-30 lapse
+  checkout_abandoned: [],  // has stripe_customer_id, ZERO succeeded payments => opened checkout, walked away
+  bug_future_expiry: [],   // free but tier_expires_at STILL in the future => login-downgrade victim
+  never_paid_engaged: [],  // no payment, no stripe customer, but DID practice => real non-converter to win back
+  never_paid_ghost: [],    // signed up, never practiced, never paid => dead lead
 };
 
 for (const r of free) {
@@ -103,7 +113,7 @@ for (const r of free) {
   } else if (everPaid) {
     seg.lapsed_paid.push(r);
   } else if (hasCustomer && !r.stripe_subscription_id) {
-    seg.unsynced_paid.push(r);
+    seg.checkout_abandoned.push(r);
   } else if (engaged) {
     seg.never_paid_engaged.push(r);
   } else {
@@ -115,13 +125,13 @@ const line = (label, arr, note) =>
   console.log(`  ${label.padEnd(34)} ${String(arr.length).padStart(5)}  ${pct(arr.length, free.length).padStart(7)}   ${note}`);
 console.log("  SEGMENT".padEnd(36) + "COUNT".padStart(5) + "  SHARE".padStart(9) + "   MEANING");
 line("🔴 bug / future-expiry victims", seg.bug_future_expiry, "PAID, knocked to free early — restore now");
-line("🟠 unsynced (paid, webhook miss?)", seg.unsynced_paid, "tried to pay? — Re-sync from Stripe to confirm");
+line("🟠 abandoned checkout (฿0 paid)", seg.checkout_abandoned, "clicked Buy, never finished — NOT a billing bug");
 line("🟡 lapsed payers (churned)", seg.lapsed_paid, "paid before, didn't renew — win-back campaign");
 line("🟢 never-paid but ENGAGED", seg.never_paid_engaged, "real prospects — these are your conversion target");
 line("⚪ never-paid ghosts", seg.never_paid_ghost, "signed up, never practiced — activation problem");
 
-const recoverable = seg.bug_future_expiry.length + seg.unsynced_paid.length;
-console.log(`\n  >> ${recoverable} of your "free" users are likely BILLING failures, not non-converters.`);
+console.log(`\n  >> ${seg.bug_future_expiry.length} are real BILLING failures (paid, access not applied).`);
+console.log(`  >> ${seg.checkout_abandoned.length} abandoned checkout — no money was lost, they never paid.`);
 console.log(`  >> ${seg.never_paid_engaged.length} are genuine engaged prospects to convert with marketing/product.`);
 console.log(`  >> ${seg.never_paid_ghost.length} never engaged at all (fix onboarding/activation first).`);
 
@@ -129,9 +139,18 @@ if (seg.bug_future_expiry.length) {
   console.log(`\n  Restore these (free but expiry still future):`);
   for (const r of seg.bug_future_expiry.slice(0, 30)) console.log(`     ${r.email}  expires=${r.tier_expires_at}`);
 }
-if (seg.unsynced_paid.length) {
-  console.log(`\n  Re-sync these from Stripe (free + has customer, no subscription):`);
-  for (const r of seg.unsynced_paid.slice(0, 30)) console.log(`     ${r.email}`);
+if (seg.checkout_abandoned.length) {
+  // Ranked by practice sessions: someone who used the product heavily and THEN
+  // walked away at the payment page is the warmest lead in the whole database.
+  const ranked = [...seg.checkout_abandoned]
+    .map((r) => ({ email: r.email, sessions: sessionCountByUser.get(r.id) ?? 0 }))
+    .sort((a, b) => b.sessions - a.sessions);
+  console.log(`\n  Abandoned checkout — ฿0 received, nothing to re-sync.`);
+  console.log(`  Ranked by engagement (ask them what stopped them):`);
+  for (const r of ranked.slice(0, 30)) {
+    const heat = r.sessions >= 10 ? " <-- HOT: used the app a lot, then stopped at payment" : "";
+    console.log(`     ${String(r.sessions).padStart(3)} sessions  ${r.email}${heat}`);
+  }
 }
 
 // ===================== FUNNEL (business_events) =====================

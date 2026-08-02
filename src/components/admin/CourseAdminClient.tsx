@@ -2,13 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { BunnyVideoEmbed } from "@/components/course/BunnyVideoEmbed";
 import type { CourseSnapshot, CourseLessonRow } from "@/lib/admin-course-data";
-
-const BUNNY_LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID ?? "715227";
-
-function embedUrl(guid: string): string {
-  return `https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${guid}?autoplay=false&preload=false`;
-}
 
 function formatDuration(seconds: number | null): string {
   if (!seconds || seconds <= 0) return "—";
@@ -73,17 +68,13 @@ export function CourseAdminClient({ snapshot }: { snapshot: CourseSnapshot }) {
       <section className="ep-brutal rounded-sm border-black bg-white p-4 lg:order-2">
         {activeLesson?.bunnyVideoGuid ? (
           <>
-            <div className="relative w-full overflow-hidden border-4 border-black bg-black pt-[56.25%]">
-              <iframe
-                key={activeLesson.bunnyVideoGuid}
-                src={embedUrl(activeLesson.bunnyVideoGuid)}
-                title={activeLesson.title}
-                loading="lazy"
-                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-                allowFullScreen
-                className="absolute inset-0 h-full w-full"
-              />
-            </div>
+            <BunnyVideoEmbed
+              guid={activeLesson.bunnyVideoGuid}
+              title={activeLesson.title}
+              brutal
+              lessonId={activeLesson.id}
+              startSeconds={0}
+            />
             <h2 className="mt-4 text-xl font-black tracking-tight">{activeLesson.title}</h2>
             <p className="mt-1 text-sm text-neutral-600">
               {formatDuration(activeLesson.durationSeconds)}

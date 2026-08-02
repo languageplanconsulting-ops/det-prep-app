@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { useAdminGateOverride } from "@/hooks/useAdminGateOverride";
 import { inlineContentFor } from "@/lib/course-plan/exercise-content";
 import { rewriteIsCorrect, type RewriteItem } from "@/lib/course-plan/grammar-writing-bank";
 import {
@@ -46,6 +47,7 @@ export function InlineExercise({
     () => inlineContentFor(exerciseKey, taskType),
     [exerciseKey, taskType],
   );
+  const override = useAdminGateOverride();
 
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -122,6 +124,15 @@ export function InlineExercise({
 
   return (
     <Frame title={titleTh} onCancel={onCancel} progress={`${index + 1}/${total}`}>
+      {override.enabled && (
+        <button
+          type="button"
+          onClick={() => onDone(total, total)}
+          className="mb-3 w-full rounded-full bg-amber-500 py-2 text-[12px] font-black text-white"
+        >
+          ⚡ ข้ามแบบฝึกนี้ทั้งชุด (admin)
+        </button>
+      )}
       {content.kind === "dictation" && (
         <DictationItem
           item={content.items[index]}

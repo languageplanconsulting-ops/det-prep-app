@@ -9,6 +9,8 @@ import { DEFAULT_TASK_PRIORITY, taskLabel } from "@/lib/course-plan/categories";
 import { COURSE_VIDEO_PLAN, type CourseVideoPlan } from "@/lib/course-production";
 import type { RungLevel, RungStep } from "@/lib/course-plan/rungs";
 
+export type CatchUpMode = "ask" | "adapt" | "carry";
+
 export type PlanSettings = {
   /** ISO "YYYY-MM-DD" the plan starts from. */
   startDate: string;
@@ -24,6 +26,13 @@ export type PlanSettings = {
   weeks: number;
   /** Skip videos entirely — exercises only (the "practice mode" toggle). */
   practiceOnly: boolean;
+  /**
+   * When past days still hold unfinished lessons/drills:
+   * - ask: prompt once
+   * - adapt: reflow the plan from today
+   * - carry: keep overdue on the calendar + backlog
+   */
+  catchUpMode: CatchUpMode;
 };
 
 export const DEFAULT_PLAN_SETTINGS: PlanSettings = {
@@ -32,6 +41,7 @@ export const DEFAULT_PLAN_SETTINGS: PlanSettings = {
   studyDays: [1, 2, 3, 4, 5],
   weeks: 12,
   practiceOnly: false,
+  catchUpMode: "ask",
 };
 
 export const WEEKDAY_TH = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];

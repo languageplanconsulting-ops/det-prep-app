@@ -61,3 +61,40 @@ export function subscribePreviewTierChange(callback: () => void): () => void {
   window.addEventListener(PREVIEW_CHANGE_EVENT, handler);
   return () => window.removeEventListener(PREVIEW_CHANGE_EVENT, handler);
 }
+
+// ---------------------------------------------------------------------------
+// Gate override — walk the learner journey without having to pass anything
+// ---------------------------------------------------------------------------
+
+export const ADMIN_GATE_OVERRIDE_KEY = "admin_gate_override";
+const GATE_OVERRIDE_EVENT = "englishplan-admin-gate-override-changed";
+
+/**
+ * When on, every pass-mark in the course journey gains a visible "skip (admin)"
+ * escape: cloze 100%, pronunciation 95%, read-aloud and listen confirmations,
+ * score gates, and video watch-through.
+ *
+ * Deliberately an explicit toggle rather than "always on for admins": an admin
+ * checking whether a gate actually blocks a learner needs the real behaviour by
+ * default, and a silent bypass would hide exactly the bugs this exists to find.
+ * It is also client-only and cosmetic — it never writes a passing score to the
+ * server, it just lets the UI advance.
+ */
+export function setGateOverride(on: boolean): void {
+  if (typeof window === "undefined") return;
+  if (on) sessionStorage.setItem(ADMIN_GATE_OVERRIDE_KEY, "1");
+  else sessionStorage.removeItem(ADMIN_GATE_OVERRIDE_KEY);
+  window.dispatchEvent(new CustomEvent(GATE_OVERRIDE_EVENT));
+}
+
+export function getGateOverride(): boolean {
+  if (typeof window === "undefined") return false;
+  return sessionStorage.getItem(ADMIN_GATE_OVERRIDE_KEY) === "1";
+}
+
+export function subscribeGateOverrideChange(callback: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const handler = () => callback();
+  window.addEventListener(GATE_OVERRIDE_EVENT, handler);
+  return () => window.removeEventListener(GATE_OVERRIDE_EVENT, handler);
+}

@@ -91,6 +91,7 @@ export async function POST(req: Request) {
   const promptTh = o.promptTh;
   const imageUrl = o.imageUrl;
   const keywords = o.keywords;
+  const targetVocabulary = o.targetVocabulary;
   const redeemed = o.redeemed;
   const originHubRaw = o.originHub;
   const originHub =
@@ -129,6 +130,9 @@ export async function POST(req: Request) {
   const taskKeywords = Array.isArray(keywords)
     ? keywords.map((k) => String(k).trim()).filter(Boolean)
     : [];
+  const targetVocabList = Array.isArray(targetVocabulary)
+    ? targetVocabulary.map((k) => String(k).trim()).filter(Boolean)
+    : [];
 
   try {
     const model = await resolveGeminiTextModel();
@@ -157,6 +161,7 @@ export async function POST(req: Request) {
       promptTh: typeof promptTh === "string" ? promptTh : "",
       imageUrl: imageUrl.trim(),
       taskKeywords,
+      targetVocabulary: targetVocabList,
       prepMinutes,
       transcript,
       originHub,

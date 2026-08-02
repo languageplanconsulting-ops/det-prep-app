@@ -35,8 +35,6 @@ import { READSPEAK_ITEMS } from "../src/lib/readspeak-lessons-data";
 import { READWRITE_ITEMS } from "../src/lib/readwrite-lessons-data";
 import { PHOTOWRITE_ITEMS } from "../src/lib/photo-write-lessons-data";
 import { SPEAKPHOTO_ITEMS } from "../src/lib/speakphoto-lessons-data";
-import { MAIN_IDEA_ITEMS } from "../src/lib/main-idea-lessons-data";
-import { CAMPUS_VOCAB_SCENARIOS } from "../src/lib/campus-vocab-lessons-data";
 
 type Tier = "easy" | "medium" | "advanced";
 type Item = { id: string; tier?: string };
@@ -49,12 +47,13 @@ const BANKS: Record<string, Item[] | null> = {
   read_and_write: READWRITE_ITEMS as unknown as Item[],
   write_about_photo: PHOTOWRITE_ITEMS as unknown as Item[],
   speak_about_photo: SPEAKPHOTO_ITEMS as unknown as Item[],
-  reading_comprehension: MAIN_IDEA_ITEMS as unknown as Item[],
-  vocabulary_reading: CAMPUS_VOCAB_SCENARIOS as unknown as Item[],
+  reading_comprehension: null,
+  vocabulary_reading: null,
   fill_in_blanks: GRAMMAR_EXERCISES as unknown as Item[],
-  // No bank of their own — these run against live AI/interactive flows.
+  // Filled from the live content-bank snapshot in buildInteractiveRefs().
   interactive_speaking: null,
   interactive_conversation_mcq: null,
+  dialogue_summary: null,
 };
 
 /** Curriculum block level -> bank tier. Banks call the top tier "advanced". */
@@ -209,26 +208,294 @@ async function buildProductionRefs(): Promise<Record<string, string[]>> {
     const speakingTopics: SpeakingTopicRow[] = JSON.parse(payload["ep-speaking-topics"] ?? "[]");
 
     const writingRound = (r: number) => writingTopics.filter((t) => t.round === r).map((t) => t.id);
+    const wEasy = writingRound(1);
     const wMedium = writingRound(2);
     const wHard = writingRound(3);
-    if (wMedium.length < 4) gaps.push(`writing round 2 has only ${wMedium.length} topics, wanted 4`);
-    if (wHard.length < 4) gaps.push(`writing round 3 has only ${wHard.length} topics, wanted 4`);
+    if (wEasy.length < 3) gaps.push(`writing round 1 has only ${wEasy.length} topics, wanted 3`);
+    if (wMedium.length < 3) gaps.push(`writing round 2 has only ${wMedium.length} topics, wanted 3`);
+    if (wHard.length < 3) gaps.push(`writing round 3 has only ${wHard.length} topics, wanted 3`);
     const wCursor = new Map<string, number>();
-    refs["mwt-real"] = takeSeq(wMedium, "writing:m", 4, wCursor);
-    refs["hwt-real"] = takeSeq(wHard, "writing:h", 4, wCursor);
+    // Three separate one-topic exercises, so the planner spreads them over three
+    // days (see the "write-topic" spreadGroup in curriculum.ts).
+    for (const [prefix, pool, tag] of [
+      ["wt", wEasy, "writing:e"],
+      ["mwt", wMedium, "writing:m"],
+      ["hwt", wHard, "writing:h"],
+    ] as const) {
+      takeSeq(pool, tag, 3, wCursor).forEach((ref, i) => {
+        refs[`${prefix}-real${i + 1}`] = [ref];
+      });
+    }
 
     const speakingPairs = (r: number) =>
       speakingTopics
         .filter((t) => t.round === r)
         .flatMap((t) => t.questions.map((q) => `${t.id}::${q.id}::${r}`));
+    const sEasy = speakingPairs(1);
     const sMedium = speakingPairs(3);
     const sHard = speakingPairs(5);
-    if (sMedium.length < 4) gaps.push(`speaking round 3 has only ${sMedium.length} question pairs, wanted 4`);
-    if (sHard.length < 4) gaps.push(`speaking round 5 has only ${sHard.length} question pairs, wanted 4`);
+    if (sEasy.length < 3) gaps.push(`speaking round 1 has only ${sEasy.length} question pairs, wanted 3`);
+    if (sMedium.length < 3) gaps.push(`speaking round 3 has only ${sMedium.length} question pairs, wanted 3`);
+    if (sHard.length < 3) gaps.push(`speaking round 5 has only ${sHard.length} question pairs, wanted 3`);
     const sCursor = new Map<string, number>();
-    refs["mst-real"] = takeSeq(sMedium, "speaking:m", 4, sCursor);
-    refs["hst-real"] = takeSeq(sHard, "speaking:h", 4, sCursor);
+    // The three un-guided speaking runs are separate exercises, one question
+    // each, so the planner can put them on three different days (see the
+    // "speak-topic" spreadGroup in curriculum.ts) instead of stacking them.
+    for (const [prefix, pool, tag] of [
+      ["st", sEasy, "speaking:e"],
+      ["mst", sMedium, "speaking:m"],
+      ["hst", sHard, "speaking:h"],
+    ] as const) {
+      const picked = takeSeq(pool, tag, 3, sCursor);
+      picked.forEach((ref, i) => {
+        refs[`${prefix}-real${i + 1}`] = [ref];
+      });
+    }
   }
+
+  return refs;
+}
+
+/**
+ * Fixed interactive speaking / conversation / dialogue-summary slots drawn
+ * from the live content-bank snapshot. Conversation currently only has the
+ * "easy" difficulty uploaded, so MEDIUM/HARD escalate by round instead.
+ *
+ * Ref shapes:
+ *   interactive_speaking → scenario id
+ *   interactive_conversation_mcq → "round:difficulty:setNumber"
+ *   dialogue_summary → exam id (ds-r{n}-{diff}-s{NN})
+ */
+async function buildInteractiveRefs(): Promise<Record<string, string[]>> {
+  const env = loadEnv();
+  const refs: Record<string, string[]> = {};
+  if (!env.NEXT_PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    gaps.push("interactive refs — no .env.local / service-role key; run locally to fill these");
+    return refs;
+  }
+  const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false },
+  });
+  const { data: snapshot, error: snapErr } = await supabase
+    .from("content_bank_snapshots")
+    .select("payload")
+    .eq("id", "global")
+    .maybeSingle();
+  if (snapErr || !snapshot?.payload) {
+    gaps.push(
+      `interactive refs — content_bank_snapshots failed: ${snapErr?.message ?? "empty"}`,
+    );
+    return refs;
+  }
+  const payload = snapshot.payload as Record<string, string>;
+
+  // --- Interactive speaking: 4 fixed scenarios per level (spreadDays: 4) ---
+  type IsScenario = { id: string };
+  let scenarios: IsScenario[] = [];
+  try {
+    scenarios = JSON.parse(payload["ep-interactive-speaking-scenarios-v1"] ?? "[]") as IsScenario[];
+  } catch {
+    scenarios = [];
+  }
+  const isIds = scenarios.map((s) => s.id).filter(Boolean);
+  // Skip the demo scenario when we have enough real ones.
+  const isPool = isIds.filter((id) => id !== "is-demo-first-week");
+  const isSource = isPool.length >= 4 ? isPool : isIds;
+  if (isSource.length < 4) {
+    gaps.push(`interactive speaking — only ${isSource.length} scenarios in bank, wanted ≥4`);
+  } else {
+    const isCursor = new Map<string, number>();
+    refs["is-real"] = takeSeq(isSource, "is", 4, isCursor);
+    refs["mis-real"] = takeSeq(isSource, "is", 4, isCursor);
+    refs["his-real"] = takeSeq(isSource, "is", 4, isCursor);
+  }
+
+  // --- Interactive conversation: 3 fixed sets per level (best_of: 3) ---
+  // Bank shape: { [round]: { [difficulty]: { [slot]: exam } } } or arrays.
+  type ConvExam = { id?: string; setNumber?: number; difficulty?: string };
+  type ConvBank = Record<string, Record<string, Record<string, ConvExam> | ConvExam[]>>;
+  let convBank: ConvBank = {};
+  try {
+    convBank = JSON.parse(payload["ep-conversation-bank-v2"] ?? "{}") as ConvBank;
+  } catch {
+    convBank = {};
+  }
+  function convRefs(round: number, difficulty: string, setNumbers: number[]): string[] {
+    const slot = convBank[String(round)]?.[difficulty];
+    if (!slot) return [];
+    const exams = Array.isArray(slot) ? slot : Object.values(slot);
+    const bySet = new Map(
+      exams
+        .filter((e) => e && typeof e.setNumber === "number")
+        .map((e) => [e.setNumber as number, e]),
+    );
+    return setNumbers
+      .filter((n) => bySet.has(n))
+      .map((n) => `${round}:${difficulty}:${n}`);
+  }
+  // Only "easy" difficulty is populated today — escalate by round.
+  const icEasy = convRefs(1, "easy", [1, 2, 3]);
+  const icMed = convRefs(3, "easy", [25, 26, 27]);
+  const icHard = convRefs(5, "easy", [34, 35, 36]);
+  if (icEasy.length === 3) refs["ic-set"] = icEasy;
+  else gaps.push(`ic-set — wanted 3, got ${icEasy.length} from R1 easy`);
+  if (icMed.length === 3) refs["mic-set"] = icMed;
+  else gaps.push(`mic-set — wanted 3, got ${icMed.length} from R3 easy`);
+  if (icHard.length === 3) refs["hic-set"] = icHard;
+  else gaps.push(`hic-set — wanted 3, got ${icHard.length} from R5 easy`);
+
+  // --- Dialogue summary: 3 fixed topics per level ---
+  type DsExam = { id?: string; setNumber?: number };
+  type DsBank = Record<string, Record<string, Record<string, DsExam> | DsExam[]>>;
+  let dsBank: DsBank = {};
+  try {
+    dsBank = JSON.parse(payload["ep-dialogue-summary-bank-v1"] ?? "{}") as DsBank;
+  } catch {
+    dsBank = {};
+  }
+  function dsRefs(round: number, difficulty: string, setNumbers: number[]): string[] {
+    const slot = dsBank[String(round)]?.[difficulty];
+    if (!slot) return [];
+    const exams = Array.isArray(slot) ? slot : Object.values(slot);
+    const bySet = new Map(
+      exams
+        .filter((e) => e && typeof e.setNumber === "number" && typeof e.id === "string")
+        .map((e) => [e.setNumber as number, e.id as string]),
+    );
+    return setNumbers.map((n) => bySet.get(n)).filter((id): id is string => Boolean(id));
+  }
+  const dsEasy = dsRefs(1, "easy", [1, 2, 3]);
+  const dsMed = dsRefs(1, "medium", [11, 12, 13]);
+  const dsHard = dsRefs(1, "hard", [16, 17, 18]);
+  if (dsEasy.length === 3) refs["ds-set"] = dsEasy;
+  else gaps.push(`ds-set — wanted 3, got ${dsEasy.length}`);
+  if (dsMed.length === 3) refs["mds-set"] = dsMed;
+  else gaps.push(`mds-set — wanted 3, got ${dsMed.length}`);
+  if (dsHard.length === 3) refs["hds-set"] = dsHard;
+  else gaps.push(`hds-set — wanted 3, got ${dsHard.length}`);
+
+  return refs;
+}
+
+/**
+ * Fixed reading + vocab exam slots (right/wrong scoring, no AI).
+ *
+ * Ref shapes:
+ *   reading_comprehension → "round:difficulty:setNumber:examNumber"
+ *   vocabulary_reading    → "round:setNumber:level:passageNumber"
+ */
+async function buildComprehensionRefs(): Promise<Record<string, string[]>> {
+  const env = loadEnv();
+  const refs: Record<string, string[]> = {};
+  if (!env.NEXT_PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    gaps.push("comprehension refs — no .env.local / service-role key; run locally to fill these");
+    return refs;
+  }
+  const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false },
+  });
+  const { data: snapshot, error: snapErr } = await supabase
+    .from("content_bank_snapshots")
+    .select("payload")
+    .eq("id", "global")
+    .maybeSingle();
+  if (snapErr || !snapshot?.payload) {
+    gaps.push(
+      `comprehension refs — content_bank_snapshots failed: ${snapErr?.message ?? "empty"}`,
+    );
+    return refs;
+  }
+  const payload = snapshot.payload as Record<string, string>;
+
+  // --- Reading: 5 fixed exams per level (average_tracked → count 5) ---
+  type ReadingSet = { setNumber?: number; exams?: unknown[] };
+  type ReadingBank = Record<string, Record<string, ReadingSet[] | Record<string, ReadingSet>>>;
+  let readingBank: ReadingBank = {};
+  try {
+    readingBank = JSON.parse(payload["ep-reading-sets"] ?? "{}") as ReadingBank;
+  } catch {
+    readingBank = {};
+  }
+  function readingRefs(
+    round: number,
+    difficulty: string,
+    setNumber: number,
+    examNumbers: number[],
+  ): string[] {
+    const slot = readingBank[String(round)]?.[difficulty];
+    if (!slot) return [];
+    const sets = Array.isArray(slot) ? slot : Object.values(slot);
+    const found = sets.find((s) => s && s.setNumber === setNumber);
+    const examCount = found?.exams?.length ?? 0;
+    return examNumbers
+      .filter((n) => n >= 1 && n <= examCount)
+      .map((n) => `${round}:${difficulty}:${setNumber}:${n}`);
+  }
+  // Mix within each track (5 slots = average_tracked count):
+  //   EASY   → all easy
+  //   MEDIUM → 2 easy + 3 medium
+  //   HARD   → 2 medium + 3 hard
+  const rsEasy = readingRefs(1, "easy", 1, [1, 2, 3, 4, 5]);
+  const rsMed = [
+    ...readingRefs(1, "easy", 1, [1, 2]),
+    ...readingRefs(1, "medium", 1, [1, 2, 3]),
+  ];
+  const rsHard = [
+    ...readingRefs(1, "medium", 1, [1, 2]),
+    ...readingRefs(1, "hard", 1, [1, 2, 3]),
+  ];
+  if (rsEasy.length === 5) refs["rs-exam"] = rsEasy;
+  else gaps.push(`rs-exam — wanted 5, got ${rsEasy.length}`);
+  if (rsMed.length === 5) refs["mrs-exam"] = rsMed;
+  else gaps.push(`mrs-exam — wanted 5 (2 easy + 3 medium), got ${rsMed.length}`);
+  if (rsHard.length === 5) refs["hrs-exam"] = rsHard;
+  else gaps.push(`hrs-exam — wanted 5 (2 medium + 3 hard), got ${rsHard.length}`);
+
+  // --- Vocab: 5 fixed passages per level from R1 set 1 ---
+  type VocabPassage = { passageNumber?: number; contentLevel?: string };
+  type VocabSet = { setNumber?: number; passages?: VocabPassage[] };
+  type VocabBank = Record<string, VocabSet[] | Record<string, VocabSet>>;
+  let vocabBank: VocabBank = {};
+  try {
+    vocabBank = JSON.parse(payload["ep-vocab-sets"] ?? "{}") as VocabBank;
+  } catch {
+    vocabBank = {};
+  }
+  function vocabRefs(
+    round: number,
+    setNumber: number,
+    level: string,
+    passageNumbers: number[],
+  ): string[] {
+    const slot = vocabBank[String(round)];
+    if (!slot) return [];
+    const sets = Array.isArray(slot) ? slot : Object.values(slot);
+    const found = sets.find((s) => s && s.setNumber === setNumber);
+    if (!found?.passages) return [];
+    const byLevel = found.passages.filter((p) => p.contentLevel === level);
+    const available = new Set(
+      byLevel.map((p) => p.passageNumber).filter((n): n is number => typeof n === "number"),
+    );
+    return passageNumbers
+      .filter((n) => available.has(n))
+      .map((n) => `${round}:${setNumber}:${level}:${n}`);
+  }
+  // Same mix as reading: EASY all easy · MEDIUM 2e+3m · HARD 2m+3h
+  const rvEasy = vocabRefs(1, 1, "easy", [1, 2, 3, 4, 5]);
+  const rvMed = [
+    ...vocabRefs(1, 1, "easy", [1, 2]),
+    ...vocabRefs(1, 1, "medium", [1, 2, 3]),
+  ];
+  const rvHard = [
+    ...vocabRefs(1, 1, "medium", [1, 2]),
+    ...vocabRefs(1, 1, "hard", [1, 2, 3]),
+  ];
+  if (rvEasy.length === 5) refs["rv-exam"] = rvEasy;
+  else gaps.push(`rv-exam — wanted 5, got ${rvEasy.length}`);
+  if (rvMed.length === 5) refs["mrv-exam"] = rvMed;
+  else gaps.push(`mrv-exam — wanted 5 (2 easy + 3 medium), got ${rvMed.length}`);
+  if (rvHard.length === 5) refs["hrv-exam"] = rvHard;
+  else gaps.push(`hrv-exam — wanted 5 (2 medium + 3 hard), got ${rvHard.length}`);
 
   return refs;
 }
@@ -293,6 +560,8 @@ function pick(block: CurriculumBlock, ex: CurriculumExercise): string[] {
 
 async function main() {
   Object.assign(AUTHORED, await buildProductionRefs());
+  Object.assign(AUTHORED, await buildInteractiveRefs());
+  Object.assign(AUTHORED, await buildComprehensionRefs());
 
   for (const track of [EASY_TRACK, MEDIUM_TRACK, HARD_TRACK]) {
     for (const block of track) {

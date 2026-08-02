@@ -36,3 +36,9 @@ mobile/node_modules
 # Supabase CLI local cache (do not commit)
 supabase/.temp/
 .vercel
+
+# local scratch (transcripts, ffmpeg, previews)
+tmp/
+
+# one-off audit/debug scripts kept locally, never part of the app
+scratchpad-*.mjs

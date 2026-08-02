@@ -129,7 +129,13 @@ function SpeakingCriterionBlock({
   );
 }
 
-export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }) {
+export function SpeakingReportView({
+  report,
+  embedded = false,
+}: {
+  report: SpeakingAttemptReport;
+  embedded?: boolean;
+}) {
   useRevealSfx();
   const router = useRouter();
   const submission = (report.punctuatedTranscript ?? report.transcript).trim();
@@ -169,11 +175,11 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
     .slice(0, 8);
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className={embedded ? "bg-[#fafafa]" : "min-h-screen bg-[#fafafa]"}>
       <ProductionReportLandingHero
         locale="th"
-        backHref="/practice/production/read-and-speak"
-        backLabel="← รอบฝึก"
+        backHref={embedded ? undefined : "/practice/production/read-and-speak"}
+        backLabel={embedded ? undefined : "← รอบฝึก"}
         eyebrow="รายงาน · อ่านแล้วพูด"
         titleEn={report.topicTitleEn}
         titleTh={report.topicTitleTh}
@@ -193,13 +199,15 @@ export function SpeakingReportView({ report }: { report: SpeakingAttemptReport }
           ) : undefined
         }
       >
-        <button
-          type="button"
-          onClick={() => router.push(`${roundTopicHref}?redeem=1&questionId=${encodeURIComponent(report.questionId)}`)}
-          className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
-        >
-          ทำอีกครั้ง
-        </button>
+        {!embedded ? (
+          <button
+            type="button"
+            onClick={() => router.push(`${roundTopicHref}?redeem=1&questionId=${encodeURIComponent(report.questionId)}`)}
+            className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
+          >
+            ทำอีกครั้ง
+          </button>
+        ) : null}
         <SpeakingFullReportNotebookButton report={report} uiLocale={uiLocale} />
       </ProductionReportLandingHero>
 

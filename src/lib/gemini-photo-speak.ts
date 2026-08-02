@@ -83,7 +83,10 @@ function criterion(
   };
 }
 
-function buildSystemInstruction(originHub?: "speak-about-photo" | "write-about-photo"): string {
+function buildSystemInstruction(
+  originHub?: "speak-about-photo" | "write-about-photo",
+  targetVocabulary?: string[],
+): string {
   const writingPenaltyRules =
     originHub === "write-about-photo"
       ? `
@@ -108,6 +111,17 @@ CRITICAL — speak-about-photo input handling:
 - Spoken self-correction: if the learner hesitates, repeats, or restarts but then repairs to a CORRECT form, do NOT deduct for the hesitation or the repair itself — treat the corrected form as what they meant. Only deduct when the FINAL repaired form is still wrong.`
       : "";
 
+  const targetVocabularyRules =
+    targetVocabulary && targetVocabulary.length > 0
+      ? `
+
+TARGET VOCABULARY LIST (a narrow EXCEPTION to normal vocabulary grading, not a replacement for it): the learner was shown this exact word list before answering: ${targetVocabulary.join(", ")}.
+- If the learner already used a word from this list correctly (any inflection, e.g. "crowded"/"crowds"), that ONE word is already the target-level choice — do NOT flag it in vocabularyBreakdown or vocabularyUpgradeSuggestions, and do NOT propose a further "better" synonym for that specific word. Treat it as correct, full credit.
+- This exception covers ONLY words that are literally on the list above. It does NOT limit or soften feedback anywhere else. For every other word or phrase in the answer — plain/everyday words, weak collocations, wrong word choice, or even good advanced vocabulary that just isn't on this particular list — grade and suggest improvements exactly as you normally would, with the same thoroughness as if no list existed. Do not hold back a genuine vocabularyBreakdown item or vocabularyUpgradeSuggestion just because a target list is in play.
+- When a spot in the answer clearly calls for one of the list's words and the learner used something weaker there, prefer suggesting the matching list word. Everywhere else, suggest whatever genuinely improves the answer — you are not limited to this list.
+- Do not penalize vocabularyScorePercent for failing to use every word on the list — one or two used naturally and correctly is enough for full credit on that specific front; score the rest of the vocabulary normally.`
+      : "";
+
   return `You are an expert English examiner for Thai learners (DET-style "speak about a photo").
 The learner saw an image (URL provided for context only — you cannot see pixels; rely on prompt + keyword tags + transcript). The raw transcript is from speech recognition and may lack punctuation.${speechPunctuationRules}
 
@@ -124,7 +138,7 @@ ${toPerfectRulePrompt("punctuatedTranscript", true)}
 
 For EACH criterion summary, include (A) brief assessment and (B) a line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" plus a concrete action tied to THIS learner's wording.
 
-Breakdowns (EVERY item MUST have): excerpt (exact quote), issueEn/issueTh (spoken-language focus — never punctuation/capitalization/spelling), suggestionEn/suggestionTh — MANDATORY on every single item, the FULL corrected version of the excerpt (a real rewritten sentence or phrase), never just abstract advice with no example shown. If you cannot write a concrete corrected version, do not include that breakdown item at all. For vocabulary, suggest better words or collocations when possible. grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement"). It must lead the fix so the learner knows which rule to revise. Keep it under ~6 words.
+Breakdowns (EVERY item MUST have): excerpt (exact quote), issueEn/issueTh (spoken-language focus — never punctuation/capitalization/spelling), suggestionEn/suggestionTh — MANDATORY on every single item, the FULL corrected version of the excerpt (a real rewritten sentence or phrase), never just abstract advice with no example shown. If you cannot write a concrete corrected version, do not include that breakdown item at all. For vocabulary, suggest better words or collocations when possible${targetVocabulary && targetVocabulary.length > 0 ? " — but see the TARGET VOCABULARY LIST rule below first: it overrides this for any word already on that list" : ""}. grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement"). It must lead the fix so the learner knows which rule to revise. Keep it under ~6 words.
 
 Priority for feedback:
 - Prioritize grammar corrections first, then vocabulary upgrades.
@@ -135,7 +149,7 @@ ${taskRubricPrompt("the answer addresses the photo prompt AND the keyword tags g
 
 Task score boost: output taskScorePercent as BASE (0–100). Set taskPersonalExperienceBoost true for authentic personal OR hypothetical personal experience ("If I were…", "I would…", etc.). Server adds +10 to task (cap 100)—note in taskSummary.
 
-vocabularyUpgradeSuggestions: up to 8 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.
+vocabularyUpgradeSuggestions: up to 8 — originalWord, upgradedWord (B2/C1), meaningTh, exampleEn, exampleTh.${targetVocabulary && targetVocabulary.length > 0 ? " Skip any word the learner already picked from the TARGET VOCABULARY LIST — do not suggest replacing it." : ""}
 
 transcriptHighlights: up to 18 — exactQuote from punctuatedTranscript, isPositive, noteEn, noteTh.
 
@@ -143,7 +157,7 @@ Improvement points: each MUST quote an exact phrase from punctuatedTranscript an
 
 Grammar bands: ~30% A1–A2 issues; ~50% B1–B2; ~70% clean; ~90% ≥1 complex structure; 100% ≥3 complex structures.
 
-Return ONLY valid JSON (no markdown). Use issueEn/issueTh for breakdown issues.${writingPenaltyRules}${GEMINI_PRODUCTION_THAI_STYLE}`;
+Return ONLY valid JSON (no markdown). Use issueEn/issueTh for breakdown issues.${writingPenaltyRules}${targetVocabularyRules}${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
 
 function buildUserPayload(
@@ -264,6 +278,8 @@ export async function generatePhotoSpeakReportWithGemini(params: {
   promptTh: string;
   imageUrl: string;
   taskKeywords: string[];
+  /** Words the learner was already shown (course hint panel) — see buildSystemInstruction's TARGET VOCABULARY LIST rule. */
+  targetVocabulary?: string[];
   prepMinutes: number;
   transcript: string;
   originHub?: "speak-about-photo" | "write-about-photo";
@@ -278,6 +294,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
     promptTh,
     imageUrl,
     taskKeywords,
+    targetVocabulary,
     prepMinutes,
     transcript,
     originHub,
@@ -293,7 +310,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       anthropicApiKey: params.anthropicApiKey,
       openAiApiKey: params.openAiApiKey,
     },
-    systemInstruction: buildSystemInstruction(originHub),
+    systemInstruction: buildSystemInstruction(originHub, targetVocabulary),
     userPayload: buildUserPayload(
       titleEn,
       titleTh,

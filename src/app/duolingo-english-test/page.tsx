@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { ARTICLES } from "@/lib/articles";
 import { DET_PAGE_ORDER, DET_PAGES } from "@/lib/seo/det-content";
 import { absoluteUrl } from "@/lib/site-metadata";
 
@@ -94,10 +95,35 @@ export default function DuolingoEnglishTestHubPage() {
         </section>
 
         <section className="mt-10 border-4 border-black bg-white p-8 shadow-[10px_10px_0_0_#111]">
+          <h2 className="text-3xl font-black tracking-tight">บทความจากทีม English Plan</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {ARTICLES.map((article) => (
+              <Link
+                key={article.slug}
+                href={`/articles/${article.slug}`}
+                className="border-2 border-black bg-neutral-50 p-5 transition hover:-translate-y-1 hover:bg-[#fffbe6]"
+              >
+                <p className="font-mono text-[11px] font-black uppercase tracking-[0.22em] text-[#004aad]">
+                  {article.kicker}
+                </p>
+                <h3 className="mt-3 text-xl font-black tracking-tight">{article.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-neutral-700">{article.subtitle}</p>
+                <p className="mt-4 text-sm font-black uppercase text-[#004aad]">
+                  อ่านบทความ · {article.readingMinutes} นาที
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-10 border-4 border-black bg-white p-8 shadow-[10px_10px_0_0_#111]">
           <h2 className="text-3xl font-black tracking-tight">Where to go next</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <Link href="/practice" className="border-2 border-black bg-neutral-50 px-5 py-4 font-bold">
-              Practice hub
+            <Link
+              href="/duolingo-english-test/practice"
+              className="border-2 border-black bg-neutral-50 px-5 py-4 font-bold"
+            >
+              ฝึกทำข้อสอบ DET ฟรี
             </Link>
             <Link href="/practice/production/write-about-photo" className="border-2 border-black bg-neutral-50 px-5 py-4 font-bold">
               Write about photo

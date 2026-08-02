@@ -94,6 +94,60 @@ export const RULES = {
       "หลัง that ห้ามมีคอมมาเด็ดขาด",
     ],
   },
+  relativeWhere: {
+    nameTh: "where ขยายสถานที่",
+    pattern: "N where S+V …  (place/situation)",
+    bulletsTh: [
+      "where ใช้ขยาย “สถานที่” หรือ “สถานการณ์” แทน which/that",
+      "ระบุสถานที่ทั่วไป (defining) → ไม่ใส่คอมมา",
+      "ชื่อเฉพาะ/สถานที่ที่รู้ตัวอยู่แล้ว (non-defining) → ใส่คอมมาคร่อม เหมือนกับ which",
+    ],
+  },
+  participialReduction: {
+    nameTh: "ย่อ “, which V” เป็น “, V-ing”",
+    pattern: "S+V, V-ing … (แทน S+V, which V …)",
+    bulletsTh: [
+      "which ที่อ้างถึง “ทั้งประโยคก่อนหน้า” (ไม่ใช่ noun ตัวใดตัวหนึ่ง) ย่อเป็น V-ing ได้",
+      "ตัด which ออก แล้วเปลี่ยนกริยาเป็น V-ing แทน",
+      "ความหมายเหมือนเดิมทุกประการ แค่กระชับขึ้น",
+    ],
+  },
+  tenses: {
+    nameTh: "Tense ที่ต้องรู้ (6 แบบ)",
+    pattern: "S+V.1(s/es) · S+is/am/are+V-ing · S+have/has+V.3 · S+V.2 · used to+V.1 · S+will+V.inf",
+    bulletsTh: [
+      "Present Simple = สิ่งที่ทำเป็นประจำ / บรรยายภาพ",
+      "Present Continuous = กำลังทำอยู่ตอนนี้ (ใช้บรรยายภาพบ่อยที่สุด)",
+      "used to + V.1 = เคยทำในอดีต แต่ตอนนี้ไม่ทำแล้ว",
+    ],
+  },
+  presentAgreement: {
+    nameTh: "Present Simple: ประธานกับกริยาต้องตรงกัน",
+    pattern: "I / you / we / they + V.1   ·   he / she / it + V.1 (s/es)",
+    bulletsTh: [
+      "ประธานเอกพจน์ (he/she/it/ชื่อเฉพาะ) → กริยาเติม -s / -es",
+      "ประธานพหูพจน์ (I/you/we/they) → กริยาไม่เติม",
+      "ข้อนี้ผิดบ่อยที่สุดตอนบรรยายภาพ — ระวังเป็นพิเศษ",
+    ],
+  },
+  simpleVsComplex: {
+    nameTh: "Simple กับ Complex Sentence",
+    pattern: "Simple = S+V.   ·   Complex = S+V, คำเชื่อม S+V.",
+    bulletsTh: [
+      "ประโยคสั้น ๆ ติดกันหลายประโยค = คะแนนไวยากรณ์ตัน",
+      "รวมสองประโยคด้วยคอมมา + FANBOYS เพื่อให้เป็น complex",
+      "ต้องมี complex sentence อย่างน้อย 1 ประโยคถึงจะได้คะแนนช่วงสูง",
+    ],
+  },
+  picturePattern: {
+    nameTh: "แพตเทิร์นบรรยายภาพ (คน / สถานที่)",
+    pattern: "This picture depicts ___ who ___. Judging from ___, ___. Finally, even though ___, ___.",
+    bulletsTh: [
+      "ประโยคที่ 1 ใช้ who / surrounded by เพื่อให้เป็น complex ทันที",
+      "ประโยคที่ 2 ขึ้นด้วย Judging from เพื่อเดาบริบท",
+      "ประโยคที่ 3 ขึ้นด้วย Finally, even though เพื่อปิดแบบมีมุมขัดแย้ง",
+    ],
+  },
 } as const satisfies Record<string, GrammarRule>;
 
 /**
@@ -188,6 +242,54 @@ export const CONJUNCTION_ITEMS: RewriteItem[] = [
     explanationThai:
       "ประโยคนี้มีทั้งสองแบบ: but เชื่อมประโยคอิสระ (ใส่คอมมา) ส่วน because อยู่ท้าย (ไม่ใส่)",
     rule: RULES.fanboys,
+  },
+  {
+    id: "cj-11",
+    prompt: "Even though the traffic was terrible we arrived on time.",
+    answers: ["Even though the traffic was terrible, we arrived on time."],
+    hintTh: "“Even though…” ขึ้นต้น → ใส่คอมมาหลังอนุประโยค",
+    explanationThai: "Even though ขึ้นต้นประโยค จึงต้องมีคอมมาคั่นก่อนประโยคหลัก",
+    rule: RULES.subLeading,
+  },
+  {
+    id: "cj-12",
+    prompt: "She felt confident since she had practiced every day.",
+    answers: ["She felt confident since she had practiced every day."],
+    hintTh: "“since” (แปลว่าเพราะ) อยู่ตรงกลาง → ไม่ต้องใส่คอมมา",
+    explanationThai: "เมื่ออนุประโยคอยู่หลังประโยคหลัก ไม่ต้องใส่คอมมา — ประโยคนี้ถูกอยู่แล้ว",
+    rule: RULES.subTrailing,
+  },
+  {
+    id: "cj-13",
+    prompt: "While he agreed with the plan he still had a few concerns.",
+    answers: ["While he agreed with the plan, he still had a few concerns."],
+    hintTh: "“While…” ขึ้นต้น → ใส่คอมมาหลังอนุประโยค",
+    explanationThai: "While ขึ้นต้นประโยค จึงต้องมีคอมมาคั่นก่อนประโยคหลัก",
+    rule: RULES.subLeading,
+  },
+  {
+    id: "cj-14",
+    prompt: "After the movie ended we went straight home.",
+    answers: ["After the movie ended, we went straight home."],
+    hintTh: "“After…” ขึ้นต้น → ใส่คอมมาหลังอนุประโยค",
+    explanationThai: "After ขึ้นต้นประโยค จึงต้องมีคอมมาคั่นก่อนประโยคหลัก",
+    rule: RULES.subLeading,
+  },
+  {
+    id: "cj-15",
+    prompt: "We packed our bags before the taxi arrived.",
+    answers: ["We packed our bags before the taxi arrived."],
+    hintTh: "“before” อยู่ตรงกลาง → ไม่ต้องใส่คอมมา",
+    explanationThai: "เมื่ออนุประโยคอยู่หลังประโยคหลัก ไม่ต้องใส่คอมมา — ประโยคนี้ถูกอยู่แล้ว",
+    rule: RULES.subTrailing,
+  },
+  {
+    id: "cj-16",
+    prompt: "She woke up early so that she could catch the first train.",
+    answers: ["She woke up early so that she could catch the first train."],
+    hintTh: "“so that” อยู่ตรงกลาง (บอกจุดประสงค์) → ไม่ต้องใส่คอมมา",
+    explanationThai: "so that อยู่หลังประโยคหลักเพื่อบอกจุดประสงค์ ไม่ต้องใส่คอมมา — ประโยคนี้ถูกอยู่แล้ว",
+    rule: RULES.subTrailing,
   },
 ];
 
@@ -417,6 +519,329 @@ export const RELATIVE_ITEMS: RewriteItem[] = [
       "หลัง that ไม่มีคอมมา ส่วน which จะใส่คอมมาคร่อมหรือไม่ก็ได้ตามความหมาย แต่ needs ต้องเติม -s",
     rule: RULES.relativeDefining,
   },
+  {
+    id: "rel-8",
+    prompt: "The cafe where we usually studies is closed today.",
+    answers: ["The cafe where we usually study is closed today."],
+    hintTh: "where ระบุ “ร้านไหน” (defining) → ไม่ใส่คอมมา และแก้ studies → study",
+    explanationThai:
+      "where ขยาย the cafe แบบจำกัดความ จึงไม่ใส่คอมมา และประธาน we ใช้กับ study ไม่เติม -s",
+    rule: RULES.relativeWhere,
+  },
+  {
+    id: "rel-9",
+    prompt: "Chiang Mai where my parents live have cooler weather.",
+    answers: ["Chiang Mai, where my parents live, has cooler weather."],
+    hintTh: "ชื่อเฉพาะ → where เป็นข้อมูลเสริม ใส่คอมมาคร่อม และแก้ have → has",
+    explanationThai:
+      "ชื่อเฉพาะระบุตัวชัดอยู่แล้ว อนุประโยค where จึงเป็นข้อมูลเสริม ต้องมีคอมมาคร่อม และ Chiang Mai เอกพจน์ ใช้ has",
+    rule: RULES.relativeWhere,
+  },
+  {
+    id: "rel-10",
+    prompt: "เปลี่ยนเป็น V-ing แทน which : I just finished my homework, which meant I can play now.",
+    answers: ["I just finished my homework, meaning I can play now."],
+    hintTh: "ตัด which ออก แล้วเปลี่ยน meant → meaning",
+    explanationThai: "which ที่อ้างถึงทั้งประโยคก่อนหน้าย่อเป็น V-ing ได้ ความหมายเหมือนเดิม",
+    rule: RULES.participialReduction,
+  },
+  {
+    id: "rel-11",
+    prompt: "เปลี่ยนเป็น V-ing แทน which : The cat caught a mouse, which startled everyone in the room.",
+    answers: [
+      "The cat caught a mouse, startling everyone in the room.",
+      "The cat caught a mouse, shocking everyone in the room.",
+    ],
+    hintTh: "ตัด which ออก แล้วเปลี่ยน startled → startling",
+    explanationThai: "which ที่อ้างถึงทั้งประโยคก่อนหน้าย่อเป็น V-ing ได้ ความหมายเหมือนเดิม",
+    rule: RULES.participialReduction,
+  },
+  {
+    id: "rel-12",
+    prompt: "เปลี่ยนเป็น V-ing แทน which : She baked a delicious cake, which impressed all of her guests.",
+    answers: ["She baked a delicious cake, impressing all of her guests."],
+    hintTh: "ตัด which ออก แล้วเปลี่ยน impressed → impressing",
+    explanationThai: "which ที่อ้างถึงทั้งประโยคก่อนหน้าย่อเป็น V-ing ได้ ความหมายเหมือนเดิม",
+    rule: RULES.participialReduction,
+  },
+  {
+    id: "rel-14",
+    prompt: "เปลี่ยนเป็น V-ing แทน which : He fixed the broken car, which saved us from being stranded on the road.",
+    answers: ["He fixed the broken car, saving us from being stranded on the road."],
+    hintTh: "ตัด which ออก แล้วเปลี่ยน saved → saving",
+    explanationThai: "which ที่อ้างถึงทั้งประโยคก่อนหน้าย่อเป็น V-ing ได้ ความหมายเหมือนเดิม",
+    rule: RULES.participialReduction,
+  },
+  {
+    id: "rel-13",
+    prompt: "เปลี่ยนเป็น V-ing แทน which : They won the championship, which brought immense joy to their fans.",
+    answers: ["They won the championship, bringing immense joy to their fans."],
+    hintTh: "ตัด which ออก แล้วเปลี่ยน brought → bringing",
+    explanationThai: "which ที่อ้างถึงทั้งประโยคก่อนหน้าย่อเป็น V-ing ได้ ความหมายเหมือนเดิม",
+    rule: RULES.participialReduction,
+  },
+];
+
+
+// ---------------------------------------------------------------------------
+// The rest of the "Grammar Basics สำหรับอธิบายรูป + คน" handout, page by page.
+//
+// Everything below is authored from that PDF specifically: its six tenses, its
+// present-simple examples, its simple-vs-complex conversions, and its two
+// picture-description practice patterns. Sentences are the handout's own
+// wherever it supplies one.
+// ---------------------------------------------------------------------------
+
+/** Page 1 — "Tense ที่ต้องรู้": the six tenses the handout lists, nothing else. */
+export const TENSE_ITEMS: RewriteItem[] = [
+  {
+    id: "tn-1",
+    prompt: "เปลี่ยนเป็น Present Simple : She (visit) her grandmother every Sunday.",
+    answers: ["She visits her grandmother every Sunday."],
+    hintTh: "Present Simple = S + V.1 (ประธานเอกพจน์เติม -s)",
+    explanationThai: "She เป็นเอกพจน์ กริยาจึงเป็น visits",
+    rule: RULES.tenses,
+  },
+  {
+    id: "tn-2",
+    prompt: "เปลี่ยนเป็น Present Continuous : The woman (paint) her wall right now.",
+    answers: ["The woman is painting her wall right now."],
+    hintTh: "Present Continuous = S + is/am/are + V-ing",
+    explanationThai: "กำลังเกิดขึ้นตอนนี้ ใช้ is + painting — เป็น tense ที่ใช้บรรยายภาพบ่อยที่สุด",
+    rule: RULES.tenses,
+  },
+  {
+    id: "tn-3",
+    prompt: "เปลี่ยนเป็น Present Perfect : I (finish) my homework already.",
+    answers: ["I have finished my homework already."],
+    hintTh: "Present Perfect = S + have/has + V.3",
+    explanationThai: "I ใช้ have + finished (V.3)",
+    rule: RULES.tenses,
+  },
+  {
+    id: "tn-4",
+    prompt: "เปลี่ยนเป็น Present Perfect : He (live) in Bangkok for ten years.",
+    answers: ["He has lived in Bangkok for ten years."],
+    hintTh: "ประธานเอกพจน์ใช้ has + V.3",
+    explanationThai: "He เป็นเอกพจน์ จึงใช้ has lived",
+    rule: RULES.tenses,
+  },
+  {
+    id: "tn-5",
+    prompt: "เปลี่ยนเป็น Past Simple : They (travel) to Japan last winter.",
+    answers: ["They travelled to Japan last winter.", "They traveled to Japan last winter."],
+    hintTh: "Past Simple = S + V.2",
+    explanationThai: "last winter เป็นอดีตจบแล้ว ใช้ V.2 (travelled หรือ traveled ก็ได้)",
+    rule: RULES.tenses,
+  },
+  {
+    id: "tn-6",
+    prompt: "ใช้ used to : I biked to school every day when I was 7.",
+    answers: ["I used to bike to school every day when I was 7."],
+    hintTh: "used to + V.1 = เคยทำ แต่ตอนนี้ไม่ทำแล้ว",
+    explanationThai: "หลัง used to ต้องเป็นกริยาช่องที่ 1 เสมอ (bike ไม่ใช่ biked)",
+    rule: RULES.tenses,
+  },
+  {
+    id: "tn-7",
+    prompt: "เปลี่ยนเป็น Future Simple : We (announce) the results tomorrow.",
+    answers: ["We will announce the results tomorrow."],
+    hintTh: "Future Simple = S + will + V.inf",
+    explanationThai: "หลัง will ใช้กริยารูปเดิมเสมอ ไม่เติมอะไร",
+    rule: RULES.tenses,
+  },
+  {
+    id: "tn-8",
+    prompt: "เปลี่ยนเป็น Present Continuous : An old man and a baby (make) snacks together.",
+    answers: ["An old man and a baby are making snacks together."],
+    hintTh: "ประธานพหูพจน์ใช้ are + V-ing",
+    explanationThai: "ประธานสองคนรวมกันเป็นพหูพจน์ จึงใช้ are making",
+    rule: RULES.tenses,
+  },
+];
+
+/** Page 2 — "PRESENT SIMPLE": the handout's own four sentences, plus the same trap. */
+export const PRESENT_SIMPLE_ITEMS: RewriteItem[] = [
+  {
+    id: "ps-1",
+    prompt: "I normally gets up at 10.",
+    answers: ["I normally get up at 10."],
+    hintTh: "I + V.1 (ไม่เติม -s)",
+    explanationThai: "I เป็นประธานที่ไม่เติม -s ที่กริยา จึงใช้ get",
+    rule: RULES.presentAgreement,
+  },
+  {
+    id: "ps-2",
+    prompt: "He usually visit the doctor twice a year.",
+    answers: ["He usually visits the doctor twice a year."],
+    hintTh: "He + V.1 เติม -s",
+    explanationThai: "He เป็นเอกพจน์ กริยาต้องเติม -s → visits",
+    rule: RULES.presentAgreement,
+  },
+  {
+    id: "ps-3",
+    prompt: "It barely rain in Canada.",
+    answers: ["It barely rains in Canada."],
+    hintTh: "It + V.1 เติม -s",
+    explanationThai: "It เป็นเอกพจน์ กริยาต้องเติม -s → rains",
+    rule: RULES.presentAgreement,
+  },
+  {
+    id: "ps-4",
+    prompt: "Thailand welcome millions of tourists annually.",
+    answers: ["Thailand welcomes millions of tourists annually."],
+    hintTh: "ชื่อประเทศ = เอกพจน์ → เติม -s",
+    explanationThai: "Thailand เป็นชื่อเฉพาะเอกพจน์ กริยาจึงเป็น welcomes",
+    rule: RULES.presentAgreement,
+  },
+  {
+    id: "ps-5",
+    prompt: "They watches a movie every Friday.",
+    answers: ["They watch a movie every Friday."],
+    hintTh: "They + V.1 (ไม่เติม -s)",
+    explanationThai: "They เป็นพหูพจน์ กริยาไม่เติม -s → watch",
+    rule: RULES.presentAgreement,
+  },
+  {
+    id: "ps-6",
+    prompt: "The woman in pink look very strong.",
+    answers: ["The woman in pink looks very strong."],
+    hintTh: "ประธานคือ The woman (เอกพจน์) → เติม -s",
+    explanationThai: "อย่าให้ in pink หลอกตา ประธานจริงคือ The woman จึงใช้ looks",
+    rule: RULES.presentAgreement,
+  },
+  {
+    id: "ps-7",
+    prompt: "My friends enjoys cooking together.",
+    answers: ["My friends enjoy cooking together."],
+    hintTh: "My friends = พหูพจน์ → ไม่เติม -s",
+    explanationThai: "friends เป็นพหูพจน์ กริยาจึงเป็น enjoy",
+    rule: RULES.presentAgreement,
+  },
+  {
+    id: "ps-8",
+    prompt: "She go to the gym after work.",
+    answers: ["She goes to the gym after work."],
+    hintTh: "She + go → goes (เติม -es)",
+    explanationThai: "กริยาที่ลงท้ายด้วย -o เติม -es → goes",
+    rule: RULES.presentAgreement,
+  },
+];
+
+/** Page 3–4 — "วิธีแยก Simple กับ Complex" and FANBOYS, using the handout's sentences. */
+export const COMPLEX_ITEMS: RewriteItem[] = [
+  {
+    id: "cx-1",
+    prompt: "รวมเป็นประโยคเดียว : I missed you. So, I called you.",
+    answers: ["I missed you, so I called you."],
+    hintTh: "S+V, so S+V. — ย้าย so มากลางประโยคแล้วใส่คอมมาข้างหน้า",
+    explanationThai: "สองประโยคสั้นรวมเป็น complex ได้ด้วยคอมมา + so",
+    rule: RULES.simpleVsComplex,
+  },
+  {
+    id: "cx-2",
+    prompt: "รวมเป็นประโยคเดียว : I woke up late. But I still went to school.",
+    answers: ["I woke up late, but I still went to school."],
+    hintTh: "S+V, but S+V.",
+    explanationThai: "but เชื่อมสองประโยคอิสระ ต้องมีคอมมานำหน้า",
+    rule: RULES.simpleVsComplex,
+  },
+  {
+    id: "cx-3",
+    prompt: "รวมเป็นประโยคเดียว : I bought you a gift. For you have done much for me.",
+    answers: ["I bought you a gift, for you have done much for me."],
+    hintTh: "for = เพราะว่า — S+V, for S+V.",
+    explanationThai: "for ใน FANBOYS แปลว่า “เพราะว่า” และต้องมีคอมมานำหน้า",
+    rule: RULES.simpleVsComplex,
+  },
+  {
+    id: "cx-4",
+    prompt: "รวมด้วย but : I wanted to go to the beach. It started raining heavily.",
+    answers: ["I wanted to go to the beach, but it started raining heavily."],
+    hintTh: "ความหมายขัดกัน → but",
+    explanationThai: "สองใจความขัดแย้งกัน ใช้ but พร้อมคอมมานำหน้า",
+    rule: RULES.simpleVsComplex,
+  },
+  {
+    id: "cx-5",
+    prompt: "รวมด้วย yet : She worked hard for the exam. She didn't achieve the desired results.",
+    answers: ["She worked hard for the exam, yet she didn't achieve the desired results."],
+    hintTh: "yet = but (แต่ทว่า)",
+    explanationThai: "yet ทำหน้าที่เหมือน but และต้องมีคอมมานำหน้าเช่นกัน",
+    rule: RULES.simpleVsComplex,
+  },
+  {
+    id: "cx-6",
+    prompt: "รวมด้วย or : We can go shopping now. We can wait until the weekend.",
+    answers: ["We can go shopping now, or we can wait until the weekend."],
+    hintTh: "ให้เลือกอย่างใดอย่างหนึ่ง → or",
+    explanationThai: "or เสนอทางเลือก และต้องมีคอมมานำหน้าเมื่อเชื่อมสองประโยคอิสระ",
+    rule: RULES.simpleVsComplex,
+  },
+  {
+    id: "cx-7",
+    prompt: "รวมด้วย for : He loves playing soccer. It allows him to stay active.",
+    answers: ["He loves playing soccer, for it allows him to stay active."],
+    hintTh: "บอกเหตุผล → for",
+    explanationThai: "for บอกเหตุผลของประโยคแรก และต้องมีคอมมานำหน้า",
+    rule: RULES.simpleVsComplex,
+  },
+];
+
+/** Pages 9–19 — the handout's PRACTICE: Pattern 1 (people) and Pattern 2 (places). */
+export const PATTERN_ITEMS: RewriteItem[] = [
+  {
+    id: "pt-1",
+    prompt: 'Pattern 1 ประโยคที่ 1 — ในภาพมีผู้หญิง 2 คน กำลังออกกำลังกาย (ใช้ depicts + who)',
+    answers: ["This picture depicts 2 women who are working out."],
+    hintTh: "This picture depicts ___ who ___.",
+    explanationThai: "ใช้ who ต่อทันทีเพื่อให้ประโยคแรกเป็น complex sentence",
+    rule: RULES.picturePattern,
+  },
+  {
+    id: "pt-2",
+    prompt: "Pattern 1 ประโยคที่ 2 — เดาจากชุดที่ใส่ ว่าน่าจะเป็นนักกีฬาอาชีพ",
+    answers: ["Judging from what they wear, they are probably professional athletes."],
+    hintTh: "Judging from ___, they are probably ___.",
+    explanationThai: "ขึ้นด้วย Judging from เพื่อเดาบริบท แล้วตามด้วยคอมมา",
+    rule: RULES.picturePattern,
+  },
+  {
+    id: "pt-3",
+    prompt: "Pattern 1 ประโยคที่ 3 — ถึงแม้ผู้หญิงชุดชมพูจะดูเหมือนพิการ แต่เธอดูแข็งแรงมาก",
+    answers: [
+      "Finally, even though the woman in pink looks like she is disabled, she looks very strong.",
+    ],
+    hintTh: "Finally, even though ___, ___.",
+    explanationThai: "ปิดท้ายด้วย Finally + even though เพื่อใส่มุมขัดแย้ง — ได้ทั้ง coherence และ complex sentence",
+    rule: RULES.picturePattern,
+  },
+  {
+    id: "pt-4",
+    prompt: "Pattern 2 ประโยคที่ 1 — ในภาพเป็นทะเลสาบสวยงามที่มีภูเขาล้อมรอบ (ใช้ surrounded by)",
+    answers: ["This picture depicts a scenic lake surrounded by mountains."],
+    hintTh: "This picture depicts ___ surrounded by ___.",
+    explanationThai: "surrounded by เป็นคำหลักของ Pattern 2 ใช้บอกสิ่งที่อยู่ล้อมรอบ",
+    rule: RULES.picturePattern,
+  },
+  {
+    id: "pt-5",
+    prompt: "Pattern 2 ประโยคที่ 2 — เดาจากฉากหลังว่าน่าจะอยู่ในประเทศแถบยุโรป",
+    answers: ["Judging from the background, this lake may be located in a country in Europe."],
+    hintTh: "Judging from ___, this ___ may be located in ___.",
+    explanationThai: "ใช้ may be located in เพื่อเดาแบบไม่ฟันธง ปลอดภัยกว่าการทายผิด",
+    rule: RULES.picturePattern,
+  },
+  {
+    id: "pt-6",
+    prompt: "Pattern 2 ประโยคที่ 3 — ถึงแม้อากาศจะดูหนาว แต่เชื่อว่าน่าจะเป็นแหล่งท่องเที่ยวยอดนิยม",
+    answers: [
+      "Finally, even though the weather looks cold, I believe it must be a popular tourist destination.",
+    ],
+    hintTh: "Finally, even though ___, I believe it must be ___.",
+    explanationThai: "ปิดท้ายเหมือน Pattern 1 — โครงเดียวกันใช้ได้ทั้งคนและสถานที่",
+    rule: RULES.picturePattern,
+  },
 ];
 
 /**
@@ -439,9 +864,29 @@ export function rewriteIsCorrect(item: RewriteItem, typed: string): boolean {
   return item.answers.some((a) => normaliseRewrite(a) === got);
 }
 
+/**
+ * Which bank each curriculum exercise runs.
+ *
+ * The conjunction and relative arrays each cover two different handout pages,
+ * so they are split by the rule the item actually drills rather than duplicated
+ * — adding an item to either array files it automatically.
+ */
 export const REWRITE_BANKS: Record<string, RewriteItem[]> = {
-  "gr-conj": CONJUNCTION_ITEMS,
+  "gr-tenses": TENSE_ITEMS,
+  "gr-present": PRESENT_SIMPLE_ITEMS,
+  "gr-complex": [
+    ...COMPLEX_ITEMS,
+    ...CONJUNCTION_ITEMS.filter((i) => i.rule === RULES.fanboys),
+  ],
+  "gr-sub": CONJUNCTION_ITEMS.filter(
+    (i) => i.rule === RULES.subLeading || i.rule === RULES.subTrailing,
+  ),
+  "gr-relative": RELATIVE_ITEMS.filter((i) => i.rule !== RULES.participialReduction),
+  "gr-reduction": RELATIVE_ITEMS.filter((i) => i.rule === RULES.participialReduction),
+  "wp-pattern": PATTERN_ITEMS,
+
+  // Not taught in this handout — kept authored for reuse elsewhere, but no
+  // longer scheduled by the grammar-foundation block.
   "gr-transition": TRANSITION_ITEMS,
   "gr-runon": RUNON_ITEMS,
-  "gr-relative": RELATIVE_ITEMS,
 };

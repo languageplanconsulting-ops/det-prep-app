@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation";
 
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+import { useAdminGateOverride } from "@/hooks/useAdminGateOverride";
 import {
   clearPreviewTier,
   setPreviewTier,
+  setGateOverride,
 } from "@/lib/admin-preview";
 import type { Tier } from "@/lib/access-control";
 import { TIER_DISPLAY } from "@/lib/access-control";
@@ -16,6 +18,7 @@ export function PreviewBanner() {
   const router = useRouter();
   const { previewEligible, isPreviewMode, effectiveTier, loading } =
     useEffectiveTier();
+  const gate = useAdminGateOverride();
 
   if (loading || !previewEligible || !isPreviewMode) {
     return null;
@@ -37,6 +40,17 @@ export function PreviewBanner() {
       <span className="shrink-0">
         👁 Admin Preview Mode — Viewing as {tierLabel} subscriber
       </span>
+      <span className="hidden sm:inline text-[#FFCC00]/70">|</span>
+      <button
+        type="button"
+        onClick={() => setGateOverride(!gate.enabled)}
+        title="เดินผ่านทุกด่านได้โดยไม่ต้องผ่านเกณฑ์ — ใช้หาบั๊ก"
+        className={`rounded-sm border-2 border-black px-2 py-1 uppercase tracking-wide transition hover:opacity-90 ${
+          gate.enabled ? "bg-[#FFCC00] text-[#004AAD]" : "bg-transparent text-[#FFCC00]"
+        }`}
+      >
+        {gate.enabled ? "⚡ SKIP GATES: ON" : "⚡ SKIP GATES: OFF"}
+      </button>
       <span className="hidden sm:inline text-[#FFCC00]/70">|</span>
       <div className="flex flex-wrap items-center gap-1">
         {SWITCH_TIERS.map((t) => (

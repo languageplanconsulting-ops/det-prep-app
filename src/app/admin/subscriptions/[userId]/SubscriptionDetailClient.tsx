@@ -1481,10 +1481,11 @@ export function SubscriptionDetailClient() {
                     <tr>
                       <th className="border-b-2 border-black p-2">Date</th>
                       <th className="border-b-2 border-black p-2">Overall</th>
-                      <th className="border-b-2 border-black p-2">Lit</th>
-                      <th className="border-b-2 border-black p-2">Comp</th>
-                      <th className="border-b-2 border-black p-2">Conv</th>
-                      <th className="border-b-2 border-black p-2">Prod</th>
+                      <th className="border-b-2 border-black p-2">Target</th>
+                      <th className="border-b-2 border-black p-2">List</th>
+                      <th className="border-b-2 border-black p-2">Speak</th>
+                      <th className="border-b-2 border-black p-2">Read</th>
+                      <th className="border-b-2 border-black p-2">Write</th>
                       <th className="border-b-2 border-black p-2">Duration</th>
                     </tr>
                   </thead>
@@ -1499,17 +1500,20 @@ export function SubscriptionDetailClient() {
                         <td className="border-b border-neutral-200 p-2 font-bold">
                           {row.overall_score != null ? String(row.overall_score) : "—"}
                         </td>
-                        <td className="border-b border-neutral-200 p-2 ep-stat">
-                          {row.literacy_score != null ? String(row.literacy_score) : "—"}
+                        <td className="border-b border-neutral-200 p-2 ep-stat text-neutral-500">
+                          {row.target_score != null ? String(row.target_score) : "—"}
                         </td>
                         <td className="border-b border-neutral-200 p-2 ep-stat">
-                          {row.comprehension_score != null ? String(row.comprehension_score) : "—"}
+                          {row.listening_score != null ? String(row.listening_score) : "—"}
                         </td>
                         <td className="border-b border-neutral-200 p-2 ep-stat">
-                          {row.conversation_score != null ? String(row.conversation_score) : "—"}
+                          {row.speaking_score != null ? String(row.speaking_score) : "—"}
                         </td>
                         <td className="border-b border-neutral-200 p-2 ep-stat">
-                          {row.production_score != null ? String(row.production_score) : "—"}
+                          {row.reading_score != null ? String(row.reading_score) : "—"}
+                        </td>
+                        <td className="border-b border-neutral-200 p-2 ep-stat">
+                          {row.writing_score != null ? String(row.writing_score) : "—"}
                         </td>
                         <td className="border-b border-neutral-200 p-2 ep-stat">
                           {row.duration_seconds != null

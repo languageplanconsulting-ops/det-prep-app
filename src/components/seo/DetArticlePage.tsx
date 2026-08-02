@@ -40,11 +40,27 @@ export function DetArticlePage({
       },
     })),
   };
+  /** Mirrors the visible breadcrumb below, so Google can render it in the result snippet. */
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Duolingo English Test",
+        item: absoluteUrl("/duolingo-english-test"),
+      },
+      { "@type": "ListItem", position: 3, name: page.h1, item: absoluteUrl(canonicalPath) },
+    ],
+  };
 
   return (
     <main className="min-h-screen bg-[#f7f2e8] px-4 py-12 text-neutral-900 sm:px-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(articleLd)} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(faqLd)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumbLd)} />
 
       <div className="mx-auto max-w-6xl">
         <nav className="mb-6 text-sm font-semibold text-neutral-600">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ConversationSummaryPattern } from "@/components/dialogue-summary/ConversationSummaryPattern";
 import { useMemo, useState } from "react";
 import { DialogueSummaryReportView } from "@/components/dialogue-summary/DialogueSummaryReportView";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
@@ -34,7 +35,15 @@ function speakerBubbleClass(index: number): string {
   return styles[index % styles.length]!;
 }
 
-export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryExam }) {
+export function DialogueSummarySessionClient({
+  exam,
+  onComplete,
+  embedded = false,
+}: {
+  exam: DialogueSummaryExam;
+  onComplete?: (report: DialogueSummaryAttemptReport) => void;
+  embedded?: boolean;
+}) {
   const { isAdmin, previewEligible } = useEffectiveTier();
   const soft = true;
   const vipGate = useVipAiFeedbackGate();
@@ -128,7 +137,15 @@ export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryEx
   }
 
   if (phase === "report" && report) {
-    return <DialogueSummaryReportView report={report} listHref={listHref} roundHref={roundHref} />;
+    return (
+      <DialogueSummaryReportView
+        report={report}
+        listHref={listHref}
+        roundHref={roundHref}
+        embedded={embedded}
+        onContinue={onComplete ? () => onComplete(report) : undefined}
+      />
+    );
   }
 
   return (
@@ -163,26 +180,28 @@ export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryEx
         aria-hidden
       />
 
-      <nav className="relative flex flex-wrap items-center gap-2 text-sm font-bold">
-        <Link
-          href={listHref}
-          className="rounded-full border-2 border-black bg-white px-4 py-2 shadow-[3px_3px_0_0_#000] transition-transform hover:-translate-y-0.5"
-        >
-          ← Set list
-        </Link>
-        <Link
-          href={roundHref}
-          className="rounded-full border-2 border-black/20 bg-white/80 px-3 py-2 text-neutral-700 hover:border-black"
-        >
-          Round {exam.round}
-        </Link>
-        <Link
-          href="/practice/listening/dialogue-summary"
-          className="rounded-full border-2 border-black/20 bg-white/80 px-3 py-2 text-neutral-700 hover:border-black"
-        >
-          All rounds
-        </Link>
-      </nav>
+      {!embedded ? (
+        <nav className="relative flex flex-wrap items-center gap-2 text-sm font-bold">
+          <Link
+            href={listHref}
+            className="rounded-full border-2 border-black bg-white px-4 py-2 shadow-[3px_3px_0_0_#000] transition-transform hover:-translate-y-0.5"
+          >
+            ← Set list
+          </Link>
+          <Link
+            href={roundHref}
+            className="rounded-full border-2 border-black/20 bg-white/80 px-3 py-2 text-neutral-700 hover:border-black"
+          >
+            Round {exam.round}
+          </Link>
+          <Link
+            href="/practice/listening/dialogue-summary"
+            className="rounded-full border-2 border-black/20 bg-white/80 px-3 py-2 text-neutral-700 hover:border-black"
+          >
+            All rounds
+          </Link>
+        </nav>
+      ) : null}
 
       <header className="relative overflow-hidden rounded-sm border-4 border-black bg-white shadow-[6px_6px_0_0_#0a0a0a]">
         <div className="absolute inset-0 bg-gradient-to-br from-ep-yellow/35 via-white to-ep-blue/10" />
@@ -306,6 +325,7 @@ export function DialogueSummarySessionClient({ exam }: { exam: DialogueSummaryEx
           </p>
         </div>
         <div className="p-6">
+          <ConversationSummaryPattern />
           <textarea
             id="ds-summary"
             value={summary}

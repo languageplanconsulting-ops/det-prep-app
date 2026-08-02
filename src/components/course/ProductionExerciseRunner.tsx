@@ -9,7 +9,9 @@ import { WritingReportView } from "@/components/writing/WritingReportView";
 import { ReadSpeakSession } from "@/components/speaking/ReadSpeakSession";
 import { SpeakingReportView } from "@/components/speaking/SpeakingReportView";
 import { Frame } from "@/components/course/InlineExercise";
+import { useAdminGateOverride } from "@/hooks/useAdminGateOverride";
 import { questionsFor } from "@/lib/course-plan/question-sets";
+import { photoTopicFromExerciseKey } from "@/lib/course-plan/photo-pattern-bank";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 import type { WritingAttemptReport } from "@/types/writing";
 import type { SpeakingAttemptReport, SpeakingRoundNum } from "@/types/speaking";
@@ -45,6 +47,7 @@ export function ProductionExerciseRunner({
   hasNext?: boolean;
 }) {
   const refs = useMemo(() => questionsFor(exerciseKey), [exerciseKey]);
+  const override = useAdminGateOverride();
   const [index, setIndex] = useState(0);
   const [report, setReport] = useState<AnyReport | null>(null);
   const [scores, setScores] = useState<number[]>([]);
@@ -92,11 +95,11 @@ export function ProductionExerciseRunner({
     return (
       <div className="space-y-4">
         {taskType === "write_about_photo" || taskType === "speak_about_photo" ? (
-          <PhotoSpeakReportView report={report as PhotoSpeakAttemptReport} />
+          <PhotoSpeakReportView report={report as PhotoSpeakAttemptReport} embedded />
         ) : taskType === "read_and_write" ? (
-          <WritingReportView report={report as WritingAttemptReport} />
+          <WritingReportView report={report as WritingAttemptReport} embedded />
         ) : (
-          <SpeakingReportView report={report as SpeakingAttemptReport} />
+          <SpeakingReportView report={report as SpeakingAttemptReport} embedded />
         )}
         <div className="px-4 pb-4">
           <button
@@ -115,16 +118,27 @@ export function ProductionExerciseRunner({
 
   return (
     <Frame title={titleTh} onCancel={onCancel} progress={total > 1 ? `${index + 1}/${total}` : undefined}>
+      {override.enabled && (
+        <button
+          type="button"
+          onClick={() => (isLastRef ? onDone(total, total) : setIndex((i) => i + 1))}
+          className="mb-3 w-full rounded-full bg-amber-500 py-2 text-[12px] font-black text-white"
+        >
+          ⚡ ข้ามข้อนี้โดยไม่ต้องส่ง (admin)
+        </button>
+      )}
       {taskType === "write_about_photo" || taskType === "speak_about_photo" ? (
         <PhotoAssessmentSession
           mode={taskType === "speak_about_photo" ? "speak" : "write"}
           itemId={ref}
           embedded
           onComplete={setReport}
+          topic={photoTopicFromExerciseKey(exerciseKey) ?? undefined}
+          forceUnlockHints
         />
       ) : null}
       {taskType === "read_and_write" ? (
-        <ReadWriteSession topicId={ref} embedded onComplete={setReport} />
+        <ReadWriteSession topicId={ref} embedded forceUnlockHints onComplete={setReport} />
       ) : null}
       {taskType === "read_then_speak" ? (
         <ReadSpeakSpread itemRef={ref} onComplete={setReport} />
@@ -149,6 +163,7 @@ function ReadSpeakSpread({
       round={round}
       presetQuestionId={questionId}
       embedded
+      forceUnlockHints
       onComplete={onComplete}
     />
   );

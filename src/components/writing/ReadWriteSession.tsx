@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
 import { EssayHintPanel } from "@/components/writing/EssayHintPanel";
+import { EssayPatternPicker } from "@/components/writing/EssayPatternPicker";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
@@ -37,9 +38,12 @@ export function ReadWriteSession({
   startWithRedeem = false,
   onComplete,
   embedded = false,
+  forceUnlockHints = false,
 }: {
   topicId: string;
   startWithRedeem?: boolean;
+  /** Course context is already a paid enrollment, so the pattern + vocabulary panel is never VIP-gated there. */
+  forceUnlockHints?: boolean;
   /** When set, the report is handed back instead of navigating to the report page — used by the course journey so the learner never leaves the session. */
   onComplete?: (report: WritingAttemptReport) => void;
   /** Drop the page-level back link and outer chrome when hosted inside another shell (the course session modal). */
@@ -153,12 +157,14 @@ export function ReadWriteSession({
           This topic is missing from the shared content bank. Please ask admin to sync the
           read-and-write bank again.
         </p>
-        <Link
-          href="/practice/production/read-and-write"
-          className="mt-4 inline-block text-ep-blue"
-        >
-          Back
-        </Link>
+        {!embedded ? (
+          <Link
+            href="/practice/production/read-and-write"
+            className="mt-4 inline-block text-ep-blue"
+          >
+            Back
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -287,7 +293,7 @@ export function ReadWriteSession({
         <p className="text-neutral-600">{topic.titleTh}</p>
       </header>
 
-      <EssayHintPanel unlocked={effectiveTier === "vip"} />
+      <EssayHintPanel unlocked={forceUnlockHints || effectiveTier === "vip"} />
 
       {hasAttempt && progress ? (
         <BrutalPanel title="Latest score" variant="accent">
@@ -299,14 +305,14 @@ export function ReadWriteSession({
               </span>
             </p>
             <div className="flex flex-wrap items-center gap-2">
-              {showRedeemOnSession ? (
+              {!embedded && showRedeemOnSession ? (
                 <Link
                   href={`/practice/production/read-and-write/report/${progress.latestAttemptId}`}
                   className="border-2 border-black bg-ep-yellow px-4 py-2 text-xs font-black uppercase tracking-wide shadow-[2px_2px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
                 >
                   Redeem
                 </Link>
-              ) : isPerfect ? (
+              ) : !embedded && isPerfect ? (
                 <>
                   <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">
                     Complete
@@ -318,6 +324,10 @@ export function ReadWriteSession({
                     View report
                   </Link>
                 </>
+              ) : isPerfect ? (
+                <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">
+                  Complete
+                </p>
               ) : null}
             </div>
           </div>
@@ -386,6 +396,7 @@ export function ReadWriteSession({
 
       {phase === "write" ? (
         <BrutalPanel title="Your essay (min. 50 words)">
+          <EssayPatternPicker />
           <textarea
             value={essay}
             onChange={(e) => setEssay(e.target.value)}

@@ -1,0 +1,113 @@
+{
+  "_comment": "Dropdown blanks for the rewritten อ่านแล้วพูด answers. Keyed on a phrase that appears in the model answer; the generator blanks the first N matches per item. Distractors are the traps a Thai learner actually falls into, and the rules teach the founder's 'Important ideas / vocabulary for Listen and Speak' list.",
+  "entries": [
+    {
+      "match": "For example",
+      "options": ["For example", "For instance", "Overall", "However"],
+      "ruleEn": "'For example' introduces the example move. 'Overall' closes an answer and 'However' signals contrast, so neither fits here.",
+      "ruleTh": "'For example' ใช้เปิดช่วงยกตัวอย่าง ส่วน 'Overall' ใช้สรุป และ 'However' ใช้ขัดแย้ง จึงไม่เข้ากับตำแหน่งนี้"
+    },
+    {
+      "match": "For instance",
+      "options": ["For instance", "For example", "Therefore", "Although"],
+      "ruleEn": "'For instance' and 'For example' both open an example; the other two signal a conclusion and a contrast.",
+      "ruleTh": "'For instance' กับ 'For example' ใช้ยกตัวอย่างเหมือนกัน ส่วนอีกสองคำใช้สรุปและขัดแย้ง"
+    },
+    {
+      "match": "Overall",
+      "options": ["Overall", "For example", "Because", "Meanwhile"],
+      "ruleEn": "'Overall' opens the concluding move — it sums the whole answer up.",
+      "ruleTh": "'Overall' ใช้เปิดประโยคสรุป — รวบยอดคำตอบทั้งหมด"
+    },
+    {
+      "match": "Therefore",
+      "options": ["Therefore", "For example", "However", "Besides"],
+      "ruleEn": "'Therefore' states the result of what you just explained, so it belongs in the conclusion.",
+      "ruleTh": "'Therefore' บอกผลลัพธ์ของสิ่งที่เพิ่งอธิบาย จึงใช้ในช่วงสรุป"
+    },
+    {
+      "match": "In conclusion",
+      "options": ["In conclusion", "In addition", "For example", "On the other hand"],
+      "ruleEn": "'In conclusion' signals the final move; 'In addition' would promise another point instead.",
+      "ruleTh": "'In conclusion' บอกว่ากำลังจะสรุป ส่วน 'In addition' แปลว่ายังมีประเด็นเพิ่ม"
+    },
+    {
+      "match": "crucial",
+      "options": ["crucial", "crucially", "crucialness", "crucialy"],
+      "ruleEn": "'crucial' is the adjective (= extremely important). Only the adverb 'crucially' is also real, and it cannot follow 'is a'.",
+      "ruleTh": "'crucial' เป็นคำคุณศัพท์ (สำคัญมาก) ส่วน 'crucially' เป็นคำวิเศษณ์ ใช้ตามหลัง 'is a' ไม่ได้"
+    },
+    {
+      "match": "essential",
+      "options": ["essential", "essentially", "essence", "essentialy"],
+      "ruleEn": "'essential' is the adjective. 'essentially' is an adverb and 'essence' is a noun.",
+      "ruleTh": "'essential' เป็นคำคุณศัพท์ ส่วน 'essentially' เป็นคำวิเศษณ์ และ 'essence' เป็นคำนาม"
+    },
+    {
+      "match": "vital",
+      "options": ["vital", "vitally", "vitality", "vitalness"],
+      "ruleEn": "'vital' is the adjective form meaning absolutely necessary.",
+      "ruleTh": "'vital' เป็นคำคุณศัพท์ แปลว่าจำเป็นอย่างยิ่ง"
+    },
+    {
+      "match": "allows for",
+      "options": ["allows for", "allows to", "allow for", "allowing for"],
+      "ruleEn": "The fixed pattern is 'X allows for + noun'. With a singular subject it takes 'allows', and the preposition is 'for', never 'to'.",
+      "ruleTh": "รูปตายตัวคือ 'X allows for + คำนาม' ประธานเอกพจน์ใช้ 'allows' และใช้บุพบท 'for' ไม่ใช่ 'to'"
+    },
+    {
+      "match": "contributes to",
+      "options": ["contributes to", "contributes for", "contribute to", "contributing to"],
+      "ruleEn": "'contribute to' is the fixed collocation, and a singular subject needs 'contributes'.",
+      "ruleTh": "'contribute to' เป็นคำที่ใช้คู่กันตายตัว และประธานเอกพจน์ต้องใช้ 'contributes'"
+    },
+    {
+      "match": "promotes",
+      "options": ["promotes", "promote", "promoting", "promoted"],
+      "ruleEn": "A singular subject in present simple takes 'promotes' (= causes something good to grow).",
+      "ruleTh": "ประธานเอกพจน์ในปัจจุบันกาลใช้ 'promotes' (ทำให้เกิด/ส่งเสริม)"
+    },
+    {
+      "match": "fosters",
+      "options": ["fosters", "foster", "fostering", "fostered"],
+      "ruleEn": "'foster' means to encourage something to develop; a singular subject needs 'fosters'.",
+      "ruleTh": "'foster' แปลว่าส่งเสริมให้เกิดขึ้น ประธานเอกพจน์ใช้ 'fosters'"
+    },
+    {
+      "match": "encourages",
+      "options": ["encourages", "encourage", "encouraging", "encouraged"],
+      "ruleEn": "Present simple with a singular subject takes 'encourages'.",
+      "ruleTh": "ปัจจุบันกาลกับประธานเอกพจน์ใช้ 'encourages'"
+    },
+    {
+      "match": "thrive",
+      "options": ["thrive", "thrives", "thriving", "thrived"],
+      "ruleEn": "'thrive' (= develop well) keeps the base form after a plural subject or a modal.",
+      "ruleTh": "'thrive' (เติบโตได้ดี) ใช้รูปเดิมหลังประธานพหูพจน์หรือหลังกริยาช่วย"
+    },
+    {
+      "match": "due to",
+      "options": ["due to", "due of", "because", "thanks of"],
+      "ruleEn": "'due to' is followed by a NOUN. 'because' would need a full clause after it.",
+      "ruleTh": "'due to' ตามด้วยคำนาม ส่วน 'because' ต้องตามด้วยประโยคเต็ม"
+    },
+    {
+      "match": "because",
+      "options": ["because", "because of", "due to", "thanks to"],
+      "ruleEn": "'because' introduces a full clause (subject + verb); 'because of' and 'due to' need a noun.",
+      "ruleTh": "'because' ตามด้วยประโยคเต็ม (ประธาน + กริยา) ส่วน 'because of' และ 'due to' ตามด้วยคำนาม"
+    },
+    {
+      "match": "traditional",
+      "options": ["traditional", "traditionally", "tradition", "traditions"],
+      "ruleEn": "'traditional' is the adjective that goes before a noun; 'tradition' is the noun itself.",
+      "ruleTh": "'traditional' เป็นคำคุณศัพท์ที่วางหน้าคำนาม ส่วน 'tradition' เป็นคำนาม"
+    },
+    {
+      "match": "significantly",
+      "options": ["significantly", "significant", "significance", "signify"],
+      "ruleEn": "An adverb is needed to modify the verb — 'significantly'.",
+      "ruleTh": "ตำแหน่งนี้ต้องใช้คำวิเศษณ์ขยายกริยา คือ 'significantly'"
+    }
+  ]
+}

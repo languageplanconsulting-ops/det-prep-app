@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { DetVsIeltsUkArticle } from "@/components/articles/DetVsIeltsUkArticle";
 import { ARTICLES, getArticle } from "@/lib/articles";
+import { absoluteUrl } from "@/lib/site-metadata";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -19,12 +20,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const a = getArticle(slug);
   if (!a) return { title: "ไม่พบบทความ" };
+  const canonical = absoluteUrl(`/articles/${a.slug}`);
   return {
     title: a.title,
     description: a.excerpt,
+    alternates: { canonical },
     openGraph: {
       title: `${a.title}: ${a.subtitle}`,
       description: a.excerpt,
+      url: canonical,
       type: "article",
     },
   };

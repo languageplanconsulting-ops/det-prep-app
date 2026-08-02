@@ -130,7 +130,13 @@ function PhotoCriterionBlock({
   );
 }
 
-export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptReport }) {
+export function PhotoSpeakReportView({
+  report,
+  embedded = false,
+}: {
+  report: PhotoSpeakAttemptReport;
+  embedded?: boolean;
+}) {
   useRevealSfx();
   const router = useRouter();
   const nav = photoReportNav(report);
@@ -159,10 +165,10 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
     .slice(0, 8);
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className={embedded ? "bg-[#fafafa]" : "min-h-screen bg-[#fafafa]"}>
       <ProductionReportLandingHero
-        backHref={nav.hub}
-        backLabel={nav.backLabel}
+        backHref={embedded ? undefined : nav.hub}
+        backLabel={embedded ? undefined : nav.backLabel}
         eyebrow={nav.eyebrow}
         titleEn={report.topicTitleEn}
         titleTh={report.topicTitleTh}
@@ -187,13 +193,15 @@ export function PhotoSpeakReportView({ report }: { report: PhotoSpeakAttemptRepo
           ) : undefined
         }
       >
-        <button
-          type="button"
-          onClick={() => router.push(`${nav.sessionPath(report.topicId)}?redeem=1`)}
-          className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
-        >
-          Try again
-        </button>
+        {!embedded ? (
+          <button
+            type="button"
+            onClick={() => router.push(`${nav.sessionPath(report.topicId)}?redeem=1`)}
+            className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
+          >
+            Try again
+          </button>
+        ) : null}
         <FullReportNotebookButton
           attemptId={report.attemptId}
           entrySource={nav.notebookSource}

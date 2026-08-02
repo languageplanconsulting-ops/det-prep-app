@@ -10,6 +10,7 @@ import { ContentBankHydrator } from "@/components/content/ContentBankHydrator";
 import { MainNav } from "@/components/layout/MainNav";
 import { NavigationProgress } from "@/components/layout/NavigationProgress";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { SiteFooterGate } from "@/components/layout/SiteFooterGate";
 import { PlanExpiryNotice } from "@/components/billing/PlanExpiryNotice";
 import { DailyQueueBanner } from "@/components/practice/DailyQueueBanner";
 import { BugReportWidget } from "@/components/support/BugReportWidget";
@@ -71,6 +72,7 @@ export default function RootLayout({
           <SoundToggle />
           <DailyQueueBanner />
           <PageTransition>{children}</PageTransition>
+          <SiteFooterGate />
         </EffectiveTierProvider>
       </body>
     </html>

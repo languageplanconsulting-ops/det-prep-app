@@ -39,6 +39,8 @@ export type StudyItem = {
   exerciseKey?: string;
   /** Spread hint from the curriculum: keep at least this many days apart. */
   spreadDays?: number;
+  /** At most one item carrying this group is scheduled per day. */
+  spreadGroup?: string;
   /** The exercise's gate kind — decides which runner the session uses. */
   gateKind?: ExerciseGate["kind"];
 };
@@ -140,6 +142,7 @@ export function buildItemStream(
         gateTh: gateLabel(ex.gate),
         exerciseKey: ex.key,
         spreadDays: ex.spreadDays,
+        spreadGroup: ex.spreadGroup,
         gateKind: ex.gate.kind,
       });
     }
@@ -214,6 +217,8 @@ export function pourIntoDays(stream: StudyItem[], settings: PourSettings): Block
     }
 
     const items: StudyItem[] = [];
+    /** Spread groups already represented today — one item per group per day. */
+    const groupsToday = new Set<string>();
     let budget = settings.minutesPerDay;
     let look = cursor;
 
@@ -233,7 +238,14 @@ export function pourIntoDays(stream: StudyItem[], settings: PourSettings): Block
         continue;
       }
 
+      // One item per spread group per day — the rest flow to later days.
+      if (item.spreadGroup && groupsToday.has(item.spreadGroup)) {
+        look++;
+        continue;
+      }
+
       items.push(item);
+      if (item.spreadGroup) groupsToday.add(item.spreadGroup);
       budget -= item.minutes;
       lastScheduled.set(item.id, offset);
       if (look === cursor) {

@@ -1,0 +1,495 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { DictationIntroModal } from "@/components/dictation/DictationIntroModal";
+import { FillInBlankIntroModal } from "@/components/fitb/FillInBlankIntroModal";
+import { InteractiveSpeakingIntroModal } from "@/components/interactive-speaking/InteractiveSpeakingIntroModal";
+import { MiniDiagnosisPromptModal } from "@/components/practice/MiniDiagnosisPromptModal";
+import { PracticeHubV2 } from "@/components/practice/PracticeHubV2";
+import { PracticePageOverview } from "@/components/practice/PracticePageOverview";
+import { ReadingSkillsIntroModal } from "@/components/reading/ReadingSkillsIntroModal";
+import { BrutalPanel } from "@/components/ui/BrutalPanel";
+import { ReadWriteIntroModal } from "@/components/writing/ReadWriteIntroModal";
+import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
+import { canAccessSkill } from "@/lib/access-control";
+import { mockTestHubProgressLabel } from "@/lib/mock-test/mock-test-availability";
+import { fetchPhotoSpeakItems } from "@/lib/photo-speak-api";
+import {
+  emitVipApiCreditNotice,
+  thInteractiveSpeakingInsufficientCredits,
+  VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION,
+} from "@/lib/vip-ai-feedback-quota";
+
+function buildHubsWithoutMock(photoSpeakLabel: string) {
+  return [
+  {
+    title: "Production",
+    subtitle: "Writing & speaking tasks",
+    items: [
+      {
+        label: "Write about photo",
+        progress: photoSpeakLabel,
+        href: "/practice/production/write-about-photo",
+      },
+      {
+        label: "Read, then write",
+        progress: "0/1",
+        href: "/practice/production/read-and-write",
+      },
+      {
+        label: "Speak about photo",
+        progress: photoSpeakLabel,
+        href: "/practice/production/speak-about-photo",
+      },
+      {
+        label: "Read, then speak",
+        progress: "0/1",
+        href: "/practice/production/read-and-speak",
+      },
+      {
+        label: "Interactive speaking",
+        progress: "6 turns / scenario",
+        href: "/practice/production/interactive-speaking",
+      },
+    ],
+  },
+  {
+    title: "Comprehension",
+    subtitle: "Reading: vocab & passages",
+    items: [
+      {
+        label: "Vocabulary",
+        progress: "0/1",
+        href: "/practice/comprehension/vocabulary",
+      },
+      {
+        label: "Reading",
+        progress: "0/1",
+        href: "/practice/comprehension/reading",
+      },
+    ],
+  },
+  {
+    title: "Conversation",
+    subtitle: "Interactive listening",
+    items: [
+      {
+        label: "Interactive conversation",
+        progress: "0/1",
+        href: "/practice/listening/interactive",
+        skillGate: "conversation" as const,
+      },
+      {
+        label: "Dialogue → summary",
+        progress: "5 rounds",
+        href: "/practice/listening/dialogue-summary",
+      },
+    ],
+  },
+  {
+    title: "Literacy",
+    subtitle: "Dictation, FITB, real word",
+    items: [
+      {
+        label: "Dictation",
+        progress: "0/1",
+        href: "/practice/literacy/dictation",
+      },
+      {
+        label: "Fill in the blank",
+        progress: "0/1",
+        href: "/practice/literacy/fill-in-blank",
+      },
+      {
+        label: "Real word",
+        progress: "0/1",
+        href: "/practice/literacy/real-word",
+      },
+    ],
+  },
+  ];
+}
+
+const READING_SKILLS_HREF = "/practice/comprehension/reading";
+const DICTATION_HREF = "/practice/literacy/dictation";
+const FITB_HREF = "/practice/literacy/fill-in-blank";
+const INTERACTIVE_SPEAKING_HREF = "/practice/production/interactive-speaking";
+const READ_AND_WRITE_HREF = "/practice/production/read-and-write";
+
+export function PracticePageClient() {
+  const router = useRouter();
+  const { effectiveTier } = useEffectiveTier();
+  const showMiniStudy = true;
+  const showV2 = true;
+  const vipAiGate = useVipAiFeedbackGate();
+  const isVip = effectiveTier === "vip";
+  const [readingIntroOpen, setReadingIntroOpen] = useState(false);
+  const [dictationIntroOpen, setDictationIntroOpen] = useState(false);
+  const [fitbIntroOpen, setFitbIntroOpen] = useState(false);
+  const [interactiveSpeakingIntroOpen, setInteractiveSpeakingIntroOpen] = useState(false);
+  const [readWriteIntroOpen, setReadWriteIntroOpen] = useState(false);
+  const [photoSpeakCount, setPhotoSpeakCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchPhotoSpeakItems("write_about_photo")
+      .then((items) => {
+        if (!cancelled) setPhotoSpeakCount(items.length);
+      })
+      .catch(() => {
+        /* keep the generic fallback label on failure */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const photoSpeakLabel = photoSpeakCount !== null ? `${photoSpeakCount} photos` : "Practice bank";
+
+  const interactiveSpeakingCanStart = vipAiGate.hasBypassAccess
+    ? true
+    : !vipAiGate.isVip
+    ? true
+    : !vipAiGate.loading &&
+      (!vipAiGate.userId ||
+        vipAiGate.remaining >= VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION);
+
+  const enterInteractiveSpeaking = () => {
+    if (vipAiGate.isVip && !vipAiGate.hasBypassAccess) {
+      if (vipAiGate.loading) {
+        window.alert("กำลังโหลดข้อมูลบัญชีอยู่ครับ โปรดรอสักครู่แล้วลองอีกครั้ง");
+        return;
+      }
+      const uid = vipAiGate.userId;
+      if (!uid) {
+        window.alert("กรุณาเข้าสู่ระบบเพื่อใช้โควต้า VIP");
+        return;
+      }
+      const rem = vipAiGate.remaining;
+      emitVipApiCreditNotice(rem, vipAiGate.limit, {
+        quotaMode: vipAiGate.quotaMode,
+        used: vipAiGate.used,
+        weeklyRenewsAt: vipAiGate.renewsAt,
+        monthlyRenewsAt: vipAiGate.planExpiresAt,
+        extraRemaining: vipAiGate.extraLimit,
+        extraExpiresAt: vipAiGate.extraExpiresAt,
+      });
+      const cost = VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION;
+      if (rem < cost) {
+        window.alert(thInteractiveSpeakingInsufficientCredits(cost, rem));
+        return;
+      }
+    }
+    router.push(INTERACTIVE_SPEAKING_HREF);
+  };
+
+  const readWriteCanStart = vipAiGate.hasBypassAccess
+    ? true
+    : !vipAiGate.isVip
+    ? true
+    : !vipAiGate.loading && (!vipAiGate.userId || vipAiGate.remaining >= 1);
+
+  const enterReadAndWrite = () => {
+    if (
+      vipAiGate.isVip &&
+      !vipAiGate.hasBypassAccess &&
+      !vipAiGate.loading &&
+      vipAiGate.userId
+    ) {
+      const rem = vipAiGate.remaining;
+      emitVipApiCreditNotice(rem, vipAiGate.limit, {
+        quotaMode: vipAiGate.quotaMode,
+        used: vipAiGate.used,
+        weeklyRenewsAt: vipAiGate.renewsAt,
+        monthlyRenewsAt: vipAiGate.planExpiresAt,
+        extraRemaining: vipAiGate.extraLimit,
+        extraExpiresAt: vipAiGate.extraExpiresAt,
+      });
+      if (rem < 1) {
+        window.alert(
+          vipAiGate.quotaMode === "weekly"
+            ? "การตรวจงาน: You have no remaining VIP grading credit this week. It resets every Monday."
+            : "การตรวจงาน: You have no remaining VIP grading credit in this monthly/package cycle right now.",
+        );
+        return;
+      }
+    }
+    router.push(READ_AND_WRITE_HREF);
+  };
+
+  const hubs = useMemo(
+    () => [
+      {
+        title: "Starter test",
+        subtitle: "Free baseline check",
+        items: [
+          {
+            label: "Mini diagnosis",
+            progress: "15–17 minutes",
+            href: "/mini-diagnosis/start",
+          },
+        ],
+      },
+      ...buildHubsWithoutMock(photoSpeakLabel),
+      {
+        title: "Mock test",
+        subtitle: "Full exam simulation",
+        items: [
+          {
+            label: "Full mock test",
+            progress: mockTestHubProgressLabel(),
+            href: "/mock-test/start",
+          },
+        ],
+      },
+    ],
+    [photoSpeakLabel],
+  );
+
+  return (
+    <>
+      <MiniDiagnosisPromptModal />
+      <ReadingSkillsIntroModal
+        open={readingIntroOpen}
+        onOpenChange={setReadingIntroOpen}
+        onEnter={() => router.push(READING_SKILLS_HREF)}
+      />
+      <DictationIntroModal
+        open={dictationIntroOpen}
+        onOpenChange={setDictationIntroOpen}
+        onEnter={() => router.push(DICTATION_HREF)}
+      />
+      <InteractiveSpeakingIntroModal
+        open={interactiveSpeakingIntroOpen}
+        onOpenChange={setInteractiveSpeakingIntroOpen}
+        onEnter={enterInteractiveSpeaking}
+        showCredits={vipAiGate.isVip && !!vipAiGate.userId}
+        remaining={vipAiGate.remaining}
+        limit={vipAiGate.limit}
+        sessionCost={VIP_INTERACTIVE_SPEAKING_API_CALLS_PER_SESSION}
+        canStart={interactiveSpeakingCanStart}
+      />
+      <ReadWriteIntroModal
+        open={readWriteIntroOpen}
+        onOpenChange={setReadWriteIntroOpen}
+        onEnter={enterReadAndWrite}
+        showCredits={vipAiGate.isVip && !!vipAiGate.userId}
+        remaining={vipAiGate.remaining}
+        limit={vipAiGate.limit}
+        sessionCost={1}
+        canStart={readWriteCanStart}
+      />
+      <FillInBlankIntroModal
+        open={fitbIntroOpen}
+        onOpenChange={setFitbIntroOpen}
+        onEnter={() => router.push(FITB_HREF)}
+      />
+      {showV2 ? (
+        <PracticeHubV2
+          effectiveTier={effectiveTier}
+          isVip={isVip}
+          showMiniStudy={showMiniStudy}
+          conversationGate={canAccessSkill(effectiveTier, "conversation")}
+          onReadingIntro={() => setReadingIntroOpen(true)}
+          onDictationIntro={() => setDictationIntroOpen(true)}
+          onFitbIntro={() => setFitbIntroOpen(true)}
+          onInteractiveSpeakingIntro={() => setInteractiveSpeakingIntroOpen(true)}
+          onReadWriteIntro={() => setReadWriteIntroOpen(true)}
+        />
+      ) : (
+        <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+          <PracticePageOverview />
+
+          {showMiniStudy ? (
+        <div className="rounded-sm border-4 border-black bg-[#fff7d1] p-5 shadow-[6px_6px_0_0_#111]">
+          <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-red-700">
+            Admin preview · Not visible to users
+          </p>
+          <h2 className="mt-2 text-2xl font-black text-neutral-900">
+            Mini Study Sessions (15-min ADHD-friendly)
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm font-semibold leading-7 text-neutral-800">
+            Three micro-lessons on dictation: FANBOYS &amp; subordinating commas, -ed/-s
+            agreement, and the four comma structures for Write/Speak about Photo. Uses
+            Deepgram TTS with strict 100% match grading.
+          </p>
+          <Link
+            href="/practice/mini-study"
+            className="mt-3 inline-block rounded-[4px] border-4 border-black bg-[#004AAD] px-4 py-2 text-sm font-black uppercase tracking-wide text-[#FFCC00] shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+          >
+            Open mini study →
+          </Link>
+        </div>
+      ) : null}
+
+      <header className="ep-brutal rounded-sm border-black bg-white p-6">
+        <p className="ep-stat text-xs font-bold uppercase tracking-[0.2em] text-ep-blue">
+          Practice hub
+        </p>
+        <h1 className="mt-2 text-3xl font-black tracking-tight">Live academic portal</h1>
+        <p className="mt-2 max-w-2xl text-sm text-neutral-600">
+          Each tile mirrors your practice skill lanes. Thumbnails will show last score /
+          redeem / review once attempts exist. Your plan and study stats are above.
+        </p>
+      </header>
+
+      {effectiveTier === "free" ? (
+        <div className="rounded-[4px] border-4 border-black bg-[#fff7d1] p-5 shadow-[6px_6px_0_0_#111]">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#004AAD]">
+            Free starter access
+          </p>
+          <h2 className="mt-2 text-2xl font-black text-neutral-900">
+            ผู้ใช้ฟรีเริ่มทำข้อสอบจริงได้อย่างละ 1 ครั้ง
+          </h2>
+          <p className="mt-2 max-w-4xl text-sm font-semibold leading-7 text-neutral-800">
+            คุณสามารถลอง <strong>Reading</strong>, <strong>Vocabulary</strong>, <strong>Dictation</strong>,
+            {" "} <strong>Fill in the Blank</strong>, <strong>Real Word</strong>, และ{" "}
+            <strong>Interactive Conversation</strong> ได้อย่างละ 1 ครั้งตลอดอายุบัญชี
+            พร้อม <strong>Instant Feedback 1 เครดิต</strong> สำหรับเลือกลองงานพูดหรือเขียน 1 งาน
+            ส่วน <strong>Full Mock Test</strong> ยังไม่รวมในแพ็กเกจฟรี
+          </p>
+        </div>
+      ) : null}
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {hubs.map((hub) => (
+          <BrutalPanel
+            key={hub.title}
+            eyebrow={hub.subtitle}
+            title={hub.title}
+          >
+            <div className="mb-3 flex items-center justify-between text-sm">
+              <span className="font-semibold text-neutral-600">Average score</span>
+              <span className="ep-stat text-neutral-400">—</span>
+            </div>
+            <ul className="space-y-2">
+              {hub.items.map((item) => {
+                const gate =
+                  "skillGate" in item && item.skillGate
+                    ? canAccessSkill(effectiveTier, item.skillGate)
+                    : null;
+                const locked = gate && !gate.allowed;
+
+                if (locked) {
+                  return (
+                    <li key={item.label}>
+                      <div className="flex cursor-not-allowed items-center justify-between rounded-sm border-2 border-dashed border-neutral-400 bg-neutral-100 px-3 py-2 text-sm font-bold text-neutral-500">
+                        <span>{item.label}</span>
+                        <span className="ep-stat text-xs uppercase text-red-700">
+                          Locked
+                        </span>
+                      </div>
+                    </li>
+                  );
+                }
+
+                if (item.href === READING_SKILLS_HREF) {
+                  return (
+                    <li key={item.label}>
+                      <button
+                        type="button"
+                        onClick={() => setReadingIntroOpen(true)}
+                        className="flex w-full items-center justify-between rounded-sm border-2 border-black bg-neutral-50 px-3 py-2 text-left text-sm font-bold hover:bg-ep-yellow/30"
+                      >
+                        <span>{item.label}</span>
+                        <span className="ep-stat text-xs text-neutral-500">
+                          {isVip && hub.title !== "Mock test" ? "Unlimited" : item.progress}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                }
+
+                if (item.href === INTERACTIVE_SPEAKING_HREF) {
+                  return (
+                    <li key={item.label}>
+                      <button
+                        type="button"
+                        onClick={() => setInteractiveSpeakingIntroOpen(true)}
+                        className="flex w-full items-center justify-between rounded-sm border-2 border-black bg-neutral-50 px-3 py-2 text-left text-sm font-bold hover:bg-ep-yellow/30"
+                      >
+                        <span>{item.label}</span>
+                        <span className="ep-stat text-xs text-neutral-500">
+                          {isVip && hub.title !== "Mock test" ? "Unlimited" : item.progress}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                }
+
+                if (item.href === READ_AND_WRITE_HREF) {
+                  return (
+                    <li key={item.label}>
+                      <button
+                        type="button"
+                        onClick={() => setReadWriteIntroOpen(true)}
+                        className="flex w-full items-center justify-between rounded-sm border-2 border-black bg-neutral-50 px-3 py-2 text-left text-sm font-bold hover:bg-ep-yellow/30"
+                      >
+                        <span>{item.label}</span>
+                        <span className="ep-stat text-xs text-neutral-500">
+                          {isVip && hub.title !== "Mock test" ? "Unlimited" : item.progress}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                }
+
+                if (item.href === DICTATION_HREF) {
+                  return (
+                    <li key={item.label}>
+                      <button
+                        type="button"
+                        onClick={() => setDictationIntroOpen(true)}
+                        className="flex w-full items-center justify-between rounded-sm border-2 border-black bg-neutral-50 px-3 py-2 text-left text-sm font-bold hover:bg-ep-yellow/30"
+                      >
+                        <span>{item.label}</span>
+                        <span className="ep-stat text-xs text-neutral-500">
+                          {isVip && hub.title !== "Mock test" ? "Unlimited" : item.progress}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                }
+
+                if (item.href === FITB_HREF) {
+                  return (
+                    <li key={item.label}>
+                      <button
+                        type="button"
+                        onClick={() => setFitbIntroOpen(true)}
+                        className="flex w-full items-center justify-between rounded-sm border-2 border-black bg-neutral-50 px-3 py-2 text-left text-sm font-bold hover:bg-ep-yellow/30"
+                      >
+                        <span>{item.label}</span>
+                        <span className="ep-stat text-xs text-neutral-500">
+                          {isVip && hub.title !== "Mock test" ? "Unlimited" : item.progress}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                }
+
+                return (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className="flex items-center justify-between rounded-sm border-2 border-black bg-neutral-50 px-3 py-2 text-sm font-bold hover:bg-ep-yellow/30"
+                    >
+                      <span>{item.label}</span>
+                      <span className="ep-stat text-xs text-neutral-500">
+                        {isVip && hub.title !== "Mock test" ? "Unlimited" : item.progress}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </BrutalPanel>
+        ))}
+          </div>
+        </main>
+      )}
+    </>
+  );
+}

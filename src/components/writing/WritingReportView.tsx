@@ -218,7 +218,13 @@ function StudyVocabRow({
   );
 }
 
-export function WritingReportView({ report }: { report: WritingAttemptReport }) {
+export function WritingReportView({
+  report,
+  embedded = false,
+}: {
+  report: WritingAttemptReport;
+  embedded?: boolean;
+}) {
   useRevealSfx();
   const router = useRouter();
   const fullReport = useMemo(() => withStudyPackDefaults(report), [report]);
@@ -263,11 +269,11 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
     .slice(0, 8);
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className={embedded ? "bg-[#fafafa]" : "min-h-screen bg-[#fafafa]"}>
       <ProductionReportLandingHero
         locale="th"
-        backHref={`/practice/production/read-and-write/round/${roundBack}`}
-        backLabel="← หัวข้อ"
+        backHref={embedded ? undefined : `/practice/production/read-and-write/round/${roundBack}`}
+        backLabel={embedded ? undefined : "← หัวข้อ"}
         eyebrow="รายงาน · อ่านแล้วเขียน"
         titleEn={fullReport.topicTitleEn}
         titleTh={fullReport.topicTitleTh}
@@ -287,15 +293,17 @@ export function WritingReportView({ report }: { report: WritingAttemptReport }) 
           ) : undefined
         }
       >
-        <button
-          type="button"
-          onClick={() =>
-            router.push(`/practice/production/read-and-write/${fullReport.topicId}?redeem=1`)
-          }
-          className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
-        >
-          ทำอีกครั้ง
-        </button>
+        {!embedded ? (
+          <button
+            type="button"
+            onClick={() =>
+              router.push(`/practice/production/read-and-write/${fullReport.topicId}?redeem=1`)
+            }
+            className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
+          >
+            ทำอีกครั้ง
+          </button>
+        ) : null}
         <FullReportNotebookButton
           attemptId={fullReport.attemptId}
           entrySource="writing-read-and-write"

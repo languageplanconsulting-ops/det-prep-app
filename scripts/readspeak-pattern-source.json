@@ -1,0 +1,185 @@
+{
+  "_comment": "Hand-authored source for the rewritten อ่านแล้วพูด lessons. Every topic is a QUESTION and every answer is built from the four moves (direct → explain → example → conclude), ~120-150 words. scripts/build-readspeak-pattern.mjs turns this into the data banks, inserting dropdown blanks from readspeak-pattern-bank.json.",
+  "items": [
+    {
+      "id": "rs-e1-1",
+      "family": "daily life",
+      "topic": "What does a typical weekday look like for you?",
+      "topicTh": "วันธรรมดาทั่วไปของคุณเป็นอย่างไร?",
+      "moves": [
+        { "kind": "direct", "en": "My weekdays follow the same simple routine from morning to night. I wake up early, go to work, and come home in the evening at about the same time every day.", "th": "วันธรรมดาของฉันมีกิจวัตรเหมือนเดิมตั้งแต่เช้าจนค่ำ ฉันตื่นเช้า ไปทำงาน และกลับบ้านตอนเย็นเวลาใกล้เคียงกันทุกวัน" },
+        { "kind": "explain", "en": "I keep this routine because it makes my day much easier to control. When I already know what comes next, I waste less time deciding and I am almost never late.", "th": "ฉันทำตามกิจวัตรนี้เพราะมันทำให้ควบคุมวันของฉันได้ง่ายขึ้นมาก เมื่อรู้อยู่แล้วว่าต้องทำอะไรต่อ ฉันก็เสียเวลาตัดสินใจน้อยลงและแทบไม่เคยไปสาย" },
+        { "kind": "example", "en": "For example, I get up at seven o'clock, take a shower, and have breakfast with my family. Then I catch the bus at eight and reach my office before nine.", "th": "ตัวอย่างเช่น ฉันตื่นตอนเจ็ดโมง อาบน้ำ แล้วกินอาหารเช้ากับครอบครัว จากนั้นขึ้นรถเมล์ตอนแปดโมงและถึงที่ทำงานก่อนเก้าโมง" },
+        { "kind": "conclude", "en": "Overall, my weekday routine is not exciting, but it works very well for me. I believe a steady routine is essential if you want a calm and productive week.", "th": "โดยรวมแล้ว กิจวัตรวันธรรมดาของฉันไม่ได้ตื่นเต้น แต่มันเหมาะกับฉันมาก ฉันเชื่อว่ากิจวัตรที่สม่ำเสมอจำเป็นมากถ้าอยากมีสัปดาห์ที่สงบและได้งาน" }
+      ],
+      "vocab": [
+        { "word": "routine", "en": "a fixed sequence of things you do regularly", "th": "กิจวัตรประจำวัน" },
+        { "word": "productive", "en": "getting a lot of useful work done", "th": "ได้ผลงาน, มีประสิทธิผล" },
+        { "word": "steady", "en": "regular and not changing", "th": "สม่ำเสมอ, คงที่" },
+        { "word": "reach", "en": "to arrive at a place", "th": "ไปถึง" }
+      ]
+    },
+    {
+      "id": "rs-e1-2",
+      "family": "family",
+      "topic": "Who are the people in your family, and how close are you to them?",
+      "topicTh": "ครอบครัวของคุณมีใครบ้าง และคุณสนิทกับพวกเขาแค่ไหน?",
+      "moves": [
+        { "kind": "direct", "en": "I come from a small family of four people, and we are very close to each other. My parents, my younger sister and I still live in the same house.", "th": "ฉันมาจากครอบครัวเล็ก ๆ สี่คน และเราสนิทกันมาก พ่อแม่ น้องสาว และฉันยังอยู่บ้านหลังเดียวกัน" },
+        { "kind": "explain", "en": "We are close because we spend real time together instead of only sharing a house. Eating and talking together every evening allows for a much stronger relationship.", "th": "เราสนิทกันเพราะเราใช้เวลาร่วมกันจริง ๆ ไม่ใช่แค่อยู่บ้านเดียวกัน การกินข้าวและพูดคุยกันทุกเย็นทำให้ความสัมพันธ์แน่นแฟ้นขึ้นมาก" },
+        { "kind": "example", "en": "For example, we always have dinner together at seven, and nobody brings a phone to the table. On Sundays we cook a big meal and my sister and I wash the dishes.", "th": "ตัวอย่างเช่น เรากินข้าวเย็นด้วยกันตอนหนึ่งทุ่มเสมอ และไม่มีใครเอาโทรศัพท์มาที่โต๊ะ วันอาทิตย์เราทำอาหารมื้อใหญ่ ส่วนฉันกับน้องสาวล้างจาน" },
+        { "kind": "conclude", "en": "Overall, my family is small but it is the most important part of my life. I think shared time is what makes a family close, not the number of people in it.", "th": "โดยรวมแล้ว ครอบครัวฉันเล็กแต่เป็นส่วนที่สำคัญที่สุดในชีวิต ฉันคิดว่าเวลาที่ใช้ร่วมกันต่างหากที่ทำให้ครอบครัวสนิทกัน ไม่ใช่จำนวนคน" }
+      ],
+      "vocab": [
+        { "word": "close", "en": "having a warm, strong relationship", "th": "สนิทสนม" },
+        { "word": "relationship", "en": "the way people are connected to each other", "th": "ความสัมพันธ์" },
+        { "word": "shared", "en": "done or owned together", "th": "ที่ทำร่วมกัน" },
+        { "word": "chores", "en": "small jobs you must do at home", "th": "งานบ้าน" }
+      ]
+    },
+    {
+      "id": "rs-e1-3",
+      "family": "home",
+      "topic": "What is your home like, and which room do you like the most?",
+      "topicTh": "บ้านของคุณเป็นอย่างไร และคุณชอบห้องไหนมากที่สุด?",
+      "moves": [
+        { "kind": "direct", "en": "I live in a small apartment near the city centre, and my favourite room is the kitchen. It is not large, but it has everything my family needs.", "th": "ฉันอยู่อพาร์ตเมนต์เล็ก ๆ ใกล้ใจกลางเมือง และห้องที่ฉันชอบที่สุดคือห้องครัว มันไม่ใหญ่ แต่มีทุกอย่างที่ครอบครัวฉันต้องใช้" },
+        { "kind": "explain", "en": "I like the kitchen most because it is where everybody naturally gathers. The big window lets in a lot of light, which makes the whole room feel warm and open.", "th": "ฉันชอบห้องครัวที่สุดเพราะเป็นที่ที่ทุกคนมารวมกันโดยธรรมชาติ หน้าต่างบานใหญ่รับแสงเข้ามาเยอะ ทำให้ทั้งห้องรู้สึกอบอุ่นและโปร่ง" },
+        { "kind": "example", "en": "For example, my mother and I cook there together every Sunday morning. My father usually sits at the counter with his coffee and talks to us while we work, and my little cousin helps us wash the vegetables.", "th": "ตัวอย่างเช่น แม่กับฉันทำอาหารด้วยกันที่นั่นทุกเช้าวันอาทิตย์ ส่วนพ่อมักนั่งที่เคาน์เตอร์พร้อมกาแฟและคุยกับเราระหว่างที่เราทำ และลูกพี่ลูกน้องตัวเล็กก็ช่วยเราล้างผัก" },
+        { "kind": "conclude", "en": "Overall, my home is simple but very comfortable for us. I think a home feels good because of the people inside it, not because of its size.", "th": "โดยรวมแล้ว บ้านของฉันเรียบง่ายแต่สบายมากสำหรับเรา ฉันคิดว่าบ้านจะน่าอยู่เพราะคนที่อยู่ข้างใน ไม่ใช่เพราะขนาดของมัน" }
+      ],
+      "vocab": [
+        { "word": "apartment", "en": "a set of rooms to live in inside a larger building", "th": "อพาร์ตเมนต์, ห้องชุด" },
+        { "word": "gather", "en": "to come together in one place", "th": "มารวมตัวกัน" },
+        { "word": "comfortable", "en": "pleasant and easy to be in", "th": "สบาย" },
+        { "word": "counter", "en": "a flat kitchen surface for preparing food", "th": "เคาน์เตอร์ครัว" }
+      ]
+    },
+    {
+      "id": "rs-e1-4",
+      "family": "daily life",
+      "topic": "What do you usually do in the first hour after you wake up?",
+      "topicTh": "ชั่วโมงแรกหลังตื่นนอน คุณมักทำอะไรบ้าง?",
+      "moves": [
+        { "kind": "direct", "en": "My first hour of the day is always quiet and very slow. I do the same few things in the same order before I speak to anybody.", "th": "ชั่วโมงแรกของวันฉันเงียบและช้ามาก ฉันทำสิ่งเดิม ๆ ไม่กี่อย่างตามลำดับเดิมก่อนจะคุยกับใคร" },
+        { "kind": "explain", "en": "I protect this hour because a rushed morning ruins the rest of my day. Starting slowly promotes a calmer mood and helps me think clearly at work later.", "th": "ฉันหวงเวลาชั่วโมงนี้เพราะเช้าที่เร่งรีบทำให้ทั้งวันเสีย การเริ่มต้นช้า ๆ ทำให้อารมณ์สงบขึ้นและช่วยให้ฉันคิดได้ชัดเจนตอนทำงาน" },
+        { "kind": "example", "en": "For instance, I drink a glass of water, open the curtains, and stretch for ten minutes. After that I make coffee and read the news without touching social media, and I never check my work email before I have finished that cup.", "th": "ตัวอย่างเช่น ฉันดื่มน้ำหนึ่งแก้ว เปิดผ้าม่าน และยืดเส้นสิบนาที หลังจากนั้นก็ชงกาแฟและอ่านข่าวโดยไม่แตะโซเชียลมีเดีย และฉันจะไม่เช็กอีเมลงานเลยจนกว่าจะดื่มกาแฟแก้วนั้นหมด" },
+        { "kind": "conclude", "en": "Overall, this quiet hour is the part of the day I enjoy most. I believe how you start the morning shapes how the whole day feels.", "th": "โดยรวมแล้ว ชั่วโมงเงียบ ๆ นี้เป็นช่วงที่ฉันชอบที่สุดของวัน ฉันเชื่อว่าการเริ่มต้นเช้าเป็นตัวกำหนดความรู้สึกของทั้งวัน" }
+      ],
+      "vocab": [
+        { "word": "stretch", "en": "to extend your arms and legs to loosen your muscles", "th": "ยืดเส้นยืดสาย" },
+        { "word": "rushed", "en": "done too quickly, without enough time", "th": "เร่งรีบ" },
+        { "word": "mood", "en": "the way you feel at a particular time", "th": "อารมณ์" },
+        { "word": "curtains", "en": "cloth that hangs over a window", "th": "ผ้าม่าน" }
+      ]
+    },
+    {
+      "id": "rs-e1-5",
+      "family": "hometown",
+      "topic": "What is your hometown like, and would you recommend it to a visitor?",
+      "topicTh": "บ้านเกิดของคุณเป็นอย่างไร และคุณจะแนะนำให้นักท่องเที่ยวไปไหม?",
+      "moves": [
+        { "kind": "direct", "en": "My hometown is a medium-sized town in the north, and I would certainly recommend it. It is quiet, green, and much cheaper than the capital city.", "th": "บ้านเกิดของฉันเป็นเมืองขนาดกลางทางภาคเหนือ และฉันจะแนะนำแน่นอน ที่นั่นเงียบสงบ เขียวชอุ่ม และค่าครองชีพถูกกว่าเมืองหลวงมาก" },
+        { "kind": "explain", "en": "I recommend it because visitors can see real local life there, not just tourist attractions. The slower pace allows for a much more relaxing holiday.", "th": "ฉันแนะนำเพราะนักท่องเที่ยวจะได้เห็นชีวิตท้องถิ่นจริง ๆ ไม่ใช่แค่สถานที่ท่องเที่ยว จังหวะชีวิตที่ช้ากว่าทำให้พักผ่อนได้เต็มที่กว่า" },
+        { "kind": "example", "en": "For example, the morning market sells food that you cannot find in Bangkok, and it opens before sunrise. There is also an old temple on the hill with a beautiful view of the valley, and the fruit there costs half the city price.", "th": "ตัวอย่างเช่น ตลาดเช้าขายอาหารที่หาไม่ได้ในกรุงเทพฯ และเปิดก่อนพระอาทิตย์ขึ้น ยังมีวัดเก่าบนเนินเขาที่มองเห็นวิวหุบเขาสวยงาม และผลไม้ที่นั่นราคาถูกกว่าในเมืองครึ่งหนึ่ง" },
+        { "kind": "conclude", "en": "Overall, my hometown is a good choice for anyone who wants a calm trip. I think small towns often show a country more honestly than big cities do.", "th": "โดยรวมแล้ว บ้านเกิดของฉันเป็นตัวเลือกที่ดีสำหรับคนที่อยากเที่ยวแบบสงบ ฉันคิดว่าเมืองเล็ก ๆ มักสะท้อนประเทศได้ตรงกว่าเมืองใหญ่" }
+      ],
+      "vocab": [
+        { "word": "hometown", "en": "the town where you were born or grew up", "th": "บ้านเกิด" },
+        { "word": "pace", "en": "the speed at which life or work happens", "th": "จังหวะ, ความเร็ว" },
+        { "word": "attraction", "en": "a place tourists like to visit", "th": "สถานที่ท่องเที่ยว" },
+        { "word": "valley", "en": "low land between hills or mountains", "th": "หุบเขา" }
+      ]
+    },
+    {
+      "id": "rs-e1-6",
+      "family": "hobbies",
+      "topic": "How do you usually spend your weekends?",
+      "topicTh": "ปกติคุณใช้เวลาช่วงสุดสัปดาห์อย่างไร?",
+      "moves": [
+        { "kind": "direct", "en": "I usually split my weekend between rest and time with other people. Saturday is for myself, and Sunday is almost always for my family and friends.", "th": "ปกติฉันแบ่งสุดสัปดาห์ระหว่างการพักผ่อนกับการใช้เวลากับคนอื่น วันเสาร์เป็นเวลาของตัวเอง ส่วนวันอาทิตย์เกือบทุกครั้งเป็นของครอบครัวและเพื่อน" },
+        { "kind": "explain", "en": "I plan it this way because I need both quiet time and social time to feel rested. Doing only one of them leaves me either lonely or tired on Monday.", "th": "ฉันวางแผนแบบนี้เพราะต้องการทั้งเวลาเงียบ ๆ และเวลาเข้าสังคมถึงจะรู้สึกได้พัก ถ้าทำอย่างเดียวฉันจะรู้สึกเหงาหรือเหนื่อยในวันจันทร์" },
+        { "kind": "example", "en": "For example, last Saturday I stayed home, cleaned my room, and finished a novel I had started. On Sunday I met two old school friends for lunch and we walked in the park afterwards.", "th": "ตัวอย่างเช่น เสาร์ที่แล้วฉันอยู่บ้าน ทำความสะอาดห้อง และอ่านนิยายที่ค้างไว้จนจบ วันอาทิตย์ฉันไปกินข้าวเที่ยงกับเพื่อนสมัยเรียนสองคน แล้วเดินเล่นในสวนสาธารณะ" },
+        { "kind": "conclude", "en": "Overall, my weekends are simple, but the balance is what matters to me. I think a good weekend should leave you feeling ready for Monday morning, not more tired than you were before it started.", "th": "โดยรวมแล้ว สุดสัปดาห์ของฉันเรียบง่าย แต่ความสมดุลคือสิ่งสำคัญสำหรับฉัน ฉันคิดว่าสุดสัปดาห์ที่ดีควรทำให้รู้สึกพร้อมสำหรับเช้าวันจันทร์ ไม่ใช่เหนื่อยกว่าตอนก่อนที่มันจะเริ่ม" }
+      ],
+      "vocab": [
+        { "word": "balance", "en": "a good mix of two different things", "th": "ความสมดุล" },
+        { "word": "rested", "en": "feeling fresh after sleeping or relaxing", "th": "ได้พักผ่อนเต็มที่" },
+        { "word": "novel", "en": "a long written story", "th": "นวนิยาย" },
+        { "word": "social", "en": "involving spending time with other people", "th": "เกี่ยวกับการเข้าสังคม" }
+      ]
+    },
+    {
+      "id": "rs-e1-7",
+      "family": "family",
+      "topic": "Who is your best friend, and why do the two of you get along so well?",
+      "topicTh": "เพื่อนสนิทที่สุดของคุณคือใคร และทำไมคุณสองคนถึงเข้ากันได้ดี?",
+      "moves": [
+        { "kind": "direct", "en": "My best friend is a woman I met on my first day at university. We have been close for almost ten years now.", "th": "เพื่อนสนิทที่สุดของฉันคือผู้หญิงที่ฉันเจอวันแรกที่มหาวิทยาลัย เราสนิทกันมาเกือบสิบปีแล้ว" },
+        { "kind": "explain", "en": "We get along so well because we are honest with each other even when it is uncomfortable. That honesty fosters real trust, so neither of us has to pretend.", "th": "เราเข้ากันได้ดีเพราะเราจริงใจต่อกันแม้ในเวลาที่พูดยาก ความจริงใจนั้นสร้างความไว้ใจจริง ๆ เราสองคนจึงไม่ต้องเสแสร้ง" },
+        { "kind": "example", "en": "For instance, she told me honestly that my first business idea was too risky, and she turned out to be completely right. When I lost that job a year later, she was the first person who called me, and we still speak almost every week.", "th": "ตัวอย่างเช่น เธอบอกฉันตรง ๆ ว่าไอเดียธุรกิจแรกของฉันเสี่ยงเกินไป และสุดท้ายเธอก็คิดถูกทั้งหมด ตอนที่ฉันตกงานอีกหนึ่งปีต่อมา เธอเป็นคนแรกที่โทรมาหา และเรายังคุยกันเกือบทุกสัปดาห์" },
+        { "kind": "conclude", "en": "Overall, she is the person I trust most outside my family. I believe honesty is what turns an ordinary friendship into a lasting one.", "th": "โดยรวมแล้ว เธอเป็นคนที่ฉันไว้ใจที่สุดนอกจากครอบครัว ฉันเชื่อว่าความจริงใจคือสิ่งที่เปลี่ยนมิตรภาพธรรมดาให้ยืนยาว" }
+      ],
+      "vocab": [
+        { "word": "honest", "en": "telling the truth even when it is hard", "th": "ซื่อสัตย์, จริงใจ" },
+        { "word": "trust", "en": "the belief that someone will not let you down", "th": "ความไว้วางใจ" },
+        { "word": "risky", "en": "likely to go wrong or lose money", "th": "เสี่ยง" },
+        { "word": "lasting", "en": "continuing for a long time", "th": "ที่ยืนยาว" }
+      ]
+    },
+    {
+      "id": "rs-e1-8",
+      "family": "food",
+      "topic": "What kind of food do you usually eat at home?",
+      "topicTh": "ปกติคุณกินอาหารแบบไหนที่บ้าน?",
+      "moves": [
+        { "kind": "direct", "en": "At home we eat mostly simple Thai food that my mother cooks herself. We rarely order delivery except when everyone is too busy.", "th": "ที่บ้านเรากินอาหารไทยง่าย ๆ ที่แม่ทำเองเป็นส่วนใหญ่ เราแทบไม่สั่งอาหารเดลิเวอรี ยกเว้นตอนที่ทุกคนยุ่งเกินไป" },
+        { "kind": "explain", "en": "We cook at home because it is cheaper and much healthier than eating outside. Choosing the ingredients ourselves allows for less oil, less sugar, and more vegetables.", "th": "เราทำอาหารเองเพราะถูกกว่าและดีต่อสุขภาพกว่ากินข้างนอกมาก การเลือกวัตถุดิบเองทำให้ใช้น้ำมันน้อยลง น้ำตาลน้อยลง และมีผักมากขึ้น" },
+        { "kind": "example", "en": "For example, a normal dinner at my house is rice, a clear soup, and a stir-fried vegetable dish. On special days my mother makes green curry, which is my favourite, and we grow our own chillies and basil in pots on the balcony.", "th": "ตัวอย่างเช่น มื้อเย็นปกติที่บ้านฉันคือข้าว แกงจืด และผัดผัก วันพิเศษแม่จะทำแกงเขียวหวานซึ่งเป็นเมนูโปรดของฉัน และเราปลูกพริกกับโหระพาเองในกระถางที่ระเบียง" },
+        { "kind": "conclude", "en": "Overall, our meals are nothing fancy, but they are fresh and made with care. I think home cooking is essential for staying healthy on a small budget.", "th": "โดยรวมแล้ว มื้ออาหารของเราไม่ได้หรูหรา แต่สดใหม่และทำด้วยความใส่ใจ ฉันคิดว่าการทำอาหารกินเองจำเป็นมากถ้าอยากสุขภาพดีด้วยงบน้อย" }
+      ],
+      "vocab": [
+        { "word": "ingredients", "en": "the different foods used to make a dish", "th": "วัตถุดิบ, ส่วนผสม" },
+        { "word": "healthy", "en": "good for your body", "th": "ดีต่อสุขภาพ" },
+        { "word": "stir-fried", "en": "cooked quickly in a hot pan with a little oil", "th": "ผัด" },
+        { "word": "budget", "en": "the amount of money you can spend", "th": "งบประมาณ" }
+      ]
+    },
+    {
+      "id": "rs-e1-9",
+      "family": "work",
+      "topic": "How do you travel to work or school every day?",
+      "topicTh": "ทุกวันคุณเดินทางไปทำงานหรือไปเรียนอย่างไร?",
+      "moves": [
+        { "kind": "direct", "en": "I travel to work by public transport every morning. The whole trip takes about forty minutes from my door to the office.", "th": "ฉันเดินทางไปทำงานด้วยขนส่งสาธารณะทุกเช้า การเดินทางทั้งหมดใช้เวลาประมาณสี่สิบนาทีจากหน้าบ้านถึงที่ทำงาน" },
+        { "kind": "explain", "en": "I choose the train instead of driving because the traffic in my city is terrible. Taking public transport also allows for some quiet reading time before work.", "th": "ฉันเลือกรถไฟฟ้าแทนการขับรถเพราะการจราจรในเมืองฉันแย่มาก การใช้ขนส่งสาธารณะยังทำให้มีเวลาอ่านหนังสือเงียบ ๆ ก่อนเข้างานด้วย" },
+        { "kind": "example", "en": "For example, I walk ten minutes to the station, take the train for five stops, and then walk again for a few minutes. On the train I usually finish one chapter of whatever book I am reading, and if the train is delayed I simply read a little more.", "th": "ตัวอย่างเช่น ฉันเดินสิบนาทีไปสถานี นั่งรถไฟห้าสถานี แล้วเดินต่ออีกไม่กี่นาที บนรถไฟฉันมักอ่านหนังสือจบหนึ่งบท และถ้ารถไฟล่าช้า ฉันก็แค่อ่านต่ออีกหน่อย" },
+        { "kind": "conclude", "en": "Overall, my commute is long but I have learned to use it well. I believe a journey feels much shorter when you turn it into useful time.", "th": "โดยรวมแล้ว การเดินทางของฉันใช้เวลานาน แต่ฉันเรียนรู้ที่จะใช้มันให้คุ้ม ฉันเชื่อว่าการเดินทางจะรู้สึกสั้นลงมากถ้าเปลี่ยนมันเป็นเวลาที่มีประโยชน์" }
+      ],
+      "vocab": [
+        { "word": "commute", "en": "the regular journey between home and work", "th": "การเดินทางไป-กลับที่ทำงาน" },
+        { "word": "public transport", "en": "buses and trains that anyone can use", "th": "ขนส่งสาธารณะ" },
+        { "word": "traffic", "en": "the vehicles moving on the roads", "th": "การจราจร" },
+        { "word": "chapter", "en": "one numbered part of a book", "th": "บท (ในหนังสือ)" }
+      ]
+    },
+    {
+      "id": "rs-e1-10",
+      "family": "hobbies",
+      "topic": "What do you like to do in your free time, and why?",
+      "topicTh": "เวลาว่างคุณชอบทำอะไร และเพราะอะไร?",
+      "moves": [
+        { "kind": "direct", "en": "In my free time I mostly cycle and read, and I try to do at least one of them every day. They are cheap hobbies that I can start whenever I have an hour.", "th": "เวลาว่างฉันมักปั่นจักรยานและอ่านหนังสือ และพยายามทำอย่างน้อยหนึ่งอย่างทุกวัน ทั้งสองเป็นงานอดิเรกที่ไม่แพงและเริ่มได้ทันทีที่มีเวลาสักชั่วโมง" },
+        { "kind": "explain", "en": "I enjoy these two because they rest completely different parts of me. Cycling clears my head after work, while reading promotes patience and teaches me new ideas.", "th": "ฉันชอบสองอย่างนี้เพราะมันพักส่วนที่ต่างกันของฉันโดยสิ้นเชิง การปั่นจักรยานทำให้หัวโล่งหลังเลิกงาน ส่วนการอ่านช่วยฝึกความอดทนและสอนแนวคิดใหม่ ๆ" },
+        { "kind": "example", "en": "For instance, I cycle around the park near my flat for an hour most evenings. Before bed I read twenty pages, and last month I finished four books that way.", "th": "ตัวอย่างเช่น ฉันปั่นจักรยานรอบสวนใกล้ห้องพักประมาณหนึ่งชั่วโมงเกือบทุกเย็น ก่อนนอนฉันอ่านยี่สิบหน้า และเดือนที่แล้วก็อ่านจบสี่เล่มด้วยวิธีนี้" },
+        { "kind": "conclude", "en": "Overall, my free time is quiet but it keeps me both healthy and curious. I think hobbies are essential because they give you something that is completely your own, away from work.", "th": "โดยรวมแล้ว เวลาว่างของฉันเงียบ ๆ แต่ทำให้ทั้งสุขภาพดีและอยากรู้อยากเห็นอยู่เสมอ ฉันคิดว่างานอดิเรกจำเป็นมากเพราะมันให้สิ่งที่เป็นของเราเองอย่างแท้จริง แยกออกจากเรื่องงาน" }
+      ],
+      "vocab": [
+        { "word": "cycle", "en": "to ride a bicycle", "th": "ปั่นจักรยาน" },
+        { "word": "patience", "en": "the ability to wait calmly", "th": "ความอดทน" },
+        { "word": "curious", "en": "wanting to learn or know more", "th": "อยากรู้อยากเห็น" },
+        { "word": "flat", "en": "an apartment", "th": "ห้องพัก, แฟลต" }
+      ]
+    }
+  ]
+}

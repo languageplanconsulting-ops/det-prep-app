@@ -1,17 +1,22 @@
 import type { MetadataRoute } from "next";
 
+import { ARTICLES } from "@/lib/articles";
 import { DET_PAGE_ORDER } from "@/lib/seo/det-content";
 import { absoluteUrl } from "@/lib/site-metadata";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  // Only routes that return 200 to an anonymous crawler belong here.
+  // /practice and /mock-test/start are deliberately excluded: middleware redirects
+  // signed-out visitors (see middleware.ts isPracticePath / requiresProtectedSession),
+  // so Googlebot never sees their content. /duolingo-english-test/practice is the
+  // crawlable, server-rendered equivalent that links into them after signup.
   const staticRoutes = [
     "/",
     "/about",
     "/pricing",
-    "/practice",
     "/mini-diagnosis/start",
-    "/mock-test/start",
     "/duolingo-english-test",
+    "/duolingo-english-test/practice",
     "/duolingo-level-test",
   ];
 
@@ -29,5 +34,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.75,
   }));
 
-  return [...staticEntries, ...detEntries];
+  const articleEntries = ARTICLES.map((article) => ({
+    url: absoluteUrl(`/articles/${article.slug}`),
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticEntries, ...detEntries, ...articleEntries];
 }

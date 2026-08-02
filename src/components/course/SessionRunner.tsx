@@ -2,10 +2,26 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import {
+  canRunInline,
+  isComprehensionExamExercise,
+  isInteractiveCourseExercise,
+  isProductionExercise,
+  lessonRunnerRefFor,
+  listenSpeakItemFor,
+  speakPhotoDrillFor,
+  writeTopicItemFor,
+} from "@/lib/course-plan/exercise-content";
+import { ComprehensionExamRunner } from "@/components/course/ComprehensionExamRunner";
 import { InlineExercise } from "@/components/course/InlineExercise";
+import { InteractiveCourseRunner } from "@/components/course/InteractiveCourseRunner";
 import { LessonRunnerInline } from "@/components/course/LessonRunnerInline";
+import { ListenSpeakBuilder } from "@/components/course/ListenSpeakBuilder";
+import { toSpeakDrill } from "@/lib/course-plan/listen-speak-bank";
+import { WriteTopicBuilder } from "@/components/course/WriteTopicBuilder";
 import { ProductionExerciseRunner } from "@/components/course/ProductionExerciseRunner";
-import { canRunInline, isProductionExercise, lessonRunnerRefFor } from "@/lib/course-plan/exercise-content";
+import { WarmupFitbRunner } from "@/components/course/WarmupFitbRunner";
+import { BunnyVideoEmbed } from "@/components/course/BunnyVideoEmbed";
 
 import {
   dayDoneCopy,
@@ -23,13 +39,29 @@ import {
   type StudyItem,
 } from "@/lib/course-plan/block-planner";
 
-type Phase = "warmup" | "choose" | "running" | "timeup" | "done";
+type Phase = "warmup" | "warmup_running" | "choose" | "running" | "timeup" | "done";
+
+/** Bunny lesson metadata keyed by course_lessons id. */
+export type LessonVideoInfo = {
+  bunnyVideoGuid: string;
+  title: string;
+  watchedSeconds?: number;
+  downloads?: Array<{ id: string; label: string; fileSize: number | null }>;
+};
 
 /** Can this item run in place, inside the session, instead of a plain checkbox? */
 function canRunInPlace(it: StudyItem): boolean {
   if (!it.exerciseKey) return false;
   if (lessonRunnerRefFor(it.exerciseKey)) return true;
+  if (listenSpeakItemFor(it.exerciseKey)) return true;
+  if (speakPhotoDrillFor(it.exerciseKey)) return true;
+  if (writeTopicItemFor(it.exerciseKey)) return true;
   if (isProductionExercise(it.taskType, it.gateKind)) return true;
+  if (isComprehensionExamExercise(it.taskType)) return true;
+  if (isInteractiveCourseExercise(it.taskType) && !it.exerciseKey.match(/^[mh]?is-l\d$/)) {
+    // Practice slots (is-real / ic-set / ds-set) — not the checkbox-only video lessons.
+    return true;
+  }
   return canRunInline(it.exerciseKey, it.taskType);
 }
 
@@ -58,12 +90,15 @@ export function SessionRunner({
   onClose,
   onFinish,
   track = "basic",
+  lessonVideos = {},
 }: {
   todaysItems: StudyItem[];
   carryOver: CarryOver;
   minutes: number;
   /** Drives the warm-up difficulty mix. */
   track?: "basic" | "medium" | "advanced";
+  /** lessonId → Bunny guid, so session videos can play inline. */
+  lessonVideos?: Record<string, LessonVideoInfo>;
   onClose: () => void;
   /** Items the learner did NOT finish — they become the new backlog. */
   onFinish: (unfinished: StudyItem[], completed: StudyItem[]) => void;
@@ -78,14 +113,146 @@ export function SessionRunner({
     setWarmupTaken(taken);
     setPhase(hasBacklog ? "choose" : "running");
   }
+
+  function startWarmup() {
+    setPhase("warmup_running");
+  }
   const [queue, setQueue] = useState<StudyItem[]>(() => dedupeById(todaysItems));
   const [done, setDone] = useState<Set<string>>(new Set());
   const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
   const [overtime, setOvertime] = useState(false);
   /** The item currently open as an inline exercise, if any. */
   const [activeExercise, setActiveExercise] = useState<StudyItem | null>(null);
+  /** Lecture video open in the session modal (Bunny iframe). */
+  const [activeVideo, setActiveVideo] = useState<StudyItem | null>(null);
+  const [videoJustFinished, setVideoJustFinished] = useState(false);
+  /** Play-through: after each item finishes, open the next unfinished one. */
+  const [sequenceMode, setSequenceMode] = useState(false);
+  const sequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [scores, setScores] = useState<Record<string, { correct: number; total: number }>>({});
   const startedRef = useRef(false);
+
+  function clearSequenceTimer() {
+    if (sequenceTimerRef.current) {
+      clearTimeout(sequenceTimerRef.current);
+      sequenceTimerRef.current = null;
+    }
+  }
+
+  function markItemDone(id: string) {
+    const next = new Set(done);
+    next.add(id);
+    setDone(next);
+    if (queue.every((i) => next.has(i.id))) {
+      clearSequenceTimer();
+      setSequenceMode(false);
+      const completed = queue.filter((i) => next.has(i.id));
+      onFinish([], completed);
+      setPhase("done");
+    }
+  }
+
+  function openVideo(it: StudyItem) {
+    setActiveExercise(null);
+    setVideoJustFinished(false);
+    setActiveVideo(it);
+  }
+
+  function closeVideo() {
+    clearSequenceTimer();
+    setSequenceMode(false);
+    setActiveVideo(null);
+    setVideoJustFinished(false);
+  }
+
+  function openItem(it: StudyItem) {
+    if (it.kind === "video") {
+      openVideo(it);
+      return;
+    }
+    setActiveVideo(null);
+    setVideoJustFinished(false);
+    if (canRunInPlace(it)) {
+      setActiveExercise(it);
+      return;
+    }
+  }
+
+  function isPlayable(it: StudyItem): boolean {
+    return it.kind === "video" || canRunInPlace(it);
+  }
+
+  /** Next unfinished playable item at/after `fromId` (exclusive). */
+  function nextPlayableAfter(currentId: string, doneSet: Set<string> = done): StudyItem | null {
+    const idx = queue.findIndex((i) => i.id === currentId);
+    const start = idx < 0 ? 0 : idx + 1;
+    for (let i = start; i < queue.length; i++) {
+      const it = queue[i];
+      if (it && !doneSet.has(it.id) && isPlayable(it)) return it;
+    }
+    return null;
+  }
+
+  function firstPlayable(doneSet: Set<string> = done): StudyItem | null {
+    for (const it of queue) {
+      if (!doneSet.has(it.id) && isPlayable(it)) return it;
+    }
+    return null;
+  }
+
+  function startSequence() {
+    const next = firstPlayable();
+    if (!next) return;
+    setSequenceMode(true);
+    openItem(next);
+  }
+
+  /** After finishing an item in sequence mode, open the next (or leave sequence). */
+  function continueSequence(finishedId: string, doneSet: Set<string>): boolean {
+    if (!sequenceMode) return false;
+    if (queue.every((i) => doneSet.has(i.id))) {
+      setSequenceMode(false);
+      return false;
+    }
+    const following = nextPlayableAfter(finishedId, doneSet);
+    if (!following) {
+      setSequenceMode(false);
+      return false;
+    }
+    clearSequenceTimer();
+    // Exercises swap immediately; videos get a short “ดูจบแล้ว” beat.
+    if (following.kind === "video") {
+      sequenceTimerRef.current = setTimeout(() => openItem(following), 700);
+    } else {
+      openItem(following);
+    }
+    return true;
+  }
+
+  /** Next unfinished item after `currentId` in today's queue (any kind). */
+  function nextAfter(currentId: string, doneSet: Set<string> = done): StudyItem | null {
+    const idx = queue.findIndex((i) => i.id === currentId);
+    if (idx < 0) return null;
+    for (let i = idx + 1; i < queue.length; i++) {
+      const it = queue[i];
+      if (it && !doneSet.has(it.id)) return it;
+    }
+    return null;
+  }
+
+  function onVideoEnded() {
+    if (!activeVideo) return;
+    const id = activeVideo.id;
+    setVideoJustFinished(true);
+    const nextDone = new Set(done);
+    nextDone.add(id);
+    markItemDone(id);
+    if (continueSequence(id, nextDone)) return;
+  }
+
+  useEffect(() => {
+    return () => clearSequenceTimer();
+  }, []);
 
   // Tick only while actually studying, so the choice screen does not burn time.
   useEffect(() => {
@@ -148,10 +315,16 @@ export function SessionRunner({
   const drillTotal = drills.length;
   const drillDone = drills.filter((i) => done.has(i.id)).length;
 
+  const wideModal = phase === "warmup_running" || Boolean(activeExercise) || Boolean(activeVideo);
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4">
-      <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
-        {/* ---------------- fill-in-the-blank warm-up ---------------- */}
+      <div
+        className={`max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl ${
+          wideModal ? "max-w-2xl" : "max-w-lg"
+        }`}
+      >
+        {/* ---------------- fill-in-the-blank warm-up offer ---------------- */}
         {phase === "warmup" && (
           <div className="p-6">
             <p className="text-[11px] font-black uppercase tracking-widest text-violet-600">
@@ -177,7 +350,7 @@ export function SessionRunner({
             <div className="mt-4 space-y-2">
               <button
                 type="button"
-                onClick={() => afterWarmup(true)}
+                onClick={startWarmup}
                 className="w-full rounded-full bg-violet-600 py-3 text-sm font-black text-white"
               >
                 เอาสิ ทำ 2 ข้อก่อน
@@ -193,15 +366,25 @@ export function SessionRunner({
           </div>
         )}
 
+        {/* ---------------- warm-up: real FITB from the practice bank ---------------- */}
+        {phase === "warmup_running" && (
+          <WarmupFitbRunner
+            levels={warmup.map((w) => w.level)}
+            onDone={() => afterWarmup(true)}
+            onSkip={() => afterWarmup(false)}
+          />
+        )}
+
         {/* ---------------- backlog choice ---------------- */}
         {phase === "choose" && (
           <div className="p-6">
             <p className="text-[11px] font-black uppercase tracking-widest text-amber-600">
-              มีงานค้างจากครั้งก่อน
+              มีบทเรียนและแบบฝึกค้างจากครั้งก่อน
             </p>
             <h2 className="mt-1 text-2xl font-black text-slate-900">จะเริ่มจากตรงไหนดี?</h2>
             <p className="mt-1 text-sm text-slate-600">
-              ค้างอยู่ {carryOver.entries.length} รายการ · ประมาณ {carryOverMinutes(carryOver)} นาที
+              ค้างอยู่ {carryOver.entries.length} บทเรียน/แบบฝึก · ประมาณ{" "}
+              {carryOverMinutes(carryOver)} นาที
             </p>
 
             <div className="mt-4 space-y-2">
@@ -210,7 +393,9 @@ export function SessionRunner({
                 onClick={() => choose("carry_over")}
                 className="w-full rounded-2xl bg-amber-50 p-4 text-left ring-1 ring-amber-200 transition hover:ring-amber-400"
               >
-                <p className="text-sm font-black text-amber-900">📌 ทำแบบฝึกค้างก่อน</p>
+                <p className="text-sm font-black text-amber-900">
+                  📌 ทำแบบฝึก / เรียนบทที่ค้างไว้
+                </p>
                 <p className="mt-0.5 text-[11px] text-amber-700">
                   เคลียร์ของเก่าให้หมด แล้วค่อยต่อของวันนี้เท่าที่เวลาเหลือ
                 </p>
@@ -233,7 +418,7 @@ export function SessionRunner({
                   ))}
                   {carryOver.entries.length > 6 && (
                     <li className="text-[11px] font-bold text-amber-600">
-                      และอีก {carryOver.entries.length - 6} รายการ
+                      และอีก {carryOver.entries.length - 6} บทเรียน/แบบฝึก
                     </li>
                   )}
                 </ul>
@@ -260,37 +445,217 @@ export function SessionRunner({
           </div>
         )}
 
+        {/* ---------------- lecture video, playing in place ---------------- */}
+        {activeVideo &&
+          phase !== "done" &&
+          (() => {
+            const meta = activeVideo.lessonId ? lessonVideos[activeVideo.lessonId] : undefined;
+            const guid = meta?.bunnyVideoGuid ?? null;
+            const alreadyDone = done.has(activeVideo.id);
+            return (
+              <div className="p-5 sm:p-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={closeVideo}
+                    className="rounded-full px-2 py-1 text-xs font-bold text-slate-400"
+                  >
+                    ← กลับ
+                  </button>
+                  <p className="min-w-0 flex-1 truncate text-center text-[13px] font-black text-slate-800">
+                    🎬 {activeVideo.titleTh}
+                  </p>
+                  <span className="w-14 text-right text-[11px] font-black text-slate-400">
+                    {activeVideo.minutes}′
+                  </span>
+                </div>
+
+                {guid && activeVideo.lessonId ? (
+                  <BunnyVideoEmbed
+                    guid={guid}
+                    title={activeVideo.titleTh}
+                    autoplay
+                    lessonId={activeVideo.lessonId}
+                    startSeconds={meta?.watchedSeconds ?? 0}
+                    onEnded={onVideoEnded}
+                  />
+                ) : guid ? (
+                  <BunnyVideoEmbed
+                    guid={guid}
+                    title={activeVideo.titleTh}
+                    autoplay
+                    onEnded={onVideoEnded}
+                  />
+                ) : (
+                  <div className="rounded-2xl bg-amber-50 p-5 text-center ring-1 ring-amber-200">
+                    <p className="text-sm font-black text-amber-900">ยังไม่มีวิดีโอบนเซิร์ฟเวอร์</p>
+                    <p className="mt-1 text-[12px] text-amber-800">
+                      บทนี้อยู่ในแผนแล้ว แต่ยังอัปโหลดคลิปไม่ครบ — ปิดแล้วกลับมาใหม่ได้เมื่อมีคลิป
+                    </p>
+                  </div>
+                )}
+
+                {meta && meta.downloads && meta.downloads.length > 0 && (
+                  <div className="mt-4 rounded-2xl bg-amber-50/80 p-3 ring-1 ring-amber-200">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-amber-800">
+                      เอกสารประกอบ ({meta.downloads.length})
+                    </p>
+                    <ul className="mt-2 space-y-1.5">
+                      {meta.downloads.map((d) => (
+                        <li key={d.id}>
+                          <a
+                            href={`/api/course/download/${d.id}`}
+                            className="flex items-center justify-between gap-3 rounded-xl bg-[#FFCC00] px-3.5 py-2.5 text-[13px] font-black text-slate-900 ring-1 ring-amber-300 transition hover:brightness-105"
+                          >
+                            <span className="flex min-w-0 items-center gap-2">
+                              <span className="shrink-0">PDF</span>
+                              <span className="truncate">{d.label}</span>
+                            </span>
+                            <span className="shrink-0 text-[11px] font-bold text-slate-700">
+                              {d.fileSize && d.fileSize > 0
+                                ? d.fileSize >= 1024 * 1024
+                                  ? `${(d.fileSize / (1024 * 1024)).toFixed(1)} MB ↓`
+                                  : `${Math.round(d.fileSize / 1024)} KB ↓`
+                                : "ดาวน์โหลด ↓"}
+                            </span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="mt-4 space-y-2">
+                  {(alreadyDone || videoJustFinished) &&
+                    (() => {
+                      // Include current as done so "next" skips the video we just finished
+                      // even before React re-renders `done`.
+                      const doneForNext = new Set(done);
+                      doneForNext.add(activeVideo.id);
+                      const next = nextAfter(activeVideo.id, doneForNext);
+                      const nextIsLesson =
+                        next != null && (next.kind === "video" || next.kind === "lesson");
+                      const nextIsExercise =
+                        next != null && (next.kind === "exercise" || next.kind === "review");
+                      return (
+                        <>
+                          <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-center text-sm font-black text-emerald-800 ring-1 ring-emerald-200">
+                            ✓ ดูจบแล้ว — ระบบติ๊กให้อัตโนมัติ
+                          </p>
+                          {next && (nextIsLesson || nextIsExercise) && (
+                            <button
+                              type="button"
+                              onClick={() => openItem(next)}
+                              className="w-full rounded-full bg-[#004AAD] px-4 py-3 text-sm font-black text-white"
+                            >
+                              <span className="block truncate">
+                                {nextIsLesson ? "บทเรียนถัดไป" : "แบบฝึกถัดไป"} → {next.titleTh}
+                              </span>
+                            </button>
+                          )}
+                        </>
+                      );
+                    })()}
+                  <button
+                    type="button"
+                    onClick={closeVideo}
+                    className="w-full rounded-full bg-slate-100 py-2.5 text-sm font-black text-slate-600"
+                  >
+                    {alreadyDone || videoJustFinished
+                      ? "กลับรายการวันนี้"
+                      : "ปิด — จำตำแหน่งไว้ให้"}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+
         {/* ---------------- an exercise, running in place ---------------- */}
-        {activeExercise && (() => {
+        {!activeVideo && activeExercise && (() => {
           const hasNext = queue.some((i) => i.id !== activeExercise.id && !done.has(i.id));
+          const exitExerciseToList = () => {
+            clearSequenceTimer();
+            setSequenceMode(false);
+            setActiveExercise(null);
+          };
           const onExerciseDone = (correct: number, total: number) => {
             setScores((s) => ({ ...s, [activeExercise.id]: { correct, total } }));
             const next = new Set(done);
             next.add(activeExercise.id);
             setDone(next);
-            setActiveExercise(null);
             // Last outstanding item — go straight to the day summary rather
             // than dropping back onto a fully-ticked checklist.
             if (queue.every((i) => next.has(i.id))) {
+              clearSequenceTimer();
+              setSequenceMode(false);
+              setActiveExercise(null);
               const completed = queue.filter((i) => next.has(i.id));
               onFinish([], completed);
               setPhase("done");
+              return;
             }
+            if (sequenceMode) {
+              const following = nextPlayableAfter(activeExercise.id, next);
+              if (following) {
+                if (following.kind === "video") {
+                  setActiveExercise(null);
+                  clearSequenceTimer();
+                  sequenceTimerRef.current = setTimeout(() => openVideo(following), 700);
+                } else {
+                  setActiveExercise(following);
+                }
+                return;
+              }
+              setSequenceMode(false);
+            }
+            setActiveExercise(null);
           };
 
           const lessonRef = activeExercise.exerciseKey
             ? lessonRunnerRefFor(activeExercise.exerciseKey)
             : null;
+          const lsItem = activeExercise.exerciseKey
+            ? listenSpeakItemFor(activeExercise.exerciseKey)
+            : null;
+          const photoDrill = activeExercise.exerciseKey
+            ? speakPhotoDrillFor(activeExercise.exerciseKey)
+            : null;
+          const listenSpeak = lsItem ? toSpeakDrill(lsItem) : photoDrill;
+          const writeTopic = activeExercise.exerciseKey
+            ? writeTopicItemFor(activeExercise.exerciseKey)
+            : null;
           const isProduction = isProductionExercise(activeExercise.taskType, activeExercise.gateKind);
+          const isInteractive = isInteractiveCourseExercise(activeExercise.taskType);
+          const isComprehension = isComprehensionExamExercise(activeExercise.taskType);
 
           return (
-            <div className={isProduction ? "" : "p-6"}>
+            <div className={isProduction || isInteractive || isComprehension ? "" : "p-6"}>
               {lessonRef ? (
                 <div className="p-6">
                   <LessonRunnerInline
                     lessonRef={lessonRef}
                     titleTh={activeExercise.titleTh}
-                    onCancel={() => setActiveExercise(null)}
+                    onCancel={exitExerciseToList}
+                    onDone={onExerciseDone}
+                  />
+                </div>
+              ) : listenSpeak ? (
+                <div className="p-6">
+                  <ListenSpeakBuilder
+                    item={listenSpeak}
+                    titleTh={activeExercise.titleTh}
+                    hasNext={hasNext}
+                    onCancel={exitExerciseToList}
+                    onDone={onExerciseDone}
+                  />
+                </div>
+              ) : writeTopic ? (
+                <div className="p-6">
+                  <WriteTopicBuilder
+                    item={writeTopic}
+                    titleTh={activeExercise.titleTh}
+                    hasNext={hasNext}
+                    onCancel={exitExerciseToList}
                     onDone={onExerciseDone}
                   />
                 </div>
@@ -306,7 +671,32 @@ export function SessionRunner({
                   }
                   titleTh={activeExercise.titleTh}
                   hasNext={hasNext}
-                  onCancel={() => setActiveExercise(null)}
+                  onCancel={exitExerciseToList}
+                  onDone={onExerciseDone}
+                />
+              ) : isInteractive ? (
+                <InteractiveCourseRunner
+                  exerciseKey={activeExercise.exerciseKey ?? ""}
+                  taskType={
+                    activeExercise.taskType === "conversation_summary"
+                      ? "dialogue_summary"
+                      : (activeExercise.taskType as
+                          | "interactive_speaking"
+                          | "interactive_conversation_mcq"
+                          | "dialogue_summary")
+                  }
+                  titleTh={activeExercise.titleTh}
+                  hasNext={hasNext}
+                  onCancel={exitExerciseToList}
+                  onDone={onExerciseDone}
+                />
+              ) : isComprehension ? (
+                <ComprehensionExamRunner
+                  exerciseKey={activeExercise.exerciseKey ?? ""}
+                  taskType={activeExercise.taskType as "reading_comprehension" | "vocabulary_reading"}
+                  titleTh={activeExercise.titleTh}
+                  hasNext={hasNext}
+                  onCancel={exitExerciseToList}
                   onDone={onExerciseDone}
                 />
               ) : (
@@ -317,7 +707,7 @@ export function SessionRunner({
                     titleTh={activeExercise.titleTh}
                     gateTh={activeExercise.gateTh}
                     hasNext={hasNext}
-                    onCancel={() => setActiveExercise(null)}
+                    onCancel={exitExerciseToList}
                     onDone={onExerciseDone}
                   />
                 </div>
@@ -327,7 +717,7 @@ export function SessionRunner({
         })()}
 
         {/* ---------------- the session ---------------- */}
-        {!activeExercise && (phase === "running" || phase === "timeup") && (
+        {!activeExercise && !activeVideo && (phase === "running" || phase === "timeup") && (
           <div className="p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -394,11 +784,38 @@ export function SessionRunner({
                 lastDone ? (lastDone.kind === "review" ? "exercise" : lastDone.kind) : null,
                 nextItem ? (nextItem.kind === "review" ? "exercise" : nextItem.kind) : null,
               );
-              if (!copy) return null;
+              const playable = firstPlayable();
+              if (!copy && !playable) return null;
               return (
                 <div className="mt-4 rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200">
-                  <p className="text-[13px] font-black text-slate-800">{copy.titleTh}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-500">{copy.bodyTh}</p>
+                  {copy && (
+                    <>
+                      <p className="text-[13px] font-black text-slate-800">{copy.titleTh}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-500">{copy.bodyTh}</p>
+                    </>
+                  )}
+                  {playable && (
+                    <button
+                      type="button"
+                      onClick={startSequence}
+                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-[#004AAD] py-3 text-sm font-black text-white transition hover:brightness-110"
+                    >
+                      <span
+                        aria-hidden
+                        className="grid h-7 w-7 place-items-center rounded-full bg-white/20 text-base leading-none"
+                      >
+                        ▶
+                      </span>
+                      <span className="min-w-0 truncate">
+                        {done.size === 0 ? "เริ่มการเรียนวันนี้เลย" : "ทำต่อเนื่องจากการเรียนวันนี้"}
+                      </span>
+                    </button>
+                  )}
+                  {playable && (
+                    <p className="mt-1.5 text-center text-[10px] font-bold text-slate-400">
+                      เปิดบทเรียนและแบบฝึกทีละข้อให้อัตโนมัติ — ไม่ต้องกดทีละอัน
+                    </p>
+                  )}
                 </div>
               );
             })()}
@@ -411,9 +828,13 @@ export function SessionRunner({
                     <button
                       type="button"
                       onClick={() => {
+                        if (it.kind === "video") {
+                          openVideo(it);
+                          return;
+                        }
                         // Runnable exercises open here rather than sending the
                         // learner off to a separate practice page.
-                        if (!isDone && it.kind !== "video" && canRunInPlace(it)) {
+                        if (!isDone && canRunInPlace(it)) {
                           setActiveExercise(it);
                           return;
                         }
@@ -430,7 +851,7 @@ export function SessionRunner({
                           isDone ? "bg-emerald-500 text-white" : "bg-white ring-1 ring-slate-300"
                         }`}
                       >
-                        {isDone ? "✓" : ""}
+                        {isDone ? "✓" : it.kind === "video" ? "▶" : ""}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className={`block text-[13px] font-bold ${isDone ? "line-through opacity-60" : ""}`}>
@@ -448,6 +869,11 @@ export function SessionRunner({
                               {it.gateTh}
                             </span>
                           )
+                        )}
+                        {it.kind === "video" && (
+                          <span className="mt-0.5 block text-[10px] font-bold text-[#004AAD]">
+                            {isDone ? "กดเพื่อดูซ้ำ" : "กดเพื่อเปิดวิดีโอ"}
+                          </span>
                         )}
                       </span>
                       <span className="shrink-0 text-[11px] font-bold text-slate-400">
@@ -470,7 +896,7 @@ export function SessionRunner({
         )}
 
         {/* ---------------- time is up ---------------- */}
-        {phase === "timeup" && (
+        {phase === "timeup" && !activeExercise && !activeVideo && (
           <div className="border-t-4 border-rose-500 bg-rose-50 p-6">
             <p className="text-lg font-black text-rose-900">⏰ หมดเวลาแล้ว</p>
             <p className="mt-1 text-sm text-rose-700">

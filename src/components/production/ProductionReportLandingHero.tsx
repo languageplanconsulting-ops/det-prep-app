@@ -6,8 +6,8 @@ import type { ReactNode } from "react";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
 
 type ProductionReportLandingHeroProps = {
-  backHref: string;
-  backLabel: string;
+  backHref?: string;
+  backLabel?: string;
   eyebrow: string;
   titleEn: string;
   titleTh: string;
@@ -41,12 +41,14 @@ export function ProductionReportLandingHero({
   return (
     <section className={`${LANDING_PAGE_GRID_BG} px-4 py-8 sm:px-6 sm:py-12`}>
       <div className="mx-auto max-w-5xl">
-        <Link
-          href={backHref}
-          className="mb-6 inline-flex text-sm font-bold text-ep-blue underline-offset-4 hover:underline"
-        >
-          {backLabel}
-        </Link>
+        {backHref && backLabel ? (
+          <Link
+            href={backHref}
+            className="mb-6 inline-flex text-sm font-bold text-ep-blue underline-offset-4 hover:underline"
+          >
+            {backLabel}
+          </Link>
+        ) : null}
 
         <div className="border-4 border-black bg-white p-6 shadow-[12px_12px_0_0_#000] sm:p-8">
           <div

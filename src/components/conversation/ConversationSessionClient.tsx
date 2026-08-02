@@ -37,12 +37,17 @@ export function ConversationSessionClient({
   difficulty,
   setNumber,
   startWithRedeem = false,
+  onComplete,
+  embedded = false,
 }: {
   exam: ConversationExam;
   round: number;
   difficulty: ConversationDifficulty;
   setNumber: number;
   startWithRedeem?: boolean;
+  /** Course journey: called after the learner finishes and sees the report. */
+  onComplete?: (correct: number, total: number) => void;
+  embedded?: boolean;
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
   const soft = true;
@@ -329,24 +334,37 @@ export function ConversationSessionClient({
           : null;
 
   if (phase === "report") {
+    const correct = itemOkSnapshot.filter(Boolean).length;
+    const total = itemOkSnapshot.length || CONVERSATION_TOTAL_STEPS;
     return (
       <div className="ep-luxury-option-in space-y-6">
-        <Link
-          href={roundSetsHref}
-          onClick={() => playBlinkBeep()}
-          className="ep-link-luxury inline-block text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-4 hover:underline"
-        >
-          ← All sets
-        </Link>
+        {!embedded ? (
+          <Link
+            href={roundSetsHref}
+            onClick={() => playBlinkBeep()}
+            className="ep-link-luxury inline-block text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-4 hover:underline"
+          >
+            ← All sets
+          </Link>
+        ) : null}
         <ConversationReportPanel
           exam={exam}
           scenarioPicks={scenarioPicks}
           mainPicks={mainPicks}
           itemOk={itemOkSnapshot}
           onRedeemNow={startRedeem}
-          backHref={roundSetsHref}
-          restartHref={restartHref}
+          backHref={embedded ? undefined : roundSetsHref}
+          restartHref={embedded ? undefined : restartHref}
         />
+        {embedded && onComplete ? (
+          <button
+            type="button"
+            onClick={() => onComplete(correct, total)}
+            className="w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white"
+          >
+            แบบฝึกถัดไป →
+          </button>
+        ) : null}
       </div>
     );
   }

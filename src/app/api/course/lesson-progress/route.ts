@@ -5,12 +5,11 @@ import { createRequestSupabase } from "@/lib/supabase-request-client";
 type Body = {
   lessonId: string;
   watchedSeconds: number;
-  completed: boolean;
+  /** When true, mark lesson completed. When false/omitted, keep existing status. */
+  completed?: boolean;
 };
 
-/** Records a student's progress on a course lesson. Not called anywhere yet —
- *  no student-facing course viewer exists — but the write path is ready for
- *  when one does; the admin course page's progress % reads from this table. */
+/** Records a student's progress on a course lesson (watch position + optional complete). */
 export async function POST(request: NextRequest) {
   const supabase = await createRequestSupabase(request);
   const {
@@ -25,14 +24,29 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid body" }, { status: 400 });
   }
 
+  const watched = Math.max(0, Math.floor(body.watchedSeconds));
+  const now = new Date().toISOString();
+
+  // Read existing so a mid-watch save never clears a prior "completed".
+  const { data: existing } = await supabase
+    .from("course_lesson_progress")
+    .select("watched_seconds, status, completed_at")
+    .eq("user_id", user.id)
+    .eq("lesson_id", body.lessonId)
+    .maybeSingle();
+
+  const wasCompleted = existing?.status === "completed";
+  const markDone = body.completed === true || wasCompleted;
+  const mergedWatched = Math.max(watched, existing?.watched_seconds ?? 0);
+
   const { error } = await supabase.from("course_lesson_progress").upsert(
     {
       user_id: user.id,
       lesson_id: body.lessonId,
-      watched_seconds: Math.max(0, Math.floor(body.watchedSeconds)),
-      status: body.completed ? "completed" : "in_progress",
-      completed_at: body.completed ? new Date().toISOString() : null,
-      updated_at: new Date().toISOString(),
+      watched_seconds: mergedWatched,
+      status: markDone ? "completed" : "in_progress",
+      completed_at: markDone ? (existing?.completed_at ?? now) : null,
+      updated_at: now,
     },
     { onConflict: "user_id,lesson_id" },
   );
@@ -40,5 +54,5 @@ export async function POST(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, watchedSeconds: mergedWatched });
 }

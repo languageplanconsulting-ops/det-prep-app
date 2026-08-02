@@ -130,7 +130,7 @@ export function LessonLibrary({
       )}
 
       <ul className="space-y-1.5">
-        {filtered.map((block, i) => {
+        {filtered.map((block) => {
           // Searching expands everything, so results are visible without extra taps.
           const open = q.length > 0 || openKey === block.key;
           const done = block.lessons.filter(
@@ -139,32 +139,72 @@ export function LessonLibrary({
           const pct = block.lessons.length
             ? Math.round((done / block.lessons.length) * 100)
             : 0;
+          const toneBg =
+            block.tone === "rose"
+              ? "bg-rose-50 hover:bg-rose-100/80"
+              : block.tone === "violet"
+                ? "bg-violet-50 hover:bg-violet-100/80"
+                : block.tone === "sky"
+                  ? "bg-sky-50 hover:bg-sky-100/80"
+                  : block.tone === "emerald"
+                    ? "bg-emerald-50 hover:bg-emerald-100/80"
+                    : "bg-slate-50 hover:bg-slate-100";
+          const toneIcon =
+            block.tone === "rose"
+              ? "bg-rose-100"
+              : block.tone === "violet"
+                ? "bg-violet-100"
+                : block.tone === "sky"
+                  ? "bg-sky-100"
+                  : block.tone === "emerald"
+                    ? "bg-emerald-100"
+                    : "bg-slate-100";
+          const toneBar =
+            block.tone === "rose"
+              ? "bg-rose-500"
+              : block.tone === "violet"
+                ? "bg-violet-500"
+                : block.tone === "sky"
+                  ? "bg-sky-500"
+                  : block.tone === "emerald"
+                    ? "bg-emerald-500"
+                    : "bg-slate-500";
+          const toneRing =
+            block.tone === "rose"
+              ? "ring-rose-200"
+              : block.tone === "violet"
+                ? "ring-violet-200"
+                : block.tone === "sky"
+                  ? "ring-sky-200"
+                  : block.tone === "emerald"
+                    ? "ring-emerald-200"
+                    : "ring-slate-200";
 
           return (
-            <li key={block.key} className="overflow-hidden rounded-2xl ring-1 ring-slate-200">
+            <li key={block.key} className={`overflow-hidden rounded-2xl ring-1 ${toneRing}`}>
               <button
                 type="button"
                 onClick={() => setOpenKey(open && !q ? null : block.key)}
-                className="flex w-full items-center gap-3 bg-white p-3.5 text-left transition hover:bg-slate-50"
+                className={`flex w-full items-center gap-3 p-3.5 text-left transition ${toneBg}`}
               >
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-100 text-lg">
+                <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl text-lg ${toneIcon}`}>
                   {block.emoji}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] font-black text-slate-800">
                     {block.titleTh}
                   </span>
-                  <span className="block truncate text-[10px] text-slate-400">
+                  <span className="block truncate text-[10px] text-slate-500">
                     {block.subtitleTh}
                   </span>
                   <span className="mt-1 flex items-center gap-2">
-                    <span className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-100">
+                    <span className="h-1.5 w-20 overflow-hidden rounded-full bg-white/80">
                       <span
-                        className="block h-full bg-emerald-500 transition-[width] duration-500"
+                        className={`block h-full transition-[width] duration-500 ${toneBar}`}
                         style={{ width: `${pct}%` }}
                       />
                     </span>
-                    <span className="text-[10px] font-bold text-slate-400">
+                    <span className="text-[10px] font-bold text-slate-500">
                       {done}/{block.lessons.length}
                     </span>
                   </span>

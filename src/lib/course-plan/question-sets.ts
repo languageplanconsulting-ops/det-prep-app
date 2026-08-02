@@ -7,17 +7,15 @@
 
 /** Exercise key -> the exact item ids that exercise runs, in order. */
 export const QUESTION_SETS: Record<string, string[]> = {
-  "gr-conj": [
-    "cj-1",
-    "cj-2",
-    "cj-3",
-    "cj-4",
-    "cj-5",
-    "cj-6",
-    "cj-7",
-    "cj-8",
-    "cj-9",
-    "cj-10"
+  "gr-tenses": [
+    "tn-1",
+    "tn-2",
+    "tn-3",
+    "tn-4",
+    "tn-5",
+    "tn-6",
+    "tn-7",
+    "tn-8"
   ],
   "gr-present": [
     "sp-pat-1",
@@ -25,35 +23,32 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "sp-pat-3",
     "sp-pat-4"
   ],
-  "gr-runon": [
-    "ro-1",
-    "ro-2",
-    "ro-3",
-    "ro-4",
-    "ro-5",
-    "ro-6",
-    "ro-7"
+  "gr-complex": [
+    "cx-1",
+    "cx-2",
+    "cx-3",
+    "cx-4",
+    "cx-5",
+    "cx-6",
+    "cx-7",
+    "cj-1",
+    "cj-2",
+    "cj-3",
+    "cj-10"
   ],
-  "gr-transition": [
-    "tr-1",
-    "tr-2",
-    "tr-3",
-    "tr-4",
-    "tr-5",
-    "tr-6",
-    "tr-7"
-  ],
-  "gr-tense": [
-    "pa-e1",
-    "pa-e2",
-    "pa-e3",
-    "pa-e4",
-    "pa-e5",
-    "pa-e6",
-    "pa-e7",
-    "pa-e8",
-    "pa-e9",
-    "pa-e10"
+  "gr-sub": [
+    "cj-4",
+    "cj-5",
+    "cj-6",
+    "cj-7",
+    "cj-8",
+    "cj-9",
+    "cj-11",
+    "cj-12",
+    "cj-13",
+    "cj-14",
+    "cj-15",
+    "cj-16"
   ],
   "gr-relative": [
     "rel-1",
@@ -62,7 +57,33 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "rel-4",
     "rel-5",
     "rel-6",
-    "rel-7"
+    "rel-7",
+    "rel-8",
+    "rel-9"
+  ],
+  "gr-reduction": [
+    "rel-10",
+    "rel-11",
+    "rel-12",
+    "rel-14",
+    "rel-13"
+  ],
+  "wp-pattern": [
+    "pt-1",
+    "pt-2",
+    "pt-3",
+    "pt-4",
+    "pt-5",
+    "pt-6"
+  ],
+  "sp-people": [
+    "sp-e1-1"
+  ],
+  "sp-objects": [
+    "sp-e1-2"
+  ],
+  "sp-places": [
+    "sp-e1-3"
   ],
   "dic-easy": [
     "e1-1",
@@ -78,20 +99,58 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "e1-9",
     "e1-10"
   ],
-  "wt-real": [
-    "rw-e1-1",
-    "rw-e1-2",
-    "rw-e1-3",
-    "rw-e1-4"
+  "wt-ws1": [
+    "rw-e1-1"
   ],
-  "st-real": [
-    "rs-e1-1",
-    "rs-e1-2",
-    "rs-e1-3",
-    "rs-e1-4"
+  "wt-ws2": [
+    "rw-e1-2"
   ],
-  "is-real": [],
-  "ic-set": [],
+  "wt-ws3": [
+    "rw-e1-3"
+  ],
+  "wt-real1": [
+    "arg-topic-1"
+  ],
+  "wt-real2": [
+    "arg-topic-4"
+  ],
+  "wt-real3": [
+    "arg-topic-7"
+  ],
+  "st-ls1": [
+    "rs-e1-1"
+  ],
+  "st-ls2": [
+    "rs-e1-2"
+  ],
+  "st-ls3": [
+    "rs-e1-3"
+  ],
+  "st-real1": [
+    "rs-topic-1::rs-topic-1-q1::1"
+  ],
+  "st-real2": [
+    "rs-topic-1::rs-topic-1-q2::1"
+  ],
+  "st-real3": [
+    "rs-topic-2::rs-topic-2-q1::1"
+  ],
+  "is-real": [
+    "is-office-morning",
+    "is-group-project",
+    "is-class-presentation",
+    "is-busy-schedule"
+  ],
+  "ic-set": [
+    "1:easy:1",
+    "1:easy:2",
+    "1:easy:3"
+  ],
+  "ds-set": [
+    "ds-r1-easy-s01",
+    "ds-r1-easy-s02",
+    "ds-r1-easy-s03"
+  ],
   "rw-ladder": [
     "rwl-e1-1",
     "rwl-e1-2",
@@ -112,30 +171,28 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "tr-e1"
   ],
   "rs-exam": [
-    "mi-02",
-    "mi-03",
-    "mi-05",
-    "mi-06",
-    "mi-08"
+    "1:easy:1:1",
+    "1:easy:1:2",
+    "1:easy:1:3",
+    "1:easy:1:4",
+    "1:easy:1:5"
   ],
   "rv-exam": [
-    "cv-1",
-    "cv-2",
-    "cv-3",
-    "cv-4",
-    "cv-5"
+    "1:1:easy:1",
+    "1:1:easy:2",
+    "1:1:easy:3",
+    "1:1:easy:4",
+    "1:1:easy:5"
   ],
-  "mgr-conj": [
-    "cj-1",
-    "cj-2",
-    "cj-3",
-    "cj-4",
-    "cj-5",
-    "cj-6",
-    "cj-7",
-    "cj-8",
-    "cj-9",
-    "cj-10"
+  "mgr-tenses": [
+    "tn-1",
+    "tn-2",
+    "tn-3",
+    "tn-4",
+    "tn-5",
+    "tn-6",
+    "tn-7",
+    "tn-8"
   ],
   "mgr-present": [
     "sp-pat-1",
@@ -143,35 +200,32 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "sp-pat-3",
     "sp-pat-4"
   ],
-  "mgr-runon": [
-    "ro-1",
-    "ro-2",
-    "ro-3",
-    "ro-4",
-    "ro-5",
-    "ro-6",
-    "ro-7"
+  "mgr-complex": [
+    "cx-1",
+    "cx-2",
+    "cx-3",
+    "cx-4",
+    "cx-5",
+    "cx-6",
+    "cx-7",
+    "cj-1",
+    "cj-2",
+    "cj-3",
+    "cj-10"
   ],
-  "mgr-transition": [
-    "tr-1",
-    "tr-2",
-    "tr-3",
-    "tr-4",
-    "tr-5",
-    "tr-6",
-    "tr-7"
-  ],
-  "mgr-tense": [
-    "pa-m1",
-    "pa-m2",
-    "pa-m3",
-    "pa-m4",
-    "pa-m5",
-    "pa-m6",
-    "pa-m7",
-    "pa-m8",
-    "pa-m9",
-    "pa-m10"
+  "mgr-sub": [
+    "cj-4",
+    "cj-5",
+    "cj-6",
+    "cj-7",
+    "cj-8",
+    "cj-9",
+    "cj-11",
+    "cj-12",
+    "cj-13",
+    "cj-14",
+    "cj-15",
+    "cj-16"
   ],
   "mgr-relative": [
     "rel-1",
@@ -180,7 +234,16 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "rel-4",
     "rel-5",
     "rel-6",
-    "rel-7"
+    "rel-7",
+    "rel-8",
+    "rel-9"
+  ],
+  "mgr-reduction": [
+    "rel-10",
+    "rel-11",
+    "rel-12",
+    "rel-14",
+    "rel-13"
   ],
   "mdic-easy": [
     "m1-1",
@@ -203,6 +266,14 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "m1-14",
     "m1-15"
   ],
+  "mwp-pattern": [
+    "pt-1",
+    "pt-2",
+    "pt-3",
+    "pt-4",
+    "pt-5",
+    "pt-6"
+  ],
   "mwp-people": [
     "e79e13b9-a2b8-45b5-ac7d-227892cefc29"
   ],
@@ -221,20 +292,58 @@ export const QUESTION_SETS: Record<string, string[]> = {
   "msp-places": [
     "ec6b394c-6dcb-4344-905b-784ea551ecb0"
   ],
-  "mwt-real": [
-    "arg-topic-3",
-    "arg-topic-6",
-    "arg-topic-9",
-    "arg-topic-12"
+  "mwt-ws1": [
+    "rw-m1-1"
   ],
-  "mst-real": [
-    "rs-r3-01::rs-r3-01-q1::3",
-    "rs-r3-01::rs-r3-01-q2::3",
-    "rs-r3-02::rs-r3-02-q1::3",
-    "rs-r3-02::rs-r3-02-q2::3"
+  "mwt-ws2": [
+    "rw-m1-2"
   ],
-  "mis-real": [],
-  "mic-set": [],
+  "mwt-ws3": [
+    "rw-m1-3"
+  ],
+  "mwt-real1": [
+    "arg-topic-3"
+  ],
+  "mwt-real2": [
+    "arg-topic-6"
+  ],
+  "mwt-real3": [
+    "arg-topic-9"
+  ],
+  "mst-ls1": [
+    "rs-m1-1"
+  ],
+  "mst-ls2": [
+    "rs-m1-2"
+  ],
+  "mst-ls3": [
+    "rs-m1-3"
+  ],
+  "mst-real1": [
+    "rs-r3-01::rs-r3-01-q1::3"
+  ],
+  "mst-real2": [
+    "rs-r3-01::rs-r3-01-q2::3"
+  ],
+  "mst-real3": [
+    "rs-r3-02::rs-r3-02-q1::3"
+  ],
+  "mis-real": [
+    "is-help-from-teacher",
+    "is-campus-place",
+    "is-free-time-habit",
+    "is-solving-problem"
+  ],
+  "mic-set": [
+    "3:easy:25",
+    "3:easy:26",
+    "3:easy:27"
+  ],
+  "mds-set": [
+    "ds-r1-medium-s11",
+    "ds-r1-medium-s12",
+    "ds-r1-medium-s13"
+  ],
   "mrw-ladder": [
     "rwl-m1-1",
     "rwl-m1-2",
@@ -260,30 +369,28 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "ad-m2"
   ],
   "mrs-exam": [
-    "mi-01",
-    "mi-04",
-    "mi-07",
-    "mi-09",
-    "mi-10"
+    "1:easy:1:1",
+    "1:easy:1:2",
+    "1:medium:1:1",
+    "1:medium:1:2",
+    "1:medium:1:3"
   ],
   "mrv-exam": [
-    "cv-1",
-    "cv-2",
-    "cv-3",
-    "cv-4",
-    "cv-5"
+    "1:1:easy:1",
+    "1:1:easy:2",
+    "1:1:medium:1",
+    "1:1:medium:2",
+    "1:1:medium:3"
   ],
-  "hgr-conj": [
-    "cj-1",
-    "cj-2",
-    "cj-3",
-    "cj-4",
-    "cj-5",
-    "cj-6",
-    "cj-7",
-    "cj-8",
-    "cj-9",
-    "cj-10"
+  "hgr-tenses": [
+    "tn-1",
+    "tn-2",
+    "tn-3",
+    "tn-4",
+    "tn-5",
+    "tn-6",
+    "tn-7",
+    "tn-8"
   ],
   "hgr-present": [
     "sp-pat-1",
@@ -291,35 +398,32 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "sp-pat-3",
     "sp-pat-4"
   ],
-  "hgr-runon": [
-    "ro-1",
-    "ro-2",
-    "ro-3",
-    "ro-4",
-    "ro-5",
-    "ro-6",
-    "ro-7"
+  "hgr-complex": [
+    "cx-1",
+    "cx-2",
+    "cx-3",
+    "cx-4",
+    "cx-5",
+    "cx-6",
+    "cx-7",
+    "cj-1",
+    "cj-2",
+    "cj-3",
+    "cj-10"
   ],
-  "hgr-transition": [
-    "tr-1",
-    "tr-2",
-    "tr-3",
-    "tr-4",
-    "tr-5",
-    "tr-6",
-    "tr-7"
-  ],
-  "hgr-tense": [
-    "pa-h1",
-    "pa-h2",
-    "pa-h3",
-    "pa-h4",
-    "pa-h5",
-    "pa-h6",
-    "pa-h7",
-    "pa-h8",
-    "pa-h9",
-    "pa-h10"
+  "hgr-sub": [
+    "cj-4",
+    "cj-5",
+    "cj-6",
+    "cj-7",
+    "cj-8",
+    "cj-9",
+    "cj-11",
+    "cj-12",
+    "cj-13",
+    "cj-14",
+    "cj-15",
+    "cj-16"
   ],
   "hgr-relative": [
     "rel-1",
@@ -328,7 +432,16 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "rel-4",
     "rel-5",
     "rel-6",
-    "rel-7"
+    "rel-7",
+    "rel-8",
+    "rel-9"
+  ],
+  "hgr-reduction": [
+    "rel-10",
+    "rel-11",
+    "rel-12",
+    "rel-14",
+    "rel-13"
   ],
   "hdic-easy": [
     "a1-1",
@@ -359,6 +472,14 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "a1-20",
     "a2-1"
   ],
+  "hwp-pattern": [
+    "pt-1",
+    "pt-2",
+    "pt-3",
+    "pt-4",
+    "pt-5",
+    "pt-6"
+  ],
   "hwp-people": [
     "fe6168d5-dbb3-44c0-8819-64628fd1c501"
   ],
@@ -377,20 +498,58 @@ export const QUESTION_SETS: Record<string, string[]> = {
   "hsp-places": [
     "ed1fcfaf-617c-4d22-be6e-ae5271871c12"
   ],
-  "hwt-real": [
-    "arg-topic-2",
-    "arg-topic-5",
-    "arg-topic-8",
-    "arg-topic-11"
+  "hwt-ws1": [
+    "rw-a1-1"
   ],
-  "hst-real": [
-    "rs-r5-01::rs-r5-01-q1::5",
-    "rs-r5-01::rs-r5-01-q2::5",
-    "rs-r5-02::rs-r5-02-q1::5",
-    "rs-r5-02::rs-r5-02-q2::5"
+  "hwt-ws2": [
+    "rw-a1-2"
   ],
-  "his-real": [],
-  "hic-set": [],
+  "hwt-ws3": [
+    "rw-a1-3"
+  ],
+  "hwt-real1": [
+    "arg-topic-2"
+  ],
+  "hwt-real2": [
+    "arg-topic-5"
+  ],
+  "hwt-real3": [
+    "arg-topic-8"
+  ],
+  "hst-ls1": [
+    "rs-a1-1"
+  ],
+  "hst-ls2": [
+    "rs-a1-2"
+  ],
+  "hst-ls3": [
+    "rs-a1-3"
+  ],
+  "hst-real1": [
+    "rs-r5-01::rs-r5-01-q1::5"
+  ],
+  "hst-real2": [
+    "rs-r5-01::rs-r5-01-q2::5"
+  ],
+  "hst-real3": [
+    "rs-r5-02::rs-r5-02-q1::5"
+  ],
+  "his-real": [
+    "is-learning-new-skill",
+    "is-future-plan",
+    "is-study-break",
+    "is-late-arrival"
+  ],
+  "hic-set": [
+    "5:easy:34",
+    "5:easy:35",
+    "5:easy:36"
+  ],
+  "hds-set": [
+    "ds-r1-hard-s16",
+    "ds-r1-hard-s17",
+    "ds-r1-hard-s18"
+  ],
   "hrw-ladder": [
     "rwl-a1-1",
     "rwl-a1-2",
@@ -416,30 +575,23 @@ export const QUESTION_SETS: Record<string, string[]> = {
     "tr-h1"
   ],
   "hrs-exam": [
-    "mi-61",
-    "mi-62",
-    "mi-63",
-    "mi-64",
-    "mi-65"
+    "1:medium:1:1",
+    "1:medium:1:2",
+    "1:hard:1:1",
+    "1:hard:1:2",
+    "1:hard:1:3"
   ],
   "hrv-exam": [
-    "cv-1",
-    "cv-2",
-    "cv-3",
-    "cv-4",
-    "cv-5"
+    "1:1:medium:1",
+    "1:1:medium:2",
+    "1:1:hard:1",
+    "1:1:hard:2",
+    "1:1:hard:3"
   ]
 };
 
 /** Exercises with no items yet — see the build log for why. */
-export const UNFILLED_EXERCISES: string[] = [
-  "is-real",
-  "ic-set",
-  "mis-real",
-  "mic-set",
-  "his-real",
-  "hic-set"
-];
+export const UNFILLED_EXERCISES: string[] = [];
 
 export function questionsFor(exerciseKey: string): string[] {
   return QUESTION_SETS[exerciseKey] ?? [];

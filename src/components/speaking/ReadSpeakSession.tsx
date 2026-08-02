@@ -43,6 +43,7 @@ export function ReadSpeakSession({
   presetQuestionId,
   onComplete,
   embedded = false,
+  forceUnlockHints = false,
 }: {
   topicId: string;
   round: SpeakingRoundNum;
@@ -50,6 +51,8 @@ export function ReadSpeakSession({
   redeemQuestionId?: string | null;
   /** Skip the "choose a question" step and go straight to prep for this question — used when the course journey has already fixed which question this exercise runs. */
   presetQuestionId?: string;
+  /** Course context is already a paid enrollment, so the pattern + vocabulary panel is never VIP-gated there. */
+  forceUnlockHints?: boolean;
   /** When set, the report is handed back instead of navigating to the report page — used by the course journey so the learner never leaves the session. */
   onComplete?: (report: SpeakingAttemptReport) => void;
   /** Drop the page-level back links and outer chrome when hosted inside another shell (the course session modal). */
@@ -226,9 +229,11 @@ export function ReadSpeakSession({
     return (
       <div className="mx-auto max-w-lg px-4 py-12 text-center">
         <p className="font-bold">Topic not found.</p>
-        <Link href="/practice/production/read-and-speak" className="mt-4 inline-block text-ep-blue">
-          Back to rounds
-        </Link>
+        {!embedded ? (
+          <Link href="/practice/production/read-and-speak" className="mt-4 inline-block text-ep-blue">
+            Back to rounds
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -608,7 +613,7 @@ export function ReadSpeakSession({
           </StickyExamCTA>
         </div>
       ) : null}
-      <SpeakingHintPanel unlocked={effectiveTier === "vip"} />
+      <SpeakingHintPanel unlocked={forceUnlockHints || effectiveTier === "vip"} />
     </div>
     </StudySessionBoundary>
   );

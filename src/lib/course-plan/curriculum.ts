@@ -67,6 +67,15 @@ export type CurriculumExercise = {
    * repetition over time matters more than volume in one sitting.
    */
   spreadDays?: number;
+  /**
+   * At most ONE exercise carrying a given group lands on a day.
+   *
+   * `spreadDays` cannot do this: the planner consumes each item exactly once, so
+   * its "was this scheduled recently?" check never fires for one-shot exercises.
+   * A group is the honest way to say "these six are one per sitting" — six
+   * speaking topics on one day is cramming, not practice.
+   */
+  spreadGroup?: string;
   /** Teaching lesson rather than scored practice. */
   isLesson?: boolean;
   noteTh?: string;
@@ -109,17 +118,17 @@ export const EASY_TRACK: CurriculumBlock[] = [
     key: "grammar-foundation",
     titleTh: "ปูพื้นฐานไวยากรณ์",
     taskType: null,
-    videoMatch: /แกรมม่าร์|ไวยากรณ์|grammar/i,
+    videoMatch: /ปูพื้นฐานแกรมม่าร์|ปูพื้นฐานไวยากรณ์/i,
     level: "easy",
     order: 1,
-    noteTh: "ปูไวยากรณ์ก่อน — เขียนและพูดจะยังทำไม่ได้ถ้าไวยากรณ์ยังไม่แน่น",
+    noteTh: "ทุกข้อมาจากชีตเลกเชอร์ “Grammar Basics สำหรับอธิบายรูป + คน” เรียงตามลำดับในชีต — ปูไวยากรณ์ก่อน เขียนและพูดจะยังทำไม่ได้ถ้าไวยากรณ์ยังไม่แน่น",
     exercises: [
-      { key: "gr-conj", titleTh: "คำเชื่อม + อนุประโยค", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: m(6) },
-      { key: "gr-present", titleTh: "Present tense: -s / -es", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: m(6) },
-      { key: "gr-runon", titleTh: "เลี่ยงประโยค run-on", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: m(6) },
-      { key: "gr-transition", titleTh: "คำเชื่อมความ (transitional words)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: m(6) },
-      { key: "gr-tense", titleTh: "อดีต / passive / อนาคต", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: m(6) },
-      { key: "gr-relative", titleTh: "which / who / that", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: m(6) },
+      { key: "gr-tenses", titleTh: "Tense ที่ต้องรู้ (6 แบบ + used to)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 8, ratio: 0.8 }, minutes: m(6) },
+      { key: "gr-present", titleTh: "Present Simple: -s / -es ให้ตรงประธาน", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 8, ratio: 0.8 }, minutes: m(6) },
+      { key: "gr-complex", titleTh: "Simple → Complex ด้วย FANBOYS", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 11, ratio: 0.8 }, minutes: m(6) },
+      { key: "gr-sub", titleTh: "คำเชื่อมอนุประโยค (although / because / while / after / so that)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 12, ratio: 0.8 }, minutes: m(6) },
+      { key: "gr-relative", titleTh: "ขยาย noun: which / who / that / where", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 9, ratio: 0.8 }, minutes: m(6) },
+      { key: "gr-reduction", titleTh: "ย่อ “, which V” เป็น “, V-ing”", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 5, ratio: 0.8 }, minutes: m(6) },
     ],
   },
   {
@@ -129,9 +138,10 @@ export const EASY_TRACK: CurriculumBlock[] = [
     level: "easy",
     order: 2,
     exercises: [
-      { key: "wp-people", titleTh: "เขียนเกี่ยวกับคน", taskType: "write_about_photo", gate: { kind: "pass_ratio", count: 3, ratio: 0.8 }, minutes: m(8) },
-      { key: "wp-objects", titleTh: "เขียนเกี่ยวกับสิ่งของ", taskType: "write_about_photo", gate: { kind: "pass_ratio", count: 3, ratio: 0.8 }, minutes: m(8) },
-      { key: "wp-places", titleTh: "เขียนเกี่ยวกับสถานที่", taskType: "write_about_photo", gate: { kind: "pass_ratio", count: 3, ratio: 0.8 }, minutes: m(8) },
+      { key: "wp-pattern", titleTh: "แพตเทิร์นบรรยายภาพ (คน + สถานที่)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 6, ratio: 0.8 }, minutes: m(6) },
+      { key: "wp-people", titleTh: "เขียนเกี่ยวกับคน", taskType: "write_about_photo", gate: { kind: "pass_ratio", count: 3, ratio: 0.8 }, minutes: m(20) },
+      { key: "wp-objects", titleTh: "เขียนเกี่ยวกับสิ่งของ", taskType: "write_about_photo", gate: { kind: "pass_ratio", count: 3, ratio: 0.8 }, minutes: m(20) },
+      { key: "wp-places", titleTh: "เขียนเกี่ยวกับสถานที่", taskType: "write_about_photo", gate: { kind: "pass_ratio", count: 3, ratio: 0.8 }, minutes: m(20) },
     ],
   },
   {
@@ -141,9 +151,9 @@ export const EASY_TRACK: CurriculumBlock[] = [
     level: "easy",
     order: 3,
     exercises: [
-      { key: "sp-people", titleTh: "พูดเกี่ยวกับคน", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 3, ratio: 0.8 }, minutes: m(8) },
-      { key: "sp-objects", titleTh: "พูดเกี่ยวกับสิ่งของ", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 3, ratio: 0.8 }, minutes: m(8) },
-      { key: "sp-places", titleTh: "พูดเกี่ยวกับสถานที่", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 3, ratio: 0.8 }, minutes: m(8) },
+      { key: "sp-people", titleTh: "ต่อประโยค → ฟัง → พูดตาม (คน)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(20) },
+      { key: "sp-objects", titleTh: "ต่อประโยค → ฟัง → พูดตาม (เมือง/สิ่งของ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(20) },
+      { key: "sp-places", titleTh: "ต่อประโยค → ฟัง → พูดตาม (ธรรมชาติ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(20) },
     ],
   },
   {
@@ -169,21 +179,14 @@ export const EASY_TRACK: CurriculumBlock[] = [
     taskType: "read_and_write",
     level: "easy",
     order: 5,
-    noteTh: "มีหลายหัวข้อ — กระจายหลายวัน แบบฝึกของแต่ละวันอิงหัวข้อของเลกเชอร์วันนั้น",
+    noteTh: "3 ข้อแรกต่อประโยคจากคำตอบตัวอย่างเพื่อจำโครง แล้ว 3 ข้อหลังเขียนเองในกล่องเปล่า เหลือแค่โครงกับคลังคำ — คนละแบบ คนละวัน",
     exercises: [
-      { key: "wt-l1", titleTh: "บทเรียนที่ 1", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(6), isLesson: true },
-      { key: "wt-l2", titleTh: "บทเรียนที่ 2", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(6), isLesson: true },
-      { key: "wt-l3", titleTh: "บทเรียนที่ 3", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(6), isLesson: true },
-      { key: "wt-l4", titleTh: "บทเรียนที่ 4", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(6), isLesson: true },
-      {
-        key: "wt-real",
-        titleTh: "เขียนจริง (ไม่จำกัดจำนวนครั้ง)",
-        taskType: "read_and_write",
-        gate: { kind: "min_score", minScore: 100, retries: 2, reflectOnImprove: true },
-        minutes: m(10),
-        spreadDays: 4,
-        noteTh: "ต้องได้ 100+ ถ้าต่ำกว่า ให้ลองอีก 1–2 ครั้งจนดีกว่าครั้งแรก",
-      },
+      { key: "wt-ws1", titleTh: "สร้างคำตอบ + จำโครง — ถามเหตุผล", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(20), spreadGroup: "write-topic" },
+      { key: "wt-ws2", titleTh: "สร้างคำตอบ + จำโครง — แสดงความเห็น", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(20), spreadGroup: "write-topic" },
+      { key: "wt-ws3", titleTh: "สร้างคำตอบ + จำโครง — บรรยาย", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(20), spreadGroup: "write-topic" },
+      { key: "wt-real1", titleTh: "เขียนจริงข้อที่ 1 (กล่องเปล่า ไม่มีสคริปต์)", taskType: "read_and_write", gate: { kind: "min_score", minScore: 100, retries: 2, reflectOnImprove: true }, minutes: m(20), spreadGroup: "write-topic", noteTh: "ต้องได้ 100+ ถ้าต่ำกว่า ให้ลองอีก 1–2 ครั้งจนดีกว่าครั้งแรก" },
+      { key: "wt-real2", titleTh: "เขียนจริงข้อที่ 2 (กล่องเปล่า ไม่มีสคริปต์)", taskType: "read_and_write", gate: { kind: "min_score", minScore: 100, retries: 2, reflectOnImprove: true }, minutes: m(20), spreadGroup: "write-topic" },
+      { key: "wt-real3", titleTh: "เขียนจริงข้อที่ 3 (กล่องเปล่า ไม่มีสคริปต์)", taskType: "read_and_write", gate: { kind: "min_score", minScore: 100, retries: 2, reflectOnImprove: true }, minutes: m(20), spreadGroup: "write-topic" },
     ],
   },
   {
@@ -192,21 +195,17 @@ export const EASY_TRACK: CurriculumBlock[] = [
     taskType: "read_then_speak",
     level: "easy",
     order: 6,
-    noteTh: "มีหลายหัวข้อ — กระจายหลายวัน แบบฝึกของแต่ละวันอิงหัวข้อของเลกเชอร์วันนั้น",
+    noteTh:
+      "3 ข้อแรกมีสคริปต์ช่วย (ต่อประโยค → อ่าน → ฟัง → พูดตาม) แล้ว 3 ข้อหลังพูดเองล้วน เหลือแค่แพตเทิร์นกับคลังคำ — คนละหัวข้อ คนละวัน",
     exercises: [
-      { key: "st-l1", titleTh: "บทเรียนที่ 1", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(6), isLesson: true },
-      { key: "st-l2", titleTh: "บทเรียนที่ 2", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(6), isLesson: true },
-      { key: "st-l3", titleTh: "บทเรียนที่ 3", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(6), isLesson: true },
-      { key: "st-l4", titleTh: "บทเรียนที่ 4", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(6), isLesson: true },
-      {
-        key: "st-real",
-        titleTh: "พูดจริง (ไม่จำกัดจำนวนครั้ง)",
-        taskType: "read_then_speak",
-        gate: { kind: "min_score", minScore: 100, retries: 2, reflectOnImprove: true },
-        minutes: m(10),
-        spreadDays: 4,
-        noteTh: "ต้องได้ 100+ ถ้าต่ำกว่า ให้ลองอีก 1–2 ครั้งจนดีกว่าครั้งแรก",
-      },
+      // Guided: rebuild the lecture's model answer, then say it back.
+      { key: "st-ls1", titleTh: "สร้างคำตอบ + พูดตาม — สื่อสังคมออนไลน์", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(20), spreadGroup: "speak-topic" },
+      { key: "st-ls2", titleTh: "สร้างคำตอบ + พูดตาม — การเจรจาต่อรอง", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(20), spreadGroup: "speak-topic" },
+      { key: "st-ls3", titleTh: "สร้างคำตอบ + พูดตาม — เรื่องที่ใช้เวลานาน", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: m(20), spreadGroup: "speak-topic" },
+      // Real: no script — just the pattern and the vocabulary, then speak for AI feedback.
+      { key: "st-real1", titleTh: "พูดจริงข้อที่ 1 (ไม่มีสคริปต์)", taskType: "read_then_speak", gate: { kind: "min_score", minScore: 100, retries: 2, reflectOnImprove: true }, minutes: m(20), spreadGroup: "speak-topic", noteTh: "ต้องได้ 100+ ถ้าต่ำกว่า ให้ลองอีก 1–2 ครั้งจนดีกว่าครั้งแรก" },
+      { key: "st-real2", titleTh: "พูดจริงข้อที่ 2 (ไม่มีสคริปต์)", taskType: "read_then_speak", gate: { kind: "min_score", minScore: 100, retries: 2, reflectOnImprove: true }, minutes: m(20), spreadGroup: "speak-topic" },
+      { key: "st-real3", titleTh: "พูดจริงข้อที่ 3 (ไม่มีสคริปต์)", taskType: "read_then_speak", gate: { kind: "min_score", minScore: 100, retries: 2, reflectOnImprove: true }, minutes: m(20), spreadGroup: "speak-topic" },
     ],
   },
   {
@@ -235,6 +234,7 @@ export const EASY_TRACK: CurriculumBlock[] = [
     key: "interactive-conversation",
     titleTh: "Interactive Conversation",
     taskType: "interactive_conversation_mcq",
+    videoMatch: /interactive conversation/i,
     level: "easy",
     order: 8,
     exercises: [
@@ -244,6 +244,25 @@ export const EASY_TRACK: CurriculumBlock[] = [
         taskType: "interactive_conversation_mcq",
         gate: { kind: "best_of", attempts: 3 },
         minutes: m(8),
+        spreadDays: 3,
+      },
+    ],
+  },
+  {
+    key: "dialogue-summary",
+    titleTh: "สรุปบทสนทนา",
+    taskType: "dialogue_summary",
+    videoMatch: /conversation summary|สรุปบทสนทนา/i,
+    level: "easy",
+    order: 8.5,
+    noteTh: "ฝึก 3 หัวข้อตายตัวหลัง Interactive Conversation",
+    exercises: [
+      {
+        key: "ds-set",
+        titleTh: "แบบฝึก 3 หัวข้อ — เก็บคะแนนสูงสุด",
+        taskType: "dialogue_summary",
+        gate: { kind: "best_of", attempts: 3 },
+        minutes: m(10),
         spreadDays: 3,
       },
     ],
@@ -378,16 +397,16 @@ export const MEDIUM_TRACK: CurriculumBlock[] = [
     key: "m-grammar-foundation",
     titleTh: "ปูพื้นฐานไวยากรณ์ (กลาง)",
     taskType: null,
-    videoMatch: /แกรมม่าร์|ไวยากรณ์|grammar/i,
+    videoMatch: /ปูพื้นฐานแกรมม่าร์|ปูพื้นฐานไวยากรณ์/i,
     level: "medium",
     order: 1,
     exercises: [
-      { key: "mgr-conj", titleTh: "คำเชื่อม + อนุประโยค", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "mgr-present", titleTh: "Present tense: -s / -es", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "mgr-runon", titleTh: "เลี่ยงประโยค run-on", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "mgr-transition", titleTh: "คำเชื่อมความ (transitional words)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "mgr-tense", titleTh: "อดีต / passive / อนาคต", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "mgr-relative", titleTh: "which / who / that", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
+      { key: "mgr-tenses", titleTh: "Tense ที่ต้องรู้ (6 แบบ + used to)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 8, ratio: 0.8 }, minutes: 6 },
+      { key: "mgr-present", titleTh: "Present Simple: -s / -es ให้ตรงประธาน", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 8, ratio: 0.8 }, minutes: 6 },
+      { key: "mgr-complex", titleTh: "Simple → Complex ด้วย FANBOYS", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 11, ratio: 0.8 }, minutes: 6 },
+      { key: "mgr-sub", titleTh: "คำเชื่อมอนุประโยค (although / because / while / after / so that)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 12, ratio: 0.8 }, minutes: 6 },
+      { key: "mgr-relative", titleTh: "ขยาย noun: which / who / that / where", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 9, ratio: 0.8 }, minutes: 6 },
+      { key: "mgr-reduction", titleTh: "ย่อ “, which V” เป็น “, V-ing”", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 5, ratio: 0.8 }, minutes: 6 },
     ],
   },
   {
@@ -410,9 +429,10 @@ export const MEDIUM_TRACK: CurriculumBlock[] = [
     order: 3,
     noteTh: "ดูเลกเชอร์ก่อน แล้วค่อยลงมือ — ต้องมีอย่างน้อย 1 ข้อได้ 110+ ถ้ายังไม่ถึง ให้ทบทวนแล้วลองใหม่",
     exercises: [
-      { key: "mwp-people", titleTh: "เขียนเกี่ยวกับคน", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 8 },
-      { key: "mwp-objects", titleTh: "เขียนเกี่ยวกับสิ่งของ", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 8 },
-      { key: "mwp-places", titleTh: "เขียนเกี่ยวกับสถานที่", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 8 },
+      { key: "mwp-pattern", titleTh: "แพตเทิร์นบรรยายภาพ (คน + สถานที่)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 6, ratio: 0.8 }, minutes: 6 },
+      { key: "mwp-people", titleTh: "เขียนเกี่ยวกับคน", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 20 },
+      { key: "mwp-objects", titleTh: "เขียนเกี่ยวกับสิ่งของ", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 20 },
+      { key: "mwp-places", titleTh: "เขียนเกี่ยวกับสถานที่", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 20 },
     ],
   },
   {
@@ -423,9 +443,9 @@ export const MEDIUM_TRACK: CurriculumBlock[] = [
     order: 4,
     noteTh: "ดูเลกเชอร์ก่อน — นับรวมกับเขียนบรรยายภาพ ขอแค่ 1 ข้อในกลุ่มนี้ได้ 110+",
     exercises: [
-      { key: "msp-people", titleTh: "พูดเกี่ยวกับคน", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 8 },
-      { key: "msp-objects", titleTh: "พูดเกี่ยวกับสิ่งของ", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 8 },
-      { key: "msp-places", titleTh: "พูดเกี่ยวกับสถานที่", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 8 },
+      { key: "msp-people", titleTh: "ต่อประโยค → ฟัง → พูดตาม (คน)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
+      { key: "msp-objects", titleTh: "ต่อประโยค → ฟัง → พูดตาม (เมือง/สิ่งของ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
+      { key: "msp-places", titleTh: "ต่อประโยค → ฟัง → พูดตาม (ธรรมชาติ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
     ],
   },
   {
@@ -436,11 +456,12 @@ export const MEDIUM_TRACK: CurriculumBlock[] = [
     order: 5,
     noteTh: "มีหลายหัวข้อ — กระจายหลายวัน แบบฝึกอิงหัวข้อของเลกเชอร์วันนั้น",
     exercises: [
-      { key: "mwt-l1", titleTh: "บทเรียนที่ 1", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "mwt-l2", titleTh: "บทเรียนที่ 2", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "mwt-l3", titleTh: "บทเรียนที่ 3", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "mwt-l4", titleTh: "บทเรียนที่ 4", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "mwt-real", titleTh: "เขียนจริง (ไม่จำกัดจำนวนครั้ง)", taskType: "read_and_write", gate: { kind: "min_score", minScore: 110, retries: 2, reflectOnImprove: true }, minutes: 10, spreadDays: 4 },
+      { key: "mwt-ws1", titleTh: "สร้างคำตอบ + จำโครง — ถามเหตุผล", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "mwt-ws2", titleTh: "สร้างคำตอบ + จำโครง — แสดงความเห็น", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "mwt-ws3", titleTh: "สร้างคำตอบ + จำโครง — บรรยาย", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "mwt-real1", titleTh: "เขียนจริงข้อที่ 1 (กล่องเปล่า ไม่มีสคริปต์)", taskType: "read_and_write", gate: { kind: "min_score", minScore: 110, retries: 2, reflectOnImprove: true }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "mwt-real2", titleTh: "เขียนจริงข้อที่ 2 (กล่องเปล่า ไม่มีสคริปต์)", taskType: "read_and_write", gate: { kind: "min_score", minScore: 110, retries: 2, reflectOnImprove: true }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "mwt-real3", titleTh: "เขียนจริงข้อที่ 3 (กล่องเปล่า ไม่มีสคริปต์)", taskType: "read_and_write", gate: { kind: "min_score", minScore: 110, retries: 2, reflectOnImprove: true }, minutes: 20, spreadGroup: "write-topic" },
     ],
   },
   {
@@ -449,13 +470,14 @@ export const MEDIUM_TRACK: CurriculumBlock[] = [
     taskType: "read_then_speak",
     level: "medium",
     order: 6,
-    noteTh: "มีหลายหัวข้อ — กระจายหลายวัน",
+    noteTh: "3 ข้อมีสคริปต์ช่วย + 3 ข้อพูดเอง — คนละหัวข้อ คนละวัน",
     exercises: [
-      { key: "mst-l1", titleTh: "บทเรียนที่ 1", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "mst-l2", titleTh: "บทเรียนที่ 2", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "mst-l3", titleTh: "บทเรียนที่ 3", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "mst-l4", titleTh: "บทเรียนที่ 4", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "mst-real", titleTh: "พูดจริง (ไม่จำกัดจำนวนครั้ง)", taskType: "read_then_speak", gate: { kind: "min_score", minScore: 110, retries: 2, reflectOnImprove: true }, minutes: 10, spreadDays: 4 },
+      { key: "mst-ls1", titleTh: "สร้างคำตอบ + พูดตาม — สื่อสังคมออนไลน์", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "mst-ls2", titleTh: "สร้างคำตอบ + พูดตาม — การเจรจาต่อรอง", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "mst-ls3", titleTh: "สร้างคำตอบ + พูดตาม — เรื่องที่ใช้เวลานาน", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "mst-real1", titleTh: "พูดจริงข้อที่ 1 (ไม่มีสคริปต์)", taskType: "read_then_speak", gate: { kind: "min_score", minScore: 110, retries: 2, reflectOnImprove: true }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "mst-real2", titleTh: "พูดจริงข้อที่ 2 (ไม่มีสคริปต์)", taskType: "read_then_speak", gate: { kind: "min_score", minScore: 110, retries: 2, reflectOnImprove: true }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "mst-real3", titleTh: "พูดจริงข้อที่ 3 (ไม่มีสคริปต์)", taskType: "read_then_speak", gate: { kind: "min_score", minScore: 110, retries: 2, reflectOnImprove: true }, minutes: 20, spreadGroup: "speak-topic" },
     ],
   },
   {
@@ -476,10 +498,23 @@ export const MEDIUM_TRACK: CurriculumBlock[] = [
     key: "m-interactive-conversation",
     titleTh: "Interactive Conversation (กลาง)",
     taskType: "interactive_conversation_mcq",
+    videoMatch: /interactive conversation/i,
     level: "medium",
     order: 8,
     exercises: [
       { key: "mic-set", titleTh: "แบบฝึก 3 ชุด — เก็บคะแนนสูงสุด", taskType: "interactive_conversation_mcq", gate: { kind: "best_of", attempts: 3 }, minutes: 8, spreadDays: 3 },
+    ],
+  },
+  {
+    key: "m-dialogue-summary",
+    titleTh: "สรุปบทสนทนา (กลาง)",
+    taskType: "dialogue_summary",
+    videoMatch: /conversation summary|สรุปบทสนทนา/i,
+    level: "medium",
+    order: 8.5,
+    noteTh: "ฝึก 3 หัวข้อตายตัวหลัง Interactive Conversation",
+    exercises: [
+      { key: "mds-set", titleTh: "แบบฝึก 3 หัวข้อ — เก็บคะแนนสูงสุด", taskType: "dialogue_summary", gate: { kind: "best_of", attempts: 3 }, minutes: 10, spreadDays: 3 },
     ],
   },
   {
@@ -553,16 +588,16 @@ export const HARD_TRACK: CurriculumBlock[] = [
     key: "h-grammar-foundation",
     titleTh: "ปูพื้นฐานไวยากรณ์ (สูง)",
     taskType: null,
-    videoMatch: /แกรมม่าร์|ไวยากรณ์|grammar/i,
+    videoMatch: /ปูพื้นฐานแกรมม่าร์|ปูพื้นฐานไวยากรณ์/i,
     level: "hard",
     order: 1,
     exercises: [
-      { key: "hgr-conj", titleTh: "คำเชื่อม + อนุประโยค", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "hgr-present", titleTh: "Present tense: -s / -es", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "hgr-runon", titleTh: "เลี่ยงประโยค run-on", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "hgr-transition", titleTh: "คำเชื่อมความ (transitional words)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "hgr-tense", titleTh: "อดีต / passive / อนาคต", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
-      { key: "hgr-relative", titleTh: "which / who / that", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 10, ratio: 0.8 }, minutes: 6 },
+      { key: "hgr-tenses", titleTh: "Tense ที่ต้องรู้ (6 แบบ + used to)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 8, ratio: 0.8 }, minutes: 6 },
+      { key: "hgr-present", titleTh: "Present Simple: -s / -es ให้ตรงประธาน", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 8, ratio: 0.8 }, minutes: 6 },
+      { key: "hgr-complex", titleTh: "Simple → Complex ด้วย FANBOYS", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 11, ratio: 0.8 }, minutes: 6 },
+      { key: "hgr-sub", titleTh: "คำเชื่อมอนุประโยค (although / because / while / after / so that)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 12, ratio: 0.8 }, minutes: 6 },
+      { key: "hgr-relative", titleTh: "ขยาย noun: which / who / that / where", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 9, ratio: 0.8 }, minutes: 6 },
+      { key: "hgr-reduction", titleTh: "ย่อ “, which V” เป็น “, V-ing”", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 5, ratio: 0.8 }, minutes: 6 },
     ],
   },
   {
@@ -587,9 +622,10 @@ export const HARD_TRACK: CurriculumBlock[] = [
     order: 3,
     noteTh: "ดูเลกเชอร์ก่อน — ต้องมีอย่างน้อย 1 ข้อได้ 120+",
     exercises: [
-      { key: "hwp-people", titleTh: "เขียนเกี่ยวกับคน", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 8 },
-      { key: "hwp-objects", titleTh: "เขียนเกี่ยวกับสิ่งของ", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 8 },
-      { key: "hwp-places", titleTh: "เขียนเกี่ยวกับสถานที่", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 8 },
+      { key: "hwp-pattern", titleTh: "แพตเทิร์นบรรยายภาพ (คน + สถานที่)", taskType: "fill_in_blanks", gate: { kind: "pass_ratio", count: 6, ratio: 0.8 }, minutes: 6 },
+      { key: "hwp-people", titleTh: "เขียนเกี่ยวกับคน", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 20 },
+      { key: "hwp-objects", titleTh: "เขียนเกี่ยวกับสิ่งของ", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 20 },
+      { key: "hwp-places", titleTh: "เขียนเกี่ยวกับสถานที่", taskType: "write_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 20 },
     ],
   },
   {
@@ -600,9 +636,9 @@ export const HARD_TRACK: CurriculumBlock[] = [
     order: 4,
     noteTh: "นับรวมกับเขียนบรรยายภาพ — ขอแค่ 1 ข้อในกลุ่มนี้ได้ 120+",
     exercises: [
-      { key: "hsp-people", titleTh: "พูดเกี่ยวกับคน", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 8 },
-      { key: "hsp-objects", titleTh: "พูดเกี่ยวกับสิ่งของ", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 8 },
-      { key: "hsp-places", titleTh: "พูดเกี่ยวกับสถานที่", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 8 },
+      { key: "hsp-people", titleTh: "ต่อประโยค → ฟัง → พูดตาม (คน)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
+      { key: "hsp-objects", titleTh: "ต่อประโยค → ฟัง → พูดตาม (เมือง/สิ่งของ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
+      { key: "hsp-places", titleTh: "ต่อประโยค → ฟัง → พูดตาม (ธรรมชาติ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
     ],
   },
   {
@@ -613,11 +649,12 @@ export const HARD_TRACK: CurriculumBlock[] = [
     order: 5,
     noteTh: "แผงจะโชว์หัวข้อที่ทำได้ดีที่สุดและแย่ที่สุด — กดแก้ตัวข้อที่แย่ที่สุดได้",
     exercises: [
-      { key: "hwt-l1", titleTh: "บทเรียนที่ 1", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "hwt-l2", titleTh: "บทเรียนที่ 2", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "hwt-l3", titleTh: "บทเรียนที่ 3", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "hwt-l4", titleTh: "บทเรียนที่ 4", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "hwt-real", titleTh: "เขียนจริง (ไม่จำกัดจำนวนครั้ง)", taskType: "read_and_write", gate: { kind: "min_score_all_topics", minScore: 120, redeemLowest: true }, minutes: 10, spreadDays: 4 },
+      { key: "hwt-ws1", titleTh: "สร้างคำตอบ + จำโครง — ถามเหตุผล", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "hwt-ws2", titleTh: "สร้างคำตอบ + จำโครง — แสดงความเห็น", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "hwt-ws3", titleTh: "สร้างคำตอบ + จำโครง — บรรยาย", taskType: "read_and_write", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "hwt-real1", titleTh: "เขียนจริงข้อที่ 1 (กล่องเปล่า ไม่มีสคริปต์)", taskType: "read_and_write", gate: { kind: "min_score_all_topics", minScore: 120, redeemLowest: true }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "hwt-real2", titleTh: "เขียนจริงข้อที่ 2 (กล่องเปล่า ไม่มีสคริปต์)", taskType: "read_and_write", gate: { kind: "min_score_all_topics", minScore: 120, redeemLowest: true }, minutes: 20, spreadGroup: "write-topic" },
+      { key: "hwt-real3", titleTh: "เขียนจริงข้อที่ 3 (กล่องเปล่า ไม่มีสคริปต์)", taskType: "read_and_write", gate: { kind: "min_score_all_topics", minScore: 120, redeemLowest: true }, minutes: 20, spreadGroup: "write-topic" },
     ],
   },
   {
@@ -626,13 +663,15 @@ export const HARD_TRACK: CurriculumBlock[] = [
     taskType: "read_then_speak",
     level: "hard",
     order: 6,
-    noteTh: "แผงจะโชว์หัวข้อที่ทำได้ดีที่สุดและแย่ที่สุด — กดแก้ตัวข้อที่แย่ที่สุดได้",
+    noteTh:
+      "3 ข้อมีสคริปต์ช่วย + 3 ข้อพูดเอง คนละหัวข้อ คนละวัน — แผงจะโชว์หัวข้อที่ทำได้ดีที่สุดและแย่ที่สุด กดแก้ตัวข้อที่แย่ที่สุดได้",
     exercises: [
-      { key: "hst-l1", titleTh: "บทเรียนที่ 1", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "hst-l2", titleTh: "บทเรียนที่ 2", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "hst-l3", titleTh: "บทเรียนที่ 3", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "hst-l4", titleTh: "บทเรียนที่ 4", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 6, isLesson: true },
-      { key: "hst-real", titleTh: "พูดจริง (ไม่จำกัดจำนวนครั้ง)", taskType: "read_then_speak", gate: { kind: "min_score_all_topics", minScore: 120, redeemLowest: true }, minutes: 10, spreadDays: 4 },
+      { key: "hst-ls1", titleTh: "สร้างคำตอบ + พูดตาม — สื่อสังคมออนไลน์", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "hst-ls2", titleTh: "สร้างคำตอบ + พูดตาม — การเจรจาต่อรอง", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "hst-ls3", titleTh: "สร้างคำตอบ + พูดตาม — เรื่องที่ใช้เวลานาน", taskType: "read_then_speak", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "hst-real1", titleTh: "พูดจริงข้อที่ 1 (ไม่มีสคริปต์)", taskType: "read_then_speak", gate: { kind: "min_score_all_topics", minScore: 120, redeemLowest: true }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "hst-real2", titleTh: "พูดจริงข้อที่ 2 (ไม่มีสคริปต์)", taskType: "read_then_speak", gate: { kind: "min_score_all_topics", minScore: 120, redeemLowest: true }, minutes: 20, spreadGroup: "speak-topic" },
+      { key: "hst-real3", titleTh: "พูดจริงข้อที่ 3 (ไม่มีสคริปต์)", taskType: "read_then_speak", gate: { kind: "min_score_all_topics", minScore: 120, redeemLowest: true }, minutes: 20, spreadGroup: "speak-topic" },
     ],
   },
   {
@@ -653,10 +692,23 @@ export const HARD_TRACK: CurriculumBlock[] = [
     key: "h-interactive-conversation",
     titleTh: "Interactive Conversation (สูง)",
     taskType: "interactive_conversation_mcq",
+    videoMatch: /interactive conversation/i,
     level: "hard",
     order: 8,
     exercises: [
       { key: "hic-set", titleTh: "แบบฝึก 3 ชุด — เก็บคะแนนสูงสุด", taskType: "interactive_conversation_mcq", gate: { kind: "best_of", attempts: 3 }, minutes: 8, spreadDays: 3 },
+    ],
+  },
+  {
+    key: "h-dialogue-summary",
+    titleTh: "สรุปบทสนทนา (สูง)",
+    taskType: "dialogue_summary",
+    videoMatch: /conversation summary|สรุปบทสนทนา/i,
+    level: "hard",
+    order: 8.5,
+    noteTh: "ฝึก 3 หัวข้อตายตัวหลัง Interactive Conversation",
+    exercises: [
+      { key: "hds-set", titleTh: "แบบฝึก 3 หัวข้อ — เก็บคะแนนสูงสุด", taskType: "dialogue_summary", gate: { kind: "best_of", attempts: 3 }, minutes: 10, spreadDays: 3 },
     ],
   },
   {
@@ -754,8 +806,47 @@ export function fillBlankWarmup(track: "basic" | "medium" | "advanced"): WarmupI
   }
 }
 
+/**
+ * The second half of the warm-up: three "which spelling is real?" words.
+ *
+ * Drawn from the LESSON bank at medium/advanced, never the real-exam bank —
+ * the exam sets are what the learner is scored on later, and burning them two
+ * or three words at a time as a warm-up would leave nothing to measure with.
+ *
+ * Three words, deliberately not all one tier: a warm-up that never reaches
+ * above the learner's level stops teaching vocabulary after the first week.
+ */
+export const REALWORD_WARMUP_COUNT = 3;
+
+export type RealWordWarmupTier = "easy" | "medium" | "advanced";
+
+/**
+ * Which tiers the three warm-up words are drawn from, by placement.
+ *
+ * A learner still on the EASY track meets all three tiers so the hard words are
+ * not hidden from them; once placed higher the mix tilts up, because a warm-up
+ * pitched at or below the learner's own level stops teaching vocabulary after
+ * the first week.
+ */
+export function realWordWarmup(track: "basic" | "medium" | "advanced"): RealWordWarmupTier[] {
+  switch (track) {
+    case "basic":
+      return ["easy", "medium", "advanced"]; // คละทุกระดับ
+    case "medium":
+      return ["medium", "medium", "advanced"]; // 2 กลาง · 1 ยาก
+    case "advanced":
+      return ["medium", "advanced", "advanced"]; // 1 กลาง · 2 ยาก
+  }
+}
+
+export const REALWORD_WARMUP_TH: Record<RealWordWarmupTier, string> = {
+  easy: "ง่าย",
+  medium: "กลาง",
+  advanced: "ยาก",
+};
+
 export const WARMUP_PROMPT_TH =
-  "อยากอุ่นเครื่องด้วยข้อ “เติมคำในช่องว่าง” 2 ข้อก่อนเริ่มบทเรียนไหม?";
+  "อยากอุ่นเครื่องด้วยข้อ “เติมคำในช่องว่าง” 2 ข้อ + คำศัพท์ 3 คำก่อนเริ่มบทเรียนไหม?";
 
 export const WARMUP_WHY_TH =
   "ข้อนี้วัดคำศัพท์เป็นหลัก — ดูเลกเชอร์อย่างเดียวไม่พอ ต้องเจอคำใหม่บ่อย ๆ ทุกวัน";

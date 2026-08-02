@@ -31,10 +31,10 @@ export function ConversationReportPanel({
   mainPicks: (number | null)[];
   itemOk: boolean[];
   onRedeemNow: () => void;
-  /** Round page listing all Easy + Medium sets */
-  backHref: string;
+  /** Round page listing all Easy + Medium sets — omitted when embedded in course. */
+  backHref?: string;
   /** Same set URL without redeem — full restart from the beginning */
-  restartHref: string;
+  restartHref?: string;
 }) {
   useRevealSfx();
   const maxScore = conversationMaxForExam(exam);
@@ -300,20 +300,24 @@ export function ConversationReportPanel({
               Redeem now
             </button>
           ) : null}
-          <Link
-            href={restartHref}
-            onClick={() => playBlinkBeep()}
-            className="ep-btn-luxury ep-link-luxury inline-flex flex-1 items-center justify-center border-4 border-black bg-white py-4 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000]"
-          >
-            Start this set again
-          </Link>
-          <Link
-            href={backHref}
-            onClick={() => playBlinkBeep()}
-            className="ep-btn-luxury ep-link-luxury inline-flex flex-1 items-center justify-center border-4 border-black bg-ep-blue py-4 text-center text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
-          >
-            Back to all sets
-          </Link>
+          {restartHref ? (
+            <Link
+              href={restartHref}
+              onClick={() => playBlinkBeep()}
+              className="ep-btn-luxury ep-link-luxury inline-flex flex-1 items-center justify-center border-4 border-black bg-white py-4 text-center text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000]"
+            >
+              Start this set again
+            </Link>
+          ) : null}
+          {backHref ? (
+            <Link
+              href={backHref}
+              onClick={() => playBlinkBeep()}
+              className="ep-btn-luxury ep-link-luxury inline-flex flex-1 items-center justify-center border-4 border-black bg-ep-blue py-4 text-center text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000]"
+            >
+              Back to all sets
+            </Link>
+          ) : null}
         </div>
       </div>
     </div>

@@ -6,6 +6,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminWritingStarters } from "@/components/practice/AdminWritingStarters";
 import { WritePhotoHintPanel } from "@/components/photo-speak/WritePhotoHintPanel";
 import { PhotoAttributionCaption } from "@/components/photo-speak/PhotoAttributionCaption";
+import {
+  targetVocabularyAll,
+  targetVocabularyForTopic,
+  type PhotoTopic,
+} from "@/lib/course-plan/photo-pattern-bank";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
@@ -53,6 +58,8 @@ export function PhotoAssessmentSession({
   startWithRedeem = false,
   onComplete,
   embedded = false,
+  topic,
+  forceUnlockHints = false,
 }: {
   mode: Mode;
   itemId: string;
@@ -61,11 +68,16 @@ export function PhotoAssessmentSession({
   onComplete?: (report: PhotoSpeakAttemptReport) => void;
   /** Drop the page-level back link and outer chrome when hosted inside another shell (the course session modal). */
   embedded?: boolean;
+  /** The curriculum's people/objects/places split, when known (course context) — picks which pattern + vocab bank the hint panel leads with. */
+  topic?: PhotoTopic;
+  /** Course context is already a paid enrollment, so the hint panel is never VIP-gated there. */
+  forceUnlockHints?: boolean;
 }) {
   const router = useRouter();
   const { effectiveTier } = useEffectiveTier();
   const soft = true;
   const taskType = mode === "speak" ? "speak_about_photo" : "write_about_photo";
+  const hintsUnlocked = forceUnlockHints || effectiveTier === "vip";
 
   const [item, setItem] = useState<PhotoSpeakItemWithProgress | null | undefined>(undefined);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -247,6 +259,11 @@ export function PhotoAssessmentSession({
           transcript,
           originHub: mode === "speak" ? "speak-about-photo" : "write-about-photo",
           redeemed: startWithRedeem && Boolean(latestProgress),
+          // Only sent when the learner actually saw this vocabulary (hint panel unlocked) —
+          // tells the grader which words are "already the target", not more to suggest.
+          // Same rule everywhere the hint panel appears: the course (topic known) and
+          // standalone write/speak-about-photo practice (topic unknown, so the full list).
+          targetVocabulary: hintsUnlocked ? (topic ? targetVocabularyForTopic(topic) : targetVocabularyAll()) : undefined,
         }),
       });
       const data = (await res.json()) as { error?: string } & Partial<PhotoSpeakAttemptReport>;
@@ -310,16 +327,18 @@ export function PhotoAssessmentSession({
       <div className="mx-auto max-w-lg px-4 py-12 text-center">
         <p className="font-bold">Photo task not found.</p>
         {loadError ? <p className="mt-2 text-sm text-red-700">{loadError}</p> : null}
-        <Link
-          href={
-            mode === "speak"
-              ? "/practice/production/speak-about-photo"
-              : "/practice/production/write-about-photo"
-          }
-          className="mt-4 inline-block text-ep-blue"
-        >
-          Back
-        </Link>
+        {!embedded ? (
+          <Link
+            href={
+              mode === "speak"
+                ? "/practice/production/speak-about-photo"
+                : "/practice/production/write-about-photo"
+            }
+            className="mt-4 inline-block text-ep-blue"
+          >
+            Back
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -383,8 +402,9 @@ export function PhotoAssessmentSession({
         </header>
 
         <WritePhotoHintPanel
-          unlocked={effectiveTier === "vip"}
+          unlocked={hintsUnlocked}
           mode={mode === "speak" ? "speak" : "write"}
+          topic={topic}
         />
 
         <BrutalPanel title="Task">

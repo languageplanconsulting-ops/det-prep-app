@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { SPEAKING_PATTERNS, patternPartSentence } from "@/lib/speaking-pattern";
+import {
+  LISTEN_SPEAK_MOVES,
+  LISTEN_SPEAK_PHRASES,
+  LISTEN_SPEAK_SKELETON,
+} from "@/lib/course-plan/listen-speak-bank";
 
 /**
  * SpeakingHintPanel — course-only ("Fast Track" VIP) answer-pattern scaffold for
@@ -170,6 +175,43 @@ export function SpeakingHintPanel({ unlocked }: { unlocked: boolean }) {
           </div>
         ))}
       </div>
+
+      {/* The listen-and-speak lecture's own skeleton — the same one the guided
+          drill rebuilds, so the un-guided run is a memory test of it. */}
+      <details className="mt-3 overflow-hidden rounded-xl border border-[#004AAD]/25 bg-[#F5F8FF]" open>
+        <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-bold text-slate-800 hover:bg-white/60">
+          🎧 โครงคำตอบจากเลกเชอร์ &ldquo;listen and speak&rdquo;
+        </summary>
+        <div className="space-y-1.5 border-t border-[#004AAD]/10 px-3 py-3">
+          {LISTEN_SPEAK_SKELETON.map((s, i) => {
+            const prev = i > 0 ? LISTEN_SPEAK_SKELETON[i - 1]!.move : null;
+            return (
+              <div key={i}>
+                {s.move !== prev && (
+                  <p className="mb-1 mt-2 text-[10px] font-black uppercase tracking-wide text-[#004AAD] first:mt-0">
+                    {LISTEN_SPEAK_MOVES[s.move].th} · {LISTEN_SPEAK_MOVES[s.move].en}
+                  </p>
+                )}
+                <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                  <p className="font-mono text-[13px] leading-6 text-slate-900">{s.en}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500">{s.th}</p>
+                </div>
+              </div>
+            );
+          })}
+          <p className="mt-3 mb-1 text-[10px] font-black uppercase tracking-wide text-[#004AAD]">
+            วลีที่ต้องใช้ (จากเลกเชอร์)
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {LISTEN_SPEAK_PHRASES.map((p) => (
+              <span key={p.en} className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs">
+                <span className="font-mono font-semibold text-slate-800">{p.en}</span>
+                <span className="text-slate-400"> · {p.th}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </details>
 
       <details className="mt-3 overflow-hidden rounded-xl border border-slate-200">
         <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-bold text-slate-800 hover:bg-slate-50">🔁 คำเชื่อม / เปลี่ยนเรื่อง</summary>

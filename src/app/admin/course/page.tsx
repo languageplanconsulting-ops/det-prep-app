@@ -1,14 +1,25 @@
 import Link from "next/link";
 
 import { CourseAdminClient } from "@/components/admin/CourseAdminClient";
+import { CourseAdminPanel } from "@/components/admin/CourseAdminPanel";
 import { getCourseSnapshot } from "@/lib/admin-course-data";
+import { getProductionSnapshot } from "@/lib/admin-course-production-data";
 
 export const dynamic = "force-dynamic";
 
 const COURSE_SLUG = "duolingo-fast-track";
 
-export default async function AdminCoursePage() {
-  const snapshot = await getCourseSnapshot(COURSE_SLUG);
+export default async function AdminCoursePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const [{ tab }, snapshot, productionSnapshot] = await Promise.all([
+    searchParams,
+    getCourseSnapshot(COURSE_SLUG),
+    getProductionSnapshot(),
+  ]);
+  const initialTab = tab === "production" ? "production" : "course";
 
   return (
     <main className="ep-page-shell mx-auto max-w-6xl space-y-6 px-4 py-8">
@@ -35,13 +46,6 @@ export default async function AdminCoursePage() {
 
         <p className="mt-4 flex flex-wrap gap-2">
           <Link
-            href="/admin/course/production"
-            className="inline-flex items-center rounded-[4px] border-4 border-black bg-amber-300 px-4 py-2 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
-            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
-          >
-            🎬 แผนถ่ายวิดีโอ
-          </Link>
-          <Link
             href="/admin"
             className="inline-flex items-center rounded-[4px] border-4 border-black bg-white px-4 py-2 text-sm font-black uppercase tracking-wide text-neutral-800 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
             style={{ fontFamily: "var(--font-jetbrains), monospace" }}
@@ -51,19 +55,25 @@ export default async function AdminCoursePage() {
         </p>
       </header>
 
-      {!snapshot ? (
-        <NoticePanel
-          title="ยังไม่มีข้อมูลคอร์ส"
-          body={`ตาราง courses ถูกสร้างแล้ว แต่ยังไม่มีคอร์ส slug "${COURSE_SLUG}" — รัน scripts/thinkific-to-bunny.mjs เพื่อ seed โครงสร้างจาก Thinkific`}
-        />
-      ) : !snapshot.deployed ? (
-        <NoticePanel
-          title="ยังไม่ได้ deploy migration"
-          body="รัน supabase/migrations/038_courses.sql บน live DB ก่อน จึงจะเห็นข้อมูลคอร์สในหน้านี้"
-        />
-      ) : (
-        <CourseAdminClient snapshot={snapshot} />
-      )}
+      <CourseAdminPanel
+        productionSnapshot={productionSnapshot}
+        initialTab={initialTab}
+        courseContent={
+          !snapshot ? (
+            <NoticePanel
+              title="ยังไม่มีข้อมูลคอร์ส"
+              body={`ตาราง courses ถูกสร้างแล้ว แต่ยังไม่มีคอร์ส slug "${COURSE_SLUG}" — รัน scripts/thinkific-to-bunny.mjs เพื่อ seed โครงสร้างจาก Thinkific`}
+            />
+          ) : !snapshot.deployed ? (
+            <NoticePanel
+              title="ยังไม่ได้ deploy migration"
+              body="รัน supabase/migrations/038_courses.sql บน live DB ก่อน จึงจะเห็นข้อมูลคอร์สในหน้านี้"
+            />
+          ) : (
+            <CourseAdminClient snapshot={snapshot} />
+          )
+        }
+      />
     </main>
   );
 }

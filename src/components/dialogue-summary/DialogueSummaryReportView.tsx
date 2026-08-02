@@ -77,10 +77,14 @@ export function DialogueSummaryReportView({
   report,
   listHref,
   roundHref,
+  embedded = false,
+  onContinue,
 }: {
   report: DialogueSummaryAttemptReport;
   listHref: string;
   roundHref: string;
+  embedded?: boolean;
+  onContinue?: () => void;
 }) {
   useRevealSfx();
   const router = useRouter();
@@ -108,26 +112,28 @@ export function DialogueSummaryReportView({
         aria-hidden
       />
 
-      <nav className="relative flex flex-wrap items-center gap-2 text-sm font-bold">
-        <Link
-          href={listHref}
-          className="rounded-full border-2 border-black bg-white px-4 py-2 shadow-[3px_3px_0_0_#000] transition-transform hover:-translate-y-0.5"
-        >
-          ← Set list
-        </Link>
-        <Link
-          href={roundHref}
-          className="rounded-full border-2 border-black/20 bg-white/90 px-3 py-2 text-neutral-700 hover:border-black"
-        >
-          Round hub
-        </Link>
-        <Link
-          href="/practice/listening/dialogue-summary"
-          className="rounded-full border-2 border-black/20 bg-white/90 px-3 py-2 text-neutral-700 hover:border-black"
-        >
-          All rounds
-        </Link>
-      </nav>
+      {!embedded ? (
+        <nav className="relative flex flex-wrap items-center gap-2 text-sm font-bold">
+          <Link
+            href={listHref}
+            className="rounded-full border-2 border-black bg-white px-4 py-2 shadow-[3px_3px_0_0_#000] transition-transform hover:-translate-y-0.5"
+          >
+            ← Set list
+          </Link>
+          <Link
+            href={roundHref}
+            className="rounded-full border-2 border-black/20 bg-white/90 px-3 py-2 text-neutral-700 hover:border-black"
+          >
+            Round hub
+          </Link>
+          <Link
+            href="/practice/listening/dialogue-summary"
+            className="rounded-full border-2 border-black/20 bg-white/90 px-3 py-2 text-neutral-700 hover:border-black"
+          >
+            All rounds
+          </Link>
+        </nav>
+      ) : null}
 
       <header className="relative overflow-hidden rounded-sm border-4 border-black bg-white shadow-[6px_6px_0_0_#0a0a0a]">
         <div className="absolute inset-0 bg-gradient-to-br from-ep-yellow/30 via-white to-ep-blue/10" />
@@ -171,13 +177,23 @@ export function DialogueSummaryReportView({
             </div>
           </div>
           <div className="mt-8 flex flex-wrap gap-3 border-t-2 border-dashed border-black/15 pt-6">
-            <button
-              type="button"
-              onClick={() => router.push(listHref)}
-              className="rounded-sm border-2 border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-wide shadow-[3px_3px_0_0_#000] transition-transform hover:-translate-y-0.5"
-            >
-              Try another set
-            </button>
+            {embedded && onContinue ? (
+              <button
+                type="button"
+                onClick={onContinue}
+                className="rounded-full bg-[#004AAD] px-5 py-2.5 text-sm font-black text-white"
+              >
+                แบบฝึกถัดไป →
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => router.push(listHref)}
+                className="rounded-sm border-2 border-black bg-white px-5 py-2.5 text-sm font-black uppercase tracking-wide shadow-[3px_3px_0_0_#000] transition-transform hover:-translate-y-0.5"
+              >
+                Try another set
+              </button>
+            )}
             <FullReportNotebookButton
               attemptId={report.attemptId}
               entrySource="dialogue-summary"

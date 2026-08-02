@@ -1,8 +1,28 @@
-"use client";
-
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { AdminPricingContent } from "@/components/pricing/AdminPricingContent";
+import { absoluteUrl } from "@/lib/site-metadata";
+
+// Targets the "สมัคร/แพ็กเกจติว" intent. The "ค่าสอบ DET เท่าไร" intent belongs to
+// /duolingo-english-test/cost-thailand — keep these two distinct to avoid cannibalising it.
+const TITLE = "แพ็กเกจติว Duolingo English Test: ราคาและสิทธิ์การใช้งาน";
+const DESCRIPTION =
+  "เลือกแพ็กเกจเตรียมสอบ Duolingo English Test กับ English Plan ทั้ง mock test เต็มรูปแบบ ตรวจ speaking/writing ด้วย AI และแผนติวรายทักษะ อธิบายเป็นภาษาไทย";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: {
+    canonical: absoluteUrl("/pricing"),
+  },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: absoluteUrl("/pricing"),
+    type: "website",
+  },
+};
 
 export default function PricingPage() {
   return (

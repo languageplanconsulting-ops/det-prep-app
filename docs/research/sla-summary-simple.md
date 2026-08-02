@@ -1,0 +1,21 @@
+# Why our app's methods work (plain-English version)
+
+Full research + citations: [sla-theory-app-mapping.md](sla-theory-app-mapping.md). This is the same findings, written simply, organized by feature instead of by academic theory.
+
+| Feature | Why it works (the research) | One easy improvement |
+|---|---|---|
+| **Notebook** (flip cards + matching game) | Trying to *recall* a word from memory sticks way better than just recognizing it in a list. Flip cards make you recall; the matching game just makes you pair things up — a much weaker workout. | Don't count them equally toward "mastered." Flip-card wins should count more. Also: review missed words sooner, review well-known words less often (instead of the same schedule for everyone). |
+| **Reading lessons** | People learn best from text that's readable but has a few new things in it — too many unknown words and comprehension (and learning) breaks down. | Check that passages don't have too many unfamiliar words for their level — should be able to already know ~95% of the words. |
+| **Dictation** | Writing down what you hear forces your brain to fully process the sound, which is a much deeper workout than passive listening. | Order the 200 items easy → hard by word difficulty, instead of random order. |
+| **AI Speaking Partner** | Being pushed to actually talk (not just listen) is what builds real fluency. But real learning happens when the listener sometimes doesn't understand and asks you to try again — not when everything is understood automatically. | Have the AI occasionally act confused and ask the student to rephrase, instead of always smoothly understanding and moving on. |
+| **Read & Speak** (chunk-based answers) | Giving students ready-made phrase "chunks" to build an answer from is a proven way to fight the freeze-up panic of speaking cold. | As students improve, let them swap parts of the chunks for their own words instead of always using the same fixed pieces — otherwise answers start sounding robotic/scripted. |
+| **Pronunciation gate** (-s/-ed endings) | Clear, immediate pass/fail feedback fixes pronunciation habits better than vague hints. | When it fails, say *why* (skipped the sound? wrong sound?) instead of just "fail." |
+| **Grammar fill-in-the-blank** (600 exercises) | Repeating the same grammar rule across many exercises is how a rule stops being "something you think about" and becomes automatic. | Typing the answer should count more toward mastery than picking from a dropdown — typing is the harder, more useful skill. |
+| **Mock tests + feedback report** | Practicing in the exact format of the real test is one of the most reliably proven ways to raise scores. | Feedback should highlight 2-3 main things to fix, not a long list — a long list of every mistake overwhelms and helps less than a short, focused one. |
+| **Personalized calendar/plan** | Starting a plan at someone's actual level (via placement test) and stepping up difficulty works much better than one-size-fits-all. | As students improve, automatically remove some hints/scaffolding instead of just piling harder content on top of the same support. |
+| **Streaks / XP / mascot / notifications** | Rewards and a friendly character make studying feel good, which keeps people coming back — this is backed by real studies of Duolingo users specifically. | Double-check "you missed 5 days!" messages don't sound guilt-trippy. Feeling anxious or bad actually blocks learning, so re-engagement messages should feel warm, not scolding. |
+| **Daily Practice / Timed random practice** (mixed-topic quizzes) | Mixing up topics instead of drilling one type repeatedly forces your brain to work harder, which makes memories stick better. | Mix *similar/confusable* things together (e.g. two grammar rules that are easy to mix up) rather than totally random topics — that's where the real benefit is. |
+
+## The one-sentence version
+
+Almost everything the app already does — testing yourself instead of just reviewing, graded-difficulty reading, immediate feedback, spaced practice, a personalized starting point, gamified motivation — is backed by real research. The improvements above are all small tweaks (how credit/scheduling/feedback is weighted), not new features.

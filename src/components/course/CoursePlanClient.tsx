@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   blockForChapter,
@@ -27,6 +27,7 @@ import {
   WEEKDAY_TH,
   type PlanSettings,
 } from "@/lib/course-plan/planner";
+import { AttemptRedeemPanel } from "@/components/course/AttemptRedeemPanel";
 import { CourseCompletion } from "@/components/course/CourseCompletion";
 import { LessonLibrary } from "@/components/course/LessonLibrary";
 import { ProgramBuilder } from "@/components/course/ProgramBuilder";
@@ -108,12 +109,16 @@ export function CoursePlanClient({
   weekly,
   hasUser,
   todayIso,
+  accessReason = "admin",
+  studentCourseEnabled = false,
 }: {
   course: StudentCourse | null;
   weakness: TaskWeakness[];
   weekly: WeeklyScore[];
   hasUser: boolean;
   todayIso: string;
+  accessReason?: "admin" | "vip";
+  studentCourseEnabled?: boolean;
 }) {
   const [settings, setSettings] = useState<PlanSettings>({
     ...DEFAULT_PLAN_SETTINGS,
@@ -130,6 +135,44 @@ export function CoursePlanClient({
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [carryOver, setCarryOver] = useState<CarryOver>(EMPTY_CARRY_OVER);
   const [sessionOpen, setSessionOpen] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
+  const [rungOpen, setRungOpen] = useState(false);
+  /** Soft banner after the plan auto-shifts overdue work onto today+. */
+  const [adaptNotice, setAdaptNotice] = useState<{
+    items: number;
+    minutes: number;
+    days: number;
+  } | null>(null);
+  const adaptingRef = useRef(false);
+
+  function applyAdaptPlan(overdueSnapshot: {
+    items: number;
+    minutes: number;
+    days: number;
+  }) {
+    adaptingRef.current = true;
+    setSettings((prev) => ({
+      ...prev,
+      startDate: todayIso,
+      catchUpMode: "adapt",
+    }));
+    setOverrides({});
+    setCarryOver(EMPTY_CARRY_OVER);
+    setAdaptNotice(overdueSnapshot);
+    queueMicrotask(() => {
+      adaptingRef.current = false;
+    });
+  }
+
+  function applyCarryPlan(overdueDays: BlockDay[]) {
+    let next = carryOver;
+    for (const d of overdueDays) {
+      next = addToCarryOver(next, d.date, d.items);
+    }
+    setCarryOver(next);
+    setSettings((prev) => ({ ...prev, catchUpMode: "carry" }));
+    setAdaptNotice(null);
+  }
 
   // ---- persistence -------------------------------------------------------
   // localStorage first (instant, works logged-out), then the DB if migration
@@ -226,6 +269,32 @@ export function CoursePlanClient({
     setMinutesDraft(String(settings.minutesPerDay));
   }, [settings.minutesPerDay]);
 
+  const lessonVideos = useMemo(() => {
+    const map: Record<
+      string,
+      {
+        bunnyVideoGuid: string;
+        title: string;
+        watchedSeconds: number;
+        downloads: Array<{ id: string; label: string; fileSize: number | null }>;
+      }
+    > = {};
+    if (!course) return map;
+    for (const ch of course.chapters) {
+      for (const l of ch.lessons) {
+        if (l.bunnyVideoGuid) {
+          map[l.id] = {
+            bunnyVideoGuid: l.bunnyVideoGuid,
+            title: l.title,
+            watchedSeconds: l.watchedSeconds ?? 0,
+            downloads: l.downloads ?? [],
+          };
+        }
+      }
+    }
+    return map;
+  }, [course]);
+
   const weakestFirst = useMemo(() => weakness.map((w) => w.taskType), [weakness]);
 
   /**
@@ -319,6 +388,37 @@ export function CoursePlanClient({
     () => applyOverrides(pourIntoDays([...remainingStream], pourSettings), overrides),
     [remainingStream, pourSettings, overrides],
   );
+
+  const overdueDays = useMemo(
+    () => days.filter((d) => d.date < todayIso && d.items.length > 0),
+    [days, todayIso],
+  );
+  const overdueStats = useMemo(() => {
+    if (overdueDays.length === 0) return null;
+    return {
+      days: overdueDays.length,
+      items: overdueDays.reduce((n, d) => n + d.items.length, 0),
+      minutes: overdueDays.reduce((n, d) => n + d.totalMinutes, 0),
+    };
+  }, [overdueDays]);
+
+  // Prefer saved mode: adapt reflows automatically; ask shows a chooser; carry
+  // leaves overdue on the calendar and seeds the session backlog.
+  const catchUpMode = settings.catchUpMode ?? "ask";
+
+  useEffect(() => {
+    if (!loaded || adaptingRef.current || !overdueStats) return;
+    if (catchUpMode !== "adapt") return;
+
+    const willBumpStart = settings.startDate < todayIso;
+    const willClearOverrides = Object.keys(overrides).length > 0;
+    const willClearCarry = carryOver.entries.length > 0;
+    if (!willBumpStart && !willClearOverrides && !willClearCarry) return;
+
+    applyAdaptPlan(overdueStats);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- adapt only when overdue + mode=adapt
+  }, [loaded, overdueStats, catchUpMode, settings.startDate, todayIso, overrides, carryOver]);
+
   const totals = useMemo(() => blockTotals(days), [days]);
   const projection = useMemo(
     () => projectBoth(remainingStream, pourSettings),
@@ -363,14 +463,28 @@ export function CoursePlanClient({
     <main className="ep-page-shell min-h-screen bg-slate-100 px-4 py-6">
       <div className="mx-auto max-w-4xl space-y-6">
         <header className="ep-stagger-in rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-rose-500">
-            Admin only · ยังไม่เปิดให้นักเรียน
+          <p
+            className={`text-[11px] font-black uppercase tracking-[0.2em] ${
+              accessReason === "vip" ? "text-emerald-600" : "text-rose-500"
+            }`}
+          >
+            {accessReason === "vip"
+              ? "VIP Fast Track"
+              : studentCourseEnabled
+                ? "Admin · พรีวิวคอร์ส"
+                : "Admin only · ยังไม่เปิดให้นักเรียน"}
           </p>
+          {!hasUser && (
+            <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-[12px] font-bold text-amber-900 ring-1 ring-amber-200">
+              คุณยังไม่ได้ล็อกอินบัญชีจริง — วิดีโอ/คลังข้อสอบ/คะแนน Redeem อาจว่าง ·{" "}
+              <Link href="/login?redirect=%2Fcourse" className="underline">
+                เข้าสู่ระบบ
+              </Link>
+            </p>
+          )}
           <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900">คอร์สของฉัน</h1>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <p className="text-sm text-slate-600">
-              ตั้งแผนเอง · ดูบทเรียนตามหมวด · ปฏิทินลากวางได้
-            </p>
+            <p className="text-sm text-slate-600">เริ่มวันนี้ · ไล่ตามแผน · ลากปฏิทินได้</p>
             {hasUser && (
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-black transition-colors duration-300 ${
@@ -437,7 +551,7 @@ export function CoursePlanClient({
                   {today.items.length} รายการ · {today.totalMinutes} นาที
                   {carryOver.entries.length > 0 && (
                     <span className="ml-2 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-black text-amber-950">
-                      ค้างอยู่ {carryOver.entries.length}
+                      ค้าง {carryOver.entries.length} บท/แบบฝึก
                     </span>
                   )}
                 </p>
@@ -450,64 +564,142 @@ export function CoursePlanClient({
                     ▶︎ เริ่มเรียนวันนี้ ({settings.minutesPerDay} นาที)
                   </button>
                 )}
+                <p className="mt-3 text-[11px] font-bold text-white/70">
+                  🎬 วิดีโอ · 📘 บทเรียน · 🏋️ แบบฝึก
+                </p>
               </div>
             </section>
           );
         })()}
 
-        {/* ============ BEHIND? REBALANCE ============ */}
-        {(() => {
-          // "Behind" means scheduled days that have already passed still hold
-          // work. Comparing against today rather than counting the carry-over
-          // queue catches days the learner simply never opened.
-          const overdue = days.filter((d) => d.date < todayIso && d.items.length > 0);
-          const overdueItems = overdue.reduce((n, d) => n + d.items.length, 0);
-          const overdueMinutes = overdue.reduce((n, d) => n + d.totalMinutes, 0);
-          if (overdueItems === 0) return null;
-          return (
-            <section className="ep-stagger-in rounded-3xl bg-amber-50 p-5 shadow-sm ring-1 ring-amber-200">
-              <p className="text-[11px] font-black uppercase tracking-widest text-amber-600">
-                ตามไม่ทันนิดหน่อย
-              </p>
-              <h2 className="mt-1 text-lg font-black text-amber-900">
-                มีงานค้าง {overdueItems} รายการ · {overdueMinutes} นาที
-              </h2>
-              <p className="mt-1 text-[12px] text-amber-800">
-                ค้างมาจาก {overdue.length} วันที่ผ่านมา — จะไล่ตามทีละวันก็ได้
-                หรือกดปรับปฏิทินใหม่ให้เริ่มนับจากวันนี้
+        {/* ============ BEHIND? CATCH-UP CHOICE / NOTICE ============ */}
+        {loaded && overdueStats && catchUpMode === "ask" && (
+          <section className="ep-stagger-in rounded-3xl bg-amber-50 p-5 shadow-sm ring-1 ring-amber-200">
+            <p className="text-[11px] font-black uppercase tracking-widest text-amber-600">
+              ตามแผนไม่ทันนิดหน่อย
+            </p>
+            <h2 className="mt-1 text-lg font-black text-amber-900">
+              มีบทเรียนและแบบฝึกค้าง {overdueStats.items} รายการ · {overdueStats.minutes}{" "}
+              นาที
+            </h2>
+            <p className="mt-1 text-[12px] text-amber-800">
+              ค้างมาจาก {overdueStats.days} วันที่ผ่านมา — อยากให้ทำยังไงดี?
+            </p>
+            <div className="mt-3 space-y-2">
+              <button
+                type="button"
+                onClick={() => applyAdaptPlan(overdueStats)}
+                className="w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white transition hover:brightness-110"
+              >
+                ปรับแผนใหม่
+              </button>
+              <p className="px-1 text-center text-[11px] text-amber-700">
+                ย้ายบทเรียนและแบบฝึกที่ค้างมาเรียงจากวันนี้
               </p>
               <button
                 type="button"
-                onClick={() => {
-                  // Re-flow everything still outstanding from today. Nothing is
-                  // deleted — the plan simply restarts from where they are.
-                  setSettings((prev) => ({ ...prev, startDate: todayIso }));
-                  setOverrides({});
-                  setCarryOver(EMPTY_CARRY_OVER);
-                }}
-                className="mt-3 w-full rounded-full bg-amber-500 py-2.5 text-sm font-black text-white transition hover:bg-amber-600"
+                onClick={() => applyCarryPlan(overdueDays)}
+                className="w-full rounded-full bg-white py-3 text-sm font-black text-amber-900 ring-1 ring-amber-300 transition hover:bg-amber-100/60"
               >
-                ↻ ปรับปฏิทินใหม่ให้เริ่มจากวันนี้
+                ทำแบบฝึก / เรียนบทที่ค้างไว้
               </button>
-              {projection.full && (
-                <p className="mt-2 text-center text-[11px] font-bold text-amber-700">
-                  กำหนดเรียนจบใหม่จะเป็นประมาณ {thaiFullDate(projection.full.date)}
-                </p>
-              )}
-            </section>
-          );
-        })()}
+              <p className="px-1 text-center text-[11px] text-amber-700">
+                เก็บบทเรียนและแบบฝึกวันเก่าไว้ ไล่ตามก่อน แล้วค่อยวันใหม่
+              </p>
+            </div>
+          </section>
+        )}
+
+        {loaded && overdueStats && catchUpMode === "carry" && (
+          <section className="ep-stagger-in rounded-3xl bg-amber-50 p-5 shadow-sm ring-1 ring-amber-200">
+            <p className="text-[11px] font-black uppercase tracking-widest text-amber-600">
+              โหมดไล่ตามที่ค้าง
+            </p>
+            <h2 className="mt-1 text-lg font-black text-amber-900">
+              ยังมีบทเรียนและแบบฝึกค้าง {overdueStats.items} รายการ ·{" "}
+              {overdueStats.minutes} นาที
+            </h2>
+            <p className="mt-1 text-[12px] text-amber-800">
+              ระบบเก็บไว้ให้แล้ว — กดเริ่มเรียนแล้วเลือกทำของที่ค้างก่อนได้
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => setSessionOpen(true)}
+                className="flex-1 rounded-full bg-[#004AAD] py-2.5 text-sm font-black text-white"
+              >
+                เริ่มเรียน (มีของค้าง)
+              </button>
+              <button
+                type="button"
+                onClick={() => applyAdaptPlan(overdueStats)}
+                className="flex-1 rounded-full bg-white py-2.5 text-sm font-black text-amber-900 ring-1 ring-amber-300"
+              >
+                เปลี่ยนเป็นปรับแผนใหม่
+              </button>
+            </div>
+          </section>
+        )}
+
+        {adaptNotice && catchUpMode === "adapt" && !overdueStats && (
+          <section className="ep-stagger-in rounded-3xl bg-emerald-50 p-5 shadow-sm ring-1 ring-emerald-200">
+            <p className="text-[11px] font-black uppercase tracking-widest text-emerald-600">
+              ปรับแผนใหม่แล้ว
+            </p>
+            <h2 className="mt-1 text-lg font-black text-emerald-900">
+              ย้ายบทเรียนและแบบฝึกค้าง {adaptNotice.items} รายการ ·{" "}
+              {adaptNotice.minutes} นาที มาเริ่มจากวันนี้
+            </h2>
+            <p className="mt-1 text-[12px] text-emerald-800">
+              ค้างมาจาก {adaptNotice.days} วันที่ผ่านมา — ปฏิทินถูกจัดใหม่ให้ไล่จากวันนี้ต่อ
+              {projection.full ? ` · เรียนจบประมาณ ${thaiFullDate(projection.full.date)}` : ""}
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => setAdaptNotice(null)}
+                className="flex-1 rounded-full bg-emerald-600 py-2.5 text-sm font-black text-white"
+              >
+                เข้าใจแล้ว
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAdaptNotice(null);
+                  setSettings((s) => ({ ...s, catchUpMode: "ask" }));
+                }}
+                className="flex-1 rounded-full bg-white py-2.5 text-sm font-black text-emerald-900 ring-1 ring-emerald-300"
+              >
+                ถามใหม่ครั้งหน้า
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* ============ SCORE BREAKDOWN ============ */}
         <ScoreBreakdown weakness={weakness} weekly={weekly} hasUser={hasUser} />
 
+        {/* ============ BEST + SUB-PAR REDEEM ============ */}
+        <AttemptRedeemPanel hasUser={hasUser} defaultCollapsed={!hasUser} />
+
         {/* ============ THE RUNG LADDER ============ */}
         {rungSteps.length > 0 && (
           <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <h2 className="text-lg font-black text-slate-900">เส้นทางของคุณ</h2>
-            <p className="mt-0.5 text-[11px] text-slate-500">
-              สร้างจากคะแนนของคุณเอง — ไต่ทีละระดับจนถึงเป้า {goalScore}
-            </p>
+            <button
+              type="button"
+              onClick={() => setRungOpen((o) => !o)}
+              className="flex w-full items-center justify-between gap-3 text-left"
+            >
+              <div>
+                <h2 className="text-lg font-black text-slate-900">เส้นทางของคุณ</h2>
+                <p className="mt-0.5 text-[11px] text-slate-500">
+                  {rungSteps.length} ขั้น · เป้า {goalScore}
+                </p>
+              </div>
+              <span className="text-sm font-black text-slate-400">{rungOpen ? "▲" : "▼"}</span>
+            </button>
+            {rungOpen && (
+              <>
             <ol className="mt-3 space-y-1.5">
               {rungSteps.slice(0, 10).map((step, i) => (
                 <li
@@ -540,16 +732,35 @@ export function CoursePlanClient({
               </p>
             )}
             <p className="mt-3 rounded-xl bg-sky-50 p-3 text-[11px] text-sky-800 ring-1 ring-sky-200">
-              ระดับที่คุณผ่านแล้วจะไม่ถูกใส่ในตาราง แต่{" "}
-              <strong>ยังเปิดดูได้ทุกเลกเชอร์ตลอดเวลา</strong> — จ่ายเท่ากัน เข้าถึงเท่ากัน
-              แต่แผนจะเลือกเฉพาะอันที่ทำให้คะแนนขึ้นจริง
+              ระดับที่ผ่านแล้วไม่ถูกใส่ในตาราง แต่ยังเปิดดูเลกเชอร์ได้ทุกอัน
             </p>
+              </>
+            )}
           </section>
         )}
 
-        {/* ============ 1. CUSTOMIZE MY PLAN ============ */}
-        <Section n={1} title="ตั้งแผนของฉัน" subtitle="เลือกเวลาและวันที่จะเรียน">
-          <div className="space-y-4">
+        {/* ============ 1. CUSTOMIZE MY PLAN (collapsed by default) ============ */}
+        <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <button
+            type="button"
+            onClick={() => setSetupOpen((o) => !o)}
+            className="flex w-full items-center gap-3 text-left"
+          >
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-slate-800 text-sm font-black text-white">
+              1
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg font-black leading-tight text-slate-900">ตั้งแผนของฉัน</h2>
+              <p className="truncate text-[11px] text-slate-500">
+                {settings.minutesPerDay} นาที · {settings.studyDays.length} วัน/สัปดาห์ · เป้า{" "}
+                {goalScore}
+                {!setupOpen ? " · กดเพื่อปรับ" : ""}
+              </p>
+            </div>
+            <span className="text-sm font-black text-slate-400">{setupOpen ? "▲" : "▼"}</span>
+          </button>
+          {setupOpen && (
+          <div className="mt-4 space-y-4">
             <div>
               <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
                 เริ่มเรียนวันไหน
@@ -576,6 +787,53 @@ export function CoursePlanClient({
                   เริ่ม {thaiFullDate(settings.startDate)}
                 </p>
               )}
+            </div>
+
+            <div>
+              <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                เมื่อตามแผนไม่ทัน
+              </p>
+              <div className="flex flex-col gap-1.5">
+                {(
+                  [
+                    {
+                      mode: "ask" as const,
+                      label: "ถามทุกครั้ง",
+                      hint: "เลือกว่าจะปรับแผนใหม่ หรือทำของที่ค้าง",
+                    },
+                    {
+                      mode: "adapt" as const,
+                      label: "ปรับแผนใหม่",
+                      hint: "ย้ายบทเรียนและแบบฝึกค้างมาเรียงจากวันนี้",
+                    },
+                    {
+                      mode: "carry" as const,
+                      label: "ทำแบบฝึก / เรียนบทที่ค้างไว้",
+                      hint: "เก็บบทเรียนและแบบฝึกวันเก่าไว้ไล่ตาม",
+                    },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.mode}
+                    type="button"
+                    onClick={() => setSettings((s) => ({ ...s, catchUpMode: opt.mode }))}
+                    className={`rounded-2xl px-3.5 py-2.5 text-left ring-1 transition ${
+                      catchUpMode === opt.mode
+                        ? "bg-[#004AAD] text-white ring-[#004AAD]"
+                        : "bg-slate-50 text-slate-800 ring-slate-200 hover:ring-slate-400"
+                    }`}
+                  >
+                    <span className="block text-[13px] font-black">{opt.label}</span>
+                    <span
+                      className={`mt-0.5 block text-[11px] ${
+                        catchUpMode === opt.mode ? "text-white/80" : "text-slate-500"
+                      }`}
+                    >
+                      {opt.hint}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>
@@ -785,13 +1043,15 @@ export function CoursePlanClient({
               </div>
             </div>
           </div>
-        </Section>
+          )}
+        </section>
 
         {/* ============ 2. STUDY ORDER ============ */}
         {allBlocks.length > 0 && (
           <Section
             n={2}
             title="ลำดับการเรียน"
+            tone="sky"
             subtitle={
               custom.mode === "guided"
                 ? "เราจัดลำดับให้แล้ว — เปลี่ยนเองได้ถ้าต้องการ"
@@ -842,7 +1102,8 @@ export function CoursePlanClient({
         <Section
           n={3}
           title="คลังบทเรียน"
-          subtitle="แยกตามทักษะ — ค้นหาชื่อบทเรียน แล้วกดดูซ้ำได้ทุกเมื่อ"
+          tone="emerald"
+          subtitle="แยกตามทักษะ — ค้นหาแล้วเปิดคลิปได้ทุกเมื่อ"
         >
           {!course ? (
             <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-200">
@@ -862,7 +1123,8 @@ export function CoursePlanClient({
         <Section
           n={4}
           title="ปฏิทินการเรียน"
-          subtitle="ลากวันหรือรายการไปวางวันอื่นได้ ถ้าอยากสลับ"
+          tone="violet"
+          subtitle="ลากวันหรือรายการไปวางวันอื่นได้"
         >
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <Pill on={plannerView === "week"} onClick={() => setPlannerView("week")}>
@@ -1004,13 +1266,16 @@ export function CoursePlanClient({
       </div>
 
       {sessionOpen && (() => {
-        const today = days.find((d) => d.date === todayIso) ?? days.find((d) => d.items.length > 0);
-        if (!today) return null;
+        const today = days.find((d) => d.date === todayIso);
+        const todaysItems = today?.items ?? [];
+        if (todaysItems.length === 0 && carryOver.entries.length === 0) return null;
+        const finishDate = today?.date ?? todayIso;
         return (
           <SessionRunner
-            todaysItems={today.items}
+            todaysItems={todaysItems}
             carryOver={carryOver}
             minutes={settings.minutesPerDay}
+            lessonVideos={lessonVideos}
             onClose={() => setSessionOpen(false)}
             onFinish={(unfinished, completed) => {
               setProgress((p) => markCompleted(p, completed.map((i) => i.id)));
@@ -1019,7 +1284,7 @@ export function CoursePlanClient({
               setCarryOver((prev) =>
                 addToCarryOver(
                   clearFromCarryOver(prev, completed.map((i) => i.id)),
-                  today.date,
+                  finishDate,
                   unfinished,
                 ),
               );
@@ -1276,16 +1541,22 @@ function DayCard({
               e.stopPropagation();
               onDragStart(it.id);
             }}
-            className="flex cursor-grab items-center gap-2.5 px-3.5 py-2.5 transition hover:bg-slate-50"
+            className={`flex cursor-grab items-center gap-2.5 px-3.5 py-2.5 transition hover:bg-slate-50/80 ${
+              it.kind === "video"
+                ? "border-l-4 border-amber-400 bg-amber-50/40"
+                : it.kind === "lesson"
+                  ? "border-l-4 border-violet-400 bg-violet-50/40"
+                  : "border-l-4 border-sky-400 bg-sky-50/40"
+            }`}
           >
             {/* Fixed icon column keeps every row aligned regardless of title length. */}
             <span
               className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[13px] ${
                 it.kind === "video"
-                  ? "bg-amber-50"
+                  ? "bg-amber-100"
                   : it.kind === "lesson"
-                    ? "bg-violet-50"
-                    : "bg-sky-50"
+                    ? "bg-violet-100"
+                    : "bg-sky-100"
               }`}
             >
               {it.kind === "video" ? "🎬" : it.kind === "lesson" ? "📘" : "🏋️"}
@@ -1294,9 +1565,6 @@ function DayCard({
               <span className="block truncate text-[12px] font-bold text-slate-700">
                 {it.titleTh}
               </span>
-              {it.gateTh && (
-                <span className="block truncate text-[10px] text-slate-400">{it.gateTh}</span>
-              )}
             </span>
             <span className="shrink-0 text-[10px] font-bold text-slate-400">{it.minutes}′</span>
           </li>
@@ -1311,21 +1579,44 @@ function Section({
   title,
   subtitle,
   children,
+  tone = "blue",
 }: {
   n: number;
   title: string;
   subtitle: string;
   children: React.ReactNode;
+  tone?: "blue" | "rose" | "violet" | "sky" | "emerald" | "slate";
 }) {
+  const badge =
+    tone === "rose"
+      ? "bg-rose-500"
+      : tone === "violet"
+        ? "bg-violet-500"
+        : tone === "sky"
+          ? "bg-sky-500"
+          : tone === "emerald"
+            ? "bg-emerald-500"
+            : tone === "slate"
+              ? "bg-slate-700"
+              : "bg-[#004AAD]";
+  const ring =
+    tone === "rose"
+      ? "ring-rose-100"
+      : tone === "violet"
+        ? "ring-violet-100"
+        : tone === "sky"
+          ? "ring-sky-100"
+          : tone === "emerald"
+            ? "ring-emerald-100"
+            : "ring-slate-200";
+
   return (
-    // Each section rises in slightly after the one above it — the app's
-    // StaggerIn cascade, so the page reveals softly instead of snapping in.
     <section
-      className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
+      className={`ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ${ring}`}
       style={{ animationDelay: `${n * 90}ms` }}
     >
       <div className="mb-3 flex items-center gap-3">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#004AAD] text-sm font-black text-white">
+        <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-sm font-black text-white ${badge}`}>
           {n}
         </span>
         <div>

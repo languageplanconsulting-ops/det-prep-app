@@ -10,7 +10,7 @@ import { resolveEffectiveTierFromProfile } from "@/lib/plan-status";
  * Kept as a constant (not an env var) so the state is obvious in code review
  * and can't drift between environments.
  */
-export const STUDENT_COURSE_ENABLED = false;
+export const STUDENT_COURSE_ENABLED = true;
 
 export type CourseViewerProfile = {
   role?: string | null;

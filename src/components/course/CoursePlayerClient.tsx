@@ -2,13 +2,9 @@
 
 import { useCallback, useMemo, useState } from "react";
 
+import { BunnyVideoEmbed } from "@/components/course/BunnyVideoEmbed";
 import type { StudentCourse, StudentLesson } from "@/lib/course-student-data";
-
-const BUNNY_LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID ?? "715227";
-
-function embedUrl(guid: string): string {
-  return `https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${guid}?autoplay=false&preload=false`;
-}
+import { saveLessonWatchProgress } from "@/lib/course-video-progress";
 
 function formatDuration(seconds: number | null): string {
   if (!seconds || seconds <= 0) return "";
@@ -49,7 +45,6 @@ export function CoursePlayerClient({
   const [completed, setCompleted] = useState<Set<string>>(
     () => new Set(flatLessons.filter((l) => l.completed).map((l) => l.id)),
   );
-  const [saving, setSaving] = useState(false);
   const [openChapters, setOpenChapters] = useState<Set<string>>(() => {
     const activeChapter = course.chapters.find((c) => c.lessons.some((l) => l.id === initialId));
     return new Set(activeChapter ? [activeChapter.id] : course.chapters.slice(0, 1).map((c) => c.id));
@@ -62,8 +57,6 @@ export function CoursePlayerClient({
 
   const markComplete = useCallback(
     async (lessonId: string, done: boolean) => {
-      setSaving(true);
-      // Optimistic: the UI shouldn't stall on the network for a checkbox.
       setCompleted((prev) => {
         const next = new Set(prev);
         if (done) next.add(lessonId);
@@ -71,24 +64,22 @@ export function CoursePlayerClient({
         return next;
       });
       try {
-        await fetch("/api/course/lesson-progress", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lessonId, watchedSeconds: 0, completed: done }),
+        const lesson = flatLessons.find((l) => l.id === lessonId);
+        await saveLessonWatchProgress({
+          lessonId,
+          watchedSeconds: lesson?.watchedSeconds ?? 0,
+          completed: done,
         });
       } catch {
-        // Revert if the save didn't land, so the tick never lies.
         setCompleted((prev) => {
           const next = new Set(prev);
           if (done) next.delete(lessonId);
           else next.add(lessonId);
           return next;
         });
-      } finally {
-        setSaving(false);
       }
     },
-    [],
+    [flatLessons],
   );
 
   function goNext() {
@@ -107,31 +98,29 @@ export function CoursePlayerClient({
       <section className="ep-brutal rounded-sm border-black bg-white p-4 lg:order-2">
         {active?.bunnyVideoGuid ? (
           <>
-            <div className="relative w-full overflow-hidden border-4 border-black bg-black pt-[56.25%]">
-              <iframe
-                key={active.bunnyVideoGuid}
-                src={embedUrl(active.bunnyVideoGuid)}
-                title={active.title}
-                loading="lazy"
-                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-                allowFullScreen
-                className="absolute inset-0 h-full w-full"
-              />
-            </div>
+            <BunnyVideoEmbed
+              guid={active.bunnyVideoGuid}
+              title={active.title}
+              brutal
+              lessonId={active.id}
+              startSeconds={active.watchedSeconds ?? 0}
+              onEnded={() => {
+                if (!completed.has(active.id)) {
+                  void markComplete(active.id, true);
+                }
+              }}
+            />
             <h2 className="mt-4 text-xl font-black tracking-tight">{active.title}</h2>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => markComplete(active.id, !isDone)}
-                className={`inline-flex items-center gap-2 rounded-[4px] border-4 border-black px-4 py-2 text-sm font-black uppercase tracking-wide shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none disabled:opacity-60 ${
-                  isDone ? "bg-emerald-300 text-neutral-900" : "bg-white text-neutral-900"
-                }`}
-                style={{ fontFamily: "var(--font-jetbrains), monospace" }}
-              >
-                {isDone ? "✓ เรียนจบแล้ว" : "ทำเครื่องหมายว่าเรียนจบ"}
-              </button>
+              {isDone && (
+                <span
+                  className="inline-flex items-center gap-2 rounded-[4px] border-4 border-black bg-emerald-300 px-4 py-2 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000]"
+                  style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+                >
+                  ✓ เรียนจบแล้ว
+                </span>
+              )}
               <button
                 type="button"
                 onClick={goNext}

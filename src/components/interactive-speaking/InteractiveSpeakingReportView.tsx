@@ -106,8 +106,10 @@ function CriterionBlock({
 
 export function InteractiveSpeakingReportView({
   report,
+  embedded = false,
 }: {
   report: InteractiveSpeakingAttemptReport;
+  embedded?: boolean;
 }) {
   useRevealSfx();
   const router = useRouter();
@@ -139,10 +141,10 @@ export function InteractiveSpeakingReportView({
     .slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className={embedded ? "bg-[#fafafa]" : "min-h-screen bg-[#fafafa]"}>
       <ProductionReportLandingHero
-        backHref="/practice/production/interactive-speaking"
-        backLabel="← Scenarios"
+        backHref={embedded ? undefined : "/practice/production/interactive-speaking"}
+        backLabel={embedded ? undefined : "← Scenarios"}
         eyebrow="Interactive speaking — report"
         titleEn={report.scenarioTitleEn}
         titleTh={report.scenarioTitleTh}
@@ -159,13 +161,15 @@ export function InteractiveSpeakingReportView({
           </>
         }
       >
-        <button
-          type="button"
-          onClick={() => router.push(`/practice/production/interactive-speaking/${report.scenarioId}?redeem=1`)}
-          className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
-        >
-          Try again
-        </button>
+        {!embedded ? (
+          <button
+            type="button"
+            onClick={() => router.push(`/practice/production/interactive-speaking/${report.scenarioId}?redeem=1`)}
+            className="border-2 border-black bg-white px-4 py-2 text-sm font-bold shadow-[3px_3px_0_0_#000]"
+          >
+            Try again
+          </button>
+        ) : null}
         <InteractiveSpeakingFullReportNotebookButton report={report} />
       </ProductionReportLandingHero>
 

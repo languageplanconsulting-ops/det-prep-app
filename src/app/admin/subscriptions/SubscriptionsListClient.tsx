@@ -14,6 +14,13 @@ type Row = {
   tier_expires_at: string | null;
   vip_granted_by_course: boolean;
   derivedStatus: string;
+  statusDetail?: {
+    code: string;
+    severity: "ok" | "info" | "muted" | "critical";
+    label: string;
+    detail: string;
+    action: string | null;
+  };
   paymentKind: string;
   totalPaidSatang: number;
   monthlyLabel: string;
@@ -63,21 +70,46 @@ function tierBadge(tier: string, course: boolean) {
   );
 }
 
-function statusDot(s: string) {
+const SEVERITY_STYLE: Record<string, { dot: string; text: string }> = {
+  ok: { dot: "●", text: "text-green-600" },
+  info: { dot: "●", text: "text-blue-600" },
+  muted: { dot: "●", text: "text-neutral-500" },
+  critical: { dot: "⚠", text: "text-red-600 font-bold" },
+};
+
+// Fallback for rows served by an older API response that has no statusDetail.
+function legacyStatusDot(s: string) {
   if (s === "active")
     return <span className="text-green-600">● Active / ใช้งาน</span>;
   if (s === "expired")
-    return <span className="text-red-600">● Expired / หมดอายุ</span>;
-  if (s === "unsynced" || s === "cancelled")
-    return (
-      <span
-        className="text-amber-600"
-        title="Stripe customer ID present but tier is free. The webhook may have missed an async PromptPay confirmation. Open this user and click 'Re-sync from Stripe' to repair."
-      >
-        ⚠ Unsynced / ต้องดึง Stripe
+    return <span className="text-neutral-500">● Expired / หมดอายุ</span>;
+  return <span className="text-blue-600">● Free / ฟรี</span>;
+}
+
+function statusCell(r: Row) {
+  const d = r.statusDetail;
+  if (!d) return legacyStatusDot(r.derivedStatus);
+
+  const style = SEVERITY_STYLE[d.severity] ?? SEVERITY_STYLE.info;
+  return (
+    <div className="max-w-[260px] space-y-0.5">
+      <span className={style.text}>
+        {style.dot} {d.label}
       </span>
-    );
-  return <span className="text-blue-600">● Free trial / ทดลอง</span>;
+      <p className="text-[10px] leading-snug text-neutral-600">{d.detail}</p>
+      {d.action ? (
+        <p
+          className={`text-[10px] leading-snug ${
+            d.severity === "critical"
+              ? "font-bold text-red-600"
+              : "text-neutral-500"
+          }`}
+        >
+          → {d.action}
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 function expiryStyle(iso: string | null, course: boolean) {
@@ -417,7 +449,20 @@ export function SubscriptionsListClient() {
           {(
             [
               ["tier", "Tier", ["all", "free", "basic", "premium", "vip"]],
-              ["status", "Status", ["all", "active", "expired", "unsynced", "vip_course", "trial"]],
+              [
+                "status",
+                "Status",
+                [
+                  "all",
+                  "active",
+                  "expired",
+                  "payment_unsynced",
+                  "checkout_abandoned",
+                  "lapsed",
+                  "vip_course",
+                  "trial",
+                ],
+              ],
               ["payment", "Payment", ["all", "stripe", "manual", "course_grant"]],
               ["sort", "Sort", ["newest", "oldest", "name", "tier", "expiry"]],
             ] as const
@@ -521,7 +566,7 @@ export function SubscriptionsListClient() {
                     {tierBadge(r.tier, r.vip_granted_by_course)}
                   </td>
                   <td className="border-b-2 border-black px-2 py-2 text-xs">
-                    {statusDot(r.derivedStatus)}
+                    {statusCell(r)}
                   </td>
                   <td className="border-b-2 border-black px-2 py-2 text-xs">
                     {r.paymentKind === "stripe"
