@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { defaultReadingFullBank } from "@/lib/reading-default-data";
 import {
   getReadingSetBestAcrossExams,
@@ -21,7 +22,11 @@ export function ReadingSetGrid({
   const [bank, setBank] = useState(() => defaultReadingFullBank());
 
   useEffect(() => {
-    setBank(loadReadingVisibleBank());
+    const read = () => setBank(loadReadingVisibleBank());
+    read();
+    // A brand-new learner has no bank in this browser yet — without this pull the grid
+    // renders empty on a hard load.
+    void ensureCanonicalPracticeContent().then(read);
   }, [round, difficulty, bankVersion]);
 
   const rows = bank[round][difficulty];

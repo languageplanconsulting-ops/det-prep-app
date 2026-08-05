@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import { VOCAB_SESSION_LABEL, VOCAB_SESSION_MAX } from "@/lib/vocab-constants";
@@ -19,6 +20,9 @@ export function VocabDifficultyQuestionsPage({
 
   useEffect(() => {
     const onStorage = () => setV((n) => n + 1);
+    // A brand-new learner has no bank in this browser yet; the pull fires the storage
+    // event below, so the counts re-render instead of reading as empty.
+    void ensureCanonicalPracticeContent().then(onStorage);
     window.addEventListener("storage", onStorage);
     window.addEventListener("ep-vocab-storage", onStorage);
     return () => {

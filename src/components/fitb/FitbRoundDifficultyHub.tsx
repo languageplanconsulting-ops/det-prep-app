@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { SoftDifficultyHub, softBandStat } from "@/components/practice/SoftDifficultyHub";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import {
@@ -19,6 +20,9 @@ export function FitbRoundDifficultyHub({ round }: { round: FitbRoundNum }) {
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);
+    // A brand-new learner has no bank in this browser yet; the pull fires the storage
+    // event below, so the counts re-render instead of reading as empty.
+    void ensureCanonicalPracticeContent().then(refresh);
     window.addEventListener("storage", refresh);
     window.addEventListener("ep-fitb-storage", refresh);
     return () => {

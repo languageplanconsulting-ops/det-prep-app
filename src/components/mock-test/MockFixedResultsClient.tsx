@@ -111,10 +111,18 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const res = await fetch(`/api/mock-test/fixed/results/${sessionId}/report`, {
-        credentials: "same-origin",
-        cache: "no-store",
-      });
+      let res: Response;
+      try {
+        res = await fetch(`/api/mock-test/fixed/results/${sessionId}/report`, {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+      } catch {
+        // Network hiccup — results-loading polls and recovers, which beats
+        // stranding the learner on "Loading result..." with no way forward.
+        if (!cancelled) router.replace(`/mock-test/fixed/results-loading/${sessionId}`);
+        return;
+      }
       if (cancelled) return;
       if (!res.ok) {
         // Result row doesn't exist yet (e.g. a bookmarked/shared link, back
@@ -124,11 +132,22 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
         router.replace(`/mock-test/fixed/results-loading/${sessionId}`);
         return;
       }
-      const json = (await res.json()) as { result?: FixedResult; stepItems?: FixedStepItem[] };
+      let json: { result?: FixedResult; stepItems?: FixedStepItem[] };
+      try {
+        json = (await res.json()) as { result?: FixedResult; stepItems?: FixedStepItem[] };
+      } catch {
+        if (!cancelled) router.replace(`/mock-test/fixed/results-loading/${sessionId}`);
+        return;
+      }
       const next = (json.result ?? null) as FixedResult | null;
+      if (!next) {
+        // 200 with no row is the same dead end as a 404 — don't sit on the spinner.
+        if (!cancelled) router.replace(`/mock-test/fixed/results-loading/${sessionId}`);
+        return;
+      }
       setRow(next);
       setStepItems(json.stepItems ?? []);
-      setDashboardSavedAt(next?.dashboard_saved_at ?? null);
+      setDashboardSavedAt(next.dashboard_saved_at ?? null);
     })();
     return () => {
       cancelled = true;

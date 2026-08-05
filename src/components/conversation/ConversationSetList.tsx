@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import {
@@ -68,6 +69,9 @@ export function ConversationSetList({
 
   useEffect(() => {
     const bump = () => setBankVersion((n) => n + 1);
+    // A brand-new learner has no bank in this browser yet; the pull fires the storage
+    // event above, so the list re-renders with the real sets instead of "COMING SOON".
+    void ensureCanonicalPracticeContent().then(bump);
     window.addEventListener("storage", bump);
     window.addEventListener("ep-conversation-storage", bump);
     return () => {

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { VocabularyBuilderAvailabilityBanner } from "@/components/vocab/VocabularyBuilderAvailabilityBanner";
 import { VOCAB_SESSION_LABEL, VOCAB_SESSION_MAX } from "@/lib/vocab-constants";
 import { loadVocabVisibleBank } from "@/lib/vocab-storage";
@@ -12,6 +13,9 @@ export function VocabRoundSetsPage({ round }: { round: VocabRoundNum }) {
 
   useEffect(() => {
     const onStorage = () => setBankVersion((n) => n + 1);
+    // A brand-new learner has no bank in this browser yet; the pull fires the storage
+    // event below, so the counts re-render instead of reading as empty.
+    void ensureCanonicalPracticeContent().then(onStorage);
     window.addEventListener("storage", onStorage);
     window.addEventListener("ep-vocab-storage", onStorage);
     return () => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { FreeQuotaLockedLink } from "@/components/practice/FreeQuotaLockedLink";
 import { FITB_MAX_SCORE, fitbMaxScore } from "@/lib/fitb-constants";
 import { getFitbProgress, hydrateFitbProgressFromServer, loadFitbVisibleBank } from "@/lib/fitb-storage";
@@ -37,7 +38,11 @@ export function FitbSetGrid({
   const [, forceRerender] = useState(0);
 
   useEffect(() => {
-    setRows(loadFitbVisibleBank()[round][difficulty]);
+    const read = () => setRows(loadFitbVisibleBank()[round][difficulty]);
+    read();
+    // A brand-new learner has no bank in this browser yet — without this pull the grid
+    // renders the "COMING SOON / no uploaded sets" empty state on a hard load.
+    void ensureCanonicalPracticeContent().then(read);
   }, [round, difficulty, bankVersion]);
 
   useEffect(() => {

@@ -1,16 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 
 import { NonApiExamQuotaReminder } from "@/components/practice/NonApiExamQuotaReminder";
 import { SoftSetPicker, softPct, type SoftSetItem } from "@/components/practice/SoftSetPicker";
 import { DICTATION_DIFFICULTY_LABEL, DICTATION_SET_COUNT } from "@/lib/dictation-constants";
 import { defaultDictationFullBank } from "@/lib/dictationData";
-import {
-  ensureDictationBankReady,
-  getDictationProgress,
-  loadDictationBank,
-} from "@/lib/dictation-storage";
+import { getDictationProgress, loadDictationBank } from "@/lib/dictation-storage";
 import type { DictationDifficulty, DictationRoundNum } from "@/types/dictation";
 
 /** Admin "Clean Grid" dictation set picker (shared SoftSetPicker). */
@@ -27,7 +24,9 @@ export function DictationSetGridSoft({
 
   useEffect(() => {
     void (async () => {
-      await ensureDictationBankReady();
+      // Pull the published bank first: ensureDictationBankReady only reads what this
+      // browser already has, which for a brand-new learner is nothing.
+      await ensureCanonicalPracticeContent();
       setBank(loadDictationBank());
     })();
   }, [round, difficulty, bankVersion]);

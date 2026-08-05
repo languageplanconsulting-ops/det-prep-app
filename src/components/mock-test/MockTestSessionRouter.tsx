@@ -11,21 +11,28 @@ export function MockTestSessionRouter({ sessionId }: { sessionId: string }) {
 
   useEffect(() => {
     void (async () => {
-      const fixedRes = await fetch(`/api/mock-test/fixed/session/${sessionId}`, {
-        cache: "no-store",
-        credentials: "same-origin",
-      });
-      if (fixedRes.ok) {
+      // Every failure here must still pick an engine: leaving `engine` null strands
+      // the learner on "กำลังโหลด…" forever. Fixed is today's engine, so it's the
+      // safe default — its own client shows a real error if the session isn't found.
+      try {
+        const fixedRes = await fetch(`/api/mock-test/fixed/session/${sessionId}`, {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        if (fixedRes.ok) {
+          setEngine(3);
+          return;
+        }
+        const res = await fetch(`/api/mock-test/session/${sessionId}`, {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        const j = (await res.json()) as { session?: { engine_version?: number } };
+        const v = j.session?.engine_version ?? 1;
+        setEngine(v === 2 ? 2 : 1);
+      } catch {
         setEngine(3);
-        return;
       }
-      const res = await fetch(`/api/mock-test/session/${sessionId}`, {
-        cache: "no-store",
-        credentials: "same-origin",
-      });
-      const j = (await res.json()) as { session?: { engine_version?: number } };
-      const v = j.session?.engine_version ?? 1;
-      setEngine(v === 2 ? 2 : 1);
     })();
   }, [sessionId]);
 
