@@ -7,13 +7,14 @@ import type {
   InteractiveSpeakingAttemptReport,
   InteractiveSpeakingScenario,
 } from "@/types/interactive-speaking";
+import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
 
 export function loadInteractiveSpeakingScenarios(): InteractiveSpeakingScenario[] {
   if (typeof window === "undefined") {
     return defaultScenarios as InteractiveSpeakingScenario[];
   }
   try {
-    const raw = localStorage.getItem(INTERACTIVE_SPEAKING_STORAGE_KEY);
+    const raw = readContentBankItem(INTERACTIVE_SPEAKING_STORAGE_KEY);
     if (!raw) return defaultScenarios as InteractiveSpeakingScenario[];
     const parsed = JSON.parse(raw) as InteractiveSpeakingScenario[];
     return Array.isArray(parsed) && parsed.length > 0
@@ -26,7 +27,7 @@ export function loadInteractiveSpeakingScenarios(): InteractiveSpeakingScenario[
 
 export function saveInteractiveSpeakingScenarios(items: InteractiveSpeakingScenario[]): void {
   try {
-    localStorage.setItem(INTERACTIVE_SPEAKING_STORAGE_KEY, JSON.stringify(items));
+    writeContentBankItem(INTERACTIVE_SPEAKING_STORAGE_KEY, JSON.stringify(items));
   } catch {
     /* ignore browser storage failures */
   }

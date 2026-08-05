@@ -13,6 +13,7 @@ import type {
   FitbRoundNum,
   FitbSet,
 } from "@/types/fitb";
+import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
 
 const FITB_BANK_KEY = "ep-fitb-bank-v1";
 const FITB_BANK_EMPTY_KEY = "ep-fitb-bank-empty-v1";
@@ -89,7 +90,7 @@ export function loadFitbAdminOccupancy(): FitbAdminOccupancy {
     return migrateOccupancy(null);
   }
   try {
-    const raw = localStorage.getItem(FITB_ADMIN_OCCUPANCY_KEY);
+    const raw = readContentBankItem(FITB_ADMIN_OCCUPANCY_KEY);
     if (!raw) {
       const legacy = localStorage.getItem("ep-fitb-admin-uploaded-v1");
       if (legacy) return migrateOccupancy(JSON.parse(legacy));
@@ -103,7 +104,7 @@ export function loadFitbAdminOccupancy(): FitbAdminOccupancy {
 
 export function saveFitbAdminOccupancy(next: FitbAdminOccupancy): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(FITB_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
+  writeContentBankItem(FITB_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
 }
 
 export function registerFitbAdminSlots(
@@ -296,20 +297,20 @@ export function composeFitbVisibleBank(
 
 export function loadFitbBank(): FitbFullBank {
   if (typeof window === "undefined") return buildDefaultFitbBank();
-  return parseStoredBank(localStorage.getItem(FITB_BANK_KEY));
+  return parseStoredBank(readContentBankItem(FITB_BANK_KEY));
 }
 
 export function persistFitbBank(bank: FitbFullBank): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(FITB_BANK_EMPTY_KEY);
-  localStorage.setItem(FITB_BANK_KEY, JSON.stringify(bank));
+  writeContentBankItem(FITB_BANK_KEY, JSON.stringify(bank));
   emitFitbUpdate();
 }
 
 export function clearFitbBankFromAdmin(): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(FITB_BANK_EMPTY_KEY, "1");
-  localStorage.setItem(FITB_BANK_KEY, JSON.stringify(emptyFitbFullBank()));
+  writeContentBankItem(FITB_BANK_KEY, JSON.stringify(emptyFitbFullBank()));
   saveFitbAdminOccupancy(emptyOccupancy());
   emitFitbUpdate();
 }

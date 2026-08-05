@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
@@ -29,6 +30,9 @@ export function RealWordRoundsHub() {
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);
+    // A brand-new learner has no content in this browser yet; the pull fires the
+    // "ep-realword-storage" event below, which re-renders the cards with real set counts.
+    void ensureCanonicalPracticeContent().then(refresh);
     window.addEventListener("storage", refresh);
     window.addEventListener("ep-realword-storage", refresh);
     window.addEventListener("focus", refresh);

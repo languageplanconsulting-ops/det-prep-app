@@ -14,6 +14,7 @@ import type {
   DialogueSummaryProgressRecord,
   DialogueSummaryRoundNum,
 } from "@/types/dialogue-summary";
+import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
 
 const BANK_KEY = "ep-dialogue-summary-bank-v1";
 const PROGRESS_KEY = "ep-dialogue-summary-progress-v1";
@@ -77,7 +78,7 @@ function migrateDialogueSummaryOccupancy(raw: unknown): DialogueSummaryAdminOccu
 export function loadDialogueSummaryAdminOccupancy(): DialogueSummaryAdminOccupancy {
   if (typeof window === "undefined") return emptyDialogueSummaryOccupancy();
   try {
-    const raw = localStorage.getItem(DIALOGUE_SUMMARY_ADMIN_OCCUPANCY_KEY);
+    const raw = readContentBankItem(DIALOGUE_SUMMARY_ADMIN_OCCUPANCY_KEY);
     if (!raw) return emptyDialogueSummaryOccupancy();
     return migrateDialogueSummaryOccupancy(JSON.parse(raw));
   } catch {
@@ -87,7 +88,7 @@ export function loadDialogueSummaryAdminOccupancy(): DialogueSummaryAdminOccupan
 
 function saveDialogueSummaryAdminOccupancy(next: DialogueSummaryAdminOccupancy): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(DIALOGUE_SUMMARY_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
+  writeContentBankItem(DIALOGUE_SUMMARY_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
 }
 
 function registerDialogueSummaryAdminSlots(
@@ -179,7 +180,7 @@ function parseStoredBank(raw: string | null): DialogueSummaryFullBank {
 
 export function loadDialogueSummaryBank(): DialogueSummaryFullBank {
   if (typeof window === "undefined") return emptyDialogueSummaryFullBank();
-  return parseStoredBank(localStorage.getItem(BANK_KEY));
+  return parseStoredBank(readContentBankItem(BANK_KEY));
 }
 
 export function parseDialogueSummaryBankFromJson(raw: string | null): DialogueSummaryFullBank {
@@ -215,7 +216,7 @@ export function composeDialogueSummaryVisibleBank(
 
 export function persistDialogueSummaryBank(bank: DialogueSummaryFullBank): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(BANK_KEY, JSON.stringify(bank));
+  writeContentBankItem(BANK_KEY, JSON.stringify(bank));
   emitDialogueSummaryUpdate();
 }
 

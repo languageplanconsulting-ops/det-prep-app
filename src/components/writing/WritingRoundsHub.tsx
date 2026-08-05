@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
@@ -15,6 +16,9 @@ export function WritingRoundsHub() {
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);
+    // A brand-new learner has no content in this browser yet; the pull fires the
+    // "ep-writing-topics" event below, which re-renders the cards with real set counts.
+    void ensureCanonicalPracticeContent().then(refresh);
     window.addEventListener("storage", refresh);
     window.addEventListener("ep-writing-topics", refresh);
     window.addEventListener("focus", refresh);

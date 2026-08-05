@@ -20,6 +20,7 @@ import type {
   VocabSessionLevel,
   VocabSet,
 } from "@/types/vocab";
+import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
 
 const VOCAB_SESSION_LEVELS: VocabSessionLevel[] = ["easy", "medium", "hard"];
 
@@ -62,7 +63,7 @@ function migrateVocabOccupancy(raw: unknown): VocabAdminOccupancy {
 export function loadVocabAdminOccupancy(): VocabAdminOccupancy {
   if (typeof window === "undefined") return emptyVocabOccupancy();
   try {
-    const raw = localStorage.getItem(VOCAB_ADMIN_OCCUPANCY_KEY);
+    const raw = readContentBankItem(VOCAB_ADMIN_OCCUPANCY_KEY);
     if (!raw) return emptyVocabOccupancy();
     return migrateVocabOccupancy(JSON.parse(raw));
   } catch {
@@ -81,7 +82,7 @@ export function parseVocabAdminOccupancyFromJson(raw: string | null): VocabAdmin
 
 function saveVocabAdminOccupancy(next: VocabAdminOccupancy): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(VOCAB_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
+  writeContentBankItem(VOCAB_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
 }
 
 function registerVocabAdminSlots(round: VocabRoundNum, setNumbers: number[]): void {
@@ -211,7 +212,7 @@ function parseStoredBank(raw: string | null): VocabFullBank {
 
 export function loadVocabBank(): VocabFullBank {
   if (typeof window === "undefined") return emptyVocabFullBank();
-  return parseStoredBank(localStorage.getItem(VOCAB_SETS_KEY));
+  return parseStoredBank(readContentBankItem(VOCAB_SETS_KEY));
 }
 
 export function parseVocabBankFromJson(raw: string | null): VocabFullBank {
@@ -239,7 +240,7 @@ export function loadVocabVisibleBank(): VocabFullBank {
 
 export function persistVocabBank(bank: VocabFullBank): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(VOCAB_SETS_KEY, JSON.stringify(bank));
+  writeContentBankItem(VOCAB_SETS_KEY, JSON.stringify(bank));
   emitVocabUpdate();
 }
 

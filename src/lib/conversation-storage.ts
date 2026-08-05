@@ -16,6 +16,7 @@ import type {
   ConversationExam,
   ConversationProgressRecord,
 } from "@/types/conversation";
+import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
 
 export const CONVERSATION_LS_BANK_KEY = "ep-conversation-bank-v2";
 export const CONVERSATION_LS_BANK_LEGACY_KEY = "ep-conversation-bank-v1";
@@ -286,7 +287,7 @@ function migrateConversationHardTierAway(bank: ConversationBankByRound): boolean
 
 function loadBankFromLocalStorage(): ConversationBankByRound {
   if (typeof window === "undefined") return cloneBank(buildDefaultConversationBank());
-  const bank = parseStoredBank(localStorage.getItem(BANK_KEY) ?? localStorage.getItem(LEGACY_BANK_KEY));
+  const bank = parseStoredBank(readContentBankItem(BANK_KEY) ?? localStorage.getItem(LEGACY_BANK_KEY));
   if (migrateConversationHardTierAway(bank)) {
     persistConversationBank(bank);
   }
@@ -300,7 +301,7 @@ export function loadConversationBank(): ConversationBankByRound {
 export function persistConversationBank(bank: ConversationBankByRound): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(BANK_KEY, JSON.stringify(bank));
+    writeContentBankItem(BANK_KEY, JSON.stringify(bank));
     emitConversationUpdate();
   } catch (e) {
     if (e instanceof DOMException && e.name === "QuotaExceededError") {

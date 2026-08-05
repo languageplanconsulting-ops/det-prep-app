@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  readContentBankItem,
+  writeContentBankItem,
+} from "@/lib/content-bank-store";
+import {
   getDictationBankJsonForContentSync,
   reconcileDictationBankAfterContentPull,
 } from "@/lib/dictation-storage";
@@ -32,7 +36,7 @@ export function readLocalContentBankSnapshot(): ContentBankSnapshot {
   if (typeof window === "undefined") return {};
   const out: ContentBankSnapshot = {};
   for (const key of CONTENT_BANK_KEYS) {
-    const raw = localStorage.getItem(key);
+    const raw = readContentBankItem(key);
     if (typeof raw === "string" && raw.length > 0) {
       out[key] = raw;
     }
@@ -47,7 +51,9 @@ export function applyLocalContentBankSnapshot(snapshot: ContentBankSnapshot): nu
   for (const [k, v] of Object.entries(snapshot)) {
     if (!CONTENT_BANK_KEYS.includes(k as (typeof CONTENT_BANK_KEYS)[number])) continue;
     if (typeof v !== "string" || !v.length) continue;
-    localStorage.setItem(k, v);
+    // Never throws — the banks are far bigger than the localStorage quota, so this is a
+    // best-effort mirror over an in-memory store (see content-bank-store).
+    writeContentBankItem(k, v);
     written += 1;
     if (k === "ep-realword-bank-v1") wroteRealWordBank = true;
   }

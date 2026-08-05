@@ -17,6 +17,7 @@ import type {
   RealWordRoundNum,
   RealWordSet,
 } from "@/types/realword";
+import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
 
 const REALWORD_BANK_KEY = "ep-realword-bank-v1";
 const REALWORD_PROGRESS_KEY = "ep-realword-progress-v2";
@@ -133,7 +134,7 @@ function migrateRealWordOccupancy(raw: unknown): RealWordAdminOccupancy {
 export function loadRealWordAdminOccupancy(): RealWordAdminOccupancy {
   if (typeof window === "undefined") return emptyRealWordOccupancy();
   try {
-    const raw = localStorage.getItem(REALWORD_ADMIN_OCCUPANCY_KEY);
+    const raw = readContentBankItem(REALWORD_ADMIN_OCCUPANCY_KEY);
     if (!raw) return emptyRealWordOccupancy();
     return migrateRealWordOccupancy(JSON.parse(raw));
   } catch {
@@ -143,7 +144,7 @@ export function loadRealWordAdminOccupancy(): RealWordAdminOccupancy {
 
 function saveRealWordAdminOccupancy(next: RealWordAdminOccupancy): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(REALWORD_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
+  writeContentBankItem(REALWORD_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
 }
 
 function isV1BankShape(o: unknown): o is Record<RealWordDifficulty, RealWordSet[]> {
@@ -236,7 +237,7 @@ function parseStoredBank(raw: string | null): RealWordFullBank {
 
 export function loadRealWordBank(): RealWordFullBank {
   if (typeof window === "undefined") return defaultRealWordFullBank();
-  return parseStoredBank(localStorage.getItem(REALWORD_BANK_KEY));
+  return parseStoredBank(readContentBankItem(REALWORD_BANK_KEY));
 }
 
 export function parseRealWordBankFromJson(raw: string | null): RealWordFullBank {
@@ -277,7 +278,7 @@ export function rebuildRealWordAdminOccupancyFromBank(bank: RealWordFullBank): v
 
 export function persistRealWordBank(bank: RealWordFullBank): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(REALWORD_BANK_KEY, JSON.stringify(bank));
+  writeContentBankItem(REALWORD_BANK_KEY, JSON.stringify(bank));
   rebuildRealWordAdminOccupancyFromBank(bank);
   emitRealWordUpdate();
 }

@@ -24,6 +24,7 @@ import type {
   ReadingRoundNum,
   ReadingSet,
 } from "@/types/reading";
+import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
 
 const READING_BANK_KEY = "ep-reading-sets";
 const READING_PROGRESS_KEY = "ep-reading-progress-v3";
@@ -72,7 +73,7 @@ function migrateReadingOccupancy(raw: unknown): ReadingAdminOccupancy {
 export function loadReadingAdminOccupancy(): ReadingAdminOccupancy {
   if (typeof window === "undefined") return emptyReadingOccupancy();
   try {
-    const raw = localStorage.getItem(READING_ADMIN_OCCUPANCY_KEY);
+    const raw = readContentBankItem(READING_ADMIN_OCCUPANCY_KEY);
     if (!raw) return emptyReadingOccupancy();
     return migrateReadingOccupancy(JSON.parse(raw));
   } catch {
@@ -91,7 +92,7 @@ export function parseReadingAdminOccupancyFromJson(raw: string | null): ReadingA
 
 function saveReadingAdminOccupancy(next: ReadingAdminOccupancy): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(READING_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
+  writeContentBankItem(READING_ADMIN_OCCUPANCY_KEY, JSON.stringify(next));
 }
 
 function registerReadingAdminSlots(
@@ -247,7 +248,7 @@ function parseStoredBank(raw: string | null): ReadingFullBank {
 
 export function loadReadingBank(): ReadingFullBank {
   if (typeof window === "undefined") return defaultReadingFullBank();
-  return parseStoredBank(localStorage.getItem(READING_BANK_KEY));
+  return parseStoredBank(readContentBankItem(READING_BANK_KEY));
 }
 
 export function parseReadingBankFromJson(raw: string | null): ReadingFullBank {
@@ -277,7 +278,7 @@ export function loadReadingVisibleBank(): ReadingFullBank {
 
 export function persistReadingBank(bank: ReadingFullBank): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(READING_BANK_KEY, JSON.stringify(bank));
+  writeContentBankItem(READING_BANK_KEY, JSON.stringify(bank));
   emitReadingUpdate();
 }
 

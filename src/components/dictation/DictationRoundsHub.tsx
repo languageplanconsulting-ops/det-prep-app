@@ -9,8 +9,8 @@ import { TimedRandomLauncher } from "@/components/practice/TimedRandomLauncher";
 import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { DICTATION_ROUND_NUMBERS } from "@/lib/dictation-constants";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import {
-  ensureDictationBankReady,
   getDictationRoundStats,
   hydrateDictationProgressFromServer,
 } from "@/lib/dictation-storage";
@@ -33,8 +33,14 @@ export function DictationRoundsHub() {
   const [bankReady, setBankReady] = useState(false);
 
   useEffect(() => {
-    void ensureDictationBankReady().then(() => setBankReady(true));
-    void hydrateDictationProgressFromServer().then(() => setV((n) => n + 1));
+    // A brand-new learner has no bank in this browser yet — pull the published content first,
+    // otherwise every round card reads 0 sets. Neither call may leave the loader up on failure.
+    void ensureCanonicalPracticeContent()
+      .catch(() => {})
+      .then(() => setBankReady(true));
+    void hydrateDictationProgressFromServer()
+      .then(() => setV((n) => n + 1))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {

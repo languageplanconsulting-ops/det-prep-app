@@ -1,5 +1,6 @@
 import { SPEAKING_ADMIN_UPLOAD_ROUND, SPEAKING_ROUND_NUMBERS } from "@/lib/speaking-constants";
 import type { SpeakingAttemptReport, SpeakingQuestion, SpeakingRoundNum, SpeakingTopic } from "@/types/speaking";
+import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
 
 const TOPICS_KEY = "ep-speaking-topics";
 const LATEST_KEY = "ep-speaking-read-speak-latest";
@@ -84,12 +85,12 @@ function parseBank(raw: string | null): SpeakingTopic[] {
 /** Raw bank in localStorage (admin + all rounds). No premade defaults. */
 export function loadSpeakingBank(): SpeakingTopic[] {
   if (typeof window === "undefined") return [];
-  return parseBank(localStorage.getItem(TOPICS_KEY));
+  return parseBank(readContentBankItem(TOPICS_KEY));
 }
 
 function saveSpeakingBank(topics: SpeakingTopic[]): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(TOPICS_KEY, JSON.stringify(topics));
+  writeContentBankItem(TOPICS_KEY, JSON.stringify(topics));
   emitSpeakingUpdate();
 }
 

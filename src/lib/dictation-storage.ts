@@ -1,5 +1,6 @@
 import { dictationRowsToPatches, parseDictationBankJson } from "@/lib/dictation-admin";
 import { getCurrentBrowserUserId } from "@/lib/browser-user-scope";
+import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
 import {
   clearDictationBankJson,
   loadDictationBankJson,
@@ -46,11 +47,6 @@ function cloneDictationFullBank(bank: DictationFullBank): DictationFullBank {
   return JSON.parse(JSON.stringify(bank)) as DictationFullBank;
 }
 
-function isStorageQuotaError(e: unknown): boolean {
-  if (!(e instanceof DOMException)) return false;
-  return e.name === "QuotaExceededError" || e.name === "NS_ERROR_DOM_QUOTA_REACHED";
-}
-
 function attachDictationBankCrossTabListener(): void {
   if (typeof window === "undefined") return;
   const g = window as Window & { __epDictationBankStorageHook?: boolean };
@@ -79,7 +75,7 @@ export async function ensureDictationBankReady(): Promise<void> {
     } catch (err) {
       console.warn("[dictation-storage] IndexedDB bank load failed", err);
     }
-    const lsRaw = localStorage.getItem(DICTATION_BANK_KEY);
+    const lsRaw = readContentBankItem(DICTATION_BANK_KEY);
     if (idbJson) {
       dictationBankMemoryCache = parseStoredBank(idbJson);
     } else {
@@ -96,6 +92,11 @@ export async function ensureDictationBankReady(): Promise<void> {
 
   try {
     await dictationBankHydratePromise;
+  } catch (err) {
+    // Must not reject: the dictation hub and session gate both gate their loader on this,
+    // and a throw here used to leave them spinning forever.
+    console.warn("[dictation-storage] Bank hydrate failed — falling back to an empty bank", err);
+    if (dictationBankMemoryCache === null) dictationBankMemoryCache = emptyDictationFullBank();
   } finally {
     dictationBankHydratePromise = null;
   }
@@ -283,7 +284,7 @@ export function loadDictationBank(): DictationFullBank {
   if (dictationBankMemoryCache !== null) {
     return cloneDictationFullBank(dictationBankMemoryCache);
   }
-  return parseStoredBank(localStorage.getItem(DICTATION_BANK_KEY));
+  return parseStoredBank(readContentBankItem(DICTATION_BANK_KEY));
 }
 
 export async function persistDictationBank(bank: DictationFullBank): Promise<void> {
@@ -303,20 +304,7 @@ export async function persistDictationBank(bank: DictationFullBank): Promise<voi
 
   dictationBankMemoryCache = parseStoredBank(json);
 
-  try {
-    localStorage.setItem(DICTATION_BANK_KEY, json);
-  } catch (e) {
-    if (isStorageQuotaError(e)) {
-      try {
-        localStorage.removeItem(DICTATION_BANK_KEY);
-      } catch {
-        /* ignore */
-      }
-      emitDictationUpdate();
-      return;
-    }
-    throw e;
-  }
+  writeContentBankItem(DICTATION_BANK_KEY, json);
   emitDictationUpdate();
 }
 
@@ -578,7 +566,7 @@ export function dictationMaxForDifficulty(difficulty: DictationDifficulty): numb
 export function clearAllDictationData(): void {
   if (typeof window === "undefined") return;
   dictationBankMemoryCache = emptyDictationFullBank();
-  localStorage.setItem(DICTATION_BANK_KEY, JSON.stringify(dictationBankMemoryCache));
+  writeContentBankItem(DICTATION_BANK_KEY, JSON.stringify(dictationBankMemoryCache));
   localStorage.removeItem(DICTATION_PROGRESS_KEY);
   localStorage.removeItem(DICTATION_PROGRESS_LEGACY_KEY);
   void clearAllDictationAudioInIndexedDb();
@@ -611,7 +599,7 @@ export async function getDictationBankJsonForContentSync(): Promise<string> {
  */
 export async function reconcileDictationBankAfterContentPull(): Promise<void> {
   if (typeof window === "undefined") return;
-  const raw = localStorage.getItem(DICTATION_BANK_KEY);
+  const raw = readContentBankItem(DICTATION_BANK_KEY);
   if (!raw?.trim()) {
     dictationBankMemoryCache = emptyDictationFullBank();
     try {

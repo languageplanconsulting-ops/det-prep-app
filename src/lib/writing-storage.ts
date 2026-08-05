@@ -5,6 +5,11 @@ import type {
 } from "@/types/writing";
 import defaultTopics from "@/data/default-writing-topics.json";
 import { WRITING_ROUND_NUMBERS, type WritingRoundNum } from "@/lib/writing-constants";
+import {
+  readContentBankItem,
+  removeContentBankItem,
+  writeContentBankItem,
+} from "@/lib/content-bank-store";
 
 const TOPICS_KEY = "ep-writing-topics";
 const LATEST_KEY = "ep-writing-read-write-latest";
@@ -85,7 +90,7 @@ export function loadWritingTopics(): WritingTopic[] {
     return bundled;
   }
   try {
-    const raw = localStorage.getItem(TOPICS_KEY);
+    const raw = readContentBankItem(TOPICS_KEY);
     if (!raw) return hasBundled ? bundled : [];
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return hasBundled ? bundled : [];
@@ -116,7 +121,7 @@ export function getWritingTopicsSnapshotToken(): string {
     return JSON.stringify(bundledWritingTopics());
   }
   try {
-    return localStorage.getItem(TOPICS_KEY) ?? "__bundled__";
+    return readContentBankItem(TOPICS_KEY) ?? "__bundled__";
   } catch {
     return "__bundled__";
   }
@@ -127,7 +132,7 @@ export function saveWritingTopics(topics: WritingTopic[]): void {
     const normalized = topics
       .map(normalizeTopic)
       .filter((topic): topic is WritingTopic => Boolean(topic));
-    localStorage.setItem(TOPICS_KEY, JSON.stringify(normalized));
+    writeContentBankItem(TOPICS_KEY, JSON.stringify(normalized));
   } catch {
     /* Safari/private mode: keep bundled/default topics available. */
   }
@@ -139,7 +144,7 @@ export function saveWritingTopics(topics: WritingTopic[]): void {
  * bundled JSON (if any); with an empty bundle, the bank is empty until admin import.
  */
 export function resetWritingTopicsToDefaults(): void {
-  localStorage.removeItem(TOPICS_KEY);
+  removeContentBankItem(TOPICS_KEY);
   emitWritingTopicsUpdate();
 }
 

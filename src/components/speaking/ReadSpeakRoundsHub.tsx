@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
@@ -16,6 +17,9 @@ export function ReadSpeakRoundsHub() {
 
   useEffect(() => {
     const refresh = () => setV((n) => n + 1);
+    // A brand-new learner has no content in this browser yet; the pull fires the
+    // "ep-speaking-storage" event below, which re-renders the cards with real set counts.
+    void ensureCanonicalPracticeContent().then(refresh);
     window.addEventListener("storage", refresh);
     window.addEventListener("ep-speaking-storage", refresh);
     window.addEventListener("focus", refresh);
