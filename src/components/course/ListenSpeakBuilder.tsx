@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useSpeechCapture } from "@/hooks/useSpeechCapture";
+
 import { ClozeStage } from "@/components/course/ClozeStage";
 import { useAdminGateOverride } from "@/hooks/useAdminGateOverride";
 import { Frame } from "@/components/course/InlineExercise";
@@ -12,10 +14,6 @@ import {
   pronunciationScore,
   PRONUNCIATION_PASS,
 } from "@/lib/pronunciation-match";
-import {
-  getSpeechRecognitionCtor,
-  handleSpeechRecognitionError,
-} from "@/lib/speech-recognition-helpers";
 
 /**
  * The shape any guided speaking drill supplies. Both banks feed this: the
@@ -244,94 +242,18 @@ function RecordStage({
   onPassed: () => void;
 }) {
   const override = useAdminGateOverride();
-  const [spoken, setSpoken] = useState("");
-  const [listening, setListening] = useState(false);
-  const [speechError, setSpeechError] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
 
-  const recRef = useRef<SpeechRecognitionInstance | null>(null);
-  const listeningRef = useRef(false);
-  const finalRef = useRef("");
-  const retriesRef = useRef(0);
+  // Pronunciation drills need the WHOLE utterance, so a browser without live captions
+  // (Firefox) or one that cuts out early (Safari) used to make this drill unpassable.
+  const capture = useSpeechCapture({ minWords: Number.POSITIVE_INFINITY });
+  const { transcript: spoken, setTranscript: setSpoken, listening, transcribing } = capture;
+  const speechError = capture.error;
 
-  useEffect(() => {
-    listeningRef.current = listening;
-  }, [listening]);
-
-  const stop = useCallback(() => {
-    setListening(false);
-    try {
-      recRef.current?.stop();
-    } catch {
-      /* ignore */
-    }
-    recRef.current = null;
-  }, []);
-
-  useEffect(() => () => stop(), [stop]);
-
-  const start = useCallback(() => {
-    const Ctor = getSpeechRecognitionCtor();
-    if (!Ctor) {
-      setSpeechError(
-        "เบราว์เซอร์นี้อาจไม่รองรับการถอดเสียงสด (โดยเฉพาะ iPad Safari) — พิมพ์สิ่งที่พูดลงช่องด้านล่างแทนได้",
-      );
-      return;
-    }
-    setSpeechError(null);
+  const start = useCallback(async () => {
     setChecked(false);
-    finalRef.current = "";
-    setSpoken("");
-    retriesRef.current = 0;
-
-    const rec = new Ctor();
-    rec.lang = "en-US";
-    rec.continuous = true;
-    rec.interimResults = true;
-    recRef.current = rec;
-
-    rec.onresult = (event: SpeechRecognitionEventLike) => {
-      retriesRef.current = 0;
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const r = event.results[i];
-        const piece = r[0]?.transcript ?? "";
-        if (r.isFinal) finalRef.current = `${finalRef.current} ${piece}`.trim();
-        else interim += piece;
-      }
-      const fin = finalRef.current;
-      setSpoken(`${fin}${interim ? (fin ? " " : "") + interim : ""}`.trim());
-    };
-
-    rec.onerror = (ev: SpeechRecognitionErrorEventLike) => {
-      handleSpeechRecognitionError(ev, {
-        listeningRef,
-        networkRetriesRef: retriesRef,
-        setSpeechError,
-        setListening,
-      });
-    };
-
-    rec.onend = () => {
-      if (!listeningRef.current || recRef.current !== rec) return;
-      window.setTimeout(() => {
-        if (!listeningRef.current || recRef.current !== rec) return;
-        try {
-          rec.start();
-        } catch {
-          setListening(false);
-        }
-      }, 200);
-    };
-
-    try {
-      rec.start();
-      setListening(true);
-    } catch {
-      setSpeechError("เปิดไมโครโฟนไม่ได้ — พิมพ์สิ่งที่พูดลงช่องด้านล่างแทนได้");
-      setListening(false);
-    }
-  }, []);
+    await capture.start();
+  }, [capture]);
 
   const result = spoken.trim() ? pronunciationScore(item.essay, spoken) : null;
   const passed = result ? pronunciationPassed(result) : false;
@@ -351,15 +273,16 @@ function RecordStage({
         {!listening ? (
           <button
             type="button"
-            onClick={start}
+            onClick={() => void start()}
+            disabled={transcribing}
             className="flex-1 rounded-full bg-rose-600 py-3 text-sm font-black text-white"
           >
-            🎤 เริ่มอัดเสียง
+            {transcribing ? "กำลังถอดเสียง…" : "🎤 เริ่มอัดเสียง"}
           </button>
         ) : (
           <button
             type="button"
-            onClick={stop}
+            onClick={() => void capture.stop()}
             className="flex-1 rounded-full bg-slate-900 py-3 text-sm font-black text-white"
           >
             ⏹ หยุดอัด
@@ -444,7 +367,6 @@ function RecordStage({
               onClick={() => {
                 setChecked(false);
                 setSpoken("");
-                finalRef.current = "";
               }}
               className="mt-3 w-full rounded-full bg-slate-900 py-3 text-sm font-black text-white"
             >

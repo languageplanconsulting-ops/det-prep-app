@@ -1,12 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
-import {
-  getSpeechRecognitionCtor,
-  handleSpeechRecognitionError,
-} from "@/lib/speech-recognition-helpers";
 
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
@@ -41,103 +38,12 @@ export function SpeakAboutPhotoMock({
   const promptEn = String(content.prompt_en ?? content.instruction ?? "");
   const promptTh = String(content.prompt_th ?? content.instruction_th ?? "");
 
-  const [listening, setListening] = useState(false);
-  const [speechError, setSpeechError] = useState<string | null>(null);
-  const [transcript, setTranscript] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const recRef = useRef<SpeechRecognitionInstance | null>(null);
-  const listeningRef = useRef(false);
-  const finalTranscriptRef = useRef("");
-  const networkRetriesRef = useRef(0);
-
-  useEffect(() => {
-    listeningRef.current = listening;
-  }, [listening]);
-
-  const stopRecognition = useCallback(() => {
-    setListening(false);
-    try {
-      recRef.current?.stop();
-    } catch {
-      /* ignore */
-    }
-    recRef.current = null;
-  }, []);
-
-  useEffect(() => {
-    return () => stopRecognition();
-  }, [stopRecognition]);
-
-  const startListening = useCallback(() => {
-    const Ctor = getSpeechRecognitionCtor();
-    if (!Ctor) {
-      setSpeechError(
-        "Speech recognition is not available in this browser. Try Chrome/Edge desktop, or type your response below.",
-      );
-      return;
-    }
-    setSpeechError(null);
-    setSubmitError(null);
-    setTranscript("");
-    finalTranscriptRef.current = "";
-    networkRetriesRef.current = 0;
-
-    const rec = new Ctor();
-    rec.lang = "en-US";
-    rec.continuous = true;
-    rec.interimResults = true;
-    recRef.current = rec;
-
-    rec.onresult = (event: SpeechRecognitionEventLike) => {
-      networkRetriesRef.current = 0;
-      let interim = "";
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const r = event.results[i];
-        const piece = r[0]?.transcript ?? "";
-        if (r.isFinal) {
-          finalTranscriptRef.current = `${finalTranscriptRef.current} ${piece}`.trim();
-        } else {
-          interim += piece;
-        }
-      }
-
-      const fin = finalTranscriptRef.current;
-      setTranscript(`${fin}${interim ? (fin ? " " : "") + interim : ""}`.trim());
-    };
-
-    rec.onerror = (ev: SpeechRecognitionErrorEventLike) => {
-      handleSpeechRecognitionError(ev, {
-        listeningRef,
-        networkRetriesRef,
-        setSpeechError,
-        setListening,
-      });
-    };
-
-    rec.onend = () => {
-      // Chrome often fires onend during silence; keep going while still "listening".
-      if (!listeningRef.current || recRef.current !== rec) return;
-      window.setTimeout(() => {
-        if (!listeningRef.current || recRef.current !== rec) return;
-        try {
-          rec.start();
-        } catch {
-          setListening(false);
-        }
-      }, 200);
-    };
-
-    try {
-      rec.start();
-      setListening(true);
-    } catch {
-      setSpeechError("Could not start the microphone. Please allow mic permissions, then try again.");
-      setListening(false);
-    }
-  }, []);
+  const capture = useSpeechCapture();
+  const { transcript, setTranscript, listening, transcribing } = capture;
+  const speechError = capture.error;
 
   const wc = useMemo(() => countWords(transcript), [transcript]);
   const canSubmit = wc >= 15;
@@ -146,7 +52,7 @@ export function SpeakAboutPhotoMock({
   // for a deliberate submit — it must never leave a learner on a dead 00:00
   // timer with a disabled button.
   useTimeUpSubmit(timeUp, () => {
-    stopRecognition();
+    capture.cancel();
     onSubmit({ text: transcript.trim() });
   });
 
@@ -203,16 +109,16 @@ export function SpeakAboutPhotoMock({
         {!listening ? (
           <button
             type="button"
-            onClick={startListening}
-            disabled={submitting}
+            onClick={() => void capture.start()}
+            disabled={submitting || transcribing}
             className="border-2 border-black bg-ep-blue px-4 py-3 text-sm font-black text-white shadow-[3px_3px_0_0_#000] disabled:opacity-50"
           >
-            Start speaking (live caption)
+            {transcribing ? "Transcribing…" : "Start speaking"}
           </button>
         ) : (
           <button
             type="button"
-            onClick={stopRecognition}
+            onClick={() => void capture.stop()}
             disabled={submitting}
             className="border-2 border-black bg-red-700 px-4 py-3 text-sm font-black text-white shadow-[3px_3px_0_0_#000] disabled:opacity-50"
           >
@@ -239,9 +145,9 @@ export function SpeakAboutPhotoMock({
 
       <button
         type="button"
-        disabled={submitting || !canSubmit}
+        disabled={submitting || !canSubmit || transcribing}
         onClick={() => {
-          stopRecognition();
+          capture.cancel();
           if (!canSubmit) {
             setSubmitError("Please speak enough words (>= 15) before submitting.");
             return;
@@ -250,7 +156,7 @@ export function SpeakAboutPhotoMock({
         }}
         className="w-full rounded-[4px] border-4 border-black bg-[#004AAD] py-3 text-sm font-black text-[#FFCC00] shadow-[4px_4px_0_0_#000] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {submitting ? "ส่งคำตอบ... / Sending" : "ส่งคำตอบ / Submit"}
+        {submitting ? "ส่งคำตอบ... / Sending" : transcribing ? "กำลังถอดเสียง…" : "ส่งคำตอบ / Submit"}
       </button>
     </div>
   );

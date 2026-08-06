@@ -21,16 +21,13 @@ import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import { savePhotoSpeakReport } from "@/lib/photo-speak-storage";
+import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 import {
   fetchPhotoSpeakItems,
   invalidatePhotoSpeakItemsCache,
   photoSpeakRoundNumber,
   type PhotoSpeakItemWithProgress,
 } from "@/lib/photo-speak-api";
-import {
-  getSpeechRecognitionCtor,
-  handleSpeechRecognitionError,
-} from "@/lib/speech-recognition-helpers";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 
 type Mode = "write" | "speak";
@@ -60,6 +57,7 @@ export function PhotoAssessmentSession({
   embedded = false,
   topic,
   forceUnlockHints = false,
+  attemptSource,
 }: {
   mode: Mode;
   itemId: string;
@@ -72,6 +70,8 @@ export function PhotoAssessmentSession({
   topic?: PhotoTopic;
   /** Course context is already a paid enrollment, so the hint panel is never VIP-gated there. */
   forceUnlockHints?: boolean;
+  /** "placement" tells the report route to skip the AI-credit charge — the one-time skill test shouldn't cost the learner's monthly quota. */
+  attemptSource?: "placement";
 }) {
   const router = useRouter();
   const { effectiveTier } = useEffectiveTier();
@@ -105,105 +105,21 @@ export function PhotoAssessmentSession({
   const round = item ? photoSpeakRoundNumber(item.sort_order) : undefined;
   const latestProgress = item?.progress ?? null;
 
-  const [transcript, setTranscript] = useState("");
-  const [listening, setListening] = useState(false);
-  const [speechError, setSpeechError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [loadingPercent, setLoadingPercent] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
-  const recRef = useRef<SpeechRecognitionInstance | null>(null);
-  const listeningRef = useRef(false);
-  const finalTranscriptRef = useRef("");
-  const networkRetriesRef = useRef(0);
+  const capture = useSpeechCapture();
+  const { transcript, setTranscript, listening, transcribing } = capture;
+  const speechError = capture.error;
+
   const loadingTimerRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    listeningRef.current = listening;
-  }, [listening]);
-
-  const stopRecognition = useCallback(() => {
-    setListening(false);
-    try {
-      recRef.current?.stop();
-    } catch {
-      // ignore
-    }
-    recRef.current = null;
-  }, []);
-
-  useEffect(() => () => stopRecognition(), [stopRecognition]);
-
-  const startListening = useCallback(() => {
-    const Ctor = getSpeechRecognitionCtor();
-    if (!Ctor) {
-      setSpeechError(
-        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer and use instant scoring normally.",
-      );
-      return;
-    }
-    setSpeechError(null);
-    finalTranscriptRef.current = transcript;
-    networkRetriesRef.current = 0;
-
-    const rec = new Ctor();
-    rec.lang = "en-US";
-    rec.continuous = true;
-    rec.interimResults = true;
-    recRef.current = rec;
-
-    rec.onresult = (event: SpeechRecognitionEventLike) => {
-      networkRetriesRef.current = 0;
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const r = event.results[i];
-        const piece = r[0]?.transcript ?? "";
-        if (r.isFinal) {
-          finalTranscriptRef.current = `${finalTranscriptRef.current} ${piece}`.trim();
-        } else {
-          interim += piece;
-        }
-      }
-      const fin = finalTranscriptRef.current;
-      setTranscript(`${fin}${interim ? (fin ? " " : "") + interim : ""}`.trim());
-    };
-
-    rec.onerror = (ev: SpeechRecognitionErrorEventLike) => {
-      handleSpeechRecognitionError(ev, {
-        listeningRef,
-        networkRetriesRef,
-        setSpeechError,
-        setListening,
-      });
-    };
-
-    rec.onend = () => {
-      if (!listeningRef.current || recRef.current !== rec) return;
-      window.setTimeout(() => {
-        if (!listeningRef.current || recRef.current !== rec) return;
-        try {
-          rec.start();
-        } catch {
-          setListening(false);
-        }
-      }, 200);
-    };
-
-    try {
-      rec.start();
-      setListening(true);
-    } catch {
-      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for instant scoring.");
-      setListening(false);
-    }
-  }, [transcript]);
-
   const resetAnswer = () => {
-    stopRecognition();
+    capture.cancel();
     setTranscript("");
-    finalTranscriptRef.current = "";
     setSubmitError(null);
-    setSpeechError(null);
+    capture.setError(null);
   };
 
   const startLoading = () => {
@@ -264,6 +180,7 @@ export function PhotoAssessmentSession({
           // Same rule everywhere the hint panel appears: the course (topic known) and
           // standalone write/speak-about-photo practice (topic unknown, so the full list).
           targetVocabulary: hintsUnlocked ? (topic ? targetVocabularyForTopic(topic) : targetVocabularyAll()) : undefined,
+          source: attemptSource,
         }),
       });
       const data = (await res.json()) as { error?: string } & Partial<PhotoSpeakAttemptReport>;
@@ -429,15 +346,16 @@ export function PhotoAssessmentSession({
             {!listening ? (
               <button
                 type="button"
-                onClick={startListening}
+                onClick={() => void capture.start()}
+                disabled={transcribing}
                 className="border-2 border-black bg-ep-yellow px-3 py-2 text-xs font-black uppercase shadow-[2px_2px_0_0_#000]"
               >
-                Start live transcription
+                {transcribing ? "กำลังถอดเสียง…" : "Start recording"}
               </button>
             ) : (
               <button
                 type="button"
-                onClick={stopRecognition}
+                onClick={() => void capture.stop()}
                 className="border-2 border-black bg-red-600 px-3 py-2 text-xs font-black uppercase text-white shadow-[2px_2px_0_0_#000]"
               >
                 Stop recording

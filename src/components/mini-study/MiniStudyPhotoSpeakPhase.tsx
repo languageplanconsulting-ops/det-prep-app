@@ -2,16 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
+import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import type { MiniStudySpeakPhotoSession } from "@/lib/mini-study/content";
 import { savePhotoSpeakReport } from "@/lib/photo-speak-storage";
-import {
-  getSpeechRecognitionCtor,
-  handleSpeechRecognitionError,
-} from "@/lib/speech-recognition-helpers";
 import type { PhotoSpeakAttemptReport } from "@/types/photo-speak";
 
 type Props = { session: MiniStudySpeakPhotoSession };
@@ -25,121 +22,41 @@ const TIMER_SECS = 60;
 export function MiniStudyPhotoSpeakPhase({ session }: Props) {
   const router = useRouter();
   const { photo } = session;
-  const [transcript, setTranscript] = useState("");
-  const [listening, setListening] = useState(false);
-  const [speechError, setSpeechError] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const recRef = useRef<SpeechRecognitionInstance | null>(null);
-  const listeningRef = useRef(false);
-  const finalTranscriptRef = useRef("");
-  const networkRetriesRef = useRef(0);
 
-  useEffect(() => {
-    listeningRef.current = listening;
-  }, [listening]);
+  const capture = useSpeechCapture();
+  const { transcript, setTranscript, listening, transcribing } = capture;
+  const speechError = capture.error;
 
-  const stopRecognition = useCallback(() => {
-    setListening(false);
+  /** Stop + transcribe, and clear the countdown. Used by the button and by time-up. */
+  const stopAndTranscribe = useCallback(async () => {
     setSecondsLeft(0);
-    try {
-      recRef.current?.stop();
-    } catch {
-      /* ignore */
-    }
-    recRef.current = null;
-  }, []);
-
-  useEffect(() => {
-    return () => stopRecognition();
-  }, [stopRecognition]);
+    await capture.stop();
+  }, [capture]);
 
   useEffect(() => {
     if (!listening) return;
     const id = window.setInterval(() => {
       setSecondsLeft((s) => {
         if (s <= 1) {
-          window.setTimeout(() => stopRecognition(), 0);
+          window.setTimeout(() => void stopAndTranscribe(), 0);
           return 0;
         }
         return s - 1;
       });
     }, 1000);
     return () => window.clearInterval(id);
-  }, [listening, stopRecognition]);
+  }, [listening, stopAndTranscribe]);
 
-  const startListening = useCallback(() => {
-    const Ctor = getSpeechRecognitionCtor();
-    if (!Ctor) {
-      setSpeechError(
-        "Live speech-to-text may be limited in this browser. You can still type your answer below and submit for instant scoring.",
-      );
-      return;
-    }
-    setSpeechError(null);
-    setTranscript("");
-    finalTranscriptRef.current = "";
-    networkRetriesRef.current = 0;
+  const startListening = useCallback(async () => {
+    await capture.start();
     setSecondsLeft(TIMER_SECS);
-
-    const rec = new Ctor();
-    rec.lang = "en-US";
-    rec.continuous = true;
-    rec.interimResults = true;
-    recRef.current = rec;
-
-    rec.onresult = (event: SpeechRecognitionEventLike) => {
-      networkRetriesRef.current = 0;
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const r = event.results[i];
-        const piece = r[0]?.transcript ?? "";
-        if (r.isFinal) {
-          finalTranscriptRef.current = `${finalTranscriptRef.current} ${piece}`.trim();
-        } else {
-          interim += piece;
-        }
-      }
-      const fin = finalTranscriptRef.current;
-      setTranscript(`${fin}${interim ? (fin ? " " : "") + interim : ""}`.trim());
-    };
-
-    rec.onerror = (ev: SpeechRecognitionErrorEventLike) => {
-      handleSpeechRecognitionError(ev, {
-        listeningRef,
-        networkRetriesRef,
-        setSpeechError,
-        setListening,
-        onFatal: () => setSecondsLeft(0),
-      });
-    };
-
-    rec.onend = () => {
-      if (!listeningRef.current || recRef.current !== rec) return;
-      window.setTimeout(() => {
-        if (!listeningRef.current || recRef.current !== rec) return;
-        try {
-          rec.start();
-        } catch {
-          setListening(false);
-          setSecondsLeft(0);
-        }
-      }, 200);
-    };
-
-    try {
-      rec.start();
-      setListening(true);
-    } catch {
-      setSpeechError("Could not start the microphone. You can type below instead.");
-      setListening(false);
-      setSecondsLeft(0);
-    }
-  }, []);
+  }, [capture]);
 
   const wc = countWords(transcript);
-  const canSubmit = wc >= 15 && !submitting && !listening;
+  const canSubmit = wc >= 15 && !submitting && !listening && !transcribing;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -216,15 +133,16 @@ export function MiniStudyPhotoSpeakPhase({ session }: Props) {
           {!listening ? (
             <button
               type="button"
-              onClick={startListening}
+              onClick={() => void startListening()}
+              disabled={transcribing}
               className="rounded-lg bg-[#004AAD] px-5 py-3 text-sm font-semibold text-[#FFCC00] shadow-sm hover:shadow-md transition"
             >
-              🎙 Start speaking
+              {transcribing ? "กำลังถอดเสียง…" : "🎙 Start speaking"}
             </button>
           ) : (
             <button
               type="button"
-              onClick={stopRecognition}
+              onClick={() => void stopAndTranscribe()}
               className="rounded-lg bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:shadow-md transition"
             >
               ■ Stop ({secondsLeft}s)

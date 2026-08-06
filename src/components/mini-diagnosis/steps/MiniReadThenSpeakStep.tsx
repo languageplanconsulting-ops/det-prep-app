@@ -2,11 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  getSpeechRecognitionCtor,
-  handleSpeechRecognitionError,
-} from "@/lib/speech-recognition-helpers";
 import { PrimaryButton, SoftCard } from "@/components/mini-diagnosis/steps/ui";
+import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 
 const MIN_WORDS = 15;
 
@@ -33,94 +30,12 @@ export function MiniReadThenSpeakStep({
   const promptEn = String(content.prompt_en ?? content.instruction ?? "");
   const promptTh = String(content.prompt_th ?? content.instruction_th ?? "");
 
-  const [listening, setListening] = useState(false);
-  const [speechError, setSpeechError] = useState<string | null>(null);
-  const [transcript, setTranscript] = useState("");
-
-  const recRef = useRef<SpeechRecognitionInstance | null>(null);
-  const listeningRef = useRef(false);
-  const finalTranscriptRef = useRef("");
-  const networkRetriesRef = useRef(0);
-
-  useEffect(() => {
-    listeningRef.current = listening;
-  }, [listening]);
-
-  const stopRecognition = useCallback(() => {
-    setListening(false);
-    try {
-      recRef.current?.stop();
-    } catch {
-      /* ignore */
-    }
-    recRef.current = null;
-  }, []);
-
-  useEffect(() => () => stopRecognition(), [stopRecognition]);
-
-  const startListening = useCallback(() => {
-    const Ctor = getSpeechRecognitionCtor();
-    if (!Ctor) {
-      setSpeechError("เบราว์เซอร์นี้ไม่รองรับไมค์ — พิมพ์คำตอบในช่องด้านล่างแทนได้เลย");
-      return;
-    }
-    setSpeechError(null);
-
-    const rec = new Ctor();
-    rec.lang = "en-US";
-    rec.continuous = true;
-    rec.interimResults = true;
-    recRef.current = rec;
-    networkRetriesRef.current = 0;
-
-    rec.onresult = (event: SpeechRecognitionEventLike) => {
-      networkRetriesRef.current = 0;
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const r = event.results[i];
-        const piece = r[0]?.transcript ?? "";
-        if (r.isFinal) {
-          finalTranscriptRef.current = `${finalTranscriptRef.current} ${piece}`.trim();
-        } else {
-          interim += piece;
-        }
-      }
-      const fin = finalTranscriptRef.current;
-      setTranscript(`${fin}${interim ? (fin ? " " : "") + interim : ""}`.trim());
-    };
-
-    rec.onerror = (ev: SpeechRecognitionErrorEventLike) => {
-      handleSpeechRecognitionError(ev, {
-        listeningRef,
-        networkRetriesRef,
-        setSpeechError,
-        setListening,
-      });
-    };
-
-    rec.onend = () => {
-      if (!listeningRef.current || recRef.current !== rec) return;
-      window.setTimeout(() => {
-        if (!listeningRef.current || recRef.current !== rec) return;
-        try {
-          rec.start();
-        } catch {
-          setListening(false);
-        }
-      }, 200);
-    };
-
-    try {
-      rec.start();
-      setListening(true);
-    } catch {
-      setSpeechError("เปิดไมค์ไม่สำเร็จ — อนุญาตไมโครโฟน หรือพิมพ์คำตอบแทนได้");
-      setListening(false);
-    }
-  }, []);
+  const capture = useSpeechCapture({ minWords: MIN_WORDS });
+  const { transcript, setTranscript, listening, transcribing } = capture;
+  const speechError = capture.error;
 
   const wc = useMemo(() => countWords(transcript), [transcript]);
-  const canSubmit = wc >= MIN_WORDS;
+  const canSubmit = wc >= MIN_WORDS && !transcribing;
   const goalPct = Math.min(100, Math.round((wc / MIN_WORDS) * 100));
 
   return (
@@ -149,8 +64,8 @@ export function MiniReadThenSpeakStep({
       <SoftCard className="text-center">
         <button
           type="button"
-          disabled={submitting}
-          onClick={listening ? stopRecognition : startListening}
+          disabled={submitting || transcribing}
+          onClick={() => void (listening ? capture.stop() : capture.start())}
           aria-label={listening ? "หยุดพูด" : "เริ่มพูด"}
           className={`relative mx-auto flex h-24 w-24 items-center justify-center rounded-full text-white shadow-lg transition active:scale-95 disabled:opacity-40 ${
             listening ? "bg-rose-500" : "bg-ep-blue"
@@ -169,7 +84,13 @@ export function MiniReadThenSpeakStep({
           )}
         </button>
         <p className="mt-3 text-sm font-semibold text-slate-700">
-          {listening ? "กำลังฟังอยู่… พูดต่อได้เลย 🎙️" : wc > 0 ? "พูดเพิ่มหรือแก้ข้อความด้านล่างได้" : "แตะเพื่อเริ่มพูด"}
+          {transcribing
+            ? "กำลังถอดเสียงเป็นข้อความ…"
+            : listening
+              ? "กำลังอัดเสียงอยู่… พูดต่อได้เลย 🎙️"
+              : wc > 0
+                ? "พูดเพิ่มหรือแก้ข้อความด้านล่างได้"
+                : "แตะเพื่อเริ่มพูด"}
         </p>
       </SoftCard>
 
@@ -209,7 +130,7 @@ export function MiniReadThenSpeakStep({
       <PrimaryButton
         disabled={submitting || !canSubmit}
         onClick={() => {
-          stopRecognition();
+          capture.cancel();
           onSubmit({ text: transcript.trim() });
         }}
       >

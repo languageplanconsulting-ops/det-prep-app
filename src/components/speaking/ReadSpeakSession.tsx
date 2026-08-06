@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SpeakingHintPanel } from "@/components/speaking/SpeakingHintPanel";
 import {
   SpeakingNotesCard,
@@ -13,21 +13,14 @@ import { TeacherSamplePlayer } from "@/components/speaking-samples/TeacherSample
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
+import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
-import {
-  pickMediaRecorderMimeType,
-  transcribeAudioBlobClient,
-} from "@/lib/client-audio-transcribe";
 import { pullContentBankSnapshotFromSupabase } from "@/lib/content-bank-sync";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import { finalizeLatestStudySession } from "@/lib/study-tracker";
-import {
-  getSpeechRecognitionCtor,
-  handleSpeechRecognitionError,
-} from "@/lib/speech-recognition-helpers";
 import {
   getSpeakingQuestionLatestScore,
   getSpeakingVisibleTopicById,
@@ -99,31 +92,22 @@ export function ReadSpeakSession({
   const [selectedQuestion, setSelectedQuestion] = useState<SpeakingQuestion | null>(
     null,
   );
-  const [transcript, setTranscript] = useState("");
-  const [listening, setListening] = useState(false);
-  const [speechError, setSpeechError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [questionScoreTick, setQuestionScoreTick] = useState(0);
+
+  const capture = useSpeechCapture();
+  const { transcript, setTranscript, listening, transcribing } = capture;
+  const speechError = capture.error;
+  const startListening = capture.start;
+  const stopRecognition = capture.cancel;
+  const stopAndTranscribe = capture.stop;
 
   const isVip = effectiveTier === "vip";
   const notesApi = useSpeakingPatternNotes(
     selectedQuestion ? `${topicId}:${selectedQuestion.id}` : null,
   );
   const [editingNotes, setEditingNotes] = useState(false);
-
-  const [transcribing, setTranscribing] = useState(false);
-
-  const recRef = useRef<SpeechRecognitionInstance | null>(null);
-  const listeningRef = useRef(false);
-  const finalTranscriptRef = useRef("");
-  const networkRetriesRef = useRef(0);
-  // Audio is captured in parallel with the browser's live-caption API, which is missing in
-  // Firefox and unreliable in Safari — when it yields nothing, the recording is transcribed
-  // server-side so the learner is never left with an empty box and a dead submit button.
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     if (phase !== "prep-run") return;
@@ -138,199 +122,14 @@ export function ReadSpeakSession({
   }, [phase, secondsLeft]);
 
   useEffect(() => {
-    listeningRef.current = listening;
-  }, [listening]);
-
-  useEffect(() => {
     const bump = () => setQuestionScoreTick((n) => n + 1);
     window.addEventListener("ep-speaking-storage", bump);
-    window.addEventListener("storage", bump);
+    window.addEventListener("focus", bump);
     return () => {
       window.removeEventListener("ep-speaking-storage", bump);
-      window.removeEventListener("storage", bump);
+      window.removeEventListener("focus", bump);
     };
   }, []);
-
-  // The course journey already fixed which question this exercise runs —
-  // skip straight to prep instead of showing the "choose a question" step.
-  useEffect(() => {
-    if (!topic || !presetQuestionId || phase !== "pick-question") return;
-    const q = topic.questions.find((x) => x.id === presetQuestionId);
-    if (!q) return;
-    setSelectedQuestion(q);
-    setPhase("prep-pick");
-  }, [topic, presetQuestionId, phase]);
-
-  /** Pure teardown — releases the mic and the caption stream, transcribes nothing. */
-  const stopRecognition = useCallback(() => {
-    setListening(false);
-    try {
-      recRef.current?.stop();
-    } catch {
-      /* ignore */
-    }
-    recRef.current = null;
-    try {
-      if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
-    } catch {
-      /* ignore */
-    }
-    mediaRecorderRef.current = null;
-    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
-    mediaStreamRef.current = null;
-  }, []);
-
-  useEffect(() => {
-    return () => stopRecognition();
-  }, [stopRecognition]);
-
-  const startListening = useCallback(async () => {
-    setSpeechError(null);
-    setTranscript("");
-    finalTranscriptRef.current = "";
-    networkRetriesRef.current = 0;
-    audioChunksRef.current = [];
-
-    // Record the audio itself first. This is the path that always works; live captions
-    // below are a bonus the browser may or may not provide.
-    let recordingOk = false;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaStreamRef.current = stream;
-      const mimeType = pickMediaRecorderMimeType();
-      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
-      mr.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-      mr.start();
-      mediaRecorderRef.current = mr;
-      recordingOk = true;
-    } catch {
-      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
-      mediaStreamRef.current = null;
-    }
-
-    const Ctor = getSpeechRecognitionCtor();
-    if (!Ctor) {
-      if (!recordingOk) {
-        setSpeechError(
-          "เปิดไมโครโฟนไม่ได้ครับ — อนุญาตให้เว็บใช้ไมค์ในเบราว์เซอร์ แล้วลองใหม่ หรือพิมพ์คำตอบลงในกล่องด้านล่างก็ส่งตรวจได้เหมือนกัน",
-        );
-        return;
-      }
-      // No live captions in this browser (Firefox has none, Safari is unreliable) — we still
-      // record, and transcribe on stop. Not an error, so tell them what will happen.
-      setSpeechError(null);
-      setListening(true);
-      return;
-    }
-
-    const rec = new Ctor();
-    rec.lang = "en-US";
-    rec.continuous = true;
-    rec.interimResults = true;
-    recRef.current = rec;
-
-    rec.onresult = (event: SpeechRecognitionEventLike) => {
-      networkRetriesRef.current = 0;
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const r = event.results[i];
-        const piece = r[0]?.transcript ?? "";
-        if (r.isFinal) {
-          finalTranscriptRef.current = `${finalTranscriptRef.current} ${piece}`.trim();
-        } else {
-          interim += piece;
-        }
-      }
-      const fin = finalTranscriptRef.current;
-      setTranscript(`${fin}${interim ? (fin ? " " : "") + interim : ""}`.trim());
-    };
-
-    rec.onerror = (ev: SpeechRecognitionErrorEventLike) => {
-      handleSpeechRecognitionError(ev, {
-        listeningRef,
-        networkRetriesRef,
-        setSpeechError,
-        setListening,
-      });
-    };
-
-    rec.onend = () => {
-      if (!listeningRef.current || recRef.current !== rec) return;
-      window.setTimeout(() => {
-        if (!listeningRef.current || recRef.current !== rec) return;
-        try {
-          rec.start();
-        } catch {
-          setListening(false);
-        }
-      }, 200);
-    };
-
-    try {
-      rec.start();
-      setListening(true);
-    } catch {
-      // Captions refused to start. The recording is still running, so this is recoverable:
-      // stay in listening mode and let the server transcribe on stop.
-      recRef.current = null;
-      if (recordingOk) {
-        setListening(true);
-      } else {
-        setSpeechError(
-          "เปิดไมโครโฟนไม่ได้ครับ — อนุญาตให้เว็บใช้ไมค์ในเบราว์เซอร์ แล้วลองใหม่ หรือพิมพ์คำตอบลงในกล่องด้านล่างก็ส่งตรวจได้เหมือนกัน",
-        );
-        setListening(false);
-      }
-    }
-  }, []);
-
-  /**
-   * What the stop button calls. Ends capture, and if live captions produced nothing usable
-   * (no caption support, or Safari cut out early) transcribes the recording server-side —
-   * the same /api/speech-transcribe the lessons and interactive-speaking recorders use.
-   * Without this the transcript box stays empty and "ส่งคำตอบ" can never enable.
-   */
-  const stopAndTranscribe = useCallback(async () => {
-    const mr = mediaRecorderRef.current;
-    const captured = await new Promise<Blob | null>((resolve) => {
-      if (!mr || mr.state !== "recording") {
-        resolve(null);
-        return;
-      }
-      mr.onstop = () => {
-        const chunks = audioChunksRef.current;
-        resolve(chunks.length ? new Blob(chunks, { type: chunks[0]!.type || "audio/webm" }) : null);
-      };
-      try {
-        mr.stop();
-      } catch {
-        resolve(null);
-      }
-    });
-
-    stopRecognition();
-
-    const spoken = finalTranscriptRef.current.trim();
-    if (countWords(spoken) >= 15 || !captured) return;
-
-    setTranscribing(true);
-    setSpeechError(null);
-    try {
-      const text = await transcribeAudioBlobClient(captured);
-      if (text) {
-        finalTranscriptRef.current = text;
-        setTranscript(text);
-      } else {
-        setSpeechError("ถอดเสียงไม่ได้ครับ — ลองอัดใหม่ หรือพิมพ์คำตอบลงในกล่องด้านล่างแล้วส่งได้เลย");
-      }
-    } catch {
-      setSpeechError("ถอดเสียงไม่สำเร็จครับ — ลองอัดใหม่อีกครั้ง หรือพิมพ์คำตอบลงในกล่องด้านล่างแล้วส่งได้เลย");
-    } finally {
-      setTranscribing(false);
-    }
-  }, [stopRecognition]);
 
   if (!topic) {
     return (
@@ -359,7 +158,6 @@ export function ReadSpeakSession({
     setPhase("prep-pick");
     setEditingNotes(false);
     setTranscript("");
-    finalTranscriptRef.current = "";
     stopRecognition();
   };
 
