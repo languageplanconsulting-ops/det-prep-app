@@ -317,3 +317,69 @@ export async function sendBugReplyToReporter(params: {
   }
   return result;
 }
+
+/**
+ * Nightly content self-heal summary. Only sent when the run actually did or
+ * needed something — a clean night stays silent so the alert keeps its meaning.
+ */
+export async function sendContentHealthReportToAdmin(params: {
+  scanned: number;
+  healthy: number;
+  repaired: Array<{ area: string; ref: string; url: string; reason: string }>;
+  unrepaired: Array<{ area: string; ref: string; url: string; reason: string }>;
+  waitingReports: Array<{ id: string; reporterEmail: string; subject: string }>;
+}): Promise<{ ok: boolean; error?: string }> {
+  const to = supportEmailDefault();
+
+  const list = (rows: Array<{ area: string; ref: string; url: string; reason: string }>) =>
+    rows.length === 0
+      ? "<p>—</p>"
+      : `<ul>${rows
+          .slice(0, 40)
+          .map(
+            (r) =>
+              `<li><strong>${escapeHtml(r.area)}</strong> — ${escapeHtml(r.ref)}<br/>` +
+              `<code>${escapeHtml(r.url.slice(0, 120))}</code><br/>${escapeHtml(r.reason)}</li>`,
+          )
+          .join("")}${rows.length > 40 ? `<li>…and ${rows.length - 40} more</li>` : ""}</ul>`;
+
+  const waiting =
+    params.waitingReports.length === 0
+      ? "<p>No open bug reports look related.</p>"
+      : `<ul>${params.waitingReports
+          .map(
+            (r) =>
+              `<li>${escapeHtml(r.reporterEmail)} — ${escapeHtml(r.subject)} ` +
+              `(report ${escapeHtml(r.id)})</li>`,
+          )
+          .join("")}</ul>`;
+
+  const html = `
+    <p><strong>Content self-heal — nightly run</strong></p>
+    <p>Checked ${params.scanned} media URLs · ${params.healthy} healthy ·
+       <strong>${params.repaired.length} repaired automatically</strong> ·
+       ${params.unrepaired.length} need a human.</p>
+    <h3>Repaired automatically</h3>
+    ${list(params.repaired)}
+    <h3>Could not repair — needs you</h3>
+    ${list(params.unrepaired)}
+    <h3>Customers possibly waiting on this</h3>
+    <p>These bug reports are still open and mention media. If the repairs above cover
+       them, reply in Admin → Bug reports and set the status to <strong>Fixed</strong>
+       — that sends the customer the update.</p>
+    ${waiting}
+    <hr/>
+    <p>สรุปการซ่อมเนื้อหาอัตโนมัติประจำคืน — ซ่อมเองได้ ${params.repaired.length} รายการ ·
+       ต้องให้คนดู ${params.unrepaired.length} รายการ</p>
+  `;
+
+  const result = await sendResendEmail({
+    to,
+    subject: `[English Plan] Content self-heal — ${params.repaired.length} repaired, ${params.unrepaired.length} need review`,
+    html,
+  });
+  if (!result.ok) {
+    console.error("[notifications] sendContentHealthReportToAdmin failed:", result.error);
+  }
+  return result;
+}

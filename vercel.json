@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/repair-subscriptions",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/content-health",
+      "schedule": "30 3 * * *"
     }
   ]
 }
