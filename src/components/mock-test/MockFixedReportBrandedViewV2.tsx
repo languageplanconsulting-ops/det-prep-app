@@ -300,7 +300,10 @@ export function MockFixedReportBrandedViewV2({
                   />
                   <div>
                     <p className="text-sm font-semibold">
-                      ขั้น {s.step_index + 1} · {humanizeTask(s.task_type)}
+                      {/* step_index is already 1-based (1…20) — adding 1 here
+                          numbered every report 2…21 and pointed learners at the
+                          wrong question when it said "review this step". */}
+                      ขั้น {s.step_index} · {humanizeTask(s.task_type)}
                     </p>
                     {review ? (
                       <p className="text-[11px] font-semibold text-amber-600">ควรทบทวน</p>
