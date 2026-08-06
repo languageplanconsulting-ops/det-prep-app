@@ -11,6 +11,7 @@ import { ConversationSummaryFromInteractiveMock } from "@/components/mock-test/q
 import { InteractiveConversationMock } from "@/components/mock-test/questions/InteractiveConversationMock";
 import { InteractiveConversationMcqMock } from "@/components/mock-test/questions/InteractiveConversationMcqMock";
 import { MockInteractiveSpeakingSession } from "@/components/mock-test/questions/MockInteractiveSpeakingSession";
+import { MockPhoto } from "@/components/mock-test/questions/MockPhoto";
 import { MockTestDictation } from "@/components/mock-test/questions/MockTestDictation";
 import { MockTestFillInBlanks } from "@/components/mock-test/questions/MockTestFillInBlanks";
 import { ReadThenSpeakMock } from "@/components/mock-test/questions/MockReadThenSpeakFixed";
@@ -564,8 +565,7 @@ function WritePhoto({
       <p className="text-sm font-bold">{String(content.instruction_th ?? "")}</p>
       <p className="text-xs text-neutral-600">{String(content.instruction ?? "")}</p>
       {url ? (
-        // eslint-disable-next-line @next/next/no-img-element -- dynamic admin URLs
-        <img src={url} alt="" className="max-h-72 w-full rounded-[4px] border-4 border-black object-cover" />
+        <MockPhoto url={url} className="max-h-72 w-full rounded-[4px] border-4 border-black object-cover" />
       ) : null}
       <textarea
         value={text}

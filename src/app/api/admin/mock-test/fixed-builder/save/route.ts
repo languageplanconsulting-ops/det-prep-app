@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
 import { parseFixedMockUploadJson } from "@/lib/mock-test/fixed-upload";
+import { ensureMockImageBucket, mirrorImagesInContent } from "@/lib/mock-test/mirror-image";
 import { synthesizeEnglishSpeechWithDeepgram } from "@/lib/deepgram-synthesize";
 import { synthesizeEnglishSpeechWithGemini } from "@/lib/gemini-synthesize";
 import { synthesizeEnglishSpeechWithInworld } from "@/lib/inworld-synthesize";
@@ -117,6 +118,28 @@ async function enrichInteractiveConversationTts(
   }
 }
 
+/**
+ * Photo steps get their image copied into our own bucket at save time, so a
+ * mock never depends on a third-party image host staying up mid-test.
+ */
+async function mirrorPhotoStepImages(
+  rows: Array<{ task_type: string; content: Record<string, unknown> }>,
+) {
+  const photoRows = rows.filter(
+    (r) => r.task_type === "write_about_photo" || r.task_type === "speak_about_photo",
+  );
+  if (photoRows.length === 0) return;
+  try {
+    await ensureMockImageBucket();
+  } catch (err) {
+    console.error("[fixed-builder/save] could not ensure mock-images bucket", err);
+    return;
+  }
+  for (const row of photoRows) {
+    row.content = await mirrorImagesInContent(row.content ?? {});
+  }
+}
+
 export async function POST(req: Request) {
   const auth = await ensureAdmin();
   if ("error" in auth) return auth.error;
@@ -133,6 +156,9 @@ export async function POST(req: Request) {
   if (parsed.error) return NextResponse.json({ error: parsed.error }, { status: 400 });
   await enrichInteractiveConversationTts(
     parsed.rows.map((r) => r as unknown as { step_index: number; task_type: string; content: Record<string, unknown> }),
+  );
+  await mirrorPhotoStepImages(
+    parsed.rows.map((r) => r as unknown as { task_type: string; content: Record<string, unknown> }),
   );
 
   const { data: setRow, error: setErr } = await supabase

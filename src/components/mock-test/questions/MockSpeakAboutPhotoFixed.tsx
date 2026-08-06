@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
+import { MockPhoto } from "@/components/mock-test/questions/MockPhoto";
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 import { SpeechPunctuationNote } from "@/components/speaking/SpeechPunctuationNote";
 import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
@@ -40,7 +41,6 @@ export function SpeakAboutPhotoMock({
   const promptTh = String(content.prompt_th ?? content.instruction_th ?? "");
 
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   const capture = useSpeechCapture();
   const { transcript, setTranscript, listening, transcribing } = capture;
@@ -57,45 +57,11 @@ export function SpeakAboutPhotoMock({
     onSubmit({ text: transcript.trim() });
   });
 
-  useEffect(() => {
-    setImageLoaded(false);
-  }, [imageUrl]);
-
-  useEffect(() => {
-    if (!imageUrl) onImageReady?.();
-  }, [imageUrl, onImageReady]);
-
   return (
     <div className="space-y-4">
       {photoType ? <p className="text-xs font-black uppercase tracking-wide text-[#004AAD]">{photoType}</p> : null}
 
-      {imageUrl ? (
-        <div className="relative">
-          {!imageLoaded ? (
-            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[4px] border-4 border-black bg-white/90">
-              <div className="flex items-center gap-2 text-sm font-black text-[#004AAD]">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#004AAD] border-t-transparent" />
-                Loading photo...
-              </div>
-            </div>
-          ) : null}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={imageUrl}
-            alt=""
-            onLoad={() => {
-              setImageLoaded(true);
-              onImageReady?.();
-            }}
-            onError={() => setImageLoaded(false)}
-            className="max-h-64 w-full rounded-[4px] border-4 border-black object-cover"
-          />
-        </div>
-      ) : (
-        <div className="rounded-[4px] border-4 border-dashed border-black bg-neutral-50 p-6 text-center text-sm font-bold text-neutral-600">
-          Photo not provided / ไม่มีรูป
-        </div>
-      )}
+      <MockPhoto url={imageUrl} onReady={onImageReady} />
 
       <div className="space-y-2">
         {promptTh ? <p className="text-sm font-bold text-neutral-900">{promptTh}</p> : null}
