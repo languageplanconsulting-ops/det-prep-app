@@ -16,6 +16,10 @@ import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
+import {
+  pickMediaRecorderMimeType,
+  transcribeAudioBlobClient,
+} from "@/lib/client-audio-transcribe";
 import { pullContentBankSnapshotFromSupabase } from "@/lib/content-bank-sync";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
@@ -44,6 +48,7 @@ export function ReadSpeakSession({
   onComplete,
   embedded = false,
   forceUnlockHints = false,
+  attemptSource,
 }: {
   topicId: string;
   round: SpeakingRoundNum;
@@ -57,6 +62,8 @@ export function ReadSpeakSession({
   onComplete?: (report: SpeakingAttemptReport) => void;
   /** Drop the page-level back links and outer chrome when hosted inside another shell (the course session modal). */
   embedded?: boolean;
+  /** "placement" tells the report route to skip the AI-credit charge — the one-time skill test shouldn't cost the learner's monthly quota. */
+  attemptSource?: "placement";
 }) {
   const router = useRouter();
   const { effectiveTier } = useEffectiveTier();
@@ -105,10 +112,18 @@ export function ReadSpeakSession({
   );
   const [editingNotes, setEditingNotes] = useState(false);
 
+  const [transcribing, setTranscribing] = useState(false);
+
   const recRef = useRef<SpeechRecognitionInstance | null>(null);
   const listeningRef = useRef(false);
   const finalTranscriptRef = useRef("");
   const networkRetriesRef = useRef(0);
+  // Audio is captured in parallel with the browser's live-caption API, which is missing in
+  // Firefox and unreliable in Safari — when it yields nothing, the recording is transcribed
+  // server-side so the learner is never left with an empty box and a dead submit button.
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     if (phase !== "prep-run") return;
@@ -146,6 +161,7 @@ export function ReadSpeakSession({
     setPhase("prep-pick");
   }, [topic, presetQuestionId, phase]);
 
+  /** Pure teardown — releases the mic and the caption stream, transcribes nothing. */
   const stopRecognition = useCallback(() => {
     setListening(false);
     try {
@@ -154,24 +170,60 @@ export function ReadSpeakSession({
       /* ignore */
     }
     recRef.current = null;
+    try {
+      if (mediaRecorderRef.current?.state === "recording") mediaRecorderRef.current.stop();
+    } catch {
+      /* ignore */
+    }
+    mediaRecorderRef.current = null;
+    mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+    mediaStreamRef.current = null;
   }, []);
 
   useEffect(() => {
     return () => stopRecognition();
   }, [stopRecognition]);
 
-  const startListening = useCallback(() => {
-    const Ctor = getSpeechRecognitionCtor();
-    if (!Ctor) {
-      setSpeechError(
-        "Live speech-to-text may be limited in this browser or on iPad Safari. You can still type your answer in the transcript box and use instant scoring normally.",
-      );
-      return;
-    }
+  const startListening = useCallback(async () => {
     setSpeechError(null);
     setTranscript("");
     finalTranscriptRef.current = "";
     networkRetriesRef.current = 0;
+    audioChunksRef.current = [];
+
+    // Record the audio itself first. This is the path that always works; live captions
+    // below are a bonus the browser may or may not provide.
+    let recordingOk = false;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      const mimeType = pickMediaRecorderMimeType();
+      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+      mr.start();
+      mediaRecorderRef.current = mr;
+      recordingOk = true;
+    } catch {
+      mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
+      mediaStreamRef.current = null;
+    }
+
+    const Ctor = getSpeechRecognitionCtor();
+    if (!Ctor) {
+      if (!recordingOk) {
+        setSpeechError(
+          "เปิดไมโครโฟนไม่ได้ครับ — อนุญาตให้เว็บใช้ไมค์ในเบราว์เซอร์ แล้วลองใหม่ หรือพิมพ์คำตอบลงในกล่องด้านล่างก็ส่งตรวจได้เหมือนกัน",
+        );
+        return;
+      }
+      // No live captions in this browser (Firefox has none, Safari is unreliable) — we still
+      // record, and transcribe on stop. Not an error, so tell them what will happen.
+      setSpeechError(null);
+      setListening(true);
+      return;
+    }
 
     const rec = new Ctor();
     rec.lang = "en-US";
@@ -220,10 +272,65 @@ export function ReadSpeakSession({
       rec.start();
       setListening(true);
     } catch {
-      setSpeechError("Could not start the microphone. On iPad/Safari, you can type your answer instead and still submit for instant scoring.");
-      setListening(false);
+      // Captions refused to start. The recording is still running, so this is recoverable:
+      // stay in listening mode and let the server transcribe on stop.
+      recRef.current = null;
+      if (recordingOk) {
+        setListening(true);
+      } else {
+        setSpeechError(
+          "เปิดไมโครโฟนไม่ได้ครับ — อนุญาตให้เว็บใช้ไมค์ในเบราว์เซอร์ แล้วลองใหม่ หรือพิมพ์คำตอบลงในกล่องด้านล่างก็ส่งตรวจได้เหมือนกัน",
+        );
+        setListening(false);
+      }
     }
   }, []);
+
+  /**
+   * What the stop button calls. Ends capture, and if live captions produced nothing usable
+   * (no caption support, or Safari cut out early) transcribes the recording server-side —
+   * the same /api/speech-transcribe the lessons and interactive-speaking recorders use.
+   * Without this the transcript box stays empty and "ส่งคำตอบ" can never enable.
+   */
+  const stopAndTranscribe = useCallback(async () => {
+    const mr = mediaRecorderRef.current;
+    const captured = await new Promise<Blob | null>((resolve) => {
+      if (!mr || mr.state !== "recording") {
+        resolve(null);
+        return;
+      }
+      mr.onstop = () => {
+        const chunks = audioChunksRef.current;
+        resolve(chunks.length ? new Blob(chunks, { type: chunks[0]!.type || "audio/webm" }) : null);
+      };
+      try {
+        mr.stop();
+      } catch {
+        resolve(null);
+      }
+    });
+
+    stopRecognition();
+
+    const spoken = finalTranscriptRef.current.trim();
+    if (countWords(spoken) >= 15 || !captured) return;
+
+    setTranscribing(true);
+    setSpeechError(null);
+    try {
+      const text = await transcribeAudioBlobClient(captured);
+      if (text) {
+        finalTranscriptRef.current = text;
+        setTranscript(text);
+      } else {
+        setSpeechError("ถอดเสียงไม่ได้ครับ — ลองอัดใหม่ หรือพิมพ์คำตอบลงในกล่องด้านล่างแล้วส่งได้เลย");
+      }
+    } catch {
+      setSpeechError("ถอดเสียงไม่สำเร็จครับ — ลองอัดใหม่อีกครั้ง หรือพิมพ์คำตอบลงในกล่องด้านล่างแล้วส่งได้เลย");
+    } finally {
+      setTranscribing(false);
+    }
+  }, [stopRecognition]);
 
   if (!topic) {
     return (
@@ -321,6 +428,7 @@ export function ReadSpeakSession({
           speakingRound: round,
           redeemed: redeemedForSameQuestion,
           previousScore160: redeemedForSameQuestion ? previousQuestionScore?.score160 ?? null : null,
+          source: attemptSource,
         }),
       });
       const data = (await res.json()) as { error?: string } & Partial<SpeakingAttemptReport>;
@@ -525,22 +633,27 @@ export function ReadSpeakSession({
           {speechError ? <p className="mt-3 text-sm font-semibold text-red-600">{speechError}</p> : null}
 
           <div className="mt-4">
-            {!listening ? (
+            {transcribing ? (
+              <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 py-3.5 text-base font-bold text-slate-600">
+                <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-slate-400" />
+                กำลังถอดเสียงเป็นข้อความ…
+              </div>
+            ) : !listening ? (
               <button
                 type="button"
-                onClick={startListening}
+                onClick={() => void startListening()}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-white hover:opacity-90"
               >
-                🎙️ เริ่มพูด (live caption)
+                🎙️ เริ่มพูด
               </button>
             ) : (
               <button
                 type="button"
-                onClick={stopRecognition}
+                onClick={() => void stopAndTranscribe()}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 py-3.5 text-base font-bold text-white hover:opacity-90"
               >
                 <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-white" />
-                ⏺ กำลังฟัง… แตะเพื่อหยุด
+                ⏺ กำลังอัดเสียง… แตะเพื่อหยุด
               </button>
             )}
           </div>
@@ -556,7 +669,7 @@ export function ReadSpeakSession({
             />
           </label>
           <p className="mt-1 text-[11px] text-slate-400">
-            live caption อาจไม่ครบบน iPad/Safari — พิมพ์/แก้เพิ่มได้
+            บางเบราว์เซอร์จะยังไม่ขึ้นข้อความระหว่างพูด — กด “หยุด” แล้วระบบจะถอดเสียงให้เอง · แก้ไขเพิ่มได้ก่อนส่ง
           </p>
 
           <div className="mt-3">
@@ -604,11 +717,11 @@ export function ReadSpeakSession({
           <StickyExamCTA>
             <button
               type="button"
-              disabled={!canSubmit || submitting}
+              disabled={!canSubmit || submitting || transcribing}
               onClick={submitWithGemini}
               className="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90 disabled:opacity-50"
             >
-              {submitting ? "กำลังตรวจ…" : "ส่งคำตอบ →"}
+              {submitting ? "กำลังตรวจ…" : transcribing ? "กำลังถอดเสียง…" : "ส่งคำตอบ →"}
             </button>
           </StickyExamCTA>
         </div>
