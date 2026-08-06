@@ -65,12 +65,26 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!step) return NextResponse.json({ error: "Step not found in set" }, { status: 400 });
 
   const prev = Array.isArray(session.responses) ? session.responses : [];
-  if (prev.some((r: { step_index?: number }) => r.step_index === body.stepIndex)) {
-    return NextResponse.json({ error: "Step already submitted" }, { status: 400 });
-  }
   const sessionTargets = (session.targets ?? {}) as Record<string, unknown>;
   const singleStepPreview = sessionTargets.singleStepPreview === true;
   const singleStepIndex = Number(sessionTargets.singleStepIndex ?? 0);
+
+  // Retake: a finished run reopened on just the steps a bug spoiled (a photo
+  // that never loaded, say). Those steps already have an answer, so replacing
+  // it is the whole point — everything else stays exactly as they left it.
+  const retakeSteps = Array.isArray(sessionTargets.retakeSteps)
+    ? (sessionTargets.retakeSteps as unknown[]).map(Number).filter((n) => n >= 1 && n <= 20)
+    : [];
+  const isRetake = retakeSteps.length > 0;
+  if (isRetake && !retakeSteps.includes(body.stepIndex)) {
+    return NextResponse.json(
+      { error: `This run is only open for step${retakeSteps.length > 1 ? "s" : ""} ${retakeSteps.join(", ")}` },
+      { status: 409 },
+    );
+  }
+  if (!isRetake && prev.some((r: { step_index?: number }) => r.step_index === body.stepIndex)) {
+    return NextResponse.json({ error: "Step already submitted" }, { status: 400 });
+  }
 
   // AI-graded steps commit instantly and grade in the BACKGROUND so the
   // learner's sequence never waits on an LLM (grading used to run inline here
@@ -92,25 +106,42 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         step,
       });
 
-  const next = [
-    ...prev,
-    {
-      step_index: body.stepIndex,
-      task_type: step.task_type,
-      answer: body.answer,
-      score,
-      ...(backgroundGrade ? { ai_pending: true } : {}),
-    },
-  ];
+  const entry = {
+    step_index: body.stepIndex,
+    task_type: step.task_type,
+    answer: body.answer,
+    score,
+    ...(backgroundGrade ? { ai_pending: true } : {}),
+  };
+  const next = isRetake
+    ? [
+        ...prev.filter((r: { step_index?: number }) => r.step_index !== body.stepIndex),
+        entry,
+      ].sort((a, b) => Number(a.step_index) - Number(b.step_index))
+    : [...prev, entry];
+
+  // A retake ends when the last reopened step is answered, not at 20 answers —
+  // the other 19 were already there when it reopened.
+  const retakeRemaining = retakeSteps.filter((s) => s !== body.stepIndex);
   const isComplete = singleStepPreview
     ? body.stepIndex === singleStepIndex && next.length >= 1
-    : next.length >= 20;
+    : isRetake
+      ? retakeRemaining.length === 0
+      : next.length >= 20;
+
   const patch: Record<string, unknown> = {
     responses: next,
     current_step: singleStepPreview
       ? body.stepIndex
-      : Math.min(20, body.stepIndex + 1),
+      : isRetake
+        ? (retakeRemaining[0] ?? body.stepIndex)
+        : Math.min(20, body.stepIndex + 1),
   };
+  if (isRetake) {
+    // Clearing the list on the final step returns the run to a normal finished
+    // attempt, so nothing downstream has to know a retake ever happened.
+    patch.targets = { ...sessionTargets, retakeSteps: retakeRemaining };
+  }
   if (isComplete && !singleStepPreview) {
     patch.status = "completed";
     patch.completed_at = new Date().toISOString();

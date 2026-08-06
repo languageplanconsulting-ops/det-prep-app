@@ -15,7 +15,7 @@ import {
 } from "@/lib/access-control";
 import { getPackageSummary } from "@/lib/package-copy";
 import { getNonApiReminderSnapshot } from "@/lib/non-api-practice-usage";
-import { mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
+import { countBillableMockFixedSessions, mockFixedMonthStartIso } from "@/lib/mock-test/mock-fixed-quota";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import { loadStats, tierProgress } from "@/lib/gamification";
 
@@ -282,14 +282,16 @@ export default function ProfilePage() {
           .maybeSingle(),
         supabase
           .from("mock_fixed_sessions")
-          .select("id")
+          .select("targets")
           .eq("user_id", user.id)
           .gte("started_at", mockFixedMonthStartIso()),
       ]);
 
       setExpiresAt((profile?.tier_expires_at as string | null) ?? null);
       setAiUsed(Math.max(0, Number(profile?.ai_credits_used ?? 0)));
-      setMockUsed((sessions ?? []).length);
+      // Match the quota API: comped runs (admin reset, voided-for-redo, previews)
+      // must not read as a spent credit here either.
+      setMockUsed(countBillableMockFixedSessions(sessions));
       setMockPlanRemaining(null);
       setAiLimitOverride(null);
       setMockTotalVisibleLimit(null);

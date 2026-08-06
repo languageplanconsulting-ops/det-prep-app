@@ -23,10 +23,18 @@ const PENDING_GRADE_GRACE_MS = 45_000;
  */
 async function resolveReady(
   req: Request,
-  session: { id: string; status: string; completed_at?: string | null },
+  session: { id: string; status: string; completed_at?: string | null; responses?: unknown },
   hasResult: boolean,
 ): Promise<boolean> {
-  if (hasResult) return true;
+  // A retake (a finished run reopened on the steps a bug spoiled) leaves the
+  // PREVIOUS report row in place, so "a row exists" no longer means "the report
+  // reflects these answers". Any ungraded step means keep waiting, or the
+  // learner is shown the stale scores they were told we'd fix.
+  const responses = Array.isArray(session.responses)
+    ? (session.responses as Array<{ score?: unknown; ai_pending?: unknown }>)
+    : [];
+  const hasPendingGrade = responses.some((r) => typeof r?.score !== "number" || r?.ai_pending === true);
+  if (hasResult && !hasPendingGrade) return true;
   if (session.status !== "completed") return false;
 
   // Cheap path: all grades landed — just materialize the result row.
@@ -49,7 +57,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ sessionI
 
     const { data: session, error: sessionErr } = await supabase
       .from("mock_fixed_sessions")
-      .select("id,user_id,targets,status,completed_at")
+      .select("id,user_id,targets,status,completed_at,responses")
       .eq("id", sessionId)
       .maybeSingle();
     if (sessionErr || !session) {
@@ -80,7 +88,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ sessionI
 
   const { data: session, error: sessionErr } = await supabase
     .from("mock_fixed_sessions")
-    .select("id,user_id,targets,status,completed_at")
+    .select("id,user_id,targets,status,completed_at,responses")
     .eq("id", sessionId)
     .eq("user_id", user.id)
     .maybeSingle();

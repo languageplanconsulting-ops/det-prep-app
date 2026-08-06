@@ -145,12 +145,26 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   // Soft journey rail: all 20 steps in true order, with done/current/locked state.
   const railSteps = useMemo(() => {
     const items = (session?.mock_fixed_set_items ?? []).slice().sort((a, b) => a.step_index - b.step_index);
+    // On a retake only the reopened steps are outstanding — every other step was
+    // answered on the original run, so the rail must not imply a full redo.
+    const retake = session?.targets?.retakeSteps;
+    const retakeSteps = Array.isArray(retake) ? retake.map(Number) : [];
     return items.map((it) => ({
       stepIndex: it.step_index,
       icon: TASK_ICON[it.task_type] ?? "•",
       label: TASK_LABELS[it.task_type]?.th ?? "แบบฝึก",
       state:
-        it.step_index < stepIndex ? "done" : it.step_index === stepIndex ? "current" : "locked",
+        retakeSteps.length > 0
+          ? it.step_index === stepIndex
+            ? "current"
+            : retakeSteps.includes(it.step_index)
+              ? "locked"
+              : "done"
+          : it.step_index < stepIndex
+            ? "done"
+            : it.step_index === stepIndex
+              ? "current"
+              : "locked",
     }));
   }, [session, stepIndex]);
 
@@ -431,7 +445,11 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     //     authoritative (blocking reload).
     //   - Admin-gated for now (verify a full run, then flip `instantAdvance`
     //     to all users by dropping the `soft` check).
-    const instantAdvance = soft && current.step_index !== 13;
+    // A retake jumps between reopened steps (2 → 7 → done), so "next step is
+    // this one + 1" is wrong. Let the server say where to go.
+    const retakeSteps = session?.targets?.retakeSteps;
+    const isRetakeRun = Array.isArray(retakeSteps) && retakeSteps.length > 0;
+    const instantAdvance = soft && current.step_index !== 13 && !isRetakeRun;
     if (!instantAdvance) {
       await load("adapting");
       return;

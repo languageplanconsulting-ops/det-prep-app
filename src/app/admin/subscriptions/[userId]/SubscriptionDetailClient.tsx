@@ -443,6 +443,78 @@ export function SubscriptionDetailClient() {
     }
   };
 
+  const [voidingRun, setVoidingRun] = useState(false);
+  /**
+   * Two shapes of goodwill redo:
+   *  - specific steps → reopens their latest run on just those questions, every
+   *    other answer kept, and the report is recalculated when they finish.
+   *  - no steps → closes an unfinished run so the set starts over at step 1.
+   */
+  const voidMockRunForRedo = async () => {
+    const raw = window.prompt(
+      "Which questions should they redo? Enter step numbers, e.g. 2,7\n\n" +
+        "Their other answers stay as they are and the report is recalculated afterwards.\n" +
+        "Leave EMPTY to instead void an unfinished run so the whole set restarts at step 1.",
+      "",
+    );
+    if (raw === null) return;
+    const steps = raw
+      .split(/[^0-9]+/)
+      .map((s) => Number(s))
+      .filter((n) => Number.isInteger(n) && n >= 1 && n <= 20);
+
+    const confirmMsg = steps.length
+      ? `Reopen question${steps.length === 1 ? "" : "s"} ${steps.join(", ")} on this learner's latest mock run? They keep every other answer, and their report updates once they resubmit.`
+      : "Close this learner's unfinished mock run so the set starts over at step 1? Progress on that run is dropped and it stops counting against their quota. Finished attempts and reports are untouched.";
+    if (!window.confirm(confirmMsg)) return;
+
+    setVoidingRun(true);
+    try {
+      const res = await fetch(`/api/admin/subscriptions/${userId}/redo-mock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          steps,
+          reason: steps.length
+            ? `Admin goodwill retake of step(s) ${steps.join(", ")}`
+            : "Admin goodwill redo — run spoiled",
+        }),
+      });
+      const json = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        voided?: Array<{ stoppedAtStep: number }>;
+        reopened?: { steps: number[] };
+      };
+      if (!res.ok) {
+        throw new Error(json.error ?? "Could not reopen the run");
+      }
+      if (json.reopened) {
+        push({
+          type: "success",
+          titleEn: `Question(s) ${json.reopened.steps.join(", ")} reopened — they'll land straight on them next time they open that test.`,
+          titleTh: `เปิดข้อ ${json.reopened.steps.join(", ")} ให้ทำใหม่แล้ว — ผู้เรียนจะเข้าไปเจอข้อนั้นทันที`,
+        });
+      } else {
+        const count = json.voided?.length ?? 0;
+        push({
+          type: "success",
+          titleEn: `${count} unfinished run${count === 1 ? "" : "s"} voided — they can start the set fresh.`,
+          titleTh: `ปิดการสอบที่ค้างไว้ ${count} ชุด — ผู้เรียนเริ่มชุดเดิมใหม่ได้แล้ว`,
+        });
+      }
+      void load();
+    } catch (e) {
+      push({
+        type: "error",
+        titleEn: e instanceof Error ? e.message : "Could not reopen the run",
+        titleTh: "เปิดให้ทำใหม่ไม่สำเร็จ",
+      });
+    } finally {
+      setVoidingRun(false);
+    }
+  };
+
   const grantExtraCredits = async (kind: "feedback" | "mock") => {
     setAiSaving(true);
     try {
@@ -1185,6 +1257,22 @@ export function SubscriptionDetailClient() {
               </button>
               <p className="text-[11px] font-bold text-neutral-500">
                 Clears this month&apos;s mock count (keeps attempt history). Auto-renews on the 1st anyway.
+              </p>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3 border-t-2 border-neutral-200 pt-4">
+              <button
+                type="button"
+                onClick={() => void voidMockRunForRedo()}
+                disabled={voidingRun}
+                className="rounded-[4px] border-4 border-black bg-white px-3 py-2 text-sm font-black shadow-[3px_3px_0_0_#000] disabled:opacity-50"
+              >
+                {voidingRun ? "Reopening…" : "Let them redo questions / ให้ทำข้อที่เสียใหม่"}
+              </button>
+              <p className="text-[11px] font-bold text-neutral-500">
+                For questions spoiled by a bug or outage. Enter the step numbers (e.g. 2,7) to
+                reopen just those on their latest run — every other answer is kept and the report
+                recalculates. Leave it empty to void an unfinished run so the set restarts at step 1.
               </p>
             </div>
 
