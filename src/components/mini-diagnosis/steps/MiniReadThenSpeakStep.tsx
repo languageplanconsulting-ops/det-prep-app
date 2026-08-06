@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { PrimaryButton, SoftCard } from "@/components/mini-diagnosis/steps/ui";
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
+import { SpeechPunctuationNote } from "@/components/speaking/SpeechPunctuationNote";
 
 const MIN_WORDS = 15;
 
@@ -119,6 +120,7 @@ export function MiniReadThenSpeakStep({
           placeholder="Your English appears here…"
           className="mt-2 w-full rounded-xl border-2 border-slate-200 bg-slate-50 p-3 text-base leading-relaxed text-slate-900 outline-none transition focus:border-ep-blue focus:bg-white"
         />
+        <SpeechPunctuationNote className="mt-2" />
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
           <div
             className={`h-full rounded-full transition-all duration-300 ${canSubmit ? "bg-emerald-500" : "bg-ep-blue"}`}

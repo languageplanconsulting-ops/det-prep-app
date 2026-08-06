@@ -11,6 +11,7 @@ import {
 } from "@/components/speaking/SpeakingPatternNotes";
 import { TeacherSamplePlayer } from "@/components/speaking-samples/TeacherSamplePlayer";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
+import { SpeechPunctuationNote } from "@/components/speaking/SpeechPunctuationNote";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
@@ -469,6 +470,7 @@ export function ReadSpeakSession({
           <p className="mt-1 text-[11px] text-slate-400">
             บางเบราว์เซอร์จะยังไม่ขึ้นข้อความระหว่างพูด — กด “หยุด” แล้วระบบจะถอดเสียงให้เอง · แก้ไขเพิ่มได้ก่อนส่ง
           </p>
+          <SpeechPunctuationNote className="mt-2" />
 
           <div className="mt-3">
             <div className="flex items-center justify-between text-xs font-semibold">

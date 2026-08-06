@@ -22,6 +22,7 @@ import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import { finalizeLatestStudySession } from "@/lib/study-tracker";
 import { savePhotoSpeakReport } from "@/lib/photo-speak-storage";
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
+import { SpeechPunctuationNote } from "@/components/speaking/SpeechPunctuationNote";
 import {
   fetchPhotoSpeakItems,
   invalidatePhotoSpeakItemsCache,
@@ -372,6 +373,7 @@ export function PhotoAssessmentSession({
             className="mt-4 w-full border-2 border-black bg-white px-3 py-2 text-sm"
           />
           <p className="ep-stat mt-2 text-xs text-neutral-500">Word count: {countWords(transcript)}</p>
+          <SpeechPunctuationNote className="mt-2" />
 
           {soft ? (
             <StickyExamCTA>

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
+import { SpeechPunctuationNote } from "@/components/speaking/SpeechPunctuationNote";
 import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
 
 function countWords(text: string): number {
@@ -130,6 +131,8 @@ export function ReadThenSpeakMock({
       <p className="text-xs font-mono text-neutral-500">
         {wc} words · need at least 15 to submit
       </p>
+
+      <SpeechPunctuationNote />
 
       <button
         type="button"

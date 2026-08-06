@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SpeechPunctuationNote } from "@/components/speaking/SpeechPunctuationNote";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
@@ -174,6 +175,7 @@ export function InteractiveSpeakingSession({
   startWithRedeem = false,
   onComplete,
   embedded = false,
+  attemptSource,
 }: {
   scenario: InteractiveSpeakingScenario;
   /** When URL has `?redeem=1`, show last score and pulse the start button. */
@@ -181,6 +183,8 @@ export function InteractiveSpeakingSession({
   /** When set (course journey), stay in place and hand the report back. */
   onComplete?: (report: InteractiveSpeakingAttemptReport) => void;
   embedded?: boolean;
+  /** "placement" tells /start and /report to skip the AI-credit reservation/charge — the one-time skill test shouldn't cost the learner's monthly quota. */
+  attemptSource?: "placement";
 }) {
   const router = useRouter();
   const { isAdmin, previewEligible, effectiveTier } = useEffectiveTier();
@@ -594,6 +598,7 @@ export function InteractiveSpeakingSession({
           body: JSON.stringify({
             attemptId,
             scenarioId: scenario.id,
+            source: attemptSource,
           }),
         });
         const data = (await res.json().catch(() => ({}))) as {
@@ -616,6 +621,7 @@ export function InteractiveSpeakingSession({
     }
   }, [
     attemptId,
+    attemptSource,
     beginTurn,
     scenario.id,
     scenario.starterQuestionEn,
@@ -698,6 +704,7 @@ export function InteractiveSpeakingSession({
             prepMinutes: 0,
             redeemed: startWithRedeem && Boolean(lastAttempt),
             previousScore160: startWithRedeem ? lastAttempt?.score160 ?? null : null,
+            source: attemptSource,
             turns: nextCompleted.map((c, i) => ({
               turnIndex: i + 1,
               questionEn: c.questionEn,
@@ -711,7 +718,7 @@ export function InteractiveSpeakingSession({
           throw new Error(typeof data.error === "string" ? data.error : "Grading failed.");
         }
         const report = data as InteractiveSpeakingAttemptReport;
-        if (vipGate.isVip && vipGate.userId) {
+        if (vipGate.isVip && vipGate.userId && !attemptSource) {
           vipGate.recordSuccessfulAiSubmit(1);
         }
         try {
@@ -764,6 +771,7 @@ export function InteractiveSpeakingSession({
     }
   }, [
     attemptId,
+    attemptSource,
     beginTurn,
     fetchNextQuestion,
     router,
@@ -779,11 +787,6 @@ export function InteractiveSpeakingSession({
       void runTurnSubmission();
     };
   }, [runTurnSubmission]);
-
-  const finishRecordingEarly = () => {
-    setRecLeft(0);
-    stopRecordingAfterAnswer();
-  };
 
   const onAnswerTranscriptChange = useCallback((value: string) => {
     transcriptRef.current = value;
@@ -1078,17 +1081,9 @@ export function InteractiveSpeakingSession({
                       className="mt-2 w-full border-2 border-black bg-neutral-50 p-3 ep-stat text-sm text-neutral-900 placeholder:text-neutral-400 read-only:opacity-80"
                     />
                   </label>
+                  <SpeechPunctuationNote className="mt-3" />
                 </div>
 
-                {phase === "record" && listening && !transcribing ? (
-                  <button
-                    type="button"
-                    onClick={finishRecordingEarly}
-                    className="mt-4 w-full border-2 border-black bg-white py-2 text-sm font-bold shadow-[2px_2px_0_0_#000]"
-                  >
-                    I’m done speaking
-                  </button>
-                ) : null}
 
                 {phase === "review" ? (
                   <div className="mt-4">
