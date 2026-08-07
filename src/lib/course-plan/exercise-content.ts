@@ -205,8 +205,14 @@ const SPEAK_PHOTO_FOR_KEY: Record<string, string> = {
   "sp-objects": "spd-city",
 };
 
+/**
+ * EASY tier only — deliberately no m-/h- fallback here, unlike the grammar
+ * drills. msp-people/hsp-people etc. are real AI-graded production exercises
+ * (min_score_group at 110/120, same shape as write-photo's mwp-/hwp-people),
+ * not a reuse of the easy guided drill — routing them here by mistake would
+ * silently swap out their score gate for a 100%-pass_ratio guided drill.
+ */
 export function speakPhotoDrillFor(exerciseKey: string): SpeakPhotoDrillItem | null {
-  const base = exerciseKey.replace(/^[mh]/, "");
-  const id = SPEAK_PHOTO_FOR_KEY[exerciseKey] ?? SPEAK_PHOTO_FOR_KEY[base];
+  const id = SPEAK_PHOTO_FOR_KEY[exerciseKey];
   return id ? speakPhotoDrillById(id) : null;
 }

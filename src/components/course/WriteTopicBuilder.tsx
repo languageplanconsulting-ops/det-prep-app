@@ -38,11 +38,11 @@ export function WriteTopicBuilder({
   return (
     <Frame title={titleTh} onCancel={onCancel} progress={stage === "build" ? progress : undefined}>
       <div className="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
-        <p className="text-[10px] font-black uppercase tracking-wide text-[#004AAD]">
+        <p className="text-[13px] font-bold uppercase tracking-wide text-[#004AAD]">
           {pattern.label} · {pattern.labelTh}
         </p>
-        <p className="mt-1 text-[12px] font-black text-slate-700">{item.topic}</p>
-        <p className="mt-0.5 text-[11px] text-slate-500">{item.topicTh}</p>
+        <p className="mt-1 text-[12px] font-bold text-slate-700">{item.topic}</p>
+        <p className="mt-0.5 text-[13px] text-slate-500">{item.topicTh}</p>
       </div>
 
       {stage === "build" ? (
@@ -56,30 +56,30 @@ export function WriteTopicBuilder({
       ) : (
         <div>
           <div className="mt-3 rounded-2xl bg-[#FFF9E6] p-3.5 ring-1 ring-[#FFCC00]">
-            <p className="text-[13px] font-black text-[#8A6A00]">🔑 สิ่งที่ต้องจำไปใช้กับโจทย์อื่น</p>
+            <p className="text-[13px] font-bold text-[#8A6A00]">🔑 สิ่งที่ต้องจำไปใช้กับโจทย์อื่น</p>
             <p className="mt-1 text-[12px] leading-6 text-slate-700">
               อย่าจำเนื้อหา — <strong>จำโครงประโยค</strong> ด้านล่างนี้แทน
               เพราะโจทย์จริงจะเปลี่ยนหัวข้อไปเรื่อย ๆ แต่โครงเดิมใช้ได้ทุกครั้ง
             </p>
           </div>
 
-          <p className="mt-3 text-[11px] font-black uppercase tracking-wide text-slate-400">คำตอบเต็ม</p>
+          <p className="mt-3 text-[13px] font-bold uppercase tracking-wide text-slate-400">คำตอบเต็ม</p>
           <p className="mt-1 rounded-xl bg-white p-3.5 text-[14px] leading-7 text-slate-800 ring-1 ring-slate-300">
             {item.essay}
           </p>
 
-          <p className="mt-3 text-[11px] font-black uppercase tracking-wide text-slate-400">คำแปลไทย</p>
+          <p className="mt-3 text-[13px] font-bold uppercase tracking-wide text-slate-400">คำแปลไทย</p>
           <p className="mt-1 rounded-xl bg-slate-50 p-3.5 text-[13px] leading-7 text-slate-700 ring-1 ring-slate-200">
             {item.essayTh}
           </p>
 
-          <p className="mt-3 text-[11px] font-black uppercase tracking-wide text-slate-400">
+          <p className="mt-3 text-[13px] font-bold uppercase tracking-wide text-slate-400">
             แต่ละประโยคทำหน้าที่อะไร
           </p>
           <div className="mt-1 space-y-1.5">
             {item.moves.map((mv, i) => (
               <div key={i} className="rounded-xl bg-white p-2.5 ring-1 ring-slate-200">
-                <p className="text-[10px] font-black uppercase tracking-wide text-[#004AAD]">
+                <p className="text-[13px] font-bold uppercase tracking-wide text-[#004AAD]">
                   {i + 1}. {mv.label}
                 </p>
                 <p className="mt-0.5 text-[12px] leading-6 text-slate-700">{mv.en}</p>
@@ -87,14 +87,14 @@ export function WriteTopicBuilder({
             ))}
           </div>
 
-          <p className="mt-3 text-[11px] font-black uppercase tracking-wide text-slate-400">
+          <p className="mt-3 text-[13px] font-bold uppercase tracking-wide text-slate-400">
             โครงที่ต้องจำ ({pattern.labelTh})
           </p>
           <div className="mt-1 space-y-1.5">
             {pattern.steps.map((s, i) => (
               <div key={i} className="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-200">
                 <p className="font-mono text-[12px] leading-6 text-slate-900">{s.en}</p>
-                <p className="mt-0.5 text-[11px] text-slate-500">{s.th}</p>
+                <p className="mt-0.5 text-[13px] text-slate-500">{s.th}</p>
               </div>
             ))}
           </div>
@@ -102,7 +102,7 @@ export function WriteTopicBuilder({
           <button
             type="button"
             onClick={() => onDone(1, 1)}
-            className={`mt-4 w-full rounded-full py-3 text-sm font-black text-white ${
+            className={`mt-4 w-full rounded-full py-3 text-sm font-bold text-white ${
               hasNext ? "bg-[#004AAD]" : "bg-emerald-600"
             }`}
           >

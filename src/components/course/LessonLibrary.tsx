@@ -112,12 +112,12 @@ export function LessonLibrary({
           placeholder="ค้นหาชื่อบทเรียน…"
           className="min-w-0 flex-1 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 outline-none ring-1 ring-transparent transition focus:bg-white focus:ring-slate-300"
         />
-        <span className="shrink-0 text-[11px] font-black text-slate-400">
+        <span className="shrink-0 text-[13px] font-bold text-slate-400">
           {totalDone}/{totalLessons} บทเรียน
         </span>
       </div>
 
-      <p className="rounded-xl bg-slate-50 px-3 py-2 text-[11px] text-slate-500 ring-1 ring-slate-200">
+      <p className="rounded-xl bg-slate-50 px-3 py-2 text-[13px] text-slate-500 ring-1 ring-slate-200">
         แสดงบทเรียนที่แผนของคุณใช้เพื่อไปถึง{" "}
         <strong className="text-slate-700">{goalScore} คะแนน</strong> —
         บทที่เกินระดับคุณแล้วจะอยู่ใต้หัวข้อ “ไม่อยู่ในแผน” แต่เปิดดูได้เสมอ
@@ -191,10 +191,10 @@ export function LessonLibrary({
                   {block.emoji}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-black text-slate-800">
+                  <span className="block truncate text-[13px] font-bold text-slate-800">
                     {block.titleTh}
                   </span>
-                  <span className="block truncate text-[10px] text-slate-500">
+                  <span className="block truncate text-[13px] text-slate-500">
                     {block.subtitleTh}
                   </span>
                   <span className="mt-1 flex items-center gap-2">
@@ -204,12 +204,12 @@ export function LessonLibrary({
                         style={{ width: `${pct}%` }}
                       />
                     </span>
-                    <span className="text-[10px] font-bold text-slate-500">
+                    <span className="text-[13px] font-bold text-slate-500">
                       {done}/{block.lessons.length}
                     </span>
                   </span>
                 </span>
-                <span className="shrink-0 text-[10px] text-slate-400">{open ? "▲" : "▼"}</span>
+                <span className="shrink-0 text-[13px] text-slate-400">{open ? "▲" : "▼"}</span>
               </button>
 
               {open && (
@@ -219,7 +219,7 @@ export function LessonLibrary({
                     return (
                       <li key={l.id} className="flex items-center gap-2.5 px-3.5 py-2.5">
                         <span
-                          className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-black ${
+                          className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[13px] font-bold ${
                             isDone
                               ? "bg-emerald-500 text-white"
                               : "bg-white text-slate-300 ring-1 ring-slate-200"
@@ -236,7 +236,7 @@ export function LessonLibrary({
                           >
                             {l.title}
                           </span>
-                          <span className="block truncate text-[10px] text-slate-400">
+                          <span className="block truncate text-[13px] text-slate-400">
                             {l.chapterTitle}
                             {l.durationSeconds
                               ? ` · ${Math.max(1, Math.round(l.durationSeconds / 60))} นาที`
@@ -246,7 +246,7 @@ export function LessonLibrary({
 
                         {l.downloads.length > 0 && (
                           <span
-                            className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 ring-1 ring-slate-200"
+                            className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[13px] font-bold text-slate-500 ring-1 ring-slate-200"
                             title={`${l.downloads.length} ไฟล์แนบ`}
                           >
                             📄 {l.downloads.length}
@@ -256,12 +256,12 @@ export function LessonLibrary({
                         {l.bunnyVideoGuid ? (
                           <Link
                             href={`/course/duolingo-fast-track?lesson=${l.id}`}
-                            className="shrink-0 rounded-full bg-[#004AAD] px-3 py-1 text-[10px] font-black text-white transition hover:bg-[#003a87]"
+                            className="shrink-0 rounded-full bg-[#004AAD] px-3 py-1 text-[13px] font-bold text-white transition hover:bg-[#003a87]"
                           >
                             ดู
                           </Link>
                         ) : (
-                          <span className="shrink-0 rounded-full bg-slate-200 px-3 py-1 text-[10px] font-black text-slate-500">
+                          <span className="shrink-0 rounded-full bg-slate-200 px-3 py-1 text-[13px] font-bold text-slate-500">
                             ยังไม่มี
                           </span>
                         )}
@@ -271,19 +271,19 @@ export function LessonLibrary({
 
                   {block.extra.length > 0 && (
                     <li className="bg-white/60 px-3.5 py-2.5">
-                      <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">
+                      <p className="text-[13px] font-bold uppercase tracking-wide text-slate-400">
                         ไม่อยู่ในแผน ({block.extra.length}) · เปิดดูได้
                       </p>
                       <ul className="mt-1.5 space-y-1">
                         {block.extra.map((l) => (
                           <li key={l.id} className="flex items-center gap-2.5">
-                            <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-slate-400">
+                            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-slate-400">
                               {l.title}
                             </span>
                             {l.bunnyVideoGuid ? (
                               <Link
                                 href={`/course/duolingo-fast-track?lesson=${l.id}`}
-                                className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-black text-slate-500 transition hover:bg-slate-200"
+                                className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[13px] font-bold text-slate-500 transition hover:bg-slate-200"
                               >
                                 ดู
                               </Link>

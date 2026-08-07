@@ -6,391 +6,259 @@
 <title>แพ็กเกจ IELTS All Skills — English Plan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Trirong:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-<style>html,body{margin:0;padding:0;}</style>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Trirong:wght@500;600&display=swap" rel="stylesheet">
+<style>html,body{margin:0;padding:0;background:#fff;}</style>
 </head>
 <body>
 
 <!-- ==========================================================================
-     PASTE BLOCK STARTS HERE (from <style> down to the closing </div> of .lp-doc)
-     ทุกอย่าง scope ไว้ใต้ .lp-doc จึงไม่ชนกับธีมเดิมของ Thinkific
-     สีแบรนด์: #004AAD (น้ำเงิน) · #FFCC00 (เหลือง)
+     วางลง Thinkific ได้เลย: คัดลอกตั้งแต่ <style> จนถึง </div> ปิด .lp
+     ไม่มี header / footer เพราะธีม Thinkific มีให้อยู่แล้ว
+     ทุก selector อยู่ใต้ .lp จึงไม่ชนกับธีม
      ========================================================================== -->
 <style>
-.lp-doc{
-  --ink:#1A1A18;
-  --ink-soft:#4A4A46;
-  --ink-faint:#7A776E;
-  --navy:#004AAD;
-  --navy-deep:#004AAD;
-  --navy-press:#00337A;
-  --brand-yellow:#FFCC00;
-  --rule:#CFC9BA;
-  --rule-soft:#E4DFD3;
-  --paper:#FBFAF6;
-  --paper-2:#F4F1E9;
-  --gold:#8A6A00;
-  --oxblood:#7A2230;
-  --green:#1F5D45;
+.lp{
+  --ink:#1C1C1C;
+  --soft:#5A5A5A;
+  --faint:#8C8C8C;
+  --line:#E6E4E0;
+  --blue:#004AAD;
+  --blue-press:#00337A;
 
-  background:var(--paper);
   color:var(--ink);
   font-family:"Sarabun","Helvetica Neue",Arial,sans-serif;
-  font-size:17px;
-  line-height:1.85;
+  font-size:17.5px;
+  line-height:1.9;
   -webkit-font-smoothing:antialiased;
 }
-.lp-doc *{box-sizing:border-box;}
-.lp-doc img{max-width:100%;height:auto;display:block;}
-.lp-doc a{color:var(--navy);text-decoration:underline;text-underline-offset:3px;}
-.lp-doc a:hover{color:var(--navy-press);}
-.lp-doc p{margin:0 0 1.05em;}
-.lp-doc strong{font-weight:700;}
+.lp *{box-sizing:border-box;}
+.lp img{max-width:100%;height:auto;display:block;}
+.lp a{color:var(--blue);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;}
+.lp a:hover{color:var(--blue-press);}
+.lp p{margin:0 0 1.1em;}
 
-.lp-doc .wrap{max-width:900px;margin:0 auto;padding:0 24px;}
-.lp-doc .wrap-wide{max-width:1120px;margin:0 auto;padding:0 24px;}
+.lp .w{max-width:720px;margin:0 auto;padding:0 20px;}
+.lp .w-wide{max-width:960px;margin:0 auto;padding:0 20px;}
 
-.lp-doc h1,.lp-doc h2,.lp-doc h3,.lp-doc h4{
-  font-family:"Trirong","Sarabun",Georgia,serif;
-  color:var(--navy-deep);font-weight:700;line-height:1.35;margin:0;
-}
-.lp-doc .kicker{
-  font-family:"Sarabun",sans-serif;font-size:12px;letter-spacing:.22em;
-  text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin:0 0 10px;
-}
-.lp-doc .num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;}
+.lp h1,.lp h2,.lp h3{font-family:"Trirong","Sarabun",Georgia,serif;font-weight:600;color:var(--ink);line-height:1.4;margin:0;}
+.lp h1{font-size:38px;letter-spacing:-.01em;}
+.lp h2{font-size:27px;}
+.lp h3{font-size:20px;}
 
-/* masthead */
-.lp-doc .masthead{border-bottom:3px double var(--navy-deep);background:var(--paper-2);padding:34px 0 26px;}
-.lp-doc .mast-top{
-  display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;
-  border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:22px;
+/* intro */
+.lp .intro{padding:56px 0 44px;}
+.lp .intro .lead{font-size:19px;color:var(--soft);margin:18px 0 0;line-height:1.85;}
+.lp .intro .facts{
+  margin:26px 0 0;padding:16px 0 0;border-top:1px solid var(--line);
+  font-size:15.5px;color:var(--faint);
 }
-.lp-doc .mast-brand{font-family:"Trirong",serif;font-size:19px;font-weight:700;letter-spacing:.16em;color:var(--navy-deep);text-transform:uppercase;}
-.lp-doc .mast-meta{font-size:12.5px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;}
-.lp-doc h1{font-size:44px;letter-spacing:-.01em;margin-bottom:14px;}
-.lp-doc .dek{font-family:"Trirong",serif;font-size:20px;font-style:italic;color:var(--ink-soft);max-width:720px;margin:0 0 22px;line-height:1.7;}
-.lp-doc .mast-facts{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin-top:26px;}
-.lp-doc .mast-fact{padding:16px 18px 14px;border-right:1px solid var(--rule-soft);}
-.lp-doc .mast-fact:last-child{border-right:0;}
-.lp-doc .mast-fact .v{font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;color:var(--navy-deep);line-height:1.2;}
-.lp-doc .mast-fact .l{font-size:13px;color:var(--ink-faint);line-height:1.5;margin-top:4px;}
 
 /* buttons */
-.lp-doc .btn-row{display:flex;gap:14px;flex-wrap:wrap;align-items:stretch;}
-.lp-doc .btn{
-  display:inline-flex;align-items:center;justify-content:center;text-align:center;
-  padding:14px 26px;font-family:"Sarabun",sans-serif;font-weight:700;font-size:16px;
-  text-decoration:none;border:2px solid var(--navy-deep);letter-spacing:.02em;transition:background .15s,color .15s;
+.lp .btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;}
+.lp .btn{
+  display:inline-block;padding:12px 24px;font-weight:600;font-size:16px;
+  text-decoration:none;border:1px solid var(--blue);color:var(--blue);
+  transition:background .15s,color .15s;
 }
-.lp-doc .btn-solid{background:var(--navy-deep);color:#fff;}
-.lp-doc .btn-solid:hover{background:var(--navy-press);border-color:var(--navy-press);color:#fff;}
-.lp-doc .btn-ghost{background:transparent;color:var(--navy-deep);}
-.lp-doc .btn-ghost:hover{background:var(--navy-deep);color:#fff;}
-.lp-doc .btn-sm{padding:9px 16px;font-size:14px;border-width:1.5px;}
+.lp .btn:hover{background:var(--blue);color:#fff;}
+.lp .btn.fill{background:var(--blue);color:#fff;}
+.lp .btn.fill:hover{background:var(--blue-press);border-color:var(--blue-press);}
+.lp .btn.sm{padding:8px 16px;font-size:14.5px;}
 
 /* toc */
-.lp-doc .toc{background:#fff;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:26px 0 22px;}
-.lp-doc .toc h2{font-size:15px;letter-spacing:.2em;text-transform:uppercase;font-family:"Sarabun",sans-serif;color:var(--ink-faint);margin-bottom:16px;}
-.lp-doc .toc ol{list-style:none;margin:0;padding:0;columns:2;column-gap:44px;}
-.lp-doc .toc li{break-inside:avoid;margin:0 0 7px;font-size:15.5px;display:flex;gap:10px;align-items:baseline;}
-.lp-doc .toc li .n{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-faint);min-width:22px;}
-.lp-doc .toc a{text-decoration:none;color:var(--ink);border-bottom:1px solid transparent;}
-.lp-doc .toc a:hover{border-bottom-color:var(--navy);color:var(--navy);}
-.lp-doc .toc-note{margin-top:16px;font-size:14px;color:var(--ink-faint);font-style:italic;border-top:1px dotted var(--rule);padding-top:12px;}
+.lp .toc{padding:30px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.lp .toc .lbl{font-size:14px;color:var(--faint);margin:0 0 14px;}
+.lp .toc ol{list-style:none;margin:0;padding:0;columns:2;column-gap:40px;}
+.lp .toc li{break-inside:avoid;margin:0 0 6px;font-size:16px;line-height:1.7;}
+.lp .toc li span{color:var(--faint);font-size:14px;margin-right:8px;}
+.lp .toc a{color:var(--ink);text-decoration:none;}
+.lp .toc a:hover{color:var(--blue);text-decoration:underline;}
 
 /* sections */
-.lp-doc section{padding:52px 0;border-bottom:1px solid var(--rule-soft);}
-.lp-doc section:nth-of-type(even){background:#fff;}
-.lp-doc .sec-head{margin-bottom:26px;}
-.lp-doc .sec-num{font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.18em;color:var(--gold);font-weight:600;display:block;margin-bottom:8px;text-transform:uppercase;}
-.lp-doc h2.sec-title{font-size:30px;margin-bottom:10px;}
-.lp-doc .sec-sub{font-size:16.5px;color:var(--ink-soft);max-width:740px;margin:0;}
-.lp-doc .rule{border:0;border-top:1px solid var(--rule);margin:34px 0;}
-.lp-doc .rule-thin{border:0;border-top:1px dotted var(--rule);margin:22px 0;}
-.lp-doc h3.sub{font-size:21px;margin:34px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule-soft);}
+.lp section{padding:56px 0;border-bottom:1px solid var(--line);}
+.lp section:last-of-type{border-bottom:0;}
+.lp .n{font-size:14px;color:var(--faint);display:block;margin:0 0 6px;}
+.lp .sub{font-size:17px;color:var(--soft);margin:10px 0 0;}
+.lp h3.blk{margin:40px 0 14px;}
 
-/* summary */
-.lp-doc .summary{border:1px solid var(--navy-deep);background:#fff;padding:30px 34px;}
-.lp-doc .summary .kicker{color:var(--navy-deep);}
-.lp-doc .summary ul{margin:0;padding-left:20px;}
-.lp-doc .summary li{margin-bottom:10px;}
+/* plain lists */
+.lp ul.plain{list-style:none;margin:20px 0 0;padding:0;}
+.lp ul.plain li{padding:9px 0 9px 20px;position:relative;border-bottom:1px solid var(--line);}
+.lp ul.plain li:last-child{border-bottom:0;}
+.lp ul.plain li:before{content:"·";position:absolute;left:4px;color:var(--faint);font-weight:700;}
 
-/* callouts */
-.lp-doc .note{border-left:4px solid var(--navy);background:var(--paper-2);padding:18px 22px;margin:24px 0;font-size:16px;}
-.lp-doc .note.warn{border-left-color:var(--oxblood);}
-.lp-doc .note.good{border-left-color:var(--green);}
-.lp-doc .note p:last-child{margin-bottom:0;}
-.lp-doc .note .note-t{font-weight:700;color:var(--navy-deep);display:block;margin-bottom:4px;font-family:"Trirong",serif;font-size:17px;}
+/* note — hairline, no fill */
+.lp .note{border-left:2px solid var(--blue);padding:2px 0 2px 20px;margin:28px 0;color:var(--soft);font-size:16.5px;}
+.lp .note b{display:block;color:var(--ink);font-weight:600;margin-bottom:4px;}
+.lp .note p:last-child{margin-bottom:0;}
 
-/* off-ramp (HBS "Not ready?") */
-.lp-doc .offramp{
-  border:1px dashed var(--rule);background:#fff;padding:24px 28px;margin:28px 0 0;
-  display:flex;gap:22px;flex-wrap:wrap;align-items:center;justify-content:space-between;
-}
-.lp-doc .offramp .or-t{font-family:"Trirong",serif;font-size:19px;font-weight:600;color:var(--navy-deep);margin:0 0 4px;}
-.lp-doc .offramp p{margin:0;font-size:15.5px;color:var(--ink-soft);max-width:520px;}
+/* tables — no fills */
+.lp .scroll{overflow-x:auto;margin:24px 0;}
+.lp table{border-collapse:collapse;width:100%;min-width:600px;font-size:16px;}
+.lp th,.lp td{padding:12px 14px 12px 0;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);}
+.lp th:last-child,.lp td:last-child{padding-right:0;}
+.lp thead th{border-bottom:1.5px solid var(--ink);font-weight:600;font-size:15px;color:var(--ink);}
+.lp tbody tr:last-child td{border-bottom:0;}
+.lp td.c,.lp th.c{text-align:center;}
+.lp td.p{white-space:nowrap;font-weight:600;}
+.lp .muted{color:var(--faint);font-size:14.5px;}
+.lp tr.tot td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:600;}
 
-/* tables */
-.lp-doc .tbl-scroll{overflow-x:auto;margin:22px 0;border:1px solid var(--rule);background:#fff;}
-.lp-doc table{border-collapse:collapse;width:100%;min-width:640px;font-size:15.5px;}
-.lp-doc table caption{text-align:left;padding:14px 16px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);border-bottom:1px solid var(--rule);font-weight:600;background:var(--paper-2);}
-.lp-doc th,.lp-doc td{border-bottom:1px solid var(--rule-soft);padding:12px 16px;text-align:left;vertical-align:top;}
-.lp-doc thead th{background:var(--navy-deep);color:#fff;font-weight:600;font-size:14px;letter-spacing:.04em;border-bottom:0;}
-.lp-doc tbody tr:last-child td{border-bottom:0;}
-.lp-doc tbody tr:nth-child(even){background:#FCFBF8;}
-.lp-doc td.c,.lp-doc th.c{text-align:center;}
-.lp-doc td.price{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--navy-deep);white-space:nowrap;}
-.lp-doc .yes{color:var(--green);font-weight:700;}
-.lp-doc .no{color:var(--ink-faint);}
-.lp-doc .pick{color:var(--gold);font-weight:600;font-size:14px;}
-.lp-doc tr.hl td{background:#F5F1E4;}
-
-/* package cards */
-.lp-doc .pkg{border:1px solid var(--rule);background:#fff;margin:0 0 22px;}
-.lp-doc .pkg.feature{border:2px solid var(--navy-deep);}
-.lp-doc .pkg-head{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:22px 26px 18px;border-bottom:1px solid var(--rule-soft);background:var(--paper-2);}
-.lp-doc .pkg.feature .pkg-head{background:var(--navy-deep);}
-.lp-doc .pkg.feature .pkg-head h3,.lp-doc .pkg.feature .pkg-head .pkg-desc{color:#fff;}
-.lp-doc .pkg.feature .pkg-head .pkg-tag{background:var(--brand-yellow);color:var(--navy-deep);}
-.lp-doc .pkg-head h3{font-size:22px;margin:0 0 4px;}
-.lp-doc .pkg-desc{font-size:15px;color:var(--ink-soft);margin:0;}
-.lp-doc .pkg-tag{align-self:flex-start;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;background:var(--navy-deep);color:#fff;padding:4px 10px;font-weight:600;white-space:nowrap;}
-.lp-doc .pkg-body{padding:24px 26px 26px;}
-
-/* uniform spec strip (HBS card-parity pattern) */
-.lp-doc .spec-strip{
-  display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule-soft);
-  background:#FCFBF8;margin:0 0 20px;
-}
-.lp-doc .spec-strip div{padding:12px 16px;border-right:1px solid var(--rule-soft);}
-.lp-doc .spec-strip div:last-child{border-right:0;}
-.lp-doc .spec-strip .sl{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
-.lp-doc .spec-strip .sv{font-size:15px;color:var(--ink);line-height:1.5;margin-top:2px;}
-
-.lp-doc .pkg-cols{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule-soft);}
-.lp-doc .pkg-col{padding:18px 20px;border-right:1px solid var(--rule-soft);}
-.lp-doc .pkg-col:last-child{border-right:0;}
-.lp-doc .pkg-col .term{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
-.lp-doc .pkg-col .amt{font-family:"IBM Plex Mono",monospace;font-size:32px;font-weight:600;color:var(--navy-deep);line-height:1.25;margin:4px 0 2px;}
-.lp-doc .pkg-col .amt small{font-size:14px;font-weight:400;color:var(--ink-faint);}
-.lp-doc .pkg-col .per{font-size:13.5px;color:var(--ink-faint);margin-bottom:14px;}
-.lp-doc .inc{list-style:none;padding:0;margin:18px 0 0;}
-.lp-doc .inc li{padding:7px 0 7px 26px;position:relative;border-bottom:1px dotted var(--rule-soft);font-size:15.5px;}
-.lp-doc .inc li:last-child{border-bottom:0;}
-.lp-doc .inc li:before{content:"—";position:absolute;left:0;color:var(--gold);font-weight:700;}
+/* packages */
+.lp .pk{padding:30px 0;border-top:1px solid var(--line);}
+.lp .pk:first-of-type{border-top:0;}
+.lp .pk.rec{border-left:2px solid var(--blue);padding-left:22px;}
+.lp .pk .tag{font-size:14px;color:var(--blue);margin:0 0 6px;}
+.lp .pk h3{margin:0 0 4px;}
+.lp .pk .desc{color:var(--soft);font-size:16px;margin:0 0 18px;}
+.lp .meta{font-size:15.5px;color:var(--soft);margin:0 0 20px;line-height:1.9;}
+.lp .meta span{color:var(--faint);}
+.lp .prices{display:flex;gap:44px;flex-wrap:wrap;margin:0 0 4px;}
+.lp .pr .t{font-size:14.5px;color:var(--faint);}
+.lp .pr .a{font-size:29px;font-weight:600;color:var(--ink);line-height:1.3;}
+.lp .pr .a small{font-size:15px;font-weight:400;color:var(--faint);}
+.lp .pr .m{font-size:14px;color:var(--faint);margin-bottom:10px;}
 
 /* curriculum */
-.lp-doc .curric{border:1px solid var(--rule);background:#fff;margin:0 0 26px;}
-.lp-doc .curric-head{padding:20px 26px 16px;border-bottom:1px solid var(--rule);background:var(--paper-2);}
-.lp-doc .curric-head h3{font-size:23px;margin:0 0 6px;}
-.lp-doc .curric-head .outcome{font-size:16px;color:var(--ink-soft);margin:0 0 10px;max-width:640px;}
-.lp-doc .curric-head .spec{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-faint);letter-spacing:.02em;}
-.lp-doc .curric-body{padding:22px 26px 26px;}
-.lp-doc .mod{border-left:2px solid var(--rule);padding:0 0 2px 20px;margin:0 0 20px;}
-.lp-doc .mod:last-child{margin-bottom:0;}
-.lp-doc .mod .m-n{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--gold);font-weight:600;}
-.lp-doc .mod .m-t{font-family:"Trirong",serif;font-size:18px;font-weight:600;color:var(--navy-deep);margin:2px 0 6px;}
-.lp-doc .mod ul{margin:0;padding-left:18px;font-size:15.5px;color:var(--ink-soft);}
-.lp-doc .mod ul li{margin-bottom:5px;}
+.lp .cr{padding:34px 0;border-top:1px solid var(--line);}
+.lp .cr:first-of-type{border-top:0;padding-top:10px;}
+.lp .cr .out{color:var(--soft);font-size:17px;margin:6px 0 8px;}
+.lp .cr .spec{font-size:15px;color:var(--faint);margin:0 0 22px;}
+.lp .mod{margin:0 0 22px;}
+.lp .mod:last-child{margin-bottom:0;}
+.lp .mod .mn{font-size:13.5px;color:var(--faint);letter-spacing:.06em;}
+.lp .mod .mt{font-weight:600;color:var(--ink);margin:0 0 4px;}
+.lp .mod ul{margin:0;padding-left:20px;color:var(--soft);font-size:16px;}
+.lp .mod ul li{margin-bottom:3px;}
 
 /* steps */
-.lp-doc .steps{list-style:none;counter-reset:s;margin:0;padding:0;}
-.lp-doc .steps li{counter-increment:s;position:relative;padding:0 0 22px 62px;border-left:1px solid var(--rule);margin-left:19px;}
-.lp-doc .steps li:last-child{border-left-color:transparent;padding-bottom:0;}
-.lp-doc .steps li:before{
-  content:counter(s);position:absolute;left:-19px;top:0;width:38px;height:38px;
-  border:1px solid var(--navy-deep);background:var(--paper);color:var(--navy-deep);
-  font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:16px;
-  display:flex;align-items:center;justify-content:center;border-radius:50%;
-}
-.lp-doc .steps .st-t{font-family:"Trirong",serif;font-size:19px;font-weight:600;color:var(--navy-deep);margin:6px 0 4px;}
-.lp-doc .steps p{margin:0 0 .5em;font-size:15.5px;color:var(--ink-soft);}
+.lp ol.steps{list-style:none;counter-reset:s;margin:22px 0 0;padding:0;}
+.lp ol.steps li{counter-increment:s;padding:0 0 24px 40px;position:relative;}
+.lp ol.steps li:last-child{padding-bottom:0;}
+.lp ol.steps li:before{content:counter(s) ".";position:absolute;left:0;top:0;color:var(--faint);font-size:16px;}
+.lp ol.steps .t{font-weight:600;color:var(--ink);}
+.lp ol.steps p{margin:0;color:var(--soft);font-size:16.5px;}
 
-/* stats (HBS: claim + source in one sentence) */
-.lp-doc .stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);background:#fff;margin:0 0 26px;}
-.lp-doc .stat{padding:22px 22px 20px;border-right:1px solid var(--rule-soft);}
-.lp-doc .stat:last-child{border-right:0;}
-.lp-doc .stat .sv{font-family:"IBM Plex Mono",monospace;font-size:34px;font-weight:600;color:var(--navy-deep);line-height:1.1;}
-.lp-doc .stat .sd{font-size:15px;color:var(--ink-soft);margin-top:8px;line-height:1.6;}
+/* stats */
+.lp .st{margin:22px 0 0;}
+.lp .st div{display:flex;gap:20px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line);}
+.lp .st div:last-child{border-bottom:0;}
+.lp .st .v{font-size:24px;font-weight:600;color:var(--blue);min-width:74px;}
+.lp .st .d{color:var(--soft);font-size:16.5px;}
 
-/* testimonials */
-.lp-doc .quotes{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule);background:#fff;}
-.lp-doc .q{padding:24px 26px;border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft);}
-.lp-doc .q:nth-child(2n){border-right:0;}
-.lp-doc .q:nth-last-child(-n+2){border-bottom:0;}
-.lp-doc .q-who{font-family:"Trirong",serif;font-size:17px;font-weight:600;color:var(--navy-deep);}
-.lp-doc .q-meta{font-size:13px;color:var(--ink-faint);letter-spacing:.04em;margin-bottom:12px;}
-.lp-doc .q-body{font-size:15.5px;color:var(--ink-soft);line-height:1.8;margin:0 0 12px;}
-.lp-doc .q-res{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;border:1px solid var(--green);color:var(--green);padding:3px 10px;}
+/* quotes */
+.lp .q{padding:26px 0;border-bottom:1px solid var(--line);}
+.lp .q:last-of-type{border-bottom:0;}
+.lp .q .who{font-weight:600;}
+.lp .q .meta2{font-size:14.5px;color:var(--faint);margin-bottom:10px;}
+.lp .q p{color:var(--soft);font-size:16.5px;margin:0 0 10px;}
+.lp .q .res{font-size:14.5px;color:var(--blue);}
 
 /* faq */
-.lp-doc .faq-item{border-bottom:1px solid var(--rule-soft);padding:22px 0;}
-.lp-doc .faq-item:first-child{border-top:1px solid var(--rule);}
-.lp-doc .faq-q{font-family:"Trirong",serif;font-size:19px;font-weight:600;color:var(--navy-deep);margin:0 0 10px;display:flex;gap:12px;align-items:baseline;}
-.lp-doc .faq-q .qn{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--gold);}
-.lp-doc .faq-a{font-size:16px;color:var(--ink-soft);margin:0;padding-left:30px;}
-.lp-doc .faq-a ul{margin:8px 0 0;padding-left:20px;}
-.lp-doc .faq-a li{margin-bottom:5px;}
+.lp .fq{padding:24px 0;border-bottom:1px solid var(--line);}
+.lp .fq:last-of-type{border-bottom:0;}
+.lp .fq .q2{font-weight:600;margin:0 0 8px;}
+.lp .fq .a2{color:var(--soft);font-size:16.5px;margin:0;}
+.lp .fq ul{margin:8px 0 0;padding-left:20px;}
+.lp .fq li{margin-bottom:4px;}
 
 /* gallery */
-.lp-doc .gal{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
-.lp-doc .gal img{border:1px solid var(--rule);width:100%;aspect-ratio:1/1;object-fit:cover;background:var(--paper-2);}
+.lp .gal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:18px;}
+.lp .gal img{width:100%;aspect-ratio:1/1;object-fit:cover;background:#F2F1EE;}
 
 /* closing */
-.lp-doc .closing{background:var(--navy-deep);color:#fff;padding:56px 0;border-bottom:0;}
-.lp-doc .closing h2,.lp-doc .closing h3{color:#fff;}
-.lp-doc .closing .dek{color:#D3E0F2;}
-.lp-doc .closing .btn-solid{background:var(--brand-yellow);color:var(--navy-deep);border-color:var(--brand-yellow);}
-.lp-doc .closing .btn-solid:hover{background:#fff;border-color:#fff;color:var(--navy-deep);}
-.lp-doc .closing .btn-ghost{color:#fff;border-color:#fff;}
-.lp-doc .closing .btn-ghost:hover{background:#fff;color:var(--navy-deep);}
-.lp-doc .closing .contact-tbl td{border-bottom-color:rgba(255,255,255,.2);color:#E7EDF6;}
-.lp-doc .closing .contact-tbl th{background:transparent;border-bottom:1px solid rgba(255,255,255,.4);color:#fff;}
-.lp-doc .closing .tbl-scroll{border-color:rgba(255,255,255,.35);background:transparent;}
-.lp-doc .closing table{background:transparent;}
-.lp-doc .closing tbody tr:nth-child(even){background:rgba(255,255,255,.05);}
-.lp-doc .closing a{color:var(--brand-yellow);}
+.lp .end{padding:56px 0 8px;}
 
-.lp-doc .colophon{background:var(--paper-2);padding:30px 0;font-size:13.5px;color:var(--ink-faint);}
-.lp-doc .colophon p{margin:0 0 6px;}
-
-@media (max-width:820px){
-  .lp-doc{font-size:16.5px;}
-  .lp-doc h1{font-size:31px;}
-  .lp-doc h2.sec-title{font-size:24px;}
-  .lp-doc .dek{font-size:17.5px;}
-  .lp-doc .mast-facts{grid-template-columns:1fr 1fr;}
-  .lp-doc .mast-fact{border-bottom:1px solid var(--rule-soft);}
-  .lp-doc .mast-fact:nth-child(2n){border-right:0;}
-  .lp-doc .toc ol{columns:1;}
-  .lp-doc .spec-strip{grid-template-columns:1fr 1fr;}
-  .lp-doc .spec-strip div{border-bottom:1px solid var(--rule-soft);}
-  .lp-doc .spec-strip div:nth-child(2n){border-right:0;}
-  .lp-doc .stats{grid-template-columns:1fr 1fr;}
-  .lp-doc .stat{border-bottom:1px solid var(--rule-soft);}
-  .lp-doc .stat:nth-child(2n){border-right:0;}
-  .lp-doc .pkg-cols{grid-template-columns:1fr;}
-  .lp-doc .pkg-col{border-right:0;border-bottom:1px solid var(--rule-soft);}
-  .lp-doc .pkg-col:last-child{border-bottom:0;}
-  .lp-doc .quotes{grid-template-columns:1fr;}
-  .lp-doc .q{border-right:0;}
-  .lp-doc .q:nth-last-child(-n+2){border-bottom:1px solid var(--rule-soft);}
-  .lp-doc .q:last-child{border-bottom:0;}
-  .lp-doc .gal{grid-template-columns:repeat(3,1fr);}
-  .lp-doc section{padding:40px 0;}
-  .lp-doc .summary{padding:22px 20px;}
+@media (max-width:760px){
+  .lp{font-size:16.5px;}
+  .lp h1{font-size:29px;}
+  .lp h2{font-size:23px;}
+  .lp .intro{padding:40px 0 34px;}
+  .lp section{padding:42px 0;}
+  .lp .toc ol{columns:1;}
+  .lp .prices{gap:30px;}
+  .lp .gal{grid-template-columns:repeat(4,1fr);}
 }
 </style>
 
-<div class="lp-doc">
+<div class="lp">
 
-<!-- ============================ MASTHEAD ============================ -->
-<header class="masthead">
-  <div class="wrap">
-    <div class="mast-top">
-      <div class="mast-brand">English&nbsp;Plan</div>
-      <div class="mast-meta">สอน IELTS ตั้งแต่ปี 2018 · โดยพี่ดอย</div>
-    </div>
-
-    <p class="kicker">แนะนำหลักสูตร</p>
-    <h1>แพ็กเกจ IELTS All Skills<br>เรียนหลายทักษะพร้อมกัน ราคาถูกกว่าซื้อแยก</h1>
-    <p class="dek">
+<!-- ============================ INTRO ============================ -->
+<div class="intro">
+  <div class="w">
+    <h1>แพ็กเกจ IELTS All Skills</h1>
+    <p class="lead">
+      เรียนหลายทักษะพร้อมกัน ราคาถูกกว่าซื้อแยก
       ทุกอย่างที่ต้องรู้ก่อนตัดสินใจอยู่ในหน้านี้แล้ว — เนื้อหาแต่ละบท ราคาทุกแพ็กเกจ
       จำนวนชั่วโมง จำนวนงานเขียนที่ส่งตรวจได้ อายุคอร์ส และค่าต่ออายุ
       อ่านเองได้เลย ไม่ต้องทักมาถามก่อน
     </p>
-
-    <div class="btn-row">
-      <a class="btn btn-solid" href="#packages">ดูราคาทุกแพ็กเกจ</a>
-      <a class="btn btn-ghost" href="#curriculum">ดูว่าแต่ละทักษะเรียนอะไรบ้าง</a>
+    <div class="btns">
+      <a class="btn fill" href="#packages">ดูราคาทุกแพ็กเกจ</a>
+      <a class="btn" href="#curriculum">ดูว่าแต่ละทักษะเรียนอะไรบ้าง</a>
     </div>
-
-    <div class="mast-facts">
-      <div class="mast-fact">
-        <div class="v">4</div>
-        <div class="l">ทักษะที่เปิดสอน<br>Writing · Reading · Listening · Speaking</div>
-      </div>
-      <div class="mast-fact">
-        <div class="v">74+</div>
-        <div class="l">ชั่วโมงวิดีโอ<br>ถ้าเรียนครบทุกทักษะ</div>
-      </div>
-      <div class="mast-fact">
-        <div class="v">300+</div>
-        <div class="l">หน้าเอกสาร PDF<br>โหลดเก็บและปรินต์ได้</div>
-      </div>
-      <div class="mast-fact">
-        <div class="v">3 / 6</div>
-        <div class="l">เลือกได้ 2 ระยะเวลา (เดือน)<br>90 วัน หรือ 180 วัน</div>
-      </div>
-    </div>
+    <p class="facts">
+      4 ทักษะ · เนื้อหารวม 74+ ชั่วโมง · เอกสาร PDF กว่า 300 หน้า · เลือกได้ 3 เดือน (90 วัน) หรือ 6 เดือน (180 วัน)
+    </p>
   </div>
-</header>
+</div>
 
 <!-- ============================ TOC ============================ -->
 <nav class="toc" aria-label="สารบัญ">
-  <div class="wrap">
-    <h2>สารบัญ</h2>
+  <div class="w">
+    <p class="lbl">สารบัญ</p>
     <ol>
-      <li><span class="n">01</span><a href="#what">คอร์สนี้เป็นแบบไหน</a></li>
-      <li><span class="n">02</span><a href="#who">ใช่คุณหรือเปล่า</a></li>
-      <li><span class="n">03</span><a href="#problems">4 ปัญหาที่คอร์สนี้แก้</a></li>
-      <li><span class="n">04</span><a href="#curriculum">เรียนอะไรบ้าง ทั้ง 4 ทักษะ</a></li>
-      <li><span class="n">05</span><a href="#packages">แพ็กเกจและราคา</a></li>
-      <li><span class="n">06</span><a href="#compare">ตารางเทียบทุกแพ็กเกจ</a></li>
-      <li><span class="n">07</span><a href="#saving">ถูกกว่าซื้อแยกเท่าไหร่</a></li>
-      <li><span class="n">08</span><a href="#choose">เลือกแพ็กเกจไหนดี</a></li>
-      <li><span class="n">09</span><a href="#feedback">การส่งงานเขียนให้ตรวจ</a></li>
-      <li><span class="n">10</span><a href="#support">ถามครูได้แค่ไหน</a></li>
-      <li><span class="n">11</span><a href="#teacher">ใครสอน</a></li>
-      <li><span class="n">12</span><a href="#results">ผลลัพธ์และรีวิว</a></li>
-      <li><span class="n">13</span><a href="#single">คอร์สเดี่ยว (Academic)</a></li>
-      <li><span class="n">14</span><a href="#gt">คอร์ส General Training</a></li>
-      <li><span class="n">15</span><a href="#after">สมัครแล้วเกิดอะไรขึ้น</a></li>
-      <li><span class="n">16</span><a href="#terms">อายุคอร์สและการต่ออายุ</a></li>
-      <li><span class="n">17</span><a href="#faq">คำถามที่เจอบ่อย</a></li>
-      <li><span class="n">18</span><a href="#contact">วิธีสมัคร</a></li>
+      <li><span>01</span><a href="#what">คอร์สนี้เป็นแบบไหน</a></li>
+      <li><span>02</span><a href="#who">ใช่คุณหรือเปล่า</a></li>
+      <li><span>03</span><a href="#problems">4 ปัญหาที่คอร์สนี้แก้</a></li>
+      <li><span>04</span><a href="#curriculum">เรียนอะไรบ้าง ทั้ง 4 ทักษะ</a></li>
+      <li><span>05</span><a href="#packages">แพ็กเกจและราคา</a></li>
+      <li><span>06</span><a href="#compare">ตารางเทียบทุกแพ็กเกจ</a></li>
+      <li><span>07</span><a href="#saving">ถูกกว่าซื้อแยกเท่าไหร่</a></li>
+      <li><span>08</span><a href="#choose">เลือกแพ็กเกจไหนดี</a></li>
+      <li><span>09</span><a href="#feedback">การส่งงานเขียนให้ตรวจ</a></li>
+      <li><span>10</span><a href="#support">ถามครูได้แค่ไหน</a></li>
+      <li><span>11</span><a href="#teacher">ใครสอน</a></li>
+      <li><span>12</span><a href="#results">ผลลัพธ์และรีวิว</a></li>
+      <li><span>13</span><a href="#single">คอร์สเดี่ยว (Academic)</a></li>
+      <li><span>14</span><a href="#gt">คอร์ส General Training</a></li>
+      <li><span>15</span><a href="#after">สมัครแล้วเกิดอะไรขึ้น</a></li>
+      <li><span>16</span><a href="#terms">อายุคอร์สและการต่ออายุ</a></li>
+      <li><span>17</span><a href="#faq">คำถามที่เจอบ่อย</a></li>
+      <li><span>18</span><a href="#contact">วิธีสมัคร</a></li>
     </ol>
-    <p class="toc-note">
-      อ่านเรียงลงมา หรือกดข้ามไปหัวข้อที่อยากรู้ก็ได้ · หน้านี้ไม่มีป๊อปอัป ไม่มีตัวนับถอยหลัง และไม่ต้องกรอกอีเมลเพื่ออ่านต่อ
-    </p>
   </div>
 </nav>
 
 <!-- ============================ 01 ============================ -->
 <section id="what">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">01</span>
-      <h2 class="sec-title">คอร์สนี้เป็นแบบไหน</h2>
-      <p class="sec-sub">อ่านหัวข้อนี้จบ จะตัดสินใจในหัวข้อที่เหลือได้เร็วขึ้นมาก</p>
-    </div>
+  <div class="w">
+    <span class="n">01</span>
+    <h2>คอร์สนี้เป็นแบบไหน</h2>
+    <p class="sub">อ่านหัวข้อนี้จบ จะตัดสินใจในหัวข้อที่เหลือได้เร็วขึ้นมาก</p>
 
-    <div class="summary">
-      <p class="kicker">สรุปสั้น ๆ</p>
-      <ul>
-        <li><strong>เรียนออนไลน์ตามเวลาที่คุณสะดวก</strong> เป็นวิดีโอ + เอกสาร PDF ย้อนดูซ้ำได้ไม่จำกัดจนกว่าคอร์สจะหมดอายุ ไม่ใช่คลาสสด ไม่มีตารางเรียนบังคับ</li>
-        <li><strong>แพ็กเกจคือการรวมคอร์สรายทักษะไว้ด้วยกันแล้วลดราคาให้</strong> เนื้อหาข้างในเหมือนคอร์สแยกเป๊ะ ไม่ได้ตัดออกและไม่ได้ใส่บทพิเศษเพิ่ม ต่างกันแค่ราคา</li>
-        <li><strong>ครูตรวจงานเขียนให้จริง</strong> แพ็กเกจที่มี Writing ส่งเรียงความมาให้ตรวจได้ตามจำนวนที่กำหนด แล้วได้คอมเมนต์กลับเป็นภาษาไทย</li>
-        <li><strong>ถามครูทาง LINE ได้ตลอด</strong> ทั้งเรื่องเนื้อหาในบทเรียนและการเตรียมตัวสอบ</li>
-        <li><strong>เลือกได้ 2 ระยะเวลา คือ 3 เดือน (90 วัน) กับ 6 เดือน (180 วัน)</strong> นับจากวันที่ครูเปิดสิทธิ์ให้</li>
-      </ul>
-    </div>
-
-    <h3 class="sub">ได้อะไรบ้าง</h3>
-    <ul class="inc">
-      <li><strong>วิดีโอบทเรียน</strong> ตัดเป็นบทสั้น ๆ ราว 20–30 นาที ดูได้ทั้งบนคอม แท็บเล็ต และมือถือ</li>
-      <li><strong>เอกสาร PDF กว่า 300 หน้า</strong> โหลดเก็บไว้ ปรินต์ได้ อ่านนอกแอปได้ ไม่ต้องแบกหนังสือ</li>
-      <li><strong>คลังข้อสอบไว้ฝึก</strong> เฉพาะ Reading มีมากกว่า 500 ข้อ และมีเพิ่มเข้ามาเรื่อย ๆ</li>
-      <li><strong>แบบฝึกทั้ง Computer-based และ Paper-based</strong> ซ้อมให้ตรงกับรูปแบบที่คุณจะไปสอบ</li>
-      <li><strong>English Plan IELTS Workspace</strong> ที่ทำโจทย์พร้อมระบบเก็บคำศัพท์ที่เจอระหว่างฝึก</li>
-      <li><strong>คอมเมนต์งานเขียนเป็นภาษาไทย</strong> (เฉพาะแพ็กเกจที่มี Writing)</li>
-      <li><strong>LINE ส่วนตัวของครู</strong> ถามได้ตลอดจนกว่าคอร์สจะหมดอายุ</li>
-      <li><strong>โจทย์จาก Cambridge เล่มล่าสุด</strong> ฝั่ง Writing ตะลุยถึง Cambridge 18–20</li>
+    <ul class="plain">
+      <li><b>เรียนออนไลน์ตามเวลาที่คุณสะดวก</b> — วิดีโอ + เอกสาร PDF ย้อนดูซ้ำได้ไม่จำกัดจนกว่าคอร์สจะหมดอายุ ไม่ใช่คลาสสด ไม่มีตารางเรียนบังคับ</li>
+      <li><b>แพ็กเกจคือการรวมคอร์สรายทักษะไว้ด้วยกันแล้วลดราคาให้</b> — เนื้อหาข้างในเหมือนคอร์สแยกเป๊ะ ไม่ได้ตัดออกและไม่ได้ใส่บทพิเศษเพิ่ม ต่างกันแค่ราคา</li>
+      <li><b>ครูตรวจงานเขียนให้จริง</b> — แพ็กเกจที่มี Writing ส่งเรียงความมาให้ตรวจได้ตามจำนวนที่กำหนด แล้วได้คอมเมนต์กลับเป็นภาษาไทย</li>
+      <li><b>ถามครูทาง LINE ได้ตลอด</b> — ทั้งเรื่องเนื้อหาในบทเรียนและการเตรียมตัวสอบ</li>
+      <li><b>เลือกได้ 2 ระยะเวลา</b> — 3 เดือน (90 วัน) กับ 6 เดือน (180 วัน) นับจากวันที่ครูเปิดสิทธิ์ให้</li>
     </ul>
 
-    <div class="note warn">
-      <span class="note-t">แต่คอร์สนี้ไม่ได้เป็นแบบนี้</span>
+    <h3 class="blk">ได้อะไรบ้าง</h3>
+    <ul class="plain">
+      <li>วิดีโอบทเรียน ตัดเป็นบทสั้น ๆ ราว 20–30 นาที ดูได้ทั้งบนคอม แท็บเล็ต และมือถือ</li>
+      <li>เอกสาร PDF กว่า 300 หน้า โหลดเก็บไว้ ปรินต์ได้ อ่านนอกแอปได้ ไม่ต้องแบกหนังสือ</li>
+      <li>คลังข้อสอบไว้ฝึก เฉพาะ Reading มีมากกว่า 500 ข้อ และมีเพิ่มเข้ามาเรื่อย ๆ</li>
+      <li>แบบฝึกทั้ง Computer-based และ Paper-based ซ้อมให้ตรงกับรูปแบบที่คุณจะไปสอบ</li>
+      <li>English Plan IELTS Workspace ที่ทำโจทย์พร้อมระบบเก็บคำศัพท์ที่เจอระหว่างฝึก</li>
+      <li>คอมเมนต์งานเขียนเป็นภาษาไทย (เฉพาะแพ็กเกจที่มี Writing)</li>
+      <li>LINE ส่วนตัวของครู ถามได้ตลอดจนกว่าคอร์สจะหมดอายุ</li>
+      <li>โจทย์จาก Cambridge เล่มล่าสุด ฝั่ง Writing ตะลุยถึง Cambridge 18–20</li>
+    </ul>
+
+    <div class="note">
+      <b>แต่คอร์สนี้ไม่ได้เป็นแบบนี้</b>
       <p>
         ไม่ใช่คลาสสดรายสัปดาห์ · ไม่มีเรียนตัวต่อตัวผ่านวิดีโอคอลรวมอยู่ในราคา ·
         ไม่รับประกันคะแนน เพราะคะแนนขึ้นอยู่กับการฝึกของคุณเป็นหลัก ·
@@ -403,16 +271,13 @@
 
 <!-- ============================ 02 ============================ -->
 <section id="who">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">02</span>
-      <h2 class="sec-title">ใช่คุณหรือเปล่า</h2>
-      <p class="sec-sub">ถ้าอ่านแล้วรู้สึกว่าไม่ใช่ ก็ไม่ต้องอ่านต่อ จะได้ไม่เสียเวลา</p>
-    </div>
+  <div class="w">
+    <span class="n">02</span>
+    <h2>ใช่คุณหรือเปล่า</h2>
+    <p class="sub">ถ้าอ่านแล้วรู้สึกว่าไม่ใช่ ก็ไม่ต้องอ่านต่อ จะได้ไม่เสียเวลา</p>
 
-    <div class="tbl-scroll">
+    <div class="scroll">
       <table>
-        <caption>ลองเช็กดูว่าตรงกับคุณข้อไหน</caption>
         <thead>
           <tr><th style="width:50%">น่าจะเหมาะ ถ้าคุณ…</th><th style="width:50%">ยังไม่เหมาะ ถ้าคุณ…</th></tr>
         </thead>
@@ -435,7 +300,7 @@
           </tr>
           <tr>
             <td>เคยเรียนกับครูต่างชาติแล้วรู้สึกว่าได้ทำโจทย์เยอะ แต่ไม่ได้เทคนิคอะไรกลับมา</td>
-            <td>กำลังหาคอร์ส TOEFL, TOEIC หรือ Duolingo English Test (คนละหลักสูตรกับหน้านี้)</td>
+            <td>กำลังหาคอร์ส TOEFL, TOEIC หรือ Duolingo English Test</td>
           </tr>
           <tr>
             <td>อยากอ่านรายละเอียดให้ครบด้วยตัวเองก่อน แล้วค่อยตัดสินใจ</td>
@@ -446,7 +311,7 @@
     </div>
 
     <div class="note">
-      <span class="note-t">ไม่แน่ใจว่าพื้นฐานพอไหม</span>
+      <b>ไม่แน่ใจว่าพื้นฐานพอไหม</b>
       <p>
         วิธีที่เร็วที่สุดคือเข้าไปกดดูบทเรียนฟรีในหน้าคอร์สจริง แล้วดูว่าฟังทันและตามได้ไหม
         เริ่มที่ <a href="https://www.language-plan.com/courses/ielts-writing-5">คอร์ส Writing</a>
@@ -458,45 +323,42 @@
 
 <!-- ============================ 03 ============================ -->
 <section id="problems">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">03</span>
-      <h2 class="sec-title">4 ปัญหาที่คอร์สนี้แก้</h2>
-      <p class="sec-sub">แต่ละทักษะติดคนละเรื่อง ข้างล่างคือสาเหตุจริง ๆ และบทที่ใช้แก้</p>
-    </div>
+  <div class="w-wide">
+    <span class="n">03</span>
+    <h2>4 ปัญหาที่คอร์สนี้แก้</h2>
+    <p class="sub">แต่ละทักษะติดคนละเรื่อง ข้างล่างคือสาเหตุจริง ๆ และบทที่ใช้แก้</p>
 
-    <div class="tbl-scroll">
+    <div class="scroll">
       <table>
-        <caption>อาการ · สาเหตุ · บทที่ใช้แก้</caption>
         <thead>
           <tr>
-            <th style="width:14%">ทักษะ</th>
+            <th style="width:13%">ทักษะ</th>
             <th style="width:26%">อาการที่เจอบ่อย</th>
             <th style="width:30%">สาเหตุจริง ๆ</th>
-            <th style="width:30%">ส่วนที่ใช้แก้</th>
+            <th style="width:31%">ส่วนที่ใช้แก้</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>Writing</strong></td>
+            <td><b>Writing</b></td>
             <td>เขียนวนไปวนมา เขียนเยอะแต่คะแนนไม่ขึ้น</td>
             <td>ไม่มีโครงสร้างในหัว เลยเขียนตามความคิดที่ผุดมาเรื่อย ๆ คะแนน Coherence เลยตก</td>
             <td>Module 01 ปูโครงสร้างประโยค + Module 04 โครงเรียงความและแพทเทิร์นสำเร็จรูป</td>
           </tr>
           <tr>
-            <td><strong>Speaking</strong></td>
+            <td><b>Speaking</b></td>
             <td>เจอหน้ากรรมการแล้วนึกไม่ออก ตอบสั้นเกินไป ขยายความไม่เป็น</td>
             <td>ไม่มีสูตรจัดระเบียบความคิด เลยต้องคิดทั้งเนื้อหาและภาษาไปพร้อมกัน</td>
             <td>Storytelling Formula + 10 แพทเทิร์นจัดระเบียบความคิด + เทคนิคขยายคำตอบ Part 3</td>
           </tr>
           <tr>
-            <td><strong>Reading</strong></td>
+            <td><b>Reading</b></td>
             <td>อ่านทุกตัวอักษรจนหมดเวลา แล้วก็ยังหาคำตอบไม่เจอ</td>
             <td>ใช้วิธีอ่านแบบอ่านหนังสือ แทนที่จะล่าคำตอบเฉพาะจุด</td>
             <td>Skimming &amp; Scanning + แยกวิธีทำตามชนิดคำถามทั้ง 9 แบบ</td>
           </tr>
           <tr>
-            <td><strong>Listening</strong></td>
+            <td><b>Listening</b></td>
             <td>ฟังทันแต่ตอบไม่ถูก เพราะโดนหลอก</td>
             <td>ข้อสอบใส่ Distractors ให้ได้ยินคำตอบผิดก่อนคำตอบจริงเสมอ</td>
             <td>บทจับ Keyword · วิธีรับมือ Distractors · Predictive Listening จากโครงสร้างประโยค</td>
@@ -509,550 +371,488 @@
 
 <!-- ============================ 04 ============================ -->
 <section id="curriculum">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">04</span>
-      <h2 class="sec-title">เรียนอะไรบ้าง ทั้ง 4 ทักษะ</h2>
-      <p class="sec-sub">
-        หัวข้อนี้ยาวที่สุดในหน้า เพราะเราคิดว่าคุณควรเห็นว่าจ่ายเงินไปแล้วได้เรียนอะไร ตั้งแต่ก่อนจ่าย
+  <div class="w">
+    <span class="n">04</span>
+    <h2>เรียนอะไรบ้าง ทั้ง 4 ทักษะ</h2>
+    <p class="sub">หัวข้อนี้ยาวที่สุดในหน้า เพราะเราคิดว่าคุณควรเห็นว่าจ่ายเงินไปแล้วได้เรียนอะไร ตั้งแต่ก่อนจ่าย</p>
+
+    <!-- WRITING -->
+    <div class="cr">
+      <h3>1 · Writing Intensive (Academic)</h3>
+      <p class="out">เขียนให้มีโครงสร้างและมีเหตุผลเรียงกัน ด้วยแพทเทิร์นที่หยิบไปใช้ในห้องสอบได้ทันที</p>
+      <p class="spec">97 บทเรียน · 37 ชั่วโมง (ไวยากรณ์ 4 · แพทเทิร์น 18 · ตะลุยโจทย์ 15) · ซื้อแยก 4,990 บาท</p>
+
+      <div class="mod">
+        <div class="mn">MODULE 01</div>
+        <div class="mt">Writing Basics &amp; Grammar Hacks</div>
+        <ul>
+          <li>Complex Structures — โครงสร้างประโยคซับซ้อนที่จำเป็นถ้าจะไปถึง Band 7</li>
+          <li>Transitional Words — เชื่อมความคิดให้คนตรวจตามทัน</li>
+          <li>Tense Mastery — คุม Tense ให้สอดคล้องกันทั้งเรียงความ</li>
+          <li>Referencing — อ้างถึงสิ่งที่พูดไปแล้วโดยไม่ต้องพูดซ้ำ</li>
+          <li>Articles (a / an / the) — จุดที่คนไทยเสียคะแนนบ่อยที่สุดจุดหนึ่ง</li>
+          <li>Noun Extension — ขยายคำนามให้ภาษาแน่นขึ้น</li>
+        </ul>
+      </div>
+      <div class="mod">
+        <div class="mn">MODULE 02</div>
+        <div class="mt">Task 1 — Data Reports (Line, Pie, Bar, Table &amp; Mixed)</div>
+        <ul>
+          <li>Line Graph — อ่านและบรรยายแนวโน้ม (Trend)</li>
+          <li>Pie Chart — เปรียบเทียบสัดส่วน</li>
+          <li>Bar Chart — เลือกข้อมูลมาเทียบให้ตรงประเด็น</li>
+          <li>Table — วิธีคัดข้อมูลจากตารางที่มีตัวเลขเต็มไปหมด</li>
+          <li>Mixed Charts — โจทย์ที่รวมกราฟหลายชนิดในข้อเดียว</li>
+          <li>Band 7 Checklist — รายการตรวจก่อนส่งงาน</li>
+        </ul>
+      </div>
+      <div class="mod">
+        <div class="mn">MODULE 03</div>
+        <div class="mt">Task 1 — Visual Diagrams (Process &amp; Maps)</div>
+        <ul>
+          <li>Process Diagram — เรียงลำดับขั้นตอนและใช้ Passive Voice ให้ถูก</li>
+          <li>Map Writing — บรรยายการเปลี่ยนแปลงของพื้นที่ตามช่วงเวลา</li>
+          <li>วิธีทำระดับ Band 7.5+ พร้อมคลังคำศัพท์เฉพาะของโจทย์สองแบบนี้</li>
+        </ul>
+      </div>
+      <div class="mod">
+        <div class="mn">MODULE 04</div>
+        <div class="mt">Task 2 — Essay Excellence</div>
+        <ul>
+          <li>Essay Architecture — โครงเรียงความที่ใช้ได้กับทุกโจทย์</li>
+          <li>Introduction — เปิดยังไงให้ตอบโจทย์ตั้งแต่บรรทัดแรก</li>
+          <li>Body Paragraphs — วางเหตุผลและพัฒนาความคิดในย่อหน้า</li>
+          <li>Lexical Resource — เลือกใช้คำให้ตรงและหลากหลาย</li>
+          <li>Examples — ยกตัวอย่างแบบที่คนตรวจนับว่าเป็นการสนับสนุนจริง</li>
+          <li>โจทย์ 4 แบบหลัก: Double Question · Advantages &amp; Disadvantages · Discussion · Opinion</li>
+        </ul>
+      </div>
+      <div class="mod">
+        <div class="mn">MODULE 05</div>
+        <div class="mt">The Masterclass — ตะลุยหัวข้อที่ออกสอบจริง</div>
+        <ul>
+          <li>หัวข้อที่ทำ: Nuclear Weapons · Gender Equality · Animal Rights · Globalization · Art &amp; Culture · Health · Famous People · Environment</li>
+          <li>อัปเดต 2024–2025: ตะลุยโจทย์จาก Cambridge เล่ม 18–20</li>
+        </ul>
+      </div>
+      <p class="spec" style="margin:22px 0 0">
+        ดูหลักสูตรเต็มที่ <a href="https://www.language-plan.com/courses/ielts-writing-5">หน้าคอร์ส IELTS Academic Writing – Intensive</a>
       </p>
     </div>
 
-    <!-- WRITING -->
-    <div class="curric">
-      <div class="curric-head">
-        <h3>1 · Writing Intensive (Academic)</h3>
-        <p class="outcome">เขียนให้มีโครงสร้างและมีเหตุผลเรียงกัน ด้วยแพทเทิร์นที่หยิบไปใช้ในห้องสอบได้ทันที</p>
-        <span class="spec">97 บทเรียน · 37 ชั่วโมง · ไวยากรณ์ 4 ชม. / แพทเทิร์น 18 ชม. / ตะลุยโจทย์ 15 ชม. · ซื้อแยก 4,990 บาท</span>
-      </div>
-      <div class="curric-body">
-        <div class="mod">
-          <div class="m-n">MODULE 01</div>
-          <div class="m-t">Writing Basics &amp; Grammar Hacks</div>
-          <ul>
-            <li>Complex Structures — โครงสร้างประโยคซับซ้อนที่จำเป็นถ้าจะไปถึง Band 7</li>
-            <li>Transitional Words — เชื่อมความคิดให้คนตรวจตามทัน</li>
-            <li>Tense Mastery — คุม Tense ให้สอดคล้องกันทั้งเรียงความ</li>
-            <li>Referencing — อ้างถึงสิ่งที่พูดไปแล้วโดยไม่ต้องพูดซ้ำ</li>
-            <li>Articles (a / an / the) — จุดที่คนไทยเสียคะแนนบ่อยที่สุดจุดหนึ่ง</li>
-            <li>Noun Extension — ขยายคำนามให้ภาษาแน่นขึ้น</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">MODULE 02</div>
-          <div class="m-t">Task 1 — Data Reports (Line, Pie, Bar, Table &amp; Mixed)</div>
-          <ul>
-            <li>Line Graph — อ่านและบรรยายแนวโน้ม (Trend)</li>
-            <li>Pie Chart — เปรียบเทียบสัดส่วน</li>
-            <li>Bar Chart — เลือกข้อมูลมาเทียบให้ตรงประเด็น</li>
-            <li>Table — วิธีคัดข้อมูลจากตารางที่มีตัวเลขเต็มไปหมด</li>
-            <li>Mixed Charts — โจทย์ที่รวมกราฟหลายชนิดในข้อเดียว</li>
-            <li>Band 7 Checklist — รายการตรวจก่อนส่งงาน</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">MODULE 03</div>
-          <div class="m-t">Task 1 — Visual Diagrams (Process &amp; Maps)</div>
-          <ul>
-            <li>Process Diagram — เรียงลำดับขั้นตอนและใช้ Passive Voice ให้ถูก</li>
-            <li>Map Writing — บรรยายการเปลี่ยนแปลงของพื้นที่ตามช่วงเวลา</li>
-            <li>วิธีทำระดับ Band 7.5+ พร้อมคลังคำศัพท์เฉพาะของโจทย์สองแบบนี้</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">MODULE 04</div>
-          <div class="m-t">Task 2 — Essay Excellence</div>
-          <ul>
-            <li>Essay Architecture — โครงเรียงความที่ใช้ได้กับทุกโจทย์</li>
-            <li>Introduction — เปิดยังไงให้ตอบโจทย์ตั้งแต่บรรทัดแรก</li>
-            <li>Body Paragraphs — วางเหตุผลและพัฒนาความคิดในย่อหน้า</li>
-            <li>Lexical Resource — เลือกใช้คำให้ตรงและหลากหลาย</li>
-            <li>Examples — ยกตัวอย่างแบบที่คนตรวจนับว่าเป็นการสนับสนุนจริง</li>
-            <li>โจทย์ 4 แบบหลัก: Double Question · Advantages &amp; Disadvantages · Discussion · Opinion</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">MODULE 05</div>
-          <div class="m-t">The Masterclass — ตะลุยหัวข้อที่ออกสอบจริง</div>
-          <ul>
-            <li>หัวข้อที่ทำ: Nuclear Weapons · Gender Equality · Animal Rights · Globalization · Art &amp; Culture · Health · Famous People · Environment</li>
-            <li>อัปเดต 2024–2025: ตะลุยโจทย์จาก Cambridge เล่ม 18–20</li>
-          </ul>
-        </div>
-        <hr class="rule-thin">
-        <p style="margin-bottom:0;font-size:15.5px;color:var(--ink-faint)">
-          ดูหลักสูตรเต็มที่ <a href="https://www.language-plan.com/courses/ielts-writing-5">หน้าคอร์ส IELTS Academic Writing – Intensive</a>
-        </p>
-      </div>
-    </div>
-
     <!-- READING -->
-    <div class="curric">
-      <div class="curric-head">
-        <h3>2 · Intensive Academic Reading</h3>
-        <p class="outcome">เปลี่ยนจาก “อ่านไม่ทัน” เป็น “หาคำตอบเจอ” ด้วยการล่าคำตอบแทนการอ่านทุกบรรทัด</p>
-        <span class="spec">27 ชั่วโมง · เทคนิค 3 ชม. / ตะลุยโจทย์หลัก 12 ชม. / ตะลุยโจทย์เพิ่ม 12 ชม. · คลังข้อสอบ 500+ ข้อ · ซื้อแยก 3,990 บาท</span>
+    <div class="cr">
+      <h3>2 · Intensive Academic Reading</h3>
+      <p class="out">เปลี่ยนจาก “อ่านไม่ทัน” เป็น “หาคำตอบเจอ” ด้วยการล่าคำตอบแทนการอ่านทุกบรรทัด</p>
+      <p class="spec">27 ชั่วโมง (เทคนิค 3 · ตะลุยโจทย์หลัก 12 · ตะลุยโจทย์เพิ่ม 12) · คลังข้อสอบ 500+ ข้อ · ซื้อแยก 3,990 บาท</p>
+
+      <div class="mod">
+        <div class="mn">ส่วนที่ 1 · 3 ชั่วโมง</div>
+        <div class="mt">เทคนิคทำโจทย์</div>
+        <ul>
+          <li>Skimming — กวาดหาใจความรวมของย่อหน้าให้เร็ว</li>
+          <li>Scanning — ล่าคำตอบเฉพาะจุดโดยไม่ต้องอ่านทั้งบทความ</li>
+          <li>วิธีคุมเวลาในห้องสอบตอนเจอบทความยาว</li>
+        </ul>
       </div>
-      <div class="curric-body">
-        <div class="mod">
-          <div class="m-n">ส่วนที่ 1 · 3 ชั่วโมง</div>
-          <div class="m-t">เทคนิคทำโจทย์</div>
-          <ul>
-            <li>Skimming — กวาดหาใจความรวมของย่อหน้าให้เร็ว</li>
-            <li>Scanning — ล่าคำตอบเฉพาะจุดโดยไม่ต้องอ่านทั้งบทความ</li>
-            <li>วิธีคุมเวลาในห้องสอบตอนเจอบทความยาว</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">ส่วนที่ 2 · 12 ชั่วโมง</div>
-          <div class="m-t">ตะลุยโจทย์หลัก — แยกวิธีทำตามชนิดคำถาม</div>
-          <ul>
-            <li>True / False / Not Given — จุดที่คนพลาดมากที่สุด</li>
-            <li>Fill in the Blanks</li>
-            <li>Matching Headings</li>
-            <li>Matching Information</li>
-            <li>Multiple Choice</li>
-            <li>Diagram Completion</li>
-            <li>Summary Completion</li>
-            <li>Sentence Completion</li>
-            <li>“Who Says What?” — จับคู่ความเห็นกับเจ้าของความเห็น</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">ส่วนที่ 3 · 12 ชั่วโมง</div>
-          <div class="m-t">ตะลุยโจทย์เพิ่มเติม</div>
-          <ul>
-            <li>ชุดฝึกเพิ่มพร้อมเฉลยละเอียด อธิบายด้วยวิธีคิดของคนที่ทำพาร์ตนี้ได้เต็ม</li>
-            <li>คลังข้อสอบมากกว่า 500 ข้อ มีเพิ่มเข้ามาเรื่อย ๆ</li>
-            <li>ทำโจทย์ผ่าน English Plan IELTS Workspace พร้อมเก็บคำศัพท์ที่เจอระหว่างฝึก</li>
-          </ul>
-        </div>
-        <hr class="rule-thin">
-        <p style="margin-bottom:0;font-size:15.5px;color:var(--ink-faint)">
-          ดูเพิ่มที่ <a href="https://www.language-plan.com/courses/intensive-academic-reading-for-ielts">หน้าคอร์ส Intensive Academic Reading for IELTS</a>
-        </p>
+      <div class="mod">
+        <div class="mn">ส่วนที่ 2 · 12 ชั่วโมง</div>
+        <div class="mt">ตะลุยโจทย์หลัก — แยกวิธีทำตามชนิดคำถาม</div>
+        <ul>
+          <li>True / False / Not Given — จุดที่คนพลาดมากที่สุด</li>
+          <li>Fill in the Blanks</li>
+          <li>Matching Headings</li>
+          <li>Matching Information</li>
+          <li>Multiple Choice</li>
+          <li>Diagram Completion</li>
+          <li>Summary Completion</li>
+          <li>Sentence Completion</li>
+          <li>“Who Says What?” — จับคู่ความเห็นกับเจ้าของความเห็น</li>
+        </ul>
       </div>
+      <div class="mod">
+        <div class="mn">ส่วนที่ 3 · 12 ชั่วโมง</div>
+        <div class="mt">ตะลุยโจทย์เพิ่มเติม</div>
+        <ul>
+          <li>ชุดฝึกเพิ่มพร้อมเฉลยละเอียด อธิบายด้วยวิธีคิดของคนที่ทำพาร์ตนี้ได้เต็ม</li>
+          <li>คลังข้อสอบมากกว่า 500 ข้อ มีเพิ่มเข้ามาเรื่อย ๆ</li>
+          <li>ทำโจทย์ผ่าน English Plan IELTS Workspace พร้อมเก็บคำศัพท์ที่เจอระหว่างฝึก</li>
+        </ul>
+      </div>
+      <p class="spec" style="margin:22px 0 0">
+        ดูเพิ่มที่ <a href="https://www.language-plan.com/courses/intensive-academic-reading-for-ielts">หน้าคอร์ส Intensive Academic Reading for IELTS</a>
+      </p>
     </div>
 
     <!-- LISTENING -->
-    <div class="curric">
-      <div class="curric-head">
-        <h3>3 · Listening for Band 7+</h3>
-        <p class="outcome">จับใจความให้ทัน รู้ทันกับดัก และใช้ไวยากรณ์ช่วยเดาคำตอบก่อนเสียงจะมาถึง</p>
-        <span class="spec">28 บทเรียน · 10 ชั่วโมง · เรียงตาม Section 1–4 ของข้อสอบจริง · ซื้อแยก 1,990 บาท</span>
+    <div class="cr">
+      <h3>3 · Listening for Band 7+</h3>
+      <p class="out">จับใจความให้ทัน รู้ทันกับดัก และใช้ไวยากรณ์ช่วยเดาคำตอบก่อนเสียงจะมาถึง</p>
+      <p class="spec">28 บทเรียน · 10 ชั่วโมง · เรียงตาม Section 1–4 ของข้อสอบจริง · ซื้อแยก 1,990 บาท</p>
+
+      <div class="mod">
+        <div class="mn">MODULE 01</div>
+        <div class="mt">Basics — กลยุทธ์พื้นฐาน</div>
+        <ul>
+          <li>ภาพรวมกับดักทั้งหมดของ IELTS Listening</li>
+          <li>วิเคราะห์โจทย์และแยกชนิดคำถามก่อนเสียงจะเริ่ม</li>
+        </ul>
       </div>
-      <div class="curric-body">
-        <div class="mod">
-          <div class="m-n">MODULE 01</div>
-          <div class="m-t">Basics — กลยุทธ์พื้นฐาน</div>
-          <ul>
-            <li>ภาพรวมกับดักทั้งหมดของ IELTS Listening</li>
-            <li>วิเคราะห์โจทย์และแยกชนิดคำถามก่อนเสียงจะเริ่ม</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">MODULE 02</div>
-          <div class="m-t">Section 1 — Practical Listening</div>
-          <ul>
-            <li>เทคนิคเก็บคะแนนเต็มในพาร์ตแรก</li>
-            <li>ตัวอย่างจริง: การจองโรงแรม — ชื่อคน การสะกด ตัวเลข</li>
-            <li>ชุดฝึกพร้อมเฉลย</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">MODULE 03</div>
-          <div class="m-t">Section 2 — Everyday Context</div>
-          <ul>
-            <li>วิธีรับมือบทสนทนาสถานการณ์ในชีวิตประจำวัน</li>
-            <li>ชนิดคำถาม: Matching · Multiple Choice · Diagram Completion</li>
-            <li>ไวยากรณ์ที่ช่วยตอบ: คำเชื่อม (Connectors) และ Passive Voice</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">MODULE 04</div>
-          <div class="m-t">Section 3 — Academic &amp; Group Talk</div>
-          <ul>
-            <li>วิธีจดโน้ตตอนมีคนพูดหลายคนสลับกัน</li>
-            <li>คำตอบแบบคำเดียว และการจับ Keyword</li>
-            <li>ชุดฝึกคละชนิดคำถาม</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">MODULE 05</div>
-          <div class="m-t">Section 4 — Monologue &amp; Lecture</div>
-          <ul>
-            <li>The Monologue Strategy — ตามให้ทันการบรรยายยาวที่ไม่มีคนพูดขัด</li>
-            <li>ชุดฝึกเต็มพาร์ตพร้อมเฉลยละเอียด</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">MODULE 06</div>
-          <div class="m-t">Vocabulary &amp; Practice Sets</div>
-          <ul>
-            <li>คำศัพท์เชิงวิชาการหมวดที่ออกบ่อย: Social History · Technology · Environment</li>
-            <li>ชุดฝึกเต็มพาร์ตพร้อมคำอธิบาย</li>
-            <li>Predictive Listening — เดาชนิดคำตอบล่วงหน้าจากโครงสร้างประโยค</li>
-          </ul>
-        </div>
-        <hr class="rule-thin">
-        <p style="margin-bottom:0;font-size:15.5px;color:var(--ink-faint)">
-          ดูเพิ่มที่ <a href="https://www.language-plan.com/courses/listening-for-band-7">หน้าคอร์ส Listening for Band 7</a>
-        </p>
+      <div class="mod">
+        <div class="mn">MODULE 02</div>
+        <div class="mt">Section 1 — Practical Listening</div>
+        <ul>
+          <li>เทคนิคเก็บคะแนนเต็มในพาร์ตแรก</li>
+          <li>ตัวอย่างจริง: การจองโรงแรม — ชื่อคน การสะกด ตัวเลข</li>
+          <li>ชุดฝึกพร้อมเฉลย</li>
+        </ul>
       </div>
+      <div class="mod">
+        <div class="mn">MODULE 03</div>
+        <div class="mt">Section 2 — Everyday Context</div>
+        <ul>
+          <li>วิธีรับมือบทสนทนาสถานการณ์ในชีวิตประจำวัน</li>
+          <li>ชนิดคำถาม: Matching · Multiple Choice · Diagram Completion</li>
+          <li>ไวยากรณ์ที่ช่วยตอบ: คำเชื่อม (Connectors) และ Passive Voice</li>
+        </ul>
+      </div>
+      <div class="mod">
+        <div class="mn">MODULE 04</div>
+        <div class="mt">Section 3 — Academic &amp; Group Talk</div>
+        <ul>
+          <li>วิธีจดโน้ตตอนมีคนพูดหลายคนสลับกัน</li>
+          <li>คำตอบแบบคำเดียว และการจับ Keyword</li>
+          <li>ชุดฝึกคละชนิดคำถาม</li>
+        </ul>
+      </div>
+      <div class="mod">
+        <div class="mn">MODULE 05</div>
+        <div class="mt">Section 4 — Monologue &amp; Lecture</div>
+        <ul>
+          <li>The Monologue Strategy — ตามให้ทันการบรรยายยาวที่ไม่มีคนพูดขัด</li>
+          <li>ชุดฝึกเต็มพาร์ตพร้อมเฉลยละเอียด</li>
+        </ul>
+      </div>
+      <div class="mod">
+        <div class="mn">MODULE 06</div>
+        <div class="mt">Vocabulary &amp; Practice Sets</div>
+        <ul>
+          <li>คำศัพท์เชิงวิชาการหมวดที่ออกบ่อย: Social History · Technology · Environment</li>
+          <li>ชุดฝึกเต็มพาร์ตพร้อมคำอธิบาย</li>
+          <li>Predictive Listening — เดาชนิดคำตอบล่วงหน้าจากโครงสร้างประโยค</li>
+        </ul>
+      </div>
+      <p class="spec" style="margin:22px 0 0">
+        ดูเพิ่มที่ <a href="https://www.language-plan.com/courses/listening-for-band-7">หน้าคอร์ส Listening for Band 7</a>
+      </p>
     </div>
 
     <!-- SPEAKING -->
-    <div class="curric">
-      <div class="curric-head">
-        <h3>4 · Speaking Intensive (10-Day Challenge)</h3>
-        <p class="outcome">พูดต่อเนื่องไม่สะดุด ด้วยสูตรเล่าเรื่องที่บอกว่าประโยคถัดไปควรพูดอะไร</p>
-        <span class="spec">10+ บทเรียน · 40+ หัวข้อย่อย · วางเป็นเส้นทาง 10 วัน · ซื้อแยก 2,990 บาท</span>
+    <div class="cr">
+      <h3>4 · Speaking Intensive (10-Day Challenge)</h3>
+      <p class="out">พูดต่อเนื่องไม่สะดุด ด้วยสูตรเล่าเรื่องที่บอกว่าประโยคถัดไปควรพูดอะไร</p>
+      <p class="spec">10+ บทเรียน · 40+ หัวข้อย่อย · วางเป็นเส้นทาง 10 วัน · ซื้อแยก 2,990 บาท</p>
+
+      <div class="mod">
+        <div class="mn">เริ่มต้น</div>
+        <div class="mt">About IELTS Speaking</div>
+        <ul><li>โครงสร้างการสอบพูดทั้ง 3 พาร์ต และเกณฑ์ที่กรรมการใช้ตัดสิน</li></ul>
       </div>
-      <div class="curric-body">
-        <div class="mod">
-          <div class="m-n">เริ่มต้น</div>
-          <div class="m-t">About IELTS Speaking</div>
-          <ul><li>โครงสร้างการสอบพูดทั้ง 3 พาร์ต และเกณฑ์ที่กรรมการใช้ตัดสิน</li></ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">DAY 1</div>
-          <div class="m-t">พื้นฐานความไหลลื่น (Fluency)</div>
-          <ul>
-            <li>ใช้ Past Tense และ Future Tense ตอนพูดโดยไม่ต้องหยุดคิด</li>
-            <li>Discourse Markers — คำที่ช่วยซื้อเวลาและทำให้ฟังเป็นธรรมชาติ</li>
-            <li>ฝึกตอบ Part 1</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">DAY 2</div>
-          <div class="m-t">แสดงความเห็นและจัดระเบียบความคิด</div>
-          <ul><li>วิธีมีความเห็นได้ทันที แม้เจอหัวข้อที่ไม่เคยคิดมาก่อน</li></ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">DAY 3</div>
-          <div class="m-t">เจาะ Part 1 — Fluency และ Grammar</div>
-          <ul><li>ฝึกตอบให้ยาวกำลังดี ไม่สั้นจนเสียคะแนน</li></ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">DAY 4–5</div>
-          <div class="m-t">เทคนิคพูด 2 นาที (Part 2)</div>
-          <ul>
-            <li>วางโครงคำตอบให้เสร็จใน 1 นาทีที่ได้เตรียมตัว</li>
-            <li>Storytelling Formula สำหรับพูดต่อเนื่องจนครบเวลา</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">DAY 6</div>
-          <div class="m-t">คลังคำศัพท์ตามหมวดที่ออกบ่อย</div>
-          <ul><li>คน (People) · สถานที่ (Places) · กิจกรรม (Activities) · สิ่งของ (Objects)</li></ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">DAY 7</div>
-          <div class="m-t">Past Tenses และการเข้าสู่ Part 3</div>
-          <ul><li>เล่าเรื่องในอดีตให้ถูกกาล แล้วสลับโหมดไปตอบคำถามเชิงวิเคราะห์</li></ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">DAY 8–9</div>
-          <div class="m-t">Part 3 — ขยายความและให้เหตุผล</div>
-          <ul>
-            <li>ขยายคำตอบให้ลึกขึ้นโดยไม่วกวน</li>
-            <li>ให้เหตุผลสนับสนุน (Justification) แบบที่กรรมการให้คะแนน</li>
-          </ul>
-        </div>
-        <div class="mod">
-          <div class="m-n">DAY 10 &amp; สรุป</div>
-          <div class="m-t">สรุปไวยากรณ์ · ซ้อมเสมือนจริง · Cambridge 18</div>
-          <ul>
-            <li>สรุปไวยากรณ์ที่ใช้ในห้องสอบพูด</li>
-            <li>Full Simulation — ซ้อมเสมือนจริงตั้งแต่ต้นจนจบ</li>
-            <li>ตะลุยโจทย์จาก Cambridge 18</li>
-            <li>10 แพทเทิร์นจัดระเบียบความคิดที่ใช้ได้จริง</li>
-          </ul>
-        </div>
-        <hr class="rule-thin">
-        <p style="margin-bottom:0;font-size:15.5px;color:var(--ink-faint)">
-          ดูเพิ่มที่ <a href="https://www.language-plan.com/courses/0-day-speaking-challenge-for-ielts">หน้าคอร์ส Speaking Intensive for IELTS</a>
-        </p>
+      <div class="mod">
+        <div class="mn">DAY 1</div>
+        <div class="mt">พื้นฐานความไหลลื่น (Fluency)</div>
+        <ul>
+          <li>ใช้ Past Tense และ Future Tense ตอนพูดโดยไม่ต้องหยุดคิด</li>
+          <li>Discourse Markers — คำที่ช่วยซื้อเวลาและทำให้ฟังเป็นธรรมชาติ</li>
+          <li>ฝึกตอบ Part 1</li>
+        </ul>
       </div>
+      <div class="mod">
+        <div class="mn">DAY 2</div>
+        <div class="mt">แสดงความเห็นและจัดระเบียบความคิด</div>
+        <ul><li>วิธีมีความเห็นได้ทันที แม้เจอหัวข้อที่ไม่เคยคิดมาก่อน</li></ul>
+      </div>
+      <div class="mod">
+        <div class="mn">DAY 3</div>
+        <div class="mt">เจาะ Part 1 — Fluency และ Grammar</div>
+        <ul><li>ฝึกตอบให้ยาวกำลังดี ไม่สั้นจนเสียคะแนน</li></ul>
+      </div>
+      <div class="mod">
+        <div class="mn">DAY 4–5</div>
+        <div class="mt">เทคนิคพูด 2 นาที (Part 2)</div>
+        <ul>
+          <li>วางโครงคำตอบให้เสร็จใน 1 นาทีที่ได้เตรียมตัว</li>
+          <li>Storytelling Formula สำหรับพูดต่อเนื่องจนครบเวลา</li>
+        </ul>
+      </div>
+      <div class="mod">
+        <div class="mn">DAY 6</div>
+        <div class="mt">คลังคำศัพท์ตามหมวดที่ออกบ่อย</div>
+        <ul><li>คน (People) · สถานที่ (Places) · กิจกรรม (Activities) · สิ่งของ (Objects)</li></ul>
+      </div>
+      <div class="mod">
+        <div class="mn">DAY 7</div>
+        <div class="mt">Past Tenses และการเข้าสู่ Part 3</div>
+        <ul><li>เล่าเรื่องในอดีตให้ถูกกาล แล้วสลับโหมดไปตอบคำถามเชิงวิเคราะห์</li></ul>
+      </div>
+      <div class="mod">
+        <div class="mn">DAY 8–9</div>
+        <div class="mt">Part 3 — ขยายความและให้เหตุผล</div>
+        <ul>
+          <li>ขยายคำตอบให้ลึกขึ้นโดยไม่วกวน</li>
+          <li>ให้เหตุผลสนับสนุน (Justification) แบบที่กรรมการให้คะแนน</li>
+        </ul>
+      </div>
+      <div class="mod">
+        <div class="mn">DAY 10 &amp; สรุป</div>
+        <div class="mt">สรุปไวยากรณ์ · ซ้อมเสมือนจริง · Cambridge 18</div>
+        <ul>
+          <li>สรุปไวยากรณ์ที่ใช้ในห้องสอบพูด</li>
+          <li>Full Simulation — ซ้อมเสมือนจริงตั้งแต่ต้นจนจบ</li>
+          <li>ตะลุยโจทย์จาก Cambridge 18</li>
+          <li>10 แพทเทิร์นจัดระเบียบความคิดที่ใช้ได้จริง</li>
+        </ul>
+      </div>
+      <p class="spec" style="margin:22px 0 0">
+        ดูเพิ่มที่ <a href="https://www.language-plan.com/courses/0-day-speaking-challenge-for-ielts">หน้าคอร์ส Speaking Intensive for IELTS</a>
+      </p>
     </div>
   </div>
 </section>
 
 <!-- ============================ 05 ============================ -->
 <section id="packages">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">05</span>
-      <h2 class="sec-title">แพ็กเกจและราคา</h2>
-      <p class="sec-sub">
-        ทุกแพ็กเกจใช้เนื้อหาชุดเดียวกับคอร์สแยก ต่างกันที่จำนวนทักษะที่เปิดให้ กับระยะเวลาเข้าเรียน
-        ราคาที่เห็นคือราคาสุทธิ ไม่มีค่าอะไรเพิ่มทีหลัง
-      </p>
-    </div>
+  <div class="w">
+    <span class="n">05</span>
+    <h2>แพ็กเกจและราคา</h2>
+    <p class="sub">
+      ทุกแพ็กเกจใช้เนื้อหาชุดเดียวกับคอร์สแยก ต่างกันที่จำนวนทักษะที่เปิดให้ กับระยะเวลาเข้าเรียน
+      ราคาที่เห็นคือราคาสุทธิ ไม่มีค่าอะไรเพิ่มทีหลัง
+    </p>
 
     <!-- ALL SKILLS -->
-    <article class="pkg feature">
-      <div class="pkg-head">
-        <div>
-          <h3>All Skills — ครบทั้ง 4 ทักษะ</h3>
-          <p class="pkg-desc">Writing · Reading · Listening · Speaking</p>
+    <div class="pk rec">
+      <p class="tag">แนะนำ · คุ้มที่สุด</p>
+      <h3>All Skills — ครบทั้ง 4 ทักษะ</h3>
+      <p class="desc">Writing · Reading · Listening · Speaking</p>
+      <p class="meta">
+        <span>เนื้อหารวม</span> 74+ ชั่วโมง<br>
+        <span>ใช้เวลาราว</span> 3 ชม./สัปดาห์ ถ้าเลือกแผน 6 เดือน · 6 ชม./สัปดาห์ ถ้าเลือกแผน 3 เดือน<br>
+        <span>ตรวจงานเขียน</span> 12 ฉบับ (6 เดือน) · 8 ฉบับ (3 เดือน)
+      </p>
+      <div class="prices">
+        <div class="pr">
+          <div class="t">6 เดือน · 180 วัน</div>
+          <div class="a">8,990 <small>บาท</small></div>
+          <div class="m">ตกราว 1,498 บาท/เดือน</div>
+          <a class="btn fill sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 6 เดือน</a>
         </div>
-        <span class="pkg-tag">คุ้มที่สุด</span>
+        <div class="pr">
+          <div class="t">3 เดือน · 90 วัน</div>
+          <div class="a">7,990 <small>บาท</small></div>
+          <div class="m">ตกราว 2,663 บาท/เดือน</div>
+          <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 3 เดือน</a>
+        </div>
       </div>
-      <div class="pkg-body">
-        <div class="spec-strip">
-          <div><div class="sl">รูปแบบ</div><div class="sv">เรียนเองตามเวลาสะดวก</div></div>
-          <div><div class="sl">เนื้อหารวม</div><div class="sv">74+ ชั่วโมง</div></div>
-          <div><div class="sl">ต้องใช้เวลาราว</div><div class="sv">3 ชม./สัปดาห์ (แผน 6 เดือน)<br>6 ชม./สัปดาห์ (แผน 3 เดือน)</div></div>
-          <div><div class="sl">ตรวจงานเขียน</div><div class="sv">12 ฉบับ (6 เดือน)<br>8 ฉบับ (3 เดือน)</div></div>
-        </div>
-        <div class="pkg-cols">
-          <div class="pkg-col">
-            <div class="term">6 เดือน · 180 วัน</div>
-            <div class="amt">8,990 <small>บาท</small></div>
-            <div class="per">ตกราว 1,498 บาท/เดือน</div>
-            <a class="btn btn-solid btn-sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 6 เดือน</a>
-          </div>
-          <div class="pkg-col">
-            <div class="term">3 เดือน · 90 วัน</div>
-            <div class="amt">7,990 <small>บาท</small></div>
-            <div class="per">ตกราว 2,663 บาท/เดือน</div>
-            <a class="btn btn-ghost btn-sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 3 เดือน</a>
-          </div>
-        </div>
-        <ul class="inc">
-          <li>เนื้อหาครบทั้ง 4 ทักษะ รวมกว่า 74 ชั่วโมง</li>
-          <li>ส่งงานเขียนให้ครูตรวจ <strong>12 ฉบับ</strong> (แผน 6 เดือน) หรือ <strong>8 ฉบับ</strong> (แผน 3 เดือน) พร้อมคอมเมนต์ภาษาไทย</li>
-          <li>ถามครูทาง LINE ส่วนตัวได้ตลอดอายุคอร์ส</li>
-          <li>เอกสาร PDF ครบทุกทักษะ โหลดเก็บและปรินต์ได้</li>
-          <li>คลังข้อสอบ Reading 500+ ข้อ และแบบฝึกทั้ง Computer-based / Paper-based</li>
-          <li>แผน 6 เดือนแถม <strong>คอร์ส Pre-Inter Grammar ฟรี</strong></li>
-          <li>ถูกกว่าซื้อแยกครบ 4 คอร์ส <strong>4,970 บาท</strong> (ดูหัวข้อ 07)</li>
-        </ul>
-      </div>
-    </article>
+      <ul class="plain">
+        <li>เนื้อหาครบทั้ง 4 ทักษะ รวมกว่า 74 ชั่วโมง</li>
+        <li>ส่งงานเขียนให้ครูตรวจ 12 ฉบับ (แผน 6 เดือน) หรือ 8 ฉบับ (แผน 3 เดือน) พร้อมคอมเมนต์ภาษาไทย</li>
+        <li>ถามครูทาง LINE ส่วนตัวได้ตลอดอายุคอร์ส</li>
+        <li>เอกสาร PDF ครบทุกทักษะ โหลดเก็บและปรินต์ได้</li>
+        <li>คลังข้อสอบ Reading 500+ ข้อ และแบบฝึกทั้ง Computer-based / Paper-based</li>
+        <li>แผน 6 เดือนแถมคอร์ส Pre-Inter Grammar ฟรี</li>
+        <li>ถูกกว่าซื้อแยกครบ 4 คอร์ส 4,970 บาท (ดูหัวข้อ 07)</li>
+      </ul>
+    </div>
 
     <!-- 3 SKILLS -->
-    <article class="pkg">
-      <div class="pkg-head">
-        <div>
-          <h3>3 Skills — เลือกเอง 3 ทักษะ</h3>
-          <p class="pkg-desc">เลือก 3 จาก Writing · Reading · Listening · Speaking</p>
+    <div class="pk">
+      <h3>3 Skills — เลือกเอง 3 ทักษะ</h3>
+      <p class="desc">เลือก 3 จาก Writing · Reading · Listening · Speaking</p>
+      <p class="meta">
+        <span>เนื้อหารวม</span> ราว 47–74 ชั่วโมง แล้วแต่ทักษะที่เลือก<br>
+        <span>ตรวจงานเขียน</span> เฉพาะเมื่อเลือก Writing
+      </p>
+      <div class="prices">
+        <div class="pr">
+          <div class="t">6 เดือน · 180 วัน</div>
+          <div class="a">8,590 <small>บาท</small></div>
+          <div class="m">ตกราว 1,432 บาท/เดือน</div>
+          <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 6 เดือน</a>
+        </div>
+        <div class="pr">
+          <div class="t">3 เดือน · 90 วัน</div>
+          <div class="a">7,590 <small>บาท</small></div>
+          <div class="m">ตกราว 2,530 บาท/เดือน</div>
+          <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 3 เดือน</a>
         </div>
       </div>
-      <div class="pkg-body">
-        <div class="spec-strip">
-          <div><div class="sl">รูปแบบ</div><div class="sv">เรียนเองตามเวลาสะดวก</div></div>
-          <div><div class="sl">เนื้อหารวม</div><div class="sv">ราว 47–74 ชม. แล้วแต่ทักษะที่เลือก</div></div>
-          <div><div class="sl">เลือกทักษะ</div><div class="sv">3 จาก 4</div></div>
-          <div><div class="sl">ตรวจงานเขียน</div><div class="sv">เฉพาะเมื่อเลือก Writing</div></div>
-        </div>
-        <div class="pkg-cols">
-          <div class="pkg-col">
-            <div class="term">6 เดือน · 180 วัน</div>
-            <div class="amt">8,590 <small>บาท</small></div>
-            <div class="per">ตกราว 1,432 บาท/เดือน</div>
-            <a class="btn btn-ghost btn-sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 6 เดือน</a>
-          </div>
-          <div class="pkg-col">
-            <div class="term">3 เดือน · 90 วัน</div>
-            <div class="amt">7,590 <small>บาท</small></div>
-            <div class="per">ตกราว 2,530 บาท/เดือน</div>
-            <a class="btn btn-ghost btn-sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 3 เดือน</a>
-          </div>
-        </div>
-        <ul class="inc">
-          <li>เลือกได้ 3 ทักษะจาก Writing · Reading · Listening · Speaking</li>
-          <li>ถ้าเลือก Writing ด้วย จะได้สิทธิ์ส่งงานเขียนให้ตรวจตามแผนที่สมัคร</li>
-          <li>ถามครูทาง LINE ส่วนตัวได้ตลอดอายุคอร์ส</li>
-          <li>เอกสาร PDF และคลังแบบฝึกของทักษะที่เลือก</li>
-        </ul>
-        <div class="note" style="margin-bottom:0">
-          <span class="note-t">เทียบราคากันก่อน</span>
-          <p>
-            แผน 6 เดือนของ 3 Skills ต่างจาก All Skills แค่ <strong>400 บาท</strong> (8,590 กับ 8,990)
-            ถ้ากำลังลังเลอยู่ระหว่างสองตัวนี้ในแผน 6 เดือน เอา All Skills ไปเลยน่าจะคุ้มกว่า
-            เพราะได้เพิ่มอีกทักษะเต็ม ๆ แถมได้ Pre-Inter Grammar ฟรีด้วย
-          </p>
-        </div>
+      <ul class="plain">
+        <li>เลือกได้ 3 ทักษะจาก Writing · Reading · Listening · Speaking</li>
+        <li>ถ้าเลือก Writing ด้วย จะได้สิทธิ์ส่งงานเขียนให้ตรวจตามแผนที่สมัคร</li>
+        <li>ถามครูทาง LINE ส่วนตัวได้ตลอดอายุคอร์ส</li>
+        <li>เอกสาร PDF และคลังแบบฝึกของทักษะที่เลือก</li>
+      </ul>
+      <div class="note">
+        <b>เทียบราคากันก่อน</b>
+        <p>
+          แผน 6 เดือนของ 3 Skills ต่างจาก All Skills แค่ 400 บาท (8,590 กับ 8,990)
+          ถ้ากำลังลังเลอยู่ระหว่างสองตัวนี้ในแผน 6 เดือน เอา All Skills ไปเลยน่าจะคุ้มกว่า
+          เพราะได้เพิ่มอีกทักษะเต็ม ๆ แถมได้ Pre-Inter Grammar ฟรีด้วย
+        </p>
       </div>
-    </article>
+    </div>
 
     <!-- WRITING + 1 -->
-    <article class="pkg">
-      <div class="pkg-head">
-        <div>
-          <h3>Writing + Reading หรือ Writing + Speaking</h3>
-          <p class="pkg-desc">2 ทักษะ โดยมี Writing เป็นตัวหลัก</p>
+    <div class="pk">
+      <h3>Writing + Reading หรือ Writing + Speaking</h3>
+      <p class="desc">2 ทักษะ โดยมี Writing เป็นตัวหลัก</p>
+      <p class="meta">
+        <span>เนื้อหารวม</span> Writing 37 ชั่วโมง + อีก 1 ทักษะที่เลือก<br>
+        <span>ตรวจงานเขียน</span> มี
+      </p>
+      <div class="prices">
+        <div class="pr">
+          <div class="t">6 เดือน · 180 วัน</div>
+          <div class="a">6,990 <small>บาท</small></div>
+          <div class="m">ตกราว 1,165 บาท/เดือน</div>
+          <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 6 เดือน</a>
+        </div>
+        <div class="pr">
+          <div class="t">3 เดือน · 90 วัน</div>
+          <div class="a">5,990 <small>บาท</small></div>
+          <div class="m">ตกราว 1,997 บาท/เดือน</div>
+          <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 3 เดือน</a>
         </div>
       </div>
-      <div class="pkg-body">
-        <div class="spec-strip">
-          <div><div class="sl">รูปแบบ</div><div class="sv">เรียนเองตามเวลาสะดวก</div></div>
-          <div><div class="sl">เนื้อหารวม</div><div class="sv">Writing 37 ชม. + อีก 1 ทักษะ</div></div>
-          <div><div class="sl">เลือกทักษะ</div><div class="sv">Writing + Reading หรือ Speaking</div></div>
-          <div><div class="sl">ตรวจงานเขียน</div><div class="sv">มี</div></div>
-        </div>
-        <div class="pkg-cols">
-          <div class="pkg-col">
-            <div class="term">6 เดือน · 180 วัน</div>
-            <div class="amt">6,990 <small>บาท</small></div>
-            <div class="per">ตกราว 1,165 บาท/เดือน</div>
-            <a class="btn btn-ghost btn-sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 6 เดือน</a>
-          </div>
-          <div class="pkg-col">
-            <div class="term">3 เดือน · 90 วัน</div>
-            <div class="amt">5,990 <small>บาท</small></div>
-            <div class="per">ตกราว 1,997 บาท/เดือน</div>
-            <a class="btn btn-ghost btn-sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 3 เดือน</a>
-          </div>
-        </div>
-        <ul class="inc">
-          <li>ได้คอร์ส Writing Intensive เต็ม (97 บทเรียน · 37 ชั่วโมง) เป็นตัวหลัก</li>
-          <li>เลือกเพิ่มอีก 1 ทักษะ ระหว่าง Reading กับ Speaking</li>
-          <li>รวมสิทธิ์ส่งงานเขียนให้ตรวจพร้อมคอมเมนต์ภาษาไทย</li>
-          <li>ถามครูทาง LINE ส่วนตัวได้ตลอดอายุคอร์ส</li>
-          <li>เหมาะกับคนที่ Reading กับ Listening พอไปได้แล้ว แต่ติดที่ Writing</li>
-        </ul>
-      </div>
-    </article>
+      <ul class="plain">
+        <li>ได้คอร์ส Writing Intensive เต็ม (97 บทเรียน · 37 ชั่วโมง) เป็นตัวหลัก</li>
+        <li>เลือกเพิ่มอีก 1 ทักษะ ระหว่าง Reading กับ Speaking</li>
+        <li>รวมสิทธิ์ส่งงานเขียนให้ตรวจพร้อมคอมเมนต์ภาษาไทย</li>
+        <li>ถามครูทาง LINE ส่วนตัวได้ตลอดอายุคอร์ส</li>
+        <li>เหมาะกับคนที่ Reading กับ Listening พอไปได้แล้ว แต่ติดที่ Writing</li>
+      </ul>
+    </div>
 
-    <!-- 2 SKILLS NO WRITING -->
-    <article class="pkg">
-      <div class="pkg-head">
-        <div>
-          <h3>2 Skills (ไม่รวม Writing)</h3>
-          <p class="pkg-desc">เลือก 2 จาก Reading · Listening · Speaking</p>
+    <!-- 2 SKILLS -->
+    <div class="pk">
+      <h3>2 Skills (ไม่รวม Writing)</h3>
+      <p class="desc">เลือก 2 จาก Reading · Listening · Speaking</p>
+      <p class="meta">
+        <span>เนื้อหารวม</span> ราว 10–37 ชั่วโมง แล้วแต่ทักษะที่เลือก<br>
+        <span>ตรวจงานเขียน</span> ไม่มี
+      </p>
+      <div class="prices">
+        <div class="pr">
+          <div class="t">6 เดือน · 180 วัน</div>
+          <div class="a">5,590 <small>บาท</small></div>
+          <div class="m">ตกราว 932 บาท/เดือน</div>
+          <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 6 เดือน</a>
         </div>
-        <span class="pkg-tag" style="background:var(--paper-2);color:var(--ink-soft)">ราคาเริ่มต้น</span>
+        <div class="pr">
+          <div class="t">3 เดือน · 90 วัน</div>
+          <div class="a">4,990 <small>บาท</small></div>
+          <div class="m">ตกราว 1,663 บาท/เดือน</div>
+          <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 3 เดือน</a>
+        </div>
       </div>
-      <div class="pkg-body">
-        <div class="spec-strip">
-          <div><div class="sl">รูปแบบ</div><div class="sv">เรียนเองตามเวลาสะดวก</div></div>
-          <div><div class="sl">เนื้อหารวม</div><div class="sv">ราว 10–37 ชม. แล้วแต่ทักษะที่เลือก</div></div>
-          <div><div class="sl">เลือกทักษะ</div><div class="sv">2 จาก Reading / Listening / Speaking</div></div>
-          <div><div class="sl">ตรวจงานเขียน</div><div class="sv">ไม่มี</div></div>
-        </div>
-        <div class="pkg-cols">
-          <div class="pkg-col">
-            <div class="term">6 เดือน · 180 วัน</div>
-            <div class="amt">5,590 <small>บาท</small></div>
-            <div class="per">ตกราว 932 บาท/เดือน</div>
-            <a class="btn btn-ghost btn-sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 6 เดือน</a>
-          </div>
-          <div class="pkg-col">
-            <div class="term">3 เดือน · 90 วัน</div>
-            <div class="amt">4,990 <small>บาท</small></div>
-            <div class="per">ตกราว 1,663 บาท/เดือน</div>
-            <a class="btn btn-ghost btn-sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 3 เดือน</a>
-          </div>
-        </div>
-        <ul class="inc">
-          <li>เลือก 2 ทักษะจาก Reading · Listening · Speaking</li>
-          <li>เอกสาร PDF และคลังแบบฝึกของทักษะที่เลือก</li>
-          <li>ถามครูทาง LINE ส่วนตัวได้ตลอดอายุคอร์ส</li>
-          <li><strong>ไม่มีการตรวจงานเขียน</strong> เพราะแพ็กเกจนี้ไม่มี Writing</li>
-        </ul>
-      </div>
-    </article>
+      <ul class="plain">
+        <li>เลือก 2 ทักษะจาก Reading · Listening · Speaking</li>
+        <li>เอกสาร PDF และคลังแบบฝึกของทักษะที่เลือก</li>
+        <li>ถามครูทาง LINE ส่วนตัวได้ตลอดอายุคอร์ส</li>
+        <li>ไม่มีการตรวจงานเขียน เพราะแพ็กเกจนี้ไม่มี Writing</li>
+      </ul>
+    </div>
 
     <div class="note">
-      <span class="note-t">ทำไมแพ็กเกจต้องทัก LINE ไม่ใช่กดซื้อเองบนเว็บ</span>
+      <b>ทำไมแพ็กเกจต้องทัก LINE ไม่ใช่กดซื้อเองบนเว็บ</b>
       <p>
         เพราะแพ็กเกจให้คุณเลือกทักษะเอง ระบบหน้าเว็บเลยเปิดสิทธิ์อัตโนมัติให้ไม่ได้
         ครูจะเป็นคนเปิดคอร์สที่คุณเลือกให้ในบัญชีของคุณ ถ้าไม่อยากคุยยาว
         พิมพ์แค่ชื่อแพ็กเกจ ระยะเวลา และทักษะที่เลือกก็พอ เช่น
-        <em>“3 Skills · 6 เดือน · Writing + Reading + Speaking”</em><br>
+        “3 Skills · 6 เดือน · Writing + Reading + Speaking”
         ถ้าอยากกดซื้อเองโดยไม่ต้องคุยกับใครเลย เลือก
         <a href="#single">คอร์สเดี่ยวในหัวข้อ 13</a> ซื้อและจ่ายเองได้บนเว็บทันที
       </p>
     </div>
 
-    <div class="offramp">
-      <div>
-        <p class="or-t">ยังไม่พร้อมสมัคร?</p>
-        <p>
-          กดดูบทเรียนฟรีในหน้าคอร์สก่อนได้ ไม่ต้องทักใคร ไม่ต้องกรอกอะไร
-          หรือจะบุ๊กมาร์กหน้านี้ไว้อ่านต่อทีหลังก็ได้ — ราคากับเงื่อนไขทั้งหมดอยู่ครบตรงนี้แล้ว
-        </p>
-      </div>
-      <div class="btn-row">
-        <a class="btn btn-ghost btn-sm" href="https://www.language-plan.com/collections">ดูคอร์สทั้งหมด</a>
-        <a class="btn btn-ghost btn-sm" href="#curriculum">กลับไปอ่านเนื้อหา</a>
-      </div>
+    <div class="note">
+      <b>ยังไม่พร้อมสมัคร?</b>
+      <p>
+        กดดูบทเรียนฟรีใน <a href="https://www.language-plan.com/collections">หน้าคอร์ส</a> ก่อนได้
+        ไม่ต้องทักใคร ไม่ต้องกรอกอะไร หรือจะบุ๊กมาร์กหน้านี้ไว้อ่านต่อทีหลังก็ได้ —
+        ราคากับเงื่อนไขทั้งหมดอยู่ครบตรงนี้แล้ว
+      </p>
     </div>
   </div>
 </section>
 
 <!-- ============================ 06 ============================ -->
 <section id="compare">
-  <div class="wrap-wide">
-    <div class="sec-head">
-      <span class="sec-num">06</span>
-      <h2 class="sec-title">ตารางเทียบทุกแพ็กเกจ</h2>
-      <p class="sec-sub">ตารางเดียวจบ เอาไว้เทียบก่อนตัดสินใจ หรือแคปเก็บไว้ดูทีหลัง</p>
-    </div>
+  <div class="w-wide">
+    <span class="n">06</span>
+    <h2>ตารางเทียบทุกแพ็กเกจ</h2>
+    <p class="sub">ตารางเดียวจบ เอาไว้เทียบก่อนตัดสินใจ หรือแคปเก็บไว้ดูทีหลัง</p>
 
-    <div class="tbl-scroll">
+    <div class="scroll">
       <table>
-        <caption>ทุกแพ็กเกจ ทุกระยะเวลา</caption>
         <thead>
           <tr>
-            <th style="width:22%">แพ็กเกจ</th>
+            <th style="width:24%">แพ็กเกจ</th>
             <th class="c">ทักษะ</th>
             <th class="c">มี Writing</th>
             <th class="c">ตรวจงานเขียน</th>
             <th class="c">3 เดือน</th>
             <th class="c">6 เดือน</th>
-            <th class="c">แถม Pre-Inter Grammar</th>
+            <th class="c">แถม Grammar</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="hl">
-            <td><strong>All Skills</strong><br><span style="font-size:14px;color:var(--ink-faint)">ครบ 4 ทักษะ</span></td>
+          <tr>
+            <td><b>All Skills</b><br><span class="muted">ครบ 4 ทักษะ</span></td>
             <td class="c">4</td>
-            <td class="c"><span class="yes">มี</span></td>
+            <td class="c">มี</td>
             <td class="c">8 / 12 ฉบับ</td>
-            <td class="c price">7,990</td>
-            <td class="c price">8,990</td>
-            <td class="c"><span class="yes">แผน 6 เดือน</span></td>
+            <td class="c p">7,990</td>
+            <td class="c p">8,990</td>
+            <td class="c">แผน 6 เดือน</td>
           </tr>
           <tr>
-            <td><strong>3 Skills</strong><br><span style="font-size:14px;color:var(--ink-faint)">เลือก 3 จาก 4</span></td>
+            <td><b>3 Skills</b><br><span class="muted">เลือก 3 จาก 4</span></td>
             <td class="c">3</td>
-            <td class="c"><span class="pick">เลือกได้</span></td>
+            <td class="c">เลือกได้</td>
             <td class="c">ถ้าเลือก Writing</td>
-            <td class="c price">7,590</td>
-            <td class="c price">8,590</td>
-            <td class="c"><span class="no">—</span></td>
+            <td class="c p">7,590</td>
+            <td class="c p">8,590</td>
+            <td class="c muted">—</td>
           </tr>
           <tr>
-            <td><strong>Writing + Reading<br>หรือ Writing + Speaking</strong></td>
+            <td><b>Writing + Reading<br>หรือ Writing + Speaking</b></td>
             <td class="c">2</td>
-            <td class="c"><span class="yes">มี</span></td>
-            <td class="c"><span class="yes">มี</span></td>
-            <td class="c price">5,990</td>
-            <td class="c price">6,990</td>
-            <td class="c"><span class="no">—</span></td>
+            <td class="c">มี</td>
+            <td class="c">มี</td>
+            <td class="c p">5,990</td>
+            <td class="c p">6,990</td>
+            <td class="c muted">—</td>
           </tr>
           <tr>
-            <td><strong>2 Skills (ไม่รวม Writing)</strong><br><span style="font-size:14px;color:var(--ink-faint)">เลือก 2 จาก Reading/Listening/Speaking</span></td>
+            <td><b>2 Skills (ไม่รวม Writing)</b><br><span class="muted">เลือก 2 จาก Reading / Listening / Speaking</span></td>
             <td class="c">2</td>
-            <td class="c"><span class="no">ไม่มี</span></td>
-            <td class="c"><span class="no">ไม่มี</span></td>
-            <td class="c price">4,990</td>
-            <td class="c price">5,590</td>
-            <td class="c"><span class="no">—</span></td>
+            <td class="c muted">ไม่มี</td>
+            <td class="c muted">ไม่มี</td>
+            <td class="c p">4,990</td>
+            <td class="c p">5,590</td>
+            <td class="c muted">—</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="tbl-scroll">
+    <h3 class="blk">สิ่งที่ได้เหมือนกันทุกแพ็กเกจ</h3>
+    <div class="scroll">
       <table>
-        <caption>สิ่งที่ได้เหมือนกันทุกแพ็กเกจ</caption>
         <thead>
-          <tr><th style="width:34%">รายการ</th><th>รายละเอียด</th></tr>
+          <tr><th style="width:32%">รายการ</th><th>รายละเอียด</th></tr>
         </thead>
         <tbody>
           <tr><td>รูปแบบการเรียน</td><td>ออนไลน์ เรียนตอนไหนก็ได้ ย้อนดูซ้ำได้ไม่จำกัดจนกว่าคอร์สจะหมดอายุ</td></tr>
@@ -1071,40 +871,37 @@
 
 <!-- ============================ 07 ============================ -->
 <section id="saving">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">07</span>
-      <h2 class="sec-title">ถูกกว่าซื้อแยกเท่าไหร่</h2>
-      <p class="sec-sub">
-        หน้าเดิมบอกแค่ว่า “มีส่วนลดพิเศษ” แต่ไม่เคยบอกว่าเท่าไหร่ ข้างล่างคือตัวเลขจริง
-        คิดจากราคาคอร์สเดี่ยวที่ประกาศอยู่บนเว็บ
-      </p>
-    </div>
+  <div class="w">
+    <span class="n">07</span>
+    <h2>ถูกกว่าซื้อแยกเท่าไหร่</h2>
+    <p class="sub">
+      หน้าเดิมบอกแค่ว่า “มีส่วนลดพิเศษ” แต่ไม่เคยบอกว่าเท่าไหร่ ข้างล่างคือตัวเลขจริง
+      คิดจากราคาคอร์สเดี่ยวที่ประกาศอยู่บนเว็บ
+    </p>
 
-    <div class="tbl-scroll">
+    <div class="scroll">
       <table>
-        <caption>ราคาคอร์สเดี่ยว เทียบกับ All Skills</caption>
         <thead>
-          <tr><th style="width:44%">รายการ</th><th class="c" style="width:20%">ราคา (บาท)</th><th>หมายเหตุ</th></tr>
+          <tr><th style="width:46%">รายการ</th><th class="c" style="width:20%">ราคา (บาท)</th><th>หมายเหตุ</th></tr>
         </thead>
         <tbody>
-          <tr><td>IELTS Academic Writing – Intensive</td><td class="c price">4,990</td><td>97 บทเรียน · 37 ชั่วโมง</td></tr>
-          <tr><td>Intensive Academic Reading for IELTS</td><td class="c price">3,990</td><td>27 ชั่วโมง · คลังข้อสอบ 500+ ข้อ</td></tr>
-          <tr><td>Speaking Intensive for IELTS</td><td class="c price">2,990</td><td>10-Day Challenge · 40+ หัวข้อย่อย</td></tr>
-          <tr><td>Listening for Band 7</td><td class="c price">1,990</td><td>28 บทเรียน · 10 ชั่วโมง</td></tr>
-          <tr class="hl"><td><strong>ซื้อแยกครบ 4 คอร์ส</strong></td><td class="c price"><strong>13,960</strong></td><td>ราคาเต็มรวมกัน</td></tr>
-          <tr class="hl"><td><strong>All Skills · 6 เดือน</strong></td><td class="c price"><strong>8,990</strong></td><td>เนื้อหาชุดเดียวกันทั้งหมด</td></tr>
-          <tr class="hl">
-            <td><strong>ถูกกว่า</strong></td>
-            <td class="c price" style="color:var(--green)"><strong>4,970</strong></td>
-            <td style="color:var(--green);font-weight:600">ประหยัดราว 36% แถมได้ Pre-Inter Grammar ฟรีอีก</td>
+          <tr><td>IELTS Academic Writing – Intensive</td><td class="c p">4,990</td><td class="muted">97 บทเรียน · 37 ชั่วโมง</td></tr>
+          <tr><td>Intensive Academic Reading for IELTS</td><td class="c p">3,990</td><td class="muted">27 ชั่วโมง · คลังข้อสอบ 500+ ข้อ</td></tr>
+          <tr><td>Speaking Intensive for IELTS</td><td class="c p">2,990</td><td class="muted">10-Day Challenge · 40+ หัวข้อย่อย</td></tr>
+          <tr><td>Listening for Band 7</td><td class="c p">1,990</td><td class="muted">28 บทเรียน · 10 ชั่วโมง</td></tr>
+          <tr class="tot"><td>ซื้อแยกครบ 4 คอร์ส</td><td class="c p">13,960</td><td>ราคาเต็มรวมกัน</td></tr>
+          <tr><td>All Skills · 6 เดือน</td><td class="c p">8,990</td><td>เนื้อหาชุดเดียวกันทั้งหมด</td></tr>
+          <tr class="tot">
+            <td>ถูกกว่า</td>
+            <td class="c p" style="color:var(--blue)">4,970</td>
+            <td style="color:var(--blue)">ประหยัดราว 36% แถมได้ Pre-Inter Grammar ฟรีอีก</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="note good">
-      <span class="note-t">แต่ส่วนลดนี้ไม่ได้คุ้มกับทุกคน</span>
+    <div class="note">
+      <b>แต่ส่วนลดนี้ไม่ได้คุ้มกับทุกคน</b>
       <p>
         คอร์สเดี่ยวก็เข้าเรียนได้ 6 เดือนเหมือนกัน ตัวเลขข้างบนเลยเทียบกับแพ็กเกจ 6 เดือนเป็นหลัก
         ถ้าคุณตั้งใจจะเรียนแค่ทักษะเดียวจริง ๆ ซื้อคอร์สเดี่ยวถูกกว่าแน่นอน —
@@ -1117,54 +914,51 @@
 
 <!-- ============================ 08 ============================ -->
 <section id="choose">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">08</span>
-      <h2 class="sec-title">เลือกแพ็กเกจไหนดี</h2>
-      <p class="sec-sub">หาบรรทัดที่ใกล้เคียงกับคุณที่สุด แล้วดูช่องขวา</p>
-    </div>
+  <div class="w-wide">
+    <span class="n">08</span>
+    <h2>เลือกแพ็กเกจไหนดี</h2>
+    <p class="sub">หาบรรทัดที่ใกล้เคียงกับคุณที่สุด แล้วดูช่องขวา</p>
 
-    <div class="tbl-scroll">
+    <div class="scroll">
       <table>
-        <caption>ถ้าคุณเป็นแบบนี้ ให้เลือกแบบนี้</caption>
         <thead>
-          <tr><th style="width:44%">สถานการณ์ของคุณ</th><th style="width:26%">แนะนำ</th><th>เพราะ</th></tr>
+          <tr><th style="width:42%">สถานการณ์ของคุณ</th><th style="width:24%">แนะนำ</th><th>เพราะ</th></tr>
         </thead>
         <tbody>
-          <tr class="hl">
+          <tr>
             <td>ยังไม่เคยสอบ หรือสอบแล้วได้ต่ำกว่า 6.0 และไม่รู้ว่าอ่อนตรงไหน</td>
-            <td><strong>All Skills · 6 เดือน</strong></td>
+            <td><b>All Skills · 6 เดือน</b></td>
             <td>ยังไม่รู้จุดอ่อน การตัดทักษะออกก็คือการเดา และ 6 เดือนทำให้ไล่เก็บได้ครบโดยไม่ต้องรีบ</td>
           </tr>
           <tr>
             <td>ได้ 6.0–6.5 แล้ว แต่ Writing ยังไม่ถึง 6.0 สักที</td>
-            <td><strong>Writing + Reading</strong> หรือ <strong>Writing + Speaking</strong></td>
+            <td><b>Writing + Reading</b> หรือ <b>Writing + Speaking</b></td>
             <td>Writing ต้องมีคนตรวจถึงจะขึ้น ลงเฉพาะจุดคุ้มกว่าซื้อครบแล้วไม่ได้เรียน</td>
           </tr>
           <tr>
             <td>Writing พอไหว แต่ Reading อ่านไม่ทัน และ Listening โดนหลอกบ่อย</td>
-            <td><strong>2 Skills (ไม่รวม Writing)</strong></td>
+            <td><b>2 Skills (ไม่รวม Writing)</b></td>
             <td>สองทักษะนี้ฝึกเองได้เยอะที่สุดถ้าได้เทคนิคที่ถูก เลยไม่ต้องจ่ายค่าตรวจงานเขียน</td>
           </tr>
           <tr>
             <td>อยากได้ครบ แต่มั่นใจว่ามีทักษะหนึ่งแข็งอยู่แล้วจริง ๆ</td>
-            <td><strong>3 Skills</strong></td>
-            <td>ถูกกว่า All Skills นิดหน่อย แต่แผน 6 เดือนต่างกันแค่ 400 บาท ลองชั่งดูก่อน (หัวข้อ 05)</td>
+            <td><b>3 Skills</b></td>
+            <td>ถูกกว่า All Skills นิดหน่อย แต่แผน 6 เดือนต่างกันแค่ 400 บาท ลองชั่งดูก่อน</td>
           </tr>
           <tr>
             <td>จองวันสอบแล้ว เหลือเวลาไม่ถึง 3 เดือน</td>
-            <td><strong>แผน 3 เดือน</strong></td>
+            <td><b>แผน 3 เดือน</b></td>
             <td>จ่ายน้อยกว่า และเวลาที่บีบช่วยให้มีวินัยขึ้น แต่ต้องรับได้ว่าตรวจงานเขียนได้น้อยลง</td>
           </tr>
           <tr>
             <td>ยังไม่กำหนดวันสอบ หรืออาจต้องสอบซ้ำ</td>
-            <td><strong>แผน 6 เดือน</strong></td>
+            <td><b>แผน 6 เดือน</b></td>
             <td>เพิ่มจากแผน 3 เดือนแค่ 600–1,000 บาท แต่ได้เวลาเท่าตัวและได้ตรวจงานเขียนเพิ่ม</td>
           </tr>
           <tr>
             <td>อยากลองเล็ก ๆ ก่อน และไม่อยากคุยกับใคร</td>
-            <td><strong>คอร์สเดี่ยว 1 คอร์ส</strong></td>
-            <td>กดซื้อเองได้บนเว็บเลย ถ้าถูกใจค่อยอัปเป็นแพ็กเกจทีหลัง (หัวข้อ 13)</td>
+            <td><b>คอร์สเดี่ยว 1 คอร์ส</b></td>
+            <td>กดซื้อเองได้บนเว็บเลย ถ้าถูกใจค่อยอัปเป็นแพ็กเกจทีหลัง</td>
           </tr>
         </tbody>
       </table>
@@ -1174,42 +968,39 @@
 
 <!-- ============================ 09 ============================ -->
 <section id="feedback">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">09</span>
-      <h2 class="sec-title">การส่งงานเขียนให้ตรวจ</h2>
-      <p class="sec-sub">เรื่องที่นักเรียนถามมากที่สุด และเป็นส่วนที่ทำให้คอร์สนี้ต่างจากคอร์สวิดีโอทั่วไป</p>
-    </div>
+  <div class="w">
+    <span class="n">09</span>
+    <h2>การส่งงานเขียนให้ตรวจ</h2>
+    <p class="sub">เรื่องที่นักเรียนถามมากที่สุด และเป็นส่วนที่ทำให้คอร์สนี้ต่างจากคอร์สวิดีโอทั่วไป</p>
 
     <ol class="steps">
       <li>
-        <div class="st-t">ดูบทที่เกี่ยวข้องก่อน</div>
+        <div class="t">ดูบทที่เกี่ยวข้องก่อน</div>
         <p>ดูบทของโจทย์ที่จะเขียน เช่น Task 1 Line Graph หรือ Task 2 Discussion Essay ให้มีโครงอยู่ในหัวก่อนลงมือ</p>
       </li>
       <li>
-        <div class="st-t">เขียนแล้วส่งให้ครู</div>
+        <div class="t">เขียนแล้วส่งให้ครู</div>
         <p>ส่งเรียงความมาตามช่องทางที่ครูบอกหลังเปิดคอร์ส ส่งตอนไหนก็ได้ ไม่มีกำหนดส่งรายสัปดาห์</p>
       </li>
       <li>
-        <div class="st-t">ได้คอมเมนต์กลับเป็นภาษาไทย</div>
+        <div class="t">ได้คอมเมนต์กลับเป็นภาษาไทย</div>
         <p>ครูชี้ให้ทีละจุดว่าต้องแก้อะไร ไม่ใช่แค่ให้คะแนน ที่สำคัญคืออธิบายเป็นภาษาไทย คุณเลยเข้าใจว่าทำไมถึงผิด ไม่ใช่แค่รู้ว่าตรงไหนผิด</p>
       </li>
       <li>
-        <div class="st-t">แก้แล้วส่งใหม่</div>
+        <div class="t">แก้แล้วส่งใหม่</div>
         <p>รอบสองคือรอบที่เห็นความต่างชัดที่สุด เพราะได้แก้จากจุดที่มีคนชี้ให้จริง ๆ ไม่ใช่เดาเอง</p>
       </li>
       <li>
-        <div class="st-t">ทำซ้ำจนครบโควตา</div>
+        <div class="t">ทำซ้ำจนครบโควตา</div>
         <p>แผน 3 เดือนตรวจได้ 8 ฉบับ · แผน 6 เดือนตรวจได้ 12 ฉบับ เฉพาะแพ็กเกจที่มี Writing</p>
       </li>
     </ol>
 
     <div class="note">
-      <span class="note-t">ทำไมถึงจำกัดจำนวน</span>
+      <b>ทำไมถึงจำกัดจำนวน</b>
       <p>
         เพราะครูอ่านและเขียนคอมเมนต์ให้เองทีละฉบับ ไม่ใช่ระบบตรวจอัตโนมัติ
-        ด้วยเหตุผลเดียวกันนี้ เราเลยจำกัดจำนวนนักเรียนใหม่ที่รับต่อเดือนด้วย
-        จะได้ตรวจงานและดูแลได้เท่าเดิม
+        ด้วยเหตุผลเดียวกันนี้ เราเลยจำกัดจำนวนนักเรียนใหม่ที่รับต่อเดือนด้วย จะได้ตรวจงานและดูแลได้เท่าเดิม
       </p>
     </div>
   </div>
@@ -1217,16 +1008,13 @@
 
 <!-- ============================ 10 ============================ -->
 <section id="support">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">10</span>
-      <h2 class="sec-title">ถามครูได้แค่ไหน</h2>
-      <p class="sec-sub">ถามได้ทุกเรื่อง แต่ถ้าไม่ถามเลยก็เรียนจบได้ครบ</p>
-    </div>
+  <div class="w-wide">
+    <span class="n">10</span>
+    <h2>ถามครูได้แค่ไหน</h2>
+    <p class="sub">ถามได้ทุกเรื่อง แต่ถ้าไม่ถามเลยก็เรียนจบได้ครบ</p>
 
-    <div class="tbl-scroll">
+    <div class="scroll">
       <table>
-        <caption>ถามได้ · และสิ่งที่ไม่ต้องถามก็มีให้แล้ว</caption>
         <thead>
           <tr><th style="width:50%">ถามครูได้ตลอดอายุคอร์ส</th><th style="width:50%">ไม่ต้องถามก็ได้ เพราะมีให้อยู่แล้ว</th></tr>
         </thead>
@@ -1255,8 +1043,8 @@
       </table>
     </div>
 
-    <div class="note good">
-      <span class="note-t">เรื่องเวลาตอบ</span>
+    <div class="note">
+      <b>เรื่องเวลาตอบ</b>
       <p>
         ครูตอบให้เร็วที่สุดเท่าที่ทำได้ แต่บางวันอาจช้าหน่อยตามตารางสอน
         ถ้าไม่อยากรอ ลองหาในบทเรียนก่อน ส่วนใหญ่คำตอบอยู่ในนั้นแล้ว
@@ -1267,18 +1055,15 @@
 
 <!-- ============================ 11 ============================ -->
 <section id="teacher">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">11</span>
-      <h2 class="sec-title">ใครสอน</h2>
-      <p class="sec-sub">คนที่ตรวจงานเขียนให้คุณคือคนนี้</p>
-    </div>
+  <div class="w">
+    <span class="n">11</span>
+    <h2>ใครสอน</h2>
+    <p class="sub">คนที่ตรวจงานเขียนให้คุณคือคนนี้</p>
 
-    <div class="tbl-scroll">
+    <div class="scroll">
       <table>
-        <caption>ประวัติผู้สอน</caption>
         <thead>
-          <tr><th style="width:30%">หัวข้อ</th><th>รายละเอียด</th></tr>
+          <tr><th style="width:32%">หัวข้อ</th><th>รายละเอียด</th></tr>
         </thead>
         <tbody>
           <tr><td>ผู้สอน</td><td>พี่ดอย (English Plan)</td></tr>
@@ -1294,7 +1079,7 @@
     </div>
 
     <div class="note">
-      <span class="note-t">ทำไมนักเรียนจากสถาบันใหญ่ถึงย้ายมา</span>
+      <b>ทำไมนักเรียนจากสถาบันใหญ่ถึงย้ายมา</b>
       <p>
         ประโยคที่ได้ยินซ้ำที่สุดคือ “เรียนกับครูต่างชาติแล้วได้ทำโจทย์เยอะ แต่ไม่ได้แพทเทิร์น”
         คอร์สนี้เลยเอาแพทเทิร์นกับโครงสร้างที่ใช้ได้ทันทีขึ้นมาก่อน แล้วค่อยตะลุยโจทย์ตาม ไม่ใช่สลับกัน
@@ -1305,98 +1090,86 @@
 
 <!-- ============================ 12 ============================ -->
 <section id="results">
-  <div class="wrap-wide">
-    <div class="sec-head">
-      <span class="sec-num">12</span>
-      <h2 class="sec-title">ผลลัพธ์และรีวิว</h2>
-      <p class="sec-sub">
-        ตัวเลขข้างล่างบอกที่มาไว้ด้วย และรีวิวบอกอายุ อาชีพ กับที่อยู่ จะได้ดูว่ามีใครใกล้เคียงกับคุณบ้าง
+  <div class="w">
+    <span class="n">12</span>
+    <h2>ผลลัพธ์และรีวิว</h2>
+    <p class="sub">ตัวเลขข้างล่างบอกที่มาไว้ด้วย และรีวิวบอกอายุ อาชีพ กับที่อยู่ จะได้ดูว่ามีใครใกล้เคียงกับคุณบ้าง</p>
+
+    <div class="st">
+      <div><span class="v">10+</span><span class="d">นักเรียนที่แจ้งผล Band 7.0+ กลับมาในแต่ละเดือน จากสถิติภายในของ English Plan</span></div>
+      <div><span class="v">100+</span><span class="d">นักเรียนที่ได้ Band 7.0+ ต่อปี เมื่อรวมตัวเลขรายเดือนข้างต้น</span></div>
+      <div><span class="v">500+</span><span class="d">จำนวนนักเรียนสะสมที่ได้ Band 7.0+ ตลอดที่เปิดสอนมา</span></div>
+      <div><span class="v">8.0</span><span class="d">คะแนนสูงสุดที่นักเรียนในคลาสเคยทำได้</span></div>
+    </div>
+
+    <h3 class="blk">รีวิวจากนักเรียน</h3>
+
+    <div class="q">
+      <div class="who">มิน · 17</div>
+      <div class="meta2">นักเรียนมัธยม · ต่างจังหวัด</div>
+      <p>
+        ชอบมากที่เรียนได้ทุกที่ ใช้ iPad หรือ iPhone ก็ได้ ไม่ต้องแบกหนังสือหนัก ๆ ไปไหนมาไหนเลย
+        เพราะทุกบทเรียนมี PDF ให้โหลด ทำให้สะดวกมาก โดยเฉพาะคนที่ไม่ได้อยู่กรุงเทพฯ
+        ถ้าไม่มีคอร์สนี้ หนูคงไม่ได้ Band 7 ไว้สมัครเรียนหมอ
       </p>
+      <div class="res">Band 7.0</div>
     </div>
 
-    <div class="stats">
-      <div class="stat">
-        <div class="sv">10+</div>
-        <div class="sd">นักเรียนที่แจ้งผล Band 7.0+ กลับมาในแต่ละเดือน จากสถิติภายในของ English Plan</div>
-      </div>
-      <div class="stat">
-        <div class="sv">100+</div>
-        <div class="sd">นักเรียนที่ได้ Band 7.0+ ต่อปี เมื่อรวมตัวเลขรายเดือนข้างต้น</div>
-      </div>
-      <div class="stat">
-        <div class="sv">500+</div>
-        <div class="sd">จำนวนนักเรียนสะสมที่ได้ Band 7.0+ ตลอดที่เปิดสอนมา</div>
-      </div>
-      <div class="stat">
-        <div class="sv">8.0</div>
-        <div class="sd">คะแนนสูงสุดที่นักเรียนในคลาสเคยทำได้</div>
-      </div>
+    <div class="q">
+      <div class="who">ตั้ม · 28</div>
+      <div class="meta2">พนักงานออฟฟิศ · กรุงเทพฯ</div>
+      <p>
+        คอร์สแบ่งเป็นบทสั้น ๆ 20–30 นาที ทำให้เรียนได้แม้มีเวลาน้อย บางวันเรียน 1–2 ชั่วโมง
+        บางวันเรียนบน BTS ไปทำงาน สะดวกมาก ที่สำคัญคือถามอาจารย์ได้ทุกข้อสงสัย
+        แล้ว feedback writing ละเอียดสุด ๆ สอบรอบแรกมา 6.5 พอส่งงานเขียนรอบสอง ได้ Band 7 เลย
+      </p>
+      <div class="res">6.5 → Band 7.0</div>
     </div>
 
-    <h3 class="sub">รีวิวจากนักเรียน 6 คน</h3>
-    <div class="quotes">
-      <div class="q">
-        <div class="q-who">มิน · 17</div>
-        <div class="q-meta">นักเรียนมัธยม · ต่างจังหวัด</div>
-        <p class="q-body">
-          ชอบมากที่เรียนได้ทุกที่ ใช้ iPad หรือ iPhone ก็ได้ ไม่ต้องแบกหนังสือหนัก ๆ ไปไหนมาไหนเลย
-          เพราะทุกบทเรียนมี PDF ให้โหลด ทำให้สะดวกมาก โดยเฉพาะคนที่ไม่ได้อยู่กรุงเทพฯ
-          ถ้าไม่มีคอร์สนี้ หนูคงไม่ได้ Band 7 ไว้สมัครเรียนหมอ
-        </p>
-        <span class="q-res">Band 7.0</span>
-      </div>
-      <div class="q">
-        <div class="q-who">ตั้ม · 28</div>
-        <div class="q-meta">พนักงานออฟฟิศ · กรุงเทพฯ</div>
-        <p class="q-body">
-          คอร์สแบ่งเป็นบทสั้น ๆ 20–30 นาที ทำให้เรียนได้แม้มีเวลาน้อย บางวันเรียน 1–2 ชั่วโมง
-          บางวันเรียนบน BTS ไปทำงาน สะดวกมาก ที่สำคัญคือถามอาจารย์ได้ทุกข้อสงสัย
-          แล้ว feedback writing ละเอียดสุด ๆ สอบรอบแรกมา 6.5 พอส่งงานเขียนรอบสอง ได้ Band 7 เลย
-        </p>
-        <span class="q-res">6.5 → Band 7.0</span>
-      </div>
-      <div class="q">
-        <div class="q-who">ฝ้าย · 25</div>
-        <div class="q-meta">พนักงานออฟฟิศ · กรุงเทพฯ</div>
-        <p class="q-body">
-          สิ่งที่ชอบมากคือ ถ้ามีคำถามถามอาจารย์ได้ตลอด ไม่ต้องแบกหนังสือไปไหน
-          แค่โหลด PDF แล้วนั่งอ่านที่บ้านแบบสบาย ๆ ที่สำคัญคือ Feedback ละเอียดมาก
-        </p>
-        <span class="q-res">พูดถึง · ฟีดแบ็กงานเขียน</span>
-      </div>
-      <div class="q">
-        <div class="q-who">นนท์ · 30</div>
-        <div class="q-meta">พนักงาน เตรียมเรียนต่อ · กรุงเทพฯ</div>
-        <p class="q-body">
-          คอร์สนี้ช่วยได้มาก เพราะเรียนเมื่อไรก็ได้ ส่งการบ้านตามเวลาที่สะดวก และอาจารย์ตอบคำถามดีมาก ๆ
-          ตอนแรกเรียนวันละ 30 นาที พอใกล้สอบก็ทบทวนและส่งการบ้าน จนสอบได้ Band 7 ตั้งแต่ครั้งแรก
-          แนะนำสำหรับคนที่อยากพัฒนาอังกฤษแต่ไม่มีเวลา
-        </p>
-        <span class="q-res">Band 7.0 ตั้งแต่ครั้งแรก</span>
-      </div>
-      <div class="q">
-        <div class="q-who">พี่กันต์ · 32</div>
-        <div class="q-meta">ทนายความ เตรียมเรียนต่อ · กรุงเทพฯ</div>
-        <p class="q-body">
-          ก่อนหน้านี้เรียนที่สถาบันใหญ่กับครูต่างชาติ แต่สอบได้แค่ 5.5 เพราะพื้นฐานไม่แน่น
-          โดยเฉพาะ Writing กับ Speaking ที่พี่ดอยให้แพทเทิร์นชัดเจน แล้วฝึกส่งงานให้ตรวจพร้อมเสียงพูด
-          ทุกครั้งได้ Feedback เป็นภาษาไทย เข้าใจง่ายมาก
-        </p>
-        <span class="q-res">จาก 5.5 · มาเน้นแพทเทิร์น</span>
-      </div>
-      <div class="q">
-        <div class="q-who">ฟาง · 18</div>
-        <div class="q-meta">นักเรียน เตรียมเข้าจุฬาอินเตอร์ · ต่างจังหวัด</div>
-        <p class="q-body">
-          เคยเสียเงินไปเรียนติวเตอร์แพงกว่านี้ 4 เท่า แต่ได้ 5.5 เพราะไม่มีเทคนิคอะไรเลย
-          ครูต่างชาติไม่สอนแพทเทิร์น แค่ให้ทำข้อสอบไปเรื่อย แต่พอมาเรียนได้เทคนิค Reading
-          + แพทเทิร์น Speaking &amp; Writing ตอนนี้สอบได้ Band 7.5 แล้ว
-        </p>
-        <span class="q-res">5.5 → Band 7.5</span>
-      </div>
+    <div class="q">
+      <div class="who">ฝ้าย · 25</div>
+      <div class="meta2">พนักงานออฟฟิศ · กรุงเทพฯ</div>
+      <p>
+        สิ่งที่ชอบมากคือ ถ้ามีคำถามถามอาจารย์ได้ตลอด ไม่ต้องแบกหนังสือไปไหน
+        แค่โหลด PDF แล้วนั่งอ่านที่บ้านแบบสบาย ๆ ที่สำคัญคือ Feedback ละเอียดมาก
+      </p>
+      <div class="res">พูดถึง · ฟีดแบ็กงานเขียน</div>
     </div>
 
-    <h3 class="sub">ผลสอบที่นักเรียนส่งมาให้</h3>
+    <div class="q">
+      <div class="who">นนท์ · 30</div>
+      <div class="meta2">พนักงาน เตรียมเรียนต่อ · กรุงเทพฯ</div>
+      <p>
+        คอร์สนี้ช่วยได้มาก เพราะเรียนเมื่อไรก็ได้ ส่งการบ้านตามเวลาที่สะดวก และอาจารย์ตอบคำถามดีมาก ๆ
+        ตอนแรกเรียนวันละ 30 นาที พอใกล้สอบก็ทบทวนและส่งการบ้าน จนสอบได้ Band 7 ตั้งแต่ครั้งแรก
+        แนะนำสำหรับคนที่อยากพัฒนาอังกฤษแต่ไม่มีเวลา
+      </p>
+      <div class="res">Band 7.0 ตั้งแต่ครั้งแรก</div>
+    </div>
+
+    <div class="q">
+      <div class="who">พี่กันต์ · 32</div>
+      <div class="meta2">ทนายความ เตรียมเรียนต่อ · กรุงเทพฯ</div>
+      <p>
+        ก่อนหน้านี้เรียนที่สถาบันใหญ่กับครูต่างชาติ แต่สอบได้แค่ 5.5 เพราะพื้นฐานไม่แน่น
+        โดยเฉพาะ Writing กับ Speaking ที่พี่ดอยให้แพทเทิร์นชัดเจน แล้วฝึกส่งงานให้ตรวจพร้อมเสียงพูด
+        ทุกครั้งได้ Feedback เป็นภาษาไทย เข้าใจง่ายมาก
+      </p>
+      <div class="res">จาก 5.5 · มาเน้นแพทเทิร์น</div>
+    </div>
+
+    <div class="q">
+      <div class="who">ฟาง · 18</div>
+      <div class="meta2">นักเรียน เตรียมเข้าจุฬาอินเตอร์ · ต่างจังหวัด</div>
+      <p>
+        เคยเสียเงินไปเรียนติวเตอร์แพงกว่านี้ 4 เท่า แต่ได้ 5.5 เพราะไม่มีเทคนิคอะไรเลย
+        ครูต่างชาติไม่สอนแพทเทิร์น แค่ให้ทำข้อสอบไปเรื่อย แต่พอมาเรียนได้เทคนิค Reading
+        + แพทเทิร์น Speaking &amp; Writing ตอนนี้สอบได้ Band 7.5 แล้ว
+      </p>
+      <div class="res">5.5 → Band 7.5</div>
+    </div>
+
+    <h3 class="blk">ผลสอบที่นักเรียนส่งมาให้</h3>
     <div class="gal">
       <img src="https://i.postimg.cc/2jcKMhZk/IMG-9602.png" alt="ผลสอบนักเรียน Band 7+" loading="lazy">
       <img src="https://i.postimg.cc/PrCRjJWm/IMG-9603.png" alt="ผลสอบนักเรียน Band 7+" loading="lazy">
@@ -1421,69 +1194,61 @@
       <img src="https://i.postimg.cc/MTbvXz15/IMG-9907-2.jpg" alt="ผลสอบนักเรียน Band 7+" loading="lazy">
     </div>
 
-    <div class="note warn">
-      <span class="note-t">เรื่องความเป็นส่วนตัวของนักเรียน</span>
+    <div class="note">
+      <b>เรื่องความเป็นส่วนตัวของนักเรียน</b>
       <p>
         เราตั้งใจปกป้องความเป็นส่วนตัวของนักเรียนทุกคน รูปทั้งหมดเลยไม่โชว์หน้า
         ผลสอบของคุณก็เหมือนกัน ถ้าไม่อยากให้ลง เราก็ไม่ลง
+        ดูผลสอบที่อัปเดตเรื่อย ๆ ได้ที่
+        <a href="https://www.instagram.com/englishplan_/" target="_blank" rel="noopener">Instagram @englishplan_</a>
       </p>
     </div>
-
-    <p style="margin-top:22px">
-      ดูผลสอบที่อัปเดตเรื่อย ๆ ได้ที่
-      <a href="https://www.instagram.com/englishplan_/" target="_blank" rel="noopener">Instagram · @englishplan_</a>
-    </p>
   </div>
 </section>
 
 <!-- ============================ 13 ============================ -->
 <section id="single">
-  <div class="wrap-wide">
-    <div class="sec-head">
-      <span class="sec-num">13</span>
-      <h2 class="sec-title">คอร์สเดี่ยว (IELTS Academic)</h2>
-      <p class="sec-sub">
-        อยากได้แค่ทักษะเดียว หรืออยากเริ่มโดยไม่ต้องคุยกับใคร — คอร์สเดี่ยวกดซื้อและจ่ายเองได้บนเว็บเลย
-      </p>
-    </div>
+  <div class="w-wide">
+    <span class="n">13</span>
+    <h2>คอร์สเดี่ยว (IELTS Academic)</h2>
+    <p class="sub">อยากได้แค่ทักษะเดียว หรืออยากเริ่มโดยไม่ต้องคุยกับใคร — คอร์สเดี่ยวกดซื้อและจ่ายเองได้บนเว็บเลย</p>
 
-    <div class="tbl-scroll">
+    <div class="scroll">
       <table>
-        <caption>คอร์สเดี่ยวทั้งหมด · สั่งซื้อได้เอง</caption>
         <thead>
           <tr>
-            <th style="width:28%">คอร์ส</th>
-            <th class="c" style="width:11%">ราคา</th>
+            <th style="width:26%">คอร์ส</th>
+            <th class="c" style="width:10%">ราคา</th>
             <th style="width:20%">ปริมาณเนื้อหา</th>
             <th>เน้นอะไร</th>
-            <th class="c" style="width:11%">ลิงก์</th>
+            <th class="c" style="width:10%"></th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>IELTS Academic Writing – Intensive</strong></td>
-            <td class="c price">4,990</td>
-            <td>97 บทเรียน · 37 ชม.<br><span style="font-size:13.5px;color:var(--ink-faint)">ไวยากรณ์ 4 · แพทเทิร์น 18 · ตะลุยโจทย์ 15</span></td>
+            <td><b>IELTS Academic Writing – Intensive</b></td>
+            <td class="c p">4,990</td>
+            <td>97 บทเรียน · 37 ชม.<br><span class="muted">ไวยากรณ์ 4 · แพทเทิร์น 18 · ตะลุยโจทย์ 15</span></td>
             <td>Task 1 ทุกแบบกราฟ + Process &amp; Maps · Task 2 ครบ 4 รูปแบบ · Masterclass 8 หัวข้อ · Cambridge 18–20</td>
             <td class="c"><a href="https://www.language-plan.com/courses/ielts-writing-5">ดูคอร์ส</a></td>
           </tr>
           <tr>
-            <td><strong>Intensive Academic Reading for IELTS</strong></td>
-            <td class="c price">3,990</td>
-            <td>27 ชม.<br><span style="font-size:13.5px;color:var(--ink-faint)">เทคนิค 3 · หลัก 12 · เพิ่มเติม 12</span></td>
+            <td><b>Intensive Academic Reading for IELTS</b></td>
+            <td class="c p">3,990</td>
+            <td>27 ชม.<br><span class="muted">เทคนิค 3 · หลัก 12 · เพิ่มเติม 12</span></td>
             <td>Skimming &amp; Scanning · คำถามครบ 9 แบบ · คลังข้อสอบ 500+ ข้อ · Workspace เก็บคำศัพท์</td>
             <td class="c"><a href="https://www.language-plan.com/courses/intensive-academic-reading-for-ielts">ดูคอร์ส</a></td>
           </tr>
           <tr>
-            <td><strong>Speaking Intensive for IELTS</strong></td>
-            <td class="c price">2,990</td>
-            <td>10-Day Challenge<br><span style="font-size:13.5px;color:var(--ink-faint)">10+ บทเรียน · 40+ หัวข้อย่อย</span></td>
+            <td><b>Speaking Intensive for IELTS</b></td>
+            <td class="c p">2,990</td>
+            <td>10-Day Challenge<br><span class="muted">10+ บทเรียน · 40+ หัวข้อย่อย</span></td>
             <td>Storytelling Formula · 10 แพทเทิร์นจัดระเบียบความคิด · ครบ Part 1–3 · ซ้อมเสมือนจริง</td>
             <td class="c"><a href="https://www.language-plan.com/courses/0-day-speaking-challenge-for-ielts">ดูคอร์ส</a></td>
           </tr>
           <tr>
-            <td><strong>Listening for Band 7</strong></td>
-            <td class="c price">1,990</td>
+            <td><b>Listening for Band 7</b></td>
+            <td class="c p">1,990</td>
             <td>28 บทเรียน · 10 ชม.</td>
             <td>ครบ Section 1–4 · รับมือ Distractors · Predictive Listening · คำศัพท์ 3 หมวดที่ออกบ่อย</td>
             <td class="c"><a href="https://www.language-plan.com/courses/listening-for-band-7">ดูคอร์ส</a></td>
@@ -1498,67 +1263,51 @@
 
 <!-- ============================ 14 ============================ -->
 <section id="gt">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">14</span>
-      <h2 class="sec-title">คอร์ส General Training</h2>
-      <p class="sec-sub">
-        ถ้าสอบเพื่อยื่นวีซ่า ย้ายถิ่นฐาน หรือทำงาน (ไม่ใช่เพื่อเรียนต่อมหาวิทยาลัย)
-        ข้อสอบที่เจอคือ General Training ซึ่งใช้คอร์สคนละชุดกับ Academic ข้างบน
-      </p>
+  <div class="w">
+    <span class="n">14</span>
+    <h2>คอร์ส General Training</h2>
+    <p class="sub">
+      ถ้าสอบเพื่อยื่นวีซ่า ย้ายถิ่นฐาน หรือทำงาน (ไม่ใช่เพื่อเรียนต่อมหาวิทยาลัย)
+      ข้อสอบที่เจอคือ General Training ซึ่งใช้คอร์สคนละชุดกับ Academic ข้างบน
+    </p>
+
+    <div class="pk">
+      <h3>Intensive Writing (General Training)</h3>
+      <p class="desc">61 บทเรียน · เข้าเรียนได้ 6 เดือน · 3,990 บาท</p>
+      <ul class="plain">
+        <li>พิชิต IELTS Writing General Training ด้วยโครงสร้างที่ชัดเจน</li>
+        <li>ฝึกเขียนจดหมายครบทั้ง Formal, Informal และ Semi-formal</li>
+        <li>วิเคราะห์โจทย์ Task 2 อย่างละเอียด พร้อมเทคนิคตอบตรงจุด</li>
+        <li>พัฒนา Grammar, Vocabulary และการใช้ Transitional Words</li>
+        <li>ส่งงานเขียนให้ตรวจได้มากกว่า 8 ครั้ง พร้อมฟีดแบ็กจากครู</li>
+        <li>ฝึกทำโจทย์จริงจากข้อสอบ Cambridge ล่าสุด</li>
+      </ul>
+      <div class="btns">
+        <a class="btn sm" href="https://www.language-plan.com/courses/ielts-writing-general-training">สมัครเรียน Writing (GT)</a>
+      </div>
     </div>
 
-    <article class="pkg">
-      <div class="pkg-head">
-        <div>
-          <h3>Intensive Writing (General Training)</h3>
-          <p class="pkg-desc">61 บทเรียน · เข้าเรียนได้ 6 เดือน</p>
-        </div>
-        <span class="pkg-tag" style="background:var(--paper-2);color:var(--ink-soft)">3,990 บาท</span>
+    <div class="pk">
+      <h3>Intensive Reading (General Training)</h3>
+      <p class="desc">25 ชั่วโมง · เข้าเรียนได้ 6 เดือน · 2,990 บาท</p>
+      <ul class="plain">
+        <li>ฝึกอ่านและจับคำตอบให้แม่น ไม่ต้องกลัวคำถามหลอก</li>
+        <li>เข้าใจโครงสร้างข้อสอบ General Training Reading</li>
+        <li>เรียนเทคนิค Skimming &amp; Scanning เพื่อตอบได้เร็วและถูก</li>
+        <li>เพิ่มคลังคำศัพท์สำคัญ 60+ Keywords ที่ออกสอบบ่อย</li>
+        <li>ตะลุยโจทย์จริงทุกแบบ — True/False/Not Given, Matching Headings, Table Completion</li>
+        <li>ฝึกทำข้อสอบจริง 2 ชุดเต็ม อัปเดตล่าสุดจาก Cambridge</li>
+      </ul>
+      <div class="btns">
+        <a class="btn sm" href="https://www.language-plan.com/courses/ielts-reading-general-training">สมัครเรียน Reading (GT)</a>
       </div>
-      <div class="pkg-body">
-        <ul class="inc">
-          <li>พิชิต IELTS Writing General Training ด้วยโครงสร้างที่ชัดเจน</li>
-          <li>ฝึกเขียนจดหมายครบทั้ง Formal, Informal และ Semi-formal</li>
-          <li>วิเคราะห์โจทย์ Task 2 อย่างละเอียด พร้อมเทคนิคตอบตรงจุด</li>
-          <li>พัฒนา Grammar, Vocabulary และการใช้ Transitional Words</li>
-          <li>ส่งงานเขียนให้ตรวจได้มากกว่า 8 ครั้ง พร้อมฟีดแบ็กจากครู</li>
-          <li>ฝึกทำโจทย์จริงจากข้อสอบ Cambridge ล่าสุด</li>
-        </ul>
-        <div style="margin-top:18px">
-          <a class="btn btn-solid btn-sm" href="https://www.language-plan.com/courses/ielts-writing-general-training">สมัครเรียน Writing (GT)</a>
-        </div>
-      </div>
-    </article>
-
-    <article class="pkg">
-      <div class="pkg-head">
-        <div>
-          <h3>Intensive Reading (General Training)</h3>
-          <p class="pkg-desc">25 ชั่วโมง · เข้าเรียนได้ 6 เดือน</p>
-        </div>
-        <span class="pkg-tag" style="background:var(--paper-2);color:var(--ink-soft)">2,990 บาท</span>
-      </div>
-      <div class="pkg-body">
-        <ul class="inc">
-          <li>ฝึกอ่านและจับคำตอบให้แม่น ไม่ต้องกลัวคำถามหลอก</li>
-          <li>เข้าใจโครงสร้างข้อสอบ General Training Reading</li>
-          <li>เรียนเทคนิค Skimming &amp; Scanning เพื่อตอบได้เร็วและถูก</li>
-          <li>เพิ่มคลังคำศัพท์สำคัญ 60+ Keywords ที่ออกสอบบ่อย</li>
-          <li>ตะลุยโจทย์จริงทุกแบบ — True/False/Not Given, Matching Headings, Table Completion</li>
-          <li>ฝึกทำข้อสอบจริง 2 ชุดเต็ม อัปเดตล่าสุดจาก Cambridge</li>
-        </ul>
-        <div style="margin-top:18px">
-          <a class="btn btn-solid btn-sm" href="https://www.language-plan.com/courses/ielts-reading-general-training">สมัครเรียน Reading (GT)</a>
-        </div>
-      </div>
-    </article>
+    </div>
 
     <div class="note">
-      <span class="note-t">ไม่รู้ว่าต้องสอบแบบไหน</span>
+      <b>ไม่รู้ว่าต้องสอบแบบไหน</b>
       <p>
-        หลักง่าย ๆ คือ <strong>Academic</strong> ใช้สมัครเรียนต่อระดับปริญญาและขึ้นทะเบียนวิชาชีพบางสาขา
-        ส่วน <strong>General Training</strong> ใช้ย้ายถิ่นฐาน ทำงาน และเรียนระดับต่ำกว่าปริญญา
+        หลักง่าย ๆ คือ Academic ใช้สมัครเรียนต่อระดับปริญญาและขึ้นทะเบียนวิชาชีพบางสาขา
+        ส่วน General Training ใช้ย้ายถิ่นฐาน ทำงาน และเรียนระดับต่ำกว่าปริญญา
         แต่ให้ยึดข้อกำหนดของสถาบันหรือหน่วยงานปลายทางเป็นหลักเสมอ เพราะเขาเป็นคนกำหนดว่ารับผลแบบไหน
       </p>
     </div>
@@ -1567,37 +1316,35 @@
 
 <!-- ============================ 15 ============================ -->
 <section id="after">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">15</span>
-      <h2 class="sec-title">สมัครแล้วเกิดอะไรขึ้น</h2>
-      <p class="sec-sub">ตั้งแต่ตอนกดสมัคร จนถึงบทเรียนแรก</p>
-    </div>
+  <div class="w">
+    <span class="n">15</span>
+    <h2>สมัครแล้วเกิดอะไรขึ้น</h2>
+    <p class="sub">ตั้งแต่ตอนกดสมัคร จนถึงบทเรียนแรก</p>
 
     <ol class="steps">
       <li>
-        <div class="st-t">เลือกแพ็กเกจกับระยะเวลา</div>
+        <div class="t">เลือกแพ็กเกจกับระยะเวลา</div>
         <p>ตัดสินใจจากหัวข้อ 05–08 พอเลือกแล้วจดไว้ 3 อย่าง คือ ชื่อแพ็กเกจ · 3 หรือ 6 เดือน · ทักษะที่อยากได้</p>
       </li>
       <li>
-        <div class="st-t">ทัก LINE แล้วชำระเงิน</div>
+        <div class="t">ทัก LINE แล้วชำระเงิน</div>
         <p>พิมพ์แค่ 3 อย่างข้างบนก็พอ ไม่ต้องเล่าประวัติหรือทำแบบทดสอบก่อนถ้าไม่อยากเล่า</p>
       </li>
       <li>
-        <div class="st-t">รับบัญชีเข้าเรียน</div>
-        <p>ครูเปิดสิทธิ์คอร์สตามทักษะที่คุณเลือกให้ในบัญชีของคุณบน language-plan.com แล้วล็อกอินที่ <a href="https://www.language-plan.com/users/sign_in">หน้าเข้าสู่ระบบ</a></p>
+        <div class="t">รับบัญชีเข้าเรียน</div>
+        <p>ครูเปิดสิทธิ์คอร์สตามทักษะที่คุณเลือกให้ในบัญชีของคุณ แล้วล็อกอินที่ <a href="https://www.language-plan.com/users/sign_in">หน้าเข้าสู่ระบบ</a></p>
       </li>
       <li>
-        <div class="st-t">เริ่มจากทักษะที่อ่อนที่สุด</div>
+        <div class="t">เริ่มจากทักษะที่อ่อนที่สุด</div>
         <p>ทุกคอร์สเรียงบทไว้ให้แล้ว เริ่มบทที่ 1 ได้เลย ไม่ต้องวางแผนเอง แล้วโหลด PDF เก็บไว้ตั้งแต่วันแรก</p>
       </li>
       <li>
-        <div class="st-t">เริ่มส่งงานเขียนตั้งแต่สัปดาห์แรก</div>
+        <div class="t">เริ่มส่งงานเขียนตั้งแต่สัปดาห์แรก</div>
         <p>คนพลาดกันบ่อยที่สุดคือดูวิดีโอให้จบก่อนแล้วค่อยเขียน สุดท้ายเหลือเวลาส่งงานน้อย แล้วใช้โควตาตรวจไม่หมด — เรียนไปเขียนไปดีกว่า</p>
       </li>
       <li>
-        <div class="st-t">ทบทวนก่อนสอบ</div>
-        <p>ย้อนดูบทแพทเทิร์นกับ Checklist อีกรอบ แล้วซ้อมด้วยชุดข้อสอบเต็มในรูปแบบเดียวกับที่จะไปสอบ (Computer-based หรือ Paper-based)</p>
+        <div class="t">ทบทวนก่อนสอบ</div>
+        <p>ย้อนดูบทแพทเทิร์นกับ Checklist อีกรอบ แล้วซ้อมด้วยชุดข้อสอบเต็มในรูปแบบเดียวกับที่จะไปสอบ</p>
       </li>
     </ol>
   </div>
@@ -1605,25 +1352,22 @@
 
 <!-- ============================ 16 ============================ -->
 <section id="terms">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">16</span>
-      <h2 class="sec-title">อายุคอร์สและการต่ออายุ</h2>
-      <p class="sec-sub">เรื่องที่ควรรู้ตั้งแต่ยังไม่จ่าย</p>
-    </div>
+  <div class="w">
+    <span class="n">16</span>
+    <h2>อายุคอร์สและการต่ออายุ</h2>
+    <p class="sub">เรื่องที่ควรรู้ตั้งแต่ยังไม่จ่าย</p>
 
-    <div class="tbl-scroll">
+    <div class="scroll">
       <table>
-        <caption>เงื่อนไขการใช้งาน</caption>
         <thead>
-          <tr><th style="width:30%">หัวข้อ</th><th>รายละเอียด</th></tr>
+          <tr><th style="width:32%">หัวข้อ</th><th>รายละเอียด</th></tr>
         </thead>
         <tbody>
           <tr><td>อายุคอร์ส</td><td>แผน 3 เดือน = เข้าเรียนได้ 90 วัน · แผน 6 เดือน = 180 วัน นับจากวันที่ครูเปิดสิทธิ์</td></tr>
           <tr><td>การดูซ้ำ</td><td>ย้อนดูซ้ำได้ไม่จำกัดตลอดอายุคอร์ส</td></tr>
           <tr><td>พอหมดอายุ</td><td>สิทธิ์เข้าเรียนจะปิด แต่ PDF ที่โหลดเก็บไว้แล้วยังใช้ได้ตามปกติ</td></tr>
-          <tr class="hl"><td>ค่าต่ออายุ · 1 คอร์ส</td><td><strong class="num">700 บาท / เดือน</strong></td></tr>
-          <tr class="hl"><td>ค่าต่ออายุ · หลายคอร์ส</td><td><strong class="num">900 บาท / เดือน</strong></td></tr>
+          <tr><td>ค่าต่ออายุ · 1 คอร์ส</td><td><b>700 บาท / เดือน</b></td></tr>
+          <tr><td>ค่าต่ออายุ · หลายคอร์ส</td><td><b>900 บาท / เดือน</b></td></tr>
           <tr><td>โควตาตรวจงานเขียน</td><td>ผูกกับแผนที่สมัคร ใช้ได้ภายในอายุคอร์ส เริ่มส่งเร็วหน่อยจะดีกว่า</td></tr>
           <tr><td>รับนักเรียนใหม่</td><td>จำกัดจำนวนต่อเดือน จะได้ตรวจงานและดูแลได้ทั่วถึง</td></tr>
           <tr><td>คอร์สแยกกับแพ็กเกจ</td><td>เนื้อหาเหมือนกันเป๊ะ ต่างกันที่ราคาและจำนวนทักษะที่เปิดให้</td></tr>
@@ -1636,120 +1380,107 @@
 
 <!-- ============================ 17 ============================ -->
 <section id="faq">
-  <div class="wrap">
-    <div class="sec-head">
-      <span class="sec-num">17</span>
-      <h2 class="sec-title">คำถามที่เจอบ่อย</h2>
-      <p class="sec-sub">กางคำตอบไว้หมดแล้ว ไม่ต้องกดเปิดทีละข้อ · กด Ctrl+F หรือ ⌘+F ค้นหาได้เลย</p>
-    </div>
+  <div class="w">
+    <span class="n">17</span>
+    <h2>คำถามที่เจอบ่อย</h2>
+    <p class="sub">กางคำตอบไว้หมดแล้ว ไม่ต้องกดเปิดทีละข้อ · กด Ctrl+F หรือ ⌘+F ค้นหาได้เลย</p>
 
-    <div class="faq-item">
-      <p class="faq-q"><span class="qn">Q1</span> เนื้อหาของคอร์สแยกกับคอร์สแบบแพ็กเกจ เหมือนกันไหม?</p>
-      <p class="faq-a">
+    <div class="fq">
+      <p class="q2">เนื้อหาของคอร์สแยกกับคอร์สแบบแพ็กเกจ เหมือนกันไหม?</p>
+      <p class="a2">
         เหมือนกันทุกอย่างครับ ไม่ได้ตัดออกและไม่ได้ใส่บทพิเศษเพิ่มให้แพ็กเกจ
-        ต่างกันแค่ว่าถ้าสมัครหลายคอร์สพร้อมกัน จะได้ส่วนลด
-        ดูตัวเลขจริงได้ที่ <a href="#saving">หัวข้อ 07</a>
+        ต่างกันแค่ว่าถ้าสมัครหลายคอร์สพร้อมกัน จะได้ส่วนลด ดูตัวเลขจริงได้ที่ <a href="#saving">หัวข้อ 07</a>
       </p>
     </div>
 
-    <div class="faq-item">
-      <p class="faq-q"><span class="qn">Q2</span> ส่งงานเขียนให้ตรวจได้กี่ครั้ง?</p>
-      <div class="faq-a">
-        <p>ขึ้นกับระยะเวลาของแผนที่สมัคร สำหรับแพ็กเกจที่มี Writing:</p>
+    <div class="fq">
+      <p class="q2">ส่งงานเขียนให้ตรวจได้กี่ครั้ง?</p>
+      <div class="a2">
+        <p style="margin-bottom:0">ขึ้นกับระยะเวลาของแผนที่สมัคร สำหรับแพ็กเกจที่มี Writing:</p>
         <ul>
-          <li><strong>แผน 3 เดือน:</strong> ส่งได้ 8 ฉบับ</li>
-          <li><strong>แผน 6 เดือน:</strong> ส่งได้ 12 ฉบับ</li>
+          <li>แผน 3 เดือน — ส่งได้ 8 ฉบับ</li>
+          <li>แผน 6 เดือน — ส่งได้ 12 ฉบับ</li>
         </ul>
-        <p style="margin-top:8px">
-          ครูตรวจให้เองทุกฉบับ พร้อมอธิบายเป็นภาษาไทย ดูขั้นตอนได้ที่ <a href="#feedback">หัวข้อ 09</a>
-        </p>
+        <p style="margin:8px 0 0">ครูตรวจให้เองทุกฉบับ พร้อมอธิบายเป็นภาษาไทย ดูขั้นตอนได้ที่ <a href="#feedback">หัวข้อ 09</a></p>
       </div>
     </div>
 
-    <div class="faq-item">
-      <p class="faq-q"><span class="qn">Q3</span> มีคำถามระหว่างเรียน ถามครูตรง ๆ ได้ไหม?</p>
-      <p class="faq-a">
+    <div class="fq">
+      <p class="q2">มีคำถามระหว่างเรียน ถามครูตรง ๆ ได้ไหม?</p>
+      <p class="a2">
         ได้เลยครับ นักเรียนจะได้ LINE ของครู ถามได้ทุกเรื่องเกี่ยวกับ IELTS
         ทั้งเนื้อหาคอร์สและการเตรียมตัวสอบ ตลอดอายุคอร์ส
         แต่ถ้าไม่ถามเลยก็เรียนจบได้ เพราะทุกบทมีเฉลยและคำอธิบายอยู่แล้ว
       </p>
     </div>
 
-    <div class="faq-item">
-      <p class="faq-q"><span class="qn">Q4</span> อยากฝึกทักษะอื่นนอกจากในคอร์ส ทำยังไง?</p>
-      <p class="faq-a">
+    <div class="fq">
+      <p class="q2">อยากฝึกทักษะอื่นนอกจากในคอร์ส ทำยังไง?</p>
+      <p class="a2">
         ในคอร์สมีแบบฝึกทั้ง Computer-based และ Paper-based ให้ใช้ และถามครูได้ตลอดระยะเวลาคอร์ส
         ถ้าอยากได้เป็นคอร์สเต็มอีกทักษะ ซื้อคอร์สเดี่ยวเพิ่มได้จาก <a href="#single">หัวข้อ 13</a>
       </p>
     </div>
 
-    <div class="faq-item">
-      <p class="faq-q"><span class="qn">Q5</span> มีเทคนิคอะไรช่วยเพิ่มคะแนน?</p>
-      <div class="faq-a">
-        <p>ครูสอนนักเรียนที่ได้ Band 7+ มาแล้วกว่า 500 คน วิธีที่ใช้แบ่งเป็นสองแนวตามลักษณะของทักษะ:</p>
+    <div class="fq">
+      <p class="q2">มีเทคนิคอะไรช่วยเพิ่มคะแนน?</p>
+      <div class="a2">
+        <p style="margin-bottom:0">ครูสอนนักเรียนที่ได้ Band 7+ มาแล้วกว่า 500 คน วิธีที่ใช้แบ่งเป็นสองแนวตามลักษณะของทักษะ:</p>
         <ul>
-          <li>
-            <strong>Writing &amp; Speaking —</strong> ใช้แพทเทิร์นสำเร็จรูปที่พิสูจน์แล้วว่าช่วยดันคะแนน
-            พร้อมการฝึกซ้อมและคำแนะนำรายคน
-          </li>
-          <li>
-            <strong>Reading &amp; Listening —</strong> สอนเทคนิคควบคู่กับพื้นฐาน แบบที่ทำให้นักเรียนหลายร้อยคนได้ Band 7
-            ครูอยู่กับข้อสอบ IELTS มากว่า 15 ปี สอนพิเศษตั้งแต่สมัยเรียนมหาวิทยาลัย
-            ช่วยแกะข้อสอบพร้อมให้ Grammar กับ Vocabulary ที่ทำให้ตอบง่ายขึ้น
-          </li>
+          <li><b>Writing &amp; Speaking</b> — ใช้แพทเทิร์นสำเร็จรูปที่พิสูจน์แล้วว่าช่วยดันคะแนน พร้อมการฝึกซ้อมและคำแนะนำรายคน</li>
+          <li><b>Reading &amp; Listening</b> — สอนเทคนิคควบคู่กับพื้นฐาน แบบที่ทำให้นักเรียนหลายร้อยคนได้ Band 7 ครูอยู่กับข้อสอบ IELTS มากว่า 15 ปี ช่วยแกะข้อสอบพร้อมให้ Grammar กับ Vocabulary ที่ทำให้ตอบง่ายขึ้น</li>
         </ul>
       </div>
     </div>
 
-    <div class="faq-item">
-      <p class="faq-q"><span class="qn">Q6</span> คอร์สหมดอายุแล้ว ต่ออายุได้ไหม?</p>
-      <div class="faq-a">
-        <p>ได้ครับ ค่าต่ออายุคือ:</p>
+    <div class="fq">
+      <p class="q2">คอร์สหมดอายุแล้ว ต่ออายุได้ไหม?</p>
+      <div class="a2">
+        <p style="margin-bottom:0">ได้ครับ ค่าต่ออายุคือ:</p>
         <ul>
-          <li><strong>700 บาท/เดือน</strong> สำหรับ 1 คอร์ส</li>
-          <li><strong>900 บาท/เดือน</strong> ถ้าต่อหลายคอร์ส</li>
+          <li>700 บาท/เดือน สำหรับ 1 คอร์ส</li>
+          <li>900 บาท/เดือน ถ้าต่อหลายคอร์ส</li>
         </ul>
       </div>
     </div>
 
-    <div class="faq-item">
-      <p class="faq-q"><span class="qn">Q7</span> เรียนบนมือถือหรือแท็บเล็ตได้ไหม ต้องมีคอมหรือเปล่า?</p>
-      <p class="faq-a">
+    <div class="fq">
+      <p class="q2">เรียนบนมือถือหรือแท็บเล็ตได้ไหม ต้องมีคอมหรือเปล่า?</p>
+      <p class="a2">
         เรียนได้ทั้งคอม แท็บเล็ต และมือถือ ด้วยบัญชีเดียวกัน PDF ทุกไฟล์โหลดไปอ่านนอกแอปได้
         นักเรียนหลายคนเรียนบน iPad หรือระหว่างเดินทาง เพราะบทเรียนตัดเป็นช่วงสั้น ๆ ราว 20–30 นาที
       </p>
     </div>
 
-    <div class="faq-item">
-      <p class="faq-q"><span class="qn">Q8</span> ไม่อยากคุยกับใครเลย สมัครเองได้ไหม?</p>
-      <p class="faq-a">
-        <strong>คอร์สเดี่ยว</strong> กดซื้อและจ่ายเองได้บนเว็บทันที ไม่ต้องทักใคร ดูรายการที่ <a href="#single">หัวข้อ 13</a><br>
-        ส่วน <strong>แพ็กเกจ</strong> ต้องทัก LINE เพราะคุณเป็นคนเลือกทักษะเอง ระบบเลยเปิดสิทธิ์อัตโนมัติไม่ได้
+    <div class="fq">
+      <p class="q2">ไม่อยากคุยกับใครเลย สมัครเองได้ไหม?</p>
+      <p class="a2">
+        คอร์สเดี่ยวกดซื้อและจ่ายเองได้บนเว็บทันที ไม่ต้องทักใคร ดูรายการที่ <a href="#single">หัวข้อ 13</a>
+        ส่วนแพ็กเกจต้องทัก LINE เพราะคุณเป็นคนเลือกทักษะเอง ระบบเลยเปิดสิทธิ์อัตโนมัติไม่ได้
         แต่พิมพ์แค่บรรทัดเดียวก็จบ เช่น “All Skills · 6 เดือน · ครบ 4 ทักษะ”
       </p>
     </div>
 
-    <div class="faq-item">
-      <p class="faq-q"><span class="qn">Q9</span> อยากถามเรื่องเฉพาะ ติดต่อครูได้ที่ไหน?</p>
-      <p class="faq-a">
-        LINE <strong>@doynatchanon</strong> ครูตอบให้เร็วที่สุดเท่าที่ทำได้ (บางวันอาจช้าหน่อยตามตารางสอน)
+    <div class="fq">
+      <p class="q2">อยากถามเรื่องเฉพาะ ติดต่อครูได้ที่ไหน?</p>
+      <p class="a2">
+        LINE <b>@doynatchanon</b> ครูตอบให้เร็วที่สุดเท่าที่ทำได้ (บางวันอาจช้าหน่อยตามตารางสอน)
       </p>
     </div>
   </div>
 </section>
 
 <!-- ============================ 18 ============================ -->
-<section id="contact" class="closing">
-  <div class="wrap">
-    <p class="kicker" style="color:#A9C2E4">18</p>
-    <h2 class="sec-title" style="font-size:32px;margin-bottom:12px">วิธีสมัคร</h2>
-    <p class="dek" style="margin-bottom:26px">
-      อ่านมาถึงตรงนี้ก็น่าจะพอตัดสินใจได้แล้ว ทักมาบอกแค่ 3 อย่างคือ
-      แพ็กเกจ ระยะเวลา และทักษะที่เลือก
+<section id="contact">
+  <div class="w">
+    <span class="n">18</span>
+    <h2>วิธีสมัคร</h2>
+    <p class="sub">
+      อ่านมาถึงตรงนี้ก็น่าจะพอตัดสินใจได้แล้ว ทักมาบอกแค่ 3 อย่างคือ แพ็กเกจ ระยะเวลา และทักษะที่เลือก
     </p>
 
-    <div class="tbl-scroll">
-      <table class="contact-tbl">
+    <div class="scroll">
+      <table>
         <thead>
           <tr><th style="width:26%">อยากทำอะไร</th><th style="width:40%">ทำยังไง</th><th>ช่องทาง</th></tr>
         </thead>
@@ -1783,24 +1514,16 @@
       </table>
     </div>
 
-    <div class="btn-row" style="margin-top:28px">
-      <a class="btn btn-solid" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัครแพ็กเกจผ่าน LINE</a>
-      <a class="btn btn-ghost" href="https://www.language-plan.com/collections">เลือกคอร์สเดี่ยวเอง</a>
-      <a class="btn btn-ghost" href="#packages">กลับไปดูราคา</a>
+    <div class="btns">
+      <a class="btn fill" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัครแพ็กเกจผ่าน LINE</a>
+      <a class="btn" href="https://www.language-plan.com/collections">เลือกคอร์สเดี่ยวเอง</a>
     </div>
   </div>
 </section>
 
-<!-- ============================ COLOPHON ============================ -->
-<footer class="colophon">
-  <div class="wrap">
-    <p><strong>ENGLISH PLAN</strong> — สอน IELTS ตั้งแต่ปี 2018 · โดยพี่ดอย</p>
-    <p>ราคาและเงื่อนไขทั้งหมดเป็นข้อมูลล่าสุด ถ้ามีเปลี่ยนแปลงจะอัปเดตที่หน้านี้</p>
-    <p>© 2025 English Plan. สงวนลิขสิทธิ์</p>
-  </div>
-</footer>
+<div class="end"></div>
 
 </div>
-<!-- ============================ PASTE BLOCK ENDS HERE ============================ -->
+<!-- ============================ จบบล็อกที่ต้องคัดลอก ============================ -->
 </body>
 </html>

@@ -39,6 +39,7 @@ export function ReadWriteSession({
   onComplete,
   embedded = false,
   forceUnlockHints = false,
+  attemptSource,
 }: {
   topicId: string;
   startWithRedeem?: boolean;
@@ -48,6 +49,8 @@ export function ReadWriteSession({
   onComplete?: (report: WritingAttemptReport) => void;
   /** Drop the page-level back link and outer chrome when hosted inside another shell (the course session modal). */
   embedded?: boolean;
+  /** "placement" tells the report route to skip the AI-credit charge — the one-time skill test shouldn't cost the learner's monthly quota. */
+  attemptSource?: "placement";
 }) {
   const router = useRouter();
   const { effectiveTier } = useEffectiveTier();
@@ -230,6 +233,7 @@ export function ReadWriteSession({
           prepMinutes: prepChoice,
           redeemed: startWithRedeem && Boolean(progress),
           previousScore160: startWithRedeem ? progress?.latestScore160 ?? null : null,
+          source: attemptSource,
         }),
       });
       const data = (await res.json()) as { error?: string } & Partial<WritingAttemptReport>;

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { transcribeEnglishAudioWithDeepgram } from "@/lib/deepgram-transcribe";
+import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { scheduleSpeechRecordingLog } from "@/lib/speech-recording-log";
 
 export const maxDuration = 120;
 
@@ -45,6 +47,13 @@ export async function POST(req: Request) {
     const buf = Buffer.from(audioBase64, "base64");
     const audio = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
     const { transcript } = await transcribeEnglishAudioWithDeepgram({ apiKey: key, audio, mimeType });
+    scheduleSpeechRecordingLog({
+      userId: await getOptionalAuthUserId(req),
+      source: "study-plan-transcribe",
+      audioBase64: audioBase64.trim(),
+      mimeType: mimeType.trim(),
+      transcript,
+    });
     return NextResponse.json({ transcript });
   } catch (err) {
     return NextResponse.json(

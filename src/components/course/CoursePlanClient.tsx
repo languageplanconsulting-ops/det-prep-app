@@ -15,6 +15,7 @@ import {
   taskLabel,
   type StudyBlockKey,
 } from "@/lib/course-plan/categories";
+import { blocksForSkillPlacement } from "@/lib/course-plan/curriculum";
 import {
   DEFAULT_PLAN_SETTINGS,
   clampMinutes,
@@ -24,31 +25,30 @@ import {
   OVERRIDES_STORAGE_KEY,
   PLAN_STORAGE_KEY,
   WEEKDAY_FULL_TH,
-  WEEKDAY_TH,
   type PlanSettings,
 } from "@/lib/course-plan/planner";
 import { AttemptRedeemPanel } from "@/components/course/AttemptRedeemPanel";
 import { CourseCompletion } from "@/components/course/CourseCompletion";
 import { LessonLibrary } from "@/components/course/LessonLibrary";
 import { ProgramBuilder } from "@/components/course/ProgramBuilder";
-import { SessionRunner } from "@/components/course/SessionRunner";
+import { SessionRunner, type BonusProjection } from "@/components/course/SessionRunner";
 import type { StudentCourse } from "@/lib/course-student-data";
 import {
   fullRungPlan,
   RUNG_TH,
   skillTargetsFor,
   type RungLevel,
+  type RungStep,
 } from "@/lib/course-plan/rungs";
 import {
   addToCarryOver,
   buildItemStream,
-  carryOverMinutes,
   CARRY_OVER_STORAGE_KEY,
   clearFromCarryOver,
   EMPTY_CARRY_OVER,
   pourIntoDays,
   projectBoth,
-  splitDayByTime,
+  projectFinish,
   applyCustomisation,
   applyOverrides,
   blocksInStream,
@@ -58,9 +58,9 @@ import {
   completionOf,
   markCompleted,
   PROGRESS_STORAGE_KEY,
+  type ItemScore,
   type Progress,
   type Customisation,
-  blockFeasibility,
   blockTotals,
   moveBlockDay,
   moveBlockItem,
@@ -86,6 +86,15 @@ const SOURCE_TH: Record<TaskWeakness["source"], string> = {
   attempts: "จากการฝึกล่าสุด",
 };
 
+/** The three screens. A learner opening the app wants the first one. */
+type Tab = "today" | "progress" | "plan";
+
+const TABS: { key: Tab; labelTh: string; icon: string }[] = [
+  { key: "today", labelTh: "วันนี้", icon: "▶" },
+  { key: "progress", labelTh: "ความคืบหน้า", icon: "📈" },
+  { key: "plan", labelTh: "แผน", icon: "🗓" },
+];
+
 function thaiFullDate(iso: string) {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString("th-TH", {
     day: "numeric",
@@ -103,6 +112,12 @@ function thaiDate(iso: string) {
   });
 }
 
+function daysBetween(fromIso: string, toIso: string): number {
+  return Math.round(
+    (Date.parse(`${toIso}T00:00:00Z`) - Date.parse(`${fromIso}T00:00:00Z`)) / 86_400_000,
+  );
+}
+
 export function CoursePlanClient({
   course,
   weakness,
@@ -111,6 +126,7 @@ export function CoursePlanClient({
   todayIso,
   accessReason = "admin",
   studentCourseEnabled = false,
+  syncEnabled,
 }: {
   course: StudentCourse | null;
   weakness: TaskWeakness[];
@@ -119,7 +135,15 @@ export function CoursePlanClient({
   todayIso: string;
   accessReason?: "admin" | "vip";
   studentCourseEnabled?: boolean;
+  /**
+   * Whether plan + progress may round-trip to the server. Defaults to hasUser,
+   * which is right everywhere except the fixture preview — there an admin with
+   * a live session would otherwise write demo progress onto their real row.
+   */
+  syncEnabled?: boolean;
 }) {
+  const canSync = syncEnabled ?? hasUser;
+  const [tab, setTab] = useState<Tab>("today");
   const [settings, setSettings] = useState<PlanSettings>({
     ...DEFAULT_PLAN_SETTINGS,
     startDate: todayIso,
@@ -129,14 +153,16 @@ export function CoursePlanClient({
   const [plannerView, setPlannerView] = useState<"week" | "month">("week");
   const [weekIndex, setWeekIndex] = useState(0);
   const [dragFrom, setDragFrom] = useState<{ date: string; itemId?: string } | null>(null);
-  const [goalScore, setGoalScore] = useState(120);
+  /** Touch equivalent of the drag: what the move sheet is currently moving. */
+  const [moveTarget, setMoveTarget] = useState<
+    { date: string; itemId?: string; titleTh: string } | null
+  >(null);
   const [minutesDraft, setMinutesDraft] = useState("20");
   const [custom, setCustom] = useState<Customisation>(EMPTY_CUSTOMISATION);
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS);
   const [carryOver, setCarryOver] = useState<CarryOver>(EMPTY_CARRY_OVER);
   const [sessionOpen, setSessionOpen] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
-  const [rungOpen, setRungOpen] = useState(false);
   /** Soft banner after the plan auto-shifts overdue work onto today+. */
   const [adaptNotice, setAdaptNotice] = useState<{
     items: number;
@@ -145,17 +171,9 @@ export function CoursePlanClient({
   } | null>(null);
   const adaptingRef = useRef(false);
 
-  function applyAdaptPlan(overdueSnapshot: {
-    items: number;
-    minutes: number;
-    days: number;
-  }) {
+  function applyAdaptPlan(overdueSnapshot: { items: number; minutes: number; days: number }) {
     adaptingRef.current = true;
-    setSettings((prev) => ({
-      ...prev,
-      startDate: todayIso,
-      catchUpMode: "adapt",
-    }));
+    setSettings((prev) => ({ ...prev, startDate: todayIso, catchUpMode: "adapt" }));
     setOverrides({});
     setCarryOver(EMPTY_CARRY_OVER);
     setAdaptNotice(overdueSnapshot);
@@ -166,18 +184,17 @@ export function CoursePlanClient({
 
   function applyCarryPlan(overdueDays: BlockDay[]) {
     let next = carryOver;
-    for (const d of overdueDays) {
-      next = addToCarryOver(next, d.date, d.items);
-    }
+    for (const d of overdueDays) next = addToCarryOver(next, d.date, d.items);
     setCarryOver(next);
     setSettings((prev) => ({ ...prev, catchUpMode: "carry" }));
     setAdaptNotice(null);
   }
 
   // ---- persistence -------------------------------------------------------
-  // localStorage first (instant, works logged-out), then the DB if migration
-  // 042 is deployed. The server copy wins on load so the plan follows the user
-  // across devices; a 503 means the table isn't there yet and we stay local.
+  // localStorage first (instant, works offline), then the DB. The server copy
+  // wins on load so the plan AND the completion record follow the learner
+  // across devices — losing months of finished work to a cleared cache was the
+  // worst failure this page had.
   const [syncState, setSyncState] = useState<"local" | "synced" | "offline">("local");
 
   useEffect(() => {
@@ -198,7 +215,7 @@ export function CoursePlanClient({
       /* corrupt or unavailable storage — fall back to defaults */
     }
 
-    if (!hasUser) {
+    if (!canSync) {
       setLoaded(true);
       return;
     }
@@ -214,6 +231,7 @@ export function CoursePlanClient({
             settings: Partial<PlanSettings> | null;
             overrides: BlockOverrides | null;
             carryOver: CarryOver | null;
+            progress: Progress | null;
           };
           if (json.settings && Object.keys(json.settings).length > 0) {
             const { custom: savedCustom, ...planOnly } = json.settings as Partial<PlanSettings> & {
@@ -224,6 +242,17 @@ export function CoursePlanClient({
           }
           if (json.overrides) setOverrides(json.overrides);
           if (json.carryOver) setCarryOver(json.carryOver);
+          // Merge rather than replace: a session finished offline on this device
+          // must not be erased by an older server copy.
+          if (json.progress) {
+            setProgress((local) =>
+              markCompleted(
+                { ...EMPTY_PROGRESS, ...json.progress },
+                local.completedIds,
+                local.accuracy,
+              ),
+            );
+          }
           setSyncState("synced");
         }
       } catch {
@@ -236,7 +265,7 @@ export function CoursePlanClient({
     return () => {
       cancelled = true;
     };
-  }, [todayIso, hasUser]);
+  }, [todayIso, canSync]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -250,19 +279,24 @@ export function CoursePlanClient({
       /* ignore */
     }
 
-    if (!hasUser || syncState === "offline") return;
+    if (!canSync || syncState === "offline") return;
     // Debounced so dragging a dozen items is one write, not a dozen.
     const t = setTimeout(() => {
       void fetch("/api/course/plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ settings: { ...settings, custom }, overrides, carryOver }),
+        body: JSON.stringify({
+          settings: { ...settings, custom },
+          overrides,
+          carryOver,
+          progress,
+        }),
       })
         .then((r) => setSyncState(r.ok ? "synced" : "offline"))
         .catch(() => setSyncState("offline"));
     }, 800);
     return () => clearTimeout(t);
-  }, [settings, overrides, carryOver, custom, progress, loaded, hasUser, syncState]);
+  }, [settings, overrides, carryOver, custom, progress, loaded, canSync, syncState]);
 
   // Keep the custom field in step when a preset is tapped or a saved plan loads.
   useEffect(() => {
@@ -338,26 +372,20 @@ export function CoursePlanClient({
 
   /**
    * The rungs this learner must climb. Generated from their score vector — no
-   * plan is authored per student. Empty until they have been assessed, which
-   * makes the planner fall back to teaching the whole course in order.
+   * plan is authored per student.
    */
   const rungSteps = useMemo(() => {
-    const scores = weekly.length > 0
-      ? weekly.map((w) => ({ taskType: w.taskType, score160: w.score160 }))
-      : weakness.map((w) => ({ taskType: w.taskType, score160: w.score160 }));
+    const scores =
+      weekly.length > 0
+        ? weekly.map((w) => ({ taskType: w.taskType, score160: w.score160 }))
+        : weakness.map((w) => ({ taskType: w.taskType, score160: w.score160 }));
     if (scores.length === 0) return [];
-    return fullRungPlan(skillTargetsFor(scores, goalScore));
-  }, [weekly, weakness, goalScore]);
+    return fullRungPlan(skillTargetsFor(scores, settings.goalScore));
+  }, [weekly, weakness, settings.goalScore]);
 
-  /**
-   * Block-by-block schedule. The curriculum is one ordered stream (block's
-   * videos → that block's exercises), poured into days by time budget — so a
-   * drill never appears before the lesson that teaches it, and anything that
-   * does not fit simply leads the next day.
-   */
   /** The curriculum as authored — every block, before the learner rearranges. */
   const baseStream = useMemo(
-    () => buildItemStream(courseVideos, undefined, rungSteps),
+    () => buildItemStream(courseVideos, blocksForSkillPlacement(rungSteps), rungSteps),
     [courseVideos, rungSteps],
   );
   /** What actually runs: their chosen blocks, in their chosen order. */
@@ -375,7 +403,7 @@ export function CoursePlanClient({
   /**
    * Only what is still outstanding gets scheduled. Completing items pulls the
    * rest of the plan forward; leaving them pushes it back. That is what makes
-   * "catch up" work without a second queue shadowing the calendar.
+   * both "catch up" and the bonus round work without a second queue.
    */
   const remainingStream = useMemo(() => {
     const done = new Set(progress.completedIds);
@@ -424,10 +452,6 @@ export function CoursePlanClient({
     () => projectBoth(remainingStream, pourSettings),
     [remainingStream, pourSettings],
   );
-  const feasibility = useMemo(
-    () => blockFeasibility(days, pourSettings, remainingStream),
-    [days, pourSettings, remainingStream],
-  );
   const completion = useMemo(() => completionOf(stream, progress), [stream, progress]);
 
   const weeks = useMemo(() => {
@@ -440,6 +464,59 @@ export function CoursePlanClient({
     return [...map.entries()].sort((a, b) => a[0] - b[0]).map(([, v]) => v);
   }, [days]);
 
+  const today = useMemo(
+    () => days.find((d) => d.date === todayIso) ?? days.find((d) => d.items.length > 0) ?? null,
+    [days, todayIso],
+  );
+
+  /**
+   * What the bonus round can offer: the next scheduled items after today.
+   *
+   * Capped, because the offer is one item at a time and nobody needs the whole
+   * rest of the course serialised into a prop.
+   */
+  const upcomingItems = useMemo(() => {
+    const todayIds = new Set((today?.items ?? []).map((i) => i.id));
+    const out: StudyItem[] = [];
+    for (const d of days) {
+      if (today && d.date <= today.date) continue;
+      for (const it of d.items) {
+        if (!todayIds.has(it.id)) out.push(it);
+        if (out.length >= 10) return out;
+      }
+    }
+    return out;
+  }, [days, today]);
+
+  /**
+   * The plan as it stood when this session opened.
+   *
+   * Frozen, because finishing today's work moves the projection on its own —
+   * measuring "days saved" against a moving baseline would credit the bonus
+   * round for work the learner was always going to do.
+   */
+  const sessionBaseline = useRef<{ stream: StudyItem[]; date: string | null } | null>(null);
+
+  function openSession() {
+    const done = new Set(progress.completedIds);
+    const rest = stream.filter((i) => !done.has(i.id));
+    sessionBaseline.current = {
+      stream: rest,
+      date: projectFinish(rest, pourSettings)?.date ?? null,
+    };
+    setSessionOpen(true);
+  }
+
+  function projectWith(extraCompletedIds: string[]): BonusProjection {
+    const base = sessionBaseline.current;
+    if (!base?.date) return null;
+    const drop = new Set(extraCompletedIds);
+    const rest = base.stream.filter((i) => !drop.has(i.id));
+    const next = projectFinish(rest, pourSettings);
+    if (!next) return null;
+    return { date: next.date, daysSaved: Math.max(0, daysBetween(next.date, base.date)) };
+  }
+
   function toggleDay(n: number) {
     setSettings((s) => ({
       ...s,
@@ -449,849 +526,777 @@ export function CoursePlanClient({
     }));
   }
 
+  function moveTo(fromDate: string, toDate: string, itemId?: string) {
+    setOverrides((o) =>
+      itemId
+        ? moveBlockItem(days, o, itemId, fromDate, toDate)
+        : moveBlockDay(days, o, fromDate, toDate),
+    );
+  }
+
   function handleDrop(toDate: string) {
     if (!dragFrom) return;
-    setOverrides((o) =>
-      dragFrom.itemId
-        ? moveBlockItem(days, o, dragFrom.itemId, dragFrom.date, toDate)
-        : moveBlockDay(days, o, dragFrom.date, toDate),
-    );
+    moveTo(dragFrom.date, toDate, dragFrom.itemId);
     setDragFrom(null);
   }
 
+  const goalScore = settings.goalScore;
+
   return (
-    <main className="ep-page-shell min-h-screen bg-slate-100 px-4 py-6">
-      <div className="mx-auto max-w-4xl space-y-6">
-        <header className="ep-stagger-in rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <p
-            className={`text-[11px] font-black uppercase tracking-[0.2em] ${
-              accessReason === "vip" ? "text-emerald-600" : "text-rose-500"
-            }`}
-          >
-            {accessReason === "vip"
-              ? "VIP Fast Track"
-              : studentCourseEnabled
-                ? "Admin · พรีวิวคอร์ส"
-                : "Admin only · ยังไม่เปิดให้นักเรียน"}
-          </p>
-          {!hasUser && (
-            <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-[12px] font-bold text-amber-900 ring-1 ring-amber-200">
-              คุณยังไม่ได้ล็อกอินบัญชีจริง — วิดีโอ/คลังข้อสอบ/คะแนน Redeem อาจว่าง ·{" "}
-              <Link href="/login?redirect=%2Fcourse" className="underline">
-                เข้าสู่ระบบ
-              </Link>
-            </p>
-          )}
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900">คอร์สของฉัน</h1>
-          <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <p className="text-sm text-slate-600">เริ่มวันนี้ · ไล่ตามแผน · ลากปฏิทินได้</p>
-            {hasUser && (
+    <main className="ep-page-shell min-h-screen bg-slate-100 pb-10">
+      {/* ---------------- header + tabs ---------------- */}
+      <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto max-w-3xl px-4 pt-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900">คอร์สของฉัน</h1>
+            <div className="flex items-center gap-2">
               <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-black transition-colors duration-300 ${
-                  syncState === "synced"
-                    ? "bg-emerald-50 text-emerald-600"
-                    : syncState === "offline"
-                      ? "bg-amber-50 text-amber-700"
-                      : "bg-slate-100 text-slate-400"
+                className={`text-[13px] font-semibold ${
+                  accessReason === "vip" ? "text-emerald-600" : "text-slate-400"
                 }`}
-                title={
-                  syncState === "offline"
-                    ? "ยังไม่ได้ deploy migration 042 — แผนถูกเก็บในเครื่องนี้เท่านั้น"
-                    : undefined
-                }
               >
-                {syncState === "synced"
-                  ? "☁︎ ซิงก์แล้ว"
-                  : syncState === "offline"
-                    ? "⚠︎ เก็บในเครื่องนี้เท่านั้น"
-                    : "…"}
+                {accessReason === "vip"
+                  ? "VIP Fast Track"
+                  : studentCourseEnabled
+                    ? "พรีวิวแอดมิน"
+                    : "แอดมินเท่านั้น"}
               </span>
-            )}
-          </div>
-        </header>
-
-        {/* ============ CORE COMPLETE ============ */}
-        {completion.isComplete && <CourseCompletion weakestFirst={weakestFirst} />}
-
-        {/* ============ PROGRESS ============ */}
-        {completion.total > 0 && !completion.isComplete && (
-          <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div className="flex items-baseline justify-between gap-2">
-              <h2 className="text-sm font-black text-slate-800">ความคืบหน้าหลักสูตร</h2>
-              <p className="text-[12px] font-black text-slate-500">
-                {completion.done} / {completion.total} รายการ
-              </p>
-            </div>
-            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100">
-              <div
-                className="h-full bg-emerald-500 transition-[width] duration-500"
-                style={{ width: `${completion.percent}%` }}
-              />
-            </div>
-            <p className="mt-1 text-[11px] text-slate-400">
-              {completion.percent}% — เหลืออีก {completion.total - completion.done} รายการ
-            </p>
-          </section>
-        )}
-
-        {/* ============ TODAY ============ */}
-        {(() => {
-          const today = days.find((d) => d.date === todayIso) ?? days.find((d) => d.items.length > 0);
-          if (!today) return null;
-          return (
-            <section className="ep-stagger-in overflow-hidden rounded-3xl bg-[#004AAD] text-white shadow-sm">
-              <div className="p-5">
-                <p className="text-[11px] font-black uppercase tracking-widest text-white/60">
-                  วันนี้ · {thaiDate(today.date)}
-                </p>
-                <h2 className="mt-1 text-2xl font-black">
-                  {today.blocks.length > 0 ? today.blocks.map((b) => b.titleTh).join(" → ") : "วันพัก"}
-                </h2>
-                <p className="mt-0.5 text-sm text-white/80">
-                  {today.items.length} รายการ · {today.totalMinutes} นาที
-                  {carryOver.entries.length > 0 && (
-                    <span className="ml-2 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-black text-amber-950">
-                      ค้าง {carryOver.entries.length} บท/แบบฝึก
-                    </span>
-                  )}
-                </p>
-                {today.items.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setSessionOpen(true)}
-                    className="mt-4 w-full rounded-full bg-white py-3 text-sm font-black text-[#004AAD] transition hover:bg-white/90"
-                  >
-                    ▶︎ เริ่มเรียนวันนี้ ({settings.minutesPerDay} นาที)
-                  </button>
-                )}
-                <p className="mt-3 text-[11px] font-bold text-white/70">
-                  🎬 วิดีโอ · 📘 บทเรียน · 🏋️ แบบฝึก
-                </p>
-              </div>
-            </section>
-          );
-        })()}
-
-        {/* ============ BEHIND? CATCH-UP CHOICE / NOTICE ============ */}
-        {loaded && overdueStats && catchUpMode === "ask" && (
-          <section className="ep-stagger-in rounded-3xl bg-amber-50 p-5 shadow-sm ring-1 ring-amber-200">
-            <p className="text-[11px] font-black uppercase tracking-widest text-amber-600">
-              ตามแผนไม่ทันนิดหน่อย
-            </p>
-            <h2 className="mt-1 text-lg font-black text-amber-900">
-              มีบทเรียนและแบบฝึกค้าง {overdueStats.items} รายการ · {overdueStats.minutes}{" "}
-              นาที
-            </h2>
-            <p className="mt-1 text-[12px] text-amber-800">
-              ค้างมาจาก {overdueStats.days} วันที่ผ่านมา — อยากให้ทำยังไงดี?
-            </p>
-            <div className="mt-3 space-y-2">
-              <button
-                type="button"
-                onClick={() => applyAdaptPlan(overdueStats)}
-                className="w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white transition hover:brightness-110"
-              >
-                ปรับแผนใหม่
-              </button>
-              <p className="px-1 text-center text-[11px] text-amber-700">
-                ย้ายบทเรียนและแบบฝึกที่ค้างมาเรียงจากวันนี้
-              </p>
-              <button
-                type="button"
-                onClick={() => applyCarryPlan(overdueDays)}
-                className="w-full rounded-full bg-white py-3 text-sm font-black text-amber-900 ring-1 ring-amber-300 transition hover:bg-amber-100/60"
-              >
-                ทำแบบฝึก / เรียนบทที่ค้างไว้
-              </button>
-              <p className="px-1 text-center text-[11px] text-amber-700">
-                เก็บบทเรียนและแบบฝึกวันเก่าไว้ ไล่ตามก่อน แล้วค่อยวันใหม่
-              </p>
-            </div>
-          </section>
-        )}
-
-        {loaded && overdueStats && catchUpMode === "carry" && (
-          <section className="ep-stagger-in rounded-3xl bg-amber-50 p-5 shadow-sm ring-1 ring-amber-200">
-            <p className="text-[11px] font-black uppercase tracking-widest text-amber-600">
-              โหมดไล่ตามที่ค้าง
-            </p>
-            <h2 className="mt-1 text-lg font-black text-amber-900">
-              ยังมีบทเรียนและแบบฝึกค้าง {overdueStats.items} รายการ ·{" "}
-              {overdueStats.minutes} นาที
-            </h2>
-            <p className="mt-1 text-[12px] text-amber-800">
-              ระบบเก็บไว้ให้แล้ว — กดเริ่มเรียนแล้วเลือกทำของที่ค้างก่อนได้
-            </p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <button
-                type="button"
-                onClick={() => setSessionOpen(true)}
-                className="flex-1 rounded-full bg-[#004AAD] py-2.5 text-sm font-black text-white"
-              >
-                เริ่มเรียน (มีของค้าง)
-              </button>
-              <button
-                type="button"
-                onClick={() => applyAdaptPlan(overdueStats)}
-                className="flex-1 rounded-full bg-white py-2.5 text-sm font-black text-amber-900 ring-1 ring-amber-300"
-              >
-                เปลี่ยนเป็นปรับแผนใหม่
-              </button>
-            </div>
-          </section>
-        )}
-
-        {adaptNotice && catchUpMode === "adapt" && !overdueStats && (
-          <section className="ep-stagger-in rounded-3xl bg-emerald-50 p-5 shadow-sm ring-1 ring-emerald-200">
-            <p className="text-[11px] font-black uppercase tracking-widest text-emerald-600">
-              ปรับแผนใหม่แล้ว
-            </p>
-            <h2 className="mt-1 text-lg font-black text-emerald-900">
-              ย้ายบทเรียนและแบบฝึกค้าง {adaptNotice.items} รายการ ·{" "}
-              {adaptNotice.minutes} นาที มาเริ่มจากวันนี้
-            </h2>
-            <p className="mt-1 text-[12px] text-emerald-800">
-              ค้างมาจาก {adaptNotice.days} วันที่ผ่านมา — ปฏิทินถูกจัดใหม่ให้ไล่จากวันนี้ต่อ
-              {projection.full ? ` · เรียนจบประมาณ ${thaiFullDate(projection.full.date)}` : ""}
-            </p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <button
-                type="button"
-                onClick={() => setAdaptNotice(null)}
-                className="flex-1 rounded-full bg-emerald-600 py-2.5 text-sm font-black text-white"
-              >
-                เข้าใจแล้ว
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setAdaptNotice(null);
-                  setSettings((s) => ({ ...s, catchUpMode: "ask" }));
-                }}
-                className="flex-1 rounded-full bg-white py-2.5 text-sm font-black text-emerald-900 ring-1 ring-emerald-300"
-              >
-                ถามใหม่ครั้งหน้า
-              </button>
-            </div>
-          </section>
-        )}
-
-        {/* ============ SCORE BREAKDOWN ============ */}
-        <ScoreBreakdown weakness={weakness} weekly={weekly} hasUser={hasUser} />
-
-        {/* ============ BEST + SUB-PAR REDEEM ============ */}
-        <AttemptRedeemPanel hasUser={hasUser} defaultCollapsed={!hasUser} />
-
-        {/* ============ THE RUNG LADDER ============ */}
-        {rungSteps.length > 0 && (
-          <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <button
-              type="button"
-              onClick={() => setRungOpen((o) => !o)}
-              className="flex w-full items-center justify-between gap-3 text-left"
-            >
-              <div>
-                <h2 className="text-lg font-black text-slate-900">เส้นทางของคุณ</h2>
-                <p className="mt-0.5 text-[11px] text-slate-500">
-                  {rungSteps.length} ขั้น · เป้า {goalScore}
-                </p>
-              </div>
-              <span className="text-sm font-black text-slate-400">{rungOpen ? "▲" : "▼"}</span>
-            </button>
-            {rungOpen && (
-              <>
-            <ol className="mt-3 space-y-1.5">
-              {rungSteps.slice(0, 10).map((step, i) => (
-                <li
-                  key={`${step.taskType}-${step.level}-${i}`}
-                  className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-200"
+              {canSync && syncState === "offline" && (
+                <span
+                  className="rounded-full bg-slate-100 px-2 py-0.5 text-[13px] font-semibold text-slate-500"
+                  title="แผนถูกเก็บไว้ในเครื่องนี้ ยังซิงก์ขึ้นระบบไม่ได้"
                 >
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-slate-900 text-[11px] font-black text-white">
-                    {i + 1}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[13px] font-black text-slate-800">
-                      {taskLabel(step.taskType)}{" "}
-                      <span className="text-slate-400">· ระดับ{RUNG_TH[step.level]}</span>
-                    </span>
-                    {step.check && (
-                      <span className="mt-0.5 block text-[10px] font-bold text-amber-700">
-                        ⚡ {step.check.reasonTh}
-                      </span>
-                    )}
-                  </span>
-                  <span className="shrink-0 text-[11px] font-black tabular-nums text-slate-500">
-                    {step.fromScore} → {step.goalScore}
-                  </span>
-                </li>
-              ))}
-            </ol>
-            {rungSteps.length > 10 && (
-              <p className="mt-2 text-[11px] text-slate-400">
-                และอีก {rungSteps.length - 10} ขั้น
-              </p>
-            )}
-            <p className="mt-3 rounded-xl bg-sky-50 p-3 text-[11px] text-sky-800 ring-1 ring-sky-200">
-              ระดับที่ผ่านแล้วไม่ถูกใส่ในตาราง แต่ยังเปิดดูเลกเชอร์ได้ทุกอัน
-            </p>
-              </>
-            )}
-          </section>
-        )}
-
-        {/* ============ 1. CUSTOMIZE MY PLAN (collapsed by default) ============ */}
-        <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-          <button
-            type="button"
-            onClick={() => setSetupOpen((o) => !o)}
-            className="flex w-full items-center gap-3 text-left"
-          >
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-slate-800 text-sm font-black text-white">
-              1
-            </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-black leading-tight text-slate-900">ตั้งแผนของฉัน</h2>
-              <p className="truncate text-[11px] text-slate-500">
-                {settings.minutesPerDay} นาที · {settings.studyDays.length} วัน/สัปดาห์ · เป้า{" "}
-                {goalScore}
-                {!setupOpen ? " · กดเพื่อปรับ" : ""}
-              </p>
-            </div>
-            <span className="text-sm font-black text-slate-400">{setupOpen ? "▲" : "▼"}</span>
-          </button>
-          {setupOpen && (
-          <div className="mt-4 space-y-4">
-            <div>
-              <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
-                เริ่มเรียนวันไหน
-              </p>
-              <input
-                type="date"
-                value={settings.startDate}
-                onChange={(e) =>
-                  setSettings((s) => ({ ...s, startDate: e.target.value || todayIso }))
-                }
-                className="rounded-xl bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700 ring-1 ring-slate-200"
-              />
-              {settings.startDate !== todayIso && (
-                <button
-                  type="button"
-                  onClick={() => setSettings((s) => ({ ...s, startDate: todayIso }))}
-                  className="ml-2 rounded-full px-2 py-1 text-[11px] font-bold text-slate-400"
-                >
-                  วันนี้
-                </button>
-              )}
-              {settings.startDate && (
-                <p className="mt-1 text-[12px] font-bold text-slate-600">
-                  เริ่ม {thaiFullDate(settings.startDate)}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
-                เมื่อตามแผนไม่ทัน
-              </p>
-              <div className="flex flex-col gap-1.5">
-                {(
-                  [
-                    {
-                      mode: "ask" as const,
-                      label: "ถามทุกครั้ง",
-                      hint: "เลือกว่าจะปรับแผนใหม่ หรือทำของที่ค้าง",
-                    },
-                    {
-                      mode: "adapt" as const,
-                      label: "ปรับแผนใหม่",
-                      hint: "ย้ายบทเรียนและแบบฝึกค้างมาเรียงจากวันนี้",
-                    },
-                    {
-                      mode: "carry" as const,
-                      label: "ทำแบบฝึก / เรียนบทที่ค้างไว้",
-                      hint: "เก็บบทเรียนและแบบฝึกวันเก่าไว้ไล่ตาม",
-                    },
-                  ] as const
-                ).map((opt) => (
-                  <button
-                    key={opt.mode}
-                    type="button"
-                    onClick={() => setSettings((s) => ({ ...s, catchUpMode: opt.mode }))}
-                    className={`rounded-2xl px-3.5 py-2.5 text-left ring-1 transition ${
-                      catchUpMode === opt.mode
-                        ? "bg-[#004AAD] text-white ring-[#004AAD]"
-                        : "bg-slate-50 text-slate-800 ring-slate-200 hover:ring-slate-400"
-                    }`}
-                  >
-                    <span className="block text-[13px] font-black">{opt.label}</span>
-                    <span
-                      className={`mt-0.5 block text-[11px] ${
-                        catchUpMode === opt.mode ? "text-white/80" : "text-slate-500"
-                      }`}
-                    >
-                      {opt.hint}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
-                วันละกี่นาที
-              </p>
-              <div className="flex flex-wrap items-center gap-1.5">
-                {MINUTE_OPTIONS.map((m) => (
-                  <Pill
-                    key={m}
-                    on={settings.minutesPerDay === m}
-                    onClick={() => setSettings((s) => ({ ...s, minutesPerDay: m }))}
-                  >
-                    {m}
-                  </Pill>
-                ))}
-                {/* Presets are shortcuts, not limits — real available time
-                    rarely lands on a round number. */}
-                <span className="ml-1 flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-1">
-                  <span className="text-[10px] font-black uppercase tracking-wide text-slate-400">
-                    กำหนดเอง
-                  </span>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={MIN_MINUTES_PER_DAY}
-                    max={MAX_MINUTES_PER_DAY}
-                    value={minutesDraft}
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      setMinutesDraft(raw);
-                      const n = Number(raw);
-                      if (raw !== "" && Number.isFinite(n) && n >= MIN_MINUTES_PER_DAY && n <= MAX_MINUTES_PER_DAY) {
-                        setSettings((s) => ({ ...s, minutesPerDay: Math.round(n) }));
-                      }
-                    }}
-                    onBlur={() => {
-                      const next = clampMinutes(Number(minutesDraft));
-                      setSettings((s) => ({ ...s, minutesPerDay: next }));
-                      setMinutesDraft(String(next));
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") e.currentTarget.blur();
-                    }}
-                    className="w-16 rounded-full bg-white px-2 py-1 text-center text-xs font-black text-slate-800 ring-1 ring-slate-300"
-                  />
-                  <span className="text-[11px] font-bold text-slate-500">นาที</span>
+                  เก็บในเครื่อง
                 </span>
-              </div>
-              <p className="mt-1 text-[11px] text-slate-500">
-                ใส่กี่นาทีก็ได้ ({MIN_MINUTES_PER_DAY}–{MAX_MINUTES_PER_DAY}) — เช่น 65, 72, 92
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
-                เรียนวันไหนบ้าง ({settings.studyDays.length} วัน/สัปดาห์)
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {WEEKDAY_FULL_TH.map((th, n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => toggleDay(n)}
-                    className={`rounded-full px-3 py-2 text-xs font-black transition ${
-                      settings.studyDays.includes(n)
-                        ? "bg-[#004AAD] text-white"
-                        : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                    }`}
-                  >
-                    {th}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
-                เป้าคะแนน
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {[100, 110, 120, 130, 140].map((g) => (
-                  <Pill key={g} on={goalScore === g} onClick={() => setGoalScore(g)}>
-                    {g}
-                  </Pill>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400">
-                แผนกี่สัปดาห์
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {[4, 8, 12, 26].map((w) => (
-                  <Pill key={w} on={settings.weeks === w} onClick={() => setSettings((s) => ({ ...s, weeks: w }))}>
-                    {w} สัปดาห์
-                  </Pill>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <Stat n={totals.studyDays} label="วันที่ต้องเรียน" />
-              <Stat n={totals.videos} label="เลกเชอร์" />
-              <Stat n={totals.exercises} label="ชุดฝึก" />
-              <Stat n={totals.hours} label="ชั่วโมงรวม" />
-            </div>
-
-            {!settings.practiceOnly && courseVideos.length > 0 && projection.full && (
-              <p className="rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800 ring-1 ring-emerald-200">
-                ถ้าเรียนตามจังหวะนี้ — วันละ <strong>{settings.minutesPerDay} นาที</strong>{" "}
-                <strong>{settings.studyDays.length} วัน/สัปดาห์</strong> — คาดว่าจะเรียนจบหลักสูตรวันที่{" "}
-                <strong>{thaiFullDate(projection.full.date)}</strong>
-              </p>
-            )}
-
-            {/* Finish projection — the honest answer to "how long will this take?",
-                with the videos-only figure alongside because the exercises
-                roughly triple the calendar. */}
-            {(projection.full || projection.videosOnly) && (
-              <div className="grid gap-2 sm:grid-cols-2">
-                <div className="rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-200">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600">
-                    เรียนจบแก่นเนื้อหา
-                  </p>
-                  <p className="mt-0.5 text-[11px] font-bold text-emerald-800">
-                    ยังไม่รวมฝึกเพิ่มเติมเพื่อเตรียมพร้อมก่อนสอบ
-                  </p>
-                  <p className="mt-1 text-[11px] font-bold text-emerald-700">
-                    เริ่ม {thaiFullDate(settings.startDate)}
-                  </p>
-                  <p className="text-xl font-black text-emerald-900">
-                    ถึง {projection.full ? thaiFullDate(projection.full.date) : "—"}
-                  </p>
-                  {projection.full && (
-                    <p className="mt-0.5 text-[11px] text-emerald-700">
-                      {projection.full.studyDays} วันเรียน ·{" "}
-                      {Math.ceil(projection.full.calendarDays / 7)} สัปดาห์ ·{" "}
-                      {Math.round(projection.full.totalMinutes / 60)} ชั่วโมง
-                    </p>
-                  )}
-                </div>
-                <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-200">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-sky-600">
-                    ดูเลกเชอร์ครบ
-                  </p>
-                  <p className="mt-0.5 text-[11px] font-bold text-sky-800">
-                    เฉพาะเลกเชอร์ ไม่รวมแบบฝึกในบทเรียน
-                  </p>
-                  <p className="mt-1 text-[11px] font-bold text-sky-700">
-                    เริ่ม {thaiFullDate(settings.startDate)}
-                  </p>
-                  <p className="text-xl font-black text-sky-900">
-                    ถึง {projection.videosOnly ? thaiFullDate(projection.videosOnly.date) : "—"}
-                  </p>
-                  {projection.videosOnly && (
-                    <p className="mt-0.5 text-[11px] text-sky-700">
-                      {projection.videosOnly.studyDays} วันเรียน ·{" "}
-                      {Math.ceil(projection.videosOnly.calendarDays / 7)} สัปดาห์ ·{" "}
-                      {Math.round(projection.videosOnly.totalMinutes / 60)} ชั่วโมง
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* The extra practice is self-directed and lives elsewhere — say so
-                rather than letting "เรียนจบ" imply the work is finished. */}
-            {(projection.full || projection.videosOnly) && (
-              <p className="rounded-xl bg-slate-50 p-3 text-[11px] text-slate-600 ring-1 ring-slate-200">
-                วันที่ด้านบนคือเรียนจบ <strong>แก่นเนื้อหา</strong> เท่านั้น —
-                การฝึกเพิ่มเติมก่อนสอบต้องกดเข้าไปที่{" "}
-                <Link href="/practice" className="font-black text-[#004AAD] underline">
-                  หน้าฝึกข้อสอบ
-                </Link>{" "}
-                เอง ไม่ได้นับรวมอยู่ในวันที่นี้
-              </p>
-            )}
-
-            {/* practice mode */}
-            <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-black text-slate-800">ไม่อยากดูเลกเชอร์?</p>
-                  <p className="text-[11px] text-slate-500">
-                    โหมดฝึกล้วน — ข้ามวิดีโอ ใช้ปฏิทินฝึกข้อสอบ/บทเรียนแบบเดิม
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSettings((s) => ({ ...s, practiceOnly: !s.practiceOnly }))}
-                    className={`rounded-full px-4 py-2 text-xs font-black ${
-                      settings.practiceOnly ? "bg-emerald-500 text-white" : "bg-white text-slate-600 ring-1 ring-slate-300"
-                    }`}
-                  >
-                    {settings.practiceOnly ? "✓ โหมดฝึกล้วน" : "เปิดโหมดฝึกล้วน"}
-                  </button>
-                  <Link
-                    href="/study-plan"
-                    className="rounded-full bg-[#004AAD] px-4 py-2 text-xs font-black text-white"
-                  >
-                    ไปปฏิทินฝึกข้อสอบ →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-          )}
-        </section>
-
-        {/* ============ 2. STUDY ORDER ============ */}
-        {allBlocks.length > 0 && (
-          <Section
-            n={2}
-            title="ลำดับการเรียน"
-            tone="sky"
-            subtitle={
-              custom.mode === "guided"
-                ? "เราจัดลำดับให้แล้ว — เปลี่ยนเองได้ถ้าต้องการ"
-                : "คุณกำลังจัดลำดับเอง"
-            }
-          >
-            <div className="space-y-3">
-              {/* One segmented control, not two competing cards — the section
-                  title used to say "จัดโปรแกรมเอง" while defaulting to the
-                  opposite, which read as a contradiction. */}
-              <div className="flex gap-1 rounded-full bg-slate-100 p-1">
-                {(
-                  [
-                    ["guided", "✨ ให้เราจัดให้"],
-                    ["custom", "🎛️ จัดเอง"],
-                  ] as const
-                ).map(([mode, label]) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setCustom((c) => ({ ...c, mode }))}
-                    className={`flex-1 rounded-full py-2 text-xs font-black transition ${
-                      custom.mode === mode
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-500 hover:text-slate-700"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {custom.mode === "guided" ? (
-                <GuidedOrder blocks={allBlocks} />
-              ) : (
-                <ProgramBuilder
-                  stream={stream}
-                  allBlocks={allBlocks}
-                  custom={custom}
-                  onChange={setCustom}
-                />
               )}
             </div>
-          </Section>
-        )}
-
-        {/* ============ 3. LESSON LIBRARY ============ */}
-        <Section
-          n={3}
-          title="คลังบทเรียน"
-          tone="emerald"
-          subtitle="แยกตามทักษะ — ค้นหาแล้วเปิดคลิปได้ทุกเมื่อ"
-        >
-          {!course ? (
-            <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-200">
-              ยังโหลดข้อมูลคอร์สไม่ได้ — ตรวจว่า migration 038 ถูก deploy แล้ว และมีคอร์ส slug{" "}
-              <code>duolingo-fast-track</code>
-            </p>
-          ) : (
-            <LessonLibrary
-              course={course}
-              stream={stream}
-              completedIds={new Set(progress.completedIds)}
-              goalScore={goalScore}
-            />
-          )}
-        </Section>
-
-        <Section
-          n={4}
-          title="ปฏิทินการเรียน"
-          tone="violet"
-          subtitle="ลากวันหรือรายการไปวางวันอื่นได้"
-        >
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <Pill on={plannerView === "week"} onClick={() => setPlannerView("week")}>
-              รายสัปดาห์
-            </Pill>
-            <Pill on={plannerView === "month"} onClick={() => setPlannerView("month")}>
-              รายเดือน
-            </Pill>
-            {Object.keys(overrides).length > 0 && (
-              <button
-                type="button"
-                onClick={() => setOverrides({})}
-                className="ml-auto rounded-full bg-rose-100 px-3 py-1.5 text-xs font-black text-rose-700"
-              >
-                ↺ ล้างการลากวาง
-              </button>
-            )}
           </div>
 
-          {plannerView === "week" ? (
-            <>
-              {/* Week header: range + a one-line summary, so the week reads as a
-                  unit instead of seven disconnected boxes. */}
-              <div className="mb-2.5 flex items-center justify-between gap-2 rounded-2xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200">
-                <button
-                  type="button"
-                  aria-label="สัปดาห์ก่อนหน้า"
-                  disabled={weekIndex === 0}
-                  onClick={() => setWeekIndex((i) => Math.max(0, i - 1))}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-sm font-black text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:opacity-30"
-                >
-                  ←
-                </button>
-                <div className="min-w-0 text-center">
-                  <p className="truncate text-[13px] font-black text-slate-800">
-                    {(() => {
-                      const w = weeks[weekIndex] ?? [];
-                      return w.length
-                        ? `${thaiDate(w[0].date)} – ${thaiDate(w[w.length - 1].date)}`
-                        : "—";
-                    })()}
-                  </p>
-                  <p className="text-[10px] font-bold text-slate-400">
-                    สัปดาห์ที่ {weekIndex + 1} / {weeks.length}
-                    {(() => {
-                      const w = weeks[weekIndex] ?? [];
-                      const study = w.filter((d) => d.items.length > 0).length;
-                      const mins = w.reduce((n, d) => n + d.totalMinutes, 0);
-                      return study ? ` · ${study} วันเรียน · ${mins} นาที` : " · พักทั้งสัปดาห์";
-                    })()}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  aria-label="สัปดาห์ถัดไป"
-                  disabled={weekIndex >= weeks.length - 1}
-                  onClick={() => setWeekIndex((i) => Math.min(weeks.length - 1, i + 1))}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-sm font-black text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:opacity-30"
-                >
-                  →
-                </button>
-              </div>
-
-              {/* One column, chronological. Rest days collapse to a slim row —
-                  as full cards they took the same space as a study day and left
-                  the grid ragged and mostly empty. */}
-              <div className="space-y-1.5">
-                {(weeks[weekIndex] ?? []).map((d) =>
-                  d.items.length === 0 ? (
-                    <RestRow key={d.date} day={d} onDrop={() => handleDrop(d.date)} />
-                  ) : (
-                    <DayCard
-                      key={d.date}
-                      day={d}
-                      isToday={d.date === todayIso}
-                      onStart={d.date === todayIso ? () => setSessionOpen(true) : undefined}
-                      onDragStart={(itemId) => setDragFrom({ date: d.date, itemId })}
-                      onDrop={() => handleDrop(d.date)}
-                      dragging={dragFrom?.date === d.date}
-                    />
-                  ),
+          <nav className="mt-3 flex gap-1" aria-label="ส่วนของคอร์ส">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTab(t.key)}
+                aria-current={tab === t.key ? "page" : undefined}
+                className={`relative flex-1 rounded-t-xl px-2 py-3 text-[14px] font-bold transition ${
+                  tab === t.key
+                    ? "text-[#004AAD]"
+                    : "text-slate-400 hover:text-slate-600"
+                }`}
+              >
+                <span aria-hidden className="mr-1">
+                  {t.icon}
+                </span>
+                {t.labelTh}
+                {tab === t.key && (
+                  <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-[#004AAD]" />
                 )}
-              </div>
-            </>
-          ) : (
-            <div className="space-y-1.5">
-              {weeks.map((w, i) => {
-                const mins = w.reduce((n, d) => n + d.totalMinutes, 0);
-                const study = w.filter((d) => d.items.length > 0).length;
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => {
-                      setWeekIndex(i);
-                      setPlannerView("week");
-                    }}
-                    className={`flex w-full items-center gap-3 rounded-2xl p-3 text-left ring-1 transition ${
-                      i === weekIndex
-                        ? "bg-slate-50 ring-slate-400"
-                        : "bg-white ring-slate-200 hover:ring-slate-300"
-                    }`}
-                  >
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-slate-900 text-[11px] font-black text-white">
-                      {i + 1}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[12px] font-black text-slate-700">
-                        {thaiDate(w[0].date)} – {thaiDate(w[w.length - 1].date)}
-                      </span>
-                      <span className="mt-1 flex gap-0.5">
-                        {w.map((d) => (
-                          <span
-                            key={d.date}
-                            title={`${thaiDate(d.date)} · ${d.totalMinutes} นาที`}
-                            className={`h-1.5 flex-1 rounded-full ${
-                              d.items.length === 0
-                                ? "bg-slate-150 bg-slate-100"
-                                : d.items.some((it: StudyItem) => it.kind === "video")
-                                  ? "bg-amber-400"
-                                  : "bg-sky-400"
-                            }`}
-                          />
-                        ))}
-                      </span>
-                    </span>
-                    <span className="shrink-0 text-right">
-                      <span className="block text-[11px] font-black text-slate-700">
-                        {study} วัน
-                      </span>
-                      <span className="block text-[10px] text-slate-400">{mins} นาที</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </Section>
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
-      {sessionOpen && (() => {
-        const today = days.find((d) => d.date === todayIso);
-        const todaysItems = today?.items ?? [];
-        if (todaysItems.length === 0 && carryOver.entries.length === 0) return null;
-        const finishDate = today?.date ?? todayIso;
-        return (
-          <SessionRunner
-            todaysItems={todaysItems}
-            carryOver={carryOver}
-            minutes={settings.minutesPerDay}
-            lessonVideos={lessonVideos}
-            onClose={() => setSessionOpen(false)}
-            onFinish={(unfinished, completed) => {
-              setProgress((p) => markCompleted(p, completed.map((i) => i.id)));
-              // Finished items leave the backlog; unfinished ones join it and
-              // are offered again at the start of the next session.
-              setCarryOver((prev) =>
-                addToCarryOver(
-                  clearFromCarryOver(prev, completed.map((i) => i.id)),
-                  finishDate,
-                  unfinished,
-                ),
-              );
-            }}
-          />
-        );
-      })()}
+      <div className="mx-auto max-w-3xl space-y-4 px-4 pt-4">
+        {!hasUser && (
+          <p className="rounded-2xl bg-amber-50 px-4 py-3 text-[14px] font-semibold text-amber-900 ring-1 ring-amber-200">
+            กำลังดูแบบยังไม่ล็อกอิน — วิดีโอ คลังข้อสอบ และคะแนนจะยังว่าง ·{" "}
+            <Link href="/login?redirect=%2Fcourse" className="underline">
+              เข้าสู่ระบบ
+            </Link>
+          </p>
+        )}
+
+        {/* ================================================== TODAY ===== */}
+        {tab === "today" && (
+          <>
+            {completion.isComplete && <CourseCompletion weakestFirst={weakestFirst} />}
+
+            {today && !completion.isComplete && (
+              <section className="ep-stagger-in overflow-hidden rounded-3xl bg-[#004AAD] text-white shadow-sm">
+                <div className="p-6">
+                  <p className="text-[13px] font-semibold uppercase tracking-widest text-white/70">
+                    วันนี้ · {thaiDate(today.date)}
+                  </p>
+                  <h2 className="mt-1 text-2xl font-extrabold tracking-tight">
+                    {today.blocks.length > 0
+                      ? today.blocks.map((b) => b.titleTh).join(" → ")
+                      : "วันพัก"}
+                  </h2>
+                  <p className="mt-1 text-[15px] text-white/80">
+                    {today.items.length} รายการ · {today.totalMinutes} นาที
+                    {carryOver.entries.length > 0 && (
+                      <span className="ml-2 rounded-full bg-amber-400 px-2.5 py-0.5 text-[13px] font-bold text-amber-950">
+                        มีของค้าง {carryOver.entries.length}
+                      </span>
+                    )}
+                  </p>
+
+                  {/* The one start button in the whole product. */}
+                  {today.items.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={openSession}
+                      className="mt-5 w-full rounded-full bg-white py-4 text-base font-extrabold text-[#004AAD] transition hover:bg-white/90"
+                    >
+                      ▶︎ เริ่มเรียน ({settings.minutesPerDay} นาที)
+                    </button>
+                  )}
+
+                  <ul className="mt-4 space-y-1.5">
+                    {today.items.slice(0, 4).map((it) => (
+                      <li
+                        key={it.id}
+                        className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2.5"
+                      >
+                        <span aria-hidden className="shrink-0 text-[15px]">
+                          {it.kind === "video" ? "🎬" : it.kind === "lesson" ? "📘" : "🏋️"}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-[14px] font-semibold text-white/90">
+                          {it.titleTh}
+                        </span>
+                        <span className="shrink-0 text-[13px] text-white/60">{it.minutes}′</span>
+                      </li>
+                    ))}
+                    {today.items.length > 4 && (
+                      <li className="px-3 text-[13px] text-white/60">
+                        และอีก {today.items.length - 4} รายการ
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </section>
+            )}
+
+            {loaded && overdueStats && catchUpMode === "ask" && (
+              <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-amber-200">
+                <p className="text-[13px] font-semibold uppercase tracking-widest text-amber-600">
+                  ตามแผนไม่ทันนิดหน่อย
+                </p>
+                <h2 className="mt-1 text-[17px] font-bold text-slate-900">
+                  ค้างอยู่ {overdueStats.items} รายการ · {overdueStats.minutes} นาที
+                </h2>
+                <p className="mt-1 text-[14px] text-slate-600">
+                  ค้างมาจาก {overdueStats.days} วันที่ผ่านมา — อยากให้ทำยังไงดี?
+                </p>
+                <div className="mt-4 space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => applyAdaptPlan(overdueStats)}
+                    className="w-full rounded-2xl bg-[#004AAD] px-4 py-3.5 text-left text-white transition hover:brightness-110"
+                  >
+                    <span className="block text-[15px] font-extrabold">ปรับแผนใหม่</span>
+                    <span className="mt-0.5 block text-[13px] text-white/80">
+                      ย้ายของค้างมาเรียงจากวันนี้ ไม่มีอะไรค้างอีก
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyCarryPlan(overdueDays)}
+                    className="w-full rounded-2xl bg-slate-50 px-4 py-3.5 text-left ring-1 ring-slate-200 transition hover:ring-slate-400"
+                  >
+                    <span className="block text-[15px] font-bold text-slate-800">
+                      ไล่เก็บของเก่าก่อน
+                    </span>
+                    <span className="mt-0.5 block text-[13px] text-slate-500">
+                      ของค้างจะขึ้นก่อนทุกครั้งที่เริ่มเรียน
+                    </span>
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {loaded && overdueStats && catchUpMode === "carry" && (
+              <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-amber-200">
+                <p className="text-[13px] font-semibold uppercase tracking-widest text-amber-600">
+                  โหมดไล่เก็บของค้าง
+                </p>
+                <h2 className="mt-1 text-[17px] font-bold text-slate-900">
+                  ค้างอยู่ {overdueStats.items} รายการ · {overdueStats.minutes} นาที
+                </h2>
+                <p className="mt-1 text-[14px] text-slate-600">
+                  ของค้างจะถูกใส่ไว้ต้นคิวให้อัตโนมัติทุกครั้งที่กดเริ่มเรียน
+                </p>
+                <button
+                  type="button"
+                  onClick={() => applyAdaptPlan(overdueStats)}
+                  className="mt-3 w-full rounded-full bg-slate-100 py-3 text-[15px] font-semibold text-slate-700"
+                >
+                  เปลี่ยนเป็นปรับแผนใหม่แทน
+                </button>
+              </section>
+            )}
+
+            {adaptNotice && catchUpMode === "adapt" && !overdueStats && (
+              <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-emerald-200">
+                <p className="text-[13px] font-semibold uppercase tracking-widest text-emerald-600">
+                  ปรับแผนใหม่แล้ว
+                </p>
+                <h2 className="mt-1 text-[17px] font-bold text-slate-900">
+                  ย้ายของค้าง {adaptNotice.items} รายการมาเริ่มจากวันนี้
+                </h2>
+                <p className="mt-1 text-[14px] text-slate-600">
+                  ปฏิทินถูกจัดใหม่ให้ไล่จากวันนี้ต่อ
+                  {projection.full ? ` · เรียนจบประมาณ ${thaiFullDate(projection.full.date)}` : ""}
+                </p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => setAdaptNotice(null)}
+                    className="flex-1 rounded-full bg-emerald-600 py-3 text-[15px] font-extrabold text-white"
+                  >
+                    เข้าใจแล้ว
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdaptNotice(null);
+                      setSettings((s) => ({ ...s, catchUpMode: "ask" }));
+                    }}
+                    className="flex-1 rounded-full bg-slate-100 py-3 text-[15px] font-semibold text-slate-700"
+                  >
+                    ถามใหม่ครั้งหน้า
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {/* Where the plan is heading — one date, not three cards of them. */}
+            {projection.full && !completion.isComplete && (
+              <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                <div className="flex items-baseline justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold uppercase tracking-widest text-slate-400">
+                      ถ้าเรียนตามจังหวะนี้
+                    </p>
+                    <p className="mt-0.5 text-[17px] font-bold text-slate-900">
+                      เรียนจบ {thaiFullDate(projection.full.date)}
+                    </p>
+                    <p className="mt-0.5 text-[13px] text-slate-500">
+                      {settings.minutesPerDay} นาที · {settings.studyDays.length} วัน/สัปดาห์ ·
+                      อีก {projection.full.studyDays} วันเรียน
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTab("plan");
+                      setSetupOpen(true);
+                    }}
+                    className="shrink-0 rounded-full bg-slate-100 px-3.5 py-2 text-[13px] font-semibold text-slate-600"
+                  >
+                    ปรับ
+                  </button>
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {/* =============================================== PROGRESS ===== */}
+        {tab === "progress" && (
+          <>
+            {completion.total > 0 && (
+              <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                <div className="flex items-baseline justify-between gap-2">
+                  <h2 className="text-[17px] font-bold text-slate-900">ความคืบหน้าหลักสูตร</h2>
+                  <p className="text-[14px] font-bold text-slate-600">
+                    {completion.done} / {completion.total}
+                  </p>
+                </div>
+                <div className="mt-2.5 h-3 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full bg-emerald-500 transition-[width] duration-500"
+                    style={{ width: `${completion.percent}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 text-[13px] text-slate-500">
+                  {completion.percent}% — เหลืออีก {completion.total - completion.done} รายการ
+                </p>
+              </section>
+            )}
+
+            <ScoreBreakdown
+              weakness={weakness}
+              weekly={weekly}
+              hasUser={hasUser}
+              goalScore={goalScore}
+            />
+
+            {rungSteps.length > 0 && (
+              <RungLadder steps={rungSteps} goalScore={goalScore} />
+            )}
+
+            <AttemptRedeemPanel hasUser={hasUser} defaultCollapsed={!hasUser} />
+          </>
+        )}
+
+        {/* =================================================== PLAN ===== */}
+        {tab === "plan" && (
+          <>
+            <Panel title="ตั้งแผนของฉัน">
+              <button
+                type="button"
+                onClick={() => setSetupOpen((o) => !o)}
+                className="flex w-full items-center gap-3 text-left"
+              >
+                <span className="min-w-0 flex-1 text-[14px] text-slate-600">
+                  {settings.minutesPerDay} นาที · {settings.studyDays.length} วัน/สัปดาห์ · เป้า{" "}
+                  {goalScore}
+                </span>
+                <span className="shrink-0 text-[14px] font-bold text-slate-400">
+                  {setupOpen ? "▲" : "▼"}
+                </span>
+              </button>
+
+              {setupOpen && (
+                <div className="mt-4 space-y-5">
+                  <Field label="เริ่มเรียนวันไหน">
+                    <input
+                      type="date"
+                      value={settings.startDate}
+                      onChange={(e) =>
+                        setSettings((s) => ({ ...s, startDate: e.target.value || todayIso }))
+                      }
+                      className="rounded-xl bg-slate-100 px-3.5 py-2.5 text-[15px] font-semibold text-slate-700 ring-1 ring-slate-200"
+                    />
+                    {settings.startDate !== todayIso && (
+                      <button
+                        type="button"
+                        onClick={() => setSettings((s) => ({ ...s, startDate: todayIso }))}
+                        className="ml-2 rounded-full bg-slate-100 px-3 py-1.5 text-[13px] font-semibold text-slate-600"
+                      >
+                        วันนี้
+                      </button>
+                    )}
+                  </Field>
+
+                  <Field label="วันละกี่นาที">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {MINUTE_OPTIONS.map((m) => (
+                        <Pill
+                          key={m}
+                          on={settings.minutesPerDay === m}
+                          onClick={() => setSettings((s) => ({ ...s, minutesPerDay: m }))}
+                        >
+                          {m}
+                        </Pill>
+                      ))}
+                      <span className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1.5">
+                        <span className="text-[13px] font-semibold text-slate-500">กำหนดเอง</span>
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          min={MIN_MINUTES_PER_DAY}
+                          max={MAX_MINUTES_PER_DAY}
+                          value={minutesDraft}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            setMinutesDraft(raw);
+                            const n = Number(raw);
+                            if (
+                              raw !== "" &&
+                              Number.isFinite(n) &&
+                              n >= MIN_MINUTES_PER_DAY &&
+                              n <= MAX_MINUTES_PER_DAY
+                            ) {
+                              setSettings((s) => ({ ...s, minutesPerDay: Math.round(n) }));
+                            }
+                          }}
+                          onBlur={() => {
+                            const next = clampMinutes(Number(minutesDraft));
+                            setSettings((s) => ({ ...s, minutesPerDay: next }));
+                            setMinutesDraft(String(next));
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.currentTarget.blur();
+                          }}
+                          className="w-16 rounded-full bg-white px-2 py-1 text-center text-[14px] font-bold text-slate-800 ring-1 ring-slate-300"
+                        />
+                      </span>
+                    </div>
+                  </Field>
+
+                  <Field label={`เรียนวันไหนบ้าง (${settings.studyDays.length} วัน/สัปดาห์)`}>
+                    <div className="flex flex-wrap gap-2">
+                      {WEEKDAY_FULL_TH.map((th, n) => (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() => toggleDay(n)}
+                          className={`rounded-full px-3.5 py-2.5 text-[14px] font-semibold transition ${
+                            settings.studyDays.includes(n)
+                              ? "bg-[#004AAD] text-white"
+                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                          }`}
+                        >
+                          {th}
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
+
+                  <Field label="เป้าคะแนน">
+                    <div className="flex flex-wrap gap-2">
+                      {[100, 110, 120, 130, 140].map((g) => (
+                        <Pill
+                          key={g}
+                          on={goalScore === g}
+                          onClick={() => setSettings((prev) => ({ ...prev, goalScore: g }))}
+                        >
+                          {g}
+                        </Pill>
+                      ))}
+                    </div>
+                  </Field>
+
+                  <Field label="เมื่อตามแผนไม่ทัน">
+                    <div className="flex flex-col gap-2">
+                      {(
+                        [
+                          { mode: "ask" as const, label: "ถามทุกครั้ง", hint: "เลือกเองแต่ละรอบ" },
+                          {
+                            mode: "adapt" as const,
+                            label: "ปรับแผนใหม่",
+                            hint: "ย้ายของค้างมาเรียงจากวันนี้",
+                          },
+                          {
+                            mode: "carry" as const,
+                            label: "ไล่เก็บของเก่าก่อน",
+                            hint: "ของค้างขึ้นก่อนเสมอ",
+                          },
+                        ] as const
+                      ).map((opt) => (
+                        <button
+                          key={opt.mode}
+                          type="button"
+                          onClick={() => setSettings((s) => ({ ...s, catchUpMode: opt.mode }))}
+                          className={`rounded-2xl px-4 py-3 text-left ring-1 transition ${
+                            catchUpMode === opt.mode
+                              ? "bg-[#004AAD] text-white ring-[#004AAD]"
+                              : "bg-slate-50 text-slate-800 ring-slate-200 hover:ring-slate-400"
+                          }`}
+                        >
+                          <span className="block text-[15px] font-bold">{opt.label}</span>
+                          <span
+                            className={`mt-0.5 block text-[13px] ${
+                              catchUpMode === opt.mode ? "text-white/80" : "text-slate-500"
+                            }`}
+                          >
+                            {opt.hint}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
+
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <Stat n={totals.studyDays} label="วันที่ต้องเรียน" />
+                    <Stat n={totals.videos} label="เลกเชอร์" />
+                    <Stat n={totals.exercises} label="ชุดฝึก" />
+                    <Stat n={totals.hours} label="ชั่วโมงรวม" />
+                  </div>
+
+                  {projection.full && (
+                    <div className="rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-200">
+                      <p className="text-[13px] font-semibold uppercase tracking-widest text-emerald-600">
+                        เรียนจบแก่นเนื้อหา
+                      </p>
+                      <p className="mt-0.5 text-xl font-extrabold text-emerald-900">
+                        {thaiFullDate(projection.full.date)}
+                      </p>
+                      <p className="mt-1 text-[13px] text-emerald-800">
+                        {projection.full.studyDays} วันเรียน ·{" "}
+                        {Math.ceil(projection.full.calendarDays / 7)} สัปดาห์ ·{" "}
+                        {Math.round(projection.full.totalMinutes / 60)} ชั่วโมง · ยังไม่รวมการฝึกเพิ่มเองที่{" "}
+                        <Link href="/practice" className="font-bold text-emerald-900 underline">
+                          หน้าฝึกข้อสอบ
+                        </Link>
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[15px] font-bold text-slate-800">ไม่อยากดูเลกเชอร์?</p>
+                        <p className="text-[13px] text-slate-500">
+                          โหมดฝึกล้วน — ข้ามวิดีโอ เหลือแต่แบบฝึก
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSettings((s) => ({ ...s, practiceOnly: !s.practiceOnly }))
+                        }
+                        className={`rounded-full px-4 py-2.5 text-[14px] font-bold ${
+                          settings.practiceOnly
+                            ? "bg-emerald-500 text-white"
+                            : "bg-white text-slate-600 ring-1 ring-slate-300"
+                        }`}
+                      >
+                        {settings.practiceOnly ? "✓ เปิดอยู่" : "เปิดโหมดฝึกล้วน"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </Panel>
+
+            {allBlocks.length > 0 && (
+              <Panel
+                title="ลำดับการเรียน"
+                subtitle={
+                  custom.mode === "guided"
+                    ? "เราจัดลำดับให้แล้ว — เปลี่ยนเองได้"
+                    : "คุณกำลังจัดลำดับเอง"
+                }
+              >
+                <div className="space-y-3">
+                  <div className="flex gap-1 rounded-full bg-slate-100 p-1">
+                    {(
+                      [
+                        ["guided", "✨ ให้เราจัดให้"],
+                        ["custom", "🎛️ จัดเอง"],
+                      ] as const
+                    ).map(([mode, label]) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setCustom((c) => ({ ...c, mode }))}
+                        className={`flex-1 rounded-full py-2.5 text-[14px] font-bold transition ${
+                          custom.mode === mode
+                            ? "bg-white text-slate-900 shadow-sm"
+                            : "text-slate-500 hover:text-slate-700"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {custom.mode === "guided" ? (
+                    <GuidedOrder blocks={allBlocks} />
+                  ) : (
+                    <ProgramBuilder
+                      stream={stream}
+                      allBlocks={allBlocks}
+                      custom={custom}
+                      onChange={setCustom}
+                    />
+                  )}
+                </div>
+              </Panel>
+            )}
+
+            <Panel title="ปฏิทินการเรียน" subtitle="แตะ ⇄ เพื่อย้ายวัน (บนคอมลากวางได้)">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <Pill on={plannerView === "week"} onClick={() => setPlannerView("week")}>
+                  รายสัปดาห์
+                </Pill>
+                <Pill on={plannerView === "month"} onClick={() => setPlannerView("month")}>
+                  รายเดือน
+                </Pill>
+                {Object.keys(overrides).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setOverrides({})}
+                    className="ml-auto rounded-full bg-slate-100 px-3.5 py-2 text-[13px] font-semibold text-slate-600"
+                  >
+                    ↺ ล้างการย้าย
+                  </button>
+                )}
+              </div>
+
+              {plannerView === "week" ? (
+                <>
+                  <div className="mb-2.5 flex items-center justify-between gap-2 rounded-2xl bg-slate-50 px-3 py-2.5 ring-1 ring-slate-200">
+                    <button
+                      type="button"
+                      aria-label="สัปดาห์ก่อนหน้า"
+                      disabled={weekIndex === 0}
+                      onClick={() => setWeekIndex((i) => Math.max(0, i - 1))}
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-[15px] font-bold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:opacity-30"
+                    >
+                      ←
+                    </button>
+                    <div className="min-w-0 text-center">
+                      <p className="truncate text-[14px] font-bold text-slate-800">
+                        {(() => {
+                          const w = weeks[weekIndex] ?? [];
+                          return w.length
+                            ? `${thaiDate(w[0].date)} – ${thaiDate(w[w.length - 1].date)}`
+                            : "—";
+                        })()}
+                      </p>
+                      <p className="text-[13px] text-slate-500">
+                        สัปดาห์ที่ {weekIndex + 1} / {weeks.length}
+                        {(() => {
+                          const w = weeks[weekIndex] ?? [];
+                          const study = w.filter((d) => d.items.length > 0).length;
+                          const mins = w.reduce((n, d) => n + d.totalMinutes, 0);
+                          return study ? ` · ${study} วันเรียน · ${mins} นาที` : " · พักทั้งสัปดาห์";
+                        })()}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="สัปดาห์ถัดไป"
+                      disabled={weekIndex >= weeks.length - 1}
+                      onClick={() => setWeekIndex((i) => Math.min(weeks.length - 1, i + 1))}
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-[15px] font-bold text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 disabled:opacity-30"
+                    >
+                      →
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {(weeks[weekIndex] ?? []).map((d) =>
+                      d.items.length === 0 ? (
+                        <RestRow key={d.date} day={d} onDrop={() => handleDrop(d.date)} />
+                      ) : (
+                        <DayCard
+                          key={d.date}
+                          day={d}
+                          isToday={d.date === todayIso}
+                          onStart={d.date === todayIso ? openSession : undefined}
+                          onDragStart={(itemId) => setDragFrom({ date: d.date, itemId })}
+                          onDrop={() => handleDrop(d.date)}
+                          dragging={dragFrom?.date === d.date}
+                          onRequestMove={(itemId, titleTh) =>
+                            setMoveTarget({ date: d.date, itemId, titleTh })
+                          }
+                        />
+                      ),
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-1.5">
+                  {weeks.map((w, i) => {
+                    const mins = w.reduce((n, d) => n + d.totalMinutes, 0);
+                    const study = w.filter((d) => d.items.length > 0).length;
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          setWeekIndex(i);
+                          setPlannerView("week");
+                        }}
+                        className={`flex w-full items-center gap-3 rounded-2xl p-3.5 text-left ring-1 transition ${
+                          i === weekIndex
+                            ? "bg-slate-50 ring-slate-400"
+                            : "bg-white ring-slate-200 hover:ring-slate-300"
+                        }`}
+                      >
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-900 text-[13px] font-bold text-white">
+                          {i + 1}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[14px] font-semibold text-slate-700">
+                            {thaiDate(w[0].date)} – {thaiDate(w[w.length - 1].date)}
+                          </span>
+                          <span className="mt-1 flex gap-0.5">
+                            {w.map((d) => (
+                              <span
+                                key={d.date}
+                                title={`${thaiDate(d.date)} · ${d.totalMinutes} นาที`}
+                                className={`h-1.5 flex-1 rounded-full ${
+                                  d.items.length === 0
+                                    ? "bg-slate-100"
+                                    : d.items.some((it: StudyItem) => it.kind === "video")
+                                      ? "bg-amber-400"
+                                      : "bg-sky-400"
+                                }`}
+                              />
+                            ))}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-right">
+                          <span className="block text-[14px] font-bold text-slate-700">
+                            {study} วัน
+                          </span>
+                          <span className="block text-[13px] text-slate-500">{mins} นาที</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </Panel>
+
+            <Panel title="คลังบทเรียน" subtitle="แยกตามทักษะ — ค้นหาแล้วเปิดคลิปได้ทุกเมื่อ">
+              {!course ? (
+                <p className="rounded-2xl bg-amber-50 p-4 text-[14px] text-amber-900 ring-1 ring-amber-200">
+                  ยังโหลดบทเรียนไม่ได้ตอนนี้ — ลองรีเฟรชหน้าอีกครั้ง ถ้ายังไม่ขึ้น ทักแอดมินได้เลย
+                </p>
+              ) : (
+                <LessonLibrary
+                  course={course}
+                  stream={stream}
+                  completedIds={new Set(progress.completedIds)}
+                  goalScore={goalScore}
+                />
+              )}
+            </Panel>
+          </>
+        )}
+      </div>
+
+      {/* ---------------- move sheet (touch) ---------------- */}
+      {moveTarget && (
+        <MoveSheet
+          target={moveTarget}
+          days={days}
+          todayIso={todayIso}
+          onClose={() => setMoveTarget(null)}
+          onPick={(toDate) => {
+            moveTo(moveTarget.date, toDate, moveTarget.itemId);
+            setMoveTarget(null);
+          }}
+        />
+      )}
+
+      {sessionOpen &&
+        (() => {
+          const todaysItems = today?.items ?? [];
+          if (todaysItems.length === 0 && carryOver.entries.length === 0) return null;
+          const finishDate = today?.date ?? todayIso;
+          return (
+            <SessionRunner
+              todaysItems={todaysItems}
+              carryOver={carryOver}
+              minutes={settings.minutesPerDay}
+              lessonVideos={lessonVideos}
+              upcomingItems={upcomingItems}
+              projectWith={projectWith}
+              onClose={() => setSessionOpen(false)}
+              onFinish={(unfinished, completed, scores: Record<string, ItemScore>) => {
+                setProgress((p) =>
+                  markCompleted(
+                    p,
+                    completed.map((i) => i.id),
+                    scores,
+                  ),
+                );
+                // Finished items leave the backlog; unfinished ones join it and
+                // lead the queue next session.
+                setCarryOver((prev) =>
+                  addToCarryOver(
+                    clearFromCarryOver(
+                      prev,
+                      completed.map((i) => i.id),
+                    ),
+                    finishDate,
+                    unfinished,
+                  ),
+                );
+              }}
+            />
+          );
+        })()}
     </main>
   );
 }
@@ -1302,76 +1307,96 @@ const BASIS_TH: Record<WeeklyScore["basis"], string> = {
   this_week: "สัปดาห์นี้",
   last_week: "สัปดาห์ที่แล้ว",
   latest: "ล่าสุด",
+  placement: "จากแบบวัดระดับ",
 };
 
+/**
+ * Per-skill scores, measured against the learner's OWN target.
+ *
+ * The bar used to fill against a fixed 160 and flag "weak" below a hardcoded
+ * 128, so someone aiming for 110 saw a 75%-full bar and no credit for a skill
+ * that had already passed their goal — while someone aiming for 140 was told
+ * 130 was fine. The goal the learner chose is the only denominator that means
+ * anything here.
+ */
 function ScoreBreakdown({
   weakness,
   weekly,
   hasUser,
+  goalScore,
 }: {
   weakness: TaskWeakness[];
   weekly: WeeklyScore[];
   hasUser: boolean;
+  goalScore: number;
 }) {
   const rows = useMemo(() => {
     const byWeek = new Map(weekly.map((w) => [w.taskType, w]));
     const byTask = new Map(weakness.map((w) => [w.taskType, w]));
-    return Object.keys(TASK_BLOCK)
-      .map((taskType) => ({
-        taskType,
-        week: byWeek.get(taskType) ?? null,
-        w: byTask.get(taskType) ?? null,
-      }))
-      .sort(
-        (a, b) =>
-          (a.week?.score160 ?? a.w?.score160 ?? 999) - (b.week?.score160 ?? b.w?.score160 ?? 999),
-      );
+    // DEFAULT_TASK_PRIORITY, not TASK_BLOCK: the block map carries three legacy
+    // aliases (interactive_listening, conversation_summary,
+    // summarize_conversation) that no scorer ever writes, so keying off it
+    // rendered three phantom skills permanently stuck on "ยังไม่มีข้อมูล".
+    return DEFAULT_TASK_PRIORITY.map((taskType) => ({
+      taskType,
+      week: byWeek.get(taskType) ?? null,
+      w: byTask.get(taskType) ?? null,
+    })).sort(
+      (a, b) =>
+        (a.week?.score160 ?? a.w?.score160 ?? 999) - (b.week?.score160 ?? b.w?.score160 ?? 999),
+    );
   }, [weakness, weekly]);
 
   const scored = rows.filter((r) => r.week || r.w);
+  const hasScores = hasUser && scored.length > 0;
+  const atGoal = rows.filter((r) => (r.week?.score160 ?? r.w?.score160 ?? -1) >= goalScore).length;
 
   return (
     <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-      <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-black text-slate-900">คะแนนแยกตามโจทย์</h2>
-        <p className="text-[11px] text-slate-400">
-          อัปเดตทุกสัปดาห์ · ถ้าสัปดาห์นี้ยังไม่มีข้อมูล จะแสดงคะแนนล่าสุดแทน
-        </p>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-[17px] font-bold text-slate-900">คะแนนแยกตามโจทย์</h2>
+        {hasScores && (
+          <p className="text-[14px] font-semibold text-slate-600">
+            ถึงเป้าแล้ว {atGoal} / {rows.length} ทักษะ
+          </p>
+        )}
       </div>
+      <p className="mt-0.5 text-[13px] text-slate-500">
+        วัดเทียบเป้าของคุณที่ {goalScore} คะแนน · อัปเดตทุกสัปดาห์
+      </p>
 
       {!hasUser ? (
-        <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800 ring-1 ring-amber-200">
-          กำลังดูด้วยรหัสแอดมิน (ไม่มีบัญชีผู้ใช้) — จึงยังไม่มีคะแนนให้แสดง
-          ล็อกอินด้วยบัญชีจริงเพื่อดูคะแนนของบัญชีนั้น
+        <p className="mt-3 rounded-2xl bg-slate-50 p-4 text-[14px] text-slate-600 ring-1 ring-slate-200">
+          กำลังดูแบบยังไม่ล็อกอิน จึงยังไม่มีคะแนนให้แสดง
         </p>
       ) : scored.length === 0 ? (
-        <p className="rounded-xl bg-slate-50 p-3 text-xs text-slate-600 ring-1 ring-slate-200">
-          ยังไม่มีคะแนน — ทำ Mock Test หรือ Mini Diagnosis หนึ่งครั้ง
-          แล้วแผนจะเรียงลำดับจุดอ่อนให้อัตโนมัติ ตอนนี้ใช้ลำดับมาตรฐานไปก่อน
+        <p className="mt-3 rounded-2xl bg-slate-50 p-4 text-[14px] text-slate-600 ring-1 ring-slate-200">
+          ยังไม่มีคะแนน — ทำ Mock Test หรือ Mini Diagnosis หนึ่งครั้ง แล้วแผนจะเรียงจุดอ่อนให้อัตโนมัติ
         </p>
       ) : (
-        <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {rows.map(({ taskType, week, w }) => {
             const block = studyBlock(TASK_BLOCK[taskType]);
             const t = TONE[block.tone];
             const score = week?.score160 ?? w?.score160 ?? null;
-            const isWeak = score !== null && score < 128;
-            const pct = score === null ? 0 : Math.round((score / 160) * 100);
+            const belowGoal = score !== null && score < goalScore;
+            // Against the learner's goal, not the 160 ceiling.
+            const pct = score === null ? 0 : Math.min(100, Math.round((score / goalScore) * 100));
             const delta = week?.deltaVsPrevWeek ?? null;
 
             return (
-              <div key={taskType} className="rounded-xl bg-slate-50 p-2.5 ring-1 ring-slate-200">
+              <div key={taskType} className="rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200">
                 <div className="flex items-baseline justify-between gap-2">
-                  <p className="truncate text-[12px] font-black text-slate-700">
+                  <p className="truncate text-[14px] font-semibold text-slate-700">
                     {taskLabel(taskType)}
                   </p>
                   {score !== null ? (
-                    <p className="shrink-0 text-sm font-black">
-                      <span className={isWeak ? "text-rose-600" : t.text}>{score}</span>
-                      <span className="text-[10px] font-bold text-slate-400">/160</span>
+                    <p className="shrink-0 text-[15px] font-bold">
+                      <span className={belowGoal ? "text-amber-700" : t.text}>{score}</span>
+                      <span className="text-[13px] font-semibold text-slate-400">/{goalScore}</span>
                       {delta !== null && delta !== 0 && (
                         <span
-                          className={`ml-1 text-[10px] font-black ${
+                          className={`ml-1 text-[13px] font-bold ${
                             delta > 0 ? "text-emerald-600" : "text-rose-500"
                           }`}
                         >
@@ -1381,29 +1406,91 @@ function ScoreBreakdown({
                       )}
                     </p>
                   ) : (
-                    <p className="shrink-0 text-[10px] font-bold text-slate-300">ยังไม่มีข้อมูล</p>
+                    <p className="shrink-0 text-[13px] font-semibold text-slate-400">
+                      ยังไม่มีข้อมูล
+                    </p>
                   )}
                 </div>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200">
+                <div className="relative mt-1.5 h-2 overflow-hidden rounded-full bg-slate-200">
                   <div
-                    className={`h-full transition-[width] duration-500 ease-out ${isWeak ? "bg-rose-400" : t.solid}`}
+                    className={`h-full transition-[width] duration-500 ease-out ${
+                      belowGoal ? "bg-amber-400" : t.solid
+                    }`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
                 {score !== null && (
-                  <p className="mt-0.5 text-[10px] text-slate-400">
+                  <p className="mt-1 text-[13px] text-slate-500">
                     {week
                       ? `${BASIS_TH[week.basis]}${week.attempts > 0 ? ` · ${week.attempts} ครั้ง` : ""}`
                       : w
                         ? SOURCE_TH[w.source]
                         : ""}
-                    {isWeak ? " · จุดอ่อน" : ""}
+                    {belowGoal ? ` · อีก ${goalScore - score} ถึงเป้า` : " · ถึงเป้าแล้ว ✓"}
                   </p>
                 )}
               </div>
             );
           })}
         </div>
+      )}
+    </section>
+  );
+}
+
+/**
+ * The path from here to the goal.
+ *
+ * Open by default and complete: this is the most motivating artifact the course
+ * has, and it used to sit collapsed behind a chevron and then truncate at ten
+ * with "และอีก N ขั้น".
+ */
+function RungLadder({ steps, goalScore }: { steps: RungStep[]; goalScore: number }) {
+  const [showAll, setShowAll] = useState(false);
+  const shown = showAll ? steps : steps.slice(0, 6);
+
+  return (
+    <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <h2 className="text-[17px] font-bold text-slate-900">เส้นทางไป {goalScore}</h2>
+      <p className="mt-0.5 text-[13px] text-slate-500">
+        {steps.length} ขั้น — ระดับที่ผ่านแล้วไม่ถูกใส่ในตาราง แต่ยังเปิดดูเลกเชอร์ได้ทุกอัน
+      </p>
+
+      <ol className="mt-3 space-y-1.5">
+        {shown.map((step, i) => (
+          <li
+            key={`${step.taskType}-${step.level}-${i}`}
+            className="flex items-center gap-3 rounded-2xl bg-slate-50 px-3.5 py-3 ring-1 ring-slate-200"
+          >
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-slate-900 text-[13px] font-bold text-white">
+              {i + 1}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[14px] font-semibold text-slate-800">
+                {taskLabel(step.taskType)}{" "}
+                <span className="text-slate-400">· ระดับ{RUNG_TH[step.level]}</span>
+              </span>
+              {step.check && (
+                <span className="mt-0.5 block text-[13px] text-amber-700">
+                  ⚡ {step.check.reasonTh}
+                </span>
+              )}
+            </span>
+            <span className="shrink-0 text-[13px] font-bold tabular-nums text-slate-500">
+              {step.fromScore} → {step.goalScore}
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      {steps.length > 6 && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className="mt-3 w-full rounded-full bg-slate-100 py-3 text-[14px] font-semibold text-slate-700"
+        >
+          {showAll ? "ย่อรายการ" : `ดูครบทั้ง ${steps.length} ขั้น`}
+        </button>
       )}
     </section>
   );
@@ -1424,18 +1511,15 @@ function RestRow({ day, onDrop }: { day: BlockDay; onDrop: () => void }) {
         setOver(false);
         onDrop();
       }}
-      className={`flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] transition ${
-        over
-          ? "bg-sky-50 ring-1 ring-sky-400"
-          : "bg-slate-50/70 ring-1 ring-transparent"
+      className={`flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-[13px] transition ${
+        over ? "bg-sky-50 ring-1 ring-sky-400" : "bg-slate-50/70 ring-1 ring-transparent"
       }`}
     >
-      <span className="w-16 shrink-0 font-bold text-slate-400">
+      <span className="w-20 shrink-0 font-semibold text-slate-500">
         {WEEKDAY_FULL_TH[day.weekday]}
       </span>
-      <span className="shrink-0 text-slate-300">·</span>
-      <span className="shrink-0 font-bold text-slate-400">{thaiDate(day.date)}</span>
-      <span className="ml-auto shrink-0 text-slate-300">วันพัก</span>
+      <span className="shrink-0 font-semibold text-slate-400">{thaiDate(day.date)}</span>
+      <span className="ml-auto shrink-0 text-slate-400">วันพัก</span>
     </div>
   );
 }
@@ -1447,6 +1531,7 @@ function DayCard({
   onDragStart,
   onDrop,
   dragging,
+  onRequestMove,
 }: {
   day: BlockDay;
   isToday?: boolean;
@@ -1455,6 +1540,8 @@ function DayCard({
   onDragStart: (itemId?: string) => void;
   onDrop: () => void;
   dragging: boolean;
+  /** Touch path: open the move sheet instead of dragging. */
+  onRequestMove: (itemId: string | undefined, titleTh: string) => void;
 }) {
   const [over, setOver] = useState(false);
 
@@ -1471,38 +1558,33 @@ function DayCard({
         onDrop();
       }}
       className={`overflow-hidden rounded-2xl bg-white ring-1 transition ${
-        over
-          ? "ring-2 ring-sky-400"
-          : isToday
-            ? "ring-2 ring-[#004AAD]"
-            : "ring-slate-200"
+        over ? "ring-2 ring-sky-400" : isToday ? "ring-2 ring-[#004AAD]" : "ring-slate-200"
       } ${dragging ? "opacity-50" : ""}`}
     >
-      {/* Header doubles as the drag handle for the whole day. */}
       <div
         draggable
         onDragStart={() => onDragStart(undefined)}
-        className={`flex cursor-grab items-center gap-2 px-3.5 py-2.5 ${
+        className={`flex items-center gap-2 px-3.5 py-3 sm:cursor-grab ${
           isToday ? "bg-[#004AAD] text-white" : "bg-slate-50"
         }`}
       >
         <span className="min-w-0 flex-1">
           <span
-            className={`block truncate text-[13px] font-black ${
+            className={`block truncate text-[14px] font-bold ${
               isToday ? "text-white" : "text-slate-800"
             }`}
           >
             {WEEKDAY_FULL_TH[day.weekday]} · {thaiDate(day.date)}
             {isToday && (
-              <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-[9px] align-middle">
+              <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 align-middle text-[12px]">
                 วันนี้
               </span>
             )}
           </span>
           {day.blocks.length > 0 && (
             <span
-              className={`block truncate text-[10px] ${
-                isToday ? "text-white/70" : "text-slate-400"
+              className={`block truncate text-[13px] ${
+                isToday ? "text-white/70" : "text-slate-500"
               }`}
             >
               {day.blocks.map((b) => b.titleTh).join(" → ")}
@@ -1510,12 +1592,28 @@ function DayCard({
           )}
         </span>
         <span
-          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[13px] font-bold ${
+            isToday ? "bg-white/20 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"
+          }`}
+        >
+          {day.totalMinutes}′
+        </span>
+        {/* Touch move — HTML5 drag never fires on a phone, which is where most
+            of these learners are. */}
+        <button
+          type="button"
+          aria-label={`ย้ายงานของ ${thaiDate(day.date)} ไปวันอื่น`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRequestMove(undefined, `ทั้งวัน · ${thaiDate(day.date)}`);
+          }}
+          onDragStart={(e) => e.preventDefault()}
+          className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-[15px] ${
             isToday ? "bg-white/20 text-white" : "bg-white text-slate-500 ring-1 ring-slate-200"
           }`}
         >
-          {day.totalMinutes} นาที
-        </span>
+          ⇄
+        </button>
         {onStart && (
           <button
             type="button"
@@ -1525,7 +1623,7 @@ function DayCard({
               onStart();
             }}
             onDragStart={(e) => e.preventDefault()}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-sm text-[#004AAD] shadow-sm transition hover:scale-105"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-[15px] text-[#004AAD] shadow-sm transition hover:scale-105"
           >
             ▶
           </button>
@@ -1541,7 +1639,7 @@ function DayCard({
               e.stopPropagation();
               onDragStart(it.id);
             }}
-            className={`flex cursor-grab items-center gap-2.5 px-3.5 py-2.5 transition hover:bg-slate-50/80 ${
+            className={`flex items-center gap-2.5 px-3.5 py-3 transition hover:bg-slate-50/80 sm:cursor-grab ${
               it.kind === "video"
                 ? "border-l-4 border-amber-400 bg-amber-50/40"
                 : it.kind === "lesson"
@@ -1549,9 +1647,8 @@ function DayCard({
                   : "border-l-4 border-sky-400 bg-sky-50/40"
             }`}
           >
-            {/* Fixed icon column keeps every row aligned regardless of title length. */}
             <span
-              className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[13px] ${
+              className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[15px] ${
                 it.kind === "video"
                   ? "bg-amber-100"
                   : it.kind === "lesson"
@@ -1562,11 +1659,25 @@ function DayCard({
               {it.kind === "video" ? "🎬" : it.kind === "lesson" ? "📘" : "🏋️"}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[12px] font-bold text-slate-700">
+              <span className="block truncate text-[14px] font-semibold text-slate-700">
                 {it.titleTh}
               </span>
             </span>
-            <span className="shrink-0 text-[10px] font-bold text-slate-400">{it.minutes}′</span>
+            <span className="shrink-0 text-[13px] font-semibold text-slate-500">
+              {it.minutes}′
+            </span>
+            <button
+              type="button"
+              aria-label={`ย้าย ${it.titleTh} ไปวันอื่น`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onRequestMove(it.id, it.titleTh);
+              }}
+              onDragStart={(e) => e.preventDefault()}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-[14px] text-slate-400 ring-1 ring-slate-200"
+            >
+              ⇄
+            </button>
           </li>
         ))}
       </ul>
@@ -1574,58 +1685,118 @@ function DayCard({
   );
 }
 
-function Section({
-  n,
+/**
+ * Move an item or a whole day without dragging.
+ *
+ * The calendar advertised drag-and-drop as its headline feature while
+ * implementing it with HTML5 dragstart/drop, which never fires on touch — so on
+ * the phones most of these learners use, the feature simply did not exist.
+ */
+function MoveSheet({
+  target,
+  days,
+  todayIso,
+  onClose,
+  onPick,
+}: {
+  target: { date: string; itemId?: string; titleTh: string };
+  days: BlockDay[];
+  todayIso: string;
+  onClose: () => void;
+  onPick: (toDate: string) => void;
+}) {
+  const options = useMemo(
+    () =>
+      days
+        .filter((d) => d.date >= todayIso && d.date !== target.date)
+        .slice(0, 21),
+    [days, todayIso, target.date],
+  );
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 sm:items-center sm:p-4"
+      onClick={onClose}
+    >
+      <div
+        className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-[13px] font-semibold uppercase tracking-widest text-slate-400">
+          ย้ายไปวันไหน
+        </p>
+        <h2 className="mt-1 truncate text-[17px] font-bold text-slate-900">{target.titleTh}</h2>
+        <p className="mt-0.5 text-[13px] text-slate-500">
+          ตอนนี้อยู่วันที่ {thaiDate(target.date)}
+        </p>
+
+        <ul className="mt-4 space-y-1.5">
+          {options.map((d) => (
+            <li key={d.date}>
+              <button
+                type="button"
+                onClick={() => onPick(d.date)}
+                className="flex w-full items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3.5 text-left ring-1 ring-slate-200 transition hover:ring-slate-400"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-semibold text-slate-800">
+                    {WEEKDAY_FULL_TH[d.weekday]} · {thaiDate(d.date)}
+                    {d.date === todayIso && (
+                      <span className="ml-2 rounded-full bg-[#004AAD] px-2 py-0.5 text-[12px] font-bold text-white">
+                        วันนี้
+                      </span>
+                    )}
+                  </span>
+                  <span className="block text-[13px] text-slate-500">
+                    {d.items.length === 0
+                      ? "ว่าง — วันพัก"
+                      : `มีอยู่แล้ว ${d.items.length} รายการ · ${d.totalMinutes} นาที`}
+                  </span>
+                </span>
+                <span className="shrink-0 text-[15px] text-slate-300">→</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-4 w-full rounded-full bg-slate-100 py-3.5 text-[15px] font-semibold text-slate-600"
+        >
+          ยกเลิก
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Panel({
   title,
   subtitle,
   children,
-  tone = "blue",
 }: {
-  n: number;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   children: React.ReactNode;
-  tone?: "blue" | "rose" | "violet" | "sky" | "emerald" | "slate";
 }) {
-  const badge =
-    tone === "rose"
-      ? "bg-rose-500"
-      : tone === "violet"
-        ? "bg-violet-500"
-        : tone === "sky"
-          ? "bg-sky-500"
-          : tone === "emerald"
-            ? "bg-emerald-500"
-            : tone === "slate"
-              ? "bg-slate-700"
-              : "bg-[#004AAD]";
-  const ring =
-    tone === "rose"
-      ? "ring-rose-100"
-      : tone === "violet"
-        ? "ring-violet-100"
-        : tone === "sky"
-          ? "ring-sky-100"
-          : tone === "emerald"
-            ? "ring-emerald-100"
-            : "ring-slate-200";
-
   return (
-    <section
-      className={`ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ${ring}`}
-      style={{ animationDelay: `${n * 90}ms` }}
-    >
-      <div className="mb-3 flex items-center gap-3">
-        <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-sm font-black text-white ${badge}`}>
-          {n}
-        </span>
-        <div>
-          <h2 className="text-lg font-black leading-tight text-slate-900">{title}</h2>
-          <p className="text-[11px] text-slate-500">{subtitle}</p>
-        </div>
-      </div>
-      {children}
+    <section className="ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <h2 className="text-[17px] font-bold leading-tight text-slate-900">{title}</h2>
+      {subtitle && <p className="mt-0.5 text-[13px] text-slate-500">{subtitle}</p>}
+      <div className={subtitle ? "mt-3" : "mt-2"}>{children}</div>
     </section>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-2 text-[13px] font-semibold uppercase tracking-widest text-slate-500">
+        {label}
+      </p>
+      {children}
+    </div>
   );
 }
 
@@ -1634,7 +1805,7 @@ function Pill({ on, onClick, children }: { on: boolean; onClick: () => void; chi
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full px-3 py-1.5 text-xs font-black transition ${
+      className={`rounded-full px-4 py-2.5 text-[14px] font-semibold transition ${
         on ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
       }`}
     >
@@ -1645,9 +1816,9 @@ function Pill({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 
 function Stat({ n, label }: { n: number; label: string }) {
   return (
-    <div className="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-200">
-      <p className="text-xl font-black text-slate-800">{n}</p>
-      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</p>
+    <div className="rounded-2xl bg-slate-50 px-3.5 py-3 ring-1 ring-slate-200">
+      <p className="text-xl font-extrabold text-slate-800">{n}</p>
+      <p className="text-[13px] text-slate-500">{label}</p>
     </div>
   );
 }
@@ -1665,29 +1836,26 @@ function GuidedOrder({
 }) {
   const [showAll, setShowAll] = useState(false);
   const shown = showAll ? blocks : blocks.slice(0, 3);
-  const totalMinutes = blocks.reduce(
-    (s, b) => s + b.items.reduce((n, i) => n + i.minutes, 0),
-    0,
-  );
+  const totalMinutes = blocks.reduce((s, b) => s + b.items.reduce((n, i) => n + i.minutes, 0), 0);
 
   return (
     <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
-      <p className="text-[12px] font-bold text-slate-600">
+      <p className="text-[14px] text-slate-600">
         เริ่มจากพื้นฐาน แล้วไล่ทีละทักษะ — รวม{" "}
         <strong className="text-slate-800">{blocks.length} บท</strong> ·{" "}
         <strong className="text-slate-800">{Math.round(totalMinutes / 60)} ชั่วโมง</strong>
       </p>
 
-      <ol className="mt-2.5 space-y-1">
+      <ol className="mt-3 space-y-1.5">
         {shown.map((b, i) => (
           <li key={b.key} className="flex items-center gap-2.5">
-            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-white text-[10px] font-black text-slate-500 ring-1 ring-slate-200">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-white text-[13px] font-bold text-slate-500 ring-1 ring-slate-200">
               {i + 1}
             </span>
-            <span className="min-w-0 flex-1 truncate text-[12px] font-bold text-slate-700">
+            <span className="min-w-0 flex-1 truncate text-[14px] font-semibold text-slate-700">
               {b.titleTh}
             </span>
-            <span className="shrink-0 text-[10px] text-slate-400">
+            <span className="shrink-0 text-[13px] text-slate-500">
               {b.items.reduce((n, it) => n + it.minutes, 0)} นาที
             </span>
           </li>
@@ -1698,7 +1866,7 @@ function GuidedOrder({
         <button
           type="button"
           onClick={() => setShowAll((v) => !v)}
-          className="mt-2.5 text-[11px] font-black text-[#004AAD]"
+          className="mt-3 text-[14px] font-bold text-[#004AAD]"
         >
           {showAll ? "ย่อรายการ" : `ดูทั้งหมด (อีก ${blocks.length - 3} บท)`}
         </button>

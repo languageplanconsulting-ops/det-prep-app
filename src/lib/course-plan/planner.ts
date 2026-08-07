@@ -33,6 +33,12 @@ export type PlanSettings = {
    * - carry: keep overdue on the calendar + backlog
    */
   catchUpMode: CatchUpMode;
+  /**
+   * The overall DET score the learner is aiming for (0-160). Fans out to
+   * per-skill targets via skillTargetsFor() in rungs.ts, which preferentially
+   * lifts weak skills rather than pushing every skill to the same number.
+   */
+  goalScore: number;
 };
 
 export const DEFAULT_PLAN_SETTINGS: PlanSettings = {
@@ -42,6 +48,7 @@ export const DEFAULT_PLAN_SETTINGS: PlanSettings = {
   weeks: 12,
   practiceOnly: false,
   catchUpMode: "ask",
+  goalScore: 120,
 };
 
 export const WEEKDAY_TH = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];

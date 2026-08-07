@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>RMD AZ Light Gel Moisturizer ACM — ส่วนผสม</title>
+<style>
+  :root{
+    --ink:#0E1113;
+    --ink-2:#4E585F;
+    --ink-3:#8E9BA3;
+    --line:#E4E9EB;
+    --paper:#FFFFFF;
+    --teal:#1BA9BC;
+
+    --c-base:#98A6B0;   /* น้ำ / เบส        */
+    --c-active:#0F9AAB; /* สารออกฤทธิ์      */
+    --c-hydra:#2E7DD1;  /* ดึงน้ำ           */
+    --c-emol:#D9902B;   /* เคลือบล็อกน้ำ     */
+    --c-tex:#7A6BD6;    /* ระบบเนื้อเจล     */
+    --c-bot:#2E8B57;    /* สารสกัดพืช       */
+    --c-pres:#C2456B;   /* กันเสีย          */
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#101315}
+  body{display:flex;align-items:center;justify-content:center;min-height:100vh;
+       font-family:"Sukhumvit Set","Noto Sans Thai","IBM Plex Sans Thai",Thonburi,
+                   -apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;
+       -webkit-font-smoothing:antialiased}
+
+  .frame{width:1080px;height:1080px;flex:none;background:var(--paper);color:var(--ink);
+         display:flex;overflow:hidden;position:relative}
+  /* soft tint behind the bottle — no hard panel edge */
+  .frame::before{content:"";position:absolute;left:-90px;top:90px;width:520px;height:900px;
+                 background:radial-gradient(closest-side,#E4EFF1 0%,rgba(228,239,241,.55) 55%,rgba(228,239,241,0) 100%);
+                 pointer-events:none}
+
+  /* ================= LEFT — PHOTO ================= */
+  .photo{width:322px;flex:none;display:flex;align-items:center;justify-content:center;
+         position:relative;padding:40px 8px 40px 30px}
+  .shot{width:100%;height:545px;object-fit:contain;display:block;
+        filter:drop-shadow(0 20px 32px rgba(20,50,55,.18))}
+
+  /* CSS mockup of the bottle — shows only if the real photo is missing */
+  .mock{width:318px;height:900px;display:flex;flex-direction:column;align-items:center;
+        filter:drop-shadow(0 24px 40px rgba(20,50,55,.22))}
+  .mock .pump{width:112px;height:66px;border-radius:7px 7px 3px 3px;
+              background:linear-gradient(90deg,#DFE5E6 0%,#FAFBFB 22%,#FFF 48%,#F2F5F5 74%,#DBE2E3 100%)}
+  .mock .collar{width:72px;height:36px;
+                background:linear-gradient(90deg,#D8E0E1 0%,#F4F7F7 24%,#FCFDFD 50%,#EDF1F2 76%,#D4DCDE 100%)}
+  .mock .shoulder{width:318px;height:34px;border-radius:50% 50% 0 0 / 100% 100% 0 0;
+                  background:linear-gradient(90deg,#DCE3E4 0%,#F9FAFB 20%,#FFF 47%,#F5F8F8 73%,#D6DEE0 100%)}
+  .mock .btl{width:318px;flex:1;margin-top:-1px;border-radius:0 0 26px 26px;
+             background:linear-gradient(90deg,#DCE3E4 0%,#F9FAFB 18%,#FFF 46%,#FBFCFC 70%,#D9E1E2 100%);
+             padding:44px 26px 30px;text-align:center;display:flex;flex-direction:column;color:#14181A}
+  .mock .l-rmd{font-size:82px;font-weight:800;line-height:.92;letter-spacing:-.01em;transform:scaleX(.94)}
+  .mock .l-acm{font-size:76px;font-weight:800;line-height:.92;letter-spacing:-.01em;transform:scaleX(.94);margin-top:4px}
+  .mock .l-name{font-size:29px;font-weight:800;line-height:1.12;letter-spacing:-.005em;transform:scaleX(.94);margin-top:9px}
+  .mock .rule{height:4px;background:#7FC6D2;margin:13px 4px 11px}
+  .mock .rule-s{height:2px;background:#9FD4DD;margin:11px 34px}
+  .mock .l-desc{font-size:10px;font-weight:600;color:#5E6B71;line-height:1.75;letter-spacing:.06em;margin-top:14px}
+  .mock .l-claims{font-size:10px;font-weight:700;color:#3E7F8C;line-height:1.85;letter-spacing:.05em}
+  .mock .l-foot{font-size:9px;font-weight:600;color:#8B979C;line-height:1.8;letter-spacing:.05em;margin-top:auto}
+  .mock .l-fine{font-size:8.5px;font-weight:600;color:#AFB9BD;line-height:1.8;letter-spacing:.05em;margin-top:9px}
+
+  /* ================= RIGHT ================= */
+  .side{flex:1;padding:54px 52px 42px 30px;display:flex;flex-direction:column;position:relative}
+  .kick{font-size:12px;font-weight:800;letter-spacing:.22em;color:var(--teal)}
+  .title{font-size:42px;font-weight:800;line-height:1.18;margin-top:10px;letter-spacing:.01em}
+  .sub{font-size:13px;color:var(--ink-3);margin-top:10px;line-height:1.5}
+
+  /* full INCI, colour-coded inline */
+  .inci{margin-top:22px;padding-top:20px;border-top:2px solid var(--ink);
+        font-size:17px;line-height:2.28;font-weight:700;letter-spacing:.015em;
+        text-transform:uppercase;color:var(--ink-3)}
+  .inci i{font-style:normal;color:var(--c)}
+  .inci b{font-weight:800;color:var(--c)}
+  .inci u{text-decoration:none;font-size:13px;letter-spacing:.04em;font-weight:800;color:var(--teal)}
+
+  /* colour key + how they work */
+  .keys{margin-top:34px;padding-top:26px;border-top:1px solid var(--line);
+        display:grid;grid-template-columns:1fr 1fr;column-gap:30px;row-gap:26px}
+  .key{display:flex;gap:10px;align-items:flex-start}
+  .key .sq{width:13px;height:13px;border-radius:3px;background:var(--c);flex:none;margin-top:3px}
+  .key .kt{font-size:13.6px;font-weight:800;line-height:1.3;color:var(--ink)}
+  .key .kd{font-size:12.2px;color:var(--ink-2);line-height:1.5;margin-top:3px}
+  .key.wide{grid-column:1 / -1}
+
+  /* hero-active highlights */
+  .notes{margin-top:auto;display:flex;flex-direction:column;gap:13px}
+  .note{border-left:6px solid var(--c-bot);background:#F0F7F2;
+        padding:15px 19px;font-size:12.2px;line-height:1.6;color:var(--ink)}
+  .note.alt{border-left-color:#5FA97D;background:#F4F9F5}
+  .note b{font-weight:800}
+  .note .nt{font-size:11px;font-weight:800;letter-spacing:.10em;color:#1F6B41;display:block;margin-bottom:5px}
+
+  @media (max-width:1079px){ .frame{zoom:.62} }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- ============ LEFT : PRODUCT PHOTO ============ -->
+  <div class="photo">
+    <!-- วางรูปจริงชื่อ rmd-az-bottle.* (png/jpg/jpeg/webp) ไว้ใน public/images/ แล้วรูปจะขึ้นแทนภาพจำลองเอง -->
+    <img class="shot" src="images/rmd-az-bottle.png" alt="RMD AZ Light Gel Moisturizer ACM"
+         data-try="images/rmd-az-bottle.jpg|images/rmd-az-bottle.jpeg|images/rmd-az-bottle.webp|images/rmd-az-bottle.PNG|images/rmd-az-bottle.JPG"
+         onerror="var t=(this.dataset.try||'').split('|').filter(Boolean);
+                  if(t.length){this.dataset.try=t.slice(1).join('|');this.src=t[0];}
+                  else{this.style.display='none';document.getElementById('mock').style.display='flex';}">
+    <div class="mock" id="mock" style="display:none">
+      <div class="pump"></div>
+      <div class="collar"></div>
+      <div class="shoulder"></div>
+      <div class="btl">
+        <div class="l-rmd">RMD</div>
+        <div class="rule"></div>
+        <div class="l-name">AZ LIGHT GEL<br>MOISTURIZER</div>
+        <div class="l-acm">ACM</div>
+        <div class="rule-s"></div>
+        <div class="l-desc">GEL-CREAM THAT IMPROVES<br>THE APPEARANCE OF BLEMISHES<br>AND ACNE-MARKS</div>
+        <div class="rule-s"></div>
+        <div class="l-claims">+ 10% GENTLE AZELAIC DERIVATIVE<br>+ 1% BETAPUR®<br>+ 0.5% LHA</div>
+        <div class="l-foot">TARGETS IMPERFECTIONS<br>CAUSED BY ACNE AND EXCESSIVE OILINESS<br>SUITABLE FOR SENSITIVE AND ACNE-PRONE SKIN</div>
+        <div class="l-fine">FRAGRANCE-FREE · COLORANT-FREE</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ RIGHT : INGREDIENTS ============ -->
+  <div class="side">
+    <div class="kick">ส่วนผสมทั้งหมด · FULL INCI</div>
+    <div class="title">วิเคราะห์ส่วนผสม</div>
+    <div class="sub">เรียงตามฉลาก = จากปริมาณมากไปน้อย · ตัวสีเดียวกันคือทำหน้าที่กลุ่มเดียวกัน</div>
+
+    <!-- FULL INGREDIENT LIST, COLOUR-CODED -->
+    <div class="inci">
+      <i style="--c:var(--c-base)">Water</i>,
+      <b style="--c:var(--c-active)">Potassium Azeloyl Diglycinate <u>10%</u></b>,
+      <i style="--c:var(--c-hydra)">Glycerin</i>,
+      <b style="--c:var(--c-emol)">Paraffinum Liquidum</b>,
+      <i style="--c:var(--c-tex)">Polyacrylamide</i>,
+      <b style="--c:var(--c-bot)">Peumus Boldus Leaf Extract <u>BETAPUR 1%</u></b>,
+      <i style="--c:var(--c-bot)">Panax Ginseng Extract</i>,
+      <i style="--c:var(--c-pres)">Phenoxyethanol</i>,
+      <i style="--c:var(--c-tex)">C13-14 Isoparaffin</i>,
+      <i style="--c:var(--c-tex)">Laureth-7</i>,
+      <b style="--c:var(--c-active)">Capryloyl Salicylic Acid <u>LHA 0.5%</u></b>,
+      <i style="--c:var(--c-bot)">Viola Mandshurica Flower Extract</i>,
+      <i style="--c:var(--c-bot)">Glycyrrhiza Glabra Root Extract</i>,
+      <i style="--c:var(--c-bot)">Camellia Sinensis Leaf Extract</i>,
+      <i style="--c:var(--c-bot)">Centella Asiatica Extract</i>,
+      <i style="--c:var(--c-bot)">Polygonum Cuspidatum Root Extract</i>,
+      <i style="--c:var(--c-bot)">Scutellaria Baicalensis Root Extract</i>
+      <u style="color:var(--c-bot)">← 6 ตัวท้าย = TRUECALM COMPLEX</u>
+    </div>
+
+    <!-- COLOUR KEY = HOW THEY WORK -->
+    <div class="keys">
+      <div class="key" style="--c:var(--c-active)">
+        <div class="sq"></div>
+        <div><div class="kt">สารออกฤทธิ์หลัก</div>
+        <div class="kd">Azelaic 10% ดูแลรอยสิว–ผิวหมอง + LHA 0.5% ลดการอุดตันอ่อน ๆ</div></div>
+      </div>
+      <div class="key" style="--c:var(--c-bot)">
+        <div class="sq"></div>
+        <div><div class="kt">สารสกัดพืช — BETAPUR + TRUECALM</div>
+        <div class="kd">BETAPUR คุมสิว–คุมมัน · TRUECALM 6 ชนิด ปลอบผิว ลดอักเสบ ต้านอนุมูลอิสระ</div></div>
+      </div>
+      <div class="key" style="--c:var(--c-emol)">
+        <div class="sq"></div>
+        <div><div class="kt">เคลือบล็อกความชุ่มชื้น</div>
+        <div class="kd">ล็อกน้ำไม่ให้ระเหยออกจากผิว กันผิวแห้งตึงจากกรด</div></div>
+      </div>
+      <div class="key" style="--c:var(--c-hydra)">
+        <div class="sq"></div>
+        <div><div class="kt">ดึงน้ำเข้าผิว</div>
+        <div class="kd">กลีเซอรีน ดึงความชุ่มชื้นเข้าผิวชั้นบน</div></div>
+      </div>
+      <div class="key" style="--c:var(--c-tex)">
+        <div class="sq"></div>
+        <div><div class="kt">ระบบเนื้อเจล</div>
+        <div class="kd">3 ตัวทำงานร่วมกัน ให้เนื้อบางเบา เกลี่ยลื่น ซึมไว</div></div>
+      </div>
+      <div class="key" style="--c:var(--c-base)">
+        <div class="sq"></div>
+        <div><div class="kt">เบส / ตัวทำละลาย</div>
+        <div class="kd">น้ำ พาสารที่ละลายน้ำได้เข้าสู่ผิว</div></div>
+      </div>
+      <div class="key wide" style="--c:var(--c-pres)">
+        <div class="sq"></div>
+        <div><div class="kt">สารกันเสีย</div></div>
+      </div>
+    </div>
+
+    <!-- HERO ACTIVES -->
+    <div class="notes">
+      <div class="note">
+        <span class="nt">★ BETAPUR 1% — ตัวคุมสิวของสูตรนี้</span>
+        สารสกัดใบโบลโด (Peumus Boldus) จาก BASF ทำงานโดย<b>กระตุ้นให้ผิวสร้าง β-defensin</b> ซึ่งเป็นเปปไทด์ต้านเชื้อของผิวเอง จึงช่วย<b>ปรับสมดุลจุลินทรีย์บนผิว ลดการเกิดสิว ลดความมัน และทำให้รูขุมขนดูเล็กลง</b> — งานวิจัยระบุว่าเห็นรอยไม่พึงประสงค์บนผิวเป็นสิวลดลงภายใน 4 สัปดาห์
+      </div>
+      <div class="note alt">
+        <span class="nt">★ TRUECALM — คอมเพล็กซ์ปลอบผิว 6 สารสกัด</span>
+        ชะเอมเทศ · Polygonum · ใบบัวบก · ชาเขียว · ไวโอเล็ตแมนจูเรีย · Scutellaria โดยมี<b>ดอกไวโอเล็ตแมนจูเรียจากเกาะเชจูเป็นตัวหลัก</b> ทั้ง 6 ตัวเสริมกันเพื่อ<b>ลดการอักเสบและต้านอนุมูลอิสระ</b> — งานวิจัยบนผิวมนุษย์ระบุว่าช่วยลดการระคายเคืองจาก UV และ SLS (ทดสอบด้วยครีมผสม TrueCalm 2% ทาวันละ 2 ครั้ง นาน 14 วัน)
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

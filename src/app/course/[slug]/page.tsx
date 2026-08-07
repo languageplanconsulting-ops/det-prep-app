@@ -43,8 +43,14 @@ export default async function StudentCoursePage({
   if (!course) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <h1 className="text-2xl font-black">ไม่พบคอร์สนี้</h1>
-        <p className="mt-2 text-sm text-neutral-600">คอร์ส &ldquo;{slug}&rdquo; ยังไม่เปิดให้เรียน</p>
+        <h1 className="text-2xl font-extrabold">ไม่พบคอร์สนี้</h1>
+        <p className="mt-2 text-[15px] text-neutral-600">
+          ลิงก์อาจเก่าไปแล้ว — กลับไปที่{" "}
+          <Link href="/course" className="font-bold text-[#004AAD] underline">
+            หน้าคอร์สของฉัน
+          </Link>{" "}
+          เพื่อเรียนต่อได้เลย
+        </p>
       </main>
     );
   }

@@ -104,13 +104,13 @@ export function ClozeStage({
         {choiceAnswers.length > 0 && (
           <>
             <br />
-            <span className="text-[11px] opacity-80">
+            <span className="text-[13px] opacity-80">
               ช่องสีม่วงให้เลือก “รูปคำที่ถูก” — ระวังการเติม -s / -es / -ed และประธานเอกพจน์–พหูพจน์
             </span>
           </>
         )}
         <br />
-        <span className="text-[11px] opacity-80">คำที่ผิดจะวางไม่ลง ต้องครบ 100% ถึงจะไปต่อได้</span>
+        <span className="text-[13px] opacity-80">คำที่ผิดจะวางไม่ลง ต้องครบ 100% ถึงจะไปต่อได้</span>
       </p>
 
       <p className="mt-3 rounded-xl bg-white p-3.5 text-[15px] leading-[2.6] text-slate-800 ring-1 ring-slate-300">
@@ -220,20 +220,20 @@ export function ClozeStage({
         <button
           type="button"
           onClick={onComplete}
-          className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-black text-white"
+          className="mt-4 w-full rounded-full bg-emerald-600 py-3 text-sm font-bold text-white"
         >
           {continueLabel}
         </button>
       ) : (
         <>
-          <p className="mt-3 text-center text-[11px] font-bold text-slate-400">
+          <p className="mt-3 text-center text-[13px] font-bold text-slate-400">
             เหลืออีก {total - filledCount} ช่อง
           </p>
           {override.enabled && (
             <button
               type="button"
               onClick={onComplete}
-              className="mt-2 w-full rounded-full bg-amber-500 py-2.5 text-[12px] font-black text-white"
+              className="mt-2 w-full rounded-full bg-amber-500 py-2.5 text-[12px] font-bold text-white"
             >
               ⚡ ข้ามด่านนี้ (admin)
             </button>

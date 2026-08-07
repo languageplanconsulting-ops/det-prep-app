@@ -56,10 +56,10 @@ export function AttemptRedeemPanel({
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-baseline justify-between gap-2 text-left"
       >
-        <h2 className="text-lg font-black text-slate-900">คะแนนสูงสุด &amp; Redeem</h2>
-        <span className="text-sm font-black text-slate-400">{open ? "▲" : "▼"}</span>
+        <h2 className="text-lg font-extrabold text-slate-900">คะแนนสูงสุด &amp; Redeem</h2>
+        <span className="text-sm font-bold text-slate-400">{open ? "▲" : "▼"}</span>
       </button>
-      <p className="mt-0.5 text-[11px] text-slate-400">
+      <p className="mt-0.5 text-[13px] text-slate-400">
         เกณฑ์ Redeem · ง่าย &lt;{SUBPAR_BAR_160.easy} · กลาง &lt;{SUBPAR_BAR_160.medium} · ยาก &lt;
         {SUBPAR_BAR_160.hard}
       </p>
@@ -82,7 +82,7 @@ export function AttemptRedeemPanel({
             <div className="space-y-5">
               {snap!.bestByType.length > 0 ? (
                 <div>
-                  <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                  <p className="mb-2 text-[13px] font-bold uppercase tracking-widest text-slate-400">
                     คะแนนสูงสุดของแต่ละประเภท
                   </p>
                   <ul className="grid gap-1.5 sm:grid-cols-2">
@@ -94,7 +94,7 @@ export function AttemptRedeemPanel({
               ) : null}
 
               <div>
-                <p className="mb-2 text-[11px] font-black uppercase tracking-widest text-rose-400">
+                <p className="mb-2 text-[13px] font-bold uppercase tracking-widest text-rose-400">
                   ต่ำกว่าเกณฑ์ — Redeem ได้เลย
                 </p>
                 {snap!.subPar.length === 0 ? (
@@ -122,15 +122,15 @@ function BestCard({ row }: { row: AttemptRow }) {
   return (
     <li className="rounded-xl bg-slate-50 p-2.5 ring-1 ring-slate-200">
       <div className="flex items-baseline justify-between gap-2">
-        <p className="truncate text-[12px] font-black text-slate-700">
+        <p className="truncate text-[12px] font-bold text-slate-700">
           {redeemableTaskLabel(row.taskType)}
         </p>
-        <p className="shrink-0 text-sm font-black text-[#004AAD]">
+        <p className="shrink-0 text-sm font-bold text-[#004AAD]">
           {row.bestScore160}
-          <span className="text-[10px] font-bold text-slate-400">/160</span>
+          <span className="text-[13px] font-bold text-slate-400">/160</span>
         </p>
       </div>
-      <p className="mt-0.5 truncate text-[10px] text-slate-500">
+      <p className="mt-0.5 truncate text-[13px] text-slate-500">
         {row.titleTh} · {difficultyLabelTh(row.difficulty)}
       </p>
       <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-200">
@@ -144,20 +144,20 @@ function SubParRow({ row }: { row: AttemptRow }) {
   return (
     <li className="flex flex-wrap items-center gap-2 rounded-xl bg-rose-50/80 p-2.5 ring-1 ring-rose-200 sm:flex-nowrap">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[12px] font-black text-slate-800">
+        <p className="truncate text-[12px] font-bold text-slate-800">
           {redeemableTaskLabel(row.taskType)}
-          <span className="ml-1.5 text-[10px] font-bold text-slate-400">
+          <span className="ml-1.5 text-[13px] font-bold text-slate-400">
             {difficultyLabelTh(row.difficulty)} · เกณฑ์ {row.bar160}
           </span>
         </p>
-        <p className="truncate text-[11px] text-slate-600">{row.titleTh}</p>
-        <p className="mt-0.5 text-[11px] font-black text-rose-600">
+        <p className="truncate text-[13px] text-slate-600">{row.titleTh}</p>
+        <p className="mt-0.5 text-[13px] font-bold text-rose-600">
           ได้ {row.bestScore160}/160
         </p>
       </div>
       <Link
         href={row.redeemHref}
-        className="ep-redeem-pulse shrink-0 rounded-full bg-[#FFCC00] px-3.5 py-2 text-[11px] font-black uppercase tracking-wide text-slate-900 shadow-sm ring-1 ring-amber-300 transition hover:brightness-105"
+        className="ep-redeem-pulse shrink-0 rounded-full bg-[#FFCC00] px-3.5 py-2 text-[13px] font-bold uppercase tracking-wide text-slate-900 shadow-sm ring-1 ring-amber-300 transition hover:brightness-105"
       >
         Redeem
       </Link>

@@ -10,7 +10,7 @@
  * planner (planner.ts) pours it into days and lets whatever does not fit flow
  * to the next session as carry-over.
  */
-import type { RungLevel } from "@/lib/course-plan/rungs";
+import type { RungLevel, RungStep } from "@/lib/course-plan/rungs";
 
 /**
  * How a learner proves they are done with an exercise.
@@ -443,9 +443,9 @@ export const MEDIUM_TRACK: CurriculumBlock[] = [
     order: 4,
     noteTh: "ดูเลกเชอร์ก่อน — นับรวมกับเขียนบรรยายภาพ ขอแค่ 1 ข้อในกลุ่มนี้ได้ 110+",
     exercises: [
-      { key: "msp-people", titleTh: "ต่อประโยค → ฟัง → พูดตาม (คน)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
-      { key: "msp-objects", titleTh: "ต่อประโยค → ฟัง → พูดตาม (เมือง/สิ่งของ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
-      { key: "msp-places", titleTh: "ต่อประโยค → ฟัง → พูดตาม (ธรรมชาติ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
+      { key: "msp-people", titleTh: "พูดเกี่ยวกับคน", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 20 },
+      { key: "msp-objects", titleTh: "พูดเกี่ยวกับสิ่งของ", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 20 },
+      { key: "msp-places", titleTh: "พูดเกี่ยวกับสถานที่", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 110, groupKey: "photo-110" }, minutes: 20 },
     ],
   },
   {
@@ -636,9 +636,9 @@ export const HARD_TRACK: CurriculumBlock[] = [
     order: 4,
     noteTh: "นับรวมกับเขียนบรรยายภาพ — ขอแค่ 1 ข้อในกลุ่มนี้ได้ 120+",
     exercises: [
-      { key: "hsp-people", titleTh: "ต่อประโยค → ฟัง → พูดตาม (คน)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
-      { key: "hsp-objects", titleTh: "ต่อประโยค → ฟัง → พูดตาม (เมือง/สิ่งของ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
-      { key: "hsp-places", titleTh: "ต่อประโยค → ฟัง → พูดตาม (ธรรมชาติ)", taskType: "speak_about_photo", gate: { kind: "pass_ratio", count: 1, ratio: 1 }, minutes: 20 },
+      { key: "hsp-people", titleTh: "พูดเกี่ยวกับคน", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 20 },
+      { key: "hsp-objects", titleTh: "พูดเกี่ยวกับสิ่งของ", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 20 },
+      { key: "hsp-places", titleTh: "พูดเกี่ยวกับสถานที่", taskType: "speak_about_photo", gate: { kind: "min_score_group", minScore: 120, groupKey: "photo-120" }, minutes: 20 },
     ],
   },
   {
@@ -780,6 +780,46 @@ export function blocksForTracks(tracks: readonly ("basic" | "medium" | "advanced
   return out;
 }
 
+/**
+ * The real per-skill scheduling function — one block per family, chosen by
+ * that family's own task type's placed level, kept at EASY_TRACK's ORDER so it
+ * stays in its natural day-to-day sequence slot instead of jumping to the end.
+ *
+ * `blocksForTracks` above concatenates whole tracks with a +100/+200 order
+ * offset, which is right for "basic learner finishes basic, then does medium
+ * end to end" but wrong here: a learner placed medium ONLY in dictation (easy
+ * everywhere else) must still meet their dictation exercises in dictation's
+ * normal position, not after every other easy block.
+ *
+ * `rungPath` is the same array already fed to buildItemStream for video-level
+ * filtering — reusing it (rather than a separately-sourced placement map)
+ * means block selection and video selection can never disagree, and both
+ * re-derive automatically as real scores move a skill's rungForScore() level.
+ */
+export function blocksForSkillPlacement(rungPath: RungStep[]): CurriculumBlock[] {
+  const firstLevelByTask = new Map<string, RungLevel>();
+  for (const step of rungPath) {
+    if (!firstLevelByTask.has(step.taskType)) firstLevelByTask.set(step.taskType, step.level);
+  }
+  if (firstLevelByTask.size === 0) return EASY_TRACK;
+
+  // Block keys use "m-"/"h-" WITH a hyphen (m-dictation, h-dictation) — a
+  // different convention from exercise keys (mgr-tenses, no hyphen).
+  const byFamily = (blocks: CurriculumBlock[]) =>
+    new Map(blocks.map((b) => [b.key.replace(/^[mh]-/, ""), b]));
+  const medium = byFamily(MEDIUM_TRACK);
+  const hard = byFamily(HARD_TRACK);
+
+  return EASY_TRACK.map((easyBlock) => {
+    // orientation, grammar-foundation: taskType-less, identical content at every tier.
+    if (!easyBlock.taskType) return easyBlock;
+    const level = firstLevelByTask.get(easyBlock.taskType);
+    if (!level || level === "easy") return easyBlock;
+    const sibling = (level === "hard" ? hard : medium).get(easyBlock.key);
+    return sibling ? { ...sibling, order: easyBlock.order } : easyBlock;
+  });
+}
+
 
 // ---------------------------------------------------------------------------
 // Daily fill-in-the-blanks warm-up
@@ -902,10 +942,47 @@ export function transitionCopy(
   return { titleTh: "ไปต่อกันเลย", bodyTh: "ยังเหลืออีกนิดเดียว" };
 }
 
-/** Shown when a day is finished, keyed loosely on how much got done. */
-export function dayDoneCopy(percent: number): { titleTh: string; bodyTh: string } {
+/**
+ * Shown when a day is finished.
+ *
+ * Accuracy leads, completion follows. Ticking every box at 40% correct is the
+ * failure mode this product has to catch early — an earlier version handed out
+ * "ครบทุกข้อเลย! 🎉" for it, which trains the learner that attendance is
+ * progress right up until the mock score says otherwise. When nothing on the day
+ * was graded (a pure lecture day) there is no accuracy to report and completion
+ * is the honest measure.
+ */
+export function dayDoneCopy(
+  percent: number,
+  accuracyPercent: number | null = null,
+): { titleTh: string; bodyTh: string } {
+  if (accuracyPercent !== null) {
+    if (accuracyPercent < 50) {
+      return {
+        titleTh: "ทำครบแล้ว แต่ยังไม่แม่น 🤔",
+        bodyTh: `ความแม่นยำ ${accuracyPercent}% — เนื้อหาช่วงนี้ยังไม่เข้า ลองย้อนดูคลิปอีกรอบก่อนไปต่อ`,
+      };
+    }
+    if (accuracyPercent < 70) {
+      return {
+        titleTh: "มาถูกทางแล้ว 🙂",
+        bodyTh: `ความแม่นยำ ${accuracyPercent}% — ยังพลาดอยู่บ้าง ทบทวนข้อที่ผิดสักหน่อยจะขึ้นเร็วมาก`,
+      };
+    }
+    if (accuracyPercent < 90) {
+      return {
+        titleTh: "แน่นขึ้นเยอะ 👏",
+        bodyTh: `ความแม่นยำ ${accuracyPercent}% — ระดับนี้พร้อมขยับขึ้นขั้นถัดไปแล้ว`,
+      };
+    }
+    return {
+      titleTh: "แม่นมาก! 🎯",
+      bodyTh: `ความแม่นยำ ${accuracyPercent}% — ระบบจะเลื่อนระดับให้ยากขึ้นเอง`,
+    };
+  }
+
   if (percent >= 100) {
-    return { titleTh: "ครบทุกข้อเลย! 🎉", bodyTh: "วันนี้ทำได้ตามแผนเป๊ะ ๆ เก่งมาก" };
+    return { titleTh: "ดูจบครบแล้ว 🎬", bodyTh: "วันนี้เป็นวันดูคลิป — แบบฝึกจะมาวัดความเข้าใจวันถัดไป" };
   }
   if (percent >= 60) {
     return { titleTh: "เก่งมาก 👏", bodyTh: "ทำได้เกินครึ่งแล้ว ที่เหลือยกไปวันหน้าได้" };

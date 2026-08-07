@@ -37,6 +37,8 @@ export async function POST(req: Request) {
   const turnsRaw = o.turns;
   const redeemed = o.redeemed;
   const previousScore160 = o.previousScore160;
+  // The one-time skill-placement probe shouldn't cost the learner's monthly AI-feedback quota.
+  const isPlacement = o.source === "placement";
 
   if (typeof attemptId !== "string" || !attemptId) {
     return NextResponse.json({ error: "attemptId required" }, { status: 400 });
@@ -92,10 +94,10 @@ export async function POST(req: Request) {
     // them now even if their balance changed mid-exam. Only re-check the
     // balance when there is no reservation (defensive).
     const existingLock =
-      userId && !adminBypass
+      userId && !adminBypass && !isPlacement
         ? await getInteractiveSpeakingCreditLockForAttempt(userId, attemptId)
         : null;
-    if (userId && !adminBypass && !existingLock) {
+    if (userId && !adminBypass && !isPlacement && !existingLock) {
       const credit = await getAiCreditStateForUser(userId, "interactive_speaking");
       if (!credit.allowed) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
@@ -123,7 +125,7 @@ export async function POST(req: Request) {
         meta: { attemptId, scenarioId },
       });
     }
-    if (userId && !adminBypass) {
+    if (userId && !adminBypass && !isPlacement) {
       const lock = existingLock;
       if (!lock || lock.status !== "charged") {
         const charged = await chargeAiCreditForUser(userId, "interactive_speaking");

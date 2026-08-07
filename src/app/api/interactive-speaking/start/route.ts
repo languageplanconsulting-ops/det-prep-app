@@ -17,6 +17,8 @@ export async function POST(req: Request) {
   const o = body as Record<string, unknown>;
   const attemptId = o.attemptId;
   const scenarioId = o.scenarioId;
+  // The one-time skill-placement probe shouldn't reserve against the learner's monthly AI-feedback quota.
+  const isPlacement = o.source === "placement";
 
   if (typeof attemptId !== "string" || !attemptId.trim()) {
     return NextResponse.json({ error: "attemptId required" }, { status: 400 });
@@ -28,7 +30,7 @@ export async function POST(req: Request) {
   try {
     const userId = await getOptionalAuthUserId(req);
     // Admins / preview-eligible accounts don't reserve real feedback credits.
-    if (!userId || (await getAdminAccess(req)).ok) {
+    if (!userId || isPlacement || (await getAdminAccess(req)).ok) {
       return NextResponse.json({ ok: true, charged: false, source: null, alreadyReserved: false });
     }
 

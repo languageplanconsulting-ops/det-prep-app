@@ -12,6 +12,7 @@ import { ProductionReportLandingHero } from "@/components/production/ProductionR
 import { AiRewardBonusNotice } from "@/components/production/AiRewardBonusNotice";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { GrammarFixesPanel, type GrammarFixItem } from "@/components/reports/GrammarFixesPanel";
+import { ScoreRungPanel } from "@/components/reports/ScoreRungPanel";
 import {
   buildWritingReportNotebookFullBodies,
   buildWritingReportNotebookPreview,
@@ -540,6 +541,11 @@ export function WritingReportView({
         titleEn="Grammar fixes (read & write)"
         titleTh="จุดแก้ไวยากรณ์ (อ่านแล้วเขียน)"
         maxItems={8}
+      />
+      <ScoreRungPanel
+        ladder={fullReport.scoreRungs}
+        attemptId={fullReport.attemptId}
+        entrySource="writing-read-and-write"
       />
           </div>
         </div>

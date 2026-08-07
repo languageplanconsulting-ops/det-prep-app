@@ -2,6 +2,7 @@ import "server-only";
 
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import type { TaskWeakness } from "@/lib/study-plan/weakness-vector";
+import { rung, type RungLevel } from "@/lib/course-plan/rungs";
 
 /**
  * Weekly rolling score per task type, for the /course score breakdown.
@@ -14,16 +15,25 @@ import type { TaskWeakness } from "@/lib/study-plan/weakness-vector";
  *   1. this week's average from practice_attempts (score_pct × 1.6 → 0–160)
  *   2. last week's average, so a quiet week still shows something recent
  *   3. the weakness vector's latest known score (mock → mini → attempts)
- *   4. nothing — the UI shows "ยังไม่มีข้อมูล"
+ *   4. the one-time placement result, for a skill with no real attempts yet —
+ *      lowest priority, since any real attempt should immediately supersede it
+ *   5. nothing — the UI shows "ยังไม่มีข้อมูล"
  */
+
+export type PlacementResult = {
+  taskType: string;
+  currentLevel: RungLevel;
+  lastScore160: number | null;
+  placedAt: string;
+};
 
 export type WeeklyScore = {
   taskType: string;
   /** 0–160. */
   score160: number;
   /** Where this number came from. */
-  basis: "this_week" | "last_week" | "latest";
-  /** Attempts backing it. 0 when basis is "latest". */
+  basis: "this_week" | "last_week" | "latest" | "placement";
+  /** Attempts backing it. 0 when basis is "latest" or "placement". */
   attempts: number;
   /** Change vs the previous week, in 0–160 points. Null when not comparable. */
   deltaVsPrevWeek: number | null;
@@ -62,6 +72,7 @@ function isMissingTable(error: { code?: string; message?: string } | null): bool
 export async function computeWeeklyScores(
   userId: string,
   weakness: TaskWeakness[] = [],
+  placements: PlacementResult[] = [],
 ): Promise<WeeklyScore[]> {
   const supabase = createServiceRoleSupabase();
   const since = new Date(Date.now() - 21 * 86_400_000).toISOString();
@@ -98,10 +109,12 @@ export async function computeWeeklyScores(
   }
 
   const byTask = new Map(weakness.map((w) => [w.taskType, w]));
+  const byPlacement = new Map(placements.map((p) => [p.taskType, p]));
   const taskTypes = new Set<string>([
     ...thisWeek.keys(),
     ...lastWeek.keys(),
     ...byTask.keys(),
+    ...byPlacement.keys(),
   ]);
 
   const out: WeeklyScore[] = [];
@@ -145,8 +158,42 @@ export async function computeWeeklyScores(
         deltaVsPrevWeek: null,
         at: w.at,
       });
+      continue;
+    }
+
+    const p = byPlacement.get(taskType);
+    if (p) {
+      out.push({
+        taskType,
+        score160: p.lastScore160 ?? rung(p.currentLevel).entryScore,
+        basis: "placement",
+        attempts: 0,
+        deltaVsPrevWeek: null,
+        at: p.placedAt,
+      });
     }
   }
 
   return out.sort((a, b) => a.score160 - b.score160);
+}
+
+/** This learner's placement-test results, or [] if none yet (including migration-not-deployed). */
+export async function fetchSkillPlacements(userId: string): Promise<PlacementResult[]> {
+  const supabase = createServiceRoleSupabase();
+  const { data, error } = await supabase
+    .from("course_skill_placement")
+    .select("task_type, current_level, last_score160, placed_at")
+    .eq("user_id", userId);
+
+  if (error) {
+    if (isMissingTable(error)) return [];
+    throw new Error(`[weekly-scores] placement lookup failed: ${error.message}`);
+  }
+
+  return (data ?? []).map((r) => ({
+    taskType: r.task_type as string,
+    currentLevel: r.current_level as RungLevel,
+    lastScore160: r.last_score160 as number | null,
+    placedAt: r.placed_at as string,
+  }));
 }

@@ -110,12 +110,12 @@ export function CoursePlayerClient({
                 }
               }}
             />
-            <h2 className="mt-4 text-xl font-black tracking-tight">{active.title}</h2>
+            <h2 className="mt-4 text-xl font-extrabold tracking-tight">{active.title}</h2>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
               {isDone && (
                 <span
-                  className="inline-flex items-center gap-2 rounded-[4px] border-4 border-black bg-emerald-300 px-4 py-2 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000]"
+                  className="inline-flex items-center gap-2 rounded-[4px] border-4 border-black bg-emerald-300 px-4 py-2 text-sm font-bold uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000]"
                   style={{ fontFamily: "var(--font-jetbrains), monospace" }}
                 >
                   ✓ เรียนจบแล้ว
@@ -124,7 +124,7 @@ export function CoursePlayerClient({
               <button
                 type="button"
                 onClick={goNext}
-                className="inline-flex items-center rounded-[4px] border-4 border-black bg-[#004AAD] px-4 py-2 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+                className="inline-flex items-center rounded-[4px] border-4 border-black bg-[#004AAD] px-4 py-2 text-sm font-bold uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
                 style={{ fontFamily: "var(--font-jetbrains), monospace" }}
               >
                 บทต่อไป →
@@ -140,7 +140,7 @@ export function CoursePlayerClient({
         {active && active.downloads.length > 0 && (
           <div className="mt-5 border-t-4 border-black pt-4">
             <h3
-              className="text-xs font-black uppercase tracking-[0.15em] text-neutral-500"
+              className="text-xs font-bold uppercase tracking-[0.15em] text-neutral-500"
               style={{ fontFamily: "var(--font-jetbrains), monospace" }}
             >
               เอกสารประกอบ ({active.downloads.length})
@@ -154,7 +154,7 @@ export function CoursePlayerClient({
                     style={{ fontFamily: "var(--font-jetbrains), monospace" }}
                   >
                     <span className="flex min-w-0 items-center gap-2">
-                      <span aria-hidden className="shrink-0 font-black">
+                      <span aria-hidden className="shrink-0 font-bold">
                         PDF
                       </span>
                       <span className="truncate text-sm font-bold text-neutral-900">{d.label}</span>
@@ -191,17 +191,17 @@ export function CoursePlayerClient({
                 className="w-full bg-[#004AAD] px-3 py-2.5 text-left text-white"
               >
                 <span className="flex items-start justify-between gap-2">
-                  <span className="text-sm font-black leading-snug">
+                  <span className="text-sm font-bold leading-snug">
                     {ci + 1}. {chapter.title}
                   </span>
-                  <span className="shrink-0 pt-0.5 text-[10px]">{open ? "▾" : "▸"}</span>
+                  <span className="shrink-0 pt-0.5 text-[13px]">{open ? "▾" : "▸"}</span>
                 </span>
                 <span className="mt-1.5 flex items-center gap-2">
                   <span className="h-2 flex-1 border border-black/40 bg-white/25">
                     <span className="block h-full bg-[#FFCC00]" style={{ width: `${pct}%` }} />
                   </span>
                   <span
-                    className="shrink-0 text-[10px] font-bold tabular-nums"
+                    className="shrink-0 text-[13px] font-bold tabular-nums"
                     style={{ fontFamily: "var(--font-jetbrains), monospace" }}
                   >
                     {done}/{chapter.lessons.length}
@@ -226,7 +226,7 @@ export function CoursePlayerClient({
                           <span
                             aria-label={finished ? "เรียนจบแล้ว" : "ยังไม่ได้เรียน"}
                             title={finished ? "เรียนจบแล้ว" : "ยังไม่ได้เรียน"}
-                            className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-black leading-none ${
+                            className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 text-[13px] font-bold leading-none ${
                               finished
                                 ? "border-emerald-600 bg-emerald-500 text-white"
                                 : "border-neutral-300 bg-white text-transparent"
@@ -240,16 +240,16 @@ export function CoursePlayerClient({
                             </span>
                             <span className="mt-0.5 flex flex-wrap items-center gap-1.5">
                               {lesson.downloads.length > 0 && (
-                                <span className="rounded-sm bg-amber-200 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+                                <span className="rounded-sm bg-amber-200 px-1.5 py-0.5 text-[13px] font-bold text-amber-900">
                                   PDF ×{lesson.downloads.length}
                                 </span>
                               )}
                               {lesson.freePreview && (
-                                <span className="rounded-sm bg-sky-200 px-1.5 py-0.5 text-[10px] font-bold text-sky-900">
+                                <span className="rounded-sm bg-sky-200 px-1.5 py-0.5 text-[13px] font-bold text-sky-900">
                                   ทดลองเรียน
                                 </span>
                               )}
-                              <span className="text-[10px] text-neutral-500">
+                              <span className="text-[13px] text-neutral-500">
                                 {formatDuration(lesson.durationSeconds)}
                               </span>
                             </span>

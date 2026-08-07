@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RMD — คู่มือพนักงานใหม่: เซ็บเดิร์ม + สิวผด + สินค้า SEB CONTROL</title>
+<style>
+  :root{
+    --ink:#14191C; --ink-2:#4E585F; --ink-3:#8A959C;
+    --teal:#0F9AAB; --teal-d:#0B7E8C; --teal-l:#E6F5F7;
+    --gold:#B8860B; --gold-l:#FBF3E0;
+    --rose:#C2456B; --rose-l:#FDEEF2;
+    --green:#2E8B57; --green-l:#E7F4EC;
+    --hair:#E2E8EA; --bg:#FBFCFC; --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+       font-family:"Sukhumvit Set","Noto Sans Thai","IBM Plex Sans Thai",Thonburi,-apple-system,"Helvetica Neue",Arial,sans-serif;
+       -webkit-font-smoothing:antialiased;line-height:1.9;padding:0 0 100px}
+  .wrap{max-width:940px;margin:0 auto;padding:0 24px}
+
+  header{border-bottom:3px solid var(--ink);padding:56px 0 22px;margin-bottom:30px}
+  header .kicker{font-size:11px;font-weight:800;letter-spacing:.26em;color:var(--teal);text-transform:uppercase}
+  header h1{font-size:38px;font-weight:800;line-height:1.2;margin-top:12px;letter-spacing:-.01em}
+  header .meta{font-size:13px;color:var(--ink-3);margin-top:14px;line-height:1.8}
+
+  /* table of contents */
+  .toc{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:20px 24px;margin-bottom:40px}
+  .toc h4{font-size:11px;letter-spacing:.2em;color:var(--ink-3);margin:0 0 10px}
+  .toc ol{margin:0 0 0 20px;font-size:14.5px;columns:2;column-gap:32px}
+  .toc li{margin:4px 0;break-inside:avoid}
+  .toc a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--hair)}
+  .toc a:hover{color:var(--teal);border-color:var(--teal)}
+
+  h2{font-size:25px;font-weight:800;margin:60px 0 6px;padding-top:26px;border-top:1px solid var(--hair);
+     letter-spacing:-.005em;scroll-margin-top:20px}
+  h2 .num{color:var(--teal);font-size:13px;letter-spacing:.2em;display:block;font-weight:800;margin-bottom:8px}
+  h3{font-size:18px;font-weight:800;margin:34px 0 10px}
+  h4{font-size:14.5px;font-weight:800;margin:22px 0 6px;color:var(--ink-2);letter-spacing:.02em}
+  p{margin:10px 0;font-size:15.5px;color:var(--ink-2)}
+  ul,ol{margin:10px 0 10px 22px;font-size:15.5px;color:var(--ink-2)}
+  li{margin:7px 0}
+  li>ul{margin-top:6px;font-size:15px}
+  strong{color:var(--ink);font-weight:800}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+       background:#EEF3F4;padding:2px 6px;border-radius:4px;color:var(--ink)}
+  .lead{font-size:17px;color:var(--ink-2);margin:18px 0 8px}
+
+  .card{background:var(--card);border:1px solid var(--hair);border-radius:14px;
+        padding:24px 26px;margin:22px 0;box-shadow:0 1px 2px rgba(20,40,50,.04)}
+  .card.accent{border-left:5px solid var(--teal)}
+  .card h3{margin-top:0}
+  .card::after{content:"";display:block;clear:both}
+
+  .pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;
+        padding:4px 10px;border-radius:100px;background:var(--teal-l);color:var(--teal-d);
+        text-transform:uppercase;vertical-align:middle;margin-left:8px}
+  .pill.warn{background:var(--rose-l);color:#A8325A}
+  .pill.gold{background:var(--gold-l);color:#8A6508}
+  .pill.ok{background:var(--green-l);color:#1F6B41}
+  td .pill{margin:6px 0 0;display:inline-block;line-height:1.3}
+
+  table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--hair);vertical-align:top}
+  th{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);
+     border-bottom:2px solid var(--ink)}
+  td strong{display:block}
+  .scroll{overflow-x:auto}
+
+  .warn{background:var(--rose-l);border:1px solid #F3D4DE;border-left:5px solid var(--rose);
+        border-radius:12px;padding:22px 24px;margin:26px 0}
+  .warn h3{color:#A8325A;margin-top:0}
+  .warn ul{color:#7A4356}
+  .note{background:var(--gold-l);border:1px solid #EDE0BE;border-left:5px solid var(--gold);
+        border-radius:12px;padding:20px 24px;margin:24px 0}
+  .note strong{color:#7A5A08}
+  .good{background:var(--green-l);border:1px solid #C9E4D4;border-left:5px solid var(--green);
+        border-radius:12px;padding:20px 24px;margin:24px 0}
+  .good h3{color:#1F6B41;margin-top:0}
+
+  .inci{font-size:12.5px;line-height:1.9;color:var(--ink-3);text-transform:uppercase;
+        letter-spacing:.02em;font-weight:600;background:#F4F7F8;padding:14px 16px;border-radius:10px;margin-top:10px}
+  .inci b{color:var(--teal-d);font-weight:800}
+
+  .qa{margin:18px 0}
+  .qa .q{font-weight:800;font-size:15.5px;color:var(--ink)}
+  .qa .a{font-size:15px;color:var(--ink-2);margin:4px 0 0}
+
+  /* ── infographic frame ── */
+  .fig{margin:30px 0;background:#fff;border:1px solid var(--hair);border-radius:16px;
+       padding:24px 20px 18px;box-shadow:0 1px 3px rgba(20,40,50,.05)}
+  .fig svg{display:block;width:100%;height:auto}
+  .fig .figtitle{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+                 color:var(--ink-3);text-align:center;margin-bottom:16px}
+  .fig .figcap{font-size:13px;color:var(--ink-3);text-align:center;margin-top:14px;
+               padding-top:12px;border-top:1px solid var(--hair);line-height:1.7}
+
+  /* ── product photos ── */
+  .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:26px 0 10px}
+  .gallery figure{background:#fff;border:1px solid var(--hair);border-radius:12px;overflow:hidden;
+                  box-shadow:0 1px 3px rgba(20,40,50,.05)}
+  .gallery img{width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff;display:block}
+  .gallery figcaption{padding:10px 12px 13px;border-top:1px solid var(--hair);text-align:center}
+  .gallery .gn{font-size:12.5px;font-weight:800;line-height:1.4}
+  .gallery .gp{font-size:11.5px;color:var(--teal);font-weight:800;margin-top:3px}
+  .gallery .gu{font-size:10.5px;color:var(--ink-3);margin-top:3px;line-height:1.5}
+  .gallery.alt{grid-template-columns:repeat(3,1fr);max-width:660px}
+
+  .shot{float:right;width:230px;margin:0 0 16px 24px;border:1px solid var(--hair);
+        border-radius:12px;background:#fff;overflow:hidden}
+  .shot img{width:100%;display:block;aspect-ratio:1/1;object-fit:contain;background:#fff}
+  .shot .cap{font-size:10.5px;color:var(--ink-3);text-align:center;padding:8px 10px;
+             border-top:1px solid var(--hair);line-height:1.6}
+
+  footer{margin-top:70px;padding-top:24px;border-top:1px solid var(--hair);
+         font-size:12.5px;color:var(--ink-3);line-height:1.9}
+
+  @media(max-width:760px){
+    header h1{font-size:27px} h2{font-size:20px}
+    .card{padding:18px} .toc ol{columns:1}
+    .gallery,.gallery.alt{grid-template-columns:repeat(2,1fr)}
+    .shot{float:none;width:100%;max-width:280px;margin:0 auto 18px}
+  }
+
+  /* ══════════ PRINT / SAVE-AS-PDF ══════════ */
+  @page{ size:A4; margin:14mm 12mm 16mm; }
+
+  @media print{
+    /* force background colours to print even if the browser's
+       "Background graphics" checkbox is off — without this every
+       coloured card and table header comes out blank white */
+    *,*::before,*::after{
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+    html,body{background:#fff !important}
+    body{padding:0;font-size:11.5pt;line-height:1.75}
+    .wrap{max-width:none;padding:0}
+
+    /* nothing may be sliced in half by a page break */
+    .fig,.card,.warn,.note,.good,.qa,.gallery figure,.inci,.toc,
+    h2,h3,h4,tr,li,figure,svg{ break-inside:avoid; page-break-inside:avoid }
+    h2,h3,h4{ break-after:avoid; page-break-after:avoid }
+    h2{ break-before:page; page-break-before:always; margin-top:0; padding-top:0; border-top:0 }
+    h2:first-of-type{ break-before:auto; page-break-before:auto }
+    p,li{ orphans:3; widows:3 }
+
+    header{ padding-top:0; margin-bottom:22px }
+    header h1{ font-size:26pt }
+    .toc{ break-after:page; page-break-after:always }
+    .toc ol{ columns:2 }
+    .toc a{ border-bottom:0 }
+
+    /* figures: keep the whole SVG on one page */
+    .fig{ padding:14px 12px 10px; margin:16px 0; box-shadow:none }
+    .fig svg{ width:100%; height:auto; max-height:200mm }
+    .fig .figtitle{ margin-bottom:10px }
+
+    /* product photos */
+    .gallery{ gap:10px; margin:16px 0 8px }
+    .gallery img{ aspect-ratio:1/1 }
+    .gallery .gn{ font-size:9.5pt } .gallery .gp,.gallery .gu{ font-size:8pt }
+    .shot{ width:170px; margin:0 0 12px 16px }
+    .shot .cap{ font-size:7.5pt }
+
+    .card{ box-shadow:none; margin:16px 0; padding:16px 18px }
+    table{ font-size:9.5pt } th,td{ padding:7px 8px }
+    .inci{ font-size:8.5pt; line-height:1.7 }
+    .scroll{ overflow:visible }
+    a{ text-decoration:none }
+    a[href^="http"]::after{ content:"" }   /* don't dump URLs into the text */
+    footer{ break-inside:avoid; page-break-inside:avoid }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">RMD Dermatological Laboratory · Onboarding</div>
+  <h1>คู่มือพนักงานใหม่<br>เซ็บเดิร์ม · สิวผด · สินค้า SEB CONTROL</h1>
+  <div class="meta">
+    อ้างอิงจาก rmd-skin.com · Shopee shop 119523214 · ฐานข้อมูล อย. (porta.fda.moph.go.th)<br>
+    ข้อมูล ณ 7 สิงหาคม 2569 · ร้านมี 7 รายการ · คะแนน 4.9 (146 รีวิว) · เปิดร้านมา 8 ปี
+  </div>
+</header>
+
+<div class="toc">
+  <h4>สารบัญ</h4>
+  <ol>
+    <li><a href="#s1">เซ็บเดิร์มคืออะไร</a></li>
+    <li><a href="#s2">สิวผด (Malassezia Folliculitis)</a></li>
+    <li><a href="#s3">ทำไมสบู่/ซัลเฟตทำร้ายผิวเซ็บเดิร์ม</a></li>
+    <li><a href="#s4">ภาพรวมสินค้า + เลข อย.</a></li>
+    <li><a href="#s4b">สินค้าอื่นทั้งหมดในแบรนด์</a></li>
+    <li><a href="#s5">รายละเอียดรายตัว</a></li>
+    <li><a href="#s5b">สรุป: สินค้าจัดการเซ็บเดิร์มยังไง</a></li>
+    <li><a href="#s6">สารออกฤทธิ์ + ประโยชน์</a></li>
+    <li><a href="#s7">จัดเซ็ตให้ลูกค้ายังไง</a></li>
+    <li><a href="#s8">คำถามที่ลูกค้าถามบ่อย</a></li>
+    <li><a href="#s10">อ้างอิงงานวิจัย</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════ SECTION 1 ═══════════════ -->
+<h2 id="s1"><span class="num">SECTION 01</span>เซ็บเดิร์มคืออะไร?</h2>
+
+<p class="lead">
+  <strong>เซ็บเดิร์ม (Seb Derm)</strong> ย่อจาก <strong>Seborrheic Dermatitis</strong> —
+  ภาษาไทยเรียก <strong>“โรคผิวหนังอักเสบจากต่อมไขมัน”</strong> หรือ <strong>“ผื่นแพ้ต่อมไขมัน”</strong><br>
+  เป็นผิวหนังอักเสบ <strong>เรื้อรัง</strong> ในบริเวณที่ผิวมันมาก · อาการเด่น =
+  <strong>แดง · ลอกเป็นขุย · คัน · มัน</strong> · และ <strong>กลับมาเป็นซ้ำ</strong>
+</p>
+
+<!-- FIG: 3 causes -->
+<div class="fig">
+  <div class="figtitle">รูปที่ 1 · เซ็บเดิร์มเกิดจาก 3 อย่างพร้อมกัน</div>
+  <svg viewBox="0 0 900 400" role="img" aria-label="สามสาเหตุของเซ็บเดิร์ม">
+    <defs>
+      <style>
+        .t-h{font:800 21px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .t-b{font:600 14px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#4E585F}
+        .t-n{font:800 30px sans-serif;fill:#fff}
+        .t-c{font:800 17px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#0B7E8C}
+      </style>
+    </defs>
+    <!-- three circles -->
+    <circle cx="230" cy="175" r="130" fill="#0F9AAB" opacity=".13"/>
+    <circle cx="450" cy="175" r="130" fill="#B8860B" opacity=".13"/>
+    <circle cx="670" cy="175" r="130" fill="#C2456B" opacity=".13"/>
+
+    <circle cx="230" cy="105" r="26" fill="#0F9AAB"/><text class="t-n" x="230" y="116" text-anchor="middle">1</text>
+    <circle cx="450" cy="105" r="26" fill="#B8860B"/><text class="t-n" x="450" y="116" text-anchor="middle">2</text>
+    <circle cx="670" cy="105" r="26" fill="#C2456B"/><text class="t-n" x="670" y="116" text-anchor="middle">3</text>
+
+    <text class="t-h" x="230" y="172" text-anchor="middle">เชื้อยีสต์โตเกิน</text>
+    <text class="t-b" x="230" y="199" text-anchor="middle">Malassezia บนผิวทุกคน</text>
+    <text class="t-b" x="230" y="221" text-anchor="middle">แต่คนเป็นเซ็บเดิร์ม</text>
+    <text class="t-b" x="230" y="243" text-anchor="middle">ตอบสนองไวผิดปกติ</text>
+
+    <text class="t-h" x="450" y="172" text-anchor="middle">ผิวมันเกิน</text>
+    <text class="t-b" x="450" y="199" text-anchor="middle">น้ำมันผิว = อาหารของ</text>
+    <text class="t-b" x="450" y="221" text-anchor="middle">เชื้อยีสต์</text>
+    <text class="t-b" x="450" y="243" text-anchor="middle">ยิ่งมัน ยิ่งเลี้ยงเชื้อ</text>
+
+    <text class="t-h" x="670" y="172" text-anchor="middle">เกราะผิวอ่อนแอ</text>
+    <text class="t-b" x="670" y="199" text-anchor="middle">ผิวรั่ว ระคายเคืองง่าย</text>
+    <text class="t-b" x="670" y="221" text-anchor="middle">แดงง่าย</text>
+    <text class="t-b" x="670" y="243" text-anchor="middle">เชื้อยิ่งโตง่ายขึ้นอีก</text>
+
+    <text class="t-c" x="450" y="358" text-anchor="middle">➜ ครีมธรรมดาแก้ได้แค่ข้อเดียว จึงไม่หาย · ต้องแก้ครบทั้ง 3</text>
+  </svg>
+  <div class="figcap">นี่คือเหตุผลว่าทำไมสินค้า RMD ทุกตัวต้องมี “ตัวลดเชื้อ + ตัวคุมมัน/ฟื้นเกราะ + ตัวลดอักเสบ” อยู่ในขวดเดียว</div>
+</div>
+
+<!-- FIG: vicious cycle -->
+<div class="fig">
+  <div class="figtitle">รูปที่ 2 · วงจรที่ทำให้ “หายแล้วกลับมาอีก”</div>
+  <svg viewBox="0 0 900 400" role="img" aria-label="วงจรเซ็บเดิร์ม">
+    <defs>
+      <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+        <path d="M0,0 L9,4.5 L0,9 z" fill="#0F9AAB"/>
+      </marker>
+      <style>
+        .n{font:800 16px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .ns{font:600 12.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#5C666D}
+      </style>
+    </defs>
+    <!-- 4 nodes on a circle -->
+    <g>
+      <rect x="350" y="20" width="200" height="66" rx="14" fill="#E6F5F7" stroke="#9AD3DB"/>
+      <text class="n" x="450" y="48" text-anchor="middle">ผิวมัน</text>
+      <text class="ns" x="450" y="70" text-anchor="middle">ร้อนชื้น · เครียด · นอนน้อย</text>
+    </g>
+    <g>
+      <rect x="650" y="167" width="210" height="66" rx="14" fill="#FBF3E0" stroke="#E0C77E"/>
+      <text class="n" x="755" y="195" text-anchor="middle">เชื้อยีสต์โต</text>
+      <text class="ns" x="755" y="217" text-anchor="middle">Malassezia กินน้ำมัน</text>
+    </g>
+    <g>
+      <rect x="350" y="314" width="200" height="66" rx="14" fill="#FDEEF2" stroke="#EEBACB"/>
+      <text class="n" x="450" y="342" text-anchor="middle">อักเสบ · แดง · คัน</text>
+      <text class="ns" x="450" y="364" text-anchor="middle">ลอกเป็นขุย</text>
+    </g>
+    <g>
+      <rect x="40" y="167" width="210" height="66" rx="14" fill="#EEF3F4" stroke="#C6D0D3"/>
+      <text class="n" x="145" y="195" text-anchor="middle">เกราะผิวพัง</text>
+      <text class="ns" x="145" y="217" text-anchor="middle">ยิ่งไวต่อการระคายเคือง</text>
+    </g>
+    <!-- arrows -->
+    <path d="M556 62 Q 680 80 730 160" fill="none" stroke="#0F9AAB" stroke-width="3" marker-end="url(#ar)"/>
+    <path d="M740 240 Q 660 320 558 344" fill="none" stroke="#0F9AAB" stroke-width="3" marker-end="url(#ar)"/>
+    <path d="M344 344 Q 220 322 165 240" fill="none" stroke="#0F9AAB" stroke-width="3" marker-end="url(#ar)"/>
+    <path d="M158 160 Q 215 80 344 62" fill="none" stroke="#0F9AAB" stroke-width="3" marker-end="url(#ar)"/>
+    <text x="450" y="205" text-anchor="middle" style="font:800 18px 'Sukhumvit Set',sans-serif;fill:#0B7E8C">วนไม่จบ</text>
+  </svg>
+  <div class="figcap"><strong>ต้องบอกลูกค้าเสมอ:</strong> เป้าหมายคือ <u>“คุมให้อยู่”</u> ไม่ใช่ <u>“หายขาด”</u> — ต้องใช้ต่อเนื่องแม้ช่วงผิวสงบ ห้ามหยุดทันทีที่ดีขึ้น</div>
+</div>
+
+<!-- FIG: face map -->
+<div class="fig">
+  <div class="figtitle">รูปที่ 3 · เป็นตรงไหนได้บ้าง — จุดที่ต้องถามลูกค้า</div>
+  <svg viewBox="0 0 900 430" role="img" aria-label="แผนที่ตำแหน่งที่เกิดเซ็บเดิร์ม">
+    <defs>
+      <style>
+        .lb{font:700 13.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .lb2{font:600 11.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#8A959C}
+        .ln{stroke:#C6D0D3;stroke-width:1.4}
+      </style>
+    </defs>
+    <!-- head -->
+    <ellipse cx="300" cy="215" rx="118" ry="150" fill="#F7F1EA" stroke="#DED2C4" stroke-width="2"/>
+    <!-- hair / scalp -->
+    <path d="M182 190 Q 300 20 418 190 Q 400 100 300 88 Q 200 100 182 190 Z" fill="#C2456B" opacity=".55"/>
+    <!-- ears -->
+    <ellipse cx="180" cy="220" rx="20" ry="32" fill="#F0E6DA" stroke="#DED2C4" stroke-width="2"/>
+    <ellipse cx="420" cy="220" rx="20" ry="32" fill="#F0E6DA" stroke="#DED2C4" stroke-width="2"/>
+    <!-- brows -->
+    <path d="M240 178 q 32 -14 62 0" stroke="#C2456B" stroke-width="11" fill="none" opacity=".65" stroke-linecap="round"/>
+    <path d="M338 178 q 32 -14 62 0" stroke="#C2456B" stroke-width="11" fill="none" opacity=".65" stroke-linecap="round"/>
+    <!-- eyes -->
+    <ellipse cx="262" cy="205" rx="16" ry="8" fill="#fff" stroke="#C9BFB2"/><circle cx="262" cy="205" r="4.5" fill="#4E585F"/>
+    <ellipse cx="338" cy="205" rx="16" ry="8" fill="#fff" stroke="#C9BFB2"/><circle cx="338" cy="205" r="4.5" fill="#4E585F"/>
+    <!-- nose folds -->
+    <path d="M300 215 L 300 262" stroke="#D8CBBD" stroke-width="2.5" fill="none"/>
+    <path d="M276 268 q -12 22 -6 40" stroke="#C2456B" stroke-width="10" fill="none" opacity=".65" stroke-linecap="round"/>
+    <path d="M324 268 q 12 22 6 40" stroke="#C2456B" stroke-width="10" fill="none" opacity=".65" stroke-linecap="round"/>
+    <!-- mouth -->
+    <path d="M272 305 q 28 16 56 0" stroke="#C9A8A0" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <!-- beard zone (jaw + chin + upper lip) -->
+    <path d="M206 282 q 12 78 94 84 q 82 -6 94 -84 q 8 60 -30 92 q -34 26 -64 27 q -30 -1 -64 -27 q -38 -32 -30 -92 Z"
+          fill="#C2456B" opacity=".38"/>
+    <path d="M276 288 q 24 -10 48 0 q -24 8 -48 0 Z" fill="#C2456B" opacity=".45"/>
+
+    <!-- labels left -->
+    <line class="ln" x1="298" y1="118" x2="620" y2="70"/>
+    <circle cx="298" cy="118" r="5" fill="#C2456B"/>
+    <text class="lb" x="632" y="68">หนังศีรษะ · ไรผม</text>
+    <text class="lb2" x="632" y="88">รังแคหนา สีเหลือง มัน คัน — พบบ่อยที่สุด</text>
+
+    <line class="ln" x1="270" y1="176" x2="620" y2="140"/>
+    <circle cx="270" cy="176" r="5" fill="#C2456B"/>
+    <text class="lb" x="632" y="138">หัวคิ้ว · ระหว่างคิ้ว</text>
+    <text class="lb2" x="632" y="158">แดง ลอกเป็นขุยขาว</text>
+
+    <line class="ln" x1="278" y1="288" x2="620" y2="210"/>
+    <circle cx="278" cy="288" r="5" fill="#C2456B"/>
+    <text class="lb" x="632" y="208">ข้างจมูก (ร่องแก้ม)</text>
+    <text class="lb2" x="632" y="228">จุดคลาสสิกที่สุดของเซ็บเดิร์มบนหน้า</text>
+
+    <line class="ln" x1="300" y1="352" x2="620" y2="280"/>
+    <circle cx="300" cy="352" r="5" fill="#C2456B"/>
+    <text class="lb" x="632" y="278">แนวหนวดเครา</text>
+    <text class="lb2" x="632" y="298">ผู้ชายที่โกนหนวดยิ่งเห่อง่าย</text>
+
+    <line class="ln" x1="424" y1="238" x2="620" y2="350"/>
+    <circle cx="424" cy="238" r="5" fill="#C2456B"/>
+    <text class="lb" x="632" y="348">หลังใบหู</text>
+    <text class="lb2" x="632" y="368">อับชื้น ลอกหนัก เรื้อรัง — ลูกค้ามักลืมบอก</text>
+
+    <text class="lb" x="60" y="392">ลำตัว:</text>
+    <text class="lb2" x="112" y="392">กลางหน้าอก · แผ่นหลัง (บริเวณที่มีต่อมไขมันเยอะ)</text>
+  </svg>
+  <div class="figcap">เวลาลูกค้าทักมา ให้ถามครบทุกจุด — หลายคนบอกแค่ “หน้าลอก” แต่จริง ๆ เป็นหนังศีรษะ + หลังหูด้วย = ต้องขายเป็นเซ็ต</div>
+</div>
+
+<h3>ตัวกระตุ้นให้กำเริบ</h3>
+<div class="scroll">
+<table>
+  <thead><tr><th>กลุ่ม</th><th>ตัวกระตุ้น</th></tr></thead>
+  <tbody>
+    <tr><td><strong>อากาศ</strong></td><td><strong>ร้อนชื้น — อันดับ 1 ของไทย</strong> · เย็น/ลมแรง · เหงื่อ · ความชื้นสูง</td></tr>
+    <tr><td><strong>ร่างกาย</strong></td><td>ความเครียด (คอร์ติซอลขึ้น → อักเสบง่าย + มันเพิ่ม) · พักผ่อนน้อย · ฮอร์โมนช่วงวัยรุ่น</td></tr>
+    <tr><td><strong>พฤติกรรม</strong></td><td>สูบบุหรี่ · แอลกอฮอล์ · โดนแดดมากเกินไป · <strong>ล้างหน้าบ่อยเกินไป</strong> · เกาหนังศีรษะ</td></tr>
+    <tr><td><strong>ของใช้</strong></td><td>สกินแคร์ที่มีน้ำหอม/แอลกอฮอล์ · <strong>โฟม/สบู่ที่แรงเกิน</strong> · หมวก/หมวกกันน็อก · มัดผมตึง · ผลิตภัณฑ์จัดแต่งผม</td></tr>
+    <tr><td><strong>อาหาร</strong></td><td>ไขมันอิ่มตัว · น้ำตาลเร็ว (เค้ก ลูกอม) · อาหารสำเร็จรูป/แช่แข็ง<br>
+        ควรทาน: วิตามิน C (ผลไม้รสเปรี้ยว) · A (เนย ไข่) · E (อะโวคาโด อัลมอนด์) · โอเมก้า 3–6 · โปรตีน</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note">
+  <strong>เซ็บเดิร์ม ≠ ผิวแพ้ง่ายธรรมดา</strong><br>
+  ผิวแพ้ง่ายทั่วไปแค่ต้องการ “ความชุ่มชื้น + ลดระคายเคือง”
+  แต่เซ็บเดิร์มต้องการ <strong>ลดเชื้อ + คุมมัน/ฟื้นเกราะ + ลดอักเสบ พร้อมกัน</strong>
+  ขาดข้อใดข้อหนึ่ง = ดีขึ้นช้า หรือดีขึ้นไม่สุด
+</div>
+
+<!-- ═══════════════ SECTION 2 ═══════════════ -->
+<h2 id="s2"><span class="num">SECTION 02</span>สิวผด — Malassezia Folliculitis <span class="pill gold">โอกาสขายที่ใหญ่ที่สุด</span></h2>
+
+<p class="lead">
+  <strong>สิวผด</strong> (ชื่อทางการ: <strong>Malassezia Folliculitis</strong> หรือ
+  <em>Pityrosporum folliculitis</em> · ฝรั่งเรียก <strong>Fungal Acne</strong>) —
+  คือ <u>เชื้อยีสต์ Malassezia ตัวเดียวกับเซ็บเดิร์ม</u> แต่ลงไปโตอยู่ <strong>ในรูขุมขน</strong>
+  ทำให้รูขุมขนอักเสบ ขึ้นเป็นตุ่มเล็ก ๆ เต็มไปหมด
+</p>
+
+<div class="good">
+  <h3>ทำไมข้อนี้สำคัญกับเราที่สุด</h3>
+  <p>คนเป็นสิวผดมักจะ <strong>รักษาสิวมาหลายปีแล้วไม่หาย</strong> เพราะไปใช้ยาฆ่าแบคทีเรีย
+     แต่ต้นเหตุจริงคือเชื้อรา — พอเรารู้ทัน แล้วอธิบายให้เขาฟังได้ เขาจะเชื่อเราทันที
+     และ <strong>คลีนเซอร์ SPC ของเราคือคำตอบตรง ๆ ของปัญหานี้</strong></p>
+</div>
+
+<!-- FIG: fungal acne vs normal acne -->
+<div class="fig">
+  <div class="figtitle">รูปที่ 4 · สิวผด (เชื้อรา) ต่างจากสิวธรรมดา (แบคทีเรีย) ยังไง</div>
+  <svg viewBox="0 0 900 470" role="img" aria-label="เปรียบเทียบสิวผดกับสิวธรรมดา">
+    <defs>
+      <style>
+        .hd{font:800 19px "Sukhumvit Set","Noto Sans Thai",sans-serif}
+        .rw{font:700 14px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#8A959C}
+        .vl{font:600 14.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+      </style>
+    </defs>
+    <!-- panels -->
+    <rect x="252" y="10" width="318" height="450" rx="16" fill="#FDEEF2"/>
+    <rect x="582" y="10" width="308" height="450" rx="16" fill="#EEF3F4"/>
+
+    <text class="hd" x="411" y="46" text-anchor="middle" fill="#A8325A">สิวผด (เชื้อรา)</text>
+    <text class="hd" x="736" y="46" text-anchor="middle" fill="#4E585F">สิวธรรมดา (แบคทีเรีย)</text>
+
+    <!-- visual: fungal = uniform tiny dots -->
+    <g fill="#C2456B" opacity=".8">
+      <circle cx="330" cy="92" r="7"/><circle cx="360" cy="86" r="7"/><circle cx="390" cy="94" r="7"/>
+      <circle cx="420" cy="86" r="7"/><circle cx="450" cy="93" r="7"/><circle cx="480" cy="87" r="7"/>
+      <circle cx="345" cy="118" r="7"/><circle cx="375" cy="112" r="7"/><circle cx="405" cy="120" r="7"/>
+      <circle cx="435" cy="112" r="7"/><circle cx="465" cy="119" r="7"/><circle cx="315" cy="115" r="7"/>
+    </g>
+    <text class="rw" x="411" y="146" text-anchor="middle">ตุ่มเล็ก ขนาดเท่ากันหมด เรียงเป็นกลุ่ม</text>
+
+    <!-- visual: bacterial = varied sizes -->
+    <g fill="#8A959C" opacity=".85">
+      <circle cx="650" cy="92" r="6"/><circle cx="690" cy="88" r="13"/><circle cx="730" cy="98" r="8"/>
+      <circle cx="775" cy="86" r="16"/><circle cx="818" cy="96" r="6"/>
+      <circle cx="665" cy="122" r="10"/><circle cx="712" cy="124" r="5"/><circle cx="800" cy="124" r="11"/>
+    </g>
+    <circle cx="775" cy="86" r="6" fill="#FFF6CC"/>
+    <circle cx="690" cy="88" r="4.5" fill="#3B3B3B"/>
+    <text class="rw" x="736" y="146" text-anchor="middle">ขนาดไม่เท่ากัน มีหัวดำ/หัวขาวปน</text>
+
+    <!-- comparison rows -->
+    <g>
+      <text class="rw" x="20" y="196">ต้นเหตุ</text>
+      <text class="vl" x="270" y="196" fill="#A8325A">เชื้อยีสต์ Malassezia</text>
+      <text class="vl" x="600" y="196">แบคทีเรีย C. acnes</text>
+      <line x1="20" y1="212" x2="880" y2="212" stroke="#E2E8EA"/>
+
+      <text class="rw" x="20" y="244">อาการคัน</text>
+      <text class="vl" x="270" y="244" fill="#A8325A">คันมาก ★ จุดสังเกตสำคัญที่สุด</text>
+      <text class="vl" x="600" y="244">ไม่คัน (เจ็บมากกว่า)</text>
+      <line x1="20" y1="260" x2="880" y2="260" stroke="#E2E8EA"/>
+
+      <text class="rw" x="20" y="292">หัวสิว</text>
+      <text class="vl" x="270" y="292" fill="#A8325A">ไม่มีหัวดำ/หัวขาว</text>
+      <text class="vl" x="600" y="292">มีหัวดำ หัวขาว หนอง</text>
+      <line x1="20" y1="308" x2="880" y2="308" stroke="#E2E8EA"/>
+
+      <text class="rw" x="20" y="340">ตำแหน่ง</text>
+      <text class="vl" x="270" y="340" fill="#A8325A">หน้าผาก ไรผม แก้ม · หน้าอก แผ่นหลัง ต้นแขน</text>
+      <text class="vl" x="600" y="340">T-zone คาง กราม</text>
+      <line x1="20" y1="356" x2="880" y2="356" stroke="#E2E8EA"/>
+
+      <text class="rw" x="20" y="388">กระตุ้นโดย</text>
+      <text class="vl" x="270" y="388" fill="#A8325A">เหงื่อ อับชื้น เสื้อรัด ยาปฏิชีวนะ</text>
+      <text class="vl" x="600" y="388">ฮอร์โมน การอุดตัน</text>
+      <line x1="20" y1="404" x2="880" y2="404" stroke="#E2E8EA"/>
+
+      <text class="rw" x="20" y="436">ยาสิวทั่วไป</text>
+      <text class="vl" x="270" y="436" fill="#A8325A">ไม่หาย · บางทีแย่ลง</text>
+      <text class="vl" x="600" y="436">ได้ผล</text>
+    </g>
+  </svg>
+  <div class="figcap"><strong>คำถามคัดกรองที่ใช้ได้เลย:</strong> “ตุ่มที่ขึ้น <u>คันไหมคะ</u>? แล้วขนาดเท่า ๆ กันทุกเม็ดหรือเปล่า? ขึ้นที่หลัง/หน้าอกด้วยไหม?” — ถ้าตอบ “ใช่” ทั้ง 3 ข้อ = สิวผด</div>
+</div>
+
+<div class="card accent">
+  <h3>ทำไมใช้ยาสิวแล้วไม่หาย (แถมบางทีแย่ลง)</h3>
+  <ul>
+    <li><strong>ยาปฏิชีวนะฆ่าแบคทีเรีย ไม่ฆ่าเชื้อรา</strong> — สิวผดเกิดจากยีสต์ ยาจึงไม่โดนเป้า</li>
+    <li><strong>ยิ่งกินยาปฏิชีวนะนาน ๆ ยิ่งแย่</strong> — แบคทีเรียดี ๆ บนผิวถูกฆ่าไปด้วย เชื้อยีสต์เลยไม่มีคู่แข่ง โตได้สบายขึ้น</li>
+    <li><strong>ครีมบำรุงส่วนใหญ่ “เลี้ยงเชื้อ”</strong> — น้ำมันหลายชนิด (มะพร้าว, olive, เอสเทอร์บางตัว) เป็นอาหารของ Malassezia โดยตรง</li>
+    <li><strong>ผลัดเซลล์อย่างเดียวไม่พอ</strong> — AHA/BHA ช่วยลดการอุดตัน แต่ไม่ได้ลดจำนวนเชื้อ</li>
+  </ul>
+</div>
+
+<div class="good">
+  <h3>ทำไมสินค้า RMD ตอบโจทย์สิวผด <span class="pill ok">Talking Point</span></h3>
+
+  <h4>SPC Cleanser — ตัวเอกของเคสนี้</h4>
+  <ul>
+    <li><strong>Zinc Pyrithione 0.5% + Climbazole 0.5%</strong> = ลดเชื้อยีสต์โดยตรง ซึ่งคือต้นเหตุจริงของสิวผด</li>
+    <li><strong>Tea Tree / Terpinen-4-ol 0.5%</strong> = ต้าน <em>C. acnes</em> ด้วย → เผื่อเคสที่เป็น
+        <strong>ทั้งสิวธรรมดาและสิวผดพร้อมกัน</strong> (พบบ่อยมาก) จบในขวดเดียว</li>
+    <li><strong>ใช้ได้ทั้งลำตัว</strong> ← จุดขายที่คู่แข่งส่วนใหญ่ไม่มี
+        สิวผดมักขึ้นที่ <u>หน้าอก แผ่นหลัง ต้นแขน</u> แต่คลีนเซอร์ทั่วไปเป็นสูตรสำหรับหน้าเท่านั้น</li>
+    <li><strong>ทิ้งไว้ 30 วิ–2 นาที</strong> = สารออกฤทธิ์ได้ทำงานจริง ไม่ใช่แค่ล้างผ่าน</li>
+    <li><strong>ไม่มีน้ำหอม ไม่มีสบู่/ซัลเฟต</strong> = ไม่ทำให้ผิวมันตอบสนอง (rebound) ซึ่งจะยิ่งเลี้ยงเชื้อ</li>
+  </ul>
+
+  <h4>S-Zinc Gel Cream — มอยส์เจอไรเซอร์ที่ “ไม่เลี้ยงเชื้อ”</h4>
+  <ul>
+    <li><strong>Piroctone Olamine 0.5%</strong> — คุมเชื้อต่อเนื่องทั้งวัน หลังจากคลีนเซอร์ล้างออกไปแล้ว</li>
+    <li><strong>Zinc PCA 1%</strong> — ลดน้ำมัน = ตัดอาหารของเชื้อ</li>
+    <li><strong>Niacinamide 4%</strong> — ลดอักเสบของทั้งสิวธรรมดาและสิวผด + ฟื้นเกราะผิว</li>
+    <li><strong>Postbiotic Complex</strong> — ปรับสมดุลจุลินทรีย์ ไม่ให้ยีสต์กลับมาครองผิวอีก</li>
+    <li>เนื้อเจลบางเบา ไม่อุดตัน</li>
+  </ul>
+
+  <h4>SSH Shampoo — สำหรับสิวผดที่หนังศีรษะ/ไรผม</h4>
+  <ul>
+    <li>คนที่ขึ้นตุ่มคันตามไรผมและหลังคอ มักเป็นสิวผดที่หนังศีรษะ — สระด้วย SSH 2–3 ครั้ง/สัปดาห์</li>
+  </ul>
+
+  <p style="margin-top:16px"><strong>ประโยคปิดการขาย:</strong>
+    “ถ้าเป็นสิวมานานแล้วยาสิวไม่หาย แล้วมันคัน ๆ ด้วย — ส่วนใหญ่ไม่ใช่สิวค่ะ เป็นสิวผดจากเชื้อยีสต์
+    ต้องใช้ตัวที่ลดเชื้อยีสต์โดยตรง ซึ่งคือคลีนเซอร์ SPC ของเรา และใช้ได้ทั้งหน้าและแผ่นหลังเลยค่ะ”</p>
+</div>
+
+<div class="note">
+  <strong>สิ่งที่ห้ามพูด:</strong> ห้ามบอกว่า “รักษาหาย” หรือ “ทดแทนยา” — เราเป็นเครื่องสำอาง ไม่ใช่ยา
+  ให้พูดว่า <u>“ช่วยดูแล / ช่วยลด / ช่วยควบคุม”</u> และถ้าอาการรุนแรงให้แนะนำพบแพทย์ผิวหนัง
+</div>
+
+<!-- ═══════════════ SECTION 3 ═══════════════ -->
+<h2 id="s3"><span class="num">SECTION 03</span>ทำไมสบู่และซัลเฟตทำร้ายผิวเซ็บเดิร์ม</h2>
+
+<p class="lead">
+  ทุกครั้งที่เราเคลม <strong>“ไม่มีสบู่ ไม่มีซัลเฟต”</strong> ต้องอธิบายได้ว่า<u>ทำไมมันสำคัญ</u> —
+  ไม่งั้นลูกค้าจะมองว่าเป็นแค่คำโฆษณา นี่คือ 4 เหตุผลที่ใช้ได้จริง
+</p>
+
+<!-- FIG: pH scale -->
+<div class="fig">
+  <div class="figtitle">รูปที่ 5 · เหตุผลที่ 1 — ค่า pH</div>
+  <svg viewBox="0 0 900 300" role="img" aria-label="สเกล pH ผิวหนังเทียบกับสบู่">
+    <defs>
+      <linearGradient id="phg" x1="0" x2="1">
+        <stop offset="0" stop-color="#E8534E"/><stop offset=".38" stop-color="#E9A13B"/>
+        <stop offset=".55" stop-color="#7FBF6A"/><stop offset="1" stop-color="#3E7BD6"/>
+      </linearGradient>
+      <style>
+        .sc{font:700 13px sans-serif;fill:#8A959C}
+        .tg{font:800 15px "Sukhumvit Set","Noto Sans Thai",sans-serif}
+        .tg2{font:600 12.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#5C666D}
+      </style>
+    </defs>
+    <rect x="60" y="150" width="780" height="34" rx="17" fill="url(#phg)"/>
+    <g class="sc">
+      <text x="60"  y="205" text-anchor="middle">3</text>
+      <text x="171" y="205" text-anchor="middle">4</text>
+      <text x="282" y="205" text-anchor="middle">5</text>
+      <text x="394" y="205" text-anchor="middle">6</text>
+      <text x="505" y="205" text-anchor="middle">7</text>
+      <text x="616" y="205" text-anchor="middle">8</text>
+      <text x="728" y="205" text-anchor="middle">9</text>
+      <text x="840" y="205" text-anchor="middle">10</text>
+    </g>
+    <!-- skin band -->
+    <rect x="249" y="140" width="90" height="54" rx="8" fill="none" stroke="#1F6B41" stroke-width="3"/>
+    <text class="tg" x="294" y="122" text-anchor="middle" fill="#1F6B41">ผิวคนปกติ</text>
+    <text class="tg2" x="294" y="102" text-anchor="middle">pH 4.7–5.5 (กรดอ่อน)</text>
+    <text class="tg2" x="294" y="232" text-anchor="middle">= “Acid Mantle” เกราะกรดที่กันเชื้อ</text>
+
+    <!-- RMD marker -->
+    <path d="M294 250 L294 232" stroke="#0F9AAB" stroke-width="2"/>
+    <rect x="204" y="250" width="180" height="34" rx="10" fill="#E6F5F7" stroke="#0F9AAB"/>
+    <text class="tg" x="294" y="272" text-anchor="middle" fill="#0B7E8C">RMD อยู่ตรงนี้</text>
+
+    <!-- soap marker -->
+    <path d="M784 140 L784 122" stroke="#C2456B" stroke-width="2"/>
+    <rect x="694" y="88" width="180" height="34" rx="10" fill="#FDEEF2" stroke="#C2456B"/>
+    <text class="tg" x="784" y="110" text-anchor="middle" fill="#A8325A">สบู่ก้อน pH 9–10</text>
+    <text class="tg2" x="784" y="232" text-anchor="middle">ด่างแรง — ทำลาย acid mantle</text>
+  </svg>
+  <div class="figcap">พอผิวถูกดันขึ้นไปเป็นด่าง เอนไซม์ที่ซ่อมเกราะผิวจะทำงานไม่ได้ และ <strong>เชื้อ Malassezia ชอบสภาพ pH ที่สูงขึ้น</strong> — เท่ากับล้างหน้าทีเดียวช่วยเชื้อ 2 ต่อ</div>
+</div>
+
+<!-- FIG: barrier damage -->
+<div class="fig">
+  <div class="figtitle">รูปที่ 6 · เหตุผลที่ 2 — ซัลเฟตชะล้างไขมันผิวออกไปด้วย</div>
+  <svg viewBox="0 0 900 330" role="img" aria-label="เกราะผิวก่อนและหลังใช้ซัลเฟต">
+    <defs>
+      <style>
+        .th{font:800 17px "Sukhumvit Set","Noto Sans Thai",sans-serif}
+        .tt{font:600 13px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#5C666D}
+      </style>
+    </defs>
+    <!-- LEFT: healthy -->
+    <text class="th" x="220" y="34" text-anchor="middle" fill="#1F6B41">เกราะผิวปกติ</text>
+    <g>
+      <!-- bricks -->
+      <g fill="#F0E6DA" stroke="#D8CBBD" stroke-width="2">
+        <rect x="60" y="60"  width="76" height="40" rx="6"/><rect x="146" y="60"  width="76" height="40" rx="6"/>
+        <rect x="232" y="60"  width="76" height="40" rx="6"/><rect x="318" y="60" width="62" height="40" rx="6"/>
+        <rect x="60" y="112" width="62" height="40" rx="6"/><rect x="132" y="112" width="76" height="40" rx="6"/>
+        <rect x="218" y="112" width="76" height="40" rx="6"/><rect x="304" y="112" width="76" height="40" rx="6"/>
+      </g>
+      <!-- mortar = lipids -->
+      <g stroke="#B8860B" stroke-width="5" opacity=".8">
+        <line x1="60" y1="105" x2="380" y2="105"/><line x1="60" y1="157" x2="380" y2="157"/>
+        <line x1="141" y1="60" x2="141" y2="100"/><line x1="227" y1="60" x2="227" y2="100"/>
+        <line x1="313" y1="60" x2="313" y2="100"/>
+        <line x1="127" y1="112" x2="127" y2="152"/><line x1="213" y1="112" x2="213" y2="152"/>
+        <line x1="299" y1="112" x2="299" y2="152"/>
+      </g>
+      <text class="tt" x="220" y="184" text-anchor="middle">อิฐ = เซลล์ผิว · ปูน = เซราไมด์/ไขมัน</text>
+      <text class="tt" x="220" y="206" text-anchor="middle" fill="#1F6B41">✓ กันน้ำระเหยออก ✓ กันเชื้อและสารระคายเข้า</text>
+    </g>
+
+    <!-- RIGHT: damaged -->
+    <text class="th" x="680" y="34" text-anchor="middle" fill="#A8325A">หลังใช้สบู่/ซัลเฟต</text>
+    <g>
+      <g fill="#F0E6DA" stroke="#D8CBBD" stroke-width="2">
+        <rect x="520" y="60"  width="76" height="40" rx="6"/><rect x="612" y="64"  width="76" height="40" rx="6"/>
+        <rect x="706" y="58"  width="76" height="40" rx="6"/><rect x="794" y="66" width="62" height="40" rx="6"/>
+        <rect x="520" y="116" width="62" height="40" rx="6"/><rect x="596" y="112" width="76" height="40" rx="6"/>
+        <rect x="690" y="118" width="76" height="40" rx="6"/><rect x="780" y="112" width="76" height="40" rx="6"/>
+      </g>
+      <g stroke="#B8860B" stroke-width="3" opacity=".28" stroke-dasharray="7 12">
+        <line x1="520" y1="107" x2="856" y2="107"/><line x1="520" y1="161" x2="856" y2="161"/>
+      </g>
+      <!-- escaping water -->
+      <g fill="#3E7BD6" opacity=".7">
+        <circle cx="604" cy="46" r="5"/><circle cx="698" cy="40" r="4"/><circle cx="788" cy="48" r="5"/>
+      </g>
+      <!-- invading yeast -->
+      <g fill="#C2456B" opacity=".85">
+        <ellipse cx="656" cy="108" rx="8" ry="6"/><ellipse cx="748" cy="110" rx="8" ry="6"/>
+      </g>
+      <text class="tt" x="680" y="184" text-anchor="middle">ปูนถูกชะออก → เกิดช่องว่าง</text>
+      <text class="tt" x="680" y="206" text-anchor="middle" fill="#A8325A">✗ น้ำระเหยออก (ผิวแห้ง) ✗ เชื้อและสารระคายเข้าได้</text>
+    </g>
+
+    <!-- rebound -->
+    <rect x="60" y="240" width="796" height="70" rx="12" fill="#FDEEF2" stroke="#EEBACB"/>
+    <text class="th" x="80" y="270" fill="#A8325A">ผลตามมา (Rebound Oil):</text>
+    <text class="tt" x="80" y="294">ผิวแห้ง → ต่อมไขมันผลิตน้ำมันชดเชย “มากกว่าเดิม” → เลี้ยงเชื้อ Malassezia → เห่อหนักกว่าเก่า</text>
+  </svg>
+  <div class="figcap">นี่คือคำตอบของคำถามยอดฮิต: <em>“ทำไมยิ่งล้างหน้าให้สะอาด หน้ายิ่งมันและยิ่งลอก?”</em></div>
+</div>
+
+<h3>4 เหตุผลเต็ม — สรุปสั้นที่ใช้ตอบลูกค้าได้เลย</h3>
+<div class="scroll">
+<table>
+  <thead><tr><th>#</th><th>ปัญหาของสบู่/ซัลเฟต</th><th>ผลกับผิวเซ็บเดิร์ม</th></tr></thead>
+  <tbody>
+    <tr><td><strong>1</strong></td><td><strong>pH เป็นด่าง (9–10)</strong> ในขณะที่ผิวคนเป็นกรดอ่อน 4.7–5.5</td>
+        <td>ทำลาย acid mantle · เอนไซม์ซ่อมเกราะผิวหยุดทำงาน · <strong>Malassezia โตดีขึ้นในสภาพด่าง</strong></td></tr>
+    <tr><td><strong>2</strong></td><td><strong>ชะล้างไขมันเกิน (delipidating)</strong> — SLS/SLES ดึงเซราไมด์ออกไปพร้อมสิ่งสกปรก</td>
+        <td>เกราะผิวรั่ว → น้ำระเหยออก ผิวแห้ง ลอก แสบ · สารระคายและเชื้อเข้าได้ง่ายขึ้น</td></tr>
+    <tr><td><strong>3</strong></td><td><strong>Rebound oil</strong> — ผิวแห้งแล้วต่อมไขมันผลิตน้ำมันชดเชยมากกว่าเดิม</td>
+        <td>น้ำมันเยอะขึ้น = อาหารเชื้อเยอะขึ้น → <strong>วงจรเห่าซ้ำเร็วขึ้น</strong></td></tr>
+    <tr><td><strong>4</strong></td><td><strong>SLS ระคายเคืองโดยตรง</strong> — SLS เป็นสารที่นักวิจัยใช้ “จงใจทำให้ผิวระคายเคือง” ในการทดลอง</td>
+        <td>ผิวที่อักเสบอยู่แล้วยิ่งแดง ยิ่งแสบ — ไม่ควรเจอทุกวัน</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="good">
+  <h3>แล้ว RMD ใช้อะไรแทน? <span class="pill ok">เหนือคู่แข่งตรงนี้</span></h3>
+  <ul>
+    <li><strong>Cocamidopropyl Betaine</strong> — สารชำระล้างกลุ่ม amphoteric อ่อนโยน
+        ฟองนุ่ม ไม่ดึงไขมันผิวออกมากเกิน</li>
+    <li><strong>Sodium Cocoyl Isethionate</strong> — จากมะพร้าว ฟองครีมมี่ ค่า pH ใกล้เคียงผิว
+        เป็นตัวเดียวกับที่ใช้ในสบู่ syndet เกรดผิวแพ้ง่าย</li>
+    <li><strong>Decyl Glucoside</strong> (ในแชมพูสูตรใหม่) — non-ionic จากน้ำตาล + มะพร้าว
+        อ่อนโยนที่สุดกลุ่มหนึ่ง ใช้ในสูตรเด็กทารก</li>
+    <li>ทั้งหมด <strong>ไม่มีน้ำหอม ไม่มีแอลกอฮอล์ ไม่มีพาราเบน ไม่มีสีสังเคราะห์</strong></li>
+  </ul>
+  <p><strong>ประโยคเทียบคู่แข่ง:</strong> “แชมพูขจัดรังแคทั่วไปในตลาดใช้ซัลเฟตเพราะฟองเยอะและถูก
+     แต่ผิวเซ็บเดิร์มเกราะพังอยู่แล้ว ยิ่งล้างแรงยิ่งพัง ของเราเลยเลือกสารชำระล้างอ่อนโยนแทน
+     ฟองน้อยกว่าหน่อยแต่ผิวไม่พังค่ะ”</p>
+</div>
+
+<!-- ═══════════════ SECTION 4 ═══════════════ -->
+<h2 id="s4"><span class="num">SECTION 04</span>ภาพรวมสินค้า + เลขที่ใบรับแจ้ง อย.</h2>
+
+<p class="lead">จำหน้าตาขวดก่อน — ทุกตัวใช้ <strong>รหัสสั้น ๆ</strong> บนขวด (SPC · SSH · S-ZINC · SUN) · <strong>ไลน์เซ็บเดิร์มมี 4 ตัว</strong></p>
+
+<div class="gallery">
+  <figure>
+    <img src="images/rmd/spc-cleanser.jpg" alt="RMD Seb Control Purifying Cleanser SPC">
+    <figcaption><div class="gn">SPC<br>Purifying Cleanser</div>
+      <div class="gp">฿329 · 100 ml</div><div class="gu">คลีนเซอร์ · หน้า+ลำตัว</div></figcaption>
+  </figure>
+  <figure>
+    <img src="images/rmd/ssh-shampoo.jpg" alt="RMD Hydrating Mild Shampoo SSH">
+    <figcaption><div class="gn">SSH<br>Mild Shampoo</div>
+      <div class="gp">฿359 · 200 ml</div><div class="gu">แชมพู · หนังศีรษะ</div></figcaption>
+  </figure>
+  <figure>
+    <img src="images/rmd/s-zinc.jpg" alt="RMD S-Zinc Gel Cream">
+    <figcaption><div class="gn">S-ZINC<br>Gel Cream</div>
+      <div class="gp">฿550 · 30 g</div><div class="gu">มอยส์เจอไรเซอร์ · ผิวมัน</div></figcaption>
+  </figure>
+  <figure>
+    <img src="images/rmd/sun-sunscreen.jpg" alt="RMD Seb Control Physical TrueCalm Sunscreen">
+    <figcaption><div class="gn">SUN<br>Physical TrueCalm</div>
+      <div class="gp">฿359 · SPF50 PA++++</div><div class="gu">กันแดด · Physical</div></figcaption>
+  </figure>
+</div>
+
+<h3>เลขที่ใบรับแจ้ง อย. (ตรวจสอบจากฐานข้อมูล อย. แล้ว)</h3>
+<div class="scroll">
+<table>
+  <thead><tr><th>สินค้า</th><th>เลขที่ใบรับแจ้ง</th><th>ผู้จดแจ้ง / ผู้ผลิต</th><th>สถานะ</th></tr></thead>
+  <tbody>
+    <tr><td><strong>SPC — Seb Control Purifying Cleanser</strong></td>
+        <td><code>34-1-6800028646</code></td><td>นางสาว อมรรัตน์ สุวรรณรมย์</td>
+        <td><span class="pill ok">รับจดแจ้ง</span></td></tr>
+    <tr><td><strong>SUN — Seb Control TrueCalm Physical Sunscreen</strong></td>
+        <td><code>34-1-6800031094</code></td><td>นางสาว อมรรัตน์ สุวรรณรมย์</td>
+        <td><span class="pill ok">รับจดแจ้ง</span></td></tr>
+    <tr><td><strong>S-Zinc Gel Cream</strong></td>
+        <td><code>12-1-6800036257</code></td><td>บริษัท พฤกษา แลบบอราเทอรี่ จำกัด</td>
+        <td><span class="pill ok">รับจดแจ้ง</span></td></tr>
+    <tr><td><strong>SSH — Seb Control Daily Shampoo (สูตรเดิม)</strong></td>
+        <td><code>30-1-6800034917</code></td><td>บริษัท ไทยโบทานิคแล็บ จำกัด</td>
+        <td><span class="pill ok">รับจดแจ้ง</span></td></tr>
+    <tr><td><strong>Seb Control Gentle Shampoo (สูตรใหม่ 2569)</strong></td>
+        <td><code>67-1-6900011613</code></td><td>บริษัท พนัชกร คอสเมติกส์ (ไทยแลนด์) จำกัด</td>
+        <td><span class="pill ok">รับจดแจ้ง</span></td></tr>
+    <tr><td><strong>RMD Dermo-Pediatrics A Soothing Lotion</strong></td>
+        <td><code>67-1-6800024882</code></td><td>บริษัท พนัชกร คอสเมติกส์ (ไทยแลนด์) จำกัด</td>
+        <td><span class="pill ok">รับจดแจ้ง</span></td></tr>
+    <tr style="opacity:.6"><td>(เลขเก่า) Seb Control Gel Cream Moisturizer O</td>
+        <td><code>12-1-6800025366</code></td><td>บริษัท พฤกษา แลบบอราเทอรี่ จำกัด</td>
+        <td><span class="pill warn">ยกเลิก</span></td></tr>
+  </tbody>
+</table>
+</div>
+<p style="font-size:13.5px;color:var(--ink-3)">
+  เลขเก่าของ S-Zinc ถูกยกเลิกและออกเลขใหม่แล้ว (<code>12-1-6800036257</code>) —
+  <strong>ถ้าลูกค้าถามเลข อย. ให้ใช้เลขใหม่เท่านั้น</strong> · ตรวจสอบได้ที่ porta.fda.moph.go.th
+</p>
+
+<h3>ตารางเปรียบเทียบสินค้า</h3>
+<div class="scroll">
+<table>
+  <thead><tr><th>สินค้า</th><th>ราคา</th><th>ขนาด</th><th>ใช้เมื่อไหร่</th><th>สารออกฤทธิ์หลัก</th><th>คะแนน</th></tr></thead>
+  <tbody>
+    <tr><td><strong>SPC Cleanser</strong>คลีนเซอร์ หน้า+ลำตัว</td><td>฿329<br><span style="color:var(--ink-3);font-size:12px">(เต็ม ฿390)</span></td><td>100 ml</td>
+        <td>ทุกวัน 1–2 ครั้ง</td><td>Zinc Pyrithione 0.5% + Climbazole 0.5% + Tea Tree 0.5% + Niacinamide 1%</td><td>5.0 (11)</td></tr>
+    <tr><td><strong>SSH Shampoo</strong>แชมพูหนังศีรษะ</td><td>฿359<br><span style="color:var(--ink-3);font-size:12px">(เต็ม ฿390)</span></td><td>200 ml</td>
+        <td>2–4 ครั้ง/สัปดาห์</td><td>Piroctone Olamine + Climbazole + Oat 2% + Seaweed + Chamomile + Zinc PCA</td><td>4.9</td></tr>
+    <tr><td><strong>S-Zinc Gel Cream</strong>มอยส์ฯ ผิวมัน</td><td>฿550</td><td>30 g</td>
+        <td>ทุกวัน หลังล้างหน้า</td><td>Niacinamide 4% + Zinc PCA 1% + Piroctone Olamine 0.5% + Postbiotic</td><td>4.8</td></tr>
+    <tr><td><strong>SUN Sunscreen</strong>กันแดด</td><td>฿359</td><td>—</td>
+        <td>ทุกเช้า ขั้นสุดท้าย</td><td>Physical filter SPF50 PA++++ + <strong>Piroctone Olamine 0.2%</strong> + TrueCalm Complex + Prebiotic MC-EQ Micro</td><td>4.9</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="s4b"><span class="num">SECTION 04B</span>สินค้าอื่น ๆ ทั้งหมดในแบรนด์</h2>
+
+<p class="lead">
+  นอกจากไลน์ SEB CONTROL แล้ว RMD ยังมีอีก <strong>4 ตัว</strong> ที่ต้องรู้จัก —
+  เพื่อจะได้ <u>ไม่แนะนำผิดตัว</u> และ <u>ขายต่อยอดได้</u> เวลาลูกค้าถามถึงปัญหาอื่น
+</p>
+
+<div class="fig">
+  <div class="figtitle">รูปที่ 7 · แบรนด์ RMD ทั้งหมด — แบ่งตาม 3 กลุ่มปัญหา</div>
+  <svg viewBox="0 0 900 280" role="img" aria-label="แผนผังไลน์สินค้า RMD">
+    <defs>
+      <style>
+        .gh{font:800 15px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#fff}
+        .gp2{font:800 13px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .gs{font:600 11px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#8A959C}
+        .gt{font:800 11.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#fff;opacity:.9}
+      </style>
+    </defs>
+    <!-- group 1 -->
+    <rect x="14" y="10" width="290" height="54" rx="12" fill="#0F9AAB"/>
+    <text class="gh" x="159" y="34" text-anchor="middle">SEB CONTROL</text>
+    <text class="gt" x="159" y="52" text-anchor="middle">เซ็บเดิร์ม · รังแค · สิวผด</text>
+    <g>
+      <rect x="14" y="76" width="290" height="42" rx="9" fill="#E6F5F7"/>
+      <text class="gp2" x="30" y="94">SPC Cleanser</text><text class="gs" x="30" y="110">คลีนเซอร์ หน้า+ลำตัว · ฿329</text>
+      <rect x="14" y="126" width="290" height="42" rx="9" fill="#E6F5F7"/>
+      <text class="gp2" x="30" y="144">S-Zinc Gel Cream</text><text class="gs" x="30" y="160">มอยส์เจอไรเซอร์ · ฿550</text>
+      <rect x="14" y="176" width="290" height="42" rx="9" fill="#E6F5F7"/>
+      <text class="gp2" x="30" y="194">SUN Sunscreen</text><text class="gs" x="30" y="210">SPF50 PA++++ · ฿359</text>
+      <rect x="14" y="226" width="290" height="42" rx="9" fill="#E6F5F7"/>
+      <text class="gp2" x="30" y="244">SSH Shampoo</text><text class="gs" x="30" y="260">แชมพูหนังศีรษะ · ฿359</text>
+    </g>
+
+    <!-- group 2 -->
+    <rect x="318" y="10" width="270" height="54" rx="12" fill="#B8860B"/>
+    <text class="gh" x="453" y="34" text-anchor="middle">RMD BABY</text>
+    <text class="gt" x="453" y="52" text-anchor="middle">เด็ก · ทารก · ผิวแพ้ง่าย</text>
+    <g>
+      <rect x="318" y="76" width="270" height="42" rx="9" fill="#FBF3E0"/>
+      <text class="gp2" x="334" y="94">Dermo-Pediatrics A Lotion</text><text class="gs" x="334" y="110">โลชั่นบำรุง 100 ml · ฿349</text>
+      <rect x="318" y="126" width="270" height="42" rx="9" fill="#FBF3E0"/>
+      <text class="gp2" x="334" y="144">Head to Toe Wash</text><text class="gs" x="334" y="160">เจลอาบน้ำ+สระผม 200 ml · ฿369</text>
+    </g>
+
+    <!-- group 3 -->
+    <rect x="602" y="10" width="284" height="54" rx="12" fill="#C2456B"/>
+    <text class="gh" x="744" y="34" text-anchor="middle">ปัญหาผิวอื่น ๆ</text>
+    <text class="gt" x="744" y="52" text-anchor="middle">สิว · ผิวแห้งคันผู้สูงอายุ</text>
+    <g>
+      <rect x="602" y="76" width="284" height="42" rx="9" fill="#FDEEF2"/>
+      <text class="gp2" x="618" y="94">AZ Light Gel ACM</text><text class="gs" x="618" y="110">สิว + รอยสิว · ฿409</text>
+      <rect x="602" y="126" width="284" height="42" rx="9" fill="#FDEEF2"/>
+      <text class="gp2" x="618" y="144">Defensil Calming Cream DCC</text><text class="gs" x="618" y="160">ครีมเย็น ผิวแห้งคัน · ฿349</text>
+    </g>
+
+    <rect x="318" y="200" width="568" height="68" rx="12" fill="#EEF3F4" stroke="#C6D0D3"/>
+    <text class="gp2" x="602" y="226" text-anchor="middle">ระวังอย่าสับสน: AZ Light Gel = สิวธรรมดา/รอยสิว</text>
+    <text class="gs" x="602" y="248" text-anchor="middle">ไม่ใช่ตัวสำหรับเซ็บเดิร์มหรือสิวผด — ถ้าลูกค้าคันด้วย ให้ไป SPC + S-Zinc</text>
+  </svg>
+  <div class="figcap">ทั้งหมด 8 รายการ · ขายบน Shopee 7 ตัว (Head to Toe Wash ยังมีเฉพาะบนเว็บ)</div>
+</div>
+
+<div class="gallery">
+  <figure><img src="images/rmd/az-light-gel.jpg" alt="RMD AZ Light Gel">
+    <figcaption><div class="gn">AZ Light Gel ACM</div><div class="gp">฿409</div>
+      <div class="gu">สิว + รอยสิว</div></figcaption></figure>
+  <figure><img src="images/rmd/defensil.jpg" alt="RMD Defensil Calming Cream">
+    <figcaption><div class="gn">Defensil DCC</div><div class="gp">฿349</div>
+      <div class="gu">ครีมเย็น · ผิวแห้งคันผู้สูงอายุ</div></figcaption></figure>
+  <figure><img src="images/rmd/baby-lotion.jpg" alt="RMD Baby Lotion">
+    <figcaption><div class="gn">Dermo-Pediatrics A Lotion</div><div class="gp">฿349 · 100 ml</div>
+      <div class="gu">โลชั่นเด็ก/ทารกผิวแพ้ง่าย</div></figcaption></figure>
+  <figure><img src="images/rmd/baby-wash.png" alt="RMD Head to Toe Wash">
+    <figcaption><div class="gn">Head to Toe Wash</div><div class="gp">฿369 · 200 ml</div>
+      <div class="gu">เจลอาบน้ำ+สระผม เด็ก</div></figcaption></figure>
+</div>
+
+<!-- AZ -->
+<div class="card">
+  <h3>AZ LIGHT GEL MOISTURIZER (ACM) <span class="pill warn">สิว — ไม่ใช่เซ็บเดิร์ม</span></h3>
+  <div class="shot"><img src="images/rmd/az-light-gel.jpg" alt="AZ Light Gel">
+    <div class="cap">เจลครีมบำรุง “ลดสิว + ลดรอย ในขวดเดียว”</div></div>
+  <p><strong>ตำแหน่ง:</strong> เจลครีมเนื้อบางเบาสำหรับ <strong>ผิวเป็นสิวและมีรอยสิว</strong> · ฿409</p>
+  <h4>สารสำคัญ + ประโยชน์</h4>
+  <ul>
+    <li><strong>Potassium Azeloyl Diglycinate 10%</strong> (อนุพันธ์ Azelaic ที่ละลายน้ำ) —
+        ดูแลรอยสิว ผิวหมองคล้ำ ลดการอักเสบของสิว</li>
+    <li><strong>BETAPUR 1%</strong> (สารสกัดใบโบลโด — Peumus Boldus จาก BASF) —
+        กระตุ้นให้ผิวสร้าง β-defensin ซึ่งเป็นเปปไทด์ต้านเชื้อของผิวเอง
+        → ปรับสมดุลจุลินทรีย์ ลดสิว ลดมัน รูขุมขนดูเล็กลง
+        <span style="color:var(--ink-3)">(งานวิจัยระบุว่าเห็นผลใน 4 สัปดาห์)</span></li>
+    <li><strong>Capryloyl Salicylic Acid (LHA) 0.5%</strong> — กรดผลัดเซลล์สายอ่อนโยน
+        ทำงานที่ปากรูขุมขน ระคายเคืองน้อยกว่าซาลิไซลิกทั่วไป</li>
+    <li><strong>TrueCalm Complex</strong> — สารสกัดพืช 6 ชนิด (ตัวเดียวกับที่อยู่ในกันแดด SUN)
+        ลดอักเสบ ต้านอนุมูลอิสระ กันผิวแห้งตึงจากกรด</li>
+  </ul>
+  <div class="warn" style="margin-bottom:0">
+    <strong>⚠️ ห้ามแนะนำตัวนี้ให้คนเป็นเซ็บเดิร์มหรือสิวผด</strong> —
+    ตัวนี้ไม่มีสารลดเชื้อ Malassezia เลย และมี Paraffinum Liquidum + เอสเทอร์ที่ไม่ได้เป็น fungal-acne safe
+    · ถ้าลูกค้าบอกว่า <u>“ตุ่มคัน”</u> ให้ไป SPC + S-Zinc เสมอ
+  </div>
+</div>
+
+<!-- Baby -->
+<div class="card">
+  <h3>RMD BABY — Dermo-Pediatrics A <span class="pill gold">เด็ก · ผิวแพ้ง่าย</span></h3>
+  <div class="shot"><img src="images/rmd/baby-wash.png" alt="Head to Toe Wash">
+    <div class="cap">Head to Toe Wash — 200 ml · ฿369<br>ปราศจาก SLS / SLES / น้ำหอม</div></div>
+
+  <h4>1 · A Soothing Lotion <span style="color:var(--ink-3);font-weight:600">— 100 ml · ฿349 (เต็ม ฿390) · อย. <code>67-1-6800024882</code></span></h4>
+  <ul>
+    <li><strong>Oat Extract 5%</strong> — ปลอบประโลม ลดการอักเสบของผิว</li>
+    <li><strong>Aloe Vera ออร์แกนิค 2%</strong> — เติมความชุ่มชื้น ลดรอยแดง</li>
+    <li><strong>Sweet Almond + Shea Butter + Jojoba (ออร์แกนิค)</strong> — ฟื้นฟูไขมันผิว เสริมเกราะผิว</li>
+    <li>ไม่มีน้ำหอม ไม่มีพาราเบน ไม่มีซิลิโคน · <strong>ใช้ได้ตั้งแต่แรกเกิด</strong> · ใช้ได้ทั้งหน้าและกาย</li>
+  </ul>
+
+  <h4>2 · A Head to Toe Soothing Wash <span style="color:var(--ink-3);font-weight:600">— 200 ml · ฿369</span></h4>
+  <ul>
+    <li><strong>Decyl Glucoside + Cocamidopropyl Betaine</strong> — สารชำระล้างจากธรรมชาติ
+        ไม่มี SLS/SLES ไม่ทำลายสมดุลผิว</li>
+    <li><strong>Oat Extract 2%</strong> — ลดคัน ลดการลอกของผิว</li>
+    <li><strong>Organic Calendula &amp; Chamomile 2.5%</strong> — ลดการระคายเคือง ผิวนุ่มหลังอาบน้ำ</li>
+    <li><strong>Seaweed Extract 5%</strong> — ผิวและผมนุ่มหลังล้าง เสริมความแข็งแรงผิว</li>
+    <li><strong>อัญชัน (Clitoria Ternatea) + ซากุระ (Prunus Serrulata)</strong> — ต้านอนุมูลอิสระ</li>
+    <li>ใช้ได้ทั้งอาบน้ำและสระผม</li>
+  </ul>
+
+  <div class="good" style="margin-bottom:0">
+    <strong>เชื่อมโยงที่ต้องรู้:</strong> สูตรของ <u>Head to Toe Wash</u> กับ <u>SSH Shampoo สูตรใหม่</u>
+    เกือบเหมือนกันเลย (Decyl Glucoside · Cocamidopropyl Betaine · อัญชัน · Seaweed · Oat · Calendula · Chamomile)
+    — ต่างกันตรงที่ SSH เติม <strong>Piroctone Olamine + Climbazole + Zinc PCA</strong> เข้าไป<br>
+    <strong>ประโยคขายที่แข็งมาก:</strong> “แชมพูเซ็บเดิร์มของเราใช้เบสเดียวกับสูตรอาบน้ำเด็กทารกเลยค่ะ
+    อ่อนโยนขนาดนั้น แค่เติมตัวลดเชื้อเข้าไป”
+  </div>
+</div>
+
+<!-- Defensil -->
+<div class="card">
+  <h3>DEFENSIL CALMING CREAM (DCC) <span class="pill gold">ผู้สูงอายุ · ผิวแห้งคัน</span></h3>
+  <div class="shot"><img src="images/rmd/defensil.jpg" alt="Defensil Calming Cream">
+    <div class="cap">ครีมเย็น ลดผิวแห้ง คัน ลอก ในผู้สูงอายุ · ฿349</div></div>
+  <p><strong>ตำแหน่ง:</strong> ครีมเนื้อเย็นสำหรับ <strong>ผิวแห้ง คัน ลอก ในผู้สูงอายุ</strong>
+     (ภาวะ xerosis / senile pruritus ที่ผิวผลิตไขมันน้อยลงตามอายุ) · ฿349 · คะแนน 5.0</p>
+  <h4>ใช้เมื่อไหร่</h4>
+  <ul>
+    <li>ลูกค้าซื้อให้พ่อแม่/ผู้สูงอายุที่บ่นว่า <strong>คันตามตัว แห้ง ลอกเป็นขุย โดยเฉพาะหน้าแข้งและแขน</strong></li>
+    <li>คนละปัญหากับเซ็บเดิร์ม — ผู้สูงอายุคือ <u>ผิวแห้งเพราะไขมันน้อย</u>
+        ส่วนเซ็บเดิร์มคือ <u>ผิวมันแต่เกราะพัง + มีเชื้อ</u></li>
+  </ul>
+  <div class="note" style="margin-bottom:0">
+    <strong>ข้อมูลที่ยังขาด:</strong> ยังไม่มีรายการส่วนผสมและเลข อย. ของตัวนี้ในมือ
+    — ต้องขอจากทีมก่อนจะเอาไปเคลมรายละเอียดกับลูกค้า
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 5 ═══════════════ -->
+<h2 id="s5"><span class="num">SECTION 05</span>รายละเอียดรายตัว</h2>
+
+<!-- SPC -->
+<div class="card">
+  <h3>1 · SEB CONTROL PURIFYING CLEANSER (SPC) <span class="pill">คลีนเซอร์</span></h3>
+  <div class="shot">
+    <img src="images/rmd/spc-cleanser.jpg" alt="ขวด SPC">
+    <div class="cap">บนขวดระบุ: 0.5% Climbazole · 0.5% Zinc Pyrithione · <strong>1% Niacinamide</strong> · Tea Tree</div>
+  </div>
+  <p><strong>ตำแหน่ง:</strong> คลีนเซอร์สำหรับผิวที่มีแนวโน้มเป็นเซ็บเดิร์ม <u>และสิวผด</u> ทั้งใบหน้าและลำตัว
+     · 100 ml · ฿329 (เต็ม ฿390) · อย. <code>34-1-6800028646</code></p>
+
+  <h4>ขายอะไร</h4>
+  <ul>
+    <li>ลดการระคายเคือง <strong>หลัง</strong>ล้างหน้า — ไม่แห้งตึง ไม่ตึงเปรี๊ยะ</li>
+    <li>ป้องกัน ลอก–คัน–แดง และช่วยให้ผิวฟื้นตัวได้ดีขึ้น</li>
+    <li><strong>ใช้ได้ทั้งหน้าและลำตัว</strong> — เหมาะกับคนที่เห่อที่หน้าอก/แผ่นหลัง หรือมีสิวผดที่หลัง</li>
+    <li>ใช้ได้ตั้งแต่เด็กโต วัยรุ่น ถึงผู้ใหญ่ผิวแพ้ง่าย</li>
+  </ul>
+
+  <h4>สารสำคัญ + ประโยชน์</h4>
+  <ul>
+    <li><strong>Zinc Pyrithione 0.5% + Climbazole 0.5%</strong> — ทำงานคู่กัน (dual-action)
+        ลดการสะสมของ Malassezia ที่เป็นสาเหตุของการลอก แดง มัน ·
+        Zinc Pyrithione ยัง<u>ต้านแบคทีเรีย</u>และ<u>ลดการผลิตน้ำมัน</u>ได้ด้วย</li>
+    <li><strong>Tea Tree Concentrate / Terpinen-4-ol 0.5%</strong> — Terpinen-4-ol คือสารออกฤทธิ์ตัวจริง
+        ในน้ำมันทีทรี · ต้านแบคทีเรีย <em>C. acnes</em> ลดสิวผดและสิวธรรมดาที่เกิดจากความมัน</li>
+    <li><strong>Niacinamide 1%</strong> — เสริมเกราะผิว ลดรอยแดง คุมมัน ลดการระคายเคือง
+        <span style="color:var(--ink-3)">(ยึดตามฉลากขวดจริง — เว็บเขียน 2% ซึ่งพิมพ์ผิด)</span></li>
+    <li><strong>Aloe Vera Callus Extract + Glycerin</strong> — ปลอบประโลม ดึงและกักเก็บความชุ่มชื้น
+        ทำให้ล้างเสร็จแล้วไม่ตึง จึงใช้ได้ทุกวัน</li>
+    <li><strong>Antioxidant Complex — Glutathione + Vitamin C + Vitamin E</strong>
+      <ul>
+        <li><strong>Glutathione</strong> — “แม่ของสารต้านอนุมูลอิสระ” ช่วยลดการอักเสบ
+            และลดผิวหมองคล้ำที่มาจากการอักเสบเรื้อรัง</li>
+        <li><strong>Vitamin C (Ascorbic Acid)</strong> — ต้านอนุมูลอิสระ ช่วยจางรอยแดงหลังอักเสบ (PIE)
+            และช่วยการสร้างคอลลาเจน</li>
+        <li><strong>Vitamin E (Tocopheryl Acetate)</strong> — ปกป้อง<u>ไขมันในเกราะผิว</u>
+            ไม่ให้ถูกอนุมูลอิสระทำลาย (lipid peroxidation) ซึ่งเป็นกลไกที่ทำให้เซ็บเดิร์มอักเสบซ้ำ</li>
+        <li><strong>ทำไมต้องมีทั้ง 3:</strong> Vitamin C ช่วย “ชาร์จ” Vitamin E ที่ใช้ไปแล้วให้กลับมาทำงานใหม่ได้
+            — ทั้งชุดจึงอยู่ได้นานกว่าใส่ตัวเดียว</li>
+        <li><strong>ทำไมสำคัญกับเซ็บเดิร์ม:</strong> การอักเสบเรื้อรังผลิตอนุมูลอิสระตลอดเวลา
+            ซึ่งไปทำลายเกราะผิวซ้ำ ๆ — ชุดนี้ตัดวงจรตรงจุดนั้น</li>
+      </ul>
+    </li>
+    <li><strong>Cocamidopropyl Betaine + Sodium Cocoyl Isethionate</strong> — สารชำระล้างอ่อนโยน
+        ฟองนุ่ม ไม่ใช่สบู่ ไม่ใช่ซัลเฟต (ดู Section 03 ว่าทำไมสำคัญ)</li>
+  </ul>
+
+  <h4>ไม่มี</h4>
+  <p>❌ น้ำหอม ❌ พาราเบน ❌ แอลกอฮอล์ ❌ สบู่ ❌ ซัลเฟต ❌ สีสังเคราะห์ ❌ การทดลองในสัตว์</p>
+
+  <h4>วิธีใช้</h4>
+  <ul>
+    <li>วันละ 1–2 ครั้ง ขณะผิวเปียก นวดเบา ๆ ให้เกิดฟอง
+        <strong>ทิ้งไว้ 30 วินาที – 2 นาที</strong> แล้วล้างออก
+        <em>(ขั้นตอนนี้สำคัญมาก — ต้องให้สารออกฤทธิ์ได้ทำงาน)</em></li>
+    <li>ช่วงกำเริบ: ทุกวัน · ช่วงผิวสงบ: อย่างน้อยสัปดาห์ละ 1 ครั้ง</li>
+    <li>เน้น ข้างจมูก · คิ้ว · หนวดเครา · หน้าอก · แผ่นหลัง</li>
+  </ul>
+
+  <h4>ส่วนผสมทั้งหมด (INCI)</h4>
+  <div class="inci">
+    Water, Cocamidopropyl Betaine, Sodium Cocoyl Isethionate, Glycerin, Aloe Vera Callus Extract,
+    <b>Niacinamide</b>, Glutathione, Hydroxypropyl Methylcellulose, Ascorbic Acid, Tocopheryl Acetate,
+    <b>Climbazole (0.5%)</b>, <b>Zinc Pyrithione (0.5%)</b>, <b>Melaleuca Alternifolia Leaf Extract (0.5%)</b>, Sodium Gluconate
+  </div>
+
+  <h4>มาตรฐาน</h4>
+  <p>✅ ASEAN GMP ✅ ISO 22716 ✅ Dermatologist Tested</p>
+</div>
+
+<!-- SSH -->
+<div class="card">
+  <h3>2 · SEB CONTROL SHAMPOO (SSH) <span class="pill">แชมพู</span> <span class="pill gold">สูตรใหม่ 2569</span></h3>
+  <div class="shot">
+    <img src="images/rmd/ssh-shampoo.jpg" alt="ขวด SSH">
+    <div class="cap">ขวดปัจจุบัน: <strong>HYDRATING MILD SHAMPOO</strong><br>+2% Oat Extract · +1% Piroctone Olamine · +Climbazole<br>Sulfate-free / Fragrance-free</div>
+  </div>
+  <p><strong>ตำแหน่ง:</strong> แชมพูเวชสำอางสูตรอ่อนโยนเป็นพิเศษ สำหรับ
+     <strong>รังแคเรื้อรัง · หนังศีรษะไวต่อการระคายเคือง · เซ็บเดิร์มและสิวผดที่ศีรษะ</strong>
+     · 200 ml · ฿359 (เต็ม ฿390) · อย. <code>67-1-6900011613</code></p>
+
+  <h4>ขายอะไร</h4>
+  <ul>
+    <li>ลดรังแค · ลดการระคายเคือง · รักษาสมดุลหนังศีรษะทุกวัน</li>
+    <li><strong>ไม่มีซัลเฟต ไม่มีน้ำหอม ไม่มีซิลิโคน ไม่มีพาราเบน</strong></li>
+    <li>ผมไม่กระด้าง — แก้ pain point คลาสสิกของแชมพูขจัดรังแคทั่วไป</li>
+    <li>ใช้กับผมทำสี/ผมแห้งได้</li>
+  </ul>
+
+  <h4>สารสำคัญ + ประโยชน์ (สูตรใหม่)</h4>
+  <ul>
+    <li><strong>Piroctone Olamine + Climbazole</strong> — คู่หลักลดยีสต์ Malassezia
+        ต้นตอของรังแค ผื่นแดง และสิวผดที่หนังศีรษะ · ลดการกลับมาเป็นซ้ำ</li>
+    <li><strong>Oat Extract (Avena Sativa) 2%</strong> — เบต้ากลูแคนจากข้าวโอ๊ต
+        เคลือบปลอบผิว <u>ลดคันทันที</u> และช่วยฟื้นเกราะหนังศีรษะ</li>
+    <li><strong>Seaweed Extract</strong> — แร่ธาตุและพอลิแซ็กคาไรด์ ช่วยกักน้ำ ลดแห้งลอก</li>
+    <li><strong>Chamomile Extract</strong> — ลดแดง ลดอักเสบ (สารกลุ่มเดียวกับ Bisabolol)</li>
+    <li><strong>Zinc PCA</strong> — คุมความมันบนหนังศีรษะ = ตัดอาหารของเชื้อ</li>
+    <li><strong>Clitoria Ternatea (อัญชัน) + Calendula + Prunus Serrulata (ซากุระ)</strong> —
+        สารสกัดพืชต้านอนุมูลอิสระและปลอบผิว</li>
+    <li><strong>Decyl Glucoside + Cocamidopropyl Betaine + Sodium Cocoyl Isethionate</strong> —
+        ระบบชำระล้าง <u>ไม่มีซัลเฟตเลย</u> อ่อนโยนระดับสูตรเด็ก</li>
+  </ul>
+
+  <h4>วิธีใช้</h4>
+  <ul>
+    <li>ชโลมบนหนังศีรษะที่เปียก นวดเบา ๆ <strong>ทิ้งไว้ 2–5 นาที</strong> แล้วล้างออก</li>
+    <li><strong>ช่วงกำเริบ:</strong> 3–4 ครั้ง/สัปดาห์ ต่อเนื่อง 3 สัปดาห์</li>
+    <li><strong>ช่วงคุมอาการ:</strong> 2 ครั้ง/สัปดาห์ · วันที่เหลือใช้แชมพูอ่อนโยนทั่วไปได้</li>
+    <li>เช็ดผมเบามือ · <strong>ห้ามเกาหนังศีรษะ</strong> ให้นวดเบา ๆ แทน</li>
+  </ul>
+
+  <h4>ส่วนผสมทั้งหมด (INCI — สูตรใหม่)</h4>
+  <div class="inci">
+    Water, Glycerin, Cocamidopropyl Betaine, <b>Decyl Glucoside</b>, Clitoria Ternatea Flower Extract,
+    Sodium Cocoyl Isethionate, Sodium Chloride, Sodium Benzoate, <b>Seaweed Extract</b>,
+    <b>Chamomile Extract</b>, <b>Avena Sativa (Oat) Extract</b>, <b>Zinc PCA</b>, Potassium Sorbate,
+    Calendula Officinalis Extract, Prunus Serrulata Flower Extract, <b>Piroctone Olamine</b>,
+    <b>Climbazole</b>, Disodium EDTA
+  </div>
+</div>
+
+<!-- S-Zinc -->
+<div class="card">
+  <h3>3 · S-ZINC GEL CREAM <span class="pill">มอยส์เจอไรเซอร์ · ผิวมัน</span></h3>
+  <div class="shot">
+    <img src="images/rmd/s-zinc.jpg" alt="ขวด S-Zinc Gel Cream">
+    <div class="cap">บนขวด: <strong>+4% Niacinamide · +1% Zinc PCA · +Postbiotic Complex</strong><br>Hydrates · Soothes · Mattifies<br>Fragrance-free · Steroid-free</div>
+  </div>
+  <p><strong>ตำแหน่ง:</strong> เจลครีมเนื้อบางเบา สำหรับ <strong>ผิวมัน / ผิวผสม</strong>
+     ที่มีแนวโน้มเป็นเซ็บเดิร์ม <u>หรือเป็นทั้งสิวและเซ็บเดิร์ม/สิวผด</u>
+     · 30 g · ฿550 · อย. <code>12-1-6800036257</code></p>
+
+  <h4>สารสำคัญ + ประโยชน์</h4>
+  <ul>
+    <li><strong>Niacinamide 4%</strong> (เข้มข้นกว่าคลีนเซอร์ 4 เท่า) — คุมมัน ลดอักเสบทั้งของสิวและเซ็บเดิร์ม
+        กระตุ้นการสร้างเซราไมด์ของผิวเอง ทำให้เกราะผิวแข็งแรงขึ้นจริง</li>
+    <li><strong>Zinc PCA 1%</strong> — ลดการผลิตน้ำมันจากต่อมไขมันอย่างเป็นธรรมชาติ
+        = ตัดอาหารของ Malassezia · ยังช่วยลดสิวอุดตันด้วย</li>
+    <li><strong>Piroctone Olamine 0.5%</strong> — ควบคุมเชื้อต่อเนื่องทั้งวัน
+        <u>อ่อนโยนกว่า Ketoconazole มาก</u> ไม่ทำให้ผิวแห้งตึงหรือแสบ จึงใช้ได้ทุกวันระยะยาว</li>
+    <li><strong>Postbiotic Complex</strong> — สารที่จุลินทรีย์ดีผลิตออกมา
+        ช่วยปรับสมดุล microbiome ให้จุลินทรีย์ดีกลับมาแข่งกับยีสต์ได้
+        = ป้องกันการกลับมาเป็นซ้ำในระยะยาว</li>
+  </ul>
+
+  <h4>ครบ 4 สัญญาณผิวเซ็บเดิร์มบนใบหน้า</h4>
+  <p>✓ ลดเชื้อ ✓ ลดน้ำมัน ✓ ลดอักเสบ–แดง ✓ ปรับสมดุลเกราะผิว</p>
+
+  <h4>เหมาะกับใคร</h4>
+  <ul>
+    <li>ผิวมัน / ผิวผสม · หรือ <strong>มัน–ลอก–แดงพร้อมกัน</strong></li>
+    <li><strong>เป็นทั้งสิวและเซ็บเดิร์ม/สิวผด</strong> — เคสนี้ S-Zinc เหมาะที่สุด
+        เพราะแก้ทั้ง “ผิวมัน–อุดตันง่าย” และ “เกราะผิวอ่อนแอ–แดงง่าย” พร้อมกัน</li>
+    <li>บริเวณ T-zone · รอบจมูก · หนวดเครา</li>
+  </ul>
+  <p><strong>คู่กับ:</strong> งานทดสอบของแบรนด์ใช้ <strong>SPC Cleanser + S-Zinc Gel</strong> เป็นคู่หลัก
+     (เคลม 79.1% ใน 4 สัปดาห์ มาจากคู่นี้ — อ่านข้อควรระวัง Section 09)</p>
+</div>
+
+<!-- SUN -->
+<div class="card">
+  <h3>4 · SEB CONTROL PHYSICAL TRUECALM SUNSCREEN (SUN) <span class="pill">กันแดด</span></h3>
+  <div class="shot">
+    <img src="images/rmd/sun-sunscreen.jpg" alt="ขวด SUN">
+    <div class="cap">ชื่อเต็มบนขวด:<br><strong>SEB CONTROL PHYSICAL TRUECALM SUNSCREEN SPF 50 PA++++</strong></div>
+  </div>
+  <p><strong>ตำแหน่ง:</strong> กันแดดเนื้อบางเบา <strong>SPF50 PA++++</strong> สำหรับผิวที่มีแนวโน้มเป็นเซ็บเดิร์ม
+     · ฿359 · อย. <code>34-1-6800031094</code></p>
+
+  <h4>ขายอะไร (bullet จากภาพสินค้า)</h4>
+  <ul>
+    <li>ลดลอก แดง คัน</li>
+    <li>ลดเชื้อยีสต์ที่ทำให้เกิดเซ็บเดิร์ม</li>
+    <li>ไม่อุดตัน</li>
+    <li><strong>ไม่มีสารกันแดดเคมี</strong> — physical filter ล้วน</li>
+    <li>ใช้ได้ทุกวัน</li>
+  </ul>
+
+  <h4>สารสำคัญ + ประโยชน์</h4>
+  <ul>
+    <li><strong>Physical / Mineral UV filter (SPF50 PA++++)</strong> —
+        สะท้อนแสงอยู่บนผิว ไม่ต้องดูดซับเข้าไปแล้วเปลี่ยนเป็นความร้อนเหมือนสารเคมี
+        จึง<u>ไม่กระตุ้นผิวที่กำลังอักเสบ</u> และไม่แสบตา</li>
+    <li><strong>Piroctone Olamine 0.2%</strong> —
+        <u>นี่คือสิ่งที่กันแดดยี่ห้ออื่นไม่มี</u> · เป็นสารลดเชื้อ Malassezia ตัวเดียวกับที่อยู่ใน S-Zinc และแชมพู
+        แต่ใส่ในความเข้มข้นอ่อนสำหรับใช้ทั้งวัน<br>
+        <strong>ทำไมสำคัญ:</strong> กันแดดคือชั้นที่อยู่บนผิวนานที่สุดในแต่ละวัน (6–8 ชม.)
+        การมีตัวคุมเชื้ออยู่ในชั้นนั้นด้วย = คุมเชื้อต่อเนื่อง<u>ในช่วงเวลาที่เชื้อโตเร็วที่สุด</u> คือกลางวันที่ร้อนและมีเหงื่อ</li>
+    <li><strong>TrueCalm Complex</strong> — คอมเพล็กซ์สารสกัดพืช 6 ชนิด:
+        ไวโอเล็ตแมนจูเรียจากเกาะเชจู (ตัวหลัก) · ชะเอมเทศ · ใบบัวบก · ชาเขียว · Polygonum · Scutellaria
+        <br><u>ประโยชน์:</u> ลดการอักเสบ + ต้านอนุมูลอิสระ
+        <br><span style="color:var(--ink-3)">งานวิจัยบนผิวมนุษย์: ลดการระคายเคืองจาก UV และ SLS
+        (ครีมผสม TrueCalm 2% ทาวันละ 2 ครั้ง 14 วัน)</span></li>
+    <li><strong>Prebiotic MC-EQ Micro</strong> (Natural Skin Microflora Controller) —
+        “อาหารของจุลินทรีย์ดี” ช่วยให้จุลินทรีย์ที่เป็นมิตรโตแข่งกับ Malassezia ได้
+        = คุมเชื้อโดยไม่ต้องฆ่าทุกอย่างทิ้ง</li>
+  </ul>
+</div>
+
+<h3>อาการ “คันยิบ ๆ ตอนกลางวัน” — ลูกค้าถามบ่อยมาก</h3>
+<p class="lead">
+  ลูกค้าหลายคนบอกว่า <em>“ตอนเช้าไม่เป็นไร พอสาย ๆ บ่าย ๆ เริ่มคันยิบ ๆ แสบ ๆ”</em>
+  — นี่ไม่ใช่ความรู้สึกไปเอง มีกลไกจริงอยู่เบื้องหลัง 4 ชั้น
+</p>
+
+<div class="fig">
+  <div class="figtitle">รูปที่ 8 · ทำไมเซ็บเดิร์มถึงคันยิบตอนกลางวัน</div>
+  <svg viewBox="0 0 900 480" role="img" aria-label="กลไกอาการคันตอนกลางวัน">
+    <defs>
+      <marker id="ar4" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+        <path d="M0,0 L9,4.5 L0,9 z" fill="#C2456B"/></marker>
+      <style>
+        .dh{font:800 15px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .dt{font:600 12.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#5C666D}
+        .dn{font:800 22px sans-serif;fill:#fff}
+        .dz{font:800 13px "Sukhumvit Set","Noto Sans Thai",sans-serif;letter-spacing:.1em;fill:#8A959C}
+      </style>
+    </defs>
+
+    <text class="dz" x="20" y="26">แดด · ความร้อน · เหงื่อ</text>
+
+    <!-- step 1 -->
+    <circle cx="70" cy="86" r="22" fill="#B8860B"/><text class="dn" x="70" y="94" text-anchor="middle">1</text>
+    <text class="dh" x="106" y="80">อากาศร้อน + แดด → ผิวอุณหภูมิสูงขึ้น</text>
+    <text class="dt" x="106" y="102">เชื้อ Malassezia โตได้ดีที่สุดในช่วงอุ่น–ชื้น = กลางวันของเมืองไทยพอดี</text>
+    <line x1="70" y1="112" x2="70" y2="146" stroke="#C2456B" stroke-width="3" marker-end="url(#ar4)"/>
+
+    <!-- step 2 -->
+    <circle cx="70" cy="176" r="22" fill="#C2456B"/><text class="dn" x="70" y="184" text-anchor="middle">2</text>
+    <text class="dh" x="106" y="170">ต่อมไขมันผลิตน้ำมันมากขึ้น + เหงื่อออก</text>
+    <text class="dt" x="106" y="192">น้ำมัน = อาหารของเชื้อ · เหงื่อ = ความชื้นที่เชื้อชอบ · ทั้งคู่พีคตอนกลางวัน</text>
+    <line x1="70" y1="202" x2="70" y2="236" stroke="#C2456B" stroke-width="3" marker-end="url(#ar4)"/>
+
+    <!-- step 3 -->
+    <circle cx="70" cy="266" r="22" fill="#A8325A"/><text class="dn" x="70" y="274" text-anchor="middle">3</text>
+    <text class="dh" x="106" y="260">เชื้อย่อยน้ำมันเป็น “กรดไขมันอิสระ”</text>
+    <text class="dt" x="106" y="282">Malassezia ปล่อยเอนไซม์ lipase ย่อยน้ำมันผิว เหลือ <tspan style="font-style:italic">oleic acid</tspan> ทิ้งไว้บนผิว</text>
+    <line x1="70" y1="292" x2="70" y2="326" stroke="#C2456B" stroke-width="3" marker-end="url(#ar4)"/>
+
+    <!-- step 4 -->
+    <circle cx="70" cy="356" r="22" fill="#8A1D42"/><text class="dn" x="70" y="364" text-anchor="middle">4</text>
+    <text class="dh" x="106" y="350">กรดไขมันอิสระแทงทะลุเกราะผิว → คันยิบ แสบ ลอก</text>
+    <text class="dt" x="106" y="372">นี่คือตัวที่ทำให้ “คัน” จริง ๆ ไม่ใช่ตัวเชื้อเอง · ยิ่งเกราะผิวพัง ยิ่งรู้สึกไว</text>
+
+    <!-- solution bar -->
+    <rect x="24" y="404" width="852" height="62" rx="14" fill="#E6F5F7" stroke="#0F9AAB" stroke-width="2"/>
+    <text class="dh" x="48" y="432" fill="#0B7E8C">➜ ทางแก้: ตัดวงจรตั้งแต่ขั้นที่ 1–2</text>
+    <text class="dt" x="48" y="454">SUN Sunscreen = กันความร้อนจาก UV + มี Piroctone Olamine 0.2% คุมเชื้ออยู่บนผิวตลอดวัน · S-Zinc = Zinc PCA 1% ลดน้ำมันตั้งแต่ต้นทาง</text>
+  </svg>
+  <div class="figcap">
+    <strong>ประโยคที่ใช้ตอบลูกค้าได้เลย:</strong> “ที่คันยิบตอนบ่ายเพราะพอร้อนและมีเหงื่อ เชื้อจะโตเร็วขึ้นแล้วย่อยน้ำมันบนหน้าเป็นกรดไขมันที่กัดผิวค่ะ
+    กันแดดตัวนี้เลยใส่ Piroctone Olamine 0.2% มาด้วย เพื่อคุมเชื้อในช่วงกลางวันที่มันโตเร็วที่สุด”
+  </div>
+</div>
+
+<div class="card accent">
+  <h3>ทำไมกันแดด “เคมี” ไม่เหมาะกับผิวเซ็บเดิร์ม <span class="pill">มีงานวิจัยรองรับ</span></h3>
+
+  <h4>✅ หลักฐานระดับงานวิจัย (พูดได้เต็มปาก)</h4>
+  <ul>
+    <li><strong>สารกันแดดเคมีคือสารก่อภูมิแพ้จากแสงอันดับ 1</strong> —
+        Oxybenzone (Benzophenone-3) เป็น UV filter ที่ถูกรายงานว่าก่อ contact
+        และ photocontact allergy บ่อยที่สุด · ในการศึกษาย้อนหลัง 10 ปี
+        ผู้ป่วยที่แจ้งว่าแพ้กันแดด <strong>70.2% ทดสอบ patch test แล้วเป็นบวกต่อ oxybenzone</strong>
+        · และใน 10 อันดับสารก่อภูมิแพ้จากแสงที่พบบ่อยที่สุด <strong>7 ตัวเป็นสารกันแดด</strong></li>
+    <li><strong>ไม่เคยมีรายงานการแพ้ต่อสารกันแดดกายภาพเลย</strong> —
+        Titanium Dioxide และ Zinc Oxide <u>ไม่มีรายงาน allergic หรือ photoallergic contact dermatitis</u>
+        จึงเป็นทางเลือกที่ปลอดภัยสำหรับคนที่สงสัยว่าแพ้สารกันแดดเคมี
+        <span style="color:var(--ink-3)">(Dermatitis, 2023 — บทปริทัศน์ UV filters และศักยภาพการก่อภูมิแพ้)</span></li>
+    <li><strong>เชื้อ Malassezia กินกรดไขมันสาย C11–C24</strong> —
+        กันแดดเคมีส่วนใหญ่ต้องละลายสารกันแดดในเอสเทอร์/น้ำมันที่อยู่ในช่วงนี้พอดี
+        (เช่น isopropyl palmitate, glyceryl stearate) จึงกลายเป็น “อาหารเชื้อ” ไปในตัว
+        <span style="color:var(--ink-3)">(DeAngelis et al., J Investig Dermatol Symp Proc 2005)</span></li>
+  </ul>
+
+  <h4>⚠️ กลไกที่สมเหตุสมผล (พูดได้ แต่ต้องบอกว่าเป็น “กลไก” ไม่ใช่ผลวิจัยตรง)</h4>
+  <ul>
+    <li><strong>กันแดดเคมีทำงานโดยดูดซับ UV แล้วเปลี่ยนเป็นความร้อน</strong> —
+        ความร้อนที่ปล่อยออกมาบนผิวที่กำลังอักเสบอยู่แล้ว อาจทำให้แดง/คันมากขึ้น
+        และความอุ่นยังเป็นสภาพที่ Malassezia ชอบ</li>
+    <li><strong>Zinc Oxide มีฤทธิ์ต้านเชื้อราอ่อน ๆ</strong> ต่อ Malassezia
+        — เป็นข้อมูลระดับห้องแล็บ ยังไม่มีงานวิจัยทางคลินิกยืนยัน</li>
+    <li><strong>กันแดดเคมีมักผสมแอลกอฮอล์และน้ำหอม</strong> เพื่อให้เนื้อบางและกลิ่นดี
+        ซึ่งทั้งคู่คือตัวกระตุ้นเซ็บเดิร์มที่อยู่ในลิสต์ของเราเอง</li>
+  </ul>
+
+  <div class="note" style="margin-bottom:0">
+    <strong>ประโยคเทียบคู่แข่งที่ใช้ได้:</strong> “กันแดดเคมีทำงานโดยดูดซับแสงแล้วเปลี่ยนเป็นความร้อนค่ะ
+    ผิวที่อักเสบอยู่แล้วเลยแดงง่ายขึ้น แถมสารกันแดดเคมีอย่าง oxybenzone เป็นสารก่อภูมิแพ้จากแสงอันดับหนึ่ง
+    ส่วนสารกันแดดกายภาพไม่เคยมีรายงานการแพ้เลย ตัวเราเลยเลือกใช้แบบกายภาพล้วน
+    แล้วยังใส่ Piroctone Olamine 0.2% เพิ่มไปอีก ซึ่งกันแดดทั่วไปไม่มีค่ะ”
+  </div>
+</div>
+
+<div class="note">
+  <strong>ทำไมคนเป็นเซ็บเดิร์มต้องใช้กันแดด:</strong> UV มากเกินไปคือ
+  <u>ตัวกระตุ้นให้กำเริบ</u> ที่ระบุอยู่ในคำแนะนำของแบรนด์เอง —
+  แต่กันแดดทั่วไปมักมีน้ำหอม แอลกอฮอล์ หรือน้ำมันที่ “เลี้ยงเชื้อรา”
+  ตัวนี้จึงตอบโจทย์ว่า <strong>กันแดดได้โดยไม่กระตุ้นให้เห่อ</strong>
+</div>
+
+<!-- ═══════════════ MASTER SUMMARY ═══════════════ -->
+<h2 id="s5b"><span class="num">สรุปภาพรวม</span>สินค้าของเราจัดการเซ็บเดิร์มยังไง</h2>
+
+<p class="lead">
+  ถ้าจำได้แค่รูปเดียวจากคู่มือนี้ ให้จำรูปนี้ — <strong>เซ็บเดิร์มเกิดจาก 3 อย่าง
+  และสินค้าทุกตัวของเราถูกออกแบบให้แตะครบทั้ง 3</strong> ซึ่งคือสิ่งที่ครีมทั่วไปทำไม่ได้
+</p>
+
+<div class="fig">
+  <div class="figtitle">รูปที่ 9 · สินค้าตัวไหน แก้ปัญหาข้อไหน</div>
+  <svg viewBox="0 0 900 560" role="img" aria-label="ตารางสินค้าแมปกับกลไกเซ็บเดิร์ม">
+    <defs>
+      <style>
+        .mh{font:800 13px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#fff}
+        .mp{font:800 15px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .mps{font:600 11.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#8A959C}
+        .mi{font:700 11.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#4E585F}
+        .mt{font:800 12px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#8A959C;letter-spacing:.08em}
+      </style>
+    </defs>
+
+    <!-- column headers -->
+    <rect x="250" y="10" width="150" height="58" rx="10" fill="#0F9AAB"/>
+    <text class="mh" x="325" y="34" text-anchor="middle">1 · ลดเชื้อ</text>
+    <text class="mh" x="325" y="54" text-anchor="middle" style="font-size:11px;opacity:.85">Malassezia</text>
+
+    <rect x="410" y="10" width="150" height="58" rx="10" fill="#B8860B"/>
+    <text class="mh" x="485" y="34" text-anchor="middle">2 · คุมมัน</text>
+    <text class="mh" x="485" y="54" text-anchor="middle" style="font-size:11px;opacity:.85">ตัดอาหารของเชื้อ</text>
+
+    <rect x="570" y="10" width="150" height="58" rx="10" fill="#C2456B"/>
+    <text class="mh" x="645" y="34" text-anchor="middle">3 · ฟื้นเกราะ</text>
+    <text class="mh" x="645" y="54" text-anchor="middle" style="font-size:11px;opacity:.85">+ ลดอักเสบ</text>
+
+    <rect x="730" y="10" width="150" height="58" rx="10" fill="#4E585F"/>
+    <text class="mh" x="805" y="42" text-anchor="middle">พิเศษ</text>
+
+    <!-- row 1 SPC -->
+    <line x1="20" y1="80" x2="880" y2="80" stroke="#E2E8EA" stroke-width="2"/>
+    <text class="mp" x="20" y="112">SPC Cleanser</text>
+    <text class="mps" x="20" y="132">คลีนเซอร์ หน้า+ลำตัว</text>
+    <rect x="250" y="88" width="150" height="62" rx="8" fill="#E6F5F7"/>
+    <text class="mi" x="325" y="112" text-anchor="middle">Zinc Pyrithione 0.5%</text>
+    <text class="mi" x="325" y="132" text-anchor="middle">Climbazole 0.5%</text>
+    <rect x="410" y="88" width="150" height="62" rx="8" fill="#FBF3E0"/>
+    <text class="mi" x="485" y="112" text-anchor="middle">Zinc Pyrithione</text>
+    <text class="mi" x="485" y="132" text-anchor="middle">ลดการผลิตน้ำมัน</text>
+    <rect x="570" y="88" width="150" height="62" rx="8" fill="#FDEEF2"/>
+    <text class="mi" x="645" y="105" text-anchor="middle">Niacinamide 1%</text>
+    <text class="mi" x="645" y="123" text-anchor="middle">Aloe Vera</text>
+    <text class="mi" x="645" y="141" text-anchor="middle">Vit C · E · Glutathione</text>
+    <rect x="730" y="88" width="150" height="62" rx="8" fill="#EEF3F4"/>
+    <text class="mi" x="805" y="112" text-anchor="middle">Tea Tree 0.5%</text>
+    <text class="mi" x="805" y="132" text-anchor="middle">คุมสิวธรรมดาด้วย</text>
+
+    <!-- row 2 S-Zinc -->
+    <line x1="20" y1="162" x2="880" y2="162" stroke="#E2E8EA" stroke-width="2"/>
+    <text class="mp" x="20" y="194">S-Zinc Gel Cream</text>
+    <text class="mps" x="20" y="214">มอยส์เจอไรเซอร์</text>
+    <rect x="250" y="170" width="150" height="62" rx="8" fill="#E6F5F7"/>
+    <text class="mi" x="325" y="196" text-anchor="middle">Piroctone Olamine</text>
+    <text class="mi" x="325" y="216" text-anchor="middle">0.5%</text>
+    <rect x="410" y="170" width="150" height="62" rx="8" fill="#FBF3E0"/>
+    <text class="mi" x="485" y="196" text-anchor="middle">Zinc PCA 1%</text>
+    <text class="mi" x="485" y="216" text-anchor="middle">Niacinamide 4%</text>
+    <rect x="570" y="170" width="150" height="62" rx="8" fill="#FDEEF2"/>
+    <text class="mi" x="645" y="196" text-anchor="middle">Niacinamide 4%</text>
+    <text class="mi" x="645" y="216" text-anchor="middle">สร้างเซราไมด์ของผิวเอง</text>
+    <rect x="730" y="170" width="150" height="62" rx="8" fill="#EEF3F4"/>
+    <text class="mi" x="805" y="196" text-anchor="middle">Postbiotic Complex</text>
+    <text class="mi" x="805" y="216" text-anchor="middle">กันเป็นซ้ำระยะยาว</text>
+
+    <!-- row 3 SUN -->
+    <line x1="20" y1="244" x2="880" y2="244" stroke="#E2E8EA" stroke-width="2"/>
+    <text class="mp" x="20" y="276">SUN Sunscreen</text>
+    <text class="mps" x="20" y="296">SPF50 PA++++</text>
+    <rect x="250" y="252" width="150" height="62" rx="8" fill="#E6F5F7"/>
+    <text class="mi" x="325" y="278" text-anchor="middle">Piroctone Olamine</text>
+    <text class="mi" x="325" y="298" text-anchor="middle">0.2% + Prebiotic</text>
+    <rect x="410" y="252" width="150" height="62" rx="8" fill="#F4F7F8"/>
+    <text class="mi" x="485" y="288" text-anchor="middle" style="fill:#B0BABF">—</text>
+    <rect x="570" y="252" width="150" height="62" rx="8" fill="#FDEEF2"/>
+    <text class="mi" x="645" y="278" text-anchor="middle">TrueCalm Complex</text>
+    <text class="mi" x="645" y="298" text-anchor="middle">สารสกัดพืช 6 ชนิด</text>
+    <rect x="730" y="252" width="150" height="62" rx="8" fill="#EEF3F4"/>
+    <text class="mi" x="805" y="278" text-anchor="middle">Physical filter</text>
+    <text class="mi" x="805" y="298" text-anchor="middle">กัน UV ที่เป็นตัวกระตุ้น</text>
+
+    <!-- row 4 SSH -->
+    <line x1="20" y1="326" x2="880" y2="326" stroke="#E2E8EA" stroke-width="2"/>
+    <text class="mp" x="20" y="358">SSH Shampoo</text>
+    <text class="mps" x="20" y="378">หนังศีรษะ</text>
+    <rect x="250" y="334" width="150" height="62" rx="8" fill="#E6F5F7"/>
+    <text class="mi" x="325" y="360" text-anchor="middle">Piroctone Olamine</text>
+    <text class="mi" x="325" y="380" text-anchor="middle">+ Climbazole</text>
+    <rect x="410" y="334" width="150" height="62" rx="8" fill="#FBF3E0"/>
+    <text class="mi" x="485" y="370" text-anchor="middle">Zinc PCA</text>
+    <rect x="570" y="334" width="150" height="62" rx="8" fill="#FDEEF2"/>
+    <text class="mi" x="645" y="360" text-anchor="middle">Oat 2% · Chamomile</text>
+    <text class="mi" x="645" y="380" text-anchor="middle">Seaweed</text>
+    <rect x="730" y="334" width="150" height="62" rx="8" fill="#EEF3F4"/>
+    <text class="mi" x="805" y="360" text-anchor="middle">ไม่มีซัลเฟต</text>
+    <text class="mi" x="805" y="380" text-anchor="middle">อ่อนโยนระดับสูตรเด็ก</text>
+
+    <line x1="20" y1="408" x2="880" y2="408" stroke="#14191C" stroke-width="2"/>
+
+    <!-- bottom banner -->
+    <rect x="20" y="424" width="860" height="120" rx="14" fill="#0F9AAB"/>
+    <text class="mh" x="450" y="458" text-anchor="middle" style="font-size:17px">ทำไมครีมทั่วไปถึงเอาไม่อยู่</text>
+    <text class="mh" x="450" y="486" text-anchor="middle" style="font-size:13px;opacity:.92">ครีมบำรุงทั่วไปแตะแค่ช่องที่ 3 (ความชุ่มชื้น) · แชมพูขจัดรังแคทั่วไปแตะแค่ช่องที่ 1 (ลดเชื้อ)</text>
+    <text class="mh" x="450" y="512" text-anchor="middle" style="font-size:13px;opacity:.92">แต่เซ็บเดิร์มต้องแก้ครบทั้ง 3 พร้อมกัน ไม่งั้นวงจรจะวนกลับมาเสมอ</text>
+    <text class="mh" x="450" y="534" text-anchor="middle" style="font-size:12.5px;opacity:.8">— ทุกตัวของ RMD ถูกออกแบบให้ครบทั้ง 3 ช่องในขวดเดียว —</text>
+  </svg>
+  <div class="figcap">ใช้รูปนี้เปิดการขายได้เลย: ถามลูกค้าก่อนว่า “ที่ใช้อยู่ตอนนี้มีตัวลดเชื้อไหมคะ?” — ส่วนใหญ่จะตอบว่าไม่มี</div>
+</div>
+
+<div class="fig">
+  <div class="figtitle">รูปที่ 10 · ครอบคลุมทั้งตัว — สินค้าตัวไหนใช้ตรงไหน</div>
+  <svg viewBox="0 0 900 430" role="img" aria-label="แผนที่ร่างกายกับสินค้า">
+    <defs>
+      <style>
+        .bl{font:800 14px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .bs{font:600 11.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#8A959C}
+        .bln{stroke:#C6D0D3;stroke-width:1.4}
+      </style>
+    </defs>
+    <!-- simple body -->
+    <circle cx="450" cy="66" r="42" fill="#F7F1EA" stroke="#DED2C4" stroke-width="2"/>
+    <path d="M450 108 L450 122" stroke="#DED2C4" stroke-width="12"/>
+    <rect x="396" y="122" width="108" height="150" rx="26" fill="#F7F1EA" stroke="#DED2C4" stroke-width="2"/>
+    <path d="M398 136 L346 232" stroke="#F0E6DA" stroke-width="24" stroke-linecap="round"/>
+    <path d="M502 136 L554 232" stroke="#F0E6DA" stroke-width="24" stroke-linecap="round"/>
+    <path d="M420 272 L414 388" stroke="#F0E6DA" stroke-width="26" stroke-linecap="round"/>
+    <path d="M480 272 L486 388" stroke="#F0E6DA" stroke-width="26" stroke-linecap="round"/>
+
+    <!-- highlights -->
+    <path d="M410 40 Q 450 8 490 40 Q 478 22 450 20 Q 422 22 410 40 Z" fill="#C2456B" opacity=".6"/>
+    <ellipse cx="450" cy="76" rx="30" ry="22" fill="#0F9AAB" opacity=".22"/>
+    <rect x="410" y="140" width="80" height="52" rx="12" fill="#0F9AAB" opacity=".22"/>
+
+    <!-- labels -->
+    <line class="bln" x1="418" y1="30" x2="250" y2="52"/><circle cx="418" cy="30" r="4.5" fill="#C2456B"/>
+    <text class="bl" x="20" y="48">หนังศีรษะ · ไรผม</text>
+    <text class="bs" x="20" y="68">SSH Shampoo — ทิ้งไว้ 2–5 นาที</text>
+
+    <line class="bln" x1="482" y1="76" x2="650" y2="70"/><circle cx="482" cy="76" r="4.5" fill="#0F9AAB"/>
+    <text class="bl" x="662" y="62">ใบหน้า</text>
+    <text class="bs" x="662" y="82">SPC ล้าง → S-Zinc ทา → SUN กันแดด</text>
+
+    <line class="bln" x1="490" y1="60" x2="650" y2="150"/><circle cx="490" cy="60" r="4.5" fill="#0F9AAB"/>
+    <text class="bl" x="662" y="142">หลังใบหู</text>
+    <text class="bs" x="662" y="162">SSH ล้าง · S-Zinc ทาบาง ๆ</text>
+
+    <line class="bln" x1="410" y1="166" x2="250" y2="200"/><circle cx="410" cy="166" r="4.5" fill="#0F9AAB"/>
+    <text class="bl" x="20" y="192">หน้าอก · แผ่นหลัง</text>
+    <text class="bs" x="20" y="212">SPC ล้างลำตัว — จุดที่สิวผดชอบขึ้น</text>
+
+    <line class="bln" x1="358" y1="212" x2="250" y2="288"/><circle cx="358" cy="212" r="4.5" fill="#0F9AAB"/>
+    <text class="bl" x="20" y="280">ต้นแขน</text>
+    <text class="bs" x="20" y="300">ตุ่มคันเล็ก ๆ = สิวผด · SPC ล้างได้</text>
+
+    <rect x="620" y="230" width="260" height="122" rx="14" fill="#E6F5F7" stroke="#0F9AAB"/>
+    <text class="bl" x="750" y="262" text-anchor="middle" fill="#0B7E8C">จุดขายที่คู่แข่งไม่มี</text>
+    <text class="bs" x="750" y="288" text-anchor="middle">คลีนเซอร์ส่วนใหญ่ทำมาสำหรับ “หน้า”</text>
+    <text class="bs" x="750" y="308" text-anchor="middle">แต่เซ็บเดิร์มและสิวผด</text>
+    <text class="bs" x="750" y="328" text-anchor="middle">ขึ้นที่หลังกับหน้าอกด้วย</text>
+    <text class="bl" x="750" y="348" text-anchor="middle" fill="#0B7E8C">SPC ใช้ได้ทั้งตัว</text>
+  </svg>
+  <div class="figcap">เวลาลูกค้าซื้อแค่ตัวเดียว ให้ถามต่อว่ามีอาการที่หนังศีรษะหรือลำตัวด้วยไหม — มักจะมี และนั่นคือยอดเพิ่ม</div>
+</div>
+
+<!-- ═══════════════ SECTION 6 ═══════════════ -->
+<h2 id="s6"><span class="num">SECTION 06</span>สารออกฤทธิ์ + ประโยชน์ — อธิบายให้ลูกค้าฟังได้ใน 1 บรรทัด</h2>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>สาร</th><th>ทำอะไร / ประโยชน์</th><th>อยู่ในตัวไหน</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Piroctone Olamine</strong></td><td>ลดเชื้อ Malassezia — <em>อ่อนโยนกว่า Ketoconazole มาก ไม่แห้งตึง ไม่แสบ ใช้ได้ทุกวัน</em></td><td>S-Zinc · SUN · SSH</td></tr>
+    <tr><td><strong>Climbazole</strong></td><td>ต้านเชื้อรา ทำงานคู่กับตัวอื่นเพื่อลดโอกาสดื้อและเพิ่มประสิทธิภาพ</td><td>SPC · SSH</td></tr>
+    <tr><td><strong>Zinc Pyrithione</strong></td><td>ต้านทั้งเชื้อราและแบคทีเรีย + ลดการผลิตน้ำมัน — ตัวเดียวได้ 3 อย่าง</td><td>SPC</td></tr>
+    <tr><td><strong>Niacinamide</strong></td><td>เสริมเกราะผิว (กระตุ้นให้ผิวสร้างเซราไมด์เอง) · ลดอักเสบ/รอยแดง · คุมมัน</td><td>SPC 1% · S-Zinc 4%</td></tr>
+    <tr><td><strong>Zinc PCA</strong></td><td>ลดการผลิตน้ำมันจากต่อมไขมัน = ตัดอาหารของเชื้อ · ลดสิวอุดตัน</td><td>S-Zinc 1% · SSH</td></tr>
+    <tr><td><strong>Postbiotic Complex</strong></td><td>ปรับสมดุล microbiome ให้จุลินทรีย์ดีกลับมาแข่งกับยีสต์ = กันเป็นซ้ำ</td><td>S-Zinc</td></tr>
+    <tr><td><strong>Prebiotic MC-EQ Micro</strong></td><td>“อาหาร” ของจุลินทรีย์ดี — คุมเชื้อโดยไม่ฆ่าทุกอย่างทิ้ง</td><td>SUN</td></tr>
+    <tr><td><strong>Chamomile Extract</strong></td><td>แหล่งธรรมชาติของ Bisabolol — ลดแดง ลดอักเสบบนหนังศีรษะ</td><td>SSH</td></tr>
+    <tr><td><strong>Oat Extract (Avena Sativa)</strong></td><td>เบต้ากลูแคนเคลือบปลอบผิว <u>ลดคันทันที</u> + ฟื้นเกราะ</td><td>SSH 2%</td></tr>
+    <tr><td><strong>Seaweed Extract</strong></td><td>แร่ธาตุ + พอลิแซ็กคาไรด์ กักน้ำ ลดแห้งลอก</td><td>SSH</td></tr>
+    <tr><td><strong>Clitoria Ternatea (อัญชัน)</strong></td><td>แอนโทไซยานิน ต้านอนุมูลอิสระ บำรุงเส้นผมและหนังศีรษะ</td><td>SSH</td></tr>
+    <tr><td><strong>Terpinen-4-ol / Tea Tree</strong></td><td>ต้านแบคทีเรีย <em>C. acnes</em> — คลุมเคสที่เป็นทั้งสิวธรรมดาและสิวผด</td><td>SPC 0.5%</td></tr>
+    <tr><td><strong>Glutathione</strong></td><td>“แม่ของสารต้านอนุมูลอิสระ” ลดอักเสบ ลดผิวหมองจากการอักเสบเรื้อรัง</td><td>SPC</td></tr>
+    <tr><td><strong>Vitamin C</strong></td><td>ต้านอนุมูลอิสระ · จางรอยแดงหลังอักเสบ (PIE) · ช่วยสร้างคอลลาเจน</td><td>SPC</td></tr>
+    <tr><td><strong>Vitamin E</strong></td><td>ปกป้องไขมันในเกราะผิวไม่ให้ถูกออกซิไดซ์ (ต้นเหตุการอักเสบซ้ำ)</td><td>SPC</td></tr>
+    <tr><td><strong>TrueCalm Complex</strong></td><td>สารสกัดพืช 6 ชนิด ลดอักเสบ + ต้านอนุมูลอิสระ (มีงานวิจัยบนผิวมนุษย์)</td><td>SUN · AZ Light Gel</td></tr>
+    <tr><td><strong>Aloe Vera Callus Extract</strong></td><td>ปลอบประโลม กักเก็บความชุ่มชื้น ทำให้ล้างเสร็จไม่ตึง</td><td>SPC</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ═══════════════ SECTION 7 ═══════════════ -->
+<h2 id="s7"><span class="num">SECTION 07</span>จัดเซ็ตให้ลูกค้ายังไง</h2>
+
+<!-- FIG routine -->
+<div class="fig">
+  <div class="figtitle">รูปที่ 11 · รูทีนมาตรฐาน</div>
+  <svg viewBox="0 0 900 340" role="img" aria-label="รูทีนเช้าและเย็น">
+    <defs>
+      <marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+        <path d="M0,0 L9,4.5 L0,9 z" fill="#8A959C"/></marker>
+      <style>
+        .st{font:800 17px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .sn{font:800 15px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .ss{font:600 12px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#8A959C}
+        .sh{font:800 13px "Sukhumvit Set","Noto Sans Thai",sans-serif;letter-spacing:.1em}
+      </style>
+    </defs>
+    <!-- morning -->
+    <text class="sh" x="20" y="40" fill="#B8860B">☀ เช้า</text>
+    <g>
+      <rect x="120" y="18" width="180" height="62" rx="12" fill="#fff" stroke="#0F9AAB" stroke-width="2"/>
+      <text class="sn" x="210" y="44" text-anchor="middle">1 · ล้างหน้า</text>
+      <text class="ss" x="210" y="64" text-anchor="middle">SPC Cleanser</text>
+
+      <rect x="360" y="18" width="180" height="62" rx="12" fill="#fff" stroke="#0F9AAB" stroke-width="2"/>
+      <text class="sn" x="450" y="44" text-anchor="middle">2 · บำรุง</text>
+      <text class="ss" x="450" y="64" text-anchor="middle">S-Zinc Gel Cream</text>
+
+      <rect x="600" y="18" width="180" height="62" rx="12" fill="#fff" stroke="#B8860B" stroke-width="2"/>
+      <text class="sn" x="690" y="44" text-anchor="middle">3 · กันแดด</text>
+      <text class="ss" x="690" y="64" text-anchor="middle">SUN SPF50</text>
+
+      <line x1="304" y1="49" x2="352" y2="49" stroke="#8A959C" stroke-width="2" marker-end="url(#ar2)"/>
+      <line x1="544" y1="49" x2="592" y2="49" stroke="#8A959C" stroke-width="2" marker-end="url(#ar2)"/>
+    </g>
+
+    <!-- evening -->
+    <text class="sh" x="20" y="150" fill="#4E585F">🌙 เย็น</text>
+    <g>
+      <rect x="120" y="128" width="180" height="62" rx="12" fill="#fff" stroke="#0F9AAB" stroke-width="2"/>
+      <text class="sn" x="210" y="154" text-anchor="middle">1 · ล้างหน้า</text>
+      <text class="ss" x="210" y="174" text-anchor="middle">SPC Cleanser</text>
+
+      <rect x="360" y="128" width="180" height="62" rx="12" fill="#fff" stroke="#0F9AAB" stroke-width="2"/>
+      <text class="sn" x="450" y="154" text-anchor="middle">2 · บำรุง</text>
+      <text class="ss" x="450" y="174" text-anchor="middle">S-Zinc Gel Cream</text>
+
+      <line x1="304" y1="159" x2="352" y2="159" stroke="#8A959C" stroke-width="2" marker-end="url(#ar2)"/>
+    </g>
+
+    <!-- scalp -->
+    <text class="sh" x="20" y="260" fill="#C2456B">✽ หนังศีรษะ</text>
+    <g>
+      <rect x="120" y="238" width="420" height="62" rx="12" fill="#fff" stroke="#C2456B" stroke-width="2"/>
+      <text class="sn" x="330" y="264" text-anchor="middle">SSH Shampoo — ทิ้งไว้ 2–5 นาทีก่อนล้าง</text>
+      <text class="ss" x="330" y="284" text-anchor="middle">ช่วงกำเริบ 3–4 ครั้ง/สัปดาห์ · ช่วงคุมอาการ 2 ครั้ง/สัปดาห์</text>
+    </g>
+
+    <rect x="600" y="128" width="280" height="172" rx="12" fill="#FBF3E0" stroke="#E0C77E"/>
+    <text class="st" x="740" y="176" text-anchor="middle" fill="#7A5A08">เคล็ดลับ</text>
+    <text class="ss" x="740" y="206" text-anchor="middle" style="fill:#7A5A08">ทามอยส์เจอไรเซอร์</text>
+    <text class="st" x="740" y="234" text-anchor="middle" fill="#7A5A08">ภายใน 3 นาทีแรก</text>
+    <text class="ss" x="740" y="260" text-anchor="middle" style="fill:#7A5A08">หลังล้างหน้า/อาบน้ำ</text>
+    <text class="ss" x="740" y="280" text-anchor="middle" style="fill:#7A5A08">ผิวดูดซับได้ดีที่สุด</text>
+  </svg>
+  <div class="figcap">บอกลูกค้าทุกครั้ง — ถ้าปล่อยให้ผิวแห้งก่อนแล้วค่อยทา จะได้ผลน้อยกว่ามาก</div>
+</div>
+
+<!-- FIG decision tree -->
+<div class="fig">
+  <div class="figtitle">รูปที่ 12 · เลือกสินค้ายังไง — ถามลูกค้า 3 คำถาม</div>
+  <svg viewBox="0 0 900 430" role="img" aria-label="แผนผังการเลือกสินค้า">
+    <defs>
+      <marker id="ar3" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="#8A959C"/></marker>
+      <style>
+        .q{font:800 15.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#14191C}
+        .a{font:800 14.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#fff}
+        .yn{font:800 12.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#8A959C}
+        .sub{font:600 11.5px "Sukhumvit Set","Noto Sans Thai",sans-serif;fill:#E6F5F7}
+      </style>
+    </defs>
+    <!-- Q1 -->
+    <rect x="290" y="14" width="320" height="56" rx="12" fill="#EEF3F4" stroke="#C6D0D3" stroke-width="2"/>
+    <text class="q" x="450" y="48" text-anchor="middle">มีอาการที่หนังศีรษะไหม? (รังแค คัน ลอก)</text>
+    <line x1="450" y1="72" x2="450" y2="100" stroke="#8A959C" stroke-width="2" marker-end="url(#ar3)"/>
+    <text class="yn" x="470" y="92">ถ้าใช่ → เพิ่ม SSH Shampoo เสมอ</text>
+
+    <!-- Q2 -->
+    <rect x="250" y="106" width="400" height="56" rx="12" fill="#EEF3F4" stroke="#C6D0D3" stroke-width="2"/>
+    <text class="q" x="450" y="140" text-anchor="middle">มีตุ่มคัน / สิวผด ที่ลำตัว–หลัง–อก ไหม?</text>
+    <text class="yn" x="664" y="132">ถ้าใช่ → ใช้ SPC</text>
+    <text class="yn" x="664" y="152">ล้างลำตัวด้วย</text>
+    <line x1="450" y1="164" x2="450" y2="196" stroke="#8A959C" stroke-width="2" marker-end="url(#ar3)"/>
+
+    <!-- core set -->
+    <rect x="230" y="204" width="440" height="90" rx="14" fill="#0F9AAB"/>
+    <text class="a" x="450" y="238" text-anchor="middle" style="font-size:16.5px">แกนหลักทุกเคส: SPC Cleanser + S-Zinc Gel Cream</text>
+    <text class="sub" x="450" y="262" text-anchor="middle">ลดเชื้อ · คุมมัน · ลดอักเสบ–แดง · ฟื้นเกราะผิว</text>
+    <text class="sub" x="450" y="282" text-anchor="middle">ใช้ได้ทั้งผิวมัน ผิวผสม และผิวแห้ง</text>
+
+    <!-- Q3 -->
+    <line x1="450" y1="296" x2="450" y2="322" stroke="#8A959C" stroke-width="2" marker-end="url(#ar3)"/>
+    <rect x="290" y="330" width="320" height="52" rx="12" fill="#EEF3F4" stroke="#C6D0D3" stroke-width="2"/>
+    <text class="q" x="450" y="362" text-anchor="middle">ออกแดดทุกวันไหม?</text>
+    <line x1="614" y1="356" x2="668" y2="356" stroke="#8A959C" stroke-width="2" marker-end="url(#ar3)"/>
+    <rect x="676" y="332" width="200" height="48" rx="12" fill="#C2456B"/>
+    <text class="a" x="776" y="362" text-anchor="middle">+ SUN Sunscreen</text>
+
+    <!-- dry-skin tip -->
+    <rect x="24" y="330" width="240" height="52" rx="12" fill="#FBF3E0" stroke="#E0C77E"/>
+    <text class="yn" x="144" y="352" text-anchor="middle" style="fill:#7A5A08">ถ้าผิวแห้งมาก ทา S-Zinc</text>
+    <text class="yn" x="144" y="370" text-anchor="middle" style="fill:#7A5A08">แล้วยังตึง → ทาครีมอ่อนโยนทับได้</text>
+  </svg>
+  <div class="figcap">เซ็ตเต็ม = SPC + S-Zinc + SUN + SSH · ถ้าลูกค้างบจำกัด ให้เริ่มจาก <strong>SPC + S-Zinc</strong> ก่อน แล้วค่อยเพิ่ม SUN กับ SSH ทีหลัง</div>
+</div>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>ลูกค้าบอกว่า…</th><th>แนะนำ</th><th>เพราะ</th></tr></thead>
+  <tbody>
+    <tr><td>ผิวมัน / T-zone มัน / เป็นสิวด้วย</td><td><strong>SPC + S-Zinc</strong></td><td>คุมมัน + ลดสิว + ลดเชื้อ เนื้อบางเบาไม่เหนอะ</td></tr>
+    <tr><td>ตุ่มเล็ก ๆ คัน ที่หน้าผาก/หลัง/อก (สิวผด)</td><td><strong>SPC + S-Zinc</strong></td><td>SPC ใช้กับลำตัวได้ · Zinc Pyrithione + Climbazole ลดเชื้อยีสต์ตรงจุด</td></tr>
+    <tr><td>ผิวแห้ง ลอกหนัก ตึง แสบ แดงง่าย</td><td><strong>SPC + S-Zinc</strong></td><td>Niacinamide 4% ฟื้นเกราะผิว · ล้างหน้าวันละครั้งพอ ไม่ต้อง 2 ครั้ง</td></tr>
+    <tr><td>เป็นที่ลำตัว / หลังหู</td><td><strong>SPC + S-Zinc</strong></td><td>SPC ล้างได้ทั้งหน้าและกาย · หลังหูทา S-Zinc บาง ๆ</td></tr>
+    <tr><td>แห้งมาก S-Zinc ยังไม่พอ</td><td>S-Zinc + ครีมอ่อนโยนทับ</td><td>ทาครีมที่หนักขึ้นทับได้ แต่ต้องเลือกสูตรไม่มีน้ำมันเลี้ยงเชื้อ</td></tr>
+    <tr><td>รังแค / คันหนังศีรษะ / สะเก็ดหนา</td><td><strong>SSH Shampoo</strong></td><td>สูตรเข้มข้นกว่าคลีนเซอร์ เหมาะกับบริเวณสะเก็ดหนา</td></tr>
+    <tr><td>ออกแดดทุกวัน / ทำงานกลางแจ้ง</td><td><strong>+ SUN</strong></td><td>UV คือตัวกระตุ้น แต่กันแดดทั่วไปกระตุ้นซ้ำ</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note">
+  <strong>หลังใบหู ใช้อะไร?</strong> คลีนเซอร์ SPC ใช้กับลำตัวได้ดี
+  แต่บริเวณที่หนาและหมักหมม อย่างหลังใบหูหรือหนังศีรษะ ที่มักมีสะเก็ดรุนแรงกว่า
+  ให้ใช้ <strong>SSH Shampoo</strong> ล้าง · ส่วนขั้นตอนบำรุงหลังหู ทา <strong>S-Zinc</strong> บาง ๆ ได้
+</div>
+
+<!-- ═══════════════ SECTION 8 ═══════════════ -->
+<h2 id="s8"><span class="num">SECTION 08</span>คำถามที่ลูกค้าถามบ่อย</h2>
+
+<div class="card">
+  <div class="qa"><div class="q">Q: ผิวมันอยู่แล้ว ต้องทามอยส์เจอไรเซอร์ด้วยเหรอ?</div>
+  <div class="a">A: ต้องใช้ค่ะ “ผิวมันจากเซ็บเดิร์ม” ไม่ได้แปลว่าผิวแข็งแรง ถ้าไม่ทาเลยเกราะผิวจะพัง และผิวจะยิ่งผลิตน้ำมันมากกว่าเดิม</div></div>
+
+  <div class="qa"><div class="q">Q: ตุ่มเล็ก ๆ คัน ๆ ที่หลังกับหน้าผาก ใช้ยาสิวมาเป็นปีไม่หาย?</div>
+  <div class="a">A: ฟังดูเป็น <strong>สิวผด (Malassezia Folliculitis)</strong> ค่ะ ไม่ใช่สิวธรรมดา — เกิดจากเชื้อยีสต์ ไม่ใช่แบคทีเรีย ยาสิวจึงไม่โดนเป้า แนะนำ SPC Cleanser ที่มี Zinc Pyrithione + Climbazole ลดเชื้อยีสต์โดยตรง และใช้ได้ทั้งหน้าและแผ่นหลังค่ะ</div></div>
+
+  <div class="qa"><div class="q">Q: ครีมมีน้ำมัน จะไป “เลี้ยงเชื้อรา” ทำให้เห่อขึ้นไหม?</div>
+  <div class="a">A: ไม่ค่ะ S-Zinc เป็นเนื้อ <strong>เจลครีม</strong> ไม่ใช่ครีมน้ำมัน จึงไม่มีน้ำมันกลุ่มที่เชื้อ Malassezia ใช้เป็นอาหาร (กรดไขมันสาย C11–C24) แถมยังมี Piroctone Olamine 0.5% คุมเชื้อ และ Zinc PCA 1% ลดน้ำมันของผิวเองด้วยค่ะ</div></div>
+
+  <div class="qa"><div class="q">Q: ทำไมยิ่งล้างหน้าให้สะอาด หน้ายิ่งมันและยิ่งลอก?</div>
+  <div class="a">A: เพราะสบู่/ซัลเฟตชะไขมันผิวออกไปด้วย พอผิวแห้ง ต่อมไขมันจะผลิตน้ำมันชดเชยมากกว่าเดิม (rebound oil) ซึ่งกลายเป็นอาหารของเชื้อ → เห่อหนักกว่าเก่า ของเราจึงใช้สารชำระล้างอ่อนโยนแทนค่ะ</div></div>
+
+  <div class="qa"><div class="q">Q: จะกัดผิวเหมือนแชมพูยาไหม? Piroctone Olamine ใช้ทุกวันได้ไหม?</div>
+  <div class="a">A: ใช้ได้ทุกวันค่ะ Piroctone Olamine อ่อนโยนกว่า Ketoconazole มาก ไม่ทำให้ผิวแห้งตึงหรือแสบ แต่คุมเชื้อได้ดี</div></div>
+
+  <div class="qa"><div class="q">Q: คลีนเซอร์จะทำให้แห้งตึงไหม? มีกลิ่นยาแรงไหม?</div>
+  <div class="a">A: ไม่ค่ะ ใช้สารทำความสะอาดอ่อนโยนฟองนุ่ม (Cocamidopropyl Betaine + Sodium Cocoyl Isethionate) + Glycerin และ Aloe Vera กักความชุ่มชื้น · และ <strong>ไม่มีน้ำหอม จึงไม่มีกลิ่นอะไรเลย</strong> ใช้ได้ทั้งเช้า-เย็น</div></div>
+
+  <div class="qa"><div class="q">Q: ผมแห้ง/ผมทำสี ใช้แชมพูตัวนี้จะยิ่งแห้งไหม?</div>
+  <div class="a">A: ไม่ค่ะ สูตรนี้ไม่มีซัลเฟตเลย ใช้ Decyl Glucoside ที่อ่อนโยนระดับสูตรเด็ก และมี Oat + Seaweed ช่วยกักความชุ่มชื้นให้ผมนุ่ม ไม่พันกัน</div></div>
+
+  <div class="qa"><div class="q">Q: กี่ครั้งถึงจะเห็นผล?</div>
+  <div class="a">A: แชมพู — ส่วนใหญ่เริ่มเห็นผลภายใน <strong>5–7 วัน</strong> เมื่อใช้วันเว้นวันหรืออย่างน้อยสัปดาห์ละ 2–3 ครั้ง อาการคันและแดงมักดีขึ้นตั้งแต่ครั้งแรก ๆ</div></div>
+
+  <div class="qa"><div class="q">Q: ใช้ร่วมกับแชมพู/ยาอื่นได้ไหม?</div>
+  <div class="a">A: ได้ค่ะ ใช้ SSH เป็น “แชมพูรักษา” 2–3 ครั้ง/สัปดาห์ และใช้แชมพูอ่อนโยนวันที่เหลือ · ใช้ร่วมกับยาเฉพาะที่ได้ตามคำแนะนำแพทย์</div></div>
+
+  <div class="qa"><div class="q">Q: ใช้รอบดวงตา/เปลือกตาได้ไหม?</div>
+  <div class="a">A: <strong>ควรหลีกเลี่ยง</strong> เพราะมีสารออกฤทธิ์ต้านเชื้อรา หลีกเลี่ยงการสัมผัสดวงตาโดยตรง สำหรับเปลือกตาที่บอบบางมาก ควรปรึกษาแพทย์ผิวหนังก่อนใช้</div></div>
+
+  <div class="qa"><div class="q">Q: ผิวแพ้ง่ายใช้ได้ไหม?</div>
+  <div class="a">A: ได้ค่ะ ไม่มีซิลิโคน ไม่มีพาราเบน ไม่มีน้ำหอม และใส่สารลดการระคายเคืองหลายชนิด <strong>แต่แนะนำให้ทดสอบที่ท้องแขนก่อน</strong></div></div>
+
+  <div class="qa"><div class="q">Q: ใช้ครีมมาหลายตัวแล้วไม่ดีขึ้นเลย ทำไม?</div>
+  <div class="a">A: มักเป็นเพราะ (1) ทาหลายชั้นจนมันสะสม → เลี้ยงเชื้อ (2) ครีมทั่วไปไม่มีสารลดเชื้อเลย (3) เกราะผิวไม่ได้ถูกฟื้นฟูจริง (4) มอยส์เจอไรเซอร์เข้มข้นเกินไปสำหรับผิวมัน · แนะนำใช้ตัวที่ “ครบจบในตัวเดียว”</div></div>
+
+  <div class="qa"><div class="q">Q: ทำไมหายแล้วกลับมาอีก?</div>
+  <div class="a">A: เพราะเซ็บเดิร์มมีธรรมชาติกลับมาเป็นซ้ำ (relapsing) — ไม่ใช่เพราะรักษาไม่ดี ต้องใช้ต่อเนื่องแม้ช่วงผิวสงบ เพื่อคุมไม่ให้กลับมาแดง–มัน–ลอกเร็วเกินไป</div></div>
+
+  <div class="qa"><div class="q">Q: มี อย. ไหม?</div>
+  <div class="a">A: มีทุกตัวค่ะ เช่น คลีนเซอร์ SPC เลขที่ <code>34-1-6800028646</code> · ตรวจสอบได้เองที่เว็บ อย. porta.fda.moph.go.th (ดูตารางเลข อย. ครบทุกตัวใน Section 04)</div></div>
+</div>
+
+<!-- ═══════════════ SECTION 10 ═══════════════ -->
+<h2 id="s10"><span class="num">SECTION 09</span>แหล่งอ้างอิงงานวิจัย</h2>
+<ol style="font-size:14px">
+  <li>Schmidt-Rose, T., et al. <em>A combination of piroctone olamine and climbazole is as effective against dandruff as zinc pyrithione.</em>
+      International Journal of Cosmetic Science, 2011; 33(3): 276–282.
+      <br><span style="color:var(--ink-3)">→ ใช้รองรับเคลม “ลดรังแค/คัน 90% ใน 4 สัปดาห์” · <strong>ใช้ได้กับแชมพูทั้งสูตรเก่าและใหม่</strong></span></li>
+  <li>Ge L., et al. <em>A cohort clinical study on the efficacy of topical salicylic acid/piroctone olamine dandruff pre-gel and cleanser…</em>
+      Journal of Cosmetic Dermatology, 2025. (PMID: 39778065) · n = 20
+      <br><span style="color:var(--ink-3)">→ ⚠️ <strong>ใช้ได้กับแชมพูสูตรเก่าเท่านั้น</strong> (สูตรใหม่ไม่มี Salicylic Acid)</span></li>
+  <li>Wisutthiphat, W. (2017). <em>Antifungal Activity of Rhinacanthus nasutus Extract against Malassezia sp.</em>
+      Journal of Health Science of Thailand, 21(3), 521–528.
+      <br><span style="color:var(--ink-3)">→ ⚠️ <strong>ใช้ได้กับแชมพูสูตรเก่าเท่านั้น</strong></span></li>
+  <li>de Groot, A.C., et al. <em>Sunscreens: A Review of UV Filters and Their Allergic Potential.</em>
+      Dermatitis, 2023.
+      <br><span style="color:var(--ink-3)">→ รองรับ: oxybenzone เป็นสารก่อภูมิแพ้จากแสงที่พบบ่อยที่สุด ·
+      70.2% ของผู้ที่แจ้งว่าแพ้กันแดด patch test บวกต่อ oxybenzone ·
+      7 ใน 10 สารก่อภูมิแพ้จากแสงที่พบบ่อยที่สุดเป็นสารกันแดด ·
+      <strong>ไม่มีรายงานการแพ้ต่อ Titanium Dioxide และ Zinc Oxide</strong></span></li>
+  <li>DeAngelis, Y.M., et al. <em>Three etiologic facets of dandruff and seborrheic dermatitis:
+      Malassezia fungi, sebaceous lipids, and individual sensitivity.</em>
+      Journal of Investigative Dermatology Symposium Proceedings, 2005; 10(3): 295–297.
+      <br><span style="color:var(--ink-3)">→ รองรับ: Malassezia ต้องการกรดไขมันสาย C11–C24 เป็นอาหาร ·
+      เชื้อย่อยน้ำมันผิวเหลือ oleic acid ซึ่งเป็นตัวที่ทำให้เกิดอาการคันและลอกจริง ๆ
+      (ใช้อธิบายอาการ “คันยิบตอนกลางวัน” และเรื่อง fungal-acne safe)</span></li>
+  <li>ข้อมูลเลขที่ใบรับแจ้ง: ระบบตรวจสอบการอนุญาต สำนักงานคณะกรรมการอาหารและยา — porta.fda.moph.go.th (สืบค้น 7 ส.ค. 2569)</li>
+</ol>
+
+<footer>
+  จัดทำเพื่อการอบรมพนักงานภายใน · RMD Dermatological Laboratory<br>
+  ข้อมูลรวบรวมจาก rmd-skin.com · Shopee shop 119523214 · ฐานข้อมูล อย. · เมื่อ 7 สิงหาคม 2569<br>
+  ราคาและสูตรอาจเปลี่ยนแปลง — ตรวจสอบกับหัวหน้าทีมก่อนใช้สื่อสารกับลูกค้าเสมอ<br>
+  ผลิตภัณฑ์เป็นเครื่องสำอาง ไม่ใช่ยา — ห้ามเคลมว่ารักษาโรคหรือทดแทนการรักษาของแพทย์
+</footer>
+
+</div>
+</body>
+</html>

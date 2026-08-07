@@ -20,6 +20,12 @@ function isMissingTable(error: { code?: string; message?: string } | null): bool
   );
 }
 
+/** The `progress` column arrives with 048 — tolerate a database still on 047. */
+function isMissingColumn(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  return error.code === "42703" || /column .*progress.* does not exist/i.test(error.message ?? "");
+}
+
 export async function GET() {
   const supabase = await createRouteHandlerSupabase();
   const {
@@ -27,23 +33,46 @@ export async function GET() {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data, error } = await supabase
-    .from("course_plan_settings")
-    .select("settings, overrides, carry_over, updated_at")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  // `progress` arrives with 048. Selected separately so a deployment sitting on
+  // 042-047 still syncs the plan instead of 500-ing on an unknown column.
+  let data: Record<string, unknown> | null = null;
+  let hasProgressColumn = true;
+  {
+    const withProgress = await supabase
+      .from("course_plan_settings")
+      .select("settings, overrides, carry_over, progress, updated_at")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  if (error) {
-    if (isMissingTable(error)) {
-      return NextResponse.json({ error: "not_deployed" }, { status: 503 });
+    if (withProgress.error && isMissingColumn(withProgress.error)) {
+      hasProgressColumn = false;
+      const legacy = await supabase
+        .from("course_plan_settings")
+        .select("settings, overrides, carry_over, updated_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (legacy.error) {
+        if (isMissingTable(legacy.error)) {
+          return NextResponse.json({ error: "not_deployed" }, { status: 503 });
+        }
+        return NextResponse.json({ error: legacy.error.message }, { status: 500 });
+      }
+      data = legacy.data;
+    } else if (withProgress.error) {
+      if (isMissingTable(withProgress.error)) {
+        return NextResponse.json({ error: "not_deployed" }, { status: 503 });
+      }
+      return NextResponse.json({ error: withProgress.error.message }, { status: 500 });
+    } else {
+      data = withProgress.data;
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   return NextResponse.json({
     settings: data?.settings ?? null,
     overrides: data?.overrides ?? null,
     carryOver: data?.carry_over ?? null,
+    progress: hasProgressColumn ? (data?.progress ?? null) : null,
     updatedAt: data?.updated_at ?? null,
   });
 }
@@ -62,7 +91,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const b = body as { settings?: unknown; overrides?: unknown; carryOver?: unknown };
+  const b = body as {
+    settings?: unknown;
+    overrides?: unknown;
+    carryOver?: unknown;
+    progress?: unknown;
+  };
   const patch: Record<string, unknown> = {
     user_id: user.id,
     updated_at: new Date().toISOString(),
@@ -70,10 +104,20 @@ export async function POST(req: Request) {
   if (b.settings !== undefined) patch.settings = b.settings ?? {};
   if (b.overrides !== undefined) patch.overrides = b.overrides ?? {};
   if (b.carryOver !== undefined) patch.carry_over = b.carryOver ?? { entries: [] };
+  if (b.progress !== undefined) patch.progress = b.progress ?? { completedIds: [], accuracy: {} };
 
-  const { error } = await supabase
+  let { error } = await supabase
     .from("course_plan_settings")
     .upsert(patch, { onConflict: "user_id" });
+
+  // Pre-048 database: save everything else rather than losing the whole write
+  // because completion has nowhere to go yet.
+  if (error && isMissingColumn(error) && patch.progress !== undefined) {
+    delete patch.progress;
+    ({ error } = await supabase
+      .from("course_plan_settings")
+      .upsert(patch, { onConflict: "user_id" }));
+  }
 
   if (error) {
     if (isMissingTable(error)) {

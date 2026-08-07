@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>V3 · Direct Response — นักเรียนที่ใช้ระบบนี้ คะแนนขึ้น 10–40 ใน 3 เดือน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/landing-plan-preview.css" />
+<style>
+  /* ============================================================
+     Brand tokens lifted verbatim from src/app/globals.css @theme
+       --color-ep-blue #004aad · --color-ep-yellow #ffcc00
+       --color-ep-green #0fa47f · body grid 24px rgba(0,74,173,.04)
+       fonts: Inter (latin) + IBM Plex Sans Thai (thai/display) + JetBrains Mono
+       surface: .ep-brutal = 3px solid #0a0a0a + hard offset shadow
+     ============================================================ */
+  :root{
+    --ep-blue:#004aad; --ep-blue-dark:#003a87;
+    --ep-yellow:#ffcc00; --ep-green:#0fa47f;
+    --ink:#0a0a0a; --page:#f4f6fb; --muted:#5b6b85; --line:#dbe3ef;
+    --ease:cubic-bezier(0.22,1,0.36,1);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;color:#171717;font-size:17px;line-height:1.85;
+    background-color:var(--page);
+    background-image:
+      linear-gradient(rgba(0,74,173,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,74,173,.04) 1px, transparent 1px);
+    background-size:24px 24px;
+    font-family:"Inter","IBM Plex Sans Thai",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:"IBM Plex Sans Thai","Inter",sans-serif;font-weight:700;letter-spacing:-.01em;line-height:1.28}
+  h1{font-size:clamp(32px,4.8vw,54px);margin:0 0 22px}
+  h2{font-size:clamp(26px,3.4vw,40px);margin:0 0 16px}
+  h3{font-size:23px;margin:0 0 10px}
+  p{margin:0 0 20px}
+  a{color:var(--ep-blue)}
+  .wrap{max-width:820px;margin:0 auto;padding:0 24px}
+  .wide{max-width:1180px;margin:0 auto;padding:0 24px}
+  section{padding:70px 0}
+
+  /* --- brand primitives --- */
+  .brutal{border:3px solid var(--ink);border-radius:24px;background:#fff;box-shadow:8px 8px 0 0 var(--ink)}
+  .pill{display:inline-flex;align-items:center;gap:8px;border:3px solid var(--ink);border-radius:999px;
+    padding:8px 18px;background:#fff;font-weight:700;font-size:13.5px;box-shadow:3px 3px 0 0 var(--ink);line-height:1.4}
+  .pill-y{background:var(--ep-yellow)}
+  .btn{display:inline-block;text-decoration:none;font-weight:700;font-size:18px;padding:18px 40px;
+    border:3px solid var(--ink);border-radius:999px;box-shadow:6px 6px 0 0 var(--ink);color:var(--ink);
+    transition:transform .52s var(--ease), box-shadow .52s var(--ease)}
+  .btn:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 0 var(--ink)}
+  .btn-y{background:var(--ep-yellow)}
+  .btn-b{background:var(--ep-blue);color:#fff}
+  .btn-w{background:#fff}
+  .btn-sm{font-size:14px;padding:10px 22px;box-shadow:3px 3px 0 0 var(--ink)}
+  .kicker{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--ep-blue);font-weight:700;margin-bottom:14px}
+
+  .top{position:sticky;top:0;z-index:60;background:rgba(244,246,251,.92);backdrop-filter:blur(10px);
+    border-bottom:3px solid var(--ink)}
+  .top .in{max-width:1180px;margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;justify-content:space-between}
+  .brand{font-family:"JetBrains Mono",monospace;font-weight:700;letter-spacing:.14em;font-size:15px;color:var(--ep-blue)}
+
+  /* --- figures: caption carries the sell (Ogilvy) --- */
+  figure{margin:32px 0 40px}
+  figure .frame{border:3px solid var(--ink);border-radius:20px;overflow:hidden;background:#fff;
+    box-shadow:8px 8px 0 0 var(--ink)}
+  .frame-bar{display:flex;gap:7px;align-items:center;padding:11px 16px;border-bottom:3px solid var(--ink);background:var(--ep-yellow)}
+  .frame-bar i{width:11px;height:11px;border-radius:50%;background:var(--ink);display:block}
+  .frame-bar span{margin-left:10px;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700}
+  figure img{display:block;width:100%;height:auto}
+  figure .h420 img{height:420px;object-fit:cover;object-position:top center}
+  figure .h500 img{height:500px;object-fit:cover;object-position:top center}
+  figcaption{font-size:15px;line-height:1.75;margin-top:16px;padding:14px 18px;background:#fff;
+    border:3px solid var(--ink);border-left-width:10px;border-left-color:var(--ep-yellow);border-radius:14px}
+  figcaption b{font-weight:700}
+
+  .ctablock{text-align:center;padding:14px 0 8px}
+  .ctablock .sub{font-size:13.5px;color:var(--muted);margin-top:16px}
+
+  /* --- agitate --- */
+  .reason{display:grid;grid-template-columns:74px 1fr;gap:18px;align-items:start;
+    border:3px solid var(--ink);border-radius:20px;background:#fff;padding:22px 24px;margin-bottom:16px;
+    box-shadow:5px 5px 0 0 var(--ink)}
+  .reason .n{font-family:"JetBrains Mono",monospace;font-size:34px;font-weight:700;color:var(--ink);
+    background:var(--ep-yellow);border:3px solid var(--ink);border-radius:14px;
+    width:56px;height:56px;display:flex;align-items:center;justify-content:center;line-height:1}
+  .reason p{margin:0;font-size:16px;color:var(--muted);line-height:1.8}
+  .reason b{color:#171717}
+
+  /* --- steps --- */
+  .step{padding:52px 0;border-top:3px solid var(--ink)}
+  .step .tag{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:11.5px;letter-spacing:.16em;
+    text-transform:uppercase;font-weight:700;background:var(--ep-blue);color:#fff;
+    border:3px solid var(--ink);border-radius:999px;padding:6px 16px;box-shadow:3px 3px 0 0 var(--ink);margin-bottom:16px}
+
+  /* --- phone gallery --- */
+  .phones{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin:30px 0 12px}
+  .phone{border:3px solid var(--ink);border-radius:24px;overflow:hidden;background:#fff;box-shadow:5px 5px 0 0 var(--ink)}
+  .phone img{display:block;width:100%;aspect-ratio:390/700;object-fit:cover;object-position:top center}
+  .phone-cap{font-size:12.5px;font-weight:700;text-align:center;margin-top:9px;line-height:1.4}
+  .phone-sub{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.5}
+
+  /* --- plan --- */
+  .planwrap{border:3px solid var(--ink);border-radius:26px;background:#fff;box-shadow:12px 12px 0 0 var(--ink);padding:32px}
+  .pp{
+    --pp-accent:#004aad; --pp-accent-soft:#e7effb; --pp-line:#0a0a0a; --pp-soft:#f4f6fb;
+    --pp-mock:#ffcc00; --pp-mock-soft:#fff3c4; --pp-muted:#5b6b85;
+    --pp-radius:16px; --pp-radius-sm:999px;
+  }
+  .pp-chip{border-width:2px;box-shadow:2px 2px 0 0 var(--ink);font-weight:600}
+  .pp-input{border-width:2px;border-radius:12px}
+  .pp-stats{border:3px solid var(--ink);border-radius:18px;background:var(--ink);gap:3px}
+  .pp-promise{border:3px solid var(--ink);box-shadow:4px 4px 0 0 var(--ink)}
+  .pp-proj{border:3px solid var(--ink);border-radius:18px;box-shadow:4px 4px 0 0 var(--ink)}
+  .pp-miles{border:3px solid var(--ink);border-radius:18px;background:var(--ink);gap:3px}
+  .pp-seq-item{border:2px solid var(--ink);border-radius:14px;background:#fff}
+  .pp-cell{border:2px solid var(--ink)}
+  .pp-cell.pp-empty,.pp-cell.pp-outside{border-color:transparent;background:transparent}
+  .pp-btn{border:3px solid var(--ink);box-shadow:6px 6px 0 0 var(--ink);background:var(--ep-yellow);color:var(--ink)}
+  .pp-btn:hover{transform:translate(2px,2px);box-shadow:3px 3px 0 0 var(--ink);filter:none}
+
+  /* --- research --- */
+  .research{border:3px solid var(--ink);border-radius:22px;background:#fff;padding:28px 30px;box-shadow:6px 6px 0 0 var(--ink)}
+  .research ul{margin:0;padding-left:22px}
+  .research li{margin-bottom:16px;font-size:15.5px;line-height:1.8}
+  .research .src{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ep-blue);display:block;margin-top:2px}
+
+  /* --- proof --- */
+  .quote{border:3px dashed var(--ink);border-radius:20px;background:#fffbe8;padding:24px 26px;margin-bottom:16px}
+  .quote .ph{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:#8a6d00;font-weight:700;margin-bottom:10px}
+  .quote p{font-size:16px;margin:0 0 12px;color:var(--muted)}
+  .quote .who{font-size:13px;color:var(--muted)}
+
+  /* --- offer --- */
+  .offer{border:3px solid var(--ink);border-radius:26px;background:#fff;padding:34px;box-shadow:10px 10px 0 0 var(--ink)}
+  .offer ul{margin:0 0 24px;padding-left:0;list-style:none}
+  .offer li{margin-bottom:12px;padding-left:34px;position:relative;font-size:16px}
+  .offer li::before{content:"✓";position:absolute;left:0;top:0;width:22px;height:22px;
+    background:var(--ep-green);color:#fff;border:2px solid var(--ink);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:5px}
+  .guarantee{border:3px solid var(--ink);border-radius:18px;background:var(--ep-yellow);padding:20px 24px;
+    margin-top:26px;font-size:15.5px;line-height:1.75}
+
+  /* --- faq --- */
+  details{border:3px solid var(--ink);border-radius:16px;background:#fff;padding:16px 20px;margin-bottom:12px;
+    box-shadow:4px 4px 0 0 var(--ink)}
+  summary{cursor:pointer;font-weight:700;font-size:16.5px;list-style:none;
+    font-family:"IBM Plex Sans Thai",sans-serif;display:flex;gap:10px;align-items:flex-start}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"+";font-family:"JetBrains Mono",monospace;color:var(--ep-blue);flex-shrink:0}
+  details[open] summary::before{content:"−"}
+  details p{margin:12px 0 0;font-size:15.5px;color:var(--muted)}
+
+  .fine{font-size:12.5px;color:var(--muted);line-height:1.75}
+
+  /* --- close --- */
+  .close{background:var(--ep-blue);border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);
+    padding:80px 0;color:#fff;text-align:center}
+  .close h2{color:#fff}
+  .close p{color:#cddcf5}
+
+  footer{padding:30px 0;font-size:12.5px;color:var(--muted)}
+  .mockbar{background:var(--ep-yellow);border-bottom:3px solid var(--ink);font-size:12.5px;padding:9px 0;font-weight:600}
+  .mockbar .in{max-width:1180px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+  @media(max-width:1000px){ .phones{grid-template-columns:repeat(3,1fr)} }
+  @media(max-width:640px){
+    body{font-size:16.5px} section{padding:48px 0}
+    .phones{grid-template-columns:repeat(2,1fr)}
+    .brutal,.planwrap,.offer{box-shadow:6px 6px 0 0 var(--ink)}
+    .reason{grid-template-columns:1fr;gap:12px}
+  }
+</style>
+</head>
+<body>
+
+<div class="mockbar"><div class="in">
+  <span><b>MOCKUP V3 · “Direct Response”</b> — วิธีคิดแบบ Ogilvy · ใช้โค้ดสีและสไตล์เดียวกับแอปจริง (ep-blue / ep-yellow / กรอบดำ 3px)</span>
+  <a href="/landing-system-index.html">← กลับไปเทียบทั้ง 4 แบบ</a>
+</div></div>
+
+<header class="top"><div class="in">
+  <div class="brand">ENGLISH PLAN</div>
+  <a class="btn btn-y btn-sm" href="#plan">ดูแผนของนักเรียน — ฟรี</a>
+</div></header>
+
+<!-- ============ HEADLINE ============ -->
+<section style="padding-bottom:16px"><div class="wrap">
+  <span class="pill pill-y">🎯 สำหรับนักเรียนที่ต้องใช้คะแนน Duolingo English Test</span>
+  <h1 style="margin-top:22px">นักเรียนที่ใช้ระบบนี้ คะแนน Duolingo ขึ้น <span style="color:var(--ep-blue)">10 ถึง 40 คะแนน</span> ในไม่ถึง 3 เดือน</h1>
+  <p style="font-size:19px;color:var(--muted)">
+    ไม่ใช่เพราะขยันขึ้น — แต่เพราะเลิกเดาว่าต้องฝึกอะไร
+    ข้างล่างนี้คือระบบทั้งหมด ทีละขั้น พร้อมภาพหน้าจอจริงทุกขั้น
+    และนักเรียนลองสร้างแผนของตัวเองดูได้เลยโดยไม่ต้องสมัคร
+  </p>
+</div>
+
+<div class="wide">
+  <figure>
+    <div class="frame">
+      <div class="frame-bar"><i></i><i></i><i></i><span>englishplan.co · หน้าฝึกของนักเรียนที่ล็อกอินแล้ว</span></div>
+      <img src="/images/landing/practice-hub-desktop.png" alt="หน้าฝึกจริงในแอป แสดงปฏิทินการเรียนและงานของวันนี้" />
+    </div>
+    <figcaption>
+      <b>นี่คือสิ่งที่นักเรียนเห็นทุกเช้า:</b> ปฏิทินซ้าย งานของวันนี้ขวา —
+      บอกว่าวันนี้ต้องทำอะไร กี่ข้อ กี่นาที และเหลืออีกกี่วันก่อนสอบ
+      นักเรียนไม่ต้องตัดสินใจอะไรเลย แค่กดปุ่มเหลือง “ทำทั้งหมดเลย”
+    </figcaption>
+  </figure>
+</div>
+
+<div class="wrap">
+  <div class="ctablock">
+    <a class="btn btn-b" href="#plan">สร้างแผนของฉัน — ฟรี ไม่ต้องสมัคร</a>
+    <div class="sub">ใช้เวลา 20 วินาที · ไม่ต้องทำข้อสอบก่อน · ไม่ต้องใส่บัตรเครดิต</div>
+  </div>
+</div></section>
+
+<!-- ============ AGITATE ============ -->
+<section><div class="wrap">
+  <div class="kicker">อ่านตรงนี้ก่อน ถ้านักเรียนเคยฝึกแล้วคะแนนไม่ขึ้น</div>
+  <h2>ทำไมฝึกมาตั้งนาน คะแนนถึงนิ่งอยู่ที่เดิม</h2>
+  <p>
+    นักเรียนเกือบทุกคนที่มาหาเรา ไม่ได้ขี้เกียจ ตรงกันข้าม — ส่วนใหญ่ทำข้อสอบมาแล้วเป็นร้อยข้อ
+    ดูคลิปติวมาแล้วหลายสิบคลิป แต่พอสอบจริง คะแนนขยับแค่ 2–3 แต้ม
+    เหตุผลมักจะเป็นสามข้อนี้เสมอ
+  </p>
+
+  <div class="reason">
+    <div class="n">1</div>
+    <p><b>ฝึกผิดจุด</b> — นักเรียนฝึกพาร์ตที่ทำได้ดีอยู่แล้ว เพราะมันทำแล้วรู้สึกดี
+      ส่วนพาร์ตที่ถ่วงคะแนนจริง ๆ นักเรียนเลี่ยงมันมาตลอด และไม่มีใครเคยบอกนักเรียนว่ามันคือตัวปัญหา</p>
+  </div>
+  <div class="reason">
+    <div class="n">2</div>
+    <p><b>ฝึกไม่ต่อเนื่อง</b> — “ว่างแล้วค่อยทำ” แปลว่าไม่เคยได้ทำ
+      พอหายไป 5 วันแล้วกลับมา ก็ต้องเริ่มนับหนึ่งใหม่ทุกครั้ง</p>
+  </div>
+  <div class="reason">
+    <div class="n">3</div>
+    <p><b>ทำผิดแล้วไม่มีใครบอก</b> — นี่คือข้อที่แพงที่สุด
+      นักเรียนเขียนประโยคผิดแบบเดิมมาสองเดือน โดยไม่มีใครเคยบอกว่ามันผิด
+      แล้วนักเรียนก็เอาความผิดแบบเดิมนั้นเข้าห้องสอบ</p>
+  </div>
+
+  <p style="margin-top:30px">
+    ระบบของ English Plan ถูกออกแบบมาเพื่อปิดสามช่องนี้โดยเฉพาะ — ด้วย 4 ขั้นตอนต่อไปนี้
+  </p>
+</div></section>
+
+<!-- ============ THE SYSTEM ============ -->
+<section style="padding-top:10px"><div class="wrap">
+  <div class="kicker">ระบบของเราคืออะไร</div>
+  <h2>4 ขั้นตอน ที่ทำงานต่อกันทุกวันจนถึงวันสอบ</h2>
+</div>
+
+<div class="wide">
+  <div class="step">
+    <div class="wrap" style="padding:0">
+      <span class="tag">ขั้นที่ 1 · รู้ว่าอ่อนตรงไหน</span>
+      <h3>วางแผนจากระดับจริงของนักเรียน ไม่ใช่ตารางสำเร็จรูป</h3>
+      <p>เริ่มจากวัดระดับ 9 ข้อ ใช้เวลาไม่ถึง 15 นาที จบแล้วนักเรียนจะได้คะแนนเทียบสเกล DET จริง (10–160)
+        แยกออกมาเป็น 4 ทักษะ พร้อมบอกตรง ๆ ว่าทักษะไหนคือตัวที่ฉุดคะแนนรวมของนักเรียนอยู่</p>
+    </div>
+    <figure>
+      <div class="frame h500">
+        <div class="frame-bar"><i></i><i></i><i></i><span>englishplan.co · ผลวัดระดับ</span></div>
+        <img src="/images/landing/diag-report-desktop.png" alt="รายงานผลวัดระดับ แยกคะแนน 4 ทักษะ" />
+      </div>
+      <figcaption>
+        <b>นักเรียนคนนี้ได้ ≈105</b> — อ่าน 120, ฟัง 116, เขียน 104 แต่ <b>พูดแค่ 80</b>
+        ระบบจึงเทเวลาไปที่การพูดก่อน แทนที่จะให้ไปทำข้ออ่านเพิ่มซึ่งเขาเก่งอยู่แล้ว
+        นี่คือความต่างระหว่าง “แผนของนักเรียน” กับ “ตารางที่แจกนักเรียนทุกคนเหมือนกัน”
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="step">
+    <div class="wrap" style="padding:0">
+      <span class="tag">ขั้นที่ 2 · รู้ว่าวันนี้ทำอะไร</span>
+      <h3>ปฏิทินที่บอกว่าวันนี้เรียนอะไร และแผนจะจบวันไหน</h3>
+      <p>นักเรียนใส่วันสอบครั้งเดียว ระบบจะกางตารางให้ทุกวันตั้งแต่วันนี้จนถึงวันสอบ
+        วันไหนฝึกกี่นาที ทำกี่ข้อ วันไหนพัก และเมื่อใกล้สอบ ระบบจะแทรกวันซ้อมสอบเต็มชุดให้เอง 2 ครั้งต่อสัปดาห์</p>
+    </div>
+    <figure>
+      <div class="frame h420">
+        <div class="frame-bar"><i></i><i></i><i></i><span>englishplan.co · ปฏิทินการเรียน</span></div>
+        <img src="/images/landing/planner-calendar-desktop.png" alt="ปฏิทินการเรียนรายวันจนถึงวันสอบ" />
+      </div>
+      <figcaption>
+        <b>สังเกตว่าทุกวันมีสถานะของมันแล้ว</b> — วันฝึก วันพัก และวัน Mock ถูกวางล่วงหน้าไว้หมด
+        ความลังเลว่า “วันนี้ทำอะไรดี” คือสาเหตุอันดับหนึ่งที่นักเรียนเลิกฝึกกลางคัน เราตัดมันทิ้งตั้งแต่ต้น
+      </figcaption>
+    </figure>
+    <figure>
+      <div class="frame h420">
+        <div class="frame-bar"><i></i><i></i><i></i><span>englishplan.co · เส้นทางทั้งหมด</span></div>
+        <img src="/images/landing/journey-desktop.png" alt="ภาพรวมเส้นทางการเรียนรายสัปดาห์" />
+      </div>
+      <figcaption>
+        <b>และนักเรียนเห็นทั้งเส้นทางตั้งแต่วันแรก</b> — ไม่ใช่แค่ “วันนี้ทำอะไร”
+        แต่รู้เลยว่าอีก 8 สัปดาห์ข้างหน้าจะเจออะไรบ้าง และแผนจบตรงกับวันสอบพอดี
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="step">
+    <div class="wrap" style="padding:0">
+      <span class="tag">ขั้นที่ 3 · เข้าใจ ไม่ใช่แค่ทำ</span>
+      <h3>มีบทเรียนสอนเทคนิคแทรกอยู่ระหว่างทาง — ไม่ใช่ให้ทำข้อสอบเปล่า ๆ</h3>
+      <p>ทุกพาร์ตของ DET มีเทคนิคเฉพาะของมัน ฟังแล้วพิมพ์ตามมีวิธีจับเสียงท้ายคำ
+        เขียนบรรยายภาพมีโครงประโยคที่ได้คะแนน พูดตอบคำถามมีโครง 4 จังหวะ
+        บทเรียนเหล่านี้ถูกวางคั่นอยู่ในเส้นทางของนักเรียน ไม่ใช่กองรวมไว้ให้ไปหาเอง</p>
+    </div>
+    <div class="phones">
+      <div>
+        <div class="phone"><img src="/images/landing/lesson-speak-mobile.png" alt="บทเรียนการพูด" /></div>
+        <div class="phone-cap">🎤 การพูด</div>
+        <div class="phone-sub">อ่านแล้วพูด + พูดบรรยายภาพ เกณฑ์ออกเสียง 90%</div>
+      </div>
+      <div>
+        <div class="phone"><img src="/images/landing/lesson-write-mobile.png" alt="บทเรียนการเขียน" /></div>
+        <div class="phone-cap">✍️ การเขียน</div>
+        <div class="phone-sub">โครงประโยคที่ได้คะแนน สำหรับเขียนบรรยายภาพ</div>
+      </div>
+      <div>
+        <div class="phone"><img src="/images/landing/lesson-reading-mobile.png" alt="บทเรียนทักษะการอ่าน" /></div>
+        <div class="phone-cap">📖 ทักษะการอ่าน</div>
+        <div class="phone-sub">หาใจความหลัก หาข้อมูล เติมย่อหน้าที่หาย</div>
+      </div>
+      <div>
+        <div class="phone"><img src="/images/landing/lesson-grammar-mobile.png" alt="บทเรียนไวยากรณ์" /></div>
+        <div class="phone-cap">✏️ ไวยากรณ์</div>
+        <div class="phone-sub">เติมคำในช่องว่าง 3 ระดับ ครอบคลุม 6 หัวข้อ</div>
+      </div>
+      <div>
+        <div class="phone"><img src="/images/landing/lesson-dictation-mobile.png" alt="บทเรียนฟังแล้วพิมพ์ตาม" /></div>
+        <div class="phone-cap">🎧 ฟังแล้วพิมพ์</div>
+        <div class="phone-sub">จับเสียงท้ายคำ -s / -ed ที่นักเรียนพลาดบ่อยที่สุด</div>
+      </div>
+    </div>
+    <div class="wrap" style="padding:0">
+      <figcaption style="margin-top:20px">
+        <b>ทำไมต้องมีบทเรียนคั่น:</b> งานวิจัยด้านการเรียนรู้ชี้ตรงกันว่าการฝึกที่ได้ผล
+        ต้องมี “คำอธิบายว่าทำไม” ควบคู่ไปกับการทำซ้ำ — ทำเยอะอย่างเดียวโดยไม่เข้าใจหลัก
+        ทำให้เก่งเฉพาะข้อที่เคยเจอ พอเจอโจทย์แนวใหม่ในห้องสอบก็ทำไม่ได้
+      </figcaption>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="wrap" style="padding:0">
+      <span class="tag">ขั้นที่ 4 · แก้ทันที</span>
+      <h3>ตรวจให้ทันที และบอกเป็นภาษาไทยว่าผิดตรงไหน</h3>
+      <p>งานเขียนและงานพูดของนักเรียนถูกตรวจทีละประโยค ไม่ต้องรอครูว่าง ไม่ต้องรอรอบถัดไป
+        ระบบจะไฮไลต์คำที่ผิด บอกว่าควรเป็นอะไร ให้คะแนนแยก 4 ด้าน และสรุปเป็นภาษาไทยว่าแก้แล้วคะแนนด้านไหนจะขึ้น</p>
+    </div>
+    <figure>
+      <div class="frame">
+        <div class="frame-bar"><i></i><i></i><i></i><span>englishplan.co · ผลตรวจงานเขียน</span></div>
+        <img src="/images/landing/feedback-showcase-desktop.png" alt="ตัวอย่างผลตรวจงานเขียน" />
+      </div>
+      <figcaption>
+        <b>สังเกตบรรทัดสุดท้าย</b> — ไม่ได้บอกแค่ว่า “ผิด” แต่บอกว่าผิดเพราะอะไร ควรใช้คำไหนแทน
+        และแก้แล้วคะแนนตัวไหนขึ้น นี่คือความต่างระหว่างการตรวจกับการสอน
+      </figcaption>
+    </figure>
+    <figure>
+      <div class="frame h420">
+        <div class="frame-bar"><i></i><i></i><i></i><span>englishplan.co · ซ้อมสอบเต็มชุด</span></div>
+        <img src="/images/landing/mock-start-desktop.png" alt="หน้าเริ่มข้อสอบเสมือนจริง" />
+      </div>
+      <figcaption>
+        <b>และเมื่อใกล้วันสอบ ระบบแทรกวันซ้อมสอบให้เอง</b> — จับเวลาจริง รูปแบบเดียวกับข้อสอบจริง
+        แล้วออกรายงานว่านักเรียนขยับจากครั้งก่อนเท่าไหร่ นักเรียนจะไม่เดินเข้าห้องสอบโดยไม่รู้คะแนนตัวเอง
+      </figcaption>
+    </figure>
+  </div>
+</div></section>
+
+<!-- ============ PLAN PREVIEW ============ -->
+<section id="plan" style="border-top:3px solid var(--ink);background:#fff"><div class="wide">
+  <div style="max-width:820px;margin:0 auto 26px">
+    <div class="kicker">ลองด้วยตัวเอง ก่อนตัดสินใจอะไรทั้งนั้น</div>
+    <h2>สร้างแผนของนักเรียนเดี๋ยวนี้ — ไม่ต้องสมัคร ไม่ต้องสอบก่อน</h2>
+    <p>
+      บอกแค่สามอย่าง: สอบวันไหน ว่างฝึกวันไหนบ้าง และวันละกี่นาที
+      แล้วนักเรียนจะเห็นปฏิทินจริงของตัวเอง พร้อมงานของวันแรก และวันที่แผนจะจบ
+    </p>
+  </div>
+  <div class="planwrap"><div id="plan-preview"></div></div>
+</div></section>
+
+<!-- ============ RESEARCH ============ -->
+<section><div class="wrap">
+  <div class="kicker">ทำไมระบบถึงต้องหน้าตาแบบนี้</div>
+  <h2>เราไม่ได้คิดเอง — เราออกแบบตามงานวิจัยด้านการเรียนรู้</h2>
+  <div class="research">
+    <ul>
+      <li><b>การถูกทดสอบ จำได้ดีกว่าการอ่านทบทวน</b> — ระบบจึงให้นักเรียน “ทำ” ทุกวัน ไม่ใช่ให้นั่งดูเฉลย
+        <span class="src">Roediger &amp; Karpicke, 2006 · Psychological Science</span></li>
+      <li><b>ซอยการเรียนเป็นช่วงสั้น ๆ หลายวัน ได้ผลระยะยาวดีกว่าอัดรวดเดียว</b> — ปฏิทินจึงเป็นวันละ 5–30 นาที
+        <span class="src">Cepeda et al., 2006 · Psychological Bulletin</span></li>
+      <li><b>สลับประเภทโจทย์ ทำให้ใช้จริงได้ดีกว่าฝึกทีละชนิดรวด ๆ</b> — งานแต่ละวันจึงคละทักษะเสมอ
+        <span class="src">Rohrer &amp; Taylor, 2007 · Instructional Science</span></li>
+      <li><b>ฟีดแบ็กเป็นหนึ่งในปัจจัยที่มีอิทธิพลต่อผลการเรียนสูงที่สุด และยิ่งเร็วยิ่งได้ผล</b> — ระบบจึงตรวจให้ทันที
+        <span class="src">Hattie &amp; Timperley, 2007 · Review of Educational Research</span></li>
+      <li><b>เป้าหมายที่เจาะจงและมีกำหนดเวลา ให้ผลดีกว่าเป้าหมายกว้าง ๆ</b> — แผนจึงผูกกับวันสอบจริงเสมอ
+        <span class="src">Locke &amp; Latham, 2002 · American Psychologist</span></li>
+    </ul>
+    <p class="fine" style="margin:20px 0 0">
+      หมายเหตุตามตรง: งานวิจัยข้างต้นเป็นหลักการเรียนรู้ทั่วไปที่เราใช้ออกแบบระบบ
+      ไม่ใช่ผลการทดลองกับผลิตภัณฑ์นี้โดยตรง
+    </p>
+  </div>
+</div></section>
+
+<!-- ============ PROOF ============ -->
+<section><div class="wrap">
+  <div class="kicker">ผลของนักเรียนจริง</div>
+  <h2>นักเรียนที่ทำครบตามแผน เขาขยับไปเท่าไหร่</h2>
+
+  <div class="quote">
+    <div class="ph">⚠ ช่องนี้รอรีวิวจริง — ใส่ชื่อ คะแนนก่อน/หลัง และระยะเวลา</div>
+    <p>“________________________________________________”</p>
+    <div class="who">— ชื่อนักเรียน · จาก ___ เป็น ___ ภายใน ___ สัปดาห์</div>
+  </div>
+  <div class="quote">
+    <div class="ph">⚠ ช่องนี้รอรีวิวจริง</div>
+    <p>“________________________________________________”</p>
+    <div class="who">— ชื่อนักเรียน · จาก ___ เป็น ___ ภายใน ___ สัปดาห์</div>
+  </div>
+  <div class="quote">
+    <div class="ph">⚠ ช่องนี้รอรีวิวจริง</div>
+    <p>“________________________________________________”</p>
+    <div class="who">— ชื่อนักเรียน · จาก ___ เป็น ___ ภายใน ___ สัปดาห์</div>
+  </div>
+  <p class="fine">
+    เว้นว่างไว้โดยตั้งใจ — หน้านี้เป็นแบบร่าง ส่วนนี้ต้องใส่รีวิวจริงพร้อมคะแนนจริงเท่านั้น
+    รีวิวปลอมทำลายความน่าเชื่อถือของทุกอย่างที่เขียนไว้ข้างบน
+  </p>
+</div></section>
+
+<!-- ============ OFFER ============ -->
+<section><div class="wrap">
+  <div class="kicker">เริ่มยังไง</div>
+  <h2>เริ่มจากของฟรีก่อน แล้วค่อยตัดสินใจ</h2>
+  <div class="offer">
+    <h3 style="margin-top:0">สิ่งที่นักเรียนได้ทันที โดยยังไม่ต้องจ่ายอะไร</h3>
+    <ul>
+      <li>วัดระดับ 9 ข้อ พร้อมคะแนนเทียบสเกล DET และคะแนนแยก 4 ทักษะ</li>
+      <li>ปฏิทินการเรียนถึงวันสอบ ปรับตามเวลาที่นักเรียนมีจริง</li>
+      <li>งานประจำวันที่เลือกมาให้แล้ว กดปุ่มเดียวทำได้เลย</li>
+      <li>บทเรียนพื้นฐานทั้ง 6 หมวด</li>
+    </ul>
+    <div style="text-align:center">
+      <a class="btn btn-y" href="/mini-diagnosis/start">วัดระดับฟรี — เริ่มเลย</a>
+      <div class="fine" style="margin-top:14px">ไม่ต้องใส่บัตรเครดิต · ใช้เวลาไม่ถึง 15 นาที</div>
+    </div>
+    <div class="guarantee">
+      <b>ถ้าอยากดูก่อนว่าแผนหน้าตายังไง</b> — เลื่อนกลับขึ้นไปที่
+      <a href="#plan" style="color:var(--ink)">เครื่องสร้างแผน</a> ได้เลย ไม่ต้องกรอกอีเมล ไม่ต้องสมัคร
+      เราอยากให้นักเรียนเห็นของจริงก่อนที่จะให้ข้อมูลอะไรกับเรา
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ FAQ ============ -->
+<section><div class="wrap">
+  <div class="kicker">คำถามที่เจอบ่อย</div>
+  <h2>ก่อนตัดสินใจ</h2>
+  <details open><summary>ต้องทำข้อสอบวัดระดับก่อนไหม ถึงจะได้แผน</summary>
+    <p>ไม่ต้อง นักเรียนสร้างแผนจากวันสอบและเวลาที่มีได้เลย แต่ถ้าวัดระดับด้วย
+      แผนจะฉลาดขึ้นมาก เพราะระบบจะรู้ว่าต้องเทเวลาไปที่ทักษะไหนก่อน</p></details>
+  <details><summary>วันละ 5 นาที พอจริงเหรอ</summary>
+    <p>พอสำหรับ “ไม่ให้หลุด” แต่ไม่พอสำหรับการขยับคะแนนเยอะ ๆ ในเวลาสั้น
+      ในเครื่องสร้างแผนด้านบน ลองเลื่อนดูได้ว่า 5 นาทีกับ 20 นาที ทำให้ชั่วโมงรวมและช่วงคะแนนที่คาดว่าจะขยับต่างกันแค่ไหน</p></details>
+  <details><summary>ถ้ายังไม่รู้ว่าจะสอบวันไหน</summary>
+    <p>กด “ยังไม่กำหนด” ในเครื่องสร้างแผน ระบบจะวางให้ 12 สัปดาห์ก่อน
+      แล้วปรับใหม่ทั้งหมดทันทีที่นักเรียนใส่วันสอบ</p></details>
+  <details><summary>ระบบตรวจการพูดกับการเขียนได้จริงไหม</summary>
+    <p>ได้ และตรวจทีละประโยค — ดูตัวอย่างผลตรวจจริงได้ที่ขั้นตอนที่ 4 ด้านบน
+      ส่วนที่เป็นการพูด ระบบจะถอดเสียงแล้วตรวจทั้งเนื้อหาและการออกเสียงลงท้ายคำ</p></details>
+  <details><summary>ถ้าฝึกไม่ทันตามแผน</summary>
+    <p>แผนจะขยับตามนักเรียน ไม่ใช่ปล่อยให้นักเรียนค้างอยู่กับวันที่ทำไม่ทัน
+      และนักเรียนเปลี่ยนจำนวนวัน/นาทีต่อวันได้ตลอด</p></details>
+</div></section>
+
+<!-- ============ FINAL CTA ============ -->
+<div class="close"><div class="wrap">
+  <span class="pill pill-y">เริ่มฟรี ไม่ต้องใส่บัตร</span>
+  <h2 style="margin-top:22px">เริ่มจากรู้ก่อนว่าตอนนี้นักเรียนอยู่ตรงไหน</h2>
+  <p style="max-width:52ch;margin:0 auto 28px">
+    15 นาทีวันนี้ แลกกับการรู้ว่าอีก 3 เดือนข้างหน้าต้องทำอะไรบ้าง
+  </p>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+    <a class="btn btn-y" href="/mini-diagnosis/start">วัดระดับฟรี — เริ่มเลย</a>
+    <a class="btn btn-w" href="#plan">ดูแผนก่อนโดยไม่ต้องสมัคร</a>
+  </div>
+</div></div>
+
+<footer><div class="wrap">MOCKUP — สร้างเพื่อเลือกทิศทางหน้า Landing ยังไม่ใช่หน้าจริงของเว็บไซต์</div></footer>
+
+<script src="/landing-plan-preview.js"></script>
+<script>
+  PlanPreview.mount(document.getElementById("plan-preview"), {
+    minutes: 20, months: 2, showScore: true,
+  });
+</script>
+</body>
+</html>

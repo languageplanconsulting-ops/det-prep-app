@@ -92,6 +92,8 @@ export async function POST(req: Request) {
   const imageUrl = o.imageUrl;
   const keywords = o.keywords;
   const targetVocabulary = o.targetVocabulary;
+  // The one-time skill-placement probe shouldn't cost the learner's monthly AI-feedback quota.
+  const isPlacement = o.source === "placement";
   const redeemed = o.redeemed;
   const originHubRaw = o.originHub;
   const originHub =
@@ -142,7 +144,7 @@ export async function POST(req: Request) {
       originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
     // Admins / preview-eligible accounts don't consume real feedback credits.
     const adminBypass = (await getAdminAccess(req)).ok;
-    if (userId && !adminBypass) {
+    if (userId && !adminBypass && !isPlacement) {
       const credit = await getAiCreditStateForUser(userId, taskType);
       if (!credit.allowed) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
@@ -177,7 +179,7 @@ export async function POST(req: Request) {
         meta: { attemptId, itemId },
       });
     }
-    if (userId && !adminBypass) {
+    if (userId && !adminBypass && !isPlacement) {
       const charged = await chargeAiCreditForUser(userId, taskType);
       if (!charged.ok) {
         return NextResponse.json({ error: "Could not apply feedback credit after grading" }, { status: 500 });

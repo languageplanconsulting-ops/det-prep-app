@@ -71,14 +71,14 @@ export function ProgramBuilder({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[11px] text-slate-500">
+        <p className="text-[13px] text-slate-500">
           เลือกว่าจะเรียนบทไหนบ้าง เรียงลำดับเอง และสลับลำดับบทเรียนข้างในได้
         </p>
         {touched && (
           <button
             type="button"
             onClick={() => onChange({ ...custom, blockOrder: [], excludedBlocks: [], itemOrder: {} })}
-            className="rounded-full bg-rose-100 px-3 py-1 text-[11px] font-black text-rose-700"
+            className="rounded-full bg-rose-100 px-3 py-1 text-[13px] font-bold text-rose-700"
           >
             ↺ กลับไปลำดับมาตรฐาน
           </button>
@@ -107,7 +107,7 @@ export function ProgramBuilder({
             >
               <div className="flex items-center gap-2 p-3">
                 <span
-                  className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[11px] font-black ${
+                  className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[13px] font-bold ${
                     off ? "bg-slate-200 text-slate-400" : "bg-slate-900 text-white"
                   }`}
                 >
@@ -121,13 +121,13 @@ export function ProgramBuilder({
                   disabled={off}
                 >
                   <span
-                    className={`block truncate text-[13px] font-black ${
+                    className={`block truncate text-[13px] font-bold ${
                       off ? "text-slate-400 line-through" : "text-slate-800"
                     }`}
                   >
                     {block.titleTh}
                   </span>
-                  <span className="block text-[10px] text-slate-400">
+                  <span className="block text-[13px] text-slate-400">
                     {items.length} รายการ ·{" "}
                     {items.reduce((s, it) => s + it.minutes, 0)} นาที
                     {!off && items.length > 1 ? (open ? " · ▲" : " · แตะเพื่อสลับลำดับ") : ""}
@@ -156,7 +156,7 @@ export function ProgramBuilder({
                 <button
                   type="button"
                   onClick={() => toggleBlock(block.key)}
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ${
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[13px] font-bold ${
                     off ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
                   }`}
                 >
@@ -171,14 +171,14 @@ export function ProgramBuilder({
                       key={it.id}
                       className="flex items-center gap-2 rounded-xl bg-slate-50 px-2.5 py-1.5"
                     >
-                      <span className="w-4 shrink-0 text-[10px] font-black text-slate-400">
+                      <span className="w-4 shrink-0 text-[13px] font-bold text-slate-400">
                         {k + 1}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-[11px] font-bold text-slate-700">
+                      <span className="min-w-0 flex-1 truncate text-[13px] font-bold text-slate-700">
                         {it.kind === "video" ? "🎬" : it.kind === "lesson" ? "📘" : "🏋️"}{" "}
                         {it.titleTh}
                       </span>
-                      <span className="shrink-0 text-[10px] text-slate-400">{it.minutes}′</span>
+                      <span className="shrink-0 text-[13px] text-slate-400">{it.minutes}′</span>
                       <span className="flex shrink-0 gap-1">
                         <MoveBtn
                           label="เลื่อนขึ้น"
@@ -224,7 +224,7 @@ function MoveBtn({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="grid h-6 w-6 place-items-center rounded-lg bg-slate-100 text-[11px] font-black text-slate-600 transition hover:bg-slate-200 disabled:opacity-30"
+      className="grid h-6 w-6 place-items-center rounded-lg bg-slate-100 text-[13px] font-bold text-slate-600 transition hover:bg-slate-200 disabled:opacity-30"
     >
       {children}
     </button>

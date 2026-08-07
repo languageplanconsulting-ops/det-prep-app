@@ -127,6 +127,53 @@ export interface WritingVocabularyUpgrade {
   exampleTh: string;
 }
 
+/** Notebook folder a score-rung change belongs to. */
+export type ScoreRungChangeCategory = "grammar" | "vocabulary" | "coherence";
+
+/**
+ * One targeted edit inside a score-rung rewrite. Rendered as a green
+ * highlight + underline on the rung text, with a one-line Thai explanation
+ * and a save-to-notebook action filed under `category`.
+ */
+export interface ScoreRungChange {
+  id: string;
+  /** Span into the rung sample's `text` (resolved server-side). */
+  start: number;
+  end: number;
+  category: ScoreRungChangeCategory;
+  /** The learner's own wording this replaced (may be empty when a word was added). */
+  original: string;
+  /** Short, plain Thai — what changed and why it scores. */
+  noteTh: string;
+  noteEn: string;
+}
+
+/**
+ * The learner's own answer rewritten at one rung of the score ladder —
+ * same ideas, same length, only grammar / vocabulary / linking fixed.
+ */
+export interface ScoreRungSample {
+  id: string;
+  /** Target on the 0–160 ladder (90 / 110 / 130 / 150). */
+  target160: number;
+  /** CEFR band this rung represents, e.g. "B1–B2". */
+  bandLabel: string;
+  text: string;
+  wordCount: number;
+  /** Up to 6 green-highlight edits. */
+  changes: ScoreRungChange[];
+  headlineEn: string;
+  headlineTh: string;
+}
+
+/** "How to get +20 from here" — the next two rungs above the learner's score. */
+export interface ScoreRungLadder {
+  currentScore160: number;
+  /** Word count of the learner's own punctuated answer (the length budget). */
+  learnerWordCount: number;
+  rungs: ScoreRungSample[];
+}
+
 export interface AiRewardBonus {
   creditsGranted: number;
   expiresAt: string;
@@ -184,6 +231,8 @@ export interface WritingAttemptReport {
   studyVocabulary?: StudyVocabularySuggestion[];
   /** When Gemini returns B2/C1 upgrade pairs (aligned with write-about-photo). */
   vocabularyUpgradeSuggestions?: WritingVocabularyUpgrade[];
+  /** "How to get +20 from here" — their own answer rewritten at the next two rungs. */
+  scoreRungs?: ScoreRungLadder;
   /** Temporary AI credit reward for redeemed improvement runs. */
   rewardBonus?: AiRewardBonus;
 }

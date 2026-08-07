@@ -40,6 +40,8 @@ export async function POST(req: Request) {
   const questionPromptTh = o.questionPromptTh;
   const redeemed = o.redeemed;
   const previousScore160 = o.previousScore160;
+  // The one-time skill-placement probe shouldn't cost the learner's monthly AI-feedback quota.
+  const isPlacement = o.source === "placement";
   const speakingRoundRaw = o.speakingRound;
   const speakingRound =
     typeof speakingRoundRaw === "number" && isSpeakingRound(speakingRoundRaw) ? speakingRoundRaw : 1;
@@ -79,7 +81,7 @@ export async function POST(req: Request) {
     const userId = await getOptionalAuthUserId(req);
     // Admins / preview-eligible accounts don't consume real feedback credits.
     const adminBypass = (await getAdminAccess(req)).ok;
-    if (userId && !adminBypass) {
+    if (userId && !adminBypass && !isPlacement) {
       const credit = await getAiCreditStateForUser(userId, "read_then_speak");
       if (!credit.allowed) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
@@ -111,7 +113,7 @@ export async function POST(req: Request) {
         meta: { attemptId, topicId, questionId },
       });
     }
-    if (userId && !adminBypass) {
+    if (userId && !adminBypass && !isPlacement) {
       const charged = await chargeAiCreditForUser(userId, "read_then_speak");
       if (!charged.ok) {
         return NextResponse.json({ error: "Could not apply feedback credit after grading" }, { status: 500 });

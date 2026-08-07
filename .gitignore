@@ -33,6 +33,29 @@ mobile/node_modules
 # typescript
 *.tsbuildinfo
 
+# python
+.venv/
+__pycache__/
+
+# video pipeline — footage, audio, frame dumps and renders
+video-pipeline/work/
+video-pipeline/.venv/
+video-pipeline/public/input-video.mp4
+video-pipeline/public/snapshots/
+# Renders at the pipeline root. overlay.mov runs to several GB; GitHub hard-rejects
+# anything over 100 MB, so these must never reach a commit.
+video-pipeline/*.mov
+video-pipeline/*.mp4
+
+# Local scratch — one-off probes, drafts and per-student notes that are not
+# part of the app and should not enter its history.
+_*.mjs
+bug-reply-*.md
+nattida-writing-review.html
+
+# hyperframes skills (installed via `npx skills add`)
+.agents/
+
 # Supabase CLI local cache (do not commit)
 supabase/.temp/
 .vercel

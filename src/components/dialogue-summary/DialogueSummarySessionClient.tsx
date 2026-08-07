@@ -39,10 +39,13 @@ export function DialogueSummarySessionClient({
   exam,
   onComplete,
   embedded = false,
+  attemptSource,
 }: {
   exam: DialogueSummaryExam;
   onComplete?: (report: DialogueSummaryAttemptReport) => void;
   embedded?: boolean;
+  /** "placement" tells the report route to skip the AI-credit charge — the one-time skill test shouldn't cost the learner's monthly quota. */
+  attemptSource?: "placement";
 }) {
   const { isAdmin, previewEligible } = useEffectiveTier();
   const soft = true;
@@ -96,6 +99,7 @@ export function DialogueSummarySessionClient({
           summary,
           exam,
           submittedAt,
+          source: attemptSource,
         }),
       });
       const data = (await res.json()) as DialogueSummaryAttemptReport | { error?: string };

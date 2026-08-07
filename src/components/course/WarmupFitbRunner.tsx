@@ -199,7 +199,7 @@ export function WarmupFitbRunner({
         <button
           type="button"
           onClick={onSkip}
-          className="w-full rounded-full bg-slate-900 py-3 text-sm font-black text-white"
+          className="w-full rounded-full bg-slate-900 py-3 text-sm font-bold text-white"
         >
           ข้ามไปเรียนเลย
         </button>
@@ -212,14 +212,14 @@ export function WarmupFitbRunner({
   return (
     <div className="p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <p className="text-[11px] font-black uppercase tracking-widest text-violet-600">
+        <p className="text-[13px] font-bold uppercase tracking-widest text-violet-600">
           อุ่นเครื่อง · ข้อ {index + 1}/{queue.length} · ระดับ
           {item.difficulty === "easy" ? "ง่าย" : item.difficulty === "medium" ? "กลาง" : "ยาก"}
         </p>
         <button
           type="button"
           onClick={onSkip}
-          className="rounded-full px-3 py-1 text-[11px] font-bold text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+          className="rounded-full px-3 py-1 text-[13px] font-bold text-slate-400 hover:bg-slate-100 hover:text-slate-600"
         >
           ข้าม
         </button>

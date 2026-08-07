@@ -67,12 +67,12 @@ export function ListenSpeakBuilder({
   return (
     <Frame title={titleTh} onCancel={onCancel} progress={stage === "build" ? progress : undefined}>
       <div className="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
-        <p className="text-[12px] font-black text-slate-700">{item.topic}</p>
-        <p className="mt-0.5 text-[11px] text-slate-500">{item.topicTh}</p>
+        <p className="text-[12px] font-bold text-slate-700">{item.topic}</p>
+        <p className="mt-0.5 text-[13px] text-slate-500">{item.topicTh}</p>
         {item.vocabUsed && item.vocabUsed.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {item.vocabUsed.map((v) => (
-              <span key={v.w} className="rounded-md bg-white px-1.5 py-0.5 text-[10px] ring-1 ring-slate-200">
+              <span key={v.w} className="rounded-md bg-white px-1.5 py-0.5 text-[13px] ring-1 ring-slate-200">
                 <span className="font-bold text-slate-800">{v.w}</span>
                 <span className="text-slate-400"> · {v.th}</span>
               </span>
@@ -121,31 +121,31 @@ function ThaiStage({ item, onContinue }: { item: SpeakDrillItem; onContinue: () 
   return (
     <div>
       <div className="mt-3 rounded-2xl bg-[#FFF9E6] p-3.5 ring-1 ring-[#FFCC00]">
-        <p className="text-[13px] font-black text-[#8A6A00]">🔑 กุญแจสำคัญของคำตอบที่ดี</p>
+        <p className="text-[13px] font-bold text-[#8A6A00]">🔑 กุญแจสำคัญของคำตอบที่ดี</p>
         <p className="mt-1 text-[12px] leading-6 text-slate-700">
           ถ้าคุณ<strong>ตอบคำถามนี้เป็นภาษาไทยไม่ได้</strong> ก็จะตอบเป็นภาษาอังกฤษไม่ได้เหมือนกัน —
           ไอเดียต้องมาก่อนภาษาเสมอ ลองอ่านคำแปลไทยด้านล่างให้เข้าใจก่อน แล้วค่อยพูดตามสคริปต์
         </p>
       </div>
 
-      <p className="mt-3 text-[11px] font-black uppercase tracking-wide text-slate-400">สคริปต์เต็ม</p>
+      <p className="mt-3 text-[13px] font-bold uppercase tracking-wide text-slate-400">สคริปต์เต็ม</p>
       <p className="mt-1 rounded-xl bg-white p-3.5 text-[14px] leading-7 text-slate-800 ring-1 ring-slate-300">
         {item.essay}
       </p>
 
-      <p className="mt-3 text-[11px] font-black uppercase tracking-wide text-slate-400">คำแปลไทย</p>
+      <p className="mt-3 text-[13px] font-bold uppercase tracking-wide text-slate-400">คำแปลไทย</p>
       <p className="mt-1 rounded-xl bg-slate-50 p-3.5 text-[13px] leading-7 text-slate-700 ring-1 ring-slate-200">
         {item.essayTh}
       </p>
 
       {/* Which move each sentence is — the lecture's skeleton, made visible. */}
-      <p className="mt-3 text-[11px] font-black uppercase tracking-wide text-slate-400">
+      <p className="mt-3 text-[13px] font-bold uppercase tracking-wide text-slate-400">
         แต่ละประโยคทำหน้าที่อะไร
       </p>
       <div className="mt-1 space-y-1.5">
         {item.moves.map((mv, i) => (
           <div key={i} className="rounded-xl bg-white p-2.5 ring-1 ring-slate-200">
-            <p className="text-[10px] font-black uppercase tracking-wide text-[#004AAD]">
+            <p className="text-[13px] font-bold uppercase tracking-wide text-[#004AAD]">
               {mv.label}
             </p>
             <p className="mt-0.5 text-[12px] leading-6 text-slate-700">{mv.en}</p>
@@ -162,7 +162,7 @@ function ThaiStage({ item, onContinue }: { item: SpeakDrillItem; onContinue: () 
         />
         <span className="text-[12px] font-bold text-slate-700">
           อ่านออกเสียงตามสคริปต์นี้จบแล้ว 1 รอบ
-          <span className="block text-[11px] font-normal text-slate-500">
+          <span className="block text-[13px] font-normal text-slate-500">
             อ่านออกเสียงจริง ๆ ก่อน อย่าเพิ่งฟังเฉลย — ปากต้องชินก่อนหู
           </span>
         </span>
@@ -172,7 +172,7 @@ function ThaiStage({ item, onContinue }: { item: SpeakDrillItem; onContinue: () 
         type="button"
         disabled={!readAloud && !override.enabled}
         onClick={onContinue}
-        className="mt-3 w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white disabled:opacity-30"
+        className="mt-3 w-full rounded-full bg-[#004AAD] py-3 text-sm font-bold text-white disabled:opacity-30"
       >
         อ่านแล้ว → ไปฟังเสียงต้นแบบ 🔊
       </button>
@@ -211,7 +211,7 @@ function ListenStage({ item, onContinue }: { item: SpeakDrillItem; onContinue: (
           playerRef.current?.play();
           setPlays((p) => p + 1);
         }}
-        className="mt-3 w-full rounded-full bg-violet-600 py-3 text-sm font-black text-white"
+        className="mt-3 w-full rounded-full bg-violet-600 py-3 text-sm font-bold text-white"
       >
         🔊 {plays === 0 ? "ฟังเสียงต้นแบบ" : `ฟังอีกครั้ง (ฟังไปแล้ว ${plays} ครั้ง)`}
       </button>
@@ -220,7 +220,7 @@ function ListenStage({ item, onContinue }: { item: SpeakDrillItem; onContinue: (
         type="button"
         disabled={plays === 0 && !override.enabled}
         onClick={onContinue}
-        className="mt-2 w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white disabled:opacity-30"
+        className="mt-2 w-full rounded-full bg-[#004AAD] py-3 text-sm font-bold text-white disabled:opacity-30"
       >
         ฟังแล้ว → ไปอัดเสียงของเรา 🎤
       </button>
@@ -275,7 +275,7 @@ function RecordStage({
             type="button"
             onClick={() => void start()}
             disabled={transcribing}
-            className="flex-1 rounded-full bg-rose-600 py-3 text-sm font-black text-white"
+            className="flex-1 rounded-full bg-rose-600 py-3 text-sm font-bold text-white"
           >
             {transcribing ? "กำลังถอดเสียง…" : "🎤 เริ่มอัดเสียง"}
           </button>
@@ -283,13 +283,13 @@ function RecordStage({
           <button
             type="button"
             onClick={() => void capture.stop()}
-            className="flex-1 rounded-full bg-slate-900 py-3 text-sm font-black text-white"
+            className="flex-1 rounded-full bg-slate-900 py-3 text-sm font-bold text-white"
           >
             ⏹ หยุดอัด
           </button>
         )}
       </div>
-      {speechError && <p className="mt-2 text-[11px] font-bold text-rose-600">{speechError}</p>}
+      {speechError && <p className="mt-2 text-[13px] font-bold text-rose-600">{speechError}</p>}
 
       <textarea
         value={spoken}
@@ -311,7 +311,7 @@ function RecordStage({
             stop();
             setChecked(true);
           }}
-          className="mt-3 w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white disabled:opacity-30"
+          className="mt-3 w-full rounded-full bg-[#004AAD] py-3 text-sm font-bold text-white disabled:opacity-30"
         >
           ตรวจการออกเสียง
         </button>
@@ -319,7 +319,7 @@ function RecordStage({
           <button
             type="button"
             onClick={onPassed}
-            className="mt-2 w-full rounded-full bg-amber-500 py-2.5 text-[12px] font-black text-white"
+            className="mt-2 w-full rounded-full bg-amber-500 py-2.5 text-[12px] font-bold text-white"
           >
             ⚡ ข้ามการอัดเสียง (admin)
           </button>
@@ -334,7 +334,7 @@ function RecordStage({
                 : "bg-rose-50 text-rose-900 ring-rose-200"
             }`}
           >
-            <p className="text-sm font-black">
+            <p className="text-sm font-bold">
               {passed ? "ผ่านแล้ว! 🎉" : "ยังไม่ผ่าน — ลองใหม่อีกครั้ง"}
             </p>
             <p className="mt-1 text-[12px]">
@@ -343,7 +343,7 @@ function RecordStage({
             {result && result.endingIssues.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {result.endingIssues.map((iss, i) => (
-                  <li key={i} className="text-[11px] font-bold">
+                  <li key={i} className="text-[13px] font-bold">
                     · {endingIssueHintTh(iss)}
                   </li>
                 ))}
@@ -355,7 +355,7 @@ function RecordStage({
             <button
               type="button"
               onClick={onPassed}
-              className={`mt-3 w-full rounded-full py-3 text-sm font-black text-white ${
+              className={`mt-3 w-full rounded-full py-3 text-sm font-bold text-white ${
                 hasNext ? "bg-[#004AAD]" : "bg-emerald-600"
               }`}
             >
@@ -368,7 +368,7 @@ function RecordStage({
                 setChecked(false);
                 setSpoken("");
               }}
-              className="mt-3 w-full rounded-full bg-slate-900 py-3 text-sm font-black text-white"
+              className="mt-3 w-full rounded-full bg-slate-900 py-3 text-sm font-bold text-white"
             >
               อัดใหม่อีกครั้ง
             </button>

@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>V1 · Pyramid — เรียน Duolingo ด้วยระบบ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/landing-plan-preview.css" />
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#004AAD; --line:#E3E7ED; --muted:#5B6980;
+    --soft:#F6F8FB; --paper:#fff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--navy);
+    font-family:"IBM Plex Sans Thai",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.65}
+  .mono{font-family:"JetBrains Mono",monospace}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  a{color:inherit}
+
+  /* --- top bar --- */
+  .top{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.94);
+    backdrop-filter:blur(8px);z-index:50}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .brand{font-family:"JetBrains Mono",monospace;font-weight:700;letter-spacing:.12em;font-size:14px;color:var(--blue)}
+  .top nav{display:flex;gap:26px;font-size:13.5px;color:var(--muted)}
+  .top nav a{text-decoration:none}
+  .top nav a:hover{color:var(--navy)}
+  .btn-sm{background:var(--blue);color:#fff;text-decoration:none;font-size:13px;font-weight:600;
+    padding:9px 18px;border-radius:3px}
+
+  /* --- section scaffolding --- */
+  section{padding:82px 0}
+  .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:14px;margin-bottom:22px}
+  .lbl::after{content:"";flex:1;height:1px;background:var(--line)}
+  h1{font-size:clamp(34px,5.2vw,58px);line-height:1.22;letter-spacing:-.02em;font-weight:700;margin:0 0 20px}
+  h2{font-size:clamp(25px,3.2vw,36px);line-height:1.35;letter-spacing:-.015em;font-weight:700;margin:0 0 14px}
+  h3{font-size:19px;font-weight:700;margin:0 0 8px}
+  p{margin:0 0 14px}
+  .lead{font-size:17.5px;color:var(--muted);max-width:62ch}
+
+  /* --- hero --- */
+  .hero{padding:88px 0 70px;border-bottom:1px solid var(--line)}
+  .hero .claim{display:inline-flex;align-items:baseline;gap:10px;border:1px solid var(--line);
+    border-left:3px solid var(--blue);padding:12px 18px;margin:26px 0 30px}
+  .hero .claim b{font-family:"JetBrains Mono",monospace;font-size:24px;color:var(--blue)}
+  .hero .claim span{font-size:13.5px;color:var(--muted)}
+  .cta-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:6px}
+  .btn{display:inline-block;text-decoration:none;font-weight:700;font-size:16px;padding:15px 30px;border-radius:3px}
+  .btn-primary{background:var(--blue);color:#fff}
+  .btn-primary:hover{background:#003c8f}
+  .btn-ghost{border:1px solid var(--line);color:var(--navy)}
+  .btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+  .fineprint{font-size:12.5px;color:var(--muted);margin-top:14px}
+
+  /* --- SCR --- */
+  .scr{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line)}
+  .scr>div{padding:28px 26px;border-right:1px solid var(--line)}
+  .scr>div:last-child{border-right:0;background:var(--soft)}
+  .scr .k{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+  .scr p{font-size:15px;margin:0;color:var(--navy)}
+
+  /* --- exhibits --- */
+  .ex{display:grid;grid-template-columns:1fr 1.25fr;gap:52px;align-items:center;
+    padding:54px 0;border-top:1px solid var(--line)}
+  .ex:nth-child(even) .ex-txt{order:2}
+  .ex-n{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--blue);letter-spacing:.14em;margin-bottom:12px}
+  .ex-txt p{font-size:15.5px;color:var(--muted)}
+  .ex-so{margin-top:16px;padding-left:16px;border-left:2px solid var(--blue);font-size:14.5px;color:var(--navy)}
+  .ex-so b{color:var(--blue)}
+  .shot{border:1px solid var(--line);background:var(--soft);overflow:hidden}
+  .shot-bar{display:flex;gap:6px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);background:#fff}
+  .shot-bar i{width:9px;height:9px;border-radius:50%;background:#DDE3EA;display:block}
+  .shot-bar span{margin-left:8px;font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--muted)}
+  .shot img{display:block;width:100%;height:auto}
+  .shot.crop img{max-height:420px;object-fit:cover;object-position:top center}
+  .cap{font-size:12.5px;color:var(--muted);margin-top:10px}
+
+  /* --- MECE table --- */
+  .mece{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:8px}
+  .mece th,.mece td{border:1px solid var(--line);padding:14px 16px;text-align:left;vertical-align:top}
+  .mece th{background:var(--soft);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    font-family:"JetBrains Mono",monospace;color:var(--blue);font-weight:500}
+  .mece td:first-child{font-weight:700;white-space:nowrap}
+  .mece td.bad{color:#B42318}
+
+  /* --- plan block --- */
+  .planbox{border:1px solid var(--line);padding:36px}
+  .pp{--pp-accent:#004AAD;--pp-radius:4px;--pp-radius-sm:3px;--pp-line:#E3E7ED;--pp-soft:#F6F8FB;--pp-accent-soft:#EDF3FC}
+  .pp-btn{border-radius:3px}
+
+  /* --- evidence --- */
+  .ev{border-collapse:collapse;width:100%;font-size:14.5px}
+  .ev td{border-bottom:1px solid var(--line);padding:16px 0;vertical-align:top}
+  .ev td:first-child{width:230px;padding-right:26px;font-family:"JetBrains Mono",monospace;
+    font-size:12.5px;color:var(--blue)}
+  .note{font-size:12.5px;color:var(--muted);margin-top:18px;padding:14px 16px;background:var(--soft);border-left:2px solid var(--line)}
+
+  /* --- close --- */
+  .close{background:var(--navy);color:#fff;padding:78px 0}
+  .close h2{color:#fff}
+  .close p{color:#B9C4D4}
+  .close .btn-primary{background:#FFCC00;color:var(--navy)}
+  .close .btn-primary:hover{background:#ffd633}
+
+  footer{padding:30px 0;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+  .mockbar{background:#FFF7E0;border-bottom:1px solid #F0D98A;font-size:12px;padding:8px 0;color:#7A5B00}
+  .mockbar .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+  @media(max-width:860px){
+    .ex{grid-template-columns:1fr;gap:26px}
+    .ex:nth-child(even) .ex-txt{order:0}
+    .scr{grid-template-columns:1fr}
+    .scr>div{border-right:0;border-bottom:1px solid var(--line)}
+    .top nav{display:none}
+    section{padding:56px 0}
+  }
+</style>
+</head>
+<body>
+
+<div class="mockbar"><div class="wrap">
+  <span><b>MOCKUP V1 · “Pyramid”</b> — วิธีคิดแบบ McKinsey: ตอบข้อสรุปก่อน แล้วค้ำด้วยเหตุผลที่ครบและไม่ซ้ำกัน (MECE)</span>
+  <a href="/landing-system-index.html">← กลับไปเทียบทั้ง 4 แบบ</a>
+</div></div>
+
+<header class="top"><div class="wrap">
+  <div class="brand">ENGLISH PLAN</div>
+  <nav>
+    <a href="#system">ระบบ 4 ส่วน</a>
+    <a href="#plan">สร้างแผนของคุณ</a>
+    <a href="#evidence">งานวิจัยที่อ้างอิง</a>
+  </nav>
+  <a class="btn-sm" href="#plan">สร้างแผนฟรี</a>
+</div></header>
+
+<!-- ============ HERO : governing thought first ============ -->
+<div class="hero"><div class="wrap">
+  <div class="lbl">ระบบเตรียมสอบ Duolingo English Test</div>
+  <h1>เรียน Duolingo<br />ด้วย<span style="color:var(--blue)">ระบบ</span> ไม่ใช่ด้วยการเดา</h1>
+  <p class="lead">
+    คุณไม่ได้ขาดความพยายาม — คุณขาดคนบอกว่า <b>ต้องฝึกอะไร วันละเท่าไหร่ และที่ผิดอยู่นั้นผิดเพราะอะไร</b>
+    ระบบนี้ตอบทั้งสามข้อให้ ตั้งแต่วันแรกจนถึงวันสอบ
+  </p>
+
+  <div class="claim">
+    <b>+10 → 40+</b>
+    <span>คะแนน DET ที่ผู้ใช้ซึ่งทำครบตามแผนขยับได้ ภายในเวลาไม่ถึง 3 เดือน</span>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn btn-primary" href="#plan">สร้างแผนของฉัน — ฟรี</a>
+    <a class="btn btn-ghost" href="#system">ดูระบบทั้ง 4 ส่วนก่อน</a>
+  </div>
+  <p class="fineprint">ไม่ต้องสมัคร ไม่ต้องทำข้อสอบก่อน · ตอบ 3 คำถามแล้วเห็นปฏิทินจริงของคุณทันที</p>
+</div></div>
+
+<!-- ============ SCR ============ -->
+<section><div class="wrap">
+  <div class="lbl">ทำไมถึงต้องมีระบบ</div>
+  <div class="scr">
+    <div>
+      <div class="k">Situation · สถานการณ์</div>
+      <p>คุณมีเดดไลน์จริง — ยื่นมหาวิทยาลัย ทุน หรือวีซ่า และต้องได้คะแนน DET ถึงเกณฑ์ภายในวันที่กำหนด</p>
+    </div>
+    <div>
+      <div class="k">Complication · ปัญหา</div>
+      <p>คุณฝึกอยู่ แต่ฝึกแบบสุ่ม วันไหนว่างก็ทำ ไม่รู้ว่าพอหรือยัง ทำผิดแล้วก็ผ่านไป — คะแนนเลยนิ่ง</p>
+    </div>
+    <div>
+      <div class="k">Resolution · ทางออก</div>
+      <p><b>ระบบที่ทำครบ 4 อย่าง</b> — วัดระดับ → กางปฏิทิน → สอนเทคนิคระหว่างทาง → ตรวจและบอกให้แก้ทันที</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ THE 4 PILLARS ============ -->
+<section id="system" style="padding-top:20px"><div class="wrap">
+  <div class="lbl">ระบบประกอบด้วย 4 ส่วน — ครบและไม่ทับซ้อนกัน</div>
+  <h2>“ระบบของเรา” คืออะไรกันแน่</h2>
+  <p class="lead" style="margin-bottom:6px">
+    ไม่ใช่คลังข้อสอบ ไม่ใช่คอร์สวิดีโอ — เป็นลูป 4 ขั้นที่ทำงานต่อกันทุกวันจนถึงวันสอบ
+  </p>
+
+  <div class="ex">
+    <div class="ex-txt">
+      <div class="ex-n">EXHIBIT 01</div>
+      <h3>วางแผนจาก<u>ระดับจริง</u>ของคุณ</h3>
+      <p>วัดระดับ 9 ข้อ ใช้เวลาไม่ถึง 15 นาที ได้คะแนนเทียบสเกล DET 10–160 พร้อมคะแนนแยก 4 ทักษะ
+        และชี้ชัดว่าทักษะไหนคือตัวถ่วง</p>
+      <div class="ex-so"><b>ผลที่ตามมา:</b> แผนของคุณไม่เหมือนของคนอื่น เพราะจุดอ่อนไม่เหมือนกัน</div>
+    </div>
+    <div>
+      <div class="shot crop">
+        <div class="shot-bar"><i></i><i></i><i></i><span>englishplan · ผลวัดระดับ</span></div>
+        <img src="/images/landing/diag-report-desktop.png" alt="รายงานผลวัดระดับ แสดงคะแนนเทียบสเกล DET และคะแนนแยก 4 ทักษะ" />
+      </div>
+      <p class="cap">ตัวอย่างรายงานจริงจากระบบ — ≈105 คะแนน, พูดคือจุดที่ต้องแก้ก่อน</p>
+    </div>
+  </div>
+
+  <div class="ex">
+    <div class="ex-txt">
+      <div class="ex-n">EXHIBIT 02</div>
+      <h3>ปฏิทินที่บอกว่า<u>วันนี้ทำอะไร</u> และ<u>จบวันไหน</u></h3>
+      <p>ตั้งวันสอบครั้งเดียว ระบบกางตารางให้ทุกวันจนถึงวันสอบ — วันไหนฝึกกี่นาที ทำกี่ข้อ
+        และแทรกวันซ้อมสอบเต็มชุดให้เองเมื่อใกล้ถึงเวลา</p>
+      <div class="ex-so"><b>ผลที่ตามมา:</b> ไม่ต้องตัดสินใจเองทุกวันว่าจะทำอะไร — ความลังเลคือสาเหตุอันดับหนึ่งที่คนหยุดฝึก</div>
+    </div>
+    <div>
+      <div class="shot crop">
+        <div class="shot-bar"><i></i><i></i><i></i><span>englishplan · ปฏิทินการเรียน</span></div>
+        <img src="/images/landing/planner-calendar-desktop.png" alt="ปฏิทินการเรียนรายวันจนถึงวันสอบ" />
+      </div>
+      <p class="cap">ปฏิทินจริงในแอป — วันฝึก วันพัก และวัน Mock ถูกวางไว้ล่วงหน้าแล้ว</p>
+    </div>
+  </div>
+
+  <div class="ex">
+    <div class="ex-txt">
+      <div class="ex-n">EXHIBIT 03</div>
+      <h3>บทเรียน<u>แทรกระหว่างฝึก</u> ไม่ใช่ทำข้อสอบอย่างเดียว</h3>
+      <p>ทุกพาร์ตมีบทเรียนสั้นสอนเทคนิคของมันเอง — ฟังแล้วพิมพ์ตาม, อ่านจับใจความ, เขียนบรรยายภาพ,
+        พูดตอบคำถาม — คั่นอยู่ในเส้นทาง ไม่ใช่กองไว้ให้ไปหาเอง</p>
+      <div class="ex-so"><b>ผลที่ตามมา:</b> คุณเข้าใจว่า<b>ทำไม</b>คำตอบถูก ไม่ใช่แค่จำว่าข้อนี้ตอบอะไร</div>
+    </div>
+    <div>
+      <div class="shot crop">
+        <div class="shot-bar"><i></i><i></i><i></i><span>englishplan · บทเรียน</span></div>
+        <img src="/images/landing/lesson-speak-desktop.png" alt="หน้าบทเรียนแยกตามทักษะ" />
+      </div>
+      <p class="cap">บทเรียน 6 หมวด เรียงตามลำดับความยาก ปลดล็อกไปพร้อมกับการฝึก</p>
+    </div>
+  </div>
+
+  <div class="ex">
+    <div class="ex-txt">
+      <div class="ex-n">EXHIBIT 04</div>
+      <h3>ฟีดแบ็กที่บอกว่า<u>ผิดตรงไหน</u> ทันที</h3>
+      <p>งานเขียนและงานพูดถูกตรวจทีละประโยค — ชี้จุดที่ผิด บอกว่าควรแก้เป็นอะไร
+        พร้อมคะแนนรายด้าน และโน้ตสรุปเป็นภาษาไทย</p>
+      <div class="ex-so"><b>ผลที่ตามมา:</b> คุณไม่ทำผิดแบบเดิมซ้ำอีก 20 ครั้งกว่าจะรู้ตัว</div>
+    </div>
+    <div>
+      <div class="shot">
+        <div class="shot-bar"><i></i><i></i><i></i><span>englishplan · ฟีดแบ็ก</span></div>
+        <img src="/images/landing/feedback-showcase-desktop.png" alt="ตัวอย่างฟีดแบ็กงานเขียน พร้อมคะแนนรายด้านและโน้ตภาษาไทย" />
+      </div>
+      <p class="cap">ตรวจแล้วชี้ทีละจุด — พร้อมคะแนน Grammar / Vocabulary / Flow / Task response</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ MECE proof ============ -->
+<section style="background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
+  <div class="lbl">ทำไมต้องครบทั้ง 4</div>
+  <h2>ถอดออกข้อใดข้อหนึ่ง แล้วเกิดอะไรขึ้น</h2>
+  <p class="lead">นี่คือเหตุผลที่ “ซื้อคลังข้อสอบมาทำเอง” หรือ “ดูคลิปติวใน YouTube” ถึงพาไปได้ไม่สุด</p>
+  <table class="mece">
+    <thead><tr><th>ถ้าขาด</th><th>สิ่งที่เกิดขึ้นจริง</th><th>เห็นได้จาก</th></tr></thead>
+    <tbody>
+      <tr><td>01 การวัดระดับ</td><td class="bad">ฝึกหนักในพาร์ตที่ทำได้ดีอยู่แล้ว ส่วนพาร์ตที่ถ่วงคะแนนกลับไม่ได้แตะ</td><td>คะแนนขยับ 2–3 แต้มแล้วตัน</td></tr>
+      <tr><td>02 ปฏิทิน</td><td class="bad">ฝึกเป็นพัก ๆ ตามอารมณ์ หายไป 5 วันแล้วกลับมาเริ่มใหม่</td><td>“ว่างค่อยทำ” = ไม่เคยว่าง</td></tr>
+      <tr><td>03 บทเรียน</td><td class="bad">ทำข้อสอบไปหลายร้อยข้อ แต่ยังจับหลักของพาร์ตนั้นไม่ได้</td><td>เจอโจทย์แนวใหม่แล้วทำไม่ได้</td></tr>
+      <tr><td>04 ฟีดแบ็ก</td><td class="bad">ผิดแบบเดิมซ้ำ ๆ เพราะไม่มีใครบอกว่าผิดตรงไหน</td><td>เขียน/พูดเท่าเดิมทั้งที่ฝึกมาเป็นเดือน</td></tr>
+    </tbody>
+  </table>
+</div></section>
+
+<!-- ============ PLAN PREVIEW ============ -->
+<section id="plan"><div class="wrap">
+  <div class="lbl">ข้อสรุปที่ตรวจสอบได้เอง</div>
+  <h2>ลองสร้างแผนของคุณเดี๋ยวนี้</h2>
+  <p class="lead" style="margin-bottom:26px">
+    ไม่ต้องสมัคร ไม่ต้องทำข้อสอบก่อน — บอกแค่ว่าสอบวันไหน ว่างวันไหน วันละกี่นาที
+    แล้วดูปฏิทินจริงของคุณ พร้อมงานของวันแรก
+  </p>
+  <div class="planbox"><div id="plan-preview"></div></div>
+</div></section>
+
+<!-- ============ EVIDENCE ============ -->
+<section id="evidence" style="background:var(--soft);border-top:1px solid var(--line)"><div class="wrap">
+  <div class="lbl">หลักการที่ระบบนี้ออกแบบตาม</div>
+  <h2>ทำไมถึงวางระบบแบบนี้ ไม่ใช่แบบอื่น</h2>
+  <p class="lead" style="margin-bottom:24px">แต่ละส่วนของระบบมาจากงานวิจัยด้านการเรียนรู้ที่ถูกทำซ้ำและยืนยันมาแล้วหลายสิบปี</p>
+  <table class="ev">
+    <tr>
+      <td>Roediger &amp; Karpicke<br />2006 · Psychological Science</td>
+      <td><b>การถูกทดสอบ จำได้ดีกว่าการอ่านทบทวน</b> — ระบบจึงให้คุณ “ทำ” ทุกวัน ไม่ใช่ให้นั่งดูเฉลย
+        <span style="color:var(--muted)">(→ ส่วนที่ 02)</span></td>
+    </tr>
+    <tr>
+      <td>Cepeda et al.<br />2006 · Psychological Bulletin</td>
+      <td><b>กระจายการเรียนเป็นช่วง ๆ ได้ผลระยะยาวดีกว่าอัดรวดเดียว</b> — ปฏิทินจึงซอยเป็นวันละ 5–30 นาที ไม่ใช่มาราธอนวันเดียว
+        <span style="color:var(--muted)">(→ ส่วนที่ 02)</span></td>
+    </tr>
+    <tr>
+      <td>Rohrer &amp; Taylor<br />2007 · Instructional Science</td>
+      <td><b>สลับประเภทโจทย์ (interleaving) ทำให้ใช้จริงได้ดีกว่าฝึกทีละชนิดรวด ๆ</b> — งานแต่ละวันจึงคละทักษะ ไม่ใช่ทำ dictation อย่างเดียว 100 ข้อ
+        <span style="color:var(--muted)">(→ ส่วนที่ 03)</span></td>
+    </tr>
+    <tr>
+      <td>Hattie &amp; Timperley<br />2007 · Review of Educational Research</td>
+      <td><b>ฟีดแบ็กเป็นหนึ่งในปัจจัยที่มีอิทธิพลต่อผลการเรียนสูงที่สุด และยิ่งเร็วยิ่งได้ผล</b> — ระบบจึงตรวจให้ทันที ไม่ต้องรอครู
+        <span style="color:var(--muted)">(→ ส่วนที่ 04)</span></td>
+    </tr>
+    <tr>
+      <td>Locke &amp; Latham<br />2002 · American Psychologist</td>
+      <td><b>เป้าหมายที่เฉพาะเจาะจงและมีกำหนดเวลา ให้ผลดีกว่าเป้าหมายกว้าง ๆ</b> — แผนจึงผูกกับวันสอบจริงเสมอ ไม่ใช่ “ฝึกไปเรื่อย ๆ”
+        <span style="color:var(--muted)">(→ ส่วนที่ 01, 02)</span></td>
+    </tr>
+  </table>
+  <p class="note">
+    หมายเหตุ: งานวิจัยข้างต้นเป็นหลักการเรียนรู้ทั่วไปที่เราใช้ออกแบบระบบ
+    ไม่ใช่ผลการทดลองกับผลิตภัณฑ์นี้โดยตรง ส่วนตัวเลข +10 ถึง 40+ คะแนน มาจากผู้ใช้ที่ทำครบตามแผน ไม่ใช่การรับประกันผล
+  </p>
+</div></section>
+
+<!-- ============ CLOSE ============ -->
+<div class="close"><div class="wrap">
+  <div class="lbl" style="color:#FFCC00">ขั้นตอนถัดไป</div>
+  <h2>เริ่มจากรู้ก่อนว่าตอนนี้คุณอยู่ตรงไหน</h2>
+  <p class="lead" style="color:#B9C4D4;margin-bottom:26px">
+    วัดระดับ 9 ข้อ ไม่ถึง 15 นาที ฟรี — จบแล้วได้คะแนนเทียบสเกล DET และปฏิทินถึงวันสอบทันที
+  </p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="/mini-diagnosis/start">วัดระดับฟรี 15 นาที</a>
+    <a class="btn btn-ghost" style="border-color:#33465F;color:#fff" href="#plan">หรือดูแผนก่อนโดยไม่ต้องสอบ</a>
+  </div>
+</div></div>
+
+<footer><div class="wrap">
+  MOCKUP — สร้างเพื่อเลือกทิศทางหน้า Landing ยังไม่ใช่หน้าจริงของเว็บไซต์
+</div></footer>
+
+<script src="/landing-plan-preview.js"></script>
+<script>
+  PlanPreview.mount(document.getElementById("plan-preview"), {
+    minutes: 20, months: 2, showScore: true,
+  });
+</script>
+</body>
+</html>

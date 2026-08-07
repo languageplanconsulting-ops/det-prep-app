@@ -682,14 +682,58 @@ export const CUSTOMISATION_STORAGE_KEY = "ep-course-customisation-v1";
 // Completion
 // ---------------------------------------------------------------------------
 
-/** Item ids the learner has actually finished, newest last. */
-export type Progress = { completedIds: string[] };
+/** How well a single graded item went. Videos and checkbox items have none. */
+export type ItemScore = { correct: number; total: number };
 
-export const EMPTY_PROGRESS: Progress = { completedIds: [] };
+/**
+ * What the learner has finished, and how well.
+ *
+ * Accuracy is kept alongside completion rather than derived from it because
+ * they answer different questions: `completedIds` drives the schedule (finished
+ * work leaves the stream), `accuracy` drives whether we should be congratulating
+ * anyone. Ticking every box at 30% correct is not a good day, and the summary
+ * used to say it was.
+ */
+export type Progress = {
+  completedIds: string[];
+  accuracy: Record<string, ItemScore>;
+};
 
-export function markCompleted(progress: Progress, ids: string[]): Progress {
+export const EMPTY_PROGRESS: Progress = { completedIds: [], accuracy: {} };
+
+export function markCompleted(
+  progress: Progress,
+  ids: string[],
+  scores: Record<string, ItemScore> = {},
+): Progress {
   const seen = new Set(progress.completedIds);
-  return { completedIds: [...progress.completedIds, ...ids.filter((id) => !seen.has(id))] };
+  return {
+    completedIds: [...progress.completedIds, ...ids.filter((id) => !seen.has(id))],
+    accuracy: { ...progress.accuracy, ...scores },
+  };
+}
+
+/**
+ * Accuracy across a set of items, ignoring anything ungraded.
+ *
+ * Returns null when nothing in the set was graded — a day of pure lecture
+ * watching has no accuracy, and inventing 100% for it would be the same lie in
+ * a different place.
+ */
+export function accuracyOf(
+  ids: string[],
+  accuracy: Record<string, ItemScore>,
+): { correct: number; total: number; percent: number } | null {
+  let correct = 0;
+  let total = 0;
+  for (const id of ids) {
+    const s = accuracy[id];
+    if (!s || s.total <= 0) continue;
+    correct += s.correct;
+    total += s.total;
+  }
+  if (total === 0) return null;
+  return { correct, total, percent: Math.round((correct / total) * 100) };
 }
 
 export type CompletionState = {

@@ -25,6 +25,11 @@ import {
   WRITING_RUBRIC_WEIGHTS,
   buildLocalStudyPack,
 } from "@/lib/writing-report";
+import {
+  parseScoreRungLadder,
+  scoreRungJsonShape,
+  scoreRungRulePrompt,
+} from "@/lib/score-rung-prompt";
 
 function pointsOn160(percent: number, weight: number): number {
   return Math.round(percent * weight * 1.6 * 10) / 10;
@@ -88,7 +93,14 @@ function criterion(
   };
 }
 
-function buildSystemInstruction(): string {
+function buildSystemInstruction(mainEssayWordCount: number): string {
+  // Rungs rewrite the MAIN essay only — follow-ups are one-liners, and mixing
+  // them into one rewrite would blur the length budget the learner is judged on.
+  const rungRules = scoreRungRulePrompt({
+    learnerWordCount: mainEssayWordCount,
+    weights: WRITING_RUBRIC_WEIGHTS,
+    textLabel: "MAIN essay (mainEssayRaw only — never the follow-up answers)",
+  });
   return `You are an expert English examiner for Thai learners (DET-style writing — same rubric and report shape as our write-about-photo writing tasks).
 The learner typed their answers. Raw text may lack proper punctuation, capitals, or paragraph breaks.
 
@@ -143,7 +155,7 @@ Improvement points: each MUST quote an exact phrase from the learner's punctuate
 
 studySentences (max 7), studyVocabulary (max 10): bilingual revision tied to this submission.
 
-Return ONLY valid JSON (no markdown).${GEMINI_PRODUCTION_THAI_STYLE}`;
+Return ONLY valid JSON (no markdown).${rungRules}${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
 
 function buildUserPayload(
@@ -223,6 +235,7 @@ function buildUserPayload(
             exampleTh: "string",
           },
         ],
+        ...scoreRungJsonShape(),
       },
     },
     null,
@@ -349,7 +362,7 @@ export async function generateWritingReportWithGemini(params: {
       anthropicApiKey: params.anthropicApiKey,
       openAiApiKey: params.openAiApiKey,
     },
-    systemInstruction: buildSystemInstruction(),
+    systemInstruction: buildSystemInstruction(countWords(essay)),
     userPayload: buildUserPayload(topic, essay, followUpRaw, prepMinutes),
     temperature: 0.35,
   });
@@ -561,6 +574,13 @@ export async function generateWritingReportWithGemini(params: {
   const hasSectionHighlights =
     mainHighlights.length > 0 || followUpHighlights.some((a) => a.length > 0);
 
+  // Rungs are budgeted against the main essay only (that's what they rewrite).
+  const scoreRungs = parseScoreRungLadder(raw.scoreRungs, {
+    attemptId,
+    currentScore160: score160,
+    learnerWordCount: countWords(punctuatedMain),
+  });
+
   const report: WritingAttemptReport = {
     gradingSource: "gemini" as const,
     attemptId,
@@ -601,6 +621,7 @@ export async function generateWritingReportWithGemini(params: {
     studyVocabulary,
     ...(boost ? { taskPersonalExperienceBoostApplied: true } : {}),
     ...(vocabularyUpgrades.length > 0 ? { vocabularyUpgradeSuggestions: vocabularyUpgrades } : {}),
+    ...(scoreRungs ? { scoreRungs } : {}),
   };
   return { report, usage };
 }

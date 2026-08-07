@@ -23,23 +23,16 @@ import { ProductionExerciseRunner } from "@/components/course/ProductionExercise
 import { WarmupFitbRunner } from "@/components/course/WarmupFitbRunner";
 import { BunnyVideoEmbed } from "@/components/course/BunnyVideoEmbed";
 
+import { dayDoneCopy, fillBlankWarmup } from "@/lib/course-plan/curriculum";
 import {
-  dayDoneCopy,
-  transitionCopy,
-  fillBlankWarmup,
-  RUNG_TH_SHORT,
-  WARMUP_PROMPT_TH,
-  WARMUP_WHY_TH,
-} from "@/lib/course-plan/curriculum";
-import {
-  carryOverMinutes,
   dedupeById,
   splitDayByTime,
   type CarryOver,
+  type ItemScore,
   type StudyItem,
 } from "@/lib/course-plan/block-planner";
 
-type Phase = "warmup" | "warmup_running" | "choose" | "running" | "timeup" | "done";
+type Phase = "running" | "timeup" | "bonus" | "done";
 
 /** Bunny lesson metadata keyed by course_lessons id. */
 export type LessonVideoInfo = {
@@ -49,8 +42,36 @@ export type LessonVideoInfo = {
   downloads?: Array<{ id: string; label: string; fileSize: number | null }>;
 };
 
+/**
+ * What finishing an extra item would do to the finish date.
+ * `null` when the plan cannot be projected (no start date, no study days).
+ */
+export type BonusProjection = { date: string; daysSaved: number } | null;
+
+/** The warm-up rides in the queue as a normal item rather than a gate screen. */
+const WARMUP_ID = "__warmup__";
+
+function isRealItem(it: StudyItem): boolean {
+  return it.id !== WARMUP_ID;
+}
+
+function warmupItem(): StudyItem {
+  return {
+    id: WARMUP_ID,
+    kind: "exercise",
+    titleTh: "อุ่นเครื่อง · เติมคำ 2 ข้อ",
+    minutes: 2,
+    blockKey: "warmup",
+    blockTitleTh: "อุ่นเครื่อง",
+    blockOrder: -1,
+    taskType: "fill_in_blanks",
+    exerciseKey: WARMUP_ID,
+  };
+}
+
 /** Can this item run in place, inside the session, instead of a plain checkbox? */
 function canRunInPlace(it: StudyItem): boolean {
+  if (it.id === WARMUP_ID) return true;
   if (!it.exerciseKey) return false;
   if (lessonRunnerRefFor(it.exerciseKey)) return true;
   if (listenSpeakItemFor(it.exerciseKey)) return true;
@@ -74,14 +95,28 @@ function thaiDay(iso: string): string {
   });
 }
 
+function thaiFullDay(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 /**
- * One study session: a countdown over today's items, with the backlog offered
- * first and whatever is left over rolled forward.
+ * One study session.
  *
- * The countdown is deliberately advisory, not a lock — it fires the "finish or
- * save for next time" question rather than closing anything mid-answer. A timer
- * that cuts someone off halfway through a speaking response would lose their
- * work, which is worse than running a few minutes long.
+ * Opening it opens the first item — there is exactly one "start", and it is on
+ * the page behind this modal. The old flow asked for a warm-up decision, then a
+ * backlog decision, then showed a checklist with a second start button: four
+ * taps and three chances to bounce before any learning happened. Now the warm-up
+ * is simply the first item in the queue and the backlog is simply at the front
+ * of it, both skippable in place.
+ *
+ * The countdown is advisory, not a lock — it raises the "finish or save for next
+ * time" question rather than closing anything mid-answer, because cutting
+ * someone off halfway through a speaking response loses their work.
  */
 export function SessionRunner({
   todaysItems,
@@ -91,6 +126,8 @@ export function SessionRunner({
   onFinish,
   track = "basic",
   lessonVideos = {},
+  upcomingItems = [],
+  projectWith,
 }: {
   todaysItems: StudyItem[];
   carryOver: CarryOver;
@@ -99,26 +136,43 @@ export function SessionRunner({
   track?: "basic" | "medium" | "advanced";
   /** lessonId → Bunny guid, so session videos can play inline. */
   lessonVideos?: Record<string, LessonVideoInfo>;
+  /**
+   * The next scheduled items AFTER today, in plan order. These are what the
+   * "one more?" offer draws from once today is clear.
+   */
+  upcomingItems?: StudyItem[];
+  /** What the calendar looks like if these extra ids were also finished. */
+  projectWith?: (extraCompletedIds: string[]) => BonusProjection;
   onClose: () => void;
   /** Items the learner did NOT finish — they become the new backlog. */
-  onFinish: (unfinished: StudyItem[], completed: StudyItem[]) => void;
+  onFinish: (
+    unfinished: StudyItem[],
+    completed: StudyItem[],
+    scores: Record<string, ItemScore>,
+  ) => void;
 }) {
-  const hasBacklog = carryOver.entries.length > 0;
-  // The warm-up is offered before anything else, every lecture day.
-  const [phase, setPhase] = useState<Phase>("warmup");
-  const [warmupTaken, setWarmupTaken] = useState(false);
-  const warmup = fillBlankWarmup(track);
+  const warmup = useRef(fillBlankWarmup(track)).current;
 
-  function afterWarmup(taken: boolean) {
-    setWarmupTaken(taken);
-    setPhase(hasBacklog ? "choose" : "running");
-  }
+  /**
+   * Today, in the order it will actually be worked: warm-up, then anything left
+   * over from previous days, then today's own plan — trimmed to the time budget.
+   * The backlog is no longer a question; it is just the oldest outstanding work,
+   * which is what "I'm behind" means.
+   */
+  const [queue, setQueue] = useState<StudyItem[]>(() => {
+    const backlog = carryOver.entries.map((e) => e.item);
+    const planned = splitDayByTime(dedupeById([...backlog, ...todaysItems]), minutes).fits;
+    return [warmupItem(), ...planned];
+  });
 
-  function startWarmup() {
-    setPhase("warmup_running");
-  }
-  const [queue, setQueue] = useState<StudyItem[]>(() => dedupeById(todaysItems));
+  /** Where each backlog item came from, for the "ค้างจาก 1 ส.ค." tag. */
+  const backlogFrom = useRef(
+    new Map(carryOver.entries.map((e) => [e.item.id, e.fromDate])),
+  ).current;
+
+  const [phase, setPhase] = useState<Phase>("running");
   const [done, setDone] = useState<Set<string>>(new Set());
+  const [scores, setScores] = useState<Record<string, ItemScore>>({});
   const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
   const [overtime, setOvertime] = useState(false);
   /** The item currently open as an inline exercise, if any. */
@@ -127,10 +181,14 @@ export function SessionRunner({
   const [activeVideo, setActiveVideo] = useState<StudyItem | null>(null);
   const [videoJustFinished, setVideoJustFinished] = useState(false);
   /** Play-through: after each item finishes, open the next unfinished one. */
-  const [sequenceMode, setSequenceMode] = useState(false);
+  const [sequenceMode, setSequenceMode] = useState(true);
   const sequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [scores, setScores] = useState<Record<string, { correct: number; total: number }>>({});
-  const startedRef = useRef(false);
+  const timeupAskedRef = useRef(false);
+
+  /** Extra items pulled forward from later days, and the resulting new finish date. */
+  const [bonusOffer, setBonusOffer] = useState<StudyItem | null>(null);
+  const [bonusTaken, setBonusTaken] = useState<string[]>([]);
+  const [bonusProjection, setBonusProjection] = useState<BonusProjection>(null);
 
   function clearSequenceTimer() {
     if (sequenceTimerRef.current) {
@@ -138,18 +196,57 @@ export function SessionRunner({
       sequenceTimerRef.current = null;
     }
   }
+  useEffect(() => () => clearSequenceTimer(), []);
+
+  /** Only real plan items are reported upward — the warm-up is not in the stream. */
+  function emitFinish(unfinished: StudyItem[], completed: StudyItem[]) {
+    const realScores: Record<string, ItemScore> = {};
+    for (const [id, s] of Object.entries(scores)) {
+      if (id !== WARMUP_ID) realScores[id] = s;
+    }
+    onFinish(unfinished.filter(isRealItem), completed.filter(isRealItem), realScores);
+  }
+
+  /** The next scheduled item we could offer as a bonus, if any. */
+  function nextBonus(exclude: Set<string>): StudyItem | null {
+    for (const it of upcomingItems) {
+      if (!exclude.has(it.id) && canRunInPlace(it)) return it;
+      if (!exclude.has(it.id) && it.kind === "video") return it;
+    }
+    return null;
+  }
+
+  /**
+   * Everything in the queue is finished.
+   *
+   * Rather than closing the day, offer one more item from tomorrow — the learner
+   * is warmed up, in flow, and has just proved they have the time. Accepting
+   * pulls the whole plan forward, which the offer says out loud.
+   */
+  function handleQueueCleared(nextDone: Set<string>) {
+    clearSequenceTimer();
+    setSequenceMode(false);
+    setActiveExercise(null);
+    setActiveVideo(null);
+    const completed = queue.filter((i) => nextDone.has(i.id));
+    emitFinish([], completed);
+
+    const inQueue = new Set(queue.map((i) => i.id));
+    const offer = nextBonus(inQueue);
+    if (offer) {
+      setBonusOffer(offer);
+      setBonusProjection(projectWith?.([...bonusTaken, offer.id]) ?? null);
+      setPhase("bonus");
+      return;
+    }
+    setPhase("done");
+  }
 
   function markItemDone(id: string) {
     const next = new Set(done);
     next.add(id);
     setDone(next);
-    if (queue.every((i) => next.has(i.id))) {
-      clearSequenceTimer();
-      setSequenceMode(false);
-      const completed = queue.filter((i) => next.has(i.id));
-      onFinish([], completed);
-      setPhase("done");
-    }
+    if (queue.every((i) => next.has(i.id))) handleQueueCleared(next);
   }
 
   function openVideo(it: StudyItem) {
@@ -172,17 +269,14 @@ export function SessionRunner({
     }
     setActiveVideo(null);
     setVideoJustFinished(false);
-    if (canRunInPlace(it)) {
-      setActiveExercise(it);
-      return;
-    }
+    if (canRunInPlace(it)) setActiveExercise(it);
   }
 
   function isPlayable(it: StudyItem): boolean {
     return it.kind === "video" || canRunInPlace(it);
   }
 
-  /** Next unfinished playable item at/after `fromId` (exclusive). */
+  /** Next unfinished playable item at/after `currentId` (exclusive). */
   function nextPlayableAfter(currentId: string, doneSet: Set<string> = done): StudyItem | null {
     const idx = queue.findIndex((i) => i.id === currentId);
     const start = idx < 0 ? 0 : idx + 1;
@@ -199,6 +293,23 @@ export function SessionRunner({
     }
     return null;
   }
+
+  /**
+   * One start button, and it is not in here.
+   *
+   * The learner already pressed "เริ่มเรียนวันนี้" to open this modal, so open
+   * the first item straight away. Backing out lands on the checklist, which is
+   * where a second start button belongs — as a resume, not as a gate.
+   */
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    const first = firstPlayable();
+    if (first) openItem(first);
+    else setSequenceMode(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on open
+  }, []);
 
   function startSequence() {
     const next = firstPlayable();
@@ -220,7 +331,7 @@ export function SessionRunner({
       return false;
     }
     clearSequenceTimer();
-    // Exercises swap immediately; videos get a short “ดูจบแล้ว” beat.
+    // Exercises swap immediately; videos get a short "ดูจบแล้ว" beat.
     if (following.kind === "video") {
       sequenceTimerRef.current = setTimeout(() => openItem(following), 700);
     } else {
@@ -229,7 +340,7 @@ export function SessionRunner({
     return true;
   }
 
-  /** Next unfinished item after `currentId` in today's queue (any kind). */
+  /** Next unfinished item after `currentId` in the queue (any kind). */
   function nextAfter(currentId: string, doneSet: Set<string> = done): StudyItem | null {
     const idx = queue.findIndex((i) => i.id === currentId);
     if (idx < 0) return null;
@@ -246,24 +357,24 @@ export function SessionRunner({
     setVideoJustFinished(true);
     const nextDone = new Set(done);
     nextDone.add(id);
-    markItemDone(id);
-    if (continueSequence(id, nextDone)) return;
+    setDone(nextDone);
+    if (queue.every((i) => nextDone.has(i.id))) {
+      handleQueueCleared(nextDone);
+      return;
+    }
+    continueSequence(id, nextDone);
   }
 
-  useEffect(() => {
-    return () => clearSequenceTimer();
-  }, []);
-
-  // Tick only while actually studying, so the choice screen does not burn time.
+  // Tick only while actually studying.
   useEffect(() => {
     if (phase !== "running") return;
     const id = setInterval(() => {
       setSecondsLeft((s) => {
         if (s <= 1) {
-          // Ask once. If they choose to continue, the timer keeps counting up
-          // as overtime rather than firing the prompt again every second.
-          if (!startedRef.current) {
-            startedRef.current = true;
+          // Ask once. If they continue, the timer stays at zero rather than
+          // firing the prompt again every second.
+          if (!timeupAskedRef.current) {
+            timeupAskedRef.current = true;
             setPhase("timeup");
           }
           return 0;
@@ -274,22 +385,15 @@ export function SessionRunner({
     return () => clearInterval(id);
   }, [phase]);
 
-  function choose(which: "carry_over" | "today") {
-    if (which === "carry_over") {
-      const backlog = carryOver.entries.map((e) => e.item);
-      // Backlog first, then as much of today as still fits.
-      setQueue(splitDayByTime(dedupeById([...backlog, ...todaysItems]), minutes).fits);
-    } else {
-      setQueue(dedupeById(todaysItems));
-    }
-    setPhase("running");
-  }
-
   function toggle(id: string) {
     setDone((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
+      if (queue.every((i) => next.has(i.id))) {
+        // Deferred so this does not set state during another component's render.
+        queueMicrotask(() => handleQueueCleared(next));
+      }
       return next;
     });
   }
@@ -297,25 +401,50 @@ export function SessionRunner({
   function finish() {
     const completed = queue.filter((i) => done.has(i.id));
     const unfinished = queue.filter((i) => !done.has(i.id));
-    onFinish(unfinished, completed);
+    emitFinish(unfinished, completed);
     setPhase("done");
   }
 
+  function acceptBonus(it: StudyItem) {
+    setQueue((q) => [...q, it]);
+    setBonusTaken((b) => [...b, it.id]);
+    setBonusOffer(null);
+    setBonusProjection(null);
+    setPhase("running");
+    setSequenceMode(false);
+    setOvertime(true);
+    openItem(it);
+  }
+
+  function declineBonus() {
+    setBonusOffer(null);
+    setPhase("done");
+  }
+
+  // ---- derived ------------------------------------------------------------
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
   const doneMinutes = queue.filter((i) => done.has(i.id)).reduce((s, i) => s + i.minutes, 0);
   const totalMinutes = queue.reduce((s, i) => s + i.minutes, 0);
   const percentDone = queue.length === 0 ? 0 : Math.round((done.size / queue.length) * 100);
-  // Videos and drills counted separately, so "I watched everything but did no
-  // exercises" is visible rather than hidden inside one number.
+
+  /**
+   * The number that actually matters. Completion says they showed up; this says
+   * whether anything stuck.
+   */
+  const graded = Object.values(scores).filter((s) => s.total > 0);
+  const gradedCorrect = graded.reduce((s, x) => s + x.correct, 0);
+  const gradedTotal = graded.reduce((s, x) => s + x.total, 0);
+  const accuracyPercent =
+    gradedTotal === 0 ? null : Math.round((gradedCorrect / gradedTotal) * 100);
+
   const videos = queue.filter((i) => i.kind === "video");
   const drills = queue.filter((i) => i.kind !== "video");
-  const videoTotal = videos.length;
   const videoDone = videos.filter((i) => done.has(i.id)).length;
-  const drillTotal = drills.length;
   const drillDone = drills.filter((i) => done.has(i.id)).length;
 
-  const wideModal = phase === "warmup_running" || Boolean(activeExercise) || Boolean(activeVideo);
+  const wideModal = Boolean(activeExercise) || Boolean(activeVideo);
+  const finalProjection = projectWith?.(bonusTaken) ?? null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4">
@@ -324,127 +453,6 @@ export function SessionRunner({
           wideModal ? "max-w-2xl" : "max-w-lg"
         }`}
       >
-        {/* ---------------- fill-in-the-blank warm-up offer ---------------- */}
-        {phase === "warmup" && (
-          <div className="p-6">
-            <p className="text-[11px] font-black uppercase tracking-widest text-violet-600">
-              อุ่นเครื่องก่อนเรียน
-            </p>
-            <h2 className="mt-1 text-2xl font-black text-slate-900">{WARMUP_PROMPT_TH}</h2>
-            <p className="mt-1.5 text-sm text-slate-600">{WARMUP_WHY_TH}</p>
-
-            <ul className="mt-4 space-y-1.5">
-              {warmup.map((w, i) => (
-                <li
-                  key={i}
-                  className="flex items-center justify-between rounded-xl bg-violet-50 px-3 py-2.5 text-[13px] font-bold text-violet-900 ring-1 ring-violet-200"
-                >
-                  <span>✏️ เติมคำในช่องว่าง ข้อ {i + 1}</span>
-                  <span className="text-[11px] font-black opacity-70">
-                    ระดับ{RUNG_TH_SHORT[w.level]}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-4 space-y-2">
-              <button
-                type="button"
-                onClick={startWarmup}
-                className="w-full rounded-full bg-violet-600 py-3 text-sm font-black text-white"
-              >
-                เอาสิ ทำ 2 ข้อก่อน
-              </button>
-              <button
-                type="button"
-                onClick={() => afterWarmup(false)}
-                className="w-full rounded-full bg-slate-100 py-3 text-sm font-black text-slate-600"
-              >
-                ข้ามไปเรียนเลย
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ---------------- warm-up: real FITB from the practice bank ---------------- */}
-        {phase === "warmup_running" && (
-          <WarmupFitbRunner
-            levels={warmup.map((w) => w.level)}
-            onDone={() => afterWarmup(true)}
-            onSkip={() => afterWarmup(false)}
-          />
-        )}
-
-        {/* ---------------- backlog choice ---------------- */}
-        {phase === "choose" && (
-          <div className="p-6">
-            <p className="text-[11px] font-black uppercase tracking-widest text-amber-600">
-              มีบทเรียนและแบบฝึกค้างจากครั้งก่อน
-            </p>
-            <h2 className="mt-1 text-2xl font-black text-slate-900">จะเริ่มจากตรงไหนดี?</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              ค้างอยู่ {carryOver.entries.length} บทเรียน/แบบฝึก · ประมาณ{" "}
-              {carryOverMinutes(carryOver)} นาที
-            </p>
-
-            <div className="mt-4 space-y-2">
-              <button
-                type="button"
-                onClick={() => choose("carry_over")}
-                className="w-full rounded-2xl bg-amber-50 p-4 text-left ring-1 ring-amber-200 transition hover:ring-amber-400"
-              >
-                <p className="text-sm font-black text-amber-900">
-                  📌 ทำแบบฝึก / เรียนบทที่ค้างไว้
-                </p>
-                <p className="mt-0.5 text-[11px] text-amber-700">
-                  เคลียร์ของเก่าให้หมด แล้วค่อยต่อของวันนี้เท่าที่เวลาเหลือ
-                </p>
-
-                {/* The actual backlog, so the choice is informed rather than blind. */}
-                <ul className="mt-2.5 space-y-1 border-t border-amber-200 pt-2.5">
-                  {carryOver.entries.slice(0, 6).map((e) => (
-                    <li
-                      key={e.item.id}
-                      className="flex items-center justify-between gap-2 text-[11px] text-amber-900"
-                    >
-                      <span className="min-w-0 truncate">
-                        {e.item.kind === "video" ? "🎬" : e.item.kind === "lesson" ? "📘" : "🏋️"}{" "}
-                        {e.item.titleTh}
-                      </span>
-                      <span className="shrink-0 font-bold opacity-60">
-                        {thaiDay(e.fromDate)} · {e.item.minutes}′
-                      </span>
-                    </li>
-                  ))}
-                  {carryOver.entries.length > 6 && (
-                    <li className="text-[11px] font-bold text-amber-600">
-                      และอีก {carryOver.entries.length - 6} บทเรียน/แบบฝึก
-                    </li>
-                  )}
-                </ul>
-              </button>
-              <button
-                type="button"
-                onClick={() => choose("today")}
-                className="w-full rounded-2xl bg-sky-50 p-4 text-left ring-1 ring-sky-200 transition hover:ring-sky-400"
-              >
-                <p className="text-sm font-black text-sky-900">▶︎ เริ่มของวันนี้เลย</p>
-                <p className="mt-0.5 text-[11px] text-sky-700">
-                  งานค้างจะถูกเก็บไว้ และถามใหม่ทุกครั้งที่เริ่มวันใหม่ (จะสะสมขึ้นเรื่อย ๆ)
-                </p>
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="mt-4 w-full rounded-full py-2 text-xs font-bold text-slate-400"
-            >
-              ปิด
-            </button>
-          </div>
-        )}
-
         {/* ---------------- lecture video, playing in place ---------------- */}
         {activeVideo &&
           phase !== "done" &&
@@ -458,14 +466,14 @@ export function SessionRunner({
                   <button
                     type="button"
                     onClick={closeVideo}
-                    className="rounded-full px-2 py-1 text-xs font-bold text-slate-400"
+                    className="rounded-full bg-slate-100 px-3 py-1.5 text-[13px] font-semibold text-slate-600"
                   >
-                    ← กลับ
+                    ← รายการวันนี้
                   </button>
-                  <p className="min-w-0 flex-1 truncate text-center text-[13px] font-black text-slate-800">
+                  <p className="min-w-0 flex-1 truncate text-center text-[14px] font-bold text-slate-800">
                     🎬 {activeVideo.titleTh}
                   </p>
-                  <span className="w-14 text-right text-[11px] font-black text-slate-400">
+                  <span className="w-12 text-right text-[13px] font-semibold text-slate-400">
                     {activeVideo.minutes}′
                   </span>
                 </div>
@@ -488,16 +496,17 @@ export function SessionRunner({
                   />
                 ) : (
                   <div className="rounded-2xl bg-amber-50 p-5 text-center ring-1 ring-amber-200">
-                    <p className="text-sm font-black text-amber-900">ยังไม่มีวิดีโอบนเซิร์ฟเวอร์</p>
-                    <p className="mt-1 text-[12px] text-amber-800">
-                      บทนี้อยู่ในแผนแล้ว แต่ยังอัปโหลดคลิปไม่ครบ — ปิดแล้วกลับมาใหม่ได้เมื่อมีคลิป
+                    <p className="text-[15px] font-bold text-amber-900">คลิปนี้กำลังจัดทำอยู่</p>
+                    <p className="mt-1 text-[13px] text-amber-800">
+                      บทนี้อยู่ในแผนแล้ว แต่คลิปยังไม่พร้อม — ข้ามไปทำข้อถัดไปได้เลย
+                      เดี๋ยวกลับมาดูทีหลัง
                     </p>
                   </div>
                 )}
 
                 {meta && meta.downloads && meta.downloads.length > 0 && (
-                  <div className="mt-4 rounded-2xl bg-amber-50/80 p-3 ring-1 ring-amber-200">
-                    <p className="text-[11px] font-black uppercase tracking-widest text-amber-800">
+                  <div className="mt-4 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200">
+                    <p className="text-[13px] font-semibold uppercase tracking-widest text-slate-500">
                       เอกสารประกอบ ({meta.downloads.length})
                     </p>
                     <ul className="mt-2 space-y-1.5">
@@ -505,13 +514,13 @@ export function SessionRunner({
                         <li key={d.id}>
                           <a
                             href={`/api/course/download/${d.id}`}
-                            className="flex items-center justify-between gap-3 rounded-xl bg-[#FFCC00] px-3.5 py-2.5 text-[13px] font-black text-slate-900 ring-1 ring-amber-300 transition hover:brightness-105"
+                            className="flex items-center justify-between gap-3 rounded-xl bg-[#FFCC00] px-3.5 py-2.5 text-[14px] font-bold text-slate-900 ring-1 ring-amber-300 transition hover:brightness-105"
                           >
                             <span className="flex min-w-0 items-center gap-2">
                               <span className="shrink-0">PDF</span>
                               <span className="truncate">{d.label}</span>
                             </span>
-                            <span className="shrink-0 text-[11px] font-bold text-slate-700">
+                            <span className="shrink-0 text-[13px] font-semibold text-slate-700">
                               {d.fileSize && d.fileSize > 0
                                 ? d.fileSize >= 1024 * 1024
                                   ? `${(d.fileSize / (1024 * 1024)).toFixed(1)} MB ↓`
@@ -528,28 +537,27 @@ export function SessionRunner({
                 <div className="mt-4 space-y-2">
                   {(alreadyDone || videoJustFinished) &&
                     (() => {
-                      // Include current as done so "next" skips the video we just finished
-                      // even before React re-renders `done`.
+                      // Include the current video so "next" skips it even before
+                      // React re-renders `done`.
                       const doneForNext = new Set(done);
                       doneForNext.add(activeVideo.id);
                       const next = nextAfter(activeVideo.id, doneForNext);
-                      const nextIsLesson =
-                        next != null && (next.kind === "video" || next.kind === "lesson");
-                      const nextIsExercise =
-                        next != null && (next.kind === "exercise" || next.kind === "review");
                       return (
                         <>
-                          <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-center text-sm font-black text-emerald-800 ring-1 ring-emerald-200">
-                            ✓ ดูจบแล้ว — ระบบติ๊กให้อัตโนมัติ
+                          <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-center text-[15px] font-bold text-emerald-800 ring-1 ring-emerald-200">
+                            ✓ ดูจบแล้ว — ติ๊กให้อัตโนมัติ
                           </p>
-                          {next && (nextIsLesson || nextIsExercise) && (
+                          {next && (
                             <button
                               type="button"
                               onClick={() => openItem(next)}
-                              className="w-full rounded-full bg-[#004AAD] px-4 py-3 text-sm font-black text-white"
+                              className="w-full rounded-full bg-[#004AAD] px-4 py-3.5 text-[15px] font-extrabold text-white"
                             >
                               <span className="block truncate">
-                                {nextIsLesson ? "บทเรียนถัดไป" : "แบบฝึกถัดไป"} → {next.titleTh}
+                                {next.kind === "video" || next.kind === "lesson"
+                                  ? "บทเรียนถัดไป"
+                                  : "แบบฝึกถัดไป"}{" "}
+                                → {next.titleTh}
                               </span>
                             </button>
                           )}
@@ -559,7 +567,7 @@ export function SessionRunner({
                   <button
                     type="button"
                     onClick={closeVideo}
-                    className="w-full rounded-full bg-slate-100 py-2.5 text-sm font-black text-slate-600"
+                    className="w-full rounded-full bg-slate-100 py-3 text-[15px] font-semibold text-slate-600"
                   >
                     {alreadyDone || videoJustFinished
                       ? "กลับรายการวันนี้"
@@ -571,7 +579,7 @@ export function SessionRunner({
           })()}
 
         {/* ---------------- an exercise, running in place ---------------- */}
-        {!activeVideo && activeExercise && (() => {
+        {!activeVideo && activeExercise && phase !== "done" && (() => {
           const hasNext = queue.some((i) => i.id !== activeExercise.id && !done.has(i.id));
           const exitExerciseToList = () => {
             clearSequenceTimer();
@@ -579,23 +587,17 @@ export function SessionRunner({
             setActiveExercise(null);
           };
           const onExerciseDone = (correct: number, total: number) => {
-            setScores((s) => ({ ...s, [activeExercise.id]: { correct, total } }));
+            const id = activeExercise.id;
+            setScores((s) => ({ ...s, [id]: { correct, total } }));
             const next = new Set(done);
-            next.add(activeExercise.id);
+            next.add(id);
             setDone(next);
-            // Last outstanding item — go straight to the day summary rather
-            // than dropping back onto a fully-ticked checklist.
             if (queue.every((i) => next.has(i.id))) {
-              clearSequenceTimer();
-              setSequenceMode(false);
-              setActiveExercise(null);
-              const completed = queue.filter((i) => next.has(i.id));
-              onFinish([], completed);
-              setPhase("done");
+              handleQueueCleared(next);
               return;
             }
             if (sequenceMode) {
-              const following = nextPlayableAfter(activeExercise.id, next);
+              const following = nextPlayableAfter(id, next);
               if (following) {
                 if (following.kind === "video") {
                   setActiveExercise(null);
@@ -610,6 +612,20 @@ export function SessionRunner({
             }
             setActiveExercise(null);
           };
+
+          if (activeExercise.id === WARMUP_ID) {
+            return (
+              <WarmupFitbRunner
+                levels={warmup.map((w) => w.level)}
+                onDone={() => onExerciseDone(0, 0)}
+                onSkip={() => {
+                  // Skipping the warm-up ticks it without a score, so it never
+                  // drags the day's accuracy down.
+                  onExerciseDone(0, 0);
+                }}
+              />
+            );
+          }
 
           const lessonRef = activeExercise.exerciseKey
             ? lessonRunnerRefFor(activeExercise.exerciseKey)
@@ -716,17 +732,18 @@ export function SessionRunner({
           );
         })()}
 
-        {/* ---------------- the session ---------------- */}
+        {/* ---------------- the checklist (resume view) ---------------- */}
         {!activeExercise && !activeVideo && (phase === "running" || phase === "timeup") && (
           <div className="p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
+                <p className="text-[13px] font-semibold uppercase tracking-widest text-slate-400">
                   {overtime ? "ต่อเวลา" : "เวลาที่เหลือ"}
                 </p>
+                {/* Deliberately not the loudest thing on screen — the work is. */}
                 <p
-                  className={`font-mono text-4xl font-black tabular-nums ${
-                    secondsLeft === 0 ? "text-rose-600" : "text-slate-900"
+                  className={`font-mono text-2xl font-bold tabular-nums ${
+                    secondsLeft === 0 ? "text-rose-600" : "text-slate-500"
                   }`}
                 >
                   {mm}:{ss}
@@ -735,41 +752,42 @@ export function SessionRunner({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full px-3 py-1.5 text-xs font-bold text-slate-400"
+                className="rounded-full bg-slate-100 px-3.5 py-2 text-[13px] font-semibold text-slate-600"
               >
                 ปิด
               </button>
             </div>
 
-            {/* Percent by ITEMS, not minutes — the bar and the label used to
-                disagree, one counting time and the other things done. */}
-            <div className="mt-3 flex items-end justify-between gap-2">
-              <p className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-                ความคืบหน้าวันนี้
-              </p>
-              <p className="text-2xl font-black leading-none text-emerald-600">
+            <div className="mt-4 flex items-end justify-between gap-2">
+              <p className="text-[15px] font-bold text-slate-800">ความคืบหน้าวันนี้</p>
+              <p className="text-2xl font-extrabold leading-none text-emerald-600">
                 {percentDone}
-                <span className="text-sm">%</span>
+                <span className="text-[15px]">%</span>
               </p>
             </div>
-            <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-slate-100">
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full bg-emerald-500 transition-[width] duration-500"
                 style={{ width: `${percentDone}%` }}
               />
             </div>
-            <p className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-bold text-slate-400">
+            <p className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-slate-500">
               <span>
-                เสร็จแล้ว {done.size} / {queue.length} รายการ
+                เสร็จแล้ว {done.size} / {queue.length}
               </span>
-              {videoTotal > 0 && (
+              {videos.length > 0 && (
                 <span>
-                  🎬 คลิป {videoDone}/{videoTotal}
+                  🎬 {videoDone}/{videos.length}
                 </span>
               )}
-              {drillTotal > 0 && (
+              {drills.length > 0 && (
                 <span>
-                  🏋️ แบบฝึก {drillDone}/{drillTotal}
+                  🏋️ {drillDone}/{drills.length}
+                </span>
+              )}
+              {accuracyPercent !== null && (
+                <span className="font-semibold text-slate-700">
+                  แม่นยำ {accuracyPercent}%
                 </span>
               )}
               <span>
@@ -777,52 +795,28 @@ export function SessionRunner({
               </span>
             </p>
 
-            {(() => {
-              const nextItem = queue.find((i) => !done.has(i.id));
-              const lastDone = [...queue].reverse().find((i) => done.has(i.id));
-              const copy = transitionCopy(
-                lastDone ? (lastDone.kind === "review" ? "exercise" : lastDone.kind) : null,
-                nextItem ? (nextItem.kind === "review" ? "exercise" : nextItem.kind) : null,
-              );
-              const playable = firstPlayable();
-              if (!copy && !playable) return null;
-              return (
-                <div className="mt-4 rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200">
-                  {copy && (
-                    <>
-                      <p className="text-[13px] font-black text-slate-800">{copy.titleTh}</p>
-                      <p className="mt-0.5 text-[11px] text-slate-500">{copy.bodyTh}</p>
-                    </>
-                  )}
-                  {playable && (
-                    <button
-                      type="button"
-                      onClick={startSequence}
-                      className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-[#004AAD] py-3 text-sm font-black text-white transition hover:brightness-110"
-                    >
-                      <span
-                        aria-hidden
-                        className="grid h-7 w-7 place-items-center rounded-full bg-white/20 text-base leading-none"
-                      >
-                        ▶
-                      </span>
-                      <span className="min-w-0 truncate">
-                        {done.size === 0 ? "เริ่มการเรียนวันนี้เลย" : "ทำต่อเนื่องจากการเรียนวันนี้"}
-                      </span>
-                    </button>
-                  )}
-                  {playable && (
-                    <p className="mt-1.5 text-center text-[10px] font-bold text-slate-400">
-                      เปิดบทเรียนและแบบฝึกทีละข้อให้อัตโนมัติ — ไม่ต้องกดทีละอัน
-                    </p>
-                  )}
-                </div>
-              );
-            })()}
+            {firstPlayable() && (
+              <button
+                type="button"
+                onClick={startSequence}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#004AAD] py-4 text-[15px] font-extrabold text-white transition hover:brightness-110"
+              >
+                <span
+                  aria-hidden
+                  className="grid h-7 w-7 place-items-center rounded-full bg-white/20 text-base leading-none"
+                >
+                  ▶
+                </span>
+                <span className="min-w-0 truncate">
+                  {done.size === 0 ? "เริ่มเลย" : "ทำต่อจากที่ค้างไว้"}
+                </span>
+              </button>
+            )}
 
-            <ul className="mt-3 space-y-1.5">
+            <ul className="mt-4 space-y-1.5">
               {queue.map((it) => {
                 const isDone = done.has(it.id);
+                const from = backlogFrom.get(it.id);
                 return (
                   <li key={it.id}>
                     <button
@@ -832,51 +826,58 @@ export function SessionRunner({
                           openVideo(it);
                           return;
                         }
-                        // Runnable exercises open here rather than sending the
-                        // learner off to a separate practice page.
                         if (!isDone && canRunInPlace(it)) {
                           setActiveExercise(it);
                           return;
                         }
                         toggle(it.id);
                       }}
-                      className={`flex w-full items-center gap-3 rounded-xl p-3 text-left ring-1 transition ${
+                      className={`flex w-full items-center gap-3 rounded-xl p-3.5 text-left ring-1 transition ${
                         isDone
                           ? "bg-emerald-50 text-emerald-900 ring-emerald-200"
                           : "bg-slate-50 text-slate-800 ring-slate-200 hover:ring-slate-400"
                       }`}
                     >
                       <span
-                        className={`grid h-5 w-5 shrink-0 place-items-center rounded-md text-[11px] font-black ${
+                        className={`grid h-6 w-6 shrink-0 place-items-center rounded-md text-[13px] font-bold ${
                           isDone ? "bg-emerald-500 text-white" : "bg-white ring-1 ring-slate-300"
                         }`}
                       >
                         {isDone ? "✓" : it.kind === "video" ? "▶" : ""}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className={`block text-[13px] font-bold ${isDone ? "line-through opacity-60" : ""}`}>
-                          {it.kind === "video" ? "🎬" : it.kind === "lesson" ? "📘" : "🏋️"}{" "}
+                        <span
+                          className={`block text-[14px] font-semibold ${
+                            isDone ? "line-through opacity-60" : ""
+                          }`}
+                        >
+                          {it.id === WARMUP_ID
+                            ? "⚡"
+                            : it.kind === "video"
+                              ? "🎬"
+                              : it.kind === "lesson"
+                                ? "📘"
+                                : "🏋️"}{" "}
                           {it.titleTh}
                         </span>
-                        {scores[it.id] ? (
-                          <span className="mt-0.5 block text-[10px] font-black text-emerald-600">
-                            ได้ {scores[it.id].correct}/{scores[it.id].total} ·{" "}
-                            {Math.round((scores[it.id].correct / scores[it.id].total) * 100)}%
+                        {scores[it.id] && scores[it.id].total > 0 ? (
+                          <span className="mt-0.5 block text-[13px] font-bold text-emerald-600">
+                            {scores[it.id].correct}/{scores[it.id].total} ·{" "}
+                            {Math.round((scores[it.id].correct / scores[it.id].total) * 100)}% แม่นยำ
+                          </span>
+                        ) : from ? (
+                          <span className="mt-0.5 block text-[13px] text-amber-700">
+                            ค้างจาก {thaiDay(from)}
                           </span>
                         ) : (
                           it.gateTh && (
-                            <span className="mt-0.5 block text-[10px] text-slate-500">
+                            <span className="mt-0.5 block text-[13px] text-slate-500">
                               {it.gateTh}
                             </span>
                           )
                         )}
-                        {it.kind === "video" && (
-                          <span className="mt-0.5 block text-[10px] font-bold text-[#004AAD]">
-                            {isDone ? "กดเพื่อดูซ้ำ" : "กดเพื่อเปิดวิดีโอ"}
-                          </span>
-                        )}
                       </span>
-                      <span className="shrink-0 text-[11px] font-bold text-slate-400">
+                      <span className="shrink-0 text-[13px] font-semibold text-slate-400">
                         {it.minutes}′
                       </span>
                     </button>
@@ -888,7 +889,7 @@ export function SessionRunner({
             <button
               type="button"
               onClick={finish}
-              className="mt-5 w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white"
+              className="mt-5 w-full rounded-full bg-slate-100 py-3 text-[15px] font-semibold text-slate-600"
             >
               จบการเรียนวันนี้
             </button>
@@ -897,10 +898,12 @@ export function SessionRunner({
 
         {/* ---------------- time is up ---------------- */}
         {phase === "timeup" && !activeExercise && !activeVideo && (
-          <div className="border-t-4 border-rose-500 bg-rose-50 p-6">
-            <p className="text-lg font-black text-rose-900">⏰ หมดเวลาแล้ว</p>
-            <p className="mt-1 text-sm text-rose-700">
-              ยังเหลืออีก {queue.length - done.size} รายการ — จะทำต่อให้จบวันนี้ หรือเก็บไว้ครั้งหน้า?
+          <div className="border-t-4 border-amber-400 bg-amber-50 p-6">
+            <p className="text-[17px] font-extrabold text-amber-900">
+              ครบ {minutes} นาทีแล้ว
+            </p>
+            <p className="mt-1 text-[15px] text-amber-800">
+              ยังเหลืออีก {queue.length - done.size} รายการ — จะทำต่อให้จบ หรือเก็บไว้ครั้งหน้า?
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
@@ -909,14 +912,14 @@ export function SessionRunner({
                   setOvertime(true);
                   setPhase("running");
                 }}
-                className="flex-1 rounded-full bg-white px-4 py-2.5 text-sm font-black text-rose-700 ring-1 ring-rose-300"
+                className="flex-1 rounded-full bg-[#004AAD] px-4 py-3 text-[15px] font-extrabold text-white"
               >
                 ทำต่อให้จบ
               </button>
               <button
                 type="button"
                 onClick={finish}
-                className="flex-1 rounded-full bg-rose-600 px-4 py-2.5 text-sm font-black text-white"
+                className="flex-1 rounded-full bg-white px-4 py-3 text-[15px] font-semibold text-amber-900 ring-1 ring-amber-300"
               >
                 เก็บไว้ครั้งหน้า
               </button>
@@ -924,28 +927,151 @@ export function SessionRunner({
           </div>
         )}
 
+        {/* ---------------- one more? ---------------- */}
+        {phase === "bonus" && bonusOffer && (
+          <div className="p-6">
+            <p className="text-4xl">⚡</p>
+            <p className="mt-2 text-[13px] font-semibold uppercase tracking-widest text-emerald-600">
+              ครบ {minutes} นาทีของวันนี้แล้ว
+            </p>
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900">
+              ยังไหวอยู่ไหม? ทำต่ออีกข้อ
+            </h2>
+            <p className="mt-1.5 text-[15px] leading-relaxed text-slate-600">
+              ถ้าทำเพิ่มตอนนี้ งานของวันถัดไปจะถูกดึงมาให้ — แผนทั้งหมดขยับเร็วขึ้น
+            </p>
+
+            <div className="mt-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+              <p className="text-[13px] font-semibold uppercase tracking-widest text-slate-400">
+                ข้อถัดไปในแผน
+              </p>
+              <p className="mt-1 text-[16px] font-bold text-slate-800">
+                {bonusOffer.kind === "video" ? "🎬" : bonusOffer.kind === "lesson" ? "📘" : "🏋️"}{" "}
+                {bonusOffer.titleTh}
+              </p>
+              <p className="mt-0.5 text-[13px] text-slate-500">
+                ประมาณ {bonusOffer.minutes} นาที
+                {bonusOffer.gateTh ? ` · ${bonusOffer.gateTh}` : ""}
+              </p>
+            </div>
+
+            {bonusProjection && bonusProjection.daysSaved > 0 && (
+              <p className="mt-3 rounded-2xl bg-emerald-50 p-3.5 text-[14px] text-emerald-900 ring-1 ring-emerald-200">
+                ทำข้อนี้แล้วจะเรียนจบเร็วขึ้น{" "}
+                <strong>{bonusProjection.daysSaved} วัน</strong> — เป็นวันที่{" "}
+                <strong>{thaiFullDay(bonusProjection.date)}</strong>
+              </p>
+            )}
+
+            <div className="mt-4 space-y-2">
+              <button
+                type="button"
+                onClick={() => acceptBonus(bonusOffer)}
+                className="w-full rounded-full bg-emerald-600 py-4 text-[15px] font-extrabold text-white transition hover:brightness-110"
+              >
+                เอา ทำต่ออีกข้อ
+              </button>
+              <button
+                type="button"
+                onClick={declineBonus}
+                className="w-full rounded-full bg-slate-100 py-3.5 text-[15px] font-semibold text-slate-600"
+              >
+                พอแค่นี้ก่อน
+              </button>
+            </div>
+            <p className="mt-2 text-center text-[13px] text-slate-400">
+              ทำครบตามแผนแล้ว — ส่วนนี้เป็นของแถม ไม่ทำก็ไม่ถือว่าตามไม่ทัน
+            </p>
+          </div>
+        )}
+
         {/* ---------------- summary ---------------- */}
         {phase === "done" && (
           <div className="p-6 text-center">
-            <p className="text-5xl">🎉</p>
-            <h2 className="mt-3 text-2xl font-black text-slate-900">
-              {dayDoneCopy(percentDone).titleTh}
+            <p className="text-5xl">{accuracyPercent !== null && accuracyPercent < 50 ? "📘" : "🎉"}</p>
+            <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900">
+              {dayDoneCopy(percentDone, accuracyPercent).titleTh}
             </h2>
-            <p className="mt-1 text-[12px] text-slate-500">{dayDoneCopy(percentDone).bodyTh}</p>
-            <p className="mt-1 text-sm text-slate-600">
-              วันนี้ทำได้ <strong className="text-emerald-600">{percentDone}%</strong> ·{" "}
-              {done.size}/{queue.length} รายการ · {doneMinutes} นาที
-              {warmupTaken ? " · อุ่นเครื่องเติมคำ 2 ข้อ" : ""}
+            <p className="mt-1.5 text-[15px] leading-relaxed text-slate-600">
+              {dayDoneCopy(percentDone, accuracyPercent).bodyTh}
             </p>
-            {queue.length - done.size > 0 && (
-              <p className="mt-3 rounded-xl bg-amber-50 p-3 text-[12px] text-amber-800 ring-1 ring-amber-200">
-                เก็บงานค้างไว้ {queue.length - done.size} รายการ — จะถามอีกครั้งตอนเริ่มวันถัดไป
+
+            {/* Two numbers, side by side, because they mean different things. */}
+            <div className="mt-4 grid grid-cols-2 gap-2 text-left">
+              <div className="rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200">
+                <p className="text-[13px] font-semibold uppercase tracking-wide text-slate-400">
+                  ทำได้
+                </p>
+                <p className="text-2xl font-extrabold text-slate-800">
+                  {done.size}
+                  <span className="text-[15px] font-bold text-slate-400">/{queue.length}</span>
+                </p>
+                <p className="text-[13px] text-slate-500">{doneMinutes} นาที</p>
+              </div>
+              <div
+                className={`rounded-2xl p-3.5 ring-1 ${
+                  accuracyPercent === null
+                    ? "bg-slate-50 ring-slate-200"
+                    : accuracyPercent >= 70
+                      ? "bg-emerald-50 ring-emerald-200"
+                      : "bg-amber-50 ring-amber-200"
+                }`}
+              >
+                <p
+                  className={`text-[13px] font-semibold uppercase tracking-wide ${
+                    accuracyPercent === null
+                      ? "text-slate-400"
+                      : accuracyPercent >= 70
+                        ? "text-emerald-600"
+                        : "text-amber-600"
+                  }`}
+                >
+                  ความแม่นยำ
+                </p>
+                <p
+                  className={`text-2xl font-extrabold ${
+                    accuracyPercent === null
+                      ? "text-slate-400"
+                      : accuracyPercent >= 70
+                        ? "text-emerald-800"
+                        : "text-amber-800"
+                  }`}
+                >
+                  {accuracyPercent === null ? "—" : `${accuracyPercent}%`}
+                </p>
+                <p className="text-[13px] text-slate-500">
+                  {accuracyPercent === null
+                    ? "วันนี้ไม่มีข้อที่ให้คะแนน"
+                    : `ถูก ${gradedCorrect} จาก ${gradedTotal} ข้อ`}
+                </p>
+              </div>
+            </div>
+
+            {bonusTaken.length > 0 && (
+              <p className="mt-3 rounded-2xl bg-emerald-50 p-3.5 text-[14px] text-emerald-900 ring-1 ring-emerald-200">
+                ⚡ ทำเกินแผน {bonusTaken.length} รายการ
+                {finalProjection && finalProjection.daysSaved > 0 ? (
+                  <>
+                    {" "}
+                    — เรียนจบเร็วขึ้น <strong>{finalProjection.daysSaved} วัน</strong> เป็นวันที่{" "}
+                    <strong>{thaiFullDay(finalProjection.date)}</strong>
+                  </>
+                ) : (
+                  " — แผนถูกดึงให้เร็วขึ้นแล้ว"
+                )}
               </p>
             )}
+
+            {queue.length - done.size > 0 && (
+              <p className="mt-3 rounded-2xl bg-amber-50 p-3.5 text-[14px] text-amber-800 ring-1 ring-amber-200">
+                เก็บงานค้างไว้ {queue.length - done.size} รายการ — จะขึ้นให้ก่อนในครั้งถัดไป
+              </p>
+            )}
+
             <button
               type="button"
               onClick={onClose}
-              className="mt-5 w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white"
+              className="mt-5 w-full rounded-full bg-[#004AAD] py-4 text-[15px] font-extrabold text-white"
             >
               เสร็จสิ้น
             </button>

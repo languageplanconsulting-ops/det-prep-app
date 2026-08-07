@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face { font-family:'Baloo 2'; src:url('fonts/baloo-2-latin-400-normal.woff2') format('woff2'); font-weight:400; font-display:block; }
+@font-face { font-family:'Baloo 2'; src:url('fonts/baloo-2-latin-700-normal.woff2') format('woff2'); font-weight:700; font-display:block; }
+@font-face { font-family:'Kanit'; src:url('fonts/kanit-thai-400-normal.woff2') format('woff2'); font-weight:400; font-display:block; unicode-range:U+0E01-0E5B,U+200C-200D,U+25CC; }
+@font-face { font-family:'Kanit'; src:url('fonts/kanit-latin-400-normal.woff2') format('woff2'); font-weight:400; font-display:block; }
+@font-face { font-family:'Kanit'; src:url('fonts/kanit-thai-500-normal.woff2') format('woff2'); font-weight:500; font-display:block; unicode-range:U+0E01-0E5B,U+200C-200D,U+25CC; }
+@font-face { font-family:'Kanit'; src:url('fonts/kanit-latin-500-normal.woff2') format('woff2'); font-weight:500; font-display:block; }
+@font-face { font-family:'Kanit'; src:url('fonts/kanit-thai-700-normal.woff2') format('woff2'); font-weight:700; font-display:block; unicode-range:U+0E01-0E5B,U+200C-200D,U+25CC; }
+@font-face { font-family:'Kanit'; src:url('fonts/kanit-latin-700-normal.woff2') format('woff2'); font-weight:700; font-display:block; }
+
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+  background:transparent; font-family:'Baloo 2','Kanit',ui-sans-serif,system-ui,sans-serif; }
+
+#stage { position:relative; width:720px; height:1280px; overflow:hidden;
+  background:transparent; }
+#backdrop { position:absolute; inset:0; background:transparent; z-index:0; }
+
+#video-wrap { position:absolute; left:0; top:0; width:720px; height:1280px;
+  overflow:hidden; z-index:1; }
+#video-wrap video { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
+
+#scrim { position:absolute; left:14px; top:150px; width:692px; height:1116px;
+  background:rgba(2,10,28,0.72); border-radius:18px; z-index:2; }
+
+.kicker { position:absolute; left:38px; top:166px; width:640px;
+  font-family:'Kanit',sans-serif; font-weight:700; font-size:19px; letter-spacing:.14em;
+  text-transform:uppercase; color:#8fb8ff; z-index:6; }
+
+/* top leaves room for a label above the FIRST line too */
+.essay { position:absolute; left:42px; top:238px; width:636px;
+  font-family:'Baloo 2',sans-serif; font-weight:400; color:#fff;
+  text-shadow:0 2px 10px rgba(0,0,0,.55); z-index:6; }
+.essay .w { opacity:0; }
+
+/* ── inline annotation: underline + highlight, label ABOVE, same box ────── */
+/* line-height:1.15 keeps the inline-block's box tight to the glyphs — if it
+   inherits the paragraph's big line-height, bottom:100% on the label
+   overshoots into the line above. */
+.ann { position:relative; display:inline-block; white-space:nowrap;
+  line-height:1.15; vertical-align:baseline; margin:0 4px; }
+/* a real highlighter: solid gold ink, text flips to dark as the wipe lands
+   (translucent gold over navy just goes muddy olive) */
+.ann .hl { position:absolute; left:-6px; right:-6px; top:-4px; bottom:-2px;
+  background:#ffcc00; border-radius:5px; z-index:-1;
+  transform:scaleX(0); transform-origin:0 50%; }
+.ann .w { text-shadow:none; }
+.ann .ul { position:absolute; left:-2px; right:-2px; bottom:-6px; height:4px;
+  background:#ffcc00; border-radius:2px;
+  transform:scaleX(0); transform-origin:0 50%; }
+/* compact: it has to fit in the gap the line-height opens up */
+.ann .lb { position:absolute; bottom:100%; left:0; margin-bottom:7px;
+  white-space:nowrap; opacity:0;
+  font-family:'Kanit',sans-serif; font-weight:500; font-size:18px;
+  line-height:1.1; color:#231a00; background:#ffcc00;
+  border-radius:7px; padding:3px 9px; text-shadow:none; }
+.ann .lb.right { left:auto; right:0; }
+.ann .lb.center { left:50%; transform:translateX(-50%); }
+
+/* ── full explanation page: brand blue + gold only, all Thai in Kanit ───── */
+.page { position:absolute; left:26px; top:162px; width:668px;
+  background:#004aad; border:4px solid #ffcc00; border-radius:16px;
+  padding:22px 26px 26px; z-index:10; }
+.page .pk { font-family:'Kanit',sans-serif; font-weight:700; font-size:18px;
+  letter-spacing:.13em; text-transform:uppercase; color:#ffcc00; opacity:0; }
+.page .pt { font-family:'Kanit',sans-serif; font-weight:700; font-size:38px;
+  color:#fff; line-height:1.32; margin-top:8px; opacity:0; }
+.page .pl { font-family:'Kanit',sans-serif; font-weight:400; font-size:26px;
+  color:#fff; line-height:1.55; margin-top:14px; padding-left:26px;
+  position:relative; opacity:0; }
+.page .pl::before { content:''; position:absolute; left:0; top:15px;
+  width:12px; height:12px; background:#ffcc00; border-radius:3px; }
+.page .pl b { color:#ffcc00; font-weight:700; }
+
+/* word-focus page: coast -> the coast */
+.page .wf { display:flex; align-items:center; justify-content:center;
+  gap:18px; margin:22px 0 6px; flex-wrap:wrap; }
+.page .wf .before { font-family:'Kanit',sans-serif; font-weight:400;
+  font-size:48px; color:#9fc0ee; opacity:0; }
+.page .wf .arrow { font-family:'Kanit',sans-serif; font-weight:700;
+  font-size:38px; color:#ffcc00; opacity:0; }
+.page .wf .after { font-family:'Kanit',sans-serif; font-weight:700;
+  font-size:52px; color:#fff; opacity:0; }
+.page .wf .after em { font-style:normal; color:#ffcc00; }
+
+/* ── final essay card: four labelled paragraphs, sized to stop ABOVE the
+      diagram so it never covers it ─────────────────────────────────────── */
+#final-card { position:absolute; left:22px; top:150px; width:676px;
+  height:564px;
+  background:#004aad; border:4px solid #ffcc00; border-radius:16px;
+  padding:16px 22px 14px; z-index:11;
+  display:flex; flex-direction:column; }
+#final-card .fk-row { display:flex; align-items:baseline;
+  justify-content:space-between; margin-bottom:8px; }
+#final-card .fk { font-family:'Kanit',sans-serif; font-weight:700;
+  font-size:17px; letter-spacing:.14em; text-transform:uppercase;
+  color:#ffcc00; }
+#final-card .fp { margin-bottom:9px; }
+#final-card .fpl { font-family:'Kanit',sans-serif; font-weight:700;
+  font-size:15px; letter-spacing:.1em; text-transform:uppercase;
+  color:#9fc0ee; margin-bottom:1px; }
+#final-card .ft { font-family:'Baloo 2',sans-serif; font-weight:400;
+  font-size:19px; color:#fff; line-height:1.35; }
+#final-card .ft b { color:#ffcc00; font-weight:700; }
+#final-card .fw { font-family:'Kanit',sans-serif; font-weight:700;
+  font-size:18px; color:#fff; white-space:nowrap; }
+
+#diagram-wrap { position:absolute; left:50px; top:726px;
+  width:620px; height:361px; overflow:hidden;
+  border-radius:12px; background:#fff; z-index:5; }
+#diagram-inner { position:absolute; left:0; top:0;
+  width:620px; height:361px; transform-origin:0 0; }
+#diagram-inner img { width:620px; height:361px; display:block; }
+/* spread only needs to reach the container edge in LOCAL coords (<=620px);
+   the zoom multiplies it, so 9999px becomes a ~30000px shadow that Chrome
+   stalls rasterising frame after frame. 800px covers it at every zoom level. */
+#spot { position:absolute; left:0; top:0; width:10px; height:10px;
+  border:3px solid #ffcc00; border-radius:7px;
+  box-shadow:0 0 0 800px rgba(0,0,0,0.62); opacity:0; }
+
+#counter { position:absolute; left:22px; top:34px;
+  font-family:'Kanit',sans-serif; font-weight:700; font-size:26px; color:#fff;
+  background:#004aad; border-radius:10px; padding:7px 15px; z-index:9; }
+#counter .goal { color:#ffcc00; }
+
+#endcard { position:absolute; inset:0; background:#004aad; z-index:12;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; }
+#endcard .mins { font-family:'Kanit',sans-serif; font-weight:700; font-size:64px;
+  color:#fff; opacity:0; }
+/* real width + scaleX: scaling a 0px-wide element renders nothing */
+#endcard .rule { width:240px; height:9px; background:#ffcc00; border-radius:5px;
+  margin:34px 0; transform-origin:50% 50%; }
+#endcard .band { font-family:'Baloo 2',sans-serif; font-weight:700; font-size:96px;
+  color:#ffcc00; letter-spacing:.03em; opacity:0; }
+#endcard .wc { font-family:'Kanit',sans-serif; font-weight:500; font-size:38px;
+  color:#fff; margin-top:26px; opacity:0; }
+</style>
+</head>
+<body>
+<div id="stage" data-composition-id="ielts-tutorial" data-start="0"
+     data-duration="389.5833" data-fps="24"
+     data-width="720" data-height="1280">
+<div id="backdrop"></div>
+<div id="scrim"></div>
+<div id="diagram-wrap"><div id="diagram-inner"><img src="diagram.jpg" alt=""><div id="spot"></div></div></div>
+<div id="counter"><span id="wcount">0</span><span class="goal"> / 150</span></div>
+<div class="clip" id="k-intro" data-start="13.25" data-duration="30.875" data-track-index="4"><div class="kicker" id="kick-intro">Introduction · บทนำ</div></div>
+<div class="clip" id="p-intro" data-start="13.25" data-duration="30.875" data-track-index="5"><div class="essay" id="essay-intro" style="font-size:42px;line-height:2.35"><span class="w" id="intro-w0">The</span> <span class="w" id="intro-w1">diagram</span> <span class="w" id="intro-w2">illustrates</span> <span class="w" id="intro-w3">the</span> <span class="w" id="intro-w4">process</span> <span class="w" id="intro-w5">of</span> <span class="w" id="intro-w6">the</span> <span class="w" id="intro-w7">formation</span> <span class="w" id="intro-w8">of</span> <span class="ann" id="intro-a1"><span class="hl" id="intro-a1-hl"></span><span class="ul" id="intro-a1-ul"></span><span class="lb right" id="intro-a1-lb">คำนามขยายคำนาม → ต้องมีขีด</span><span class="w" id="intro-w9">rain-shadow</span> <span class="w" id="intro-w10">deserts</span></span> <span class="w" id="intro-w11">from</span> <span class="w" id="intro-w12">start</span> <span class="w" id="intro-w13">to</span> <span class="w" id="intro-w14">finish.</span></div></div>
+<div class="clip" id="k-overview" data-start="48.0" data-duration="68.9167" data-track-index="4"><div class="kicker" id="kick-overview">Overview · ภาพรวม</div></div>
+<div class="clip" id="p-overview" data-start="48.0" data-duration="68.9167" data-track-index="5"><div class="essay" id="essay-overview" style="font-size:37px;line-height:2.35"><span class="w" id="overview-w0">Overall,</span> <span class="w" id="overview-w1">the</span> <span class="w" id="overview-w2">process</span> <span class="w" id="overview-w3">entails</span> <span class="w" id="overview-w4">seven</span> <span class="w" id="overview-w5">steps</span> <span class="w" id="overview-w6">in</span> <span class="w" id="overview-w7">total,</span> <span class="ann" id="overview-a1"><span class="hl" id="overview-a1-hl"></span><span class="ul" id="overview-a1-ul"></span><span class="lb" id="overview-a1-lb">preposition + คำนาม</span><span class="w" id="overview-w8">starting</span> <span class="w" id="overview-w9">with</span> <span class="w" id="overview-w10">the</span> <span class="w" id="overview-w11">approach</span></span> <span class="w" id="overview-w12">of</span> <span class="w" id="overview-w13">winds</span> <span class="w" id="overview-w14">from</span> <span class="ann" id="overview-a2"><span class="hl" id="overview-a2-hl"></span><span class="ul" id="overview-a2-ul"></span><span class="lb" id="overview-a2-lb">article: คำนามเอกพจน์นับได้</span><span class="w" id="overview-w15">the</span> <span class="w" id="overview-w16">coast</span></span> <span class="w" id="overview-w17">and</span> <span class="w" id="overview-w18">culminating</span> <span class="w" id="overview-w19">in</span> <span class="w" id="overview-w20">dry</span> <span class="w" id="overview-w21">winds</span> <span class="w" id="overview-w22">reaching</span> <span class="ann" id="overview-a3"><span class="hl" id="overview-a3-hl"></span><span class="ul" id="overview-a3-ul"></span><span class="lb right" id="overview-a3-lb">นับได้ → เติม s</span><span class="w" id="overview-w23">inland</span> <span class="w" id="overview-w24">areas,</span></span> <span class="ann" id="overview-a4"><span class="hl" id="overview-a4-hl"></span><span class="ul" id="overview-a4-ul"></span><span class="lb" id="overview-a4-lb">S + V , V-ing (complex structure)</span><span class="w" id="overview-w25">resulting</span> <span class="w" id="overview-w26">in</span> <span class="w" id="overview-w27">a</span> <span class="w" id="overview-w28">rain-shadow</span> <span class="w" id="overview-w29">desert.</span></span></div></div>
+<div class="clip" id="k-body1" data-start="117.7917" data-duration="83.9583" data-track-index="4"><div class="kicker" id="kick-body1">Body 1 · ขั้นตอนที่ 1–5</div></div>
+<div class="clip" id="p-body1" data-start="117.7917" data-duration="83.9583" data-track-index="5"><div class="essay" id="essay-body1" style="font-size:34px;line-height:2.35"><span class="ann" id="body1-a1"><span class="hl" id="body1-a1-hl"></span><span class="ul" id="body1-a1-ul"></span><span class="lb" id="body1-a1-lb">transitional word</span><span class="w" id="body1-w0">To</span> <span class="w" id="body1-w1">begin</span> <span class="w" id="body1-w2">with,</span></span> <span class="w" id="body1-w3">winds</span> <span class="w" id="body1-w4">from</span> <span class="w" id="body1-w5">the</span> <span class="w" id="body1-w6">sea</span> <span class="w" id="body1-w7">approach</span> <span class="w" id="body1-w8">the</span> <span class="w" id="body1-w9">coast</span> <span class="ann" id="body1-a2"><span class="hl" id="body1-a2-hl"></span><span class="ul" id="body1-a2-ul"></span><span class="lb right" id="body1-a2-lb">before + V-ing</span><span class="w" id="body1-w10">before</span> <span class="w" id="body1-w11">being</span> <span class="w" id="body1-w12">pushed</span> <span class="w" id="body1-w13">upwards.</span></span> <span class="ann" id="body1-a3"><span class="hl" id="body1-a3-hl"></span><span class="ul" id="body1-a3-ul"></span><span class="lb" id="body1-a3-lb">transitional word</span><span class="w" id="body1-w14">Subsequently,</span></span> <span class="ann" id="body1-a4"><span class="hl" id="body1-a4-hl"></span><span class="ul" id="body1-a4-ul"></span><span class="lb" id="body1-a4-lb">as + S V , S V</span><span class="w" id="body1-w15">as</span> <span class="w" id="body1-w16">the</span> <span class="w" id="body1-w17">air</span> <span class="w" id="body1-w18">rises,</span></span> <span class="w" id="body1-w19">it</span> <span class="w" id="body1-w20">becomes</span> <span class="w" id="body1-w21">moist</span> <span class="w" id="body1-w22">and</span> <span class="w" id="body1-w23">cool.</span> <span class="ann" id="body1-a5"><span class="hl" id="body1-a5-hl"></span><span class="ul" id="body1-a5-ul"></span><span class="lb" id="body1-a5-lb">transitional word</span><span class="w" id="body1-w24">In</span> <span class="w" id="body1-w25">the</span> <span class="w" id="body1-w26">following</span> <span class="w" id="body1-w27">step,</span></span> <span class="ann" id="body1-a6"><span class="hl" id="body1-a6-hl"></span><span class="ul" id="body1-a6-ul"></span><span class="lb" id="body1-a6-lb">the = พูดถึงมาแล้ว (referencing)</span><span class="w" id="body1-w28">the</span> <span class="w" id="body1-w29">cool</span> <span class="w" id="body1-w30">moist</span> <span class="w" id="body1-w31">air</span></span> <span class="ann" id="body1-a7"><span class="hl" id="body1-a7-hl"></span><span class="ul" id="body1-a7-ul"></span><span class="lb" id="body1-a7-lb">present simple · clouds นับได้ +s</span><span class="w" id="body1-w32">forms</span> <span class="w" id="body1-w33">clouds,</span></span> <span class="ann" id="body1-a8"><span class="hl" id="body1-a8-hl"></span><span class="ul" id="body1-a8-ul"></span><span class="lb right" id="body1-a8-lb">S + V , which</span><span class="w" id="body1-w34">which</span> <span class="w" id="body1-w35">result</span> <span class="w" id="body1-w36">in</span> <span class="w" id="body1-w37">rainfall.</span></span></div></div>
+<div class="clip" id="k-body2a" data-start="203.6667" data-duration="64.0416" data-track-index="4"><div class="kicker" id="kick-body2a">Body 2 · ขั้นตอนที่ 6</div></div>
+<div class="clip" id="p-body2a" data-start="203.6667" data-duration="64.0416" data-track-index="5"><div class="essay" id="essay-body2a" style="font-size:30px;line-height:2.35"><span class="ann" id="body2a-a1"><span class="hl" id="body2a-a1-hl"></span><span class="ul" id="body2a-a1-ul"></span><span class="lb" id="body2a-a1-lb">preposition + คำนาม</span><span class="w" id="body2a-w0">With</span> <span class="w" id="body2a-w1">regard</span> <span class="w" id="body2a-w2">to</span></span> <span class="w" id="body2a-w3">the</span> <span class="w" id="body2a-w4">remaining</span> <span class="w" id="body2a-w5">stages</span> <span class="w" id="body2a-w6">of</span> <span class="w" id="body2a-w7">the</span> <span class="w" id="body2a-w8">process,</span> <span class="ann" id="body2a-a2"><span class="hl" id="body2a-a2-hl"></span><span class="ul" id="body2a-a2-ul"></span><span class="lb" id="body2a-a2-lb">after + คำนาม (ไม่ใช่ประโยค)</span><span class="w" id="body2a-w9">after</span> <span class="w" id="body2a-w10">the</span> <span class="w" id="body2a-w11">rainfall,</span></span> <span class="w" id="body2a-w12">the</span> <span class="w" id="body2a-w13">dry</span> <span class="w" id="body2a-w14">air</span> <span class="w" id="body2a-w15">continues</span> <span class="w" id="body2a-w16">to</span> <span class="w" id="body2a-w17">move</span> <span class="w" id="body2a-w18">over</span> <span class="w" id="body2a-w19">the</span> <span class="w" id="body2a-w20">mountain</span> <span class="ann" id="body2a-a3"><span class="hl" id="body2a-a3-hl"></span><span class="ul" id="body2a-a3-ul"></span><span class="lb" id="body2a-a3-lb">before + V-ing</span><span class="w" id="body2a-w21">before</span> <span class="w" id="body2a-w22">going</span> <span class="w" id="body2a-w23">down</span></span> <span class="w" id="body2a-w24">along</span> <span class="w" id="body2a-w25">the</span> <span class="w" id="body2a-w26">leeward</span> <span class="w" id="body2a-w27">side</span> <span class="ann" id="body2a-a4"><span class="hl" id="body2a-a4-hl"></span><span class="ul" id="body2a-a4-ul"></span><span class="lb right" id="body2a-a4-lb">ตามหลัง before → ต้องเป็น V-ing</span><span class="w" id="body2a-w28">and</span> <span class="w" id="body2a-w29">reaching</span></span> <span class="w" id="body2a-w30">the</span> <span class="w" id="body2a-w31">bottom</span> <span class="w" id="body2a-w32">of</span> <span class="w" id="body2a-w33">the</span> <span class="w" id="body2a-w34">mountain,</span> <span class="ann" id="body2a-a5"><span class="hl" id="body2a-a5-hl"></span><span class="ul" id="body2a-a5-ul"></span><span class="lb right" id="body2a-a5-lb">S + V , which</span><span class="w" id="body2a-w35">which</span> <span class="w" id="body2a-w36">continues</span> <span class="w" id="body2a-w37">towards</span> <span class="w" id="body2a-w38">inland</span> <span class="w" id="body2a-w39">areas.</span></span></div></div>
+<div class="clip" id="k-body2b" data-start="267.8333" data-duration="110.2917" data-track-index="4"><div class="kicker" id="kick-body2b">Body 2 · ขั้นตอนที่ 7</div></div>
+<div class="clip" id="p-body2b" data-start="267.8333" data-duration="110.2917" data-track-index="5"><div class="essay" id="essay-body2b" style="font-size:32px;line-height:2.35"><span class="ann" id="body2b-a1"><span class="hl" id="body2b-a1-hl"></span><span class="ul" id="body2b-a1-ul"></span><span class="lb" id="body2b-a1-lb">transitional word</span><span class="w" id="body2b-w0">In</span> <span class="w" id="body2b-w1">the</span> <span class="w" id="body2b-w2">final</span> <span class="w" id="body2b-w3">step,</span></span> <span class="ann" id="body2b-a2"><span class="hl" id="body2b-a2-hl"></span><span class="ul" id="body2b-a2-ul"></span><span class="lb" id="body2b-a2-lb">when + S V , S V (subordinating conjunction)</span><span class="w" id="body2b-w4">when</span></span> <span class="ann" id="body2b-a3"><span class="hl" id="body2b-a3-hl"></span><span class="ul" id="body2b-a3-ul"></span><span class="lb" id="body2b-a3-lb">referencing</span><span class="w" id="body2b-w5">these</span> <span class="w" id="body2b-w6">dry</span> <span class="w" id="body2b-w7">winds</span></span> <span class="w" id="body2b-w8">reach</span> <span class="w" id="body2b-w9">the</span> <span class="w" id="body2b-w10">inland</span> <span class="w" id="body2b-w11">area,</span> <span class="w" id="body2b-w12">they</span> <span class="w" id="body2b-w13">lead</span> <span class="w" id="body2b-w14">to</span> <span class="w" id="body2b-w15">the</span> <span class="w" id="body2b-w16">formation</span> <span class="w" id="body2b-w17">of</span> <span class="w" id="body2b-w18">a</span> <span class="w" id="body2b-w19">rain-shadow</span> <span class="w" id="body2b-w20">desert,</span> <span class="ann" id="body2b-a4"><span class="hl" id="body2b-a4-hl"></span><span class="ul" id="body2b-a4-ul"></span><span class="lb" id="body2b-a4-lb">จบไม่เป็น ให้ใช้ , marking the completion of…</span><span class="w" id="body2b-w21">marking</span> <span class="w" id="body2b-w22">the</span> <span class="w" id="body2b-w23">completion</span></span> <span class="w" id="body2b-w24">of</span> <span class="w" id="body2b-w25">the</span> <span class="w" id="body2b-w26">rain-shadow</span> <span class="w" id="body2b-w27">desert</span> <span class="w" id="body2b-w28">formation</span> <span class="w" id="body2b-w29">process.</span></div></div>
+<div class="clip" id="page-pg-dash" data-start="23.4583" data-duration="19.3334" data-track-index="7"><div class="page"><div class="pk" id="pg-dash-pk">Grammar</div><div class="pt" id="pg-dash-pt">คำนามขยายคำนาม → ต้องมีขีด</div><div class="pl" id="pg-dash-l0">เอาคำนาม 2 คำมาต่อกัน แล้วตัวหน้าขยายตัวหลัง → ใส่ <b>hyphen</b></div><div class="pl" id="pg-dash-l1"><b>rain-shadow</b> deserts ✓ &nbsp;·&nbsp; a <b>well-known</b> person ✓</div><div class="pl" id="pg-dash-l2">แต่ถ้าวางไว้หลัง verb to be → <b>ไม่มีขีด</b>: the people are well known</div></div></div>
+<div class="clip" id="page-pg-article" data-start="75.125" data-duration="12.875" data-track-index="7"><div class="page"><div class="pk" id="pg-article-pk">Article</div><div class="pt" id="pg-article-pt">คำนามเอกพจน์นับได้ ต้องมี a / the</div><div class="wf"><span class="before" id="pg-article-wb">coast</span><span class="arrow" id="pg-article-wa">→</span><span class="after" id="pg-article-wc"><em>the</em> coast</span></div><div class="pl" id="pg-article-l0">โจทย์ให้คำว่า <b>coast</b> มาเฉยๆ — เราต้องใส่ article ให้เขาเอง</div><div class="pl" id="pg-article-l1">เอกพจน์นับได้ → <b>a coast</b> หรือ <b>the coast</b></div><div class="pl" id="pg-article-l2">ถ้าไม่ใส่ article ก็ต้องเป็นพหูพจน์ → <b>coasts</b></div></div></div>
+<div class="clip" id="page-pg-passive" data-start="134.6667" data-duration="6.4166" data-track-index="7"><div class="page"><div class="pk" id="pg-passive-pk">Complex structure</div><div class="pt" id="pg-passive-pt">before + being + V3</div><div class="pl" id="pg-passive-l0"><b>before</b> ตามด้วย V-ing เสมอ</div><div class="pl" id="pg-passive-l1"><b>being pushed</b> = passive voice (ถูกกระทำ)</div></div></div>
+<div class="clip" id="page-pg-transitional" data-start="193.625" data-duration="7.2083" data-track-index="7"><div class="page"><div class="pk" id="pg-transitional-pk">Transitional words</div><div class="pt" id="pg-transitional-pt">ขึ้นประโยคใหม่ ต้องมีคำเชื่อมทุกครั้ง</div><div class="pl" id="pg-transitional-l0"><b>To begin with</b> — เริ่มขั้นตอนแรก</div><div class="pl" id="pg-transitional-l1"><b>Subsequently</b> · <b>In the following step</b> — ขั้นต่อมา</div><div class="pl" id="pg-transitional-l2"><b>In the final step</b> — ขั้นสุดท้าย</div></div></div>
+<div class="clip" id="page-pg-reminder" data-start="310.3333" data-duration="14.125" data-track-index="7"><div class="page"><div class="pk" id="pg-reminder-pk">Reminder</div><div class="pt" id="pg-reminder-pt">3 อย่างที่ต้องทำทุกครั้ง</div><div class="pl" id="pg-reminder-l0">1. ทุกประโยคเป็น <b>present simple</b></div><div class="pl" id="pg-reminder-l1">2. ขึ้นประโยคใหม่ ต้องมี <b>transitional word</b></div><div class="pl" id="pg-reminder-l2">3. ต้องมี <b>complex structure</b></div></div></div>
+<div class="clip" id="page-pg-complex" data-start="325.1667" data-duration="21.2083" data-track-index="7"><div class="page"><div class="pk" id="pg-complex-pk">Complex structures</div><div class="pt" id="pg-complex-pt">ทั้งหมดที่ใช้ในคำตอบนี้</div><div class="pl" id="pg-complex-l0"><b>as</b> + S V , S V &nbsp;·&nbsp; <b>when</b> + S V , S V</div><div class="pl" id="pg-complex-l1">S + V , <b>V-ing</b> &nbsp;·&nbsp; S + V , <b>which</b> + V</div><div class="pl" id="pg-complex-l2"><b>before</b> + V-ing</div></div></div>
+<div class="clip" id="page-pg-article2" data-start="351.5" data-duration="24.875" data-track-index="7"><div class="page"><div class="pk" id="pg-article2-pk">Reminder</div><div class="pt" id="pg-article2-pt">อย่าลืมใส่ article</div><div class="pl" id="pg-article2-l0">โจทย์ไม่ได้ให้ article มา — เราต้องเติมเอง</div><div class="pl" id="pg-article2-l1"><b>coast</b> → the coast &nbsp;·&nbsp; <b>inland area</b> → inland areas</div><div class="pl" id="pg-article2-l2">เอกพจน์นับได้ต้องมี <b>a</b> หรือ <b>the</b>; พหูพจน์ไม่ต้องก็ได้</div></div></div>
+<div class="clip" id="final-clip" data-start="378.5833" data-duration="5.0" data-track-index="9"><div id="final-card"><div class="fk-row"><div class="fk">Model answer · คำตอบเต็ม</div><div class="fw">153 คำ</div></div><div class="fp"><div class="fpl">Introduction</div><div class="ft">The diagram illustrates the process of the formation of <b>rain-shadow deserts</b> from start to finish.</div></div><div class="fp"><div class="fpl">Overview</div><div class="ft">Overall, the process entails seven steps in total, <b>starting with the approach</b> of winds from <b>the coast</b> and culminating in dry winds reaching <b>inland areas</b>, <b>resulting in a rain-shadow desert</b>.</div></div><div class="fp"><div class="fpl">Body 1</div><div class="ft"><b>To begin with</b>, winds from the sea approach <b>the coast</b> <b>before being pushed upwards</b>. <b>Subsequently</b>, <b>as the air rises</b>, it becomes moist and cool. <b>In the following step</b>, <b>the cool moist air</b> <b>forms clouds</b>, <b>which result in rainfall</b>.</div></div><div class="fp"><div class="fpl">Body 2</div><div class="ft"><b>With regard to</b> the remaining stages of the process, <b>after the rainfall</b>, the dry air continues to move over the mountain <b>before going down</b> along the leeward side <b>and reaching</b> the bottom of the mountain, which continues towards <b>inland areas</b>. <b>In the final step</b>, <b>when</b> <b>these dry winds</b> reach the inland area, they lead to the formation of a rain-shadow desert, <b>marking the completion</b> of the rain-shadow desert formation process.</div></div></div></div>
+<div class="clip" id="endcard-clip" data-start="383.5833" data-duration="6.0" data-track-index="8"><div id="endcard"><div class="mins" id="ec-mins">6 นาที</div><div class="rule" id="ec-rule"></div><div class="band" id="ec-band">BAND 7</div><div class="wc" id="ec-wc">0 คำ</div></div></div>
+<script src="vendor/gsap.min.js"></script>
+<script>
+(function(){
+  var tl = window.gsap.timeline({ paused: true });
+  function setCount(n){
+    var el = document.getElementById("wcount");
+    if (el) el.textContent = String(n);
+  }
+  tl.to("#intro-w0",{opacity:1,duration:0.14,ease:"none"},13.875);
+  tl.to("#intro-w1",{opacity:1,duration:0.14,ease:"none"},13.875);
+  tl.to("#intro-w2",{opacity:1,duration:0.14,ease:"none"},14.6667);
+  tl.to("#intro-w3",{opacity:1,duration:0.14,ease:"none"},15.5);
+  tl.to("#intro-w4",{opacity:1,duration:0.14,ease:"none"},15.7917);
+  tl.to("#intro-w5",{opacity:1,duration:0.14,ease:"none"},16.1667);
+  tl.to("#intro-w6",{opacity:1,duration:0.14,ease:"none"},16.4583);
+  tl.to("#intro-w7",{opacity:1,duration:0.14,ease:"none"},16.5833);
+  tl.to("#intro-w8",{opacity:1,duration:0.14,ease:"none"},17.125);
+  tl.to("#intro-w9",{opacity:1,duration:0.14,ease:"none"},17.7083);
+  tl.to("#intro-w10",{opacity:1,duration:0.14,ease:"none"},18.625);
+  tl.to("#intro-w11",{opacity:1,duration:0.14,ease:"none"},19.25);
+  tl.to("#intro-w12",{opacity:1,duration:0.14,ease:"none"},19.5);
+  tl.to("#intro-w13",{opacity:1,duration:0.14,ease:"none"},20.0);
+  tl.to("#intro-w14",{opacity:1,duration:0.14,ease:"none"},20.2917);
+  tl.to("#intro-a1-hl",{scaleX:1,duration:0.32,ease:"power2.out"},21.6667);
+  tl.to("#intro-a1 .w",{color:"#12213d",duration:0.18,ease:"none"},21.875);
+  tl.to("#intro-a1-ul",{scaleX:1,duration:0.30,ease:"power2.out"},21.75);
+  tl.fromTo("#intro-a1-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},21.875);
+  tl.to("#intro-a1-lb",{opacity:0,duration:0.35,ease:"power2.in"},28.75);
+  tl.to("#overview-w0",{opacity:1,duration:0.14,ease:"none"},49.4167);
+  tl.to("#overview-w1",{opacity:1,duration:0.14,ease:"none"},49.625);
+  tl.to("#overview-w2",{opacity:1,duration:0.14,ease:"none"},49.9583);
+  tl.to("#overview-w3",{opacity:1,duration:0.14,ease:"none"},50.3333);
+  tl.to("#overview-w4",{opacity:1,duration:0.14,ease:"none"},50.9583);
+  tl.to("#overview-w5",{opacity:1,duration:0.14,ease:"none"},51.375);
+  tl.to("#overview-w6",{opacity:1,duration:0.14,ease:"none"},51.9167);
+  tl.to("#overview-w7",{opacity:1,duration:0.14,ease:"none"},52.0833);
+  tl.to("#overview-w8",{opacity:1,duration:0.14,ease:"none"},52.9167);
+  tl.to("#overview-w9",{opacity:1,duration:0.14,ease:"none"},53.375);
+  tl.to("#overview-w10",{opacity:1,duration:0.14,ease:"none"},53.5833);
+  tl.to("#overview-w11",{opacity:1,duration:0.14,ease:"none"},53.7917);
+  tl.to("#overview-w12",{opacity:1,duration:0.14,ease:"none"},54.2083);
+  tl.to("#overview-w13",{opacity:1,duration:0.14,ease:"none"},54.5);
+  tl.to("#overview-w14",{opacity:1,duration:0.14,ease:"none"},54.7917);
+  tl.to("#overview-w15",{opacity:1,duration:0.14,ease:"none"},55.0417);
+  tl.to("#overview-w16",{opacity:1,duration:0.14,ease:"none"},55.2917);
+  tl.to("#overview-w17",{opacity:1,duration:0.14,ease:"none"},55.5833);
+  tl.to("#overview-w18",{opacity:1,duration:0.14,ease:"none"},55.9167);
+  tl.to("#overview-w19",{opacity:1,duration:0.14,ease:"none"},56.4583);
+  tl.to("#overview-w20",{opacity:1,duration:0.14,ease:"none"},56.75);
+  tl.to("#overview-w21",{opacity:1,duration:0.14,ease:"none"},56.9583);
+  tl.to("#overview-w22",{opacity:1,duration:0.14,ease:"none"},57.2917);
+  tl.to("#overview-w23",{opacity:1,duration:0.14,ease:"none"},57.7083);
+  tl.to("#overview-w24",{opacity:1,duration:0.14,ease:"none"},58.2917);
+  tl.to("#overview-w25",{opacity:1,duration:0.14,ease:"none"},58.9167);
+  tl.to("#overview-w26",{opacity:1,duration:0.14,ease:"none"},59.6667);
+  tl.to("#overview-w27",{opacity:1,duration:0.14,ease:"none"},60.125);
+  tl.to("#overview-w28",{opacity:1,duration:0.14,ease:"none"},60.4583);
+  tl.to("#overview-w29",{opacity:1,duration:0.14,ease:"none"},61.5);
+  tl.to("#overview-a1-hl",{scaleX:1,duration:0.32,ease:"power2.out"},66.4583);
+  tl.to("#overview-a1 .w",{color:"#12213d",duration:0.18,ease:"none"},66.6667);
+  tl.to("#overview-a1-ul",{scaleX:1,duration:0.30,ease:"power2.out"},66.5417);
+  tl.fromTo("#overview-a1-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},66.6667);
+  tl.to("#overview-a1-lb",{opacity:0,duration:0.35,ease:"power2.in"},73.0);
+  tl.to("#overview-a2-hl",{scaleX:1,duration:0.32,ease:"power2.out"},74.5);
+  tl.to("#overview-a2 .w",{color:"#12213d",duration:0.18,ease:"none"},74.7083);
+  tl.to("#overview-a2-ul",{scaleX:1,duration:0.30,ease:"power2.out"},74.5833);
+  tl.fromTo("#overview-a2-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},74.7083);
+  tl.to("#overview-a2-lb",{opacity:0,duration:0.35,ease:"power2.in"},80.6667);
+  tl.to("#overview-a3-hl",{scaleX:1,duration:0.32,ease:"power2.out"},101.3333);
+  tl.to("#overview-a3 .w",{color:"#12213d",duration:0.18,ease:"none"},101.5417);
+  tl.to("#overview-a3-ul",{scaleX:1,duration:0.30,ease:"power2.out"},101.4167);
+  tl.fromTo("#overview-a3-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},101.5417);
+  tl.to("#overview-a3-lb",{opacity:0,duration:0.35,ease:"power2.in"},108.4167);
+  tl.to("#overview-a4-hl",{scaleX:1,duration:0.32,ease:"power2.out"},89.1667);
+  tl.to("#overview-a4 .w",{color:"#12213d",duration:0.18,ease:"none"},89.375);
+  tl.to("#overview-a4-ul",{scaleX:1,duration:0.30,ease:"power2.out"},89.25);
+  tl.fromTo("#overview-a4-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},89.375);
+  tl.to("#overview-a4-lb",{opacity:0,duration:0.35,ease:"power2.in"},95.5);
+  tl.to("#body1-w0",{opacity:1,duration:0.14,ease:"none"},118.125);
+  tl.to("#body1-w1",{opacity:1,duration:0.14,ease:"none"},118.3333);
+  tl.to("#body1-w2",{opacity:1,duration:0.14,ease:"none"},118.7083);
+  tl.to("#body1-w3",{opacity:1,duration:0.14,ease:"none"},119.125);
+  tl.to("#body1-w4",{opacity:1,duration:0.14,ease:"none"},119.5833);
+  tl.to("#body1-w5",{opacity:1,duration:0.14,ease:"none"},119.9167);
+  tl.to("#body1-w6",{opacity:1,duration:0.14,ease:"none"},120.25);
+  tl.to("#body1-w7",{opacity:1,duration:0.14,ease:"none"},120.5833);
+  tl.to("#body1-w8",{opacity:1,duration:0.14,ease:"none"},121.25);
+  tl.to("#body1-w9",{opacity:1,duration:0.14,ease:"none"},121.6667);
+  tl.to("#body1-w10",{opacity:1,duration:0.14,ease:"none"},122.0833);
+  tl.to("#body1-w11",{opacity:1,duration:0.14,ease:"none"},122.875);
+  tl.to("#body1-w12",{opacity:1,duration:0.14,ease:"none"},123.4583);
+  tl.to("#body1-w13",{opacity:1,duration:0.14,ease:"none"},123.9167);
+  tl.to("#body1-w14",{opacity:1,duration:0.14,ease:"none"},141.4167);
+  tl.to("#body1-w15",{opacity:1,duration:0.14,ease:"none"},145.7917);
+  tl.to("#body1-w16",{opacity:1,duration:0.14,ease:"none"},146.0833);
+  tl.to("#body1-w17",{opacity:1,duration:0.14,ease:"none"},146.375);
+  tl.to("#body1-w18",{opacity:1,duration:0.14,ease:"none"},146.5417);
+  tl.to("#body1-w19",{opacity:1,duration:0.14,ease:"none"},147.0833);
+  tl.to("#body1-w20",{opacity:1,duration:0.14,ease:"none"},147.4583);
+  tl.to("#body1-w21",{opacity:1,duration:0.14,ease:"none"},148.0833);
+  tl.to("#body1-w22",{opacity:1,duration:0.14,ease:"none"},148.5833);
+  tl.to("#body1-w23",{opacity:1,duration:0.14,ease:"none"},148.7917);
+  tl.to("#body1-w24",{opacity:1,duration:0.14,ease:"none"},158.0417);
+  tl.to("#body1-w25",{opacity:1,duration:0.14,ease:"none"},158.2083);
+  tl.to("#body1-w26",{opacity:1,duration:0.14,ease:"none"},158.5);
+  tl.to("#body1-w27",{opacity:1,duration:0.14,ease:"none"},158.8333);
+  tl.to("#body1-w28",{opacity:1,duration:0.14,ease:"none"},159.5417);
+  tl.to("#body1-w29",{opacity:1,duration:0.14,ease:"none"},159.7917);
+  tl.to("#body1-w30",{opacity:1,duration:0.14,ease:"none"},160.25);
+  tl.to("#body1-w31",{opacity:1,duration:0.14,ease:"none"},161.125);
+  tl.to("#body1-w32",{opacity:1,duration:0.14,ease:"none"},161.6667);
+  tl.to("#body1-w33",{opacity:1,duration:0.14,ease:"none"},162.2083);
+  tl.to("#body1-w34",{opacity:1,duration:0.14,ease:"none"},163.7917);
+  tl.to("#body1-w35",{opacity:1,duration:0.14,ease:"none"},164.0417);
+  tl.to("#body1-w36",{opacity:1,duration:0.14,ease:"none"},164.3333);
+  tl.to("#body1-w37",{opacity:1,duration:0.14,ease:"none"},164.75);
+  tl.to("#body1-a1-hl",{scaleX:1,duration:0.32,ease:"power2.out"},118.875);
+  tl.to("#body1-a1 .w",{color:"#12213d",duration:0.18,ease:"none"},119.0833);
+  tl.to("#body1-a1-ul",{scaleX:1,duration:0.30,ease:"power2.out"},118.9583);
+  tl.fromTo("#body1-a1-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},119.0833);
+  tl.to("#body1-a1-lb",{opacity:0,duration:0.35,ease:"power2.in"},124.375);
+  tl.to("#body1-a2-hl",{scaleX:1,duration:0.32,ease:"power2.out"},125.0);
+  tl.to("#body1-a2 .w",{color:"#12213d",duration:0.18,ease:"none"},125.2083);
+  tl.to("#body1-a2-ul",{scaleX:1,duration:0.30,ease:"power2.out"},125.0833);
+  tl.fromTo("#body1-a2-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},125.2083);
+  tl.to("#body1-a2-lb",{opacity:0,duration:0.35,ease:"power2.in"},131.1667);
+  tl.to("#body1-a3-hl",{scaleX:1,duration:0.32,ease:"power2.out"},142.6667);
+  tl.to("#body1-a3 .w",{color:"#12213d",duration:0.18,ease:"none"},142.875);
+  tl.to("#body1-a3-ul",{scaleX:1,duration:0.30,ease:"power2.out"},142.75);
+  tl.fromTo("#body1-a3-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},142.875);
+  tl.to("#body1-a3-lb",{opacity:0,duration:0.35,ease:"power2.in"},147.9583);
+  tl.to("#body1-a4-hl",{scaleX:1,duration:0.32,ease:"power2.out"},154.1667);
+  tl.to("#body1-a4 .w",{color:"#12213d",duration:0.18,ease:"none"},154.375);
+  tl.to("#body1-a4-ul",{scaleX:1,duration:0.30,ease:"power2.out"},154.25);
+  tl.fromTo("#body1-a4-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},154.375);
+  tl.to("#body1-a4-lb",{opacity:0,duration:0.35,ease:"power2.in"},159.875);
+  tl.to("#body1-a5-hl",{scaleX:1,duration:0.32,ease:"power2.out"},159.375);
+  tl.to("#body1-a5 .w",{color:"#12213d",duration:0.18,ease:"none"},159.5833);
+  tl.to("#body1-a5-ul",{scaleX:1,duration:0.30,ease:"power2.out"},159.4583);
+  tl.fromTo("#body1-a5-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},159.5833);
+  tl.to("#body1-a5-lb",{opacity:0,duration:0.35,ease:"power2.in"},165.75);
+  tl.to("#body1-a6-hl",{scaleX:1,duration:0.32,ease:"power2.out"},169.0);
+  tl.to("#body1-a6 .w",{color:"#12213d",duration:0.18,ease:"none"},169.2083);
+  tl.to("#body1-a6-ul",{scaleX:1,duration:0.30,ease:"power2.out"},169.0833);
+  tl.fromTo("#body1-a6-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},169.2083);
+  tl.to("#body1-a6-lb",{opacity:0,duration:0.35,ease:"power2.in"},176.4583);
+  tl.to("#body1-a7-hl",{scaleX:1,duration:0.32,ease:"power2.out"},177.9583);
+  tl.to("#body1-a7 .w",{color:"#12213d",duration:0.18,ease:"none"},178.1667);
+  tl.to("#body1-a7-ul",{scaleX:1,duration:0.30,ease:"power2.out"},178.0417);
+  tl.fromTo("#body1-a7-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},178.1667);
+  tl.to("#body1-a7-lb",{opacity:0,duration:0.35,ease:"power2.in"},184.5833);
+  tl.to("#body1-a8-hl",{scaleX:1,duration:0.32,ease:"power2.out"},186.9583);
+  tl.to("#body1-a8 .w",{color:"#12213d",duration:0.18,ease:"none"},187.1667);
+  tl.to("#body1-a8-ul",{scaleX:1,duration:0.30,ease:"power2.out"},187.0417);
+  tl.fromTo("#body1-a8-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},187.1667);
+  tl.to("#body1-a8-lb",{opacity:0,duration:0.35,ease:"power2.in"},192.625);
+  tl.to("#body2a-w0",{opacity:1,duration:0.14,ease:"none"},205.375);
+  tl.to("#body2a-w1",{opacity:1,duration:0.14,ease:"none"},205.5);
+  tl.to("#body2a-w2",{opacity:1,duration:0.14,ease:"none"},206.0);
+  tl.to("#body2a-w3",{opacity:1,duration:0.14,ease:"none"},206.2083);
+  tl.to("#body2a-w4",{opacity:1,duration:0.14,ease:"none"},206.4167);
+  tl.to("#body2a-w5",{opacity:1,duration:0.14,ease:"none"},206.75);
+  tl.to("#body2a-w6",{opacity:1,duration:0.14,ease:"none"},207.2083);
+  tl.to("#body2a-w7",{opacity:1,duration:0.14,ease:"none"},207.4167);
+  tl.to("#body2a-w8",{opacity:1,duration:0.14,ease:"none"},207.6667);
+  tl.to("#body2a-w9",{opacity:1,duration:0.14,ease:"none"},213.1667);
+  tl.to("#body2a-w10",{opacity:1,duration:0.14,ease:"none"},213.875);
+  tl.to("#body2a-w11",{opacity:1,duration:0.14,ease:"none"},214.1667);
+  tl.to("#body2a-w12",{opacity:1,duration:0.14,ease:"none"},214.5833);
+  tl.to("#body2a-w13",{opacity:1,duration:0.14,ease:"none"},214.875);
+  tl.to("#body2a-w14",{opacity:1,duration:0.14,ease:"none"},215.2083);
+  tl.to("#body2a-w15",{opacity:1,duration:0.14,ease:"none"},215.5417);
+  tl.to("#body2a-w16",{opacity:1,duration:0.14,ease:"none"},216.2083);
+  tl.to("#body2a-w17",{opacity:1,duration:0.14,ease:"none"},216.5417);
+  tl.to("#body2a-w18",{opacity:1,duration:0.14,ease:"none"},216.75);
+  tl.to("#body2a-w19",{opacity:1,duration:0.14,ease:"none"},217.1667);
+  tl.to("#body2a-w20",{opacity:1,duration:0.14,ease:"none"},217.375);
+  tl.to("#body2a-w21",{opacity:1,duration:0.14,ease:"none"},218.25);
+  tl.to("#body2a-w22",{opacity:1,duration:0.14,ease:"none"},218.6667);
+  tl.to("#body2a-w23",{opacity:1,duration:0.14,ease:"none"},219.125);
+  tl.to("#body2a-w24",{opacity:1,duration:0.14,ease:"none"},219.7083);
+  tl.to("#body2a-w25",{opacity:1,duration:0.14,ease:"none"},220.125);
+  tl.to("#body2a-w26",{opacity:1,duration:0.14,ease:"none"},220.4583);
+  tl.to("#body2a-w27",{opacity:1,duration:0.14,ease:"none"},220.7917);
+  tl.to("#body2a-w28",{opacity:1,duration:0.14,ease:"none"},221.1667);
+  tl.to("#body2a-w29",{opacity:1,duration:0.14,ease:"none"},221.5417);
+  tl.to("#body2a-w30",{opacity:1,duration:0.14,ease:"none"},221.9167);
+  tl.to("#body2a-w31",{opacity:1,duration:0.14,ease:"none"},222.3333);
+  tl.to("#body2a-w32",{opacity:1,duration:0.14,ease:"none"},222.6667);
+  tl.to("#body2a-w33",{opacity:1,duration:0.14,ease:"none"},223.0833);
+  tl.to("#body2a-w34",{opacity:1,duration:0.14,ease:"none"},223.375);
+  tl.to("#body2a-w35",{opacity:1,duration:0.14,ease:"none"},224.5417);
+  tl.to("#body2a-w36",{opacity:1,duration:0.14,ease:"none"},224.8333);
+  tl.to("#body2a-w37",{opacity:1,duration:0.14,ease:"none"},225.1667);
+  tl.to("#body2a-w38",{opacity:1,duration:0.14,ease:"none"},226.0417);
+  tl.to("#body2a-w39",{opacity:1,duration:0.14,ease:"none"},226.6667);
+  tl.to("#body2a-a1-hl",{scaleX:1,duration:0.32,ease:"power2.out"},205.625);
+  tl.to("#body2a-a1 .w",{color:"#12213d",duration:0.18,ease:"none"},205.8333);
+  tl.to("#body2a-a1-ul",{scaleX:1,duration:0.30,ease:"power2.out"},205.7083);
+  tl.fromTo("#body2a-a1-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},205.8333);
+  tl.to("#body2a-a1-lb",{opacity:0,duration:0.35,ease:"power2.in"},212.375);
+  tl.to("#body2a-a2-hl",{scaleX:1,duration:0.32,ease:"power2.out"},233.4583);
+  tl.to("#body2a-a2 .w",{color:"#12213d",duration:0.18,ease:"none"},233.6667);
+  tl.to("#body2a-a2-ul",{scaleX:1,duration:0.30,ease:"power2.out"},233.5417);
+  tl.fromTo("#body2a-a2-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},233.6667);
+  tl.to("#body2a-a2-lb",{opacity:0,duration:0.35,ease:"power2.in"},240.0);
+  tl.to("#body2a-a3-hl",{scaleX:1,duration:0.32,ease:"power2.out"},244.0833);
+  tl.to("#body2a-a3 .w",{color:"#12213d",duration:0.18,ease:"none"},244.2917);
+  tl.to("#body2a-a3-ul",{scaleX:1,duration:0.30,ease:"power2.out"},244.1667);
+  tl.fromTo("#body2a-a3-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},244.2917);
+  tl.to("#body2a-a3-lb",{opacity:0,duration:0.35,ease:"power2.in"},250.5);
+  tl.to("#body2a-a4-hl",{scaleX:1,duration:0.32,ease:"power2.out"},251.6667);
+  tl.to("#body2a-a4 .w",{color:"#12213d",duration:0.18,ease:"none"},251.875);
+  tl.to("#body2a-a4-ul",{scaleX:1,duration:0.30,ease:"power2.out"},251.75);
+  tl.fromTo("#body2a-a4-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},251.875);
+  tl.to("#body2a-a4-lb",{opacity:0,duration:0.35,ease:"power2.in"},258.1667);
+  tl.to("#body2a-a5-hl",{scaleX:1,duration:0.32,ease:"power2.out"},258.2917);
+  tl.to("#body2a-a5 .w",{color:"#12213d",duration:0.18,ease:"none"},258.5);
+  tl.to("#body2a-a5-ul",{scaleX:1,duration:0.30,ease:"power2.out"},258.375);
+  tl.fromTo("#body2a-a5-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},258.5);
+  tl.to("#body2a-a5-lb",{opacity:0,duration:0.35,ease:"power2.in"},264.6667);
+  tl.to("#body2b-w0",{opacity:1,duration:0.14,ease:"none"},268.375);
+  tl.to("#body2b-w1",{opacity:1,duration:0.14,ease:"none"},268.625);
+  tl.to("#body2b-w2",{opacity:1,duration:0.14,ease:"none"},268.9167);
+  tl.to("#body2b-w3",{opacity:1,duration:0.14,ease:"none"},269.2917);
+  tl.to("#body2b-w4",{opacity:1,duration:0.14,ease:"none"},269.5833);
+  tl.to("#body2b-w5",{opacity:1,duration:0.14,ease:"none"},270.1667);
+  tl.to("#body2b-w6",{opacity:1,duration:0.14,ease:"none"},270.75);
+  tl.to("#body2b-w7",{opacity:1,duration:0.14,ease:"none"},271.0833);
+  tl.to("#body2b-w8",{opacity:1,duration:0.14,ease:"none"},271.4583);
+  tl.to("#body2b-w9",{opacity:1,duration:0.14,ease:"none"},271.9583);
+  tl.to("#body2b-w10",{opacity:1,duration:0.14,ease:"none"},272.3333);
+  tl.to("#body2b-w11",{opacity:1,duration:0.14,ease:"none"},272.625);
+  tl.to("#body2b-w12",{opacity:1,duration:0.14,ease:"none"},273.1667);
+  tl.to("#body2b-w13",{opacity:1,duration:0.14,ease:"none"},273.5417);
+  tl.to("#body2b-w14",{opacity:1,duration:0.14,ease:"none"},273.875);
+  tl.to("#body2b-w15",{opacity:1,duration:0.14,ease:"none"},274.125);
+  tl.to("#body2b-w16",{opacity:1,duration:0.14,ease:"none"},274.25);
+  tl.to("#body2b-w17",{opacity:1,duration:0.14,ease:"none"},274.75);
+  tl.to("#body2b-w18",{opacity:1,duration:0.14,ease:"none"},275.25);
+  tl.to("#body2b-w19",{opacity:1,duration:0.14,ease:"none"},275.7083);
+  tl.to("#body2b-w20",{opacity:1,duration:0.14,ease:"none"},276.3333);
+  tl.to("#body2b-w21",{opacity:1,duration:0.14,ease:"none"},277.625);
+  tl.to("#body2b-w22",{opacity:1,duration:0.14,ease:"none"},278.2917);
+  tl.to("#body2b-w23",{opacity:1,duration:0.14,ease:"none"},278.5833);
+  tl.to("#body2b-w24",{opacity:1,duration:0.14,ease:"none"},279.125);
+  tl.to("#body2b-w25",{opacity:1,duration:0.14,ease:"none"},279.5833);
+  tl.to("#body2b-w26",{opacity:1,duration:0.14,ease:"none"},279.9583);
+  tl.to("#body2b-w27",{opacity:1,duration:0.14,ease:"none"},280.375);
+  tl.to("#body2b-w28",{opacity:1,duration:0.14,ease:"none"},280.875);
+  tl.to("#body2b-w29",{opacity:1,duration:0.14,ease:"none"},281.5417);
+  tl.to("#body2b-a1-hl",{scaleX:1,duration:0.32,ease:"power2.out"},269.0833);
+  tl.to("#body2b-a1 .w",{color:"#12213d",duration:0.18,ease:"none"},269.2917);
+  tl.to("#body2b-a1-ul",{scaleX:1,duration:0.30,ease:"power2.out"},269.1667);
+  tl.fromTo("#body2b-a1-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},269.2917);
+  tl.to("#body2b-a1-lb",{opacity:0,duration:0.35,ease:"power2.in"},275.0);
+  tl.to("#body2b-a2-hl",{scaleX:1,duration:0.32,ease:"power2.out"},283.5833);
+  tl.to("#body2b-a2 .w",{color:"#12213d",duration:0.18,ease:"none"},283.7917);
+  tl.to("#body2b-a2-ul",{scaleX:1,duration:0.30,ease:"power2.out"},283.6667);
+  tl.fromTo("#body2b-a2-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},283.7917);
+  tl.to("#body2b-a2-lb",{opacity:0,duration:0.35,ease:"power2.in"},290.8333);
+  tl.to("#body2b-a3-hl",{scaleX:1,duration:0.32,ease:"power2.out"},297.7083);
+  tl.to("#body2b-a3 .w",{color:"#12213d",duration:0.18,ease:"none"},297.9167);
+  tl.to("#body2b-a3-ul",{scaleX:1,duration:0.30,ease:"power2.out"},297.7917);
+  tl.fromTo("#body2b-a3-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},297.9167);
+  tl.to("#body2b-a3-lb",{opacity:0,duration:0.35,ease:"power2.in"},304.5);
+  tl.to("#body2b-a4-hl",{scaleX:1,duration:0.32,ease:"power2.out"},302.0417);
+  tl.to("#body2b-a4 .w",{color:"#12213d",duration:0.18,ease:"none"},302.25);
+  tl.to("#body2b-a4-ul",{scaleX:1,duration:0.30,ease:"power2.out"},302.125);
+  tl.fromTo("#body2b-a4-lb",{opacity:0,y:8},{opacity:1,y:0,duration:0.30,ease:"power2.out"},302.25);
+  tl.to("#body2b-a4-lb",{opacity:0,duration:0.35,ease:"power2.in"},308.8333);
+  tl.to("#essay-intro",{opacity:0,duration:0.26,ease:"power2.in"},23.1667);
+  tl.set("#essay-intro",{opacity:0},23.4167);
+  tl.to("#essay-intro",{opacity:1,duration:0.30,ease:"power2.out"},42.7917);
+  tl.to("#kick-intro",{opacity:0,duration:0.26,ease:"power2.in"},23.1667);
+  tl.set("#kick-intro",{opacity:0},23.4167);
+  tl.to("#kick-intro",{opacity:1,duration:0.30,ease:"power2.out"},42.7917);
+  tl.fromTo("#pg-dash-pk",{opacity:0,y:-6},{opacity:1,y:0,duration:0.26,ease:"power2.out"},23.5417);
+  tl.fromTo("#pg-dash-pt",{opacity:0,y:10},{opacity:1,y:0,duration:0.34,ease:"power2.out"},23.7083);
+  tl.fromTo("#pg-dash-l0",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},25.0833);
+  tl.fromTo("#pg-dash-l1",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},32.3333);
+  tl.fromTo("#pg-dash-l2",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},40.75);
+  tl.to("#essay-overview",{opacity:0,duration:0.26,ease:"power2.in"},74.8333);
+  tl.set("#essay-overview",{opacity:0},75.0833);
+  tl.to("#essay-overview",{opacity:1,duration:0.30,ease:"power2.out"},88.0);
+  tl.to("#kick-overview",{opacity:0,duration:0.26,ease:"power2.in"},74.8333);
+  tl.set("#kick-overview",{opacity:0},75.0833);
+  tl.to("#kick-overview",{opacity:1,duration:0.30,ease:"power2.out"},88.0);
+  tl.fromTo("#pg-article-pk",{opacity:0,y:-6},{opacity:1,y:0,duration:0.26,ease:"power2.out"},75.2083);
+  tl.fromTo("#pg-article-pt",{opacity:0,y:10},{opacity:1,y:0,duration:0.34,ease:"power2.out"},75.375);
+  tl.fromTo("#pg-article-wb",{opacity:0},{opacity:1,duration:0.26,ease:"power2.out"},75.625);
+  tl.fromTo("#pg-article-wa",{opacity:0,x:-10},{opacity:1,x:0,duration:0.26,ease:"power2.out"},75.9167);
+  tl.fromTo("#pg-article-wc",{opacity:0,scale:0.86},{opacity:1,scale:1,duration:0.38,ease:"back.out(1.6)"},76.125);
+  tl.fromTo("#pg-article-l0",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},75.875);
+  tl.fromTo("#pg-article-l1",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},80.0833);
+  tl.fromTo("#pg-article-l2",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},85.3333);
+  tl.to("#essay-body1",{opacity:0,duration:0.26,ease:"power2.in"},134.375);
+  tl.set("#essay-body1",{opacity:0},134.625);
+  tl.to("#essay-body1",{opacity:1,duration:0.30,ease:"power2.out"},141.0833);
+  tl.to("#kick-body1",{opacity:0,duration:0.26,ease:"power2.in"},134.375);
+  tl.set("#kick-body1",{opacity:0},134.625);
+  tl.to("#kick-body1",{opacity:1,duration:0.30,ease:"power2.out"},141.0833);
+  tl.fromTo("#pg-passive-pk",{opacity:0,y:-6},{opacity:1,y:0,duration:0.26,ease:"power2.out"},134.75);
+  tl.fromTo("#pg-passive-pt",{opacity:0,y:10},{opacity:1,y:0,duration:0.34,ease:"power2.out"},134.9167);
+  tl.fromTo("#pg-passive-l0",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},135.0833);
+  tl.fromTo("#pg-passive-l1",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},137.5);
+  tl.to("#essay-body1",{opacity:0,duration:0.26,ease:"power2.in"},193.3333);
+  tl.set("#essay-body1",{opacity:0},193.5833);
+  tl.to("#essay-body1",{opacity:1,duration:0.30,ease:"power2.out"},200.8333);
+  tl.to("#kick-body1",{opacity:0,duration:0.26,ease:"power2.in"},193.3333);
+  tl.set("#kick-body1",{opacity:0},193.5833);
+  tl.to("#kick-body1",{opacity:1,duration:0.30,ease:"power2.out"},200.8333);
+  tl.fromTo("#pg-transitional-pk",{opacity:0,y:-6},{opacity:1,y:0,duration:0.26,ease:"power2.out"},193.7083);
+  tl.fromTo("#pg-transitional-pt",{opacity:0,y:10},{opacity:1,y:0,duration:0.34,ease:"power2.out"},193.875);
+  tl.fromTo("#pg-transitional-l0",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},197.375);
+  tl.fromTo("#pg-transitional-l1",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},198.375);
+  tl.fromTo("#pg-transitional-l2",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},199.4583);
+  tl.to("#essay-body2b",{opacity:0,duration:0.26,ease:"power2.in"},310.0417);
+  tl.set("#essay-body2b",{opacity:0},310.2917);
+  tl.to("#essay-body2b",{opacity:1,duration:0.30,ease:"power2.out"},324.4583);
+  tl.to("#kick-body2b",{opacity:0,duration:0.26,ease:"power2.in"},310.0417);
+  tl.set("#kick-body2b",{opacity:0},310.2917);
+  tl.to("#kick-body2b",{opacity:1,duration:0.30,ease:"power2.out"},324.4583);
+  tl.fromTo("#pg-reminder-pk",{opacity:0,y:-6},{opacity:1,y:0,duration:0.26,ease:"power2.out"},310.4167);
+  tl.fromTo("#pg-reminder-pt",{opacity:0,y:10},{opacity:1,y:0,duration:0.34,ease:"power2.out"},310.5833);
+  tl.fromTo("#pg-reminder-l0",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},311.8333);
+  tl.fromTo("#pg-reminder-l1",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},316.0);
+  tl.fromTo("#pg-reminder-l2",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},322.5833);
+  tl.to("#essay-body2b",{opacity:0,duration:0.26,ease:"power2.in"},324.875);
+  tl.set("#essay-body2b",{opacity:0},325.125);
+  tl.to("#essay-body2b",{opacity:1,duration:0.30,ease:"power2.out"},346.375);
+  tl.to("#kick-body2b",{opacity:0,duration:0.26,ease:"power2.in"},324.875);
+  tl.set("#kick-body2b",{opacity:0},325.125);
+  tl.to("#kick-body2b",{opacity:1,duration:0.30,ease:"power2.out"},346.375);
+  tl.fromTo("#pg-complex-pk",{opacity:0,y:-6},{opacity:1,y:0,duration:0.26,ease:"power2.out"},325.25);
+  tl.fromTo("#pg-complex-pt",{opacity:0,y:10},{opacity:1,y:0,duration:0.34,ease:"power2.out"},325.4167);
+  tl.fromTo("#pg-complex-l0",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},326.4583);
+  tl.fromTo("#pg-complex-l1",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},332.875);
+  tl.fromTo("#pg-complex-l2",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},342.6667);
+  tl.to("#essay-body2b",{opacity:0,duration:0.26,ease:"power2.in"},351.2083);
+  tl.set("#essay-body2b",{opacity:0},351.4583);
+  tl.to("#essay-body2b",{opacity:1,duration:0.30,ease:"power2.out"},376.375);
+  tl.to("#kick-body2b",{opacity:0,duration:0.26,ease:"power2.in"},351.2083);
+  tl.set("#kick-body2b",{opacity:0},351.4583);
+  tl.to("#kick-body2b",{opacity:1,duration:0.30,ease:"power2.out"},376.375);
+  tl.fromTo("#pg-article2-pk",{opacity:0,y:-6},{opacity:1,y:0,duration:0.26,ease:"power2.out"},351.5833);
+  tl.fromTo("#pg-article2-pt",{opacity:0,y:10},{opacity:1,y:0,duration:0.34,ease:"power2.out"},351.75);
+  tl.fromTo("#pg-article2-l0",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},354.2083);
+  tl.fromTo("#pg-article2-l1",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},356.8333);
+  tl.fromTo("#pg-article2-l2",{opacity:0,x:-14},{opacity:1,x:0,duration:0.30,ease:"power2.out"},362.9583);
+  tl.set("#spot",{left:150.58,top:3.07,width:325.75,height:23.05,opacity:1,scale:1},14.5417);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},14.5417);
+  tl.set("#spot",{left:0.0,top:0.0,width:620.0,height:361.09,opacity:1,scale:1},43.0);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},43.0);
+  tl.set("#spot",{left:0.0,top:0.0,width:620.0,height:361.09,opacity:1,scale:1},49.2083);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},49.2083);
+  tl.set("#spot",{left:56.85,top:184.39,width:89.12,height:50.71,opacity:1,scale:1},53.9583);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},53.9583);
+  tl.set("#spot",{left:427.16,top:198.22,width:127.53,height:43.02,opacity:1,scale:1},57.4583);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},57.4583);
+  tl.set("#spot",{left:468.65,top:296.56,width:90.66,height:39.95,opacity:1,scale:1},59.625);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},59.625);
+  tl.set("#spot",{left:135.22,top:296.56,width:69.14,height:26.12,opacity:1,scale:1},74.0);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},74.0);
+  tl.set("#spot",{left:0.0,top:0.0,width:620.0,height:361.09,opacity:1,scale:1},110.4583);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},110.4583);
+  tl.set("#spot",{left:56.85,top:184.39,width:89.12,height:50.71,opacity:1,scale:1},119.5417);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},119.5417);
+  tl.set("#spot",{left:144.44,top:181.31,width:79.9,height:53.78,opacity:1,scale:1},122.8333);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},122.8333);
+  tl.set("#spot",{left:164.41,top:138.29,width:93.73,height:58.39,opacity:1,scale:1},144.1667);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},144.1667);
+  tl.set("#spot",{left:196.68,top:90.66,width:73.75,height:47.63,opacity:1,scale:1},160.375);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},160.375);
+  tl.set("#spot",{left:247.39,top:33.8,width:64.54,height:47.63,opacity:1,scale:1},164.25);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},164.25);
+  tl.set("#spot",{left:247.39,top:33.8,width:64.54,height:47.63,opacity:1,scale:1},206.5);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},206.5);
+  tl.set("#spot",{left:354.94,top:82.97,width:133.68,height:39.95,opacity:1,scale:1},215.5833);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},215.5833);
+  tl.set("#spot",{left:351.87,top:149.05,width:64.54,height:35.34,opacity:1,scale:1},219.2917);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},219.2917);
+  tl.set("#spot",{left:373.38,top:115.24,width:98.34,height:153.66,opacity:1,scale:1},222.3333);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},222.3333);
+  tl.set("#spot",{left:427.16,top:198.22,width:127.53,height:43.02,opacity:1,scale:1},261.2917);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},261.2917);
+  tl.set("#spot",{left:445.6,top:267.36,width:64.54,height:23.05,opacity:1,scale:1},270.5833);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},270.5833);
+  tl.set("#spot",{left:468.65,top:296.56,width:90.66,height:39.95,opacity:1,scale:1},275.0833);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},275.0833);
+  tl.set("#spot",{left:0.0,top:0.0,width:620.0,height:361.09,opacity:1,scale:1},327.7083);
+  tl.fromTo("#spot",{scale:1.14},{scale:1,duration:0.26,ease:"power2.out"},327.7083);
+  tl.to("#diagram-inner",{x:-204.47,y:156.55,scale:1.6413,duration:0.6,ease:"power2.inOut"},14.75);
+  tl.to("#diagram-inner",{x:0,y:0,scale:1,duration:0.55,ease:"power2.inOut"},43.2083);
+  tl.to("#diagram-inner",{x:0,y:0,scale:1,duration:0.55,ease:"power2.inOut"},49.2083);
+  tl.to("#diagram-inner",{x:5.77,y:-448.73,scale:3.0,duration:0.6,ease:"power2.inOut"},54.125);
+  tl.to("#diagram-inner",{x:-1162.78,y:-478.69,scale:3.0,duration:0.6,ease:"power2.inOut"},57.625);
+  tl.to("#diagram-inner",{x:-1231.94,y:-769.11,scale:3.0,duration:0.6,ease:"power2.inOut"},59.8333);
+  tl.to("#diagram-inner",{x:-199.37,y:-748.36,scale:3.0,duration:0.6,ease:"power2.inOut"},74.1667);
+  tl.to("#diagram-inner",{x:0,y:0,scale:1,duration:0.55,ease:"power2.inOut"},110.625);
+  tl.to("#diagram-inner",{x:5.77,y:-448.73,scale:3.0,duration:0.6,ease:"power2.inOut"},119.5833);
+  tl.to("#diagram-inner",{x:-243.17,y:-444.1,scale:3.0,duration:0.6,ease:"power2.inOut"},123.0417);
+  tl.to("#diagram-inner",{x:-323.83,y:-321.95,scale:3.0,duration:0.6,ease:"power2.inOut"},144.2083);
+  tl.to("#diagram-inner",{x:-390.66,y:-162.92,scale:3.0,duration:0.6,ease:"power2.inOut"},160.5833);
+  tl.to("#diagram-inner",{x:-528.98,y:7.66,scale:3.0,duration:0.6,ease:"power2.inOut"},164.4583);
+  tl.to("#diagram-inner",{x:0,y:0,scale:1,duration:0.55,ease:"power2.inOut"},188.4583);
+  tl.to("#diagram-inner",{x:-955.34,y:-128.33,scale:3.0,duration:0.6,ease:"power2.inOut"},215.7917);
+  tl.to("#diagram-inner",{x:-842.42,y:-319.66,scale:3.0,duration:0.6,ease:"power2.inOut"},219.5);
+  tl.to("#diagram-inner",{x:-431.7,y:-156.64,scale:1.7553,duration:0.6,ease:"power2.inOut"},222.5417);
+  tl.to("#diagram-inner",{x:-1162.78,y:-478.69,scale:3.0,duration:0.6,ease:"power2.inOut"},261.5);
+  tl.to("#diagram-inner",{x:-1123.61,y:-656.15,scale:3.0,duration:0.6,ease:"power2.inOut"},270.7917);
+  tl.to("#diagram-inner",{x:-1231.94,y:-769.11,scale:3.0,duration:0.6,ease:"power2.inOut"},275.2917);
+  tl.to("#diagram-inner",{x:0,y:0,scale:1,duration:0.55,ease:"power2.inOut"},327.9167);
+  (function(){var CUES=[13.875,13.875,14.6667,15.5,15.7917,16.1667,16.4583,16.5833,17.125,17.7083,18.625,19.25,19.5,20.0,20.2917,49.4167,49.625,49.9583,50.3333,50.9583,51.375,51.9167,52.0833,52.9167,53.375,53.5833,53.7917,54.2083,54.5,54.7917,55.0417,55.2917,55.5833,55.9167,56.4583,56.75,56.9583,57.2917,57.7083,58.2917,58.9167,59.6667,60.125,60.4583,61.5,118.125,118.3333,118.7083,119.125,119.5833,119.9167,120.25,120.5833,121.25,121.6667,122.0833,122.875,123.4583,123.9167,141.4167,145.7917,146.0833,146.375,146.5417,147.0833,147.4583,148.0833,148.5833,148.7917,158.0417,158.2083,158.5,158.8333,159.5417,159.7917,160.25,161.125,161.6667,162.2083,163.7917,164.0417,164.3333,164.75,205.375,205.5,206.0,206.2083,206.4167,206.75,207.2083,207.4167,207.6667,213.1667,213.875,214.1667,214.5833,214.875,215.2083,215.5417,216.2083,216.5417,216.75,217.1667,217.375,218.25,218.6667,219.125,219.7083,220.125,220.4583,220.7917,221.1667,221.5417,221.9167,222.3333,222.6667,223.0833,223.375,224.5417,224.8333,225.1667,226.0417,226.6667,268.375,268.625,268.9167,269.2917,269.5833,270.1667,270.75,271.0833,271.4583,271.9583,272.3333,272.625,273.1667,273.5417,273.875,274.125,274.25,274.75,275.25,275.7083,276.3333,277.625,278.2917,278.5833,279.125,279.5833,279.9583,280.375,280.875,281.5417],o={v:0};tl.to(o,{v:1,duration:267.6667,ease:"none",onUpdate:function(){var now=tl.time(),lo=0,hi=CUES.length;while(lo<hi){var mid=(lo+hi)>>1;if(CUES[mid]<=now){lo=mid+1;}else{hi=mid;}}setCount(lo);}},13.875);})();
+  tl.fromTo("#final-card",{opacity:0,y:16},{opacity:1,y:0,duration:0.4,ease:"power2.out"},378.5833);
+  tl.fromTo("#ec-mins",{opacity:0,y:22},{opacity:1,y:0,duration:0.45,ease:"power2.out"},383.8333);
+  tl.fromTo("#ec-rule",{scaleX:0},{scaleX:1,duration:0.5,ease:"power2.inOut"},384.375);
+  tl.fromTo("#ec-band",{opacity:0,scale:0.82},{opacity:1,scale:1,duration:0.55,ease:"back.out(1.6)"},384.9167);
+  tl.fromTo("#ec-wc",{opacity:0},{opacity:1,duration:0.35,ease:"power2.out"},385.5833);
+  (function(){var o={v:0};tl.to(o,{v:153,duration:1.5,ease:"power2.out",onUpdate:function(){var el=document.getElementById("ec-wc");if(el)el.textContent=Math.round(o.v)+" คำ";}},385.6667);})();
+  window.__timelines = window.__timelines || {};
+  window.__timelines["ielts-tutorial"] = tl;
+})();
+</script>
+</div>
+</body>
+</html>

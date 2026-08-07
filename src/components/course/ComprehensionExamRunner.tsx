@@ -105,7 +105,7 @@ export function ComprehensionExamRunner({
         <button
           type="button"
           onClick={() => onDone(1, 1)}
-          className="mt-3 w-full rounded-full bg-slate-900 py-2.5 text-sm font-black text-white"
+          className="mt-3 w-full rounded-full bg-slate-900 py-2.5 text-sm font-bold text-white"
         >
           ทำเสร็จแล้ว ทำเครื่องหมายว่าเรียบร้อย
         </button>
@@ -142,10 +142,10 @@ export function ComprehensionExamRunner({
   return (
     <div className="relative space-y-3 p-4">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[12px] font-black text-slate-700">{titleTh}</p>
+        <p className="text-[12px] font-bold text-slate-700">{titleTh}</p>
         <div className="flex items-center gap-2">
-          {progress ? <span className="text-[11px] font-bold text-slate-400">{progress}</span> : null}
-          <button type="button" onClick={onCancel} className="text-[11px] font-bold text-slate-400">
+          {progress ? <span className="text-[13px] font-bold text-slate-400">{progress}</span> : null}
+          <button type="button" onClick={onCancel} className="text-[13px] font-bold text-slate-400">
             ปิด
           </button>
         </div>
@@ -167,7 +167,7 @@ export function ComprehensionExamRunner({
         <button
           type="button"
           onClick={() => advance(pendingScore)}
-          className={`w-full rounded-full py-3 text-sm font-black text-white ${
+          className={`w-full rounded-full py-3 text-sm font-bold text-white ${
             hasNext || !isLast ? "bg-[#004AAD]" : "bg-emerald-600"
           }`}
         >

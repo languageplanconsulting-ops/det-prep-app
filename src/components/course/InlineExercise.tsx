@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { useAdminGateOverride } from "@/hooks/useAdminGateOverride";
-import { inlineContentFor } from "@/lib/course-plan/exercise-content";
+import { inlineContentFor, type InlineExerciseContent } from "@/lib/course-plan/exercise-content";
 import { rewriteIsCorrect, type RewriteItem } from "@/lib/course-plan/grammar-writing-bank";
 import {
   inflectionIsCorrect,
@@ -32,6 +32,8 @@ export function InlineExercise({
   onDone,
   onCancel,
   hasNext = true,
+  content: contentOverride,
+  singleAttempt = false,
 }: {
   exerciseKey: string;
   taskType: string | null;
@@ -42,11 +44,25 @@ export function InlineExercise({
   onCancel: () => void;
   /** False when this is the last outstanding item of the day. */
   hasNext?: boolean;
+  /**
+   * Ad-hoc content, bypassing the exerciseKey → questionsFor() curriculum
+   * lookup — for a placement probe item that has no registered exerciseKey.
+   */
+  content?: InlineExerciseContent;
+  /**
+   * Reveal immediately on the first check and hide pre-answer hints, instead
+   * of the normal 3-attempts-then-reveal loop. A placement probe is
+   * deliberately single-shot (PROBE_PASS_RATIO=1) — unlimited retries would
+   * let a student guess-and-check their way to a higher placement than their
+   * actual starting ability.
+   */
+  singleAttempt?: boolean;
 }) {
-  const content = useMemo(
+  const resolved = useMemo(
     () => inlineContentFor(exerciseKey, taskType),
     [exerciseKey, taskType],
   );
+  const content = contentOverride ?? resolved;
   const override = useAdminGateOverride();
 
   const [index, setIndex] = useState(0);
@@ -65,7 +81,7 @@ export function InlineExercise({
         <button
           type="button"
           onClick={() => onDone(1, 1)}
-          className="mt-3 w-full rounded-full bg-slate-900 py-2.5 text-sm font-black text-white"
+          className="mt-3 w-full rounded-full bg-slate-900 py-2.5 text-sm font-bold text-white"
         >
           ทำเสร็จแล้ว ทำเครื่องหมายว่าเรียบร้อย
         </button>
@@ -82,16 +98,16 @@ export function InlineExercise({
       <Frame title={titleTh} onCancel={onCancel}>
         <div className="py-4 text-center">
           <p className="text-5xl">{pct >= 80 ? "🎉" : pct >= 50 ? "💪" : "📚"}</p>
-          <p className="mt-3 text-3xl font-black text-slate-900">{pct}%</p>
+          <p className="mt-3 text-3xl font-extrabold text-slate-900">{pct}%</p>
           <p className="mt-1 text-sm text-slate-600">
             ถูก {correct} จาก {total} ข้อ
           </p>
-          {gateTh && <p className="mt-2 text-[11px] text-slate-400">เกณฑ์ผ่าน: {gateTh}</p>}
+          {gateTh && <p className="mt-2 text-[13px] text-slate-400">เกณฑ์ผ่าน: {gateTh}</p>}
         </div>
         <button
           type="button"
           onClick={() => onDone(correct, total)}
-          className={`w-full rounded-full py-3 text-sm font-black text-white ${
+          className={`w-full rounded-full py-3 text-sm font-bold text-white ${
             hasNext ? "bg-[#004AAD]" : "bg-emerald-600"
           }`}
         >
@@ -128,7 +144,7 @@ export function InlineExercise({
         <button
           type="button"
           onClick={() => onDone(total, total)}
-          className="mb-3 w-full rounded-full bg-amber-500 py-2 text-[12px] font-black text-white"
+          className="mb-3 w-full rounded-full bg-amber-500 py-2 text-[12px] font-bold text-white"
         >
           ⚡ ข้ามแบบฝึกนี้ทั้งชุด (admin)
         </button>
@@ -150,6 +166,7 @@ export function InlineExercise({
           checked={checked}
           onCheck={(ok) => grade(ok)}
           {...shared}
+          singleAttempt={singleAttempt}
           onNext={() => next(checked === true)}
         />
       )}
@@ -177,6 +194,7 @@ export function InlineExercise({
           checked={checked}
           onCheck={(ok) => grade(ok)}
           {...shared}
+          singleAttempt={singleAttempt}
           onNext={() => next(checked === true)}
         />
       )}
@@ -205,10 +223,10 @@ export function Frame({
         >
           ← กลับ
         </button>
-        <p className="min-w-0 flex-1 truncate text-center text-[13px] font-black text-slate-800">
+        <p className="min-w-0 flex-1 truncate text-center text-[13px] font-bold text-slate-800">
           {title}
         </p>
-        <span className="w-14 text-right text-[11px] font-black text-slate-400">
+        <span className="w-14 text-right text-[13px] font-bold text-slate-400">
           {progress ?? ""}
         </span>
       </div>
@@ -280,7 +298,7 @@ function DictationItem({
         <button
           type="button"
           onClick={() => setAnswer(answer.slice(0, -1))}
-          className="mt-2 text-[11px] font-bold text-slate-400"
+          className="mt-2 text-[13px] font-bold text-slate-400"
         >
           ↩︎ ลบคำสุดท้าย
         </button>
@@ -312,6 +330,7 @@ function RealWordItemView({
   gaveUp,
   onRetry,
   onGiveUp,
+  singleAttempt,
 }: {
   item: { word: string; misspelling: string; meaningTh: string };
   checked: boolean | null;
@@ -321,6 +340,7 @@ function RealWordItemView({
   gaveUp?: boolean;
   onRetry?: () => void;
   onGiveUp?: () => void;
+  singleAttempt?: boolean;
 }) {
   const [picked, setPicked] = useState<string | null>(null);
   // Stable order: alphabetical, so the answer is not always in the same slot
@@ -362,6 +382,7 @@ function RealWordItemView({
         gaveUp={gaveUp}
         onRetry={onRetry}
         onGiveUp={onGiveUp}
+        singleAttempt={singleAttempt}
       />
     </div>
   );
@@ -377,6 +398,7 @@ function GrammarItemView({
   gaveUp,
   onRetry,
   onGiveUp,
+  singleAttempt,
 }: {
   item: {
     titleEn: string;
@@ -397,6 +419,7 @@ function GrammarItemView({
   gaveUp?: boolean;
   onRetry?: () => void;
   onGiveUp?: () => void;
+  singleAttempt?: boolean;
 }) {
   const [typed, setTyped] = useState<Record<number, string>>({});
   const [hintFor, setHintFor] = useState<number | null>(null);
@@ -414,8 +437,8 @@ function GrammarItemView({
 
   return (
     <div>
-      <p className="text-[13px] font-black text-slate-800">{item.titleEn}</p>
-      <p className="text-[11px] text-slate-400">{item.passageTh}</p>
+      <p className="text-[13px] font-bold text-slate-800">{item.titleEn}</p>
+      <p className="text-[13px] text-slate-400">{item.passageTh}</p>
       <p className="mt-2 rounded-xl bg-slate-50 p-3 text-[13px] leading-relaxed text-slate-700 ring-1 ring-slate-200">
         {item.passage}
       </p>
@@ -427,7 +450,7 @@ function GrammarItemView({
           return (
             <div key={i}>
               <div className="flex items-center gap-2">
-                <span className="w-14 shrink-0 text-[11px] font-black text-slate-500">
+                <span className="w-14 shrink-0 text-[13px] font-bold text-slate-500">
                   ช่อง {i + 1}
                 </span>
                 <span
@@ -439,7 +462,7 @@ function GrammarItemView({
                         : "bg-rose-50 ring-rose-300"
                   }`}
                 >
-                  <span className="shrink-0 text-[14px] font-black text-slate-400">{given}</span>
+                  <span className="shrink-0 text-[14px] font-bold text-slate-400">{given}</span>
                   <input
                     value={typed[i] ?? ""}
                     disabled={checked !== null}
@@ -448,19 +471,21 @@ function GrammarItemView({
                     placeholder="…"
                   />
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setHintFor(hintFor === i ? null : i)}
-                  className="shrink-0 rounded-full px-2 py-1 text-[11px] font-bold text-slate-400"
-                >
-                  💡
-                </button>
+                {!singleAttempt && (
+                  <button
+                    type="button"
+                    onClick={() => setHintFor(hintFor === i ? null : i)}
+                    className="shrink-0 rounded-full px-2 py-1 text-[13px] font-bold text-slate-400"
+                  >
+                    💡
+                  </button>
+                )}
               </div>
-              {hintFor === i && checked === null && (
-                <p className="ml-16 mt-1 text-[11px] text-slate-500">{b.clueTh}</p>
+              {!singleAttempt && hintFor === i && checked === null && (
+                <p className="ml-16 mt-1 text-[13px] text-slate-500">{b.clueTh}</p>
               )}
               {checked !== null && (
-                <p className="ml-16 mt-1 text-[11px] text-slate-500">
+                <p className="ml-16 mt-1 text-[13px] text-slate-500">
                   <strong>{b.correctWord}</strong> — {b.explanationThai}
                 </p>
               )}
@@ -479,6 +504,7 @@ function GrammarItemView({
         gaveUp={gaveUp}
         onRetry={onRetry}
         onGiveUp={onGiveUp}
+        singleAttempt={singleAttempt}
       />
     </div>
   );
@@ -530,30 +556,30 @@ function RewriteItemView({
         <button
           type="button"
           onClick={() => setShowHint((v) => !v)}
-          className="mt-1.5 text-[11px] font-bold text-slate-400"
+          className="mt-1.5 text-[13px] font-bold text-slate-400"
         >
           💡 {showHint ? "ซ่อนคำใบ้" : "ขอคำใบ้"}
         </button>
       )}
       {showHint && checked === null && (
-        <p className="mt-1 text-[11px] text-slate-500">{item.hintTh}</p>
+        <p className="mt-1 text-[13px] text-slate-500">{item.hintTh}</p>
       )}
 
       {/* The rule, as a portable pattern rather than a paragraph. */}
       {checked !== null && (
         <div className="mt-3 rounded-2xl bg-slate-50 p-3.5 ring-1 ring-slate-200">
-          <p className="text-[11px] font-black text-slate-700">{item.rule.nameTh}</p>
+          <p className="text-[13px] font-bold text-slate-700">{item.rule.nameTh}</p>
           <p className="mt-1 rounded-lg bg-white px-2.5 py-1.5 font-mono text-[12px] font-bold text-[#004AAD] ring-1 ring-slate-200">
             {item.rule.pattern}
           </p>
           <ul className="mt-2 space-y-0.5">
             {item.rule.bulletsTh.map((b, i) => (
-              <li key={i} className="text-[11px] text-slate-600">
+              <li key={i} className="text-[13px] text-slate-600">
                 · {b}
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[11px] text-slate-500">{item.explanationThai}</p>
+          <p className="mt-2 text-[13px] text-slate-500">{item.explanationThai}</p>
         </div>
       )}
 
@@ -619,7 +645,7 @@ function SpeakPatternView({
             disabled={stage === "speak"}
             onChange={(e) => setTyped(e.target.value)}
             placeholder={item.baseVerb}
-            className="w-24 bg-transparent text-center text-[15px] font-black text-amber-900 outline-none"
+            className="w-24 bg-transparent text-center text-[15px] font-bold text-amber-900 outline-none"
           />
         </span>
         {item.frameEn.split("__")[1]}
@@ -628,7 +654,7 @@ function SpeakPatternView({
       {stage === "type" && (
         <>
           {typed.trim().length > 0 && !typedOk && (
-            <p className="mt-2 text-[11px] font-bold text-rose-600">
+            <p className="mt-2 text-[13px] font-bold text-rose-600">
               ยังไม่ถูก — ประธานเอกพจน์ ต้องเติม -s / -es
             </p>
           )}
@@ -636,7 +662,7 @@ function SpeakPatternView({
             type="button"
             disabled={!typedOk}
             onClick={() => setStage("speak")}
-            className="mt-4 w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white disabled:opacity-30"
+            className="mt-4 w-full rounded-full bg-[#004AAD] py-3 text-sm font-bold text-white disabled:opacity-30"
           >
             ถูกแล้ว → ไปอัดเสียง
           </button>
@@ -648,7 +674,7 @@ function SpeakPatternView({
           <p className="rounded-xl bg-violet-50 p-3 text-[13px] font-bold text-violet-900 ring-1 ring-violet-200">
             🎤 พูดประโยคนี้: “{item.fullSentence}”
           </p>
-          <p className="mt-1.5 text-[11px] text-slate-500">
+          <p className="mt-1.5 text-[13px] text-slate-500">
             เสียงท้ายคำ “-s” ต้องได้ยินชัด ไม่งั้นไม่ผ่าน
           </p>
 
@@ -665,13 +691,13 @@ function SpeakPatternView({
 
           {result && checked !== null && (
             <div className="mt-2 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200">
-              <p className="text-[12px] font-black text-slate-700">
+              <p className="text-[12px] font-bold text-slate-700">
                 ตรงกัน {result.pct}% (ต้องได้ 95% ขึ้นไป)
               </p>
               {result.endingIssues.length > 0 && (
                 <ul className="mt-1 space-y-0.5">
                   {result.endingIssues.map((iss, i) => (
-                    <li key={i} className="text-[11px] font-bold text-rose-600">
+                    <li key={i} className="text-[13px] font-bold text-rose-600">
                       · {endingIssueHintTh(iss)}
                     </li>
                   ))}
@@ -681,13 +707,13 @@ function SpeakPatternView({
           )}
 
           <div className="mt-2 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200">
-            <p className="text-[11px] font-black text-slate-700">
+            <p className="text-[13px] font-bold text-slate-700">
               Present simple: ประธานเอกพจน์
             </p>
             <p className="mt-1 rounded-lg bg-white px-2.5 py-1.5 font-mono text-[12px] font-bold text-[#004AAD] ring-1 ring-slate-200">
               He / She / It / N(เอกพจน์) + V-s
             </p>
-            <p className="mt-1.5 text-[11px] text-slate-600">· {item.whyTh}</p>
+            <p className="mt-1.5 text-[13px] text-slate-600">· {item.whyTh}</p>
           </div>
 
           <Verdict
@@ -723,6 +749,7 @@ function Verdict({
   gaveUp = false,
   onRetry,
   onGiveUp,
+  singleAttempt = false,
 }: {
   checked: boolean | null;
   correctText: string;
@@ -734,6 +761,8 @@ function Verdict({
   gaveUp?: boolean;
   onRetry?: () => void;
   onGiveUp?: () => void;
+  /** Reveal on the first check, right or wrong — no retry loop. */
+  singleAttempt?: boolean;
 }) {
   if (checked === null) {
     return (
@@ -741,7 +770,7 @@ function Verdict({
         type="button"
         disabled={!canCheck}
         onClick={onCheck}
-        className="mt-4 w-full rounded-full bg-[#004AAD] py-3 text-sm font-black text-white disabled:opacity-30"
+        className="mt-4 w-full rounded-full bg-[#004AAD] py-3 text-sm font-bold text-white disabled:opacity-30"
       >
         ตรวจคำตอบ
       </button>
@@ -749,22 +778,23 @@ function Verdict({
   }
 
   // Right, or out of attempts, or they asked — only then is the answer shown.
-  const reveal = checked || gaveUp || attempts >= 3;
+  // A single-attempt probe reveals on the very first check regardless.
+  const reveal = singleAttempt || checked || gaveUp || attempts >= 3;
 
   if (!checked && !reveal) {
     return (
       <div className="mt-4">
         <div className="rounded-2xl bg-rose-50 p-3.5 text-rose-900 ring-1 ring-rose-200">
-          <p className="text-sm font-black">ยังไม่ถูก — ลองใหม่อีกครั้ง</p>
-          <p className="mt-0.5 text-[11px]">
+          <p className="text-sm font-bold">ยังไม่ถูก — ลองใหม่อีกครั้ง</p>
+          <p className="mt-0.5 text-[13px]">
             พยายามครั้งที่ {attempts} / 3 {attempts >= 2 ? "· อีกครั้งเดียวจะเฉลยให้" : ""}
           </p>
-          {hintTh && <p className="mt-1 text-[11px] opacity-80">💡 {hintTh}</p>}
+          {hintTh && <p className="mt-1 text-[13px] opacity-80">💡 {hintTh}</p>}
         </div>
         <button
           type="button"
           onClick={onRetry}
-          className="mt-3 w-full rounded-full bg-slate-900 py-3 text-sm font-black text-white"
+          className="mt-3 w-full rounded-full bg-slate-900 py-3 text-sm font-bold text-white"
         >
           แก้ใหม่อีกครั้ง
         </button>
@@ -788,18 +818,18 @@ function Verdict({
             : "bg-rose-50 text-rose-900 ring-rose-200"
         }`}
       >
-        <p className="text-sm font-black">
+        <p className="text-sm font-bold">
           {checked ? "ถูกต้อง! 🎉" : gaveUp ? "เฉลย" : "ยังไม่ถูก — นี่คือเฉลย"}
         </p>
         <p className="mt-1 text-[12px]">
           <strong>เฉลย:</strong> {correctText}
         </p>
-        {!checked && hintTh && <p className="mt-1 text-[11px] opacity-80">💡 {hintTh}</p>}
+        {!checked && hintTh && <p className="mt-1 text-[13px] opacity-80">💡 {hintTh}</p>}
       </div>
       <button
         type="button"
         onClick={onNext}
-        className="mt-3 w-full rounded-full bg-slate-900 py-3 text-sm font-black text-white"
+        className="mt-3 w-full rounded-full bg-slate-900 py-3 text-sm font-bold text-white"
       >
         ข้อต่อไป →
       </button>

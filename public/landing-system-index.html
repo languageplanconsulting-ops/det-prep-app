@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Landing “ระบบของเรา” — 4 แนวทาง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{--ink:#0B1F3A;--blue:#004AAD;--line:#E3E7ED;--muted:#5B6980;--soft:#F6F8FB}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font-family:"IBM Plex Sans Thai",system-ui,sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  a{color:var(--blue)}
+  h1{font-size:clamp(30px,4.4vw,46px);line-height:1.2;letter-spacing:-.02em;margin:0 0 16px}
+  h2{font-size:24px;margin:0 0 12px}
+  .lbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--blue);margin-bottom:14px}
+  header{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+  .lead{font-size:17.5px;color:var(--muted);max-width:66ch}
+  section{padding:52px 0}
+
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+  .card{border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;
+    transition:border-color .15s,transform .15s,box-shadow .15s;text-decoration:none;color:inherit}
+  .card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 10px 30px rgba(11,31,58,.09)}
+  .card .head{padding:20px 22px;border-bottom:1px solid var(--line)}
+  .card .firm{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--blue)}
+  .card h3{margin:6px 0 4px;font-size:21px}
+  .card .one{font-size:14px;color:var(--muted);margin:0}
+  .card .body{padding:18px 22px;font-size:14px;display:grid;gap:12px}
+  .card .row{display:grid;grid-template-columns:78px 1fr;gap:12px}
+  .card .k{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);padding-top:3px}
+  .card .go{margin-top:auto;padding:14px 22px;background:var(--soft);font-weight:700;font-size:14px;color:var(--blue)}
+  .swatch{height:6px;display:flex}
+  .swatch i{flex:1}
+
+  .rec{border:1px solid var(--blue);border-left:4px solid var(--blue);border-radius:8px;
+    padding:22px 24px;background:#F5F9FF}
+  .rec b{color:var(--blue)}
+
+  table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:10px}
+  th,td{border:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top}
+  th{background:var(--soft);font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--blue);font-weight:500}
+  td:first-child{font-weight:700;white-space:nowrap}
+
+  .note{border:1px solid var(--line);border-radius:8px;padding:20px 22px;background:var(--soft);font-size:14.5px}
+  .note h4{margin:0 0 8px;font-size:15px}
+  .note+.note{margin-top:14px}
+  .warn{background:#FFF8E6;border-color:#EBD08A}
+  code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:#EEF2F7;padding:2px 6px;border-radius:4px}
+  footer{padding:28px 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+  @media(max-width:820px){ .cards{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="lbl">Landing revamp · “เรียน Duolingo ด้วยระบบของเรา”</div>
+  <h1>4 แนวทาง จาก 4 สำนักคิด</h1>
+  <p class="lead">
+    เนื้อหาเหมือนกันทั้ง 4 หน้า — ระบบ 4 ส่วน, ภาพหน้าจอจริงจากแอป, งานวิจัยที่อ้างอิง,
+    และเครื่องสร้างแผนที่ใช้งานได้จริง สิ่งที่ต่างคือ <b>ลำดับการเล่าและน้ำหนักที่ให้แต่ละส่วน</b>
+    ซึ่งเป็นตัวตัดสินว่าคนอ่านจะเชื่อ หรือจะกด
+  </p>
+</div></header>
+
+<section><div class="wrap">
+  <div class="cards">
+
+    <a class="card" href="/landing-system-v1-mckinsey.html">
+      <div class="swatch"><i style="background:#004AAD"></i><i style="background:#F6F8FB"></i><i style="background:#0B1F3A"></i></div>
+      <div class="head">
+        <div class="firm">McKinsey · Pyramid Principle + MECE</div>
+        <h3>V1 · Pyramid</h3>
+        <p class="one">หน้าเว็บคือ “ข้อโต้แย้ง” ไม่ใช่โบรชัวร์ — ตอบข้อสรุปก่อน แล้วค้ำด้วยเหตุผลที่ครบและไม่ทับซ้อน</p>
+      </div>
+      <div class="body">
+        <div class="row"><span class="k">จุดเด่น</span><span>ตาราง “ถอดออกข้อใดข้อหนึ่งแล้วเกิดอะไร” — พิสูจน์ว่าทำไมต้องครบทั้ง 4 ไม่ใช่ซื้อคลังข้อสอบมาทำเอง</span></div>
+        <div class="row"><span class="k">เหมาะกับ</span><span>คนอ่านสายวิเคราะห์ ยื่นเรียนต่อ/ทุน · traffic ที่รู้จักแบรนด์อยู่แล้ว</span></div>
+        <div class="row"><span class="k">ความเสี่ยง</span><span>เย็นชา ไม่เร่งให้ตัดสินใจ</span></div>
+      </div>
+      <div class="go">เปิดดู →</div>
+    </a>
+
+    <a class="card" href="/landing-system-v2-bcg.html">
+      <div class="swatch"><i style="background:#004AAD"></i><i style="background:#FFCC00"></i><i style="background:#0a0a0a"></i></div>
+      <div class="head">
+        <div class="firm">BCG · Value-Driver Tree</div>
+        <h3>V2 · Value Driver</h3>
+        <p class="one">ทำช่องว่างคะแนนให้เป็นตัวเลข แตกออกเป็นตัวขับเคลื่อน แล้วจัดสรรเวลาไปที่จุดที่คืนคะแนนสูงสุด</p>
+      </div>
+      <div class="body">
+        <div class="row"><span class="k">ดีไซน์</span><span><b>ใช้โค้ดแบรนด์จริงจากแอป</b> — ep-blue #004aad / ep-yellow #ffcc00 / ep-green #0fa47f, พื้นตาราง 24px, IBM Plex Sans Thai + JetBrains Mono, กรอบดำ 3px + เงาแข็ง (.ep-brutal)</span></div>
+        <div class="row"><span class="k">จุดเด่น</span><span>เครื่องสร้างแผนอยู่ใน hero + แผนภาพแตกคะแนน DET เป็น 4 ตัว + ภาพหน้าจอจริง 9 จุด รวมแกลเลอรีบทเรียน 5 จอมือถือ</span></div>
+        <div class="row"><span class="k">เหมาะกับ</span><span>คนที่มีคะแนนเดิมอยู่แล้วและรู้ว่าต้องได้เท่าไหร่ · โฆษณาที่ยิงคำว่า “คะแนนไม่ถึง”</span></div>
+        <div class="row"><span class="k">ความเสี่ยง</span><span>ต้องระวังไม่ให้ตัวเลขคาดการณ์ดูเหมือนคำสัญญา</span></div>
+      </div>
+      <div class="go">เปิดดู →</div>
+    </a>
+
+    <a class="card" href="/landing-system-v3-ogilvy.html">
+      <div class="swatch"><i style="background:#004AAD"></i><i style="background:#FFCC00"></i><i style="background:#0a0a0a"></i></div>
+      <div class="head">
+        <div class="firm">Ogilvy · Direct Response — ★ แบบที่เลือกแล้ว</div>
+        <h3>V3 · Direct Response</h3>
+        <p class="one">สัญญาที่ใหญ่และเจาะจง แล้วพิสูจน์ด้วยรายละเอียดยาว ๆ — คำบรรยายใต้ภาพทุกอันคือตัวขาย</p>
+      </div>
+      <div class="body">
+        <div class="row"><span class="k">ดีไซน์</span><span><b>ใช้โค้ดแบรนด์จริงจากแอป</b> — ep-blue #004aad / ep-yellow #ffcc00 / ep-green #0fa47f, พื้นตาราง 24px, IBM Plex Sans Thai + Inter + JetBrains Mono, กรอบดำ 3px + เงาแข็ง (.ep-brutal)</span></div>
+        <div class="row"><span class="k">จุดเด่น</span><span>เล่าครบตั้งแต่ปัญหา → ระบบ 4 ขั้น → งานวิจัย → ข้อเสนอ → FAQ · CTA ซ้ำ 4 จุด · ภาพหน้าจอจริง 6 จุด + แกลเลอรีบทเรียน 5 จอมือถือ</span></div>
+        <div class="row"><span class="k">เหมาะกับ</span><span>traffic เย็น (โฆษณา/SEO) ที่ยังไม่รู้จักเรา — ปกติแปลงเป็นยอดได้ดีที่สุดในสามแบบแรก</span></div>
+        <div class="row"><span class="k">ที่ต้องเติม</span><span>ช่องรีวิว 3 ช่องยังว่าง ต้องใส่รีวิวจริงพร้อมคะแนนก่อนขึ้นจริง</span></div>
+      </div>
+      <div class="go">เปิดดู →</div>
+    </a>
+
+    <a class="card" href="/landing-system-v4-wk.html">
+      <div class="swatch"><i style="background:#0A0A0A"></i><i style="background:#FFCC00"></i><i style="background:#2C6BE8"></i></div>
+      <div class="head">
+        <div class="firm">Wieden+Kennedy · Brand Manifesto</div>
+        <h3>V4 · Manifesto</h3>
+        <p class="one">ไม่อธิบายระบบ — ประกาศจุดยืน ตัวอักษรใหญ่ ภาพเต็มจอ คำน้อยที่สุด</p>
+      </div>
+      <div class="body">
+        <div class="row"><span class="k">จุดเด่น</span><span>“หยุดฝึกมั่ว → เริ่มมีระบบ” + แผงสินค้าเต็มจอ 4 แผง + โมเมนต์ตัวเลข +40 เต็มหน้า</span></div>
+        <div class="row"><span class="k">เหมาะกับ</span><span>สร้างแบรนด์ · รีทาร์เก็ต · คนที่เคยเห็นเรามาแล้ว</span></div>
+        <div class="row"><span class="k">ความเสี่ยง</span><span>ตอบคำถาม “แล้วฉันได้อะไร” ได้อ่อนที่สุด — ปกติปิดการขายเองไม่ได้</span></div>
+      </div>
+      <div class="go">เปิดดู →</div>
+    </a>
+
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <div class="rec">
+    <b>เลือกแล้ว: V3</b> — ตอนนี้ V3 กับ V2 ถูกทำใหม่ด้วยโค้ดแบรนด์จริงจากแอปแล้วทั้งคู่
+    (ep-blue / ep-yellow / กรอบดำ 3px + เงาแข็ง / พื้นตาราง 24px / IBM Plex Sans Thai)
+    ส่วน V1 กับ V4 ยังเป็นดีไซน์เดิมไว้เทียบ
+    <br /><br />
+    <b>ขั้นถัดไปที่แนะนำสำหรับ V3:</b> ปลูก <b>ตาราง MECE ของ V1</b> (“ถอดออกข้อใดข้อหนึ่งแล้วเกิดอะไร”)
+    ลงในส่วน “ระบบของเราคืออะไร” และพิจารณายก <b>ตัวเลื่อนช่องว่างคะแนนของ V2</b> ขึ้นไปไว้ใน hero
+    — แล้วเติมรีวิวจริง 3 ช่อง ก่อนเอาขึ้น production
+  </div>
+</div></section>
+
+<section style="background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+<div class="wrap">
+  <div class="lbl">สิ่งที่ต่างกันจริง ๆ</div>
+  <h2>ตำแหน่งของเครื่องสร้างแผน คือสิ่งที่ต่างกันมากที่สุด</h2>
+  <table>
+    <thead><tr><th>แบบ</th><th>เครื่องสร้างแผนอยู่ตรงไหน</th><th>เหตุผลตามสำนักคิดนั้น</th></tr></thead>
+    <tbody>
+      <tr><td>V1 Pyramid</td><td>กลางหน้า หลังระบบ 4 ส่วน</td><td>เป็น “หลักฐานที่ตรวจสอบเองได้” ว่าข้อสรุปที่อ้างไว้เป็นจริง</td></tr>
+      <tr><td>V2 Value Driver</td><td><b>บนสุด — คือ hero</b></td><td>ช่องว่างคะแนนคือเรื่องทั้งหมด ทุกอย่างที่เหลือคือการอธิบายวิธีปิดช่องว่าง</td></tr>
+      <tr><td>V3 Direct Response</td><td>หลังอธิบายระบบครบ ก่อนข้อเสนอ</td><td>ให้ลองของฟรีตอนที่ความอยากสูงสุด แล้วค่อยขอสมัคร</td></tr>
+      <tr><td>V4 Manifesto</td><td>ท้ายหน้า จุดโต้ตอบจุดเดียว</td><td>อารมณ์มาก่อน รายละเอียดทีหลัง</td></tr>
+    </tbody>
+  </table>
+</div></section>
+
+<section><div class="wrap">
+  <div class="lbl">หมายเหตุทางเทคนิค · อ่านก่อนตัดสินใจ</div>
+  <h2>ของจริงแค่ไหน</h2>
+
+  <div class="note">
+    <h4>✅ ภาพหน้าจอเป็นของจริงทั้งหมด — และผ่านการตรวจแล้วว่าไม่ใช่หน้า 404</h4>
+    ทุกภาพถ่ายจากแอปที่รันบนเครื่องนี้ (<code>localhost:3000</code>) ไม่ได้วาดขึ้นใหม่
+    เก็บไว้ที่ <code>public/images/landing/</code> (desktop + mobile อย่างละชุด)
+    <br /><br />
+    <b>รอบแรกมีภาพเสีย:</b> เคยยิงไปที่ <code>/practice/lessons</code> กับ <code>/practice/daily</code>
+    ซึ่ง<b>ไม่มีอยู่จริง</b> (บทเรียนแยกเป็นหน้าย่อยรายหัวข้อ ไม่มีหน้า hub) ภาพที่ได้จึงเป็นหน้า 404 เปล่า ๆ
+    ตอนนี้สคริปต์เก็บภาพจะตรวจทุกหน้าก่อนบันทึก — ถ้าเจอ “This page could not be found”
+    หรือหน้าที่แทบไม่มีเนื้อหา จะทิ้งทันที ปัจจุบันผ่าน 36/36 หน้า และไม่มีภาพเสียเหลืออยู่
+  </div>
+
+  <div class="note">
+    <h4>✅ เครื่องสร้างแผนใช้อัลกอริทึมจริงของระบบ</h4>
+    <code>public/landing-plan-preview.js</code> พอร์ตมาจากเอนจินที่ใช้งานจริง —
+    <code>src/lib/study-plan/schedule.ts</code> (วันฝึก, วันเช็คจุดยืนที่วันที่ 14, โหมดโค้งสุดท้าย 2 mock/สัปดาห์)
+    และ <code>src/lib/study-plan/daily-plan.ts</code> (ชุดงานคงที่ต่อระดับเวลา 5/10/20/30 นาที)
+    แผนที่คนเห็นในหน้า Landing จึงเป็นแผนเดียวกับที่เขาจะได้จริงหลังสมัคร
+  </div>
+
+  <div class="note warn">
+    <h4>⚠️ มีจุดเดียวที่ “เกิน” ของจริง — ต้องแก้โค้ดถ้าจะใช้</h4>
+    เครื่องสร้างแผนให้ผู้ใช้ <b>เลือกวันในสัปดาห์</b> ที่ว่างฝึก (จ/อ/พ/พฤ/ศ/ส/อา)
+    แต่เอนจินจริงตอนนี้ใช้ <code>cadenceDays</code> (ทุก 1/2/3 วัน) ไม่ใช่วันในสัปดาห์
+    <br /><br />
+    เลือกวันที่ว่างถามแล้วตอบง่ายกว่าและตรงกับชีวิตจริงมากกว่า (“ว่างเสาร์อาทิตย์”)
+    ถ้าจะใช้แนวนี้ ต้องเพิ่มฟิลด์ weekday ใน <code>ScheduleInput</code> และใน
+    <code>study_plan_schedules</code> — งานไม่ใหญ่ แต่ต้องแก้ทั้งเว็บและมือถือให้ตรงกัน
+    ถ้ายังไม่อยากแตะเอนจิน เปลี่ยนตัวเลือกเป็น “ทุกวัน / วันเว้นวัน / ทุก 3 วัน” ได้เลย
+  </div>
+
+  <div class="note warn">
+    <h4>⚠️ ตัวเลขคาดการณ์คะแนนเป็นช่วงกว้าง และมีหมายเหตุกำกับทุกที่</h4>
+    ช่วง “+10 ถึง 40+” คำนวณจากชั่วโมงฝึกรวม และแสดงเป็นช่วงเสมอ พร้อมข้อความว่าไม่ใช่การรับประกัน
+    ถ้ามีข้อมูลผู้ใช้จริง (คะแนนก่อน/หลัง) ควรเปลี่ยนไปใช้ตัวเลขจริงแทนสูตรนี้
+  </div>
+
+  <div class="note warn">
+    <h4>⚠️ ช่องรีวิวใน V3 เว้นว่างไว้โดยตั้งใจ</h4>
+    ไม่ได้แต่งรีวิวปลอมใส่ให้ — ช่องถูกทำเป็นกรอบประที่เขียนว่า “รอรีวิวจริง”
+    ต้องเติมคำรีวิวจริงพร้อมคะแนนก่อน/หลังก่อนเอาขึ้นจริง
+  </div>
+
+  <div class="note">
+    <h4>ไฟล์ทั้งหมดที่เพิ่มเข้ามา</h4>
+    <code>public/landing-system-index.html</code> · <code>public/landing-system-v1-mckinsey.html</code> ·
+    <code>public/landing-system-v2-bcg.html</code> · <code>public/landing-system-v3-ogilvy.html</code> ·
+    <code>public/landing-system-v4-wk.html</code> · <code>public/landing-plan-preview.js</code> ·
+    <code>public/landing-plan-preview.css</code> · <code>public/images/landing/*.png</code>
+    <br /><br />
+    ยังไม่มีการแก้โค้ดจริงของเว็บไซต์ — <code>src/</code> ไม่ถูกแตะเลย
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  MOCKUP · English Plan — สร้างเพื่อเลือกทิศทางหน้า Landing
+</div></footer>
+
+</body>
+</html>

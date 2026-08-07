@@ -63,7 +63,7 @@ export function ProductionExerciseRunner({
         <button
           type="button"
           onClick={() => onDone(1, 1)}
-          className="mt-3 w-full rounded-full bg-slate-900 py-2.5 text-sm font-black text-white"
+          className="mt-3 w-full rounded-full bg-slate-900 py-2.5 text-sm font-bold text-white"
         >
           ทำเสร็จแล้ว ทำเครื่องหมายว่าเรียบร้อย
         </button>
@@ -105,7 +105,7 @@ export function ProductionExerciseRunner({
           <button
             type="button"
             onClick={() => advance(report.score160)}
-            className={`w-full rounded-full py-3 text-sm font-black text-white ${
+            className={`w-full rounded-full py-3 text-sm font-bold text-white ${
               hasNext || !isLastRef ? "bg-[#004AAD]" : "bg-emerald-600"
             }`}
           >
@@ -122,7 +122,7 @@ export function ProductionExerciseRunner({
         <button
           type="button"
           onClick={() => (isLastRef ? onDone(total, total) : setIndex((i) => i + 1))}
-          className="mb-3 w-full rounded-full bg-amber-500 py-2 text-[12px] font-black text-white"
+          className="mb-3 w-full rounded-full bg-amber-500 py-2 text-[12px] font-bold text-white"
         >
           ⚡ ข้ามข้อนี้โดยไม่ต้องส่ง (admin)
         </button>

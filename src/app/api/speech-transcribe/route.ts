@@ -3,6 +3,7 @@ import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { resolveTranscriptionGeminiModel } from "@/lib/gemini-model-resolve";
 import { transcribeEnglishAudioWithGemini } from "@/lib/gemini-transcribe";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { scheduleSpeechRecordingLog } from "@/lib/speech-recording-log";
 
 export const maxDuration = 120;
 
@@ -87,6 +88,13 @@ export async function POST(req: Request) {
         meta: { note: "no_usage_metadata" },
       });
     }
+    scheduleSpeechRecordingLog({
+      userId,
+      source: "speech-transcribe",
+      audioBase64: audioBase64.trim(),
+      mimeType: mimeType.trim(),
+      transcript,
+    });
     return NextResponse.json({ transcript });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Transcription failed";

@@ -1,4 +1,9 @@
-import type { AiRewardBonus, ImprovementPoint, WritingCriterionReport } from "@/types/writing";
+import type {
+  AiRewardBonus,
+  ImprovementPoint,
+  ScoreRungLadder,
+  WritingCriterionReport,
+} from "@/types/writing";
 
 export type SpeakingRoundNum = 1 | 2 | 3 | 4 | 5;
 
@@ -77,4 +82,6 @@ export interface SpeakingAttemptReport {
   transcriptHighlights?: SpeakingTranscriptHighlight[];
   /** Temporary AI credit reward for redeemed improvement runs. */
   rewardBonus?: AiRewardBonus;
+  /** Write-about-photo only: their own answer rewritten at the next two score rungs. */
+  scoreRungs?: ScoreRungLadder;
 }

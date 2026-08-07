@@ -22,6 +22,11 @@ import {
   grammarPunctuationPenaltyPercent,
 } from "@/lib/production-writing-penalties";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
+import {
+  parseScoreRungLadder,
+  scoreRungJsonShape,
+  scoreRungRulePrompt,
+} from "@/lib/score-rung-prompt";
 
 function pointsOn160(percent: number, weight: number): number {
   return Math.round(percent * weight * 1.6 * 10) / 10;
@@ -86,7 +91,20 @@ function criterion(
 function buildSystemInstruction(
   originHub?: "speak-about-photo" | "write-about-photo",
   targetVocabulary?: string[],
+  /** Word budget for the score rungs; 0 disables them. */
+  learnerWordCount = 0,
 ): string {
+  // Rungs are a WRITING feature: they rewrite text the learner typed. A
+  // speak-about-photo answer was spoken, so handing back a polished paragraph
+  // to "say next time" teaches the wrong thing.
+  const rungRules =
+    originHub === "write-about-photo"
+      ? scoreRungRulePrompt({
+          learnerWordCount,
+          weights: SPEAKING_RUBRIC_WEIGHTS,
+          textLabel: "answer",
+        })
+      : "";
   const writingPenaltyRules =
     originHub === "write-about-photo"
       ? `
@@ -157,7 +175,7 @@ Improvement points: each MUST quote an exact phrase from punctuatedTranscript an
 
 Grammar bands: ~30% A1–A2 issues; ~50% B1–B2; ~70% clean; ~90% ≥1 complex structure; 100% ≥3 complex structures.
 
-Return ONLY valid JSON (no markdown). Use issueEn/issueTh for breakdown issues.${writingPenaltyRules}${targetVocabularyRules}${GEMINI_PRODUCTION_THAI_STYLE}`;
+Return ONLY valid JSON (no markdown). Use issueEn/issueTh for breakdown issues.${writingPenaltyRules}${targetVocabularyRules}${rungRules}${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
 
 function buildUserPayload(
@@ -169,6 +187,7 @@ function buildUserPayload(
   keywordTags: string[],
   prepMinutes: number,
   transcript: string,
+  wantScoreRungs: boolean,
 ): string {
   return JSON.stringify(
     {
@@ -254,6 +273,7 @@ function buildUserPayload(
             noteTh: "string",
           },
         ],
+        ...(wantScoreRungs ? scoreRungJsonShape() : {}),
       },
     },
     null,
@@ -263,6 +283,10 @@ function buildUserPayload(
 
 function asArr(v: unknown): unknown[] {
   return Array.isArray(v) ? v : [];
+}
+
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
 export async function generatePhotoSpeakReportWithGemini(params: {
@@ -310,7 +334,11 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       anthropicApiKey: params.anthropicApiKey,
       openAiApiKey: params.openAiApiKey,
     },
-    systemInstruction: buildSystemInstruction(originHub, targetVocabulary),
+    systemInstruction: buildSystemInstruction(
+      originHub,
+      targetVocabulary,
+      countWords(transcript),
+    ),
     userPayload: buildUserPayload(
       titleEn,
       titleTh,
@@ -320,6 +348,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       taskKeywords,
       prepMinutes,
       transcript,
+      originHub === "write-about-photo",
     ),
     temperature: 0.35,
   });
@@ -457,7 +486,17 @@ export async function generatePhotoSpeakReportWithGemini(params: {
     typeof raw.punctuatedTranscript === "string" && raw.punctuatedTranscript.trim()
       ? raw.punctuatedTranscript.replace(/\s+/g, " ").trim()
       : normalized;
-  const wc = punctuatedRaw.split(/\s+/).filter(Boolean).length;
+  const wc = countWords(punctuatedRaw);
+
+  // Write-about-photo only — rungs rewrite typed text, not speech.
+  const scoreRungs =
+    originHub === "write-about-photo"
+      ? parseScoreRungLadder(raw.scoreRungs, {
+          attemptId,
+          currentScore160: score160,
+          learnerWordCount: wc,
+        })
+      : null;
 
   const vocabularyUpgradeSuggestions: SpeakingVocabularyUpgrade[] = asArr(raw.vocabularyUpgradeSuggestions)
     .slice(0, 8)
@@ -537,6 +576,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
     taskPersonalExperienceBoostApplied: boost,
     ...(vocabularyUpgradeSuggestions.length > 0 ? { vocabularyUpgradeSuggestions } : {}),
     ...(transcriptHighlights.length > 0 ? { transcriptHighlights } : {}),
+    ...(scoreRungs ? { scoreRungs } : {}),
     improvementPoints:
       improvementPoints.length >= 2
         ? improvementPoints

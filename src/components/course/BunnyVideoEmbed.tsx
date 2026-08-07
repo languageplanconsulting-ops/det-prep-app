@@ -236,7 +236,7 @@ export function BunnyVideoEmbed({
     <div className="space-y-2">
       {resumeHint != null && (
         <p
-          className={`text-[11px] font-bold ${brutal ? "text-neutral-600" : "text-slate-500"}`}
+          className={`text-[13px] font-bold ${brutal ? "text-neutral-600" : "text-slate-500"}`}
         >
           ต่อจากนาทีที่ {formatWatchClock(resumeHint)} — ระบบจำตำแหน่งไว้ให้แล้ว
         </p>

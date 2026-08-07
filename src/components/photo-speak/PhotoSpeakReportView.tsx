@@ -15,6 +15,7 @@ import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { SpeakingAnnotatedTranscript } from "@/components/speaking/SpeakingAnnotatedTranscript";
 import { SpeakingVocabularyUpgradePanel } from "@/components/speaking/SpeakingVocabularyUpgradePanel";
 import { GrammarFixesPanel, type GrammarFixItem } from "@/components/reports/GrammarFixesPanel";
+import { ScoreRungPanel } from "@/components/reports/ScoreRungPanel";
 import { resolveGrammarFixDisplay } from "@/lib/grammar-fix-display";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
 import { GRADING_BADGE_OFFLINE, GRADING_BADGE_PRIMARY } from "@/lib/report-branding";
@@ -360,6 +361,11 @@ export function PhotoSpeakReportView({
         titleEn={nav.isWrite ? "Grammar fixes (photo write)" : "Grammar fixes (photo speak)"}
         titleTh={nav.isWrite ? "จุดแก้ไวยากรณ์ (เขียนเกี่ยวกับภาพ)" : "จุดแก้ไวยากรณ์ (พูดจากภาพ)"}
         maxItems={8}
+      />
+      <ScoreRungPanel
+        ladder={report.scoreRungs}
+        attemptId={report.attemptId}
+        entrySource={nav.notebookSource}
       />
         </div>
       </section>

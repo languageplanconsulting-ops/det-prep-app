@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คอร์สเรียน IELTS ที่ English Plan — All Skills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>html,body{margin:0;padding:0;background:#fff;}</style>
+</head>
+<body>
+
+<!-- =========================================================================
+     วางลง Thinkific ได้เลย: คัดลอกตั้งแต่ <style> จนถึง </div> ปิด .ep
+     ทุก selector อยู่ใต้ .ep จึงไม่ชนกับธีมเดิม
+     ========================================================================= -->
+<style>
+.ep{
+  --blue:#004aad;
+  --blue-dark:#00337a;
+  --blue-tint:#eef3fb;
+  --yellow:#ffcc00;
+  --yellow-soft:#fff8dd;
+  --ink:#15181f;
+  --body:#4a4f5a;
+  --faint:#878d99;
+  --line:#e6e8ed;
+
+  font-family:"Prompt","Noto Sans Thai",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  color:var(--body);
+  font-size:18px;
+  line-height:1.8;
+  font-weight:300;
+  -webkit-font-smoothing:antialiased;
+  background:#fff;
+}
+.ep *{box-sizing:border-box;}
+.ep img{max-width:100%;display:block;}
+.ep p{margin:0 0 1em;}
+.ep h1,.ep h2,.ep h3,.ep h4{color:var(--ink);font-weight:600;line-height:1.3;margin:0;}
+.ep h1{font-size:clamp(32px,5vw,50px);font-weight:700;letter-spacing:-.01em;}
+.ep h2{font-size:clamp(27px,3.6vw,38px);}
+.ep h3{font-size:23px;font-weight:500;}
+.ep h4{font-size:18px;font-weight:500;}
+.ep .w{max-width:1080px;margin:0 auto;padding:0 22px;}
+.ep .w-narrow{max-width:780px;margin:0 auto;padding:0 22px;}
+.ep section{padding:88px 0;}
+.ep .alt{background:#f7f8fa;}
+
+/* --- kicker + section head --- */
+.ep .kicker{
+  display:inline-block;font-size:14px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--blue);margin:0 0 16px;
+}
+.ep .head{text-align:center;max-width:700px;margin:0 auto 52px;}
+.ep .head p{color:var(--faint);margin:14px 0 0;font-size:18px;line-height:1.75;}
+.ep .rule{width:64px;height:4px;background:var(--yellow);border-radius:2px;margin:22px auto 0;}
+
+/* --- buttons --- */
+.ep .btn{
+  display:inline-block;padding:15px 34px;font-size:17px;font-weight:500;
+  text-decoration:none;border:2px solid var(--blue);color:var(--blue);
+  background:#fff;border-radius:100px;transition:.18s ease;text-align:center;
+}
+.ep .btn:hover{background:var(--blue);color:#fff;}
+.ep .btn.fill{background:var(--blue);color:#fff;}
+.ep .btn.fill:hover{background:var(--blue-dark);border-color:var(--blue-dark);}
+.ep .btn.gold{background:var(--yellow);border-color:var(--yellow);color:#15181f;}
+.ep .btn.gold:hover{background:#ecbc00;border-color:#ecbc00;color:#15181f;}
+.ep .btn.sm{padding:10px 22px;font-size:15.5px;border-width:1px;}
+.ep .btns{display:flex;gap:14px;flex-wrap:wrap;}
+
+/* --- hero --- */
+.ep .hero{
+  background:linear-gradient(180deg,var(--blue) 0%,#003784 100%);
+  color:#fff;padding:72px 0 64px;position:relative;overflow:hidden;
+}
+.ep .hero h1{color:#fff;}
+.ep .hero .mark{color:var(--yellow);}
+.ep .hero .lead{color:#cfdcf2;font-size:20px;line-height:1.8;margin:22px 0 0;max-width:580px;}
+.ep .hero .lead b{color:#fff;font-weight:600;}
+.ep .hero .btns{margin-top:32px;}
+.ep .hero .btn{border-color:#fff;color:#fff;background:transparent;}
+.ep .hero .btn:hover{background:#fff;color:var(--blue);}
+.ep .hero .btn.gold{background:var(--yellow);border-color:var(--yellow);color:#15181f;}
+.ep .hero .btn.gold:hover{background:#fff;border-color:#fff;color:var(--blue);}
+.ep .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;}
+.ep .hero-tag{
+  display:inline-flex;align-items:center;gap:9px;font-size:14px;font-weight:600;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+  color:#fff;padding:7px 15px;border-radius:100px;margin-bottom:22px;
+}
+.ep .hero-tag .dot{width:7px;height:7px;border-radius:50%;background:var(--yellow);}
+.ep .hero-shots{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ep .hero-shots img{
+  border-radius:6px;border:3px solid rgba(255,255,255,.9);
+  aspect-ratio:3/4;max-height:300px;width:100%;object-fit:cover;object-position:top;
+  box-shadow:0 12px 30px rgba(0,0,0,.25);
+}
+.ep .hero-shots img:nth-child(2){margin-top:26px;}
+.ep .hero-note{
+  font-size:12.5px;color:#a9bfe2;grid-column:1/-1;margin:2px 0 0;line-height:1.6;
+}
+
+/* --- stat bar --- */
+.ep .stats{background:var(--yellow);}
+.ep .stats .w{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-top:26px;padding-bottom:26px;}
+.ep .stat{text-align:center;}
+.ep .stat b{display:block;font-size:32px;font-weight:600;color:#15181f;line-height:1.2;}
+.ep .stat span{font-size:15px;color:#4a4207;font-weight:400;}
+
+/* --- 4 skills --- */
+.ep .skills{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.ep .skill{border:1px solid var(--line);border-radius:4px;padding:26px 22px;background:#fff;transition:.18s;}
+.ep .skill:hover{border-color:var(--blue);transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,74,173,.09);}
+.ep .skill .ico{
+  width:44px;height:44px;border-radius:4px;background:var(--blue-tint);color:var(--blue);
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+}
+.ep .skill .ico svg{width:22px;height:22px;}
+.ep .skill h3{font-size:18px;margin-bottom:4px;}
+.ep .skill .hrs{font-size:13px;font-weight:600;color:var(--blue);letter-spacing:.02em;}
+.ep .skill ul{list-style:none;margin:16px 0 0;padding:0;font-size:16px;line-height:1.75;}
+.ep .skill li{padding-left:16px;position:relative;margin-bottom:6px;color:var(--body);}
+.ep .skill li:before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--yellow);}
+
+/* --- 3 steps --- */
+.ep .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+.ep .step{padding:32px 28px;border-right:1px solid var(--line);position:relative;background:#fff;}
+.ep .step:last-child{border-right:0;}
+.ep .step .num{
+  font-size:13px;font-weight:700;letter-spacing:.1em;color:#fff;background:var(--blue);
+  width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+}
+.ep .step h3{font-size:19px;margin-bottom:8px;}
+.ep .step p{font-size:17px;margin:0;color:var(--body);}
+
+/* --- pricing : hero plan --- */
+.ep .hero-plan{
+  background:linear-gradient(135deg,var(--blue) 0%,#00306f 100%);
+  border-radius:12px;color:#fff;position:relative;
+  display:grid;grid-template-columns:1.25fr .75fr;
+  box-shadow:0 20px 50px rgba(0,48,111,.28);margin-bottom:26px;
+}
+.ep .hero-plan .flag{
+  position:absolute;top:-14px;left:34px;background:var(--yellow);color:#15181f;
+  font-size:13px;font-weight:600;letter-spacing:.04em;padding:6px 18px;border-radius:100px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+.ep .hero-plan .left{padding:42px 36px 38px;}
+.ep .hero-plan .tier{
+  font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--yellow);margin:0 0 10px;
+}
+.ep .hero-plan h3{color:#fff;font-size:30px;font-weight:600;margin:0 0 8px;}
+.ep .hero-plan .desc{color:#c3d5f0;font-size:17px;margin:0 0 22px;line-height:1.7;}
+.ep .hero-plan .skills-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;}
+.ep .hero-plan .skills-row span{
+  font-size:14px;font-weight:500;padding:6px 15px;border-radius:100px;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;
+}
+.ep .hero-plan ul{list-style:none;margin:0;padding:0;font-size:16px;}
+.ep .hero-plan li{padding-left:27px;position:relative;margin-bottom:10px;color:#dce7f7;line-height:1.65;}
+.ep .hero-plan li:before{
+  content:"";position:absolute;left:2px;top:9px;width:13px;height:7px;
+  border-left:2px solid var(--yellow);border-bottom:2px solid var(--yellow);transform:rotate(-45deg);
+}
+.ep .hero-plan li b{color:#fff;font-weight:600;}
+.ep .hero-plan .right{
+  background:rgba(255,255,255,.07);border-left:1px solid rgba(255,255,255,.14);
+  padding:42px 32px 38px;display:flex;flex-direction:column;justify-content:center;
+  border-radius:0 12px 12px 0;
+}
+.ep .hero-plan .was{font-size:15px;color:#9db6da;margin:0 0 2px;}
+.ep .hero-plan .was s{margin-right:6px;}
+.ep .hero-plan .big{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;}
+.ep .hero-plan .big b{font-size:52px;font-weight:700;color:var(--yellow);line-height:1;}
+.ep .hero-plan .big span{font-size:16px;color:#c3d5f0;font-weight:500;}
+.ep .hero-plan .save{
+  display:inline-block;background:var(--yellow);color:#15181f;font-size:13.5px;font-weight:600;
+  padding:4px 13px;border-radius:100px;margin:10px 0 20px;align-self:flex-start;
+}
+.ep .hero-plan .alt-price{
+  border-top:1px solid rgba(255,255,255,.18);margin-top:18px;padding-top:16px;
+  font-size:15px;color:#c3d5f0;
+}
+.ep .hero-plan .alt-price a{color:#fff;font-weight:500;}
+
+/* --- pricing : tier cards --- */
+.ep .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.ep .tier-card{
+  --accent:var(--blue);--accent-bg:var(--blue-tint);
+  border:1px solid var(--line);border-top:5px solid var(--accent);border-radius:10px;
+  background:#fff;padding:28px 24px 26px;display:flex;flex-direction:column;transition:.18s;
+}
+.ep .tier-card:hover{box-shadow:0 14px 32px rgba(0,0,0,.10);transform:translateY(-3px);}
+.ep .tier-card.t-amber{--accent:#d99e00;--accent-bg:#fdf4dc;}
+.ep .tier-card.t-blue{--accent:#004aad;--accent-bg:#eef3fb;}
+.ep .tier-card.t-slate{--accent:#5a6b85;--accent-bg:#eef1f6;}
+.ep .tier-card .tier{
+  font-size:12.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 8px;
+}
+.ep .tier-card h3{font-size:21px;font-weight:600;margin:0 0 6px;line-height:1.35;}
+.ep .tier-card .desc{font-size:15.5px;color:var(--faint);margin:0 0 18px;line-height:1.6;}
+.ep .tier-card .skills-row{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 22px;}
+.ep .tier-card .skills-row span{
+  font-size:13px;font-weight:500;padding:4px 11px;border-radius:100px;
+  background:var(--accent-bg);color:var(--accent);
+}
+.ep .tier-card .skills-row span.off{background:#f4f5f7;color:#aab0ba;text-decoration:line-through;}
+.ep .tier-card .pricebox{margin-top:auto;border-top:1px solid var(--line);padding-top:18px;}
+.ep .tier-card .big{display:flex;align-items:baseline;gap:7px;}
+.ep .tier-card .big b{font-size:34px;font-weight:700;color:var(--ink);line-height:1;}
+.ep .tier-card .big span{font-size:14.5px;color:var(--faint);}
+.ep .tier-card .save{
+  display:inline-block;background:var(--accent-bg);color:var(--accent);
+  font-size:13px;font-weight:600;padding:3px 11px;border-radius:100px;margin:10px 0 4px;
+}
+.ep .tier-card .alt-price{font-size:14.5px;color:var(--faint);margin:8px 0 18px;}
+.ep .tier-card .alt-price b{color:var(--ink);font-weight:600;}
+.ep .tier-card .btn{width:100%;border-color:var(--accent);color:var(--accent);}
+.ep .tier-card .btn:hover{background:var(--accent);color:#fff;}
+
+/* --- single courses --- */
+.ep .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.ep .card{
+  border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;
+  display:flex;flex-direction:column;transition:.18s;
+}
+.ep .card:hover{border-color:var(--blue);box-shadow:0 12px 28px rgba(0,74,173,.12);transform:translateY(-3px);}
+.ep .card .thumb{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#f2f3f5;border-bottom:1px solid var(--line);}
+.ep .card .body{padding:20px 20px 22px;display:flex;flex-direction:column;flex:1;}
+.ep .card .tag{font-size:12.5px;font-weight:600;letter-spacing:.12em;color:var(--faint);text-transform:uppercase;}
+.ep .card h4{margin:8px 0 auto;font-size:17px;line-height:1.55;font-weight:500;}
+.ep .card .p{font-size:25px;font-weight:600;color:var(--blue);margin:18px 0 14px;}
+.ep .card .btn{width:100%;}
+
+/* --- general training --- */
+.ep .gt{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.ep .gt-card{border:1px solid var(--line);border-radius:5px;padding:30px 28px;background:#fff;}
+.ep .gt-card .top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:18px;}
+.ep .gt-card .amt{font-size:24px;font-weight:700;color:var(--blue);}
+.ep .gt-card .meta{font-size:14px;color:var(--faint);}
+.ep .gt-card ul{list-style:none;margin:0 0 24px;padding:0;font-size:17px;}
+.ep .gt-card li{padding-left:24px;position:relative;margin-bottom:9px;}
+.ep .gt-card li:before{
+  content:"";position:absolute;left:0;top:9px;width:12px;height:7px;
+  border-left:2px solid var(--blue);border-bottom:2px solid var(--blue);transform:rotate(-45deg);
+}
+
+/* --- testimonials --- */
+.ep .quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.ep .quote{background:#fff;border:1px solid var(--line);border-left:3px solid var(--yellow);border-radius:3px;padding:26px 24px;}
+.ep .quote p{font-size:16.5px;line-height:1.85;margin:0 0 18px;color:var(--body);}
+.ep .quote .who{font-size:14px;font-weight:700;color:var(--ink);}
+.ep .quote .who small{display:block;font-weight:400;color:var(--faint);font-size:13px;margin-top:2px;}
+.ep .quote .band{
+  display:inline-block;background:var(--blue);color:#fff;font-size:12.5px;font-weight:700;
+  padding:3px 11px;border-radius:100px;margin-bottom:14px;
+}
+
+/* --- featured / starred testimonial --- */
+.ep .feature{
+  background:#fff;border:2px solid var(--blue);border-radius:6px;
+  box-shadow:0 18px 46px rgba(0,74,173,.13);position:relative;
+  display:grid;grid-template-columns:340px 1fr;margin-bottom:44px;
+}
+.ep .feature .star{
+  position:absolute;top:-15px;left:28px;z-index:2;
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--yellow);color:#15181f;font-size:13px;font-weight:700;
+  letter-spacing:.04em;padding:6px 16px;border-radius:100px;
+  box-shadow:0 3px 10px rgba(0,0,0,.12);
+}
+
+/* left: score panel */
+.ep .score{
+  background:linear-gradient(180deg,var(--blue) 0%,#003784 100%);
+  color:#fff;padding:38px 30px 32px;border-radius:3px 0 0 3px;
+}
+.ep .score .lbl{
+  font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:#9dbaea;margin:0 0 10px;
+}
+.ep .score .overall{display:flex;align-items:baseline;gap:12px;margin-bottom:6px;}
+.ep .score .overall b{font-size:58px;font-weight:700;line-height:1;color:var(--yellow);}
+.ep .score .overall span{font-size:15px;color:#cfdcf2;font-weight:600;}
+.ep .score .test{font-size:13px;color:#9dbaea;margin:0 0 22px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.18);}
+.ep .score-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,.1);
+}
+.ep .score-row:last-child{border-bottom:0;}
+.ep .score-row .sk{font-size:14.5px;font-weight:600;color:#fff;}
+.ep .score-row .mv{display:flex;align-items:center;gap:7px;font-size:14px;white-space:nowrap;}
+.ep .score-row .was{color:#8fa9d4;text-decoration:line-through;}
+.ep .score-row .arw{color:#7c98c7;font-size:12px;}
+.ep .score-row .now{
+  font-weight:700;font-size:16px;color:#15181f;background:var(--yellow);
+  border-radius:3px;padding:1px 9px;
+}
+.ep .score-row.flat .now{background:rgba(255,255,255,.16);color:#fff;}
+
+/* right: quotes */
+.ep .feature .said{padding:40px 38px 34px;}
+.ep .feature .said .mark{
+  font-size:44px;line-height:.6;color:var(--yellow);font-family:Georgia,serif;display:block;margin-bottom:10px;
+}
+.ep .feature .said p{font-size:16.5px;line-height:1.9;color:var(--body);margin:0 0 16px;}
+.ep .feature .said p b{color:var(--ink);background:var(--yellow-soft);padding:0 4px;font-weight:700;}
+.ep .feature .said .sep{height:1px;background:var(--line);margin:20px 0;}
+.ep .feature .who{font-size:14.5px;font-weight:700;color:var(--ink);margin-top:22px;}
+.ep .feature .who small{display:block;font-weight:400;color:var(--faint);font-size:13.5px;margin-top:3px;}
+.ep .feature .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px;}
+.ep .feature .tags span{
+  font-size:12.5px;font-weight:600;padding:4px 11px;border-radius:100px;
+  background:var(--blue-tint);color:var(--blue);
+}
+
+/* proof strip inside featured review */
+.ep .feature .proof{
+  grid-column:1/-1;border-top:1px solid var(--line);background:#f4f6f9;
+  padding:34px 38px 38px;border-radius:0 0 3px 3px;
+}
+.ep .feature .shots{display:grid;grid-template-columns:1fr;gap:26px;}
+.ep .feature .shots figure{margin:0;}
+.ep .feature .shots img{
+  width:100%;border:1px solid #dfe3ea;border-radius:8px;background:#fff;
+  box-shadow:0 10px 30px rgba(0,0,0,.13);
+}
+.ep .feature .shots figcaption{
+  font-size:15px;color:var(--body);margin-top:12px;line-height:1.65;
+  padding-left:16px;border-left:3px solid var(--yellow);
+}
+.ep .feature .shots .slot{
+  border:2px dashed #c3cbd8;border-radius:4px;background:#fff;color:#98a1b0;
+  min-height:190px;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:13.5px;line-height:1.7;padding:18px;
+}
+
+/* --- proof gallery --- */
+.ep .gallery{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;}
+.ep .gallery img{
+  border-radius:4px;border:1px solid var(--line);background:#f2f3f5;
+  aspect-ratio:3/4;object-fit:cover;object-position:top;width:100%;
+}
+.ep .privacy{
+  margin-top:22px;font-size:14px;color:var(--faint);text-align:center;
+  background:var(--yellow-soft);border:1px solid #f4e3a0;border-radius:4px;padding:12px 18px;
+}
+
+/* --- accordion (course / combo details) --- */
+.ep .accgroup{margin-bottom:44px;}
+.ep .accgroup > h3{
+  font-size:19px;font-weight:600;color:var(--ink);margin:0 0 4px;
+  display:flex;align-items:center;gap:10px;
+}
+.ep .accgroup > h3:before{content:"";width:5px;height:20px;background:var(--yellow);border-radius:3px;}
+.ep .accgroup > .note{font-size:15.5px;color:var(--faint);margin:0 0 18px;padding-left:15px;}
+
+.ep .acc{
+  border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:12px;overflow:hidden;
+  transition:border-color .15s,box-shadow .15s;
+}
+.ep .acc[open]{border-color:var(--blue);box-shadow:0 10px 26px rgba(0,74,173,.10);}
+.ep .acc > summary{
+  cursor:pointer;list-style:none;padding:20px 56px 20px 22px;position:relative;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.ep .acc > summary::-webkit-details-marker{display:none;}
+.ep .acc > summary:hover{background:#fafbfc;}
+.ep .acc > summary:after{
+  content:"";position:absolute;right:24px;top:50%;width:9px;height:9px;
+  border-right:2px solid var(--blue);border-bottom:2px solid var(--blue);
+  transform:translateY(-70%) rotate(45deg);transition:transform .2s;
+}
+.ep .acc[open] > summary:after{transform:translateY(-30%) rotate(-135deg);}
+.ep .acc .name{font-size:17.5px;font-weight:500;color:var(--ink);flex:1;min-width:190px;line-height:1.5;}
+.ep .acc .name em{display:block;font-style:normal;font-size:13.5px;font-weight:400;color:var(--faint);margin-top:2px;}
+.ep .acc .tick{font-size:22px;font-weight:600;color:var(--blue);white-space:nowrap;}
+.ep .acc .tick s{font-size:15px;font-weight:400;color:var(--faint);margin-right:6px;}
+
+.ep .acc .in{padding:2px 22px 24px;border-top:1px solid var(--line);margin-top:2px;}
+.ep .meta{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 20px;}
+.ep .meta span{
+  font-size:13.5px;font-weight:500;padding:5px 13px;border-radius:100px;
+  background:var(--blue-tint);color:var(--blue);
+}
+.ep .meta span.gold{background:var(--yellow-soft);color:#7a5c00;border:1px solid #f0dc95;}
+.ep .acc .in h4{font-size:15px;font-weight:600;color:var(--ink);margin:0 0 10px;letter-spacing:.01em;}
+.ep .acc .in ol{margin:0 0 22px;padding-left:22px;font-size:16.5px;line-height:1.8;}
+.ep .acc .in ol li{margin-bottom:7px;padding-left:3px;}
+.ep .acc .in ol li::marker{color:var(--blue);font-weight:600;}
+.ep .acc .in ul.tick-list{list-style:none;margin:0 0 22px;padding:0;font-size:16.5px;}
+.ep .acc .in ul.tick-list li{padding-left:26px;position:relative;margin-bottom:9px;line-height:1.75;}
+.ep .acc .in ul.tick-list li:before{
+  content:"";position:absolute;left:2px;top:10px;width:12px;height:7px;
+  border-left:2px solid var(--blue);border-bottom:2px solid var(--blue);transform:rotate(-45deg);
+}
+.ep .acc .go{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* --- faq --- */
+.ep .faq details{border-bottom:1px solid var(--line);}
+.ep .faq summary{
+  cursor:pointer;list-style:none;padding:18px 34px 18px 0;position:relative;
+  font-weight:500;color:var(--ink);font-size:18px;
+}
+.ep .faq summary::-webkit-details-marker{display:none;}
+.ep .faq summary:after{
+  content:"+";position:absolute;right:6px;top:15px;font-size:22px;font-weight:400;color:var(--blue);
+}
+.ep .faq details[open] summary:after{content:"–";}
+.ep .faq .a{padding:0 0 22px;font-size:17px;color:var(--body);}
+.ep .faq .a ul{margin:8px 0 0;padding-left:20px;}
+
+/* --- final cta --- */
+.ep .cta{background:var(--blue);color:#fff;text-align:center;}
+.ep .cta h2{color:#fff;}
+.ep .cta p{color:#cfdcf2;max-width:520px;margin:14px auto 30px;}
+.ep .cta .btns{justify-content:center;}
+.ep .cta .line-note{font-size:14px;color:#a9bfe2;margin:22px 0 0;}
+
+/* ==========================================================================
+   MOTION
+   หลักการ: เคลื่อนไหวเฉพาะ transform/opacity, เข้าเร็วออกช้า (ease-out),
+   ระยะสั้น 150–500ms, ไม่ทำให้ layout ขยับ, ปิดอัตโนมัติถ้าผู้ใช้ตั้งค่า reduce motion
+   ========================================================================== */
+.ep{--ease-out:cubic-bezier(.16,1,.3,1);--ease:cubic-bezier(.4,0,.2,1);}
+
+/* selection + focus */
+.ep ::selection{background:var(--yellow);color:#15181f;}
+.ep a:focus-visible,.ep summary:focus-visible{
+  outline:2px solid var(--blue);outline-offset:3px;border-radius:4px;
+}
+
+@media (prefers-reduced-motion: no-preference){
+  html{scroll-behavior:smooth;}
+
+  /* scroll reveal — ซ่อนเฉพาะเมื่อ JS ทำงาน (กัน no-JS แล้วหน้าว่าง) */
+  .ep.js-motion [data-reveal]{opacity:0;transform:translateY(14px);}
+  .ep.js-motion [data-reveal].in{
+    opacity:1;transform:none;
+    transition:opacity .55s var(--ease-out),transform .55s var(--ease-out);
+  }
+  /* stagger — ไล่ทีละใบ ไม่เกิน 5 ลำดับ เพื่อไม่ให้รอนาน */
+  .ep.js-motion .tiers > *:nth-child(2).in,
+  .ep.js-motion .skills > *:nth-child(2).in,
+  .ep.js-motion .cards > *:nth-child(2).in,
+  .ep.js-motion .quotes > *:nth-child(2).in{transition-delay:.06s;}
+  .ep.js-motion .tiers > *:nth-child(3).in,
+  .ep.js-motion .skills > *:nth-child(3).in,
+  .ep.js-motion .cards > *:nth-child(3).in,
+  .ep.js-motion .quotes > *:nth-child(3).in{transition-delay:.12s;}
+  .ep.js-motion .skills > *:nth-child(4).in,
+  .ep.js-motion .cards > *:nth-child(4).in,
+  .ep.js-motion .quotes > *:nth-child(4).in{transition-delay:.18s;}
+  .ep.js-motion .quotes > *:nth-child(n+5).in{transition-delay:.24s;}
+  .ep.js-motion .gallery img.in{transition-delay:calc(var(--gi,0) * 40ms);}
+
+  /* accordion — เนื้อหาไหลลงมาแทนที่จะกระตุก */
+  .ep .acc[open] > .in,.ep .faq details[open] > .a{
+    animation:epFadeDown .3s var(--ease-out);
+  }
+  @keyframes epFadeDown{
+    from{opacity:0;transform:translateY(-8px);}
+    to{opacity:1;transform:none;}
+  }
+
+  /* interactive states */
+  .ep .btn{transition:background .15s var(--ease),color .15s var(--ease),
+                      border-color .15s var(--ease),transform .12s var(--ease);}
+  .ep .btn:active{transform:scale(.97);}
+  .ep .acc,.ep .tier-card,.ep .skill,.ep .card{
+    transition:transform .22s var(--ease-out),box-shadow .22s var(--ease-out),
+               border-color .18s var(--ease);
+  }
+  .ep .acc > summary:after{transition:transform .25s var(--ease-out);}
+  .ep .gallery img{transition:transform .25s var(--ease-out),box-shadow .25s var(--ease-out);}
+  .ep .gallery img:hover{transform:scale(1.04);box-shadow:0 10px 24px rgba(0,0,0,.16);}
+}
+
+/* --- responsive --- */
+@media(max-width:960px){
+  .ep .skills,.ep .cards{grid-template-columns:repeat(2,1fr);}
+  .ep .gallery{grid-template-columns:repeat(4,1fr);}
+  .ep .quotes{grid-template-columns:1fr 1fr;}
+  .ep .tiers{grid-template-columns:1fr;}
+  .ep .hero-plan{grid-template-columns:1fr;}
+  .ep .hero-plan .right{
+    border-left:0;border-top:1px solid rgba(255,255,255,.14);
+    border-radius:0 0 12px 12px;padding:30px 36px 34px;
+  }
+  .ep .feature{grid-template-columns:1fr;}
+  .ep .score{border-radius:3px 3px 0 0;}
+  .ep .feature .said{padding:32px 28px 30px;}
+  .ep .steps{grid-template-columns:1fr;}
+  .ep .step{border-right:0;border-bottom:1px solid var(--line);}
+  .ep .step:last-child{border-bottom:0;}
+}
+@media(max-width:820px){
+  .ep .hero-grid{grid-template-columns:1fr;gap:26px;}
+  .ep .hero-shots{max-width:400px;padding-bottom:34px;}
+}
+@media(max-width:700px){
+  .ep{font-size:16px;}
+  .ep section{padding:52px 0;}
+  .ep .gt,.ep .quotes{grid-template-columns:1fr;}
+  .ep .hero-plan .left{padding:34px 24px 30px;}
+  .ep .hero-plan .right{padding:26px 24px 30px;}
+  .ep .hero-plan h3{font-size:26px;}
+  .ep .hero-plan .big b{font-size:44px;}
+  .ep .hero-plan .flag{left:20px;}
+  .ep .stats .w{grid-template-columns:1fr 1fr;gap:20px;}
+  .ep .skills,.ep .cards{grid-template-columns:1fr;}
+  .ep .gallery{grid-template-columns:repeat(3,1fr);}
+  .ep .feature .proof{padding:22px 22px 26px;}
+  .ep .feature .shots{grid-template-columns:1fr;}
+  .ep .btns .btn{width:100%;}
+}
+</style>
+
+<div class="ep">
+
+  <!-- ============ HERO ============ -->
+  <div class="hero">
+    <div class="w">
+      <div class="hero-grid">
+        <div>
+          <span class="hero-tag"><span class="dot"></span> ช่วยนักเรียนได้ Band 7.0+ มากว่า 6 ปี</span>
+          <h1>คอร์สเรียน IELTS<br>ที่ <span class="mark">English Plan</span></h1>
+          <p class="lead">
+            <b>เทคนิคจากพี่ Band 9.0</b> ที่ช่วยนักเรียนให้ได้ Band 7.0+ มากว่า 6 ปี —
+            เรียนครบทุก skills ตั้งแต่ปูพื้น เทคนิคการทำข้อสอบ ตะลุยโจทย์
+            และแบบฝึกหัดจากรุ่นพี่ IELTS Band 9.0
+          </p>
+          <div class="btns">
+            <a class="btn gold" href="#packages">เลือกแพ็กเกจเลย</a>
+            <a class="btn" href="https://www.language-plan.com/pages/ielts-all-skills-bundle">ดูคอร์ส ALL SKILLS (Academic Bundle)</a>
+          </div>
+        </div>
+        <div class="hero-shots">
+          <img src="https://i.postimg.cc/2jcKMhZk/IMG-9602.png" alt="ผลสอบ IELTS ของนักเรียน English Plan" loading="lazy">
+          <img src="https://i.postimg.cc/PrCRjJWm/IMG-9603.png" alt="ผลสอบ IELTS ของนักเรียน English Plan" loading="lazy">
+          <p class="hero-note">ผลสอบจริงของนักเรียน — ปิดข้อมูลส่วนตัวทุกครั้งเพื่อความเป็นส่วนตัว</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STATS ============ -->
+  <div class="stats">
+    <div class="w">
+      <div class="stat"><b>4</b><span>Skills ครบในคอร์สเดียว</span></div>
+      <div class="stat"><b>70+</b><span>ชั่วโมงเนื้อหา</span></div>
+      <div class="stat"><b>14</b><span>Essays ตรวจละเอียด</span></div>
+      <div class="stat"><b>6 ปี</b><span>ช่วยนักเรียนได้ Band 7.0+</span></div>
+    </div>
+  </div>
+
+  <!-- ============ PACKAGES ============ -->
+  <section id="packages">
+    <div class="w">
+      <div class="head">
+        <span class="kicker">ราคาแพ็กเกจ</span>
+        <h2>เลือกแพ็กเกจที่เหมาะกับเป้าหมายของคุณ</h2>
+        <p>เรียนหลาย Skills พร้อมกัน ได้ส่วนลดพิเศษทันที เนื้อหาเหมือนคอร์สแยกทุกอย่าง</p>
+        <div class="rule"></div>
+      </div>
+
+      <!-- ---- tier 1: hero plan ---- -->
+      <div class="hero-plan">
+        <span class="flag">★ แนะนำที่สุด</span>
+        <div class="left">
+          <p class="tier">แพ็กเกจครบทุกทักษะ</p>
+          <h3>All Skills Package</h3>
+          <p class="desc">ยกคะแนนทั้งชุด ไม่ต้องเดาว่าควรเริ่มจากพาร์ตไหน</p>
+          <div class="skills-row">
+            <span>Writing 37 ชม.</span><span>Reading 27 ชม.</span>
+            <span>Listening 10 ชม.</span><span>Speaking 8 ชม.</span>
+          </div>
+          <ul>
+            <li><b>ตรวจ Essay 14 ครั้ง</b> พร้อม Feedback ภาษาไทย</li>
+            <li><b>แถมคอร์ส Pre-Inter Grammar ฟรี</b> สำหรับแพ็กเกจ 6 เดือน</li>
+            <li>ปรึกษาครูส่วนตัวทาง LINE ตลอดคอร์ส</li>
+          </ul>
+        </div>
+        <div class="right">
+          <p class="was">แยกซื้อ <s>฿13,960</s></p>
+          <div class="big"><b>฿8,990</b><span>/ 6 เดือน</span></div>
+          <span class="save">ประหยัด ฿4,970</span>
+          <a class="btn gold" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัครเลย</a>
+          <p class="alt-price">
+            หรือเรียน 3 เดือน ฿7,990 —
+            <a href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัครแบบ 3 เดือน</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- ---- tier 2-4 ---- -->
+      <div class="tiers">
+
+        <div class="tier-card t-amber">
+          <p class="tier">3 ทักษะ</p>
+          <h3>3 Skills Package</h3>
+          <p class="desc">เลือกเองได้ 3 ทักษะ รวม Writing ก็ได้</p>
+          <div class="skills-row">
+            <span>เลือกได้ 3 ทักษะ</span><span>รวม Writing ได้</span>
+          </div>
+          <div class="pricebox">
+            <div class="big"><b>฿8,590</b><span>/ 6 เดือน</span></div>
+            <span class="save">ประหยัดสูงสุด ฿3,380</span>
+            <p class="alt-price">3 เดือน <b>฿7,590</b></p>
+            <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัครเลย</a>
+          </div>
+        </div>
+
+        <div class="tier-card t-blue">
+          <p class="tier">Writing + 1 ทักษะ</p>
+          <h3>Writing + Reading หรือ Speaking</h3>
+          <p class="desc">สำหรับคนที่ติดแค่ Writing กับอีกหนึ่งพาร์ต</p>
+          <div class="skills-row">
+            <span>Writing</span><span>+ Reading หรือ Speaking</span>
+          </div>
+          <div class="pricebox">
+            <div class="big"><b>฿6,990</b><span>/ 6 เดือน</span></div>
+            <span class="save">ประหยัดสูงสุด ฿1,990</span>
+            <p class="alt-price">3 เดือน <b>฿5,990</b></p>
+            <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัครเลย</a>
+          </div>
+        </div>
+
+        <div class="tier-card t-slate">
+          <p class="tier">2 ทักษะ</p>
+          <h3>2 Skills (ไม่รวม Writing)</h3>
+          <p class="desc">Writing ถึงเป้าแล้ว เหลือดันพาร์ตอื่น</p>
+          <div class="skills-row">
+            <span>เลือก 2 จาก R / L / S</span><span class="off">Writing</span>
+          </div>
+          <div class="pricebox">
+            <div class="big"><b>฿5,590</b><span>/ 6 เดือน</span></div>
+            <span class="save">ประหยัดสูงสุด ฿1,390</span>
+            <p class="alt-price">3 เดือน <b>฿4,990</b></p>
+            <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัครเลย</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="btns" style="justify-content:center;margin-top:38px;">
+        <a class="btn fill" href="#details">ดูชั่วโมงเรียนและเนื้อหาทุกคอร์ส</a>
+        <a class="btn" href="https://www.language-plan.com/pages/ielts-all-skills-bundle">คอร์ส ALL SKILLS (Academic Bundle)</a>
+        <a class="btn" href="https://www.language-plan.com/pages/ielts-general-bundle">รายละเอียด IELTS General Training</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 SKILLS ============ -->
+  <section class="alt">
+    <div class="w">
+      <div class="head">
+        <span class="kicker">All Skills</span>
+        <h2>เรียนครบทุกทักษะ ในที่เดียว</h2>
+        <p>ไม่ต้องไล่หาคอร์สทีละสกิล ทุกทักษะสอนเป็นแพทเทิร์นที่จับต้องได้ ใช้สอบได้จริง</p>
+        <div class="rule"></div>
+      </div>
+
+      <div class="skills">
+        <div class="skill">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+          <h3>Writing</h3>
+          <div class="hrs">37 ชั่วโมง · 97 บทเรียน</div>
+          <ul>
+            <li>ปูพื้น Grammar และประโยคซับซ้อน</li>
+            <li>Task 1 ครบทุกแบบ กราฟ / process / map</li>
+            <li>Task 2 แพทเทิร์นเรียงความ 5 รูปแบบ</li>
+            <li>ตรวจ Essay ละเอียด พร้อม Feedback ภาษาไทย</li>
+          </ul>
+        </div>
+        <div class="skill">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></div>
+          <h3>Reading</h3>
+          <div class="hrs">27 ชั่วโมง</div>
+          <ul>
+            <li>Skimming &amp; Scanning ที่ใช้ได้จริง</li>
+            <li>True / False / Not Given ไม่ตกหลุมพราง</li>
+            <li>Matching Headings, Multiple Choice</li>
+            <li>คลังคำศัพท์ 60+ Keywords ที่ออกบ่อย</li>
+          </ul>
+        </div>
+        <div class="skill">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14v-3a9 9 0 0 1 18 0v3"/><path d="M21 16a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2Z"/><path d="M3 16a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2Z"/></svg></div>
+          <h3>Listening</h3>
+          <div class="hrs">10 ชั่วโมง · 28 บทเรียน</div>
+          <ul>
+            <li>สรุปกับดักหลักของ IELTS Listening</li>
+            <li>จับตัวเลข วันที่ ชื่อเฉพาะ ให้แม่น</li>
+            <li>รับมือการเปลี่ยนคำตอบกลางบทสนทนา</li>
+            <li>ฝึกฟัง Synonym ที่โจทย์ชอบใช้</li>
+          </ul>
+        </div>
+        <div class="skill">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg></div>
+          <h3>Speaking</h3>
+          <div class="hrs">8 ชั่วโมง · 40+ หัวข้อย่อย</div>
+          <ul>
+            <li>Part 1 ตอบให้เป็นธรรมชาติ ไม่ท่องจำ</li>
+            <li>Part 2 สูตรเล่าเรื่องเต็ม 2 นาที</li>
+            <li>Part 3 ตอบเชิงวิชาการแบบมีเหตุผล</li>
+            <li>ส่งไฟล์เสียงให้ครูตรวจได้</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 STEPS ============ -->
+  <section>
+    <div class="w">
+      <div class="head">
+        <span class="kicker">วิธีเรียน</span>
+        <h2>ปูพื้น → เทคนิค → ตะลุยโจทย์</h2>
+        <p>ทุกคอร์สเดินตามลำดับเดียวกัน เรียนจบแล้วรู้ว่าต้องทำอะไรต่อ</p>
+        <div class="rule"></div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <h3>ปูพื้นให้แน่น</h3>
+          <p>เริ่มจาก Grammar และโครงสร้างประโยคที่ IELTS ต้องใช้จริง ไม่ต้องกลัวว่าพื้นฐานไม่พอ เพราะเราไล่ตั้งแต่ต้น</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h3>เทคนิคการทำข้อสอบ</h3>
+          <p>สอนเป็นแพทเทิร์นที่จำได้และใช้ซ้ำได้ทุกข้อ ทั้ง Writing, Speaking และเทคนิคจับคำตอบใน Reading &amp; Listening</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h3>ตะลุยโจทย์ + แบบฝึกหัด</h3>
+          <p>ฝึกจากข้อสอบ Cambridge ล่าสุด พร้อมแบบฝึกหัดที่รุ่นพี่ IELTS Band 9.0 ทำไว้ให้ ทั้ง Computer-based และ Paper-based</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SINGLE COURSES ============ -->
+  <section class="alt">
+    <div class="w">
+      <div class="head">
+        <span class="kicker">IELTS Academic</span>
+        <h2>สำหรับคนที่อยากเรียนแค่ 1 Skill</h2>
+        <p>เนื้อหาเหมือนในแพ็กเกจทุกอย่าง เลือกเฉพาะทักษะที่ต้องการได้เลย</p>
+        <div class="rule"></div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <img class="thumb" src="https://import.cdn.thinkific.com/563960/54IJMT4NSSuO4HPUAVug_11.png" alt="คอร์ส Intensive Writing (Academic) — สอนโดยพี่ดอย" loading="lazy">
+          <div class="body">
+            <span class="tag">Writing · 37 ชม.</span>
+            <h4>IELTS Academic Writing — Intensive</h4>
+            <div class="p">฿4,990</div>
+            <a class="btn sm fill" href="https://www.language-plan.com/courses/ielts-writing-5">ดูคอร์ส</a>
+          </div>
+        </div>
+        <div class="card">
+          <img class="thumb" src="https://import.cdn.thinkific.com/563960/t1nYjGlTTL2eK0pDaDcC_12.png" alt="คอร์ส Intensive Reading (Academic) — สอนโดยพี่ดอย" loading="lazy">
+          <div class="body">
+            <span class="tag">Reading · 27 ชม.</span>
+            <h4>Intensive Academic Reading for IELTS</h4>
+            <div class="p">฿3,990</div>
+            <a class="btn sm fill" href="https://www.language-plan.com/courses/intensive-academic-reading-for-ielts">ดูคอร์ส</a>
+          </div>
+        </div>
+        <div class="card">
+          <img class="thumb" src="https://import.cdn.thinkific.com/563960/bXDhzeTR9u130qWZY3zQ_13.png" alt="คอร์ส IELTS Speaking — สอนโดยพี่ดอย" loading="lazy">
+          <div class="body">
+            <span class="tag">Speaking · 8 ชม.</span>
+            <h4>Speaking Intensive for IELTS</h4>
+            <div class="p">฿2,990</div>
+            <a class="btn sm fill" href="https://www.language-plan.com/courses/0-day-speaking-challenge-for-ielts">ดูคอร์ส</a>
+          </div>
+        </div>
+        <div class="card">
+          <img class="thumb" src="https://import.cdn.thinkific.com/563960/vMlJAp6SEmFru8uiEA0A_14.png" alt="คอร์ส IELTS Listening for Band 7 — สอนโดยพี่ดอย" loading="lazy">
+          <div class="body">
+            <span class="tag">Listening · 10 ชม.</span>
+            <h4>Listening for Band 7</h4>
+            <div class="p">฿1,990</div>
+            <a class="btn sm fill" href="https://www.language-plan.com/courses/listening-for-band-7">ดูคอร์ส</a>
+          </div>
+        </div>
+      </div>
+
+      <p style="text-align:center;margin:28px 0 0;">
+        <a href="https://www.language-plan.com/collections">ดูคอร์สทั้งหมดของ English Plan →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ GENERAL TRAINING ============ -->
+  <section id="general">
+    <div class="w">
+      <div class="head">
+        <span class="kicker">General Training</span>
+        <h2>รายละเอียด IELTS General Training</h2>
+        <p>สำหรับคนที่สอบเพื่อย้ายถิ่นฐาน ทำงาน หรือ PR — โจทย์คนละแบบกับ Academic</p>
+        <div class="rule"></div>
+      </div>
+
+      <div class="gt">
+        <div class="gt-card">
+          <div class="top">
+            <div>
+              <h3>Intensive Writing (General Training)</h3>
+              <div class="meta">18.5 ชั่วโมง · 61 บทเรียน · เรียนได้ 6 เดือน</div>
+            </div>
+            <div class="amt">฿4,990</div>
+          </div>
+          <ul>
+            <li>พิชิต Writing GT ด้วยโครงสร้างที่ชัดเจน</li>
+            <li>ฝึกเขียนจดหมาย Formal, Informal และ Semi-formal</li>
+            <li>วิเคราะห์โจทย์ Task 2 พร้อมเทคนิคตอบตรงจุด</li>
+            <li>พัฒนา Grammar, Vocabulary และ Transitional Words</li>
+            <li>ตรวจงานเขียนได้มากกว่า 8 ครั้ง พร้อมฟีดแบ็ก</li>
+            <li>ฝึกจากข้อสอบจริง Cambridge ล่าสุด</li>
+          </ul>
+          <a class="btn fill" href="https://www.language-plan.com/courses/ielts-writing-general-training">สมัครเรียน</a>
+        </div>
+
+        <div class="gt-card">
+          <div class="top">
+            <div>
+              <h3>Intensive Reading (General Training)</h3>
+              <div class="meta">14.5 ชั่วโมง · 38 บทเรียน · เรียนได้ 6 เดือน</div>
+            </div>
+            <div class="amt">฿2,990</div>
+          </div>
+          <ul>
+            <li>อ่านและจับคำตอบแม่นยำ ไม่กลัวคำถามหลอก</li>
+            <li>เข้าใจโครงสร้างข้อสอบ GT Reading</li>
+            <li>เทคนิค Skimming &amp; Scanning ตอบเร็วและถูก</li>
+            <li>คลังคำศัพท์ 60+ Keywords ที่ออกบ่อย</li>
+            <li>ตะลุยโจทย์ครบทุกประเภท T/F/NG, Matching Headings, Table Completion</li>
+            <li>ฝึกข้อสอบจริง 2 ชุดเต็ม อัปเดตล่าสุด</li>
+          </ul>
+          <a class="btn fill" href="https://www.language-plan.com/courses/ielts-reading-general-training">สมัครเรียน</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ALL COURSE DETAILS (DROPDOWNS) ============ -->
+  <section id="details" class="alt">
+    <div class="w">
+      <div class="head">
+        <span class="kicker">รายละเอียดทั้งหมด</span>
+        <h2>ชั่วโมงเรียนและเนื้อหาของทุกคอร์ส</h2>
+        <p>กดที่คอร์สเพื่อดูจำนวนชั่วโมง จำนวนบทเรียน และหัวข้อที่สอนทั้งหมด</p>
+        <div class="rule"></div>
+      </div>
+
+      <!-- ---- GROUP C: Combos ---- -->
+      <div class="accgroup">
+        <h3>แพ็กเกจรวม (Combo) — เลือกได้ทั้ง Academic และ General Training</h3>
+        <p class="note">ยิ่งเรียนหลายทักษะ ยิ่งถูกลง · เนื้อหาเหมือนคอร์สแยกทุกอย่าง</p>
+
+        <details class="acc" open>
+          <summary>
+            <span class="name">All Skills Package — ครบทั้ง 4 ทักษะ<em>Writing + Reading + Listening + Speaking · 70+ ชั่วโมง</em></span>
+            <span class="tick"><s>฿13,960</s>฿8,990</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>70+ ชั่วโมง</span><span>Writing 37 ชม.</span><span>Reading 27 ชม.</span>
+              <span>Listening 10 ชม.</span><span>Speaking 8 ชม.</span>
+              <span class="gold">แถมคอร์ส Pre-Inter Grammar ฟรี</span>
+            </div>
+            <h4>ราคาและสิ่งที่ได้</h4>
+            <ul class="tick-list">
+              <li><b>6 เดือน — ฿8,990</b> · ตรวจ Essay ได้ 14 ครั้ง · แถมคอร์ส Grammar ปูพื้นฟรี</li>
+              <li><b>3 เดือน — ฿7,990</b> · ตรวจ Essay ได้ 10 ครั้ง</li>
+              <li>ปรึกษาครูส่วนตัวทาง LINE ตลอดคอร์ส</li>
+              <li>ฝึกได้ทั้ง Computer-based และ Paper-based</li>
+            </ul>
+            <div class="go">
+              <a class="btn sm fill" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 6 เดือน ฿8,990</a>
+              <a class="btn sm" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัคร 3 เดือน ฿7,990</a>
+              <a class="btn sm" href="https://www.language-plan.com/pages/ielts-all-skills-bundle">รายละเอียด Academic</a>
+              <a class="btn sm" href="https://www.language-plan.com/pages/ielts-general-bundle">รายละเอียด General</a>
+            </div>
+          </div>
+        </details>
+
+        <details class="acc">
+          <summary>
+            <span class="name">3 Skills Package<em>เลือก 3 ทักษะจาก 4 · รวม Writing ได้</em></span>
+            <span class="tick">฿8,590</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>เลือกได้ 3 ทักษะ</span><span>รวม Writing ได้</span><span>เรียนได้ 3 หรือ 6 เดือน</span>
+            </div>
+            <h4>ราคาและสิ่งที่ได้</h4>
+            <ul class="tick-list">
+              <li><b>6 เดือน — ฿8,590</b></li>
+              <li><b>3 เดือน — ฿7,590</b></li>
+              <li>ถ้าเลือก Writing จะได้สิทธิ์ตรวจ Essay ด้วย</li>
+              <li>ปรึกษาครูส่วนตัวทาง LINE ตลอดคอร์ส</li>
+            </ul>
+            <div class="go">
+              <a class="btn sm fill" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">ทักไลน์เพื่อเลือก 3 ทักษะ</a>
+              <a class="btn sm" href="https://www.language-plan.com/pages/ielts-all-skills-bundle">ดูรายละเอียด</a>
+            </div>
+          </div>
+        </details>
+
+        <details class="acc">
+          <summary>
+            <span class="name">Writing + Reading หรือ Speaking<em>เจาะเฉพาะจุดที่ยังไม่ผ่าน</em></span>
+            <span class="tick">฿6,990</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>Writing 37 ชม.</span><span>+ Reading 27 ชม. หรือ Speaking 8 ชม.</span>
+            </div>
+            <h4>ราคาและสิ่งที่ได้</h4>
+            <ul class="tick-list">
+              <li><b>6 เดือน — ฿6,990</b> · ตรวจ Essay ได้ 10 ครั้ง</li>
+              <li><b>3 เดือน — ฿5,990</b> · ตรวจ Essay ได้ 6 ครั้ง</li>
+              <li>เหมาะกับคนที่คะแนนพาร์ตอื่นถึงแล้ว เหลือติดแค่ Writing กับอีกหนึ่งทักษะ</li>
+            </ul>
+            <div class="go">
+              <a class="btn sm fill" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">ทักไลน์เพื่อสมัคร</a>
+              <a class="btn sm" href="https://www.language-plan.com/pages/ielts-all-skills-bundle">ดูรายละเอียด</a>
+            </div>
+          </div>
+        </details>
+
+        <details class="acc">
+          <summary>
+            <span class="name">2 Skills (ไม่รวม Writing)<em>เลือก 2 จาก Reading / Listening / Speaking</em></span>
+            <span class="tick">฿5,590</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>เลือกได้ 2 ทักษะ</span><span>ไม่รวม Writing</span><span>เรียนได้ 3 หรือ 6 เดือน</span>
+            </div>
+            <h4>ราคาและสิ่งที่ได้</h4>
+            <ul class="tick-list">
+              <li><b>6 เดือน — ฿5,590</b></li>
+              <li><b>3 เดือน — ฿4,990</b></li>
+              <li>เหมาะกับคนที่ Writing ถึงเป้าแล้ว เหลือแค่ดันพาร์ตอื่น</li>
+            </ul>
+            <div class="go">
+              <a class="btn sm fill" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">ทักไลน์เพื่อเลือก 2 ทักษะ</a>
+              <a class="btn sm" href="https://www.language-plan.com/pages/ielts-all-skills-bundle">ดูรายละเอียด</a>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- ---- GROUP A: Academic single courses ---- -->
+      <div class="accgroup">
+        <h3>คอร์สแยกรายทักษะ — IELTS Academic</h3>
+        <p class="note">เนื้อหาเหมือนในแพ็กเกจทุกอย่าง · เรียนได้ 6 เดือน · ต่ออายุ 700 บาท/เดือน</p>
+
+        <details class="acc">
+          <summary>
+            <span class="name">IELTS Academic Writing — Intensive<em>37 ชั่วโมง · 97 บทเรียน</em></span>
+            <span class="tick">฿4,990</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>37 ชั่วโมง</span><span>97 บทเรียน</span>
+              <span class="gold">ตรวจ Essay 12 ครั้ง</span><span>เรียนได้ 6 เดือน</span>
+            </div>
+            <h4>เนื้อหาที่สอน</h4>
+            <ol>
+              <li>Writing Basics &amp; Grammar Hacks — ปูพื้นไวยากรณ์และทางลัดที่ใช้จริงในห้องสอบ</li>
+              <li>Task 1: Data Reports — line graph, pie chart, bar chart และตาราง</li>
+              <li>Task 1: Visual Diagrams — process diagram และ map</li>
+              <li>Task 2: Essay Excellence — โครงสร้าง เปิดเรื่อง ย่อหน้าเนื้อหา และโจทย์ระดับยาก</li>
+              <li>Masterclass รายหัวข้อ — nuclear weapons, gender equality, animal rights, globalization และอื่น ๆ</li>
+              <li>ฝึกจากข้อสอบ Cambridge 18–20 (อัปเดต 2024–2025)</li>
+            </ol>
+            <div class="go">
+              <a class="btn sm fill" href="https://www.language-plan.com/enroll/1651205?price_id=2143276">สมัครคอร์สนี้</a>
+              <a class="btn sm" href="https://www.language-plan.com/courses/ielts-writing-5">ดูหน้าคอร์ส</a>
+            </div>
+          </div>
+        </details>
+
+        <details class="acc">
+          <summary>
+            <span class="name">Intensive Academic Reading for IELTS<em>27 ชั่วโมง · ข้อสอบ 500+ ข้อ</em></span>
+            <span class="tick">฿3,990</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>27 ชั่วโมง</span><span>ข้อสอบ 500+ ข้อ</span>
+              <span class="gold">IELTS Workspace</span><span>เรียนได้ 6 เดือน</span>
+            </div>
+            <h4>เนื้อหาที่สอน</h4>
+            <ol>
+              <li>บทเทคนิค (3 ชม.) — ปรับมายด์เซ็ต, paraphrase patterns</li>
+              <li>เทคนิครายประเภทโจทย์ — True/False/Not Given, เติมคำ, Matching Heading, Matching Information, Multiple Choice</li>
+              <li>ชุดฝึกหลัก Set 1–4 (12 ชม.)</li>
+              <li>ชุดฝึกเสริมอีก 6 ชุด (12 ชม.) จาก Cambridge อัปเดตถึงปี 2025–2026</li>
+              <li>คลังคำศัพท์ 60+ Keywords ที่ออกสอบบ่อย</li>
+            </ol>
+            <h4>สิ่งที่ได้เพิ่ม</h4>
+            <ul class="tick-list">
+              <li>English Plan IELTS Workspace — จำลองข้อสอบแบบ Computer-based</li>
+              <li>Vocab Saver บันทึกศัพท์ และระบบติดตามความคืบหน้า</li>
+              <li>เอกสาร PDF โหลดและปรินต์ได้ฟรี</li>
+            </ul>
+            <div class="go">
+              <a class="btn sm fill" href="https://www.language-plan.com/order?ct=f9711f87-734f-4510-9bac-47d21352f75c">สมัครคอร์สนี้</a>
+              <a class="btn sm" href="https://www.language-plan.com/courses/intensive-academic-reading-for-ielts">ดูหน้าคอร์ส</a>
+            </div>
+          </div>
+        </details>
+
+        <details class="acc">
+          <summary>
+            <span class="name">Speaking Intensive for IELTS<em>8 ชั่วโมง · 10 บทเรียน · 40+ หัวข้อย่อย</em></span>
+            <span class="tick">฿2,990</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>8 ชั่วโมง</span><span>10 บทเรียน</span>
+              <span>40+ หัวข้อย่อย</span><span class="gold">10 แพทเทิร์นที่พิสูจน์แล้ว</span>
+            </div>
+            <h4>เนื้อหาที่สอน</h4>
+            <ol>
+              <li>ทำความรู้จัก IELTS Speaking และเกณฑ์ให้คะแนน</li>
+              <li>Part 1 — ตอบให้ลื่น ใช้ tense อดีต/อนาคต และ discourse markers</li>
+              <li>การแสดงความเห็นและเรียบเรียงไอเดียให้เป็นระบบ</li>
+              <li>Part 2 — พูดเต็ม 2 นาที ทั้งหัวข้อคน สถานที่ กิจกรรม และสิ่งของ</li>
+              <li>Part 3 — ขยายคำตอบและให้เหตุผลเชิงวิชาการ</li>
+              <li>หัวข้อที่ออกบ่อย — social media, creativity, money/business, education, environment</li>
+              <li>จำลองสอบเต็มรูปแบบด้วยชุด Cambridge 18</li>
+            </ol>
+            <h4>สิ่งที่ได้เพิ่ม</h4>
+            <ul class="tick-list">
+              <li>เทคนิคพูดให้เป็นธรรมชาติ ออกแบบมาสำหรับคนไทยโดยเฉพาะ</li>
+              <li>ส่งไฟล์เสียงให้ครูตรวจ และถามได้ทาง LINE VIP</li>
+            </ul>
+            <div class="go">
+              <a class="btn sm fill" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สมัครคอร์สนี้</a>
+              <a class="btn sm" href="https://www.language-plan.com/courses/0-day-speaking-challenge-for-ielts">ดูหน้าคอร์ส</a>
+            </div>
+          </div>
+        </details>
+
+        <details class="acc">
+          <summary>
+            <span class="name">Listening for Band 7<em>10 ชั่วโมง · 28 บทเรียน</em></span>
+            <span class="tick">฿1,990</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>10 ชั่วโมง</span><span>28 บทเรียน</span>
+              <span class="gold">เป้า Band 7.0+</span><span>เรียนได้ 6 เดือน</span>
+            </div>
+            <h4>เนื้อหาที่สอน</h4>
+            <ol>
+              <li>Basics — ภาพรวมกลยุทธ์และกับดักหลักของ IELTS Listening</li>
+              <li>Section 1 — บทสนทนาในชีวิตจริง พร้อมเคสจองโรงแรม</li>
+              <li>Section 2 — บริบทประจำวัน เน้น connectors และ passive voice</li>
+              <li>Section 3 — บทสนทนากลุ่มเชิงวิชาการ พร้อมเทคนิคจดโน้ต</li>
+              <li>Section 4 — เลกเชอร์และบทพูดยาว</li>
+              <li>คำศัพท์วิชาการ — Social History, Technology, Environment + ชุดฝึกเต็มรูปแบบ</li>
+            </ol>
+            <h4>เทคนิคเด่นในคอร์ส</h4>
+            <ul class="tick-list">
+              <li>จับ keyword และวิธีจดโน้ตที่ทันเสียง</li>
+              <li>รู้ทัน distractor และการเปลี่ยนคำตอบกลางบทสนทนา</li>
+              <li>Predictive Listening — เดาคำตอบจากโครงสร้างประโยค</li>
+              <li>เฉลยละเอียดทุกข้อในชุดฝึก</li>
+            </ul>
+            <div class="go">
+              <a class="btn sm fill" href="https://www.language-plan.com/enroll/1932248">สมัครคอร์สนี้</a>
+              <a class="btn sm" href="https://www.language-plan.com/courses/listening-for-band-7">ดูหน้าคอร์ส</a>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- ---- GROUP B: General Training ---- -->
+      <div class="accgroup">
+        <h3>คอร์สแยกรายทักษะ — General Training</h3>
+        <p class="note">สำหรับคนที่สอบเพื่อย้ายถิ่นฐาน ทำงาน หรือขอ PR · โจทย์คนละแบบกับ Academic</p>
+
+        <details class="acc">
+          <summary>
+            <span class="name">Intensive Writing (General Training)<em>18.5 ชั่วโมง · 61 บทเรียน</em></span>
+            <span class="tick">฿4,990</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>18.5 ชั่วโมง</span><span>61 บทเรียน</span>
+              <span class="gold">ตรวจงานเขียน 10 ครั้ง</span><span>เรียนได้ 6 เดือน</span>
+            </div>
+            <h4>เนื้อหาที่สอน</h4>
+            <ol>
+              <li>ปูพื้นไวยากรณ์และการใช้ tense ให้แม่น</li>
+              <li>เทคนิคขยายคำนามและคำกริยาเพื่อดันแบนด์ให้สูงขึ้น</li>
+              <li>การสร้างประโยคซับซ้อน (complex sentences)</li>
+              <li>Transitional words ทำให้งานเขียนลื่นไหล</li>
+              <li>Task 1 — จดหมาย Informal, Semi-formal และ Formal</li>
+              <li>Task 2 — เรียงความหลายรูปแบบ ทั้ง agree/disagree และ discussion</li>
+              <li>ฝึกจากโจทย์ข้อสอบจริงหลายหัวข้อ + Mock ครบ Task 1 และ 2</li>
+            </ol>
+            <div class="go">
+              <a class="btn sm fill" href="https://www.language-plan.com/order?ct=0d2aa2a8-85b9-45cc-bb4f-6143d989630f">สมัครคอร์สนี้</a>
+              <a class="btn sm" href="https://www.language-plan.com/courses/ielts-writing-general-training">ดูหน้าคอร์ส</a>
+            </div>
+          </div>
+        </details>
+
+        <details class="acc">
+          <summary>
+            <span class="name">Intensive Reading (General Training)<em>14.5 ชั่วโมง · 38 บทเรียน</em></span>
+            <span class="tick">฿2,990</span>
+          </summary>
+          <div class="in">
+            <div class="meta">
+              <span>14.5 ชั่วโมง</span><span>38 บทเรียน</span>
+              <span class="gold">ข้อสอบเต็ม 4 ชุด</span><span>เรียนได้ 6 เดือน</span>
+            </div>
+            <h4>เนื้อหาที่สอน</h4>
+            <ol>
+              <li>โครงสร้างข้อสอบและเทคนิคตีความโจทย์ (7 บทเรียน)</li>
+              <li>Section 1 — คำศัพท์และบทอ่านในชีวิตประจำวัน (6 บทเรียน)</li>
+              <li>Section 2 — คำศัพท์สายงานและที่ทำงาน (6 บทเรียน)</li>
+              <li>Practice Test 1 (7 บทเรียน)</li>
+              <li>Practice Test 2 &amp; 3 (12 บทเรียน)</li>
+              <li>Practice Test 4 (5 บทเรียน)</li>
+            </ol>
+            <h4>ประเภทโจทย์ที่ฝึกครบ</h4>
+            <ul class="tick-list">
+              <li>True / False / Not Given</li>
+              <li>Matching Headings และ Matching Information</li>
+              <li>Table &amp; Sentence Completion</li>
+              <li>Multiple Choice</li>
+            </ul>
+            <div class="go">
+              <a class="btn sm fill" href="https://www.language-plan.com/order?ct=4ce1bb05-c240-4666-8bfb-2203ff00044e">สมัครคอร์สนี้</a>
+              <a class="btn sm" href="https://www.language-plan.com/courses/ielts-reading-general-training">ดูหน้าคอร์ส</a>
+            </div>
+          </div>
+        </details>
+      </div>
+
+
+      <div class="btns" style="justify-content:center;">
+        <a class="btn fill" href="https://www.language-plan.com/courses/ce5fd9">ทดลองเรียนฟรี</a>
+        <a class="btn" href="https://www.language-plan.com/collections">ดูคอร์สทั้งหมดของ English Plan</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <section>
+    <div class="w">
+      <div class="head">
+        <span class="kicker">รีวิวจากนักเรียน</span>
+        <h2>ความคิดเห็นจากนักเรียนของเรา</h2>
+        <p>นักเรียนของเราได้ Band 7 ขึ้นไปอย่างน้อยเดือนละ 10 คน</p>
+        <div class="rule"></div>
+      </div>
+
+      <!-- ---- featured / starred review ---- -->
+      <div class="feature">
+        <span class="star">★ รีวิวเด่นประจำเดือน</span>
+
+        <div class="score">
+          <p class="lbl">IELTS on Computer · Academic</p>
+          <div class="overall"><b>7.0</b><span>Overall Band</span></div>
+          <p class="test">ผลสอบจริง · ทำได้ตามเป้าทุกพาร์ต</p>
+
+          <div class="score-row">
+            <span class="sk">Writing</span>
+            <span class="mv"><span class="was">5.5</span><span class="arw">▶</span><span class="now">7.5</span></span>
+          </div>
+          <div class="score-row">
+            <span class="sk">Reading</span>
+            <span class="mv"><span class="was">6.0</span><span class="arw">▶</span><span class="now">7.0</span></span>
+          </div>
+          <div class="score-row">
+            <span class="sk">Speaking</span>
+            <span class="mv"><span class="was">6.0</span><span class="arw">▶</span><span class="now">6.5</span></span>
+          </div>
+          <div class="score-row flat">
+            <span class="sk">Listening</span>
+            <span class="mv"><span class="now">7.5</span></span>
+          </div>
+        </div>
+
+        <div class="said">
+          <span class="mark">“</span>
+          <p>
+            ประทับใจสุด ๆ คือ <b>Writing</b> ของพี่ดอยครับ ผมเริ่มจากแค่ band 5.5 เองครับ
+            พอได้มาเรียนกับพี่ดอย ได้เทคนิคการเขียน แนวคิด pattern
+            ทำให้ภายใน <b>3–4 เดือน ผมกระโดดมา 7–7.5 ได้เลยครับ</b>
+            ไม่ใช่เพราะผมเก่งนะครับ แต่ผมพยายามฝึกตามที่พี่ดอยสอน
+            ซึ่งถ้าทำได้ตามที่สอน writing 7 ได้อยู่แล้วครับ อาจจะมากกว่านั้นซะด้วยซ้ำ
+            อยากให้น้อง ๆ มาเรียนกับพี่ดอยเยอะ ๆ เลยครับ
+          </p>
+          <div class="sep"></div>
+          <p>
+            ส่วนคอร์ส <b>Reading &amp; Speaking</b> พี่ดอยช่วยผมเยอะมากเลยครับ
+            ทำให้ผมเข้าใจจริง ๆ ว่าข้อสอบต้องการวัดผลเราแบบไหน ทำให้เราไปตามเป้าหมายได้ถูก
+          </p>
+
+          <div class="tags">
+            <span>All Skills</span><span>Writing +2.0 bands</span><span>ใช้เวลา 3–4 เดือน</span>
+          </div>
+
+          <div class="who">
+            นักเรียนคอร์ส All Skills
+            <small>สอบ IELTS on Computer (Academic) · ขอสงวนชื่อและรูปตามนโยบายความเป็นส่วนตัว</small>
+          </div>
+        </div>
+
+        <!-- ภาพหลักฐานจริง: วางไฟล์ที่ public/images/reviews/ แล้วภาพจะขึ้นเอง -->
+        <div class="proof">
+          <div class="shots">
+            <figure>
+              <img src="images/reviews/featured-chat.png?v=1"
+                   alt="ข้อความจากนักเรียนหลังทราบผลสอบ"
+                   onerror="this.insertAdjacentHTML('afterend','&lt;div class=\'slot\'&gt;วางภาพแชตที่&lt;br&gt;public/images/reviews/featured-chat.png&lt;/div&gt;');this.remove();">
+              <figcaption>ข้อความจริงที่นักเรียนส่งมาหลังทราบผลสอบ</figcaption>
+            </figure>
+            <figure>
+              <img src="images/reviews/featured-score.png?v=1"
+                   alt="ผลสอบ IELTS on Computer — Overall 7.0 (L 7.5 / R 7.0 / W 7.5 / S 6.5)"
+                   loading="lazy"
+                   onerror="this.insertAdjacentHTML('afterend','&lt;div class=\'slot\'&gt;วางภาพผลสอบที่&lt;br&gt;public/images/reviews/featured-score.png&lt;/div&gt;');this.remove();">
+              <figcaption>ผลสอบจริงจากระบบ IELTS — Overall 7.0 (L 7.5 / R 7.0 / W 7.5 / S 6.5)</figcaption>
+            </figure>
+          </div>
+        </div>
+      </div>
+
+      <div class="quotes">
+        <div class="quote">
+          <span class="band">Band 7.0</span>
+          <p>ชอบมากที่เรียนได้ทุกที่ ใช้ iPad หรือ iPhone ก็ได้ ไม่ต้องแบกหนังสือหนัก ๆ ไปไหนมาไหนเลย เพราะทุกบทเรียนมี PDF ให้โหลด สะดวกมาก โดยเฉพาะคนที่ไม่ได้อยู่กรุงเทพฯ ถ้าไม่มีคอร์สนี้ หนูคงไม่ได้ Band 7 ไว้สมัครเรียนหมอ</p>
+          <div class="who">มิน (17)<small>นักเรียนมัธยม · ต่างจังหวัด</small></div>
+        </div>
+        <div class="quote">
+          <span class="band">6.5 → 7.0</span>
+          <p>คอร์สแบ่งเป็นบทสั้น ๆ 20–30 นาที ทำให้เรียนได้แม้มีเวลาน้อย บางวันเรียนบน BTS ไปทำงาน ที่สำคัญคือถามอาจารย์ได้ทุกข้อสงสัย แล้ว feedback writing ละเอียดสุด ๆ สอบรอบแรกมา 6.5 พอส่งงานเขียนรอบสอง ได้ Band 7 เลย</p>
+          <div class="who">ตั้ม (28)<small>พนักงานออฟฟิศ · กรุงเทพฯ</small></div>
+        </div>
+        <div class="quote">
+          <span class="band">Band 7.0</span>
+          <p>สิ่งที่ชอบมากคือ ถ้ามีคำถามถามอาจารย์ได้ตลอด ไม่ต้องแบกหนังสือไปไหน แค่โหลด PDF แล้วนั่งอ่านที่บ้านแบบสบาย ๆ ที่สำคัญคือ Feedback ละเอียดมาก</p>
+          <div class="who">ฝ้าย (25)<small>พนักงานออฟฟิศ · กรุงเทพฯ</small></div>
+        </div>
+        <div class="quote">
+          <span class="band">Band 7.0 ครั้งแรก</span>
+          <p>คอร์สนี้ช่วยได้มาก เพราะเรียนเมื่อไรก็ได้ ส่งการบ้านตามเวลาที่สะดวก และอาจารย์ตอบคำถามดีมาก ๆ ตอนแรกเรียนวันละ 30 นาที พอใกล้สอบก็ทบทวนและส่งการบ้าน จนสอบได้ Band 7 ตั้งแต่ครั้งแรก</p>
+          <div class="who">นนท์ (30)<small>เตรียมเรียนต่อ · กรุงเทพฯ</small></div>
+        </div>
+        <div class="quote">
+          <span class="band">5.5 → Band 7</span>
+          <p>ก่อนหน้านี้เรียนที่สถาบันใหญ่กับครูต่างชาติ แต่สอบได้แค่ 5.5 เพราะพื้นฐานไม่แน่น โดยเฉพาะ Writing กับ Speaking ที่พี่ดอยให้แพทเทิร์นชัดเจน แล้วฝึกส่งงานให้ตรวจพร้อมเสียงพูด ทุกครั้งได้ Feedback เป็นภาษาไทย เข้าใจง่ายมาก</p>
+          <div class="who">พี่กันต์ (32)<small>ทนายความเตรียมเรียนต่อ · กรุงเทพฯ</small></div>
+        </div>
+        <div class="quote">
+          <span class="band">5.5 → 7.5</span>
+          <p>เคยเสียเงินไปเรียนติวเตอร์แพงกว่านี้ 4 เท่า แต่ได้ 5.5 เพราะไม่มีเทคนิคอะไรเลย ครูต่างชาติไม่สอนแพทเทิร์น แค่ให้ทำข้อสอบไปเรื่อย แต่พอมาเรียนได้เทคนิค Reading + แพทเทิร์น Speaking &amp; Writing ตอนนี้สอบได้ Band 7.5 แล้ว</p>
+          <div class="who">ฟาง (18)<small>เตรียมเข้าจุฬาอินเตอร์ · ต่างจังหวัด</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROOF GALLERY ============ -->
+  <section class="alt">
+    <div class="w">
+      <div class="head">
+        <span class="kicker">ผลสอบจริง</span>
+        <h2>Band 7+ เดือนละ 10 คนขึ้นไป</h2>
+        <p>เราโพสต์ผลสอบของนักเรียนเป็นประจำบน Instagram</p>
+        <div class="rule"></div>
+      </div>
+
+      <div class="gallery">
+        <img src="https://i.postimg.cc/NfQR6zML/IMG-1295.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/RZDfzCTn/IMG-1361.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/85hrWRgh/IMG-2284.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/ZKYyBv7d/IMG-2821.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/Y2zWCz37/IMG-3313.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/kgzVp1nQ/IMG-6225-2.png" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/nhCjTbtV/IMG-6229-2.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/xTsNKjhF/IMG-6230-2.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/pdj9bfTg/IMG-8322-2.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/G214c4T9/IMG-8475.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/NG61rcQW/IMG-9555.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+        <img src="https://i.postimg.cc/MTbvXz15/IMG-9907-2.jpg" alt="ผลสอบ IELTS นักเรียน English Plan" loading="lazy">
+      </div>
+
+      <p class="privacy">⚠️ เรามี strong commitment ในการปกป้องความเป็นส่วนตัวของนักเรียนทุกคน รูปภาพทั้งหมดจึงไม่แสดงใบหน้าของนักเรียน</p>
+
+      <p style="text-align:center;margin:24px 0 0;">
+        <a class="btn sm" href="https://www.instagram.com/englishplan_/" target="_blank" rel="noopener">ดูผลสอบเพิ่มเติมบน Instagram</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section>
+    <div class="w-narrow faq">
+      <div class="head">
+        <span class="kicker">FAQ</span>
+        <h2>คำถามที่พบบ่อย</h2>
+        <div class="rule"></div>
+      </div>
+
+      <details open>
+        <summary>เนื้อหาของคอร์สแยก (Separate Courses) และคอร์สแบบแพ็กเกจ (Bundle) เหมือนกันไหม?</summary>
+        <div class="a">ใช่ครับผม! เนื้อหาเหมือนกันทุกอย่าง แต่ถ้าสมัครเรียนหลายคอร์สพร้อมกัน จะได้รับส่วนลดพิเศษนะครับ</div>
+      </details>
+      <details>
+        <summary>สามารถส่ง Writing Essays ได้กี่ครั้ง?</summary>
+        <div class="a">
+          จำนวนครั้งที่ส่งได้:
+          <ul>
+            <li>เรียน 3 เดือน — ส่งได้ 10 essays</li>
+            <li>เรียน 6 เดือน — ส่งได้ 14 essays</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>ถ้ามีคำถามระหว่างเรียน สามารถถามครูโดยตรงได้ไหม?</summary>
+        <div class="a">ได้เลยครับ! นักเรียนจะได้รับ LINE ติดต่อของครู และสอบถามได้ทุกเรื่องเกี่ยวกับ IELTS ไม่ว่าจะเป็นเนื้อหาคอร์ส หรือการเตรียมตัวสอบ</div>
+      </details>
+      <details>
+        <summary>ถ้าอยากฝึกทักษะอื่นนอกจากในคอร์ส จะทำยังไง?</summary>
+        <div class="a">ในคอร์สของเรามี resources ให้ใช้ฝึกทั้ง Computer-based และ Paper-based IELTS ครับผม และสามารถสอบถามครูได้ตลอด มีการซัพพอร์ตตลอดระยะเวลาคอร์ส</div>
+      </details>
+      <details>
+        <summary>ถ้าคอร์สหมดอายุแล้ว สามารถต่ออายุได้ไหม?</summary>
+        <div class="a">
+          ได้ครับผม! ค่าต่ออายุ:
+          <ul>
+            <li>700 บาท / เดือน สำหรับ 1 คอร์ส</li>
+            <li>900 บาท / เดือน ถ้าต้องการต่ออายุหลายคอร์ส</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>ถ้ามีคำถามเฉพาะเกี่ยวกับคอร์ส หรือต้องการคำแนะนำ ติดต่อครูได้ที่ไหน?</summary>
+        <div class="a">LINE <b>@doynatchanon</b> ครูจะตอบกลับให้เร็วที่สุดนะครับ</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="cta">
+    <div class="w-narrow">
+      <h2>ไม่แน่ใจว่าควรเริ่มจากแพ็กเกจไหน?</h2>
+      <p>ทักมาคุยกับครูได้เลย บอกคะแนนเป้าหมายและเวลาที่เหลือก่อนสอบ แล้วเราจะช่วยเลือกแผนที่เหมาะที่สุดให้</p>
+      <div class="btns">
+        <a class="btn gold" href="https://line.me/ti/p/lASfh6KQDw" target="_blank" rel="noopener">สนใจสมัครเรียน</a>
+        <a class="btn" href="https://www.language-plan.com/pages/ielts-all-skills-bundle">ดูรายละเอียด All Skills Bundle</a>
+      </div>
+      <p class="line-note">LINE: @doynatchanon · ตอบกลับเร็วที่สุดในเวลาทำการ</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* Motion: reveal-on-scroll ที่ปลอดภัย
+   - ถ้าเบราว์เซอร์ไม่รองรับ / ผู้ใช้ตั้ง reduce motion → ไม่ทำอะไรเลย หน้าปกติ 100%
+   - class .js-motion ถูกใส่โดย JS เท่านั้น CSS จึงซ่อน element ต่อเมื่อ JS พร้อมทำงาน
+   - มี failsafe ถ้า observer ไม่ยิงใน 2.5 วิ จะเผยทุกอย่างทันที */
+(function () {
+  var root = document.querySelector('.ep');
+  if (!root || !('IntersectionObserver' in window)) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var els = root.querySelectorAll(
+    '.head, .hero-plan, .tier-card, .skill, .step, .card, .gt-card,' +
+    '.accgroup, .feature, .quote, .gallery img, .privacy, .stat'
+  );
+  if (!els.length) return;
+
+  root.classList.add('js-motion');
+  Array.prototype.forEach.call(els, function (el, i) {
+    el.setAttribute('data-reveal', '');
+    if (el.parentNode && el.parentNode.classList.contains('gallery')) {
+      el.style.setProperty('--gi', i % 6);
+    }
+  });
+
+  var reveal = function (el) { el.classList.add('in'); };
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { reveal(e.target); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -6% 0px', threshold: 0.04 });
+
+  Array.prototype.forEach.call(els, function (el) { io.observe(el); });
+
+  setTimeout(function () { Array.prototype.forEach.call(els, reveal); }, 2500);
+})();
+</script>
+
+</body>
+</html>
