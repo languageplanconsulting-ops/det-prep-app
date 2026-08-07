@@ -29,7 +29,15 @@ export function ExerciseIntro({
     () => transfersFor(exerciseKey, taskType ?? null),
     [exerciseKey, taskType],
   );
-  const [open, setOpen] = useState(false);
+  /**
+   * Open by default.
+   *
+   * This is the answer to "why am I doing this?", and a learner who has to tap
+   * a chevron to find it has already decided the drill is busywork. Behind a
+   * toggle it was a fact nobody read; on screen it is the reason they keep
+   * going. The toggle stays so it can be folded away once it stops being news.
+   */
+  const [open, setOpen] = useState(true);
 
   if (targets.length === 0 && !skip) return null;
 
@@ -37,9 +45,6 @@ export function ExerciseIntro({
     <div className="space-y-2 px-4 pt-4 sm:px-6">
       {targets.length > 0 && (
         <div className="overflow-hidden rounded-2xl bg-sky-50 ring-1 ring-sky-200">
-          {/* Collapsed by default: the point is reassurance, not reading. The
-              count alone answers "is this worth my time?"; opening it answers
-              "worth it for what?". */}
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
