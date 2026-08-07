@@ -127,8 +127,13 @@ export function ProductionExerciseRunner({
           ⚡ ข้ามข้อนี้โดยไม่ต้องส่ง (admin)
         </button>
       )}
+      {/* key={ref} — these sessions hold the learner's draft and recording in
+          their own state. Without a key React reuses the instance when `index`
+          advances, so the essay written for photo 1 would still be sitting in
+          the box for photo 2. */}
       {taskType === "write_about_photo" || taskType === "speak_about_photo" ? (
         <PhotoAssessmentSession
+          key={ref}
           mode={taskType === "speak_about_photo" ? "speak" : "write"}
           itemId={ref}
           embedded
@@ -138,10 +143,10 @@ export function ProductionExerciseRunner({
         />
       ) : null}
       {taskType === "read_and_write" ? (
-        <ReadWriteSession topicId={ref} embedded forceUnlockHints onComplete={setReport} />
+        <ReadWriteSession key={ref} topicId={ref} embedded forceUnlockHints onComplete={setReport} />
       ) : null}
       {taskType === "read_then_speak" ? (
-        <ReadSpeakSpread itemRef={ref} onComplete={setReport} />
+        <ReadSpeakSpread key={ref} itemRef={ref} onComplete={setReport} />
       ) : null}
     </Frame>
   );

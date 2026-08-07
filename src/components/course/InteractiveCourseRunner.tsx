@@ -165,8 +165,12 @@ export function InteractiveCourseRunner({
         </div>
       );
     }
+    // key={ref} on every slot: each session owns the learner's turns, typed
+    // summary and recordings, so reusing the instance across `index` carries
+    // the previous question's work into the next one.
     return (
       <SpeakingSlot
+        key={ref}
         scenarioId={ref}
         titleTh={titleTh}
         progress={progress}
@@ -179,6 +183,7 @@ export function InteractiveCourseRunner({
   if (taskType === "interactive_conversation_mcq") {
     return (
       <ConversationSlot
+        key={ref}
         refKey={ref}
         titleTh={titleTh}
         progress={progress}
@@ -190,6 +195,7 @@ export function InteractiveCourseRunner({
 
   return (
     <DialogueSlot
+      key={ref}
       examId={ref}
       titleTh={titleTh}
       progress={progress}

@@ -149,8 +149,17 @@ export function InlineExercise({
           ⚡ ข้ามแบบฝึกนี้ทั้งชุด (admin)
         </button>
       )}
+      {/* key={index} on every item view.
+          Each of these holds its own answer state — the typed sentence, the
+          picked option, the per-blank text, the type/speak stage. Without a key
+          React reuses the instance across questions, so question 2 opened
+          pre-filled with question 1's answer (and SpeakPatternView opened
+          already in "speak" mode showing the previous transcript). Remounting
+          per question is what clears it; next() can only reset what the parent
+          owns. */}
       {content.kind === "dictation" && (
         <DictationItem
+          key={index}
           item={content.items[index]}
           answer={answer}
           setAnswer={setAnswer}
@@ -162,6 +171,7 @@ export function InlineExercise({
       )}
       {content.kind === "realword" && (
         <RealWordItemView
+          key={index}
           item={content.items[index]}
           checked={checked}
           onCheck={(ok) => grade(ok)}
@@ -172,6 +182,7 @@ export function InlineExercise({
       )}
       {content.kind === "rewrite" && (
         <RewriteItemView
+          key={index}
           item={content.items[index]}
           checked={checked}
           onCheck={(ok) => grade(ok)}
@@ -181,6 +192,7 @@ export function InlineExercise({
       )}
       {content.kind === "speakPattern" && (
         <SpeakPatternView
+          key={index}
           item={content.items[index]}
           checked={checked}
           onCheck={(ok) => grade(ok)}
@@ -190,6 +202,7 @@ export function InlineExercise({
       )}
       {content.kind === "grammar" && (
         <GrammarItemView
+          key={index}
           item={content.items[index]}
           checked={checked}
           onCheck={(ok) => grade(ok)}
