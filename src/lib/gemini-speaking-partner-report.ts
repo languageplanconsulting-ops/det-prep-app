@@ -1,8 +1,7 @@
 import { SPEAKING_PARTNER_TURN_COUNT } from "@/lib/speaking-partner-constants";
 import { findTextSpan } from "@/lib/find-text-span";
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
-import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
-import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
+import { generateGradingJsonObject } from "@/lib/grading-llm-generate";
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import { SPEAKING_RUBRIC_WEIGHTS } from "@/lib/speaking-report";
 import type {
@@ -183,7 +182,7 @@ export async function generateSpeakingPartnerReportWithGemini(params: {
     2,
   );
 
-  const { text, usage } = await generateGradingJsonCompletion({
+  const { raw, usage } = await generateGradingJsonObject({
     model: modelName,
     keys: {
       geminiApiKey: apiKey,
@@ -193,8 +192,8 @@ export async function generateSpeakingPartnerReportWithGemini(params: {
     systemInstruction: buildSystemInstruction(),
     userPayload,
     temperature: 0.35,
+    operation: "speaking_partner_report",
   });
-  const raw = parseGeminiJsonObjectResponse(text);
 
   const g = clampPercent(raw.grammarScorePercent);
   const v = clampPercent(raw.vocabularyScorePercent);

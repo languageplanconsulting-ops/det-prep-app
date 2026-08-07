@@ -6,6 +6,12 @@ import {
 } from "@/lib/addon-credits";
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateWritingReportWithGemini } from "@/lib/gemini-writing";
+import {
+  AllGradingAttemptsFailedError,
+  buildModelLadder,
+  gradeWithEscalation,
+  gradingDeadlineFrom,
+} from "@/lib/grading-escalation";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
@@ -14,7 +20,9 @@ import { getAdminAccess } from "@/lib/admin-auth";
 import { recordDataCollectionSubmission } from "@/lib/data-collection";
 import type { WritingTopic } from "@/types/writing";
 
-export const maxDuration = 120;
+// Room for the whole escalation ladder (retries, then other models) instead of
+// being killed mid-attempt and throwing the learner's work away.
+export const maxDuration = 300;
 
 function isTopic(v: unknown): v is WritingTopic {
   if (!v || typeof v !== "object") return false;
@@ -29,6 +37,7 @@ function isTopic(v: unknown): v is WritingTopic {
 }
 
 export async function POST(req: Request) {
+  const startedAt = Date.now();
   let body: unknown;
   try {
     body = await req.json();
@@ -89,16 +98,24 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
       }
     }
-    const { report, usage } = await generateWritingReportWithGemini({
-      apiKey: keys.geminiApiKey,
-      anthropicApiKey: keys.anthropicApiKey,
-      model,
-      attemptId,
-      topic,
-      essay,
-      followUpAnswers: followUpAnswerStrings,
-      prepMinutes,
+    const graded = await gradeWithEscalation({
+      operation: "writing_report",
+      models: buildModelLadder(model, keys),
+      deadlineAt: gradingDeadlineFrom(startedAt, maxDuration),
+      runAi: (m, deadlineAt) =>
+        generateWritingReportWithGemini({
+          apiKey: keys.geminiApiKey,
+          anthropicApiKey: keys.anthropicApiKey,
+          model: m,
+          attemptId,
+          topic,
+          essay,
+          followUpAnswers: followUpAnswerStrings,
+          prepMinutes,
+          deadlineAt,
+        }),
     });
+    const { report, usage } = graded;
     if (usage) {
       scheduleApiUsageLog({
         userId,
@@ -107,7 +124,11 @@ export async function POST(req: Request) {
         model: usage.model,
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
-        meta: { attemptId },
+        meta: {
+          attemptId,
+          gradeSource: graded.source,
+          ...(graded.failures.length ? { recoveredFrom: graded.failures } : {}),
+        },
       });
     }
     if (userId && !adminBypass && !isPlacement) {
@@ -143,6 +164,19 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(report);
   } catch (e) {
+    // Every model failed. Never a fabricated score — tell the client this is
+    // temporary so it can re-ask while the learner's work is still on screen.
+    if (e instanceof AllGradingAttemptsFailedError) {
+      console.error("[writing-report] all models failed:", e.failures.join(" | "));
+      return NextResponse.json(
+        {
+          error:
+            "ระบบตรวจกำลังไม่ว่างชั่วคราว งานของคุณยังอยู่ครบ — กดส่งอีกครั้งได้เลย (Grading is briefly busy. Your work is safe — please submit again.)",
+          retryable: true,
+        },
+        { status: 503 },
+      );
+    }
     const message = normalizeGradingErrorMessage(e);
     console.error("[writing-report]", e);
     return NextResponse.json({ error: message }, { status: 500 });

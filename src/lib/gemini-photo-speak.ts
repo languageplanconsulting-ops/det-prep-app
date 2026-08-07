@@ -1,7 +1,6 @@
 import { findTextSpan } from "@/lib/find-text-span";
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
-import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
-import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
+import { generateGradingJsonObject } from "@/lib/grading-llm-generate";
 import type { CriterionToPerfect, ImprovementPoint, WritingCriterionReport } from "@/types/writing";
 import {
   COHERENCE_RUBRIC_PROMPT,
@@ -307,6 +306,8 @@ export async function generatePhotoSpeakReportWithGemini(params: {
   prepMinutes: number;
   transcript: string;
   originHub?: "speak-about-photo" | "write-about-photo";
+  /** Wall-clock deadline for internal retries (Date.now() ms). */
+  deadlineAt?: number;
 }): Promise<{ report: PhotoSpeakAttemptReport; usage: GradingLlmUsage | null }> {
   const {
     apiKey,
@@ -327,7 +328,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
   const modelName =
     params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const { text, usage } = await generateGradingJsonCompletion({
+  const { raw, usage } = await generateGradingJsonObject({
     model: modelName,
     keys: {
       geminiApiKey: apiKey,
@@ -351,8 +352,9 @@ export async function generatePhotoSpeakReportWithGemini(params: {
       originHub === "write-about-photo",
     ),
     temperature: 0.35,
+    operation: "photo_speak_report",
+    deadlineAt: params.deadlineAt,
   });
-  const raw = parseGeminiJsonObjectResponse(text);
 
   const grammarPunctuationIssues =
     originHub === "write-about-photo" ? detectGrammarPunctuationIssues(transcript) : [];

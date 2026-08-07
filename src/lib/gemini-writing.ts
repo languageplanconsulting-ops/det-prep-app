@@ -1,7 +1,6 @@
 import { findTextSpan } from "@/lib/find-text-span";
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
-import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
-import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
+import { generateGradingJsonObject } from "@/lib/grading-llm-generate";
 import type {
   ImprovementPoint,
   StudySentenceSuggestion,
@@ -345,6 +344,8 @@ export async function generateWritingReportWithGemini(params: {
   essay: string;
   followUpAnswers?: string[];
   prepMinutes: number;
+  /** Wall-clock deadline for internal retries (Date.now() ms). */
+  deadlineAt?: number;
 }): Promise<{ report: WritingAttemptReport; usage: GradingLlmUsage | null }> {
   const { apiKey, attemptId, topic, essay, prepMinutes } = params;
   const followUps = topic.followUps ?? [];
@@ -355,7 +356,7 @@ export async function generateWritingReportWithGemini(params: {
   const modelName =
     params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const { text, usage } = await generateGradingJsonCompletion({
+  const { raw, usage } = await generateGradingJsonObject({
     model: modelName,
     keys: {
       geminiApiKey: apiKey,
@@ -365,8 +366,9 @@ export async function generateWritingReportWithGemini(params: {
     systemInstruction: buildSystemInstruction(countWords(essay)),
     userPayload: buildUserPayload(topic, essay, followUpRaw, prepMinutes),
     temperature: 0.35,
+    operation: "writing_report",
+    deadlineAt: params.deadlineAt,
   });
-  const raw = parseGeminiJsonObjectResponse(text);
 
   const grammarPunctuationIssues = detectGrammarPunctuationIssues(essay);
   const grammarStructureIssues = detectGrammarStructureIssues(essay);

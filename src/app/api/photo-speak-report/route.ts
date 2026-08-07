@@ -6,6 +6,12 @@ import {
 } from "@/lib/addon-credits";
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generatePhotoSpeakReportWithGemini } from "@/lib/gemini-photo-speak";
+import {
+  AllGradingAttemptsFailedError,
+  buildModelLadder,
+  gradeWithEscalation,
+  gradingDeadlineFrom,
+} from "@/lib/grading-escalation";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
@@ -66,9 +72,12 @@ async function upsertPhotoSpeakProgress(args: {
   }
 }
 
-export const maxDuration = 120;
+// Room for the whole escalation ladder (retries, then other models) instead of
+// being killed mid-attempt and throwing the learner's work away.
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
+  const startedAt = Date.now();
   let body: unknown;
   try {
     body = await req.json();
@@ -151,23 +160,31 @@ export async function POST(req: Request) {
       }
     }
     const serverProgress = userId ? await getPhotoSpeakProgress(userId, itemId, taskType) : null;
-    const { report, usage } = await generatePhotoSpeakReportWithGemini({
-      apiKey: keys.geminiApiKey,
-      anthropicApiKey: keys.anthropicApiKey,
-      model,
-      attemptId,
-      itemId,
-      titleEn,
-      titleTh: typeof titleTh === "string" ? titleTh : "",
-      promptEn,
-      promptTh: typeof promptTh === "string" ? promptTh : "",
-      imageUrl: imageUrl.trim(),
-      taskKeywords,
-      targetVocabulary: targetVocabList,
-      prepMinutes,
-      transcript,
-      originHub,
+    const graded = await gradeWithEscalation({
+      operation: "photo_speak_report",
+      models: buildModelLadder(model, keys),
+      deadlineAt: gradingDeadlineFrom(startedAt, maxDuration),
+      runAi: (m, deadlineAt) =>
+        generatePhotoSpeakReportWithGemini({
+          apiKey: keys.geminiApiKey,
+          anthropicApiKey: keys.anthropicApiKey,
+          model: m,
+          attemptId,
+          itemId,
+          titleEn,
+          titleTh: typeof titleTh === "string" ? titleTh : "",
+          promptEn,
+          promptTh: typeof promptTh === "string" ? promptTh : "",
+          imageUrl: imageUrl.trim(),
+          taskKeywords,
+          targetVocabulary: targetVocabList,
+          prepMinutes,
+          transcript,
+          originHub,
+          deadlineAt,
+        }),
     });
+    const { report, usage } = graded;
     if (usage) {
       scheduleApiUsageLog({
         userId,
@@ -176,7 +193,12 @@ export async function POST(req: Request) {
         model: usage.model,
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
-        meta: { attemptId, itemId },
+        meta: {
+          attemptId,
+          itemId,
+          gradeSource: graded.source,
+          ...(graded.failures.length ? { recoveredFrom: graded.failures } : {}),
+        },
       });
     }
     if (userId && !adminBypass && !isPlacement) {
@@ -222,6 +244,19 @@ export async function POST(req: Request) {
     }
     return NextResponse.json(report);
   } catch (e) {
+    // Every model failed. Never a fabricated score — tell the client this is
+    // temporary so it can re-ask while the learner's work is still on screen.
+    if (e instanceof AllGradingAttemptsFailedError) {
+      console.error("[photo-speak-report] all models failed:", e.failures.join(" | "));
+      return NextResponse.json(
+        {
+          error:
+            "ระบบตรวจกำลังไม่ว่างชั่วคราว งานของคุณยังอยู่ครบ — กดส่งอีกครั้งได้เลย (Grading is briefly busy. Your work is safe — please submit again.)",
+          retryable: true,
+        },
+        { status: 503 },
+      );
+    }
     const message = normalizeGradingErrorMessage(e);
     console.error("[photo-speak-report]", e);
     return NextResponse.json({ error: message }, { status: 500 });

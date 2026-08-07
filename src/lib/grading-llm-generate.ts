@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import OpenAI from "openai";
 
 import { readGeminiUsageFromResponse } from "@/lib/gemini-usage-metadata";
+import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 
 /** True when admin-selected model is served by Anthropic (Claude). */
@@ -124,4 +125,116 @@ export async function generateGradingJsonCompletion(opts: {
   const text = result.response.text();
   const usage = readGeminiUsageFromResponse(result.response, model);
   return { text, usage };
+}
+
+/**
+ * Provider hiccups that are worth another attempt: overload / rate limit /
+ * gateway blips and dropped sockets. A 400 or a bad API key is not retryable —
+ * retrying those just burns the learner's wait.
+ */
+function isTransientProviderError(err: unknown): boolean {
+  const status = (err as { status?: number })?.status;
+  if (typeof status === "number") {
+    return status === 408 || status === 429 || (status >= 500 && status <= 599);
+  }
+  const msg = String((err as Error)?.message ?? err).toLowerCase();
+  return (
+    msg.includes("overload") ||
+    msg.includes("high demand") ||
+    msg.includes("rate limit") ||
+    msg.includes("service unavailable") ||
+    msg.includes("econnreset") ||
+    msg.includes("etimedout") ||
+    msg.includes("fetch failed") ||
+    msg.includes("socket hang up")
+  );
+}
+
+const RETRY_BACKOFF_MS = [700, 2200];
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export type GradingJsonObjectResult = {
+  raw: Record<string, unknown>;
+  usage: GradingLlmUsage | null;
+};
+
+/**
+ * Generate AND parse one grading JSON object, retrying the failures that
+ * otherwise cost a learner their whole submission.
+ *
+ * Two things go wrong in production, both of which used to surface as a 500
+ * after the learner had already written or recorded their answer:
+ *  - the provider is briefly overloaded (Gemini 503 "high demand"),
+ *  - the model emits JSON that survives neither JSON.parse nor the repair pass.
+ *
+ * Both are transient, so we re-ask. Credits are charged by the routes only
+ * after grading succeeds, so a retry can never double-charge; the cost of the
+ * extra call is a fraction of a satang against losing the learner's work.
+ *
+ * Prefer this over calling `generateGradingJsonCompletion` + parsing yourself.
+ */
+export async function generateGradingJsonObject(opts: {
+  model: string;
+  keys: GradingLlmKeys;
+  systemInstruction: string;
+  userPayload: string;
+  temperature?: number;
+  /** Label for logs, e.g. "writing_report". */
+  operation?: string;
+  /**
+   * Absolute wall-clock deadline (Date.now() ms). We never START an attempt we
+   * can't plausibly finish before it — being killed mid-attempt by the platform
+   * loses the learner's work, which is the exact failure we're removing.
+   */
+  deadlineAt?: number;
+}): Promise<GradingJsonObjectResult> {
+  const label = opts.operation ?? "grading";
+  let lastError: unknown;
+  let lastAttemptMs = 0;
+
+  for (let attempt = 0; attempt <= RETRY_BACKOFF_MS.length; attempt++) {
+    if (attempt > 0) {
+      const backoff = RETRY_BACKOFF_MS[attempt - 1]!;
+      if (!hasTimeForAnotherAttempt(opts.deadlineAt, lastAttemptMs, backoff)) {
+        console.warn(`[${label}] out of time budget, not retrying`);
+        break;
+      }
+      await sleep(backoff);
+    }
+    let usage: GradingLlmUsage | null = null;
+    const startedAt = Date.now();
+    try {
+      const completion = await generateGradingJsonCompletion(opts);
+      usage = completion.usage;
+      return { raw: parseGeminiJsonObjectResponse(completion.text), usage };
+    } catch (err) {
+      lastAttemptMs = Date.now() - startedAt;
+      lastError = err;
+      // A parse failure means we already paid for the tokens — the response
+      // just wasn't usable. Both that and a transient provider error are worth
+      // one more ask; anything else (bad key, 400) fails fast.
+      const retryable = usage != null || isTransientProviderError(err);
+      if (!retryable || attempt === RETRY_BACKOFF_MS.length) break;
+      console.warn(
+        `[${label}] attempt ${attempt + 1} failed (${usage != null ? "unparseable JSON" : "provider error"}), retrying:`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+
+  throw lastError;
+}
+
+/** Assume a fresh attempt costs at least as long as the last one (min 20s). */
+export function hasTimeForAnotherAttempt(
+  deadlineAt: number | undefined,
+  lastAttemptMs: number,
+  extraMs = 0,
+): boolean {
+  if (deadlineAt == null) return true;
+  const need = Math.max(20_000, lastAttemptMs * 1.2) + extraMs;
+  return deadlineAt - Date.now() > need;
 }

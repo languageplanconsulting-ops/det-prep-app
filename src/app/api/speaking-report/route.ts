@@ -6,6 +6,12 @@ import {
 } from "@/lib/addon-credits";
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
 import { generateSpeakingReportWithGemini } from "@/lib/gemini-speaking";
+import {
+  AllGradingAttemptsFailedError,
+  buildModelLadder,
+  gradeWithEscalation,
+  gradingDeadlineFrom,
+} from "@/lib/grading-escalation";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
@@ -14,9 +20,12 @@ import { recordDataCollectionSubmission } from "@/lib/data-collection";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { isSpeakingRound } from "@/lib/speaking-constants";
 
-export const maxDuration = 120;
+// Room for the whole escalation ladder (retries, then other models) instead of
+// being killed mid-attempt and throwing the learner's work away.
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
+  const startedAt = Date.now();
   let body: unknown;
   try {
     body = await req.json();
@@ -87,21 +96,29 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
       }
     }
-    const { report, usage } = await generateSpeakingReportWithGemini({
-      apiKey: keys.geminiApiKey,
-      anthropicApiKey: keys.anthropicApiKey,
-      model,
-      attemptId,
-      topicId,
-      topicTitleEn,
-      topicTitleTh: typeof topicTitleTh === "string" ? topicTitleTh : "",
-      questionId,
-      questionPromptEn,
-      questionPromptTh: typeof questionPromptTh === "string" ? questionPromptTh : "",
-      prepMinutes,
-      transcript,
-      speakingRound,
+    const graded = await gradeWithEscalation({
+      operation: "speaking_report",
+      models: buildModelLadder(model, keys),
+      deadlineAt: gradingDeadlineFrom(startedAt, maxDuration),
+      runAi: (m, deadlineAt) =>
+        generateSpeakingReportWithGemini({
+          apiKey: keys.geminiApiKey,
+          anthropicApiKey: keys.anthropicApiKey,
+          model: m,
+          attemptId,
+          topicId,
+          topicTitleEn,
+          topicTitleTh: typeof topicTitleTh === "string" ? topicTitleTh : "",
+          questionId,
+          questionPromptEn,
+          questionPromptTh: typeof questionPromptTh === "string" ? questionPromptTh : "",
+          prepMinutes,
+          transcript,
+          speakingRound,
+          deadlineAt,
+        }),
     });
+    const { report, usage } = graded;
     if (usage) {
       scheduleApiUsageLog({
         userId,
@@ -110,7 +127,13 @@ export async function POST(req: Request) {
         model: usage.model,
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
-        meta: { attemptId, topicId, questionId },
+        meta: {
+          attemptId,
+          topicId,
+          questionId,
+          gradeSource: graded.source,
+          ...(graded.failures.length ? { recoveredFrom: graded.failures } : {}),
+        },
       });
     }
     if (userId && !adminBypass && !isPlacement) {
@@ -146,6 +169,19 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(report);
   } catch (e) {
+    // Every model failed. Never a fabricated score — tell the client this is
+    // temporary so it can re-ask while the learner's work is still on screen.
+    if (e instanceof AllGradingAttemptsFailedError) {
+      console.error("[speaking-report] all models failed:", e.failures.join(" | "));
+      return NextResponse.json(
+        {
+          error:
+            "ระบบตรวจกำลังไม่ว่างชั่วคราว งานของคุณยังอยู่ครบ — กดส่งอีกครั้งได้เลย (Grading is briefly busy. Your work is safe — please submit again.)",
+          retryable: true,
+        },
+        { status: 503 },
+      );
+    }
     const message = normalizeGradingErrorMessage(e);
     console.error("[speaking-report]", e);
     return NextResponse.json({ error: message }, { status: 500 });

@@ -1,7 +1,6 @@
 import { GEMINI_PRODUCTION_THAI_STYLE } from "@/lib/gemini-production-thai-style";
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
-import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
-import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
+import { generateGradingJsonObject } from "@/lib/grading-llm-generate";
 import { DIALOGUE_SUMMARY_RUBRIC_WEIGHTS } from "@/lib/dialogue-summary-constants";
 import type {
   DialogueSummaryAttemptReport,
@@ -185,7 +184,7 @@ export async function generateDialogueSummaryReportWithGemini(params: {
   const { apiKey, attemptId, exam, summary, submittedAt, wordCount } = params;
   const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const { text, usage } = await generateGradingJsonCompletion({
+  const { raw, usage } = await generateGradingJsonObject({
     model: modelName,
     keys: {
       geminiApiKey: apiKey,
@@ -195,8 +194,8 @@ export async function generateDialogueSummaryReportWithGemini(params: {
     systemInstruction: buildSystemInstruction(),
     userPayload: buildUserPayload(exam, summary),
     temperature: 0.35,
+    operation: "dialogue_summary_report",
   });
-  const raw = parseGeminiJsonObjectResponse(text);
 
   const rel = clampPercent(raw.relevancyScorePercent);
   const gram = clampPercent(raw.grammarScorePercent);

@@ -3,8 +3,7 @@
 // the student's grammar) → Gemini-lite extracts SIGNALS → our pure scoreSpeaking() decides
 // the band. Gemini only punctuates internally for readability; it must NOT fix grammar.
 
-import { generateGradingJsonCompletion, type GradingLlmKeys } from "@/lib/grading-llm-generate";
-import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
+import { generateGradingJsonObject, type GradingLlmKeys } from "@/lib/grading-llm-generate";
 import { B1_COLLOCATIONS, B2_COLLOCATIONS } from "@/lib/study-plan/collocations";
 import { scoreSpeaking, type SkillResult, type SpeakingAssessment } from "@/lib/study-plan/diagnostic.ts";
 
@@ -60,13 +59,14 @@ export async function gradeSpeakingForDiagnostic(opts: {
   model: string;
   keys: GradingLlmKeys;
 }): Promise<{ assessment: SpeakingAssessment; result: SkillResult }> {
-  const { text } = await generateGradingJsonCompletion({
+  const { raw } = await generateGradingJsonObject({
     model: opts.model,
     keys: opts.keys,
     systemInstruction: buildSpeakingSystemInstruction(),
     userPayload: `Prompt: ${SPEAKING_PROMPT_EN}\n\nRAW transcript:\n${opts.transcript}`,
     temperature: 0.1,
+    operation: "study_plan_speaking_grade",
   });
-  const assessment = parseSpeakingAssessment(parseGeminiJsonObjectResponse(text));
+  const assessment = parseSpeakingAssessment(raw);
   return { assessment, result: scoreSpeaking(assessment) };
 }

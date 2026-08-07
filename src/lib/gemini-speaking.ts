@@ -1,7 +1,6 @@
 import { findTextSpan } from "@/lib/find-text-span";
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
-import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
-import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
+import { generateGradingJsonObject } from "@/lib/grading-llm-generate";
 import type { CriterionToPerfect, ImprovementPoint, WritingCriterionReport } from "@/types/writing";
 import type {
   SpeakingAttemptReport,
@@ -281,6 +280,8 @@ export async function generateSpeakingReportWithGemini(params: {
   speakingRound?: SpeakingRoundNum;
   punctuateBeforeScoring?: boolean;
   spokenFillerLenient?: boolean;
+  /** Wall-clock deadline for internal retries (Date.now() ms). */
+  deadlineAt?: number;
 }): Promise<{ report: SpeakingAttemptReport; usage: GradingLlmUsage | null }> {
   const {
     apiKey,
@@ -301,7 +302,7 @@ export async function generateSpeakingReportWithGemini(params: {
   const modelName =
     params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
-  const { text, usage } = await generateGradingJsonCompletion({
+  const { raw, usage } = await generateGradingJsonObject({
     model: modelName,
     keys: {
       geminiApiKey: apiKey,
@@ -322,8 +323,9 @@ export async function generateSpeakingReportWithGemini(params: {
       { punctuateBeforeScoring },
     ),
     temperature: 0.35,
+    operation: "speaking_report",
+    deadlineAt: params.deadlineAt,
   });
-  const raw = parseGeminiJsonObjectResponse(text);
 
   const g = clampPercent(raw.grammarScorePercent);
   const v = clampPercent(raw.vocabularyScorePercent);

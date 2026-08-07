@@ -1,8 +1,7 @@
 import { scheduleApiUsageLog } from "@/lib/api-usage-log";
-import { generateGradingJsonCompletion } from "@/lib/grading-llm-generate";
+import { generateGradingJsonObject } from "@/lib/grading-llm-generate";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { GRADING_TEACHER_TONE } from "@/lib/gemini-production-thai-style";
-import { parseGeminiJsonObjectResponse } from "@/lib/parse-gemini-json";
 
 export type GraderResult = {
   score: number;
@@ -24,9 +23,9 @@ ${isSpoken ? SPOKEN_RESPONSE_POLICY : ""}
 ${GRADING_TEACHER_TONE}`;
 }
 
-function parseJson(raw: string): GraderResult | null {
+function toGraderResult(raw: Record<string, unknown>): GraderResult | null {
   try {
-    const json = parseGeminiJsonObjectResponse(raw) as {
+    const json = raw as {
       score?: unknown;
       feedback?: unknown;
       strengths?: unknown;
@@ -59,14 +58,15 @@ export async function gradeDetResponse(
   const openAiKey = process.env.OPENAI_API_KEY?.trim();
 
   try {
-    const { text, usage } = await generateGradingJsonCompletion({
+    const { raw, usage } = await generateGradingJsonObject({
       model: modelName,
       keys: { geminiApiKey: geminiKey, anthropicApiKey: anthropicKey, openAiApiKey: openAiKey },
       systemInstruction: buildSystem(Boolean(opts?.isSpoken)),
       userPayload: `${prompt}\n\nRespond with JSON only.`,
       temperature: 0.2,
+      operation: "mock_test_open_grade",
     });
-    const parsed = parseJson(text);
+    const parsed = toGraderResult(raw);
     if (parsed && usage) {
       scheduleApiUsageLog({
         userId: log?.userId ?? null,
@@ -120,7 +120,7 @@ export async function generateInsightSummary(
   const openAiKey = process.env.OPENAI_API_KEY?.trim();
 
   try {
-    const { text, usage } = await generateGradingJsonCompletion({
+    const { raw, usage } = await generateGradingJsonObject({
       model: modelName,
       keys: { geminiApiKey: geminiKey, anthropicApiKey: anthropicKey, openAiApiKey: openAiKey },
       systemInstruction:
@@ -129,8 +129,9 @@ export async function generateInsightSummary(
 Return JSON only: { "bullets": [ { "en": string, "th": string } ] } with exactly 3 items: strongest skill, weakest skill + action, one grammar/vocab tip.
 Thai lines: supportive teacher tone; you may end a Thai line with ครับ only when it sounds natural.`,
       temperature: 0.35,
+      operation: "mock_test_insight_summary",
     });
-    const j = parseGeminiJsonObjectResponse(text) as { bullets?: unknown };
+    const j = raw as { bullets?: unknown };
     if (typeof j === "object" && Array.isArray(j.bullets)) {
       if (usage) {
         scheduleApiUsageLog({
