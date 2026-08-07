@@ -18,6 +18,15 @@ export type RewriteItem = {
   explanationThai: string;
   /** The grammar rule being tested, named and shown as a pattern. */
   rule: GrammarRule;
+  /**
+   * Photo-bank id for the picture-description items.
+   *
+   * "ในภาพมีผู้หญิง 2 คน กำลังออกกำลังกาย" is not answerable without the
+   * picture, so these items were unusable until the image was shown. Ids are
+   * verified by eye — the bank's `scene` labels are wrong often enough that
+   * pairing from the label alone produces a bird where a jogger should be.
+   */
+  photoId?: string;
 };
 
 /**
@@ -792,25 +801,35 @@ export const COMPLEX_ITEMS: RewriteItem[] = [
 export const PATTERN_ITEMS: RewriteItem[] = [
   {
     id: "pt-1",
-    prompt: 'Pattern 1 ประโยคที่ 1 — ในภาพมีผู้หญิง 2 คน กำลังออกกำลังกาย (ใช้ depicts + who)',
-    answers: ["This picture depicts 2 women who are working out."],
+    photoId: "8bd7c8ae-a9d5-4c8a-9a4d-3c5cb7636205",
+    prompt: "Pattern 1 ประโยคที่ 1 — ในภาพมีผู้หญิงคนหนึ่งกำลังวิ่งจ๊อกกิ้ง (ใช้ depicts + who)",
+    answers: [
+      "This picture depicts a woman who is jogging.",
+      "This picture depicts a woman who is jogging in a park.",
+      "This picture depicts a woman who is running.",
+    ],
     hintTh: "This picture depicts ___ who ___.",
     explanationThai: "ใช้ who ต่อทันทีเพื่อให้ประโยคแรกเป็น complex sentence",
     rule: RULES.picturePattern,
   },
   {
     id: "pt-2",
+    photoId: "8bd7c8ae-a9d5-4c8a-9a4d-3c5cb7636205",
     prompt: "Pattern 1 ประโยคที่ 2 — เดาจากชุดที่ใส่ ว่าน่าจะเป็นนักกีฬาอาชีพ",
-    answers: ["Judging from what they wear, they are probably professional athletes."],
-    hintTh: "Judging from ___, they are probably ___.",
+    answers: [
+      "Judging from what she wears, she is probably a professional athlete.",
+      "Judging from what she is wearing, she is probably a professional athlete.",
+    ],
+    hintTh: "Judging from ___, she is probably ___.",
     explanationThai: "ขึ้นด้วย Judging from เพื่อเดาบริบท แล้วตามด้วยคอมมา",
     rule: RULES.picturePattern,
   },
   {
     id: "pt-3",
-    prompt: "Pattern 1 ประโยคที่ 3 — ถึงแม้ผู้หญิงชุดชมพูจะดูเหมือนพิการ แต่เธอดูแข็งแรงมาก",
+    photoId: "8bd7c8ae-a9d5-4c8a-9a4d-3c5cb7636205",
+    prompt: "Pattern 1 ประโยคที่ 3 — ถึงแม้ผู้หญิงชุดชมพูจะดูเหนื่อย แต่เธอดูแข็งแรงมาก",
     answers: [
-      "Finally, even though the woman in pink looks like she is disabled, she looks very strong.",
+      "Finally, even though the woman in pink looks tired, she looks very strong.",
     ],
     hintTh: "Finally, even though ___, ___.",
     explanationThai: "ปิดท้ายด้วย Finally + even though เพื่อใส่มุมขัดแย้ง — ได้ทั้ง coherence และ complex sentence",
@@ -818,6 +837,7 @@ export const PATTERN_ITEMS: RewriteItem[] = [
   },
   {
     id: "pt-4",
+    photoId: "75ae8075-2a07-4c38-92d7-7fa88b0fed4a",
     prompt: "Pattern 2 ประโยคที่ 1 — ในภาพเป็นทะเลสาบสวยงามที่มีภูเขาล้อมรอบ (ใช้ surrounded by)",
     answers: ["This picture depicts a scenic lake surrounded by mountains."],
     hintTh: "This picture depicts ___ surrounded by ___.",
@@ -826,6 +846,7 @@ export const PATTERN_ITEMS: RewriteItem[] = [
   },
   {
     id: "pt-5",
+    photoId: "75ae8075-2a07-4c38-92d7-7fa88b0fed4a",
     prompt: "Pattern 2 ประโยคที่ 2 — เดาจากฉากหลังว่าน่าจะอยู่ในประเทศแถบยุโรป",
     answers: ["Judging from the background, this lake may be located in a country in Europe."],
     hintTh: "Judging from ___, this ___ may be located in ___.",
@@ -834,6 +855,7 @@ export const PATTERN_ITEMS: RewriteItem[] = [
   },
   {
     id: "pt-6",
+    photoId: "75ae8075-2a07-4c38-92d7-7fa88b0fed4a",
     prompt: "Pattern 2 ประโยคที่ 3 — ถึงแม้อากาศจะดูหนาว แต่เชื่อว่าน่าจะเป็นแหล่งท่องเที่ยวยอดนิยม",
     answers: [
       "Finally, even though the weather looks cold, I believe it must be a popular tourist destination.",

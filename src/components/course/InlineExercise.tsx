@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useAdminGateOverride } from "@/hooks/useAdminGateOverride";
 import { inlineContentFor, type InlineExerciseContent } from "@/lib/course-plan/exercise-content";
 import { rewriteIsCorrect, type RewriteItem } from "@/lib/course-plan/grammar-writing-bank";
+import { DrillPhoto } from "@/components/course/DrillPhoto";
 import {
   inflectionIsCorrect,
   type SpeakPatternItem,
@@ -548,6 +549,7 @@ function RewriteItemView({
 
   return (
     <div>
+      <DrillPhoto photoId={item.photoId} captionTh="ภาพที่ต้องบรรยาย" />
       <p className="rounded-xl bg-slate-50 p-3 text-[12px] text-slate-500 ring-1 ring-slate-200">
         พิมพ์ประโยคใหม่ให้ถูกต้อง (เครื่องหมายวรรคตอนสำคัญ)
       </p>

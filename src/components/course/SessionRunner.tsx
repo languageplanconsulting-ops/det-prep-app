@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   canRunInline,
@@ -22,14 +22,20 @@ import { WriteTopicBuilder } from "@/components/course/WriteTopicBuilder";
 import { ProductionExerciseRunner } from "@/components/course/ProductionExerciseRunner";
 import { WarmupFitbRunner } from "@/components/course/WarmupFitbRunner";
 import { BunnyVideoEmbed } from "@/components/course/BunnyVideoEmbed";
+import { ExerciseIntro } from "@/components/course/ExerciseIntro";
+import { useAdminGateOverride } from "@/hooks/useAdminGateOverride";
 
 import { dayDoneCopy, fillBlankWarmup } from "@/lib/course-plan/curriculum";
 import {
   dedupeById,
+  gateRequirement,
   splitDayByTime,
+  VIDEO_DEBT_LIMIT_MINUTES,
   type CarryOver,
   type ItemScore,
   type StudyItem,
+  type StudyItemKind,
+  type VideoDebt,
 } from "@/lib/course-plan/block-planner";
 
 type Phase = "running" | "timeup" | "bonus" | "done";
@@ -95,6 +101,39 @@ function thaiDay(iso: string): string {
   });
 }
 
+/**
+ * Thai wording for one item, by kind.
+ *
+ * A lecture is เรียน and a drill is ทำ — calling both "ข้อ" read as if every
+ * item were a question, so "ทำต่ออีกข้อ" appeared on a button that opens a
+ * video.
+ */
+function wordsFor(kind: StudyItemKind): {
+  /** "เรียนต่อ" / "ทำต่ออีกชุด" — the accept button. */
+  continueTh: string;
+  /** "ยังไหวอยู่ไหม? เรียนต่ออีกบท" — the headline. */
+  offerTh: string;
+  /** "บทเรียนถัดไปในแผน" — the label above the item. */
+  nextLabelTh: string;
+  /** "บทนี้" / "ชุดนี้" — for inline references. */
+  thisOneTh: string;
+} {
+  if (kind === "video" || kind === "lesson") {
+    return {
+      continueTh: "เรียนต่อ",
+      offerTh: "ยังไหวอยู่ไหม? เรียนต่ออีกบท",
+      nextLabelTh: "บทเรียนถัดไปในแผน",
+      thisOneTh: "บทนี้",
+    };
+  }
+  return {
+    continueTh: "ทำต่ออีกชุด",
+    offerTh: "ยังไหวอยู่ไหม? ทำต่ออีกชุด",
+    nextLabelTh: "แบบฝึกถัดไปในแผน",
+    thisOneTh: "ชุดนี้",
+  };
+}
+
 function thaiFullDay(iso: string): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString("th-TH", {
     day: "numeric",
@@ -128,6 +167,8 @@ export function SessionRunner({
   lessonVideos = {},
   upcomingItems = [],
   projectWith,
+  debt,
+  onSkipExercise,
 }: {
   todaysItems: StudyItem[];
   carryOver: CarryOver;
@@ -143,6 +184,10 @@ export function SessionRunner({
   upcomingItems?: StudyItem[];
   /** What the calendar looks like if these extra ids were also finished. */
   projectWith?: (extraCompletedIds: string[]) => BonusProjection;
+  /** Skipped-exercise debt carried in from previous sessions. */
+  debt?: VideoDebt;
+  /** Called when a drill is stepped past to reach a lecture. */
+  onSkipExercise?: (item: StudyItem) => void;
   onClose: () => void;
   /** Items the learner did NOT finish — they become the new backlog. */
   onFinish: (
@@ -152,6 +197,7 @@ export function SessionRunner({
   ) => void;
 }) {
   const warmup = useRef(fillBlankWarmup(track)).current;
+  const adminOverride = useAdminGateOverride();
 
   /**
    * Today, in the order it will actually be worked: warm-up, then anything left
@@ -189,6 +235,31 @@ export function SessionRunner({
   const [bonusOffer, setBonusOffer] = useState<StudyItem | null>(null);
   const [bonusTaken, setBonusTaken] = useState<string[]>([]);
   const [bonusProjection, setBonusProjection] = useState<BonusProjection>(null);
+
+  /**
+   * Skipped-exercise debt.
+   *
+   * Starts from whatever previous sessions left owing and grows as drills are
+   * stepped past in this one. Sets finished here pay it down immediately, so a
+   * learner who hits the gate and works through it is released within the same
+   * session rather than being told to come back tomorrow.
+   */
+  const [skippedHere, setSkippedHere] = useState<StudyItem[]>([]);
+  const [paidHere, setPaidHere] = useState<Set<string>>(new Set());
+
+  const liveDebt = useMemo<VideoDebt>(() => {
+    const carried = (debt?.items ?? []).filter((i) => !paidHere.has(i.id));
+    const fresh = skippedHere.filter(
+      (i) => !paidHere.has(i.id) && !carried.some((c) => c.id === i.id),
+    );
+    const items = [...carried, ...fresh];
+    const mins = items.reduce((s, i) => s + i.minutes, 0);
+    return { items, minutes: mins, locked: mins >= VIDEO_DEBT_LIMIT_MINUTES };
+  }, [debt, skippedHere, paidHere]);
+
+  const gate = useMemo(() => gateRequirement(liveDebt), [liveDebt]);
+  /** The lecture the learner tried to open while the gate was closed. */
+  const [blockedVideo, setBlockedVideo] = useState<StudyItem | null>(null);
 
   function clearSequenceTimer() {
     if (sequenceTimerRef.current) {
@@ -250,9 +321,41 @@ export function SessionRunner({
   }
 
   function openVideo(it: StudyItem) {
+    // The gate. Watching first is fine; watching forever is not.
+    if (liveDebt.locked) {
+      clearSequenceTimer();
+      setSequenceMode(false);
+      setActiveExercise(null);
+      setActiveVideo(null);
+      setBlockedVideo(it);
+      return;
+    }
     setActiveExercise(null);
+    setBlockedVideo(null);
     setVideoJustFinished(false);
     setActiveVideo(it);
+  }
+
+  /**
+   * Step past a drill to reach the lecture.
+   *
+   * The set stays outstanding — it is not marked done and not removed from the
+   * queue — so the checklist, the carry-over and the debt all keep pointing at
+   * it. Skipping is a reordering, never a discount.
+   */
+  function skipToVideo(it: StudyItem) {
+    setSkippedHere((prev) => (prev.some((p) => p.id === it.id) ? prev : [...prev, it]));
+    onSkipExercise?.(it);
+    clearSequenceTimer();
+    setSequenceMode(false);
+    setActiveExercise(null);
+
+    const nextVideo =
+      queue.find((q) => q.kind === "video" && !done.has(q.id)) ??
+      upcomingItems.find((q) => q.kind === "video");
+    // openVideo re-checks the gate, so a skip that tips the balance over 45
+    // minutes lands the learner on the gate rather than on a lecture.
+    if (nextVideo) openVideo(nextVideo);
   }
 
   function closeVideo() {
@@ -405,6 +508,22 @@ export function SessionRunner({
     setPhase("done");
   }
 
+  /**
+   * Admin: treat every remaining item as finished.
+   *
+   * Deliberately routed through handleQueueCleared rather than jumping to the
+   * summary, so the bonus offer, the finish-date projection and the calendar
+   * reflow all still fire. The point is to check the flow end to end without
+   * answering forty questions — a shortcut that skipped those would validate
+   * nothing.
+   */
+  function adminCompleteSession() {
+    const next = new Set(queue.map((i) => i.id));
+    setDone(next);
+    setPaidHere(new Set(next));
+    handleQueueCleared(next);
+  }
+
   function acceptBonus(it: StudyItem) {
     setQueue((q) => [...q, it]);
     setBonusTaken((b) => [...b, it.id]);
@@ -446,15 +565,85 @@ export function SessionRunner({
   const wideModal = Boolean(activeExercise) || Boolean(activeVideo);
   const finalProjection = projectWith?.(bonusTaken) ?? null;
 
+  // z-[1100] clears MainNav, which is sticky at z-[1001]: at z-50 the nav sat
+  // on top of this modal and swallowed its header and skip control.
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-[1100] flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-4">
       <div
-        className={`max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl ${
+        className={`max-h-[92dvh] w-full overflow-y-auto overscroll-contain rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl ${
           wideModal ? "max-w-2xl" : "max-w-lg"
         }`}
       >
+        {/* ---------------- the debt gate ---------------- */}
+        {blockedVideo && phase !== "done" && (
+          <div className="p-6">
+            <p className="text-4xl">📼</p>
+            <p className="mt-2 text-[13px] font-semibold uppercase tracking-widest text-amber-600">
+              ค้างไว้ {liveDebt.minutes} นาทีแล้ว
+            </p>
+            <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900">
+              เคลียร์แบบฝึกสักหน่อยก่อนดูต่อ
+            </h2>
+            <p className="mt-1.5 text-[15px] leading-relaxed text-slate-600">
+              ดูวิดีโอก่อนได้เสมอ — แต่พอค้างถึง {VIDEO_DEBT_LIMIT_MINUTES} นาที
+              ต้องเก็บของเก่าก่อน ไม่งั้นพอถึงวันสอบจะเป็นช่องโหว่ใหญ่
+            </p>
+
+            <div className="mt-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
+              <p className="text-[13px] font-semibold uppercase tracking-widest text-slate-400">
+                ทำแค่นี้ก็ปลดล็อกแล้ว · {gate.minutes} นาที
+              </p>
+              <ul className="mt-2 space-y-1.5">
+                {gate.items.map((it) => (
+                  <li
+                    key={it.id}
+                    className="flex items-center gap-2.5 rounded-xl bg-white px-3 py-2.5 ring-1 ring-slate-200"
+                  >
+                    <span aria-hidden className="shrink-0 text-[15px]">
+                      🏋️
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[14px] font-semibold text-slate-800">
+                      {it.titleTh}
+                    </span>
+                    <span className="shrink-0 text-[13px] text-slate-500">{it.minutes}′</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <p className="mt-3 text-[13px] text-slate-500">
+              รออยู่: 🎬 {blockedVideo.titleTh}
+            </p>
+
+            <div className="mt-4 space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const first = gate.items[0];
+                  setBlockedVideo(null);
+                  if (first) {
+                    setSequenceMode(true);
+                    setActiveExercise(first);
+                  }
+                }}
+                className="w-full rounded-full bg-[#004AAD] py-4 text-[15px] font-extrabold text-white transition hover:brightness-110"
+              >
+                เริ่มเคลียร์เลย ({gate.minutes} นาที)
+              </button>
+              <button
+                type="button"
+                onClick={() => setBlockedVideo(null)}
+                className="w-full rounded-full bg-slate-100 py-3.5 text-[15px] font-semibold text-slate-600"
+              >
+                กลับรายการวันนี้
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ---------------- lecture video, playing in place ---------------- */}
-        {activeVideo &&
+        {!blockedVideo &&
+          activeVideo &&
           phase !== "done" &&
           (() => {
             const meta = activeVideo.lessonId ? lessonVideos[activeVideo.lessonId] : undefined;
@@ -579,7 +768,7 @@ export function SessionRunner({
           })()}
 
         {/* ---------------- an exercise, running in place ---------------- */}
-        {!activeVideo && activeExercise && phase !== "done" && (() => {
+        {!activeVideo && !blockedVideo && activeExercise && phase !== "done" && (() => {
           const hasNext = queue.some((i) => i.id !== activeExercise.id && !done.has(i.id));
           const exitExerciseToList = () => {
             clearSequenceTimer();
@@ -589,6 +778,9 @@ export function SessionRunner({
           const onExerciseDone = (correct: number, total: number) => {
             const id = activeExercise.id;
             setScores((s) => ({ ...s, [id]: { correct, total } }));
+            // Finishing a set pays down the debt straight away, so someone who
+            // works through the gate is released now, not tomorrow.
+            setPaidHere((p) => new Set(p).add(id));
             const next = new Set(done);
             next.add(id);
             setDone(next);
@@ -644,8 +836,34 @@ export function SessionRunner({
           const isInteractive = isInteractiveCourseExercise(activeExercise.taskType);
           const isComprehension = isComprehensionExamExercise(activeExercise.taskType);
 
+          // A lecture is only offered as an escape when one is actually waiting
+          // and the gate is open — dangling "skip to video" in front of someone
+          // who would immediately be blocked is worse than not offering it.
+          const videoWaiting =
+            queue.some((q) => q.kind === "video" && !done.has(q.id)) ||
+            upcomingItems.some((q) => q.kind === "video");
+          const canSkip =
+            activeExercise.id !== WARMUP_ID && videoWaiting && !liveDebt.locked;
+          const debtAfterSkip = liveDebt.minutes + activeExercise.minutes;
+
           return (
             <div className={isProduction || isInteractive || isComprehension ? "" : "p-6"}>
+              <ExerciseIntro
+                exerciseKey={activeExercise.exerciseKey}
+                taskType={activeExercise.taskType}
+                skip={
+                  canSkip
+                    ? {
+                        onSkip: () => skipToVideo(activeExercise),
+                        labelTh: "🎬 ข้ามไปดูวิดีโอก่อน",
+                        noteTh:
+                          debtAfterSkip >= VIDEO_DEBT_LIMIT_MINUTES
+                            ? `ชุดนี้จะถูกเก็บไว้ — ค้างรวม ${debtAfterSkip} นาที ต้องเคลียร์ก่อนดูวิดีโอถัดไป`
+                            : `ชุดนี้จะถูกเก็บไว้ทำทีหลัง (ค้างรวม ${debtAfterSkip}/${VIDEO_DEBT_LIMIT_MINUTES} นาที)`,
+                      }
+                    : undefined
+                }
+              />
               {lessonRef ? (
                 <div className="p-6">
                   <LessonRunnerInline
@@ -733,7 +951,7 @@ export function SessionRunner({
         })()}
 
         {/* ---------------- the checklist (resume view) ---------------- */}
-        {!activeExercise && !activeVideo && (phase === "running" || phase === "timeup") && (
+        {!activeExercise && !activeVideo && !blockedVideo && (phase === "running" || phase === "timeup") && (
           <div className="p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -893,6 +1111,16 @@ export function SessionRunner({
             >
               จบการเรียนวันนี้
             </button>
+
+            {adminOverride.enabled && (
+              <button
+                type="button"
+                onClick={adminCompleteSession}
+                className="mt-2 w-full rounded-full bg-amber-500 py-3 text-[14px] font-bold text-white"
+              >
+                ⚡ ทำครบทั้งเซสชันเลย (admin — ทดสอบ flow)
+              </button>
+            )}
           </div>
         )}
 
@@ -928,14 +1156,16 @@ export function SessionRunner({
         )}
 
         {/* ---------------- one more? ---------------- */}
-        {phase === "bonus" && bonusOffer && (
+        {phase === "bonus" && bonusOffer && (() => {
+          const w = wordsFor(bonusOffer.kind);
+          return (
           <div className="p-6">
             <p className="text-4xl">⚡</p>
             <p className="mt-2 text-[13px] font-semibold uppercase tracking-widest text-emerald-600">
               ครบ {minutes} นาทีของวันนี้แล้ว
             </p>
             <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-slate-900">
-              ยังไหวอยู่ไหม? ทำต่ออีกข้อ
+              {w.offerTh}
             </h2>
             <p className="mt-1.5 text-[15px] leading-relaxed text-slate-600">
               ถ้าทำเพิ่มตอนนี้ งานของวันถัดไปจะถูกดึงมาให้ — แผนทั้งหมดขยับเร็วขึ้น
@@ -943,7 +1173,7 @@ export function SessionRunner({
 
             <div className="mt-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200">
               <p className="text-[13px] font-semibold uppercase tracking-widest text-slate-400">
-                ข้อถัดไปในแผน
+                {w.nextLabelTh}
               </p>
               <p className="mt-1 text-[16px] font-bold text-slate-800">
                 {bonusOffer.kind === "video" ? "🎬" : bonusOffer.kind === "lesson" ? "📘" : "🏋️"}{" "}
@@ -957,7 +1187,7 @@ export function SessionRunner({
 
             {bonusProjection && bonusProjection.daysSaved > 0 && (
               <p className="mt-3 rounded-2xl bg-emerald-50 p-3.5 text-[14px] text-emerald-900 ring-1 ring-emerald-200">
-                ทำข้อนี้แล้วจะเรียนจบเร็วขึ้น{" "}
+                {w.thisOneTh === "บทนี้" ? "เรียนบทนี้" : "ทำชุดนี้"}แล้วจะเรียนจบเร็วขึ้น{" "}
                 <strong>{bonusProjection.daysSaved} วัน</strong> — เป็นวันที่{" "}
                 <strong>{thaiFullDay(bonusProjection.date)}</strong>
               </p>
@@ -969,7 +1199,7 @@ export function SessionRunner({
                 onClick={() => acceptBonus(bonusOffer)}
                 className="w-full rounded-full bg-emerald-600 py-4 text-[15px] font-extrabold text-white transition hover:brightness-110"
               >
-                เอา ทำต่ออีกข้อ
+                เอา {w.continueTh}
               </button>
               <button
                 type="button"
@@ -983,7 +1213,8 @@ export function SessionRunner({
               ทำครบตามแผนแล้ว — ส่วนนี้เป็นของแถม ไม่ทำก็ไม่ถือว่าตามไม่ทัน
             </p>
           </div>
-        )}
+          );
+        })()}
 
         {/* ---------------- summary ---------------- */}
         {phase === "done" && (

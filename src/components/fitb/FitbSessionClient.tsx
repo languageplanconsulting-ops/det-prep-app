@@ -313,15 +313,27 @@ export function FitbSessionClient({
       <div key={phase} className="ep-step-slide-in">
       {phase === "quiz" ? (
         <>
-          <div className="mb-3 border-4 border-black bg-white p-1 shadow-[4px_4px_0_0_#000]">
-            <div
-              className="h-4 bg-ep-yellow transition-[width] duration-500 ease-out"
-              style={{ width: `${progressPct}%` }}
-              role="progressbar"
-              aria-valuenow={Math.round(progressPct)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            />
+          {/* A bare fill on white read as an empty box at 0%, which is where
+              every set starts — so the first thing the learner saw was a
+              blank bordered rectangle. A grey track plus the count means the
+              bar says something before any answer is typed. */}
+          <div className="mb-3 flex items-center gap-2">
+            <div className="min-w-0 flex-1 border-4 border-black bg-white p-1 shadow-[4px_4px_0_0_#000]">
+              <div className="h-4 w-full bg-neutral-200">
+                <div
+                  className="h-full bg-ep-yellow transition-[width] duration-500 ease-out"
+                  style={{ width: `${progressPct}%` }}
+                  role="progressbar"
+                  aria-valuenow={Math.round(progressPct)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="ความคืบหน้าของชุดนี้"
+                />
+              </div>
+            </div>
+            <span className="shrink-0 text-[13px] font-bold tabular-nums text-neutral-600">
+              {Math.round((progressPct / 100) * n)}/{n}
+            </span>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">

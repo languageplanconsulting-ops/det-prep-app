@@ -57,6 +57,9 @@ import {
   EMPTY_PROGRESS,
   completionOf,
   markCompleted,
+  markSkipped,
+  videoDebt,
+  VIDEO_DEBT_LIMIT_MINUTES,
   PROGRESS_STORAGE_KEY,
   type ItemScore,
   type Progress,
@@ -453,6 +456,12 @@ export function CoursePlanClient({
     [remainingStream, pourSettings],
   );
   const completion = useMemo(() => completionOf(stream, progress), [stream, progress]);
+  /**
+   * Exercise time the learner has stepped past to reach lectures. Resolved
+   * against the live stream so a skipped set that later leaves the programme
+   * (goal changed, block excluded) stops being owed.
+   */
+  const debt = useMemo(() => videoDebt(stream, progress), [stream, progress]);
 
   const weeks = useMemo(() => {
     const map = new Map<number, BlockDay[]>();
@@ -545,7 +554,7 @@ export function CoursePlanClient({
   return (
     <main className="ep-page-shell min-h-screen bg-slate-100 pb-10">
       {/* ---------------- header + tabs ---------------- */}
-      <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto max-w-3xl px-4 pt-4">
           <div className="flex items-baseline justify-between gap-3">
             <h1 className="text-xl font-extrabold tracking-tight text-slate-900">คอร์สของฉัน</h1>
@@ -666,6 +675,55 @@ export function CoursePlanClient({
                     )}
                   </ul>
                 </div>
+              </section>
+            )}
+
+            {/* Skipped-drill debt, stated plainly outside the session so it is
+                never a surprise at the moment a lecture refuses to open. */}
+            {debt.items.length > 0 && (
+              <section
+                className={`ep-stagger-in rounded-3xl bg-white p-5 shadow-sm ring-1 ${
+                  debt.locked ? "ring-amber-300" : "ring-slate-200"
+                }`}
+              >
+                <p
+                  className={`text-[13px] font-semibold uppercase tracking-widest ${
+                    debt.locked ? "text-amber-600" : "text-slate-400"
+                  }`}
+                >
+                  {debt.locked ? "วิดีโอถูกล็อกไว้ชั่วคราว" : "แบบฝึกที่ข้ามไว้"}
+                </p>
+                <h2 className="mt-1 text-[17px] font-bold text-slate-900">
+                  ค้างอยู่ {debt.items.length} ชุด · {debt.minutes} นาที
+                </h2>
+                <p className="mt-1 text-[14px] text-slate-600">
+                  {debt.locked
+                    ? `ค้างถึง ${VIDEO_DEBT_LIMIT_MINUTES} นาทีแล้ว — เคลียร์สัก 1 ชุดก่อน แล้วดูวิดีโอต่อได้เลย`
+                    : `ข้ามได้อีก ${VIDEO_DEBT_LIMIT_MINUTES - debt.minutes} นาที ก่อนที่วิดีโอจะถูกล็อกชั่วคราว`}
+                </p>
+                <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className={`h-full transition-[width] duration-500 ${
+                      debt.locked ? "bg-amber-500" : "bg-slate-400"
+                    }`}
+                    style={{
+                      width: `${Math.min(100, Math.round((debt.minutes / VIDEO_DEBT_LIMIT_MINUTES) * 100))}%`,
+                    }}
+                  />
+                </div>
+                {today && today.items.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={openSession}
+                    className={`mt-3 w-full rounded-full py-3.5 text-[15px] font-extrabold ${
+                      debt.locked
+                        ? "bg-[#004AAD] text-white"
+                        : "bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    {debt.locked ? "ไปเคลียร์แบบฝึกที่ค้าง" : "ทำแบบฝึกที่ค้างต่อ"}
+                  </button>
+                )}
               </section>
             )}
 
@@ -1272,6 +1330,8 @@ export function CoursePlanClient({
               lessonVideos={lessonVideos}
               upcomingItems={upcomingItems}
               projectWith={projectWith}
+              debt={debt}
+              onSkipExercise={(item) => setProgress((p) => markSkipped(p, item.id))}
               onClose={() => setSessionOpen(false)}
               onFinish={(unfinished, completed, scores: Record<string, ItemScore>) => {
                 setProgress((p) =>
@@ -1715,11 +1775,11 @@ function MoveSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/50 sm:items-center sm:p-4"
+      className="fixed inset-0 z-[1100] flex items-end justify-center bg-slate-900/50 sm:items-center sm:p-4"
       onClick={onClose}
     >
       <div
-        className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl"
+        className="max-h-[85dvh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <p className="text-[13px] font-semibold uppercase tracking-widest text-slate-400">

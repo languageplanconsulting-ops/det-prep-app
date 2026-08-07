@@ -1,5 +1,6 @@
 import { CoursePlanClient } from "@/components/course/CoursePlanClient";
 import { PlacementRunner } from "@/components/course/PlacementRunner";
+import { DrillPreview } from "@/app/preview/course-redesign/DrillPreview";
 import type { StudentChapter, StudentCourse, StudentLesson } from "@/lib/course-student-data";
 import type { WeeklyScore } from "@/lib/course-plan/weekly-scores";
 import type { TaskWeakness } from "@/lib/study-plan/weakness-vector";
@@ -112,10 +113,10 @@ const PREVIEW_WEAKNESS: TaskWeakness[] = PREVIEW_WEEKLY.map((w) => ({
 export default async function CourseRedesignPreview({
   searchParams,
 }: {
-  searchParams: Promise<{ step?: string }>;
+  searchParams: Promise<{ step?: string; drill?: string }>;
 }) {
   const todayIso = new Date(Date.now() + 7 * 3_600_000).toISOString().slice(0, 10);
-  const { step } = await searchParams;
+  const { step, drill } = await searchParams;
 
   // ?step=placement shows what a brand-new learner meets first.
   if (step === "placement") {
@@ -123,6 +124,20 @@ export default async function CourseRedesignPreview({
       <>
         <PreviewBar />
         <PlacementRunner initialPlacements={[]} />
+      </>
+    );
+  }
+
+  // ?drill=<exerciseKey> opens one drill straight away. Reaching a given
+  // exercise through the plan means finishing everything before it, which makes
+  // checking a single drill's photo or hints far more work than it should be.
+  if (drill) {
+    return (
+      <>
+        <PreviewBar />
+        <div className="mx-auto max-w-2xl p-4">
+          <DrillPreview exerciseKey={drill} />
+        </div>
       </>
     );
   }

@@ -8,13 +8,18 @@
 --
 -- Shape, owned by the client planner (block-planner.ts Progress):
 --   { "completedIds": ["v-...", "e-..."],
---     "accuracy": { "e-...": { "correct": 4, "total": 5 } } }
+--     "accuracy":    { "e-...": { "correct": 4, "total": 5 } },
+--     "skippedIds":  ["e-..."] }
 --
 -- Accuracy rides along in the same blob because it is written on the same
 -- event — an item finishing — and is only ever read back with its item.
+-- skippedIds is the drill time a learner stepped past to reach a lecture; it
+-- has to survive a device change or the 45-minute gate would reset itself
+-- every time someone opened the course on their phone.
 
 alter table public.course_plan_settings
-  add column if not exists progress jsonb not null default '{"completedIds":[],"accuracy":{}}'::jsonb;
+  add column if not exists progress jsonb not null
+  default '{"completedIds":[],"accuracy":{},"skippedIds":[]}'::jsonb;
 
 comment on column public.course_plan_settings.progress is
   'Finished course item ids + per-item accuracy. Client shape: block-planner.ts Progress.';

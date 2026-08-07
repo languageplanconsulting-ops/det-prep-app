@@ -697,9 +697,19 @@ export type ItemScore = { correct: number; total: number };
 export type Progress = {
   completedIds: string[];
   accuracy: Record<string, ItemScore>;
+  /**
+   * Exercises pushed aside to reach a lecture, oldest first.
+   *
+   * A learner who prefers to watch first is not doing anything wrong, and
+   * blocking them outright is how a course loses the people who most need it.
+   * But skipped work that is never named quietly becomes a hole in the
+   * foundation, so it is tracked and eventually comes due — see
+   * videoDebt() and gateRequirement().
+   */
+  skippedIds: string[];
 };
 
-export const EMPTY_PROGRESS: Progress = { completedIds: [], accuracy: {} };
+export const EMPTY_PROGRESS: Progress = { completedIds: [], accuracy: {}, skippedIds: [] };
 
 export function markCompleted(
   progress: Progress,
@@ -707,10 +717,79 @@ export function markCompleted(
   scores: Record<string, ItemScore> = {},
 ): Progress {
   const seen = new Set(progress.completedIds);
+  const done = new Set(ids);
   return {
     completedIds: [...progress.completedIds, ...ids.filter((id) => !seen.has(id))],
     accuracy: { ...progress.accuracy, ...scores },
+    // Finishing an exercise settles it, however it got onto the list.
+    skippedIds: (progress.skippedIds ?? []).filter((id) => !done.has(id)),
   };
+}
+
+/** Record an exercise the learner stepped past to watch a lecture. */
+export function markSkipped(progress: Progress, id: string): Progress {
+  const existing = progress.skippedIds ?? [];
+  if (existing.includes(id)) return progress;
+  return { ...progress, skippedIds: [...existing, id] };
+}
+
+// ---------------------------------------------------------------------------
+// The skipped-exercise debt, and the gate it eventually closes
+// ---------------------------------------------------------------------------
+
+/**
+ * Once this much skipped exercise time has piled up, lectures stop opening
+ * until some of it is cleared.
+ *
+ * 45 minutes is roughly two sessions' worth of drills — far enough that nobody
+ * hits it by skipping one awkward set, close enough that the hole never gets
+ * deep enough to matter on test day.
+ */
+export const VIDEO_DEBT_LIMIT_MINUTES = 45;
+
+/** Clearing the gate takes at least one whole set and at least this long. */
+export const GATE_MIN_SETS = 1;
+export const GATE_MIN_MINUTES = 10;
+
+/** …and never more than this, however long the sets happen to run. */
+export const GATE_MAX_MINUTES = 25;
+
+export type VideoDebt = {
+  /** The skipped exercises still outstanding, oldest first. */
+  items: StudyItem[];
+  minutes: number;
+  /** True once lectures are gated. */
+  locked: boolean;
+};
+
+/** What the learner currently owes, resolved against the live programme. */
+export function videoDebt(stream: StudyItem[], progress: Progress): VideoDebt {
+  const skipped = new Set(progress.skippedIds ?? []);
+  const done = new Set(progress.completedIds);
+  const items = stream.filter((i) => skipped.has(i.id) && !done.has(i.id));
+  const minutes = items.reduce((s, i) => s + i.minutes, 0);
+  return { items, minutes, locked: minutes >= VIDEO_DEBT_LIMIT_MINUTES };
+}
+
+/**
+ * The specific sets that reopen the lectures.
+ *
+ * Named up front rather than expressed as a meter: "do these two, about 12
+ * minutes" is a task someone can start, whereas "clear 10 more minutes" is a
+ * bill. Takes whole sets off the front of the backlog until both the set
+ * minimum and the minute minimum are met, and stops at GATE_MAX_MINUTES so a
+ * block of 20-minute writing tasks never demands three of them at once.
+ */
+export function gateRequirement(debt: VideoDebt): { items: StudyItem[]; minutes: number } {
+  const items: StudyItem[] = [];
+  let minutes = 0;
+  for (const item of debt.items) {
+    items.push(item);
+    minutes += item.minutes;
+    if (items.length >= GATE_MIN_SETS && minutes >= GATE_MIN_MINUTES) break;
+    if (minutes >= GATE_MAX_MINUTES) break;
+  }
+  return { items, minutes };
 }
 
 /**

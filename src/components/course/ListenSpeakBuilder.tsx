@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { DrillPhoto } from "@/components/course/DrillPhoto";
+
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 
 import { ClozeStage } from "@/components/course/ClozeStage";
@@ -31,6 +33,8 @@ export type SpeakDrillItem = {
   choices?: { phrase: string; options: string[] }[];
   /** Lecture words this script uses, shown before the rebuild starts. */
   vocabUsed?: { w: string; th: string }[];
+  /** Photo-bank id for speak/write-about-photo drills. Absent for listen-and-speak. */
+  photoId?: string;
 };
 
 type Stage = "build" | "thai" | "listen" | "record";
@@ -66,6 +70,9 @@ export function ListenSpeakBuilder({
 
   return (
     <Frame title={titleTh} onCancel={onCancel} progress={stage === "build" ? progress : undefined}>
+      {/* Shown at every stage, not just the first: the learner is still
+          describing this photo when they read it aloud and record it. */}
+      <DrillPhoto photoId={item.photoId} captionTh="ภาพที่ต้องบรรยาย" />
       <div className="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
         <p className="text-[12px] font-bold text-slate-700">{item.topic}</p>
         <p className="mt-0.5 text-[13px] text-slate-500">{item.topicTh}</p>

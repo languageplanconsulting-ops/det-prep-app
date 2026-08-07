@@ -16,6 +16,16 @@
 
 export type SpeakPhotoDrillItem = {
   id: string;
+  /**
+   * The photo being described, as an id in lesson-photo-bank.
+   *
+   * Not optional in spirit: this is "speak about the PHOTO", and the drill used
+   * to show only the script, so a learner rebuilt a description of an image
+   * they had never seen. Every id here was opened and looked at — the bank's
+   * `scene` labels are unreliable (one "people jogging in a park" is a bird in
+   * grass), so never pair one from the label alone.
+   */
+  photoId: string;
   /** Which photo family this drill belongs to. */
   topic: string;
   topicTh: string;
@@ -31,22 +41,23 @@ export type SpeakPhotoDrillItem = {
 export const SPEAK_PHOTO_DRILLS: SpeakPhotoDrillItem[] = [
   {
     id: "spd-people",
+    photoId: "8bd7c8ae-a9d5-4c8a-9a4d-3c5cb7636205",
     choices: [
       { phrase: "depicts", options: ["depict", "depicts", "depicted"] },
-      { phrase: "are working out", options: ["is working out", "are working out", "works out"] },
-      { phrase: "professional athletes", options: ["professional athlete", "professional athletes"] },
+      { phrase: "is jogging", options: ["is jogging", "are jogging", "jogs"] },
+      { phrase: "a professional athlete", options: ["a professional athlete", "professional athletes"] },
       { phrase: "seems", options: ["seem", "seems", "seemed"] },
     ],
-    topic: "Speak about this photo — two women working out (Pattern 1: people)",
+    topic: "Speak about this photo — a woman jogging in a park (Pattern 1: people)",
     topicTh: "พูดบรรยายภาพคน — ใช้ Pattern 1",
     essay:
-      "This picture depicts two women who are working out. Judging from what they wear, they are probably professional athletes. They both look lively and persistent. Finally, even though the woman in pink looks tired, she seems very optimistic.",
+      "This picture depicts a woman who is jogging in a park. Judging from what she wears, she is probably a professional athlete. She looks lively and persistent. Finally, even though the woman in pink looks tired, she seems very optimistic.",
     essayTh:
-      "ภาพนี้แสดงถึงผู้หญิงสองคนที่กำลังออกกำลังกาย ดูจากชุดที่พวกเธอใส่ พวกเธอน่าจะเป็นนักกีฬาอาชีพ ทั้งคู่ดูมีชีวิตชีวาและมุ่งมั่นไม่ลดละ สุดท้ายนี้ ถึงแม้ผู้หญิงชุดชมพูจะดูเหนื่อย แต่เธอก็ดูมองโลกในแง่บวกมาก",
+      "ภาพนี้แสดงถึงผู้หญิงคนหนึ่งที่กำลังวิ่งจ๊อกกิ้งในสวน ดูจากชุดที่เธอใส่ เธอน่าจะเป็นนักกีฬาอาชีพ เธอดูมีชีวิตชีวาและมุ่งมั่นไม่ลดละ สุดท้ายนี้ ถึงแม้ผู้หญิงชุดชมพูจะดูเหนื่อย แต่เธอก็ดูมองโลกในแง่บวกมาก",
     moves: [
-      { label: "ประโยคที่ 1 — depicts + who", en: "This picture depicts two women who are working out." },
-      { label: "ประโยคที่ 2 — Judging from", en: "Judging from what they wear, they are probably professional athletes." },
-      { label: "ประโยคที่ 3 — ใส่คำศัพท์บรรยายคน", en: "They both look lively and persistent." },
+      { label: "ประโยคที่ 1 — depicts + who", en: "This picture depicts a woman who is jogging in a park." },
+      { label: "ประโยคที่ 2 — Judging from", en: "Judging from what she wears, she is probably a professional athlete." },
+      { label: "ประโยคที่ 3 — ใส่คำศัพท์บรรยายคน", en: "She looks lively and persistent." },
       { label: "ประโยคที่ 4 — Finally, even though", en: "Finally, even though the woman in pink looks tired, she seems very optimistic." },
     ],
     vocabUsed: [
@@ -57,6 +68,7 @@ export const SPEAK_PHOTO_DRILLS: SpeakPhotoDrillItem[] = [
   },
   {
     id: "spd-places",
+    photoId: "75ae8075-2a07-4c38-92d7-7fa88b0fed4a",
     choices: [
       { phrase: "depicts", options: ["depict", "depicts", "depicted"] },
       { phrase: "surrounded by", options: ["surround by", "surrounded by", "surrounding by"] },
@@ -84,6 +96,7 @@ export const SPEAK_PHOTO_DRILLS: SpeakPhotoDrillItem[] = [
   },
   {
     id: "spd-city",
+    photoId: "2dd4a8bf-b3ee-4132-b778-b60222303ef8",
     choices: [
       { phrase: "depicts", options: ["depict", "depicts", "depicted"] },
       { phrase: "skyscrapers", options: ["skyscraper", "skyscrapers"] },
