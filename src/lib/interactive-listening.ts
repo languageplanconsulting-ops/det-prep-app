@@ -15,6 +15,13 @@ import type { ConversationExam, ConversationScenarioQuestion } from "@/types/con
  */
 export const IL_CONVERSATION_SECONDS = 390;
 
+/**
+ * The real test plays every clip once and says so. For practice that is too punishing — a learner
+ * who mishears one word loses the whole turn with nothing to learn from — so each clip may be
+ * replayed up to three times. It is the one place we knowingly differ from the real task.
+ */
+export const IL_MAX_PLAYS = 3;
+
 /** Verbatim from the real task's constants, rendered in Thai where the learner reads them. */
 export const IL_COPY = {
   comprehensionTh: "ฟังสถานการณ์ แล้วตอบคำถาม",
@@ -27,7 +34,7 @@ export const IL_COPY = {
   selectResponseEn: "Select the best response",
   completeTh: "บทสนทนาจบแล้ว",
   bestAnswerTh: "คำตอบที่ดีที่สุด:",
-  playOnceTh: "ตั้งใจฟังให้ดี — เสียงเล่นได้ครั้งเดียวเท่านั้น",
+  playOnceTh: "ตั้งใจฟังให้ดี — เสียงเล่นได้สูงสุด 3 ครั้ง (ข้อสอบจริงเล่นได้ครั้งเดียว)",
 } as const;
 
 /** Number of graded questions in a set: every comprehension question plus every conversation turn. */

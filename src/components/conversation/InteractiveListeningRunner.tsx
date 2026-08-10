@@ -31,6 +31,7 @@ import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import {
   IL_CONVERSATION_SECONDS,
   IL_COPY,
+  IL_MAX_PLAYS,
   ilGradeTyped,
   ilIsTyped,
   ilReferenceAnswer,
@@ -76,6 +77,10 @@ export function InteractiveListeningRunner({
   const [typed, setTyped] = useState<string[]>(() => exam.scenarioQuestions.map(() => ""));
   const [picksScenario, setPicksScenario] = useState<(number | null)[]>(() => exam.scenarioQuestions.map(() => null));
   const [compSubmitted, setCompSubmitted] = useState(false);
+  const [checking, setChecking] = useState(false);
+  /** Blanks the local grader rejected but the AI judge accepted, plus its Thai note for the rest. */
+  const [aiOk, setAiOk] = useState<Record<number, boolean>>({});
+  const [aiWhy, setAiWhy] = useState<Record<number, string>>({});
 
   // conversation turns
   const [turn, setTurn] = useState(0);
@@ -83,10 +88,11 @@ export function InteractiveListeningRunner({
   const [turnSubmitted, setTurnSubmitted] = useState(false);
   const [picksMain, setPicksMain] = useState<(number | null)[]>(() => exam.mainQuestions.map(() => null));
 
-  // audio plays once per clip
+  // each clip may be played up to IL_MAX_PLAYS times
   const [playing, setPlaying] = useState<string | null>(null);
-  const played = useRef<Set<string>>(new Set());
+  const [plays, setPlays] = useState<Record<string, number>>({});
   const saved = useRef(false);
+  const playsLeft = (id: string) => IL_MAX_PLAYS - (plays[id] ?? 0);
 
   useEffect(() => {
     ensureSpeechVoices(() => {});
@@ -128,8 +134,8 @@ export function InteractiveListeningRunner({
   const playTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function play(id: string, text: string, audio?: { audioBase64?: string; audioMimeType?: string }) {
-    if (played.current.has(id) || playing) return;
-    played.current.add(id);
+    if (playsLeft(id) <= 0 || playing) return;
+    setPlays((cur) => ({ ...cur, [id]: (cur[id] ?? 0) + 1 }));
     setPlaying(id);
     const clear = () => {
       if (playTimer.current) clearTimeout(playTimer.current);
@@ -146,6 +152,62 @@ export function InteractiveListeningRunner({
     const comp = compSubmitted ? exam.scenarioQuestions.length : 0;
     return comp + turn + (turnSubmitted ? 1 : 0);
   }, [compSubmitted, turn, turnSubmitted, exam.scenarioQuestions.length]);
+
+  /**
+   * Grade the comprehension blanks. Local rules decide first — exact match, listed variants,
+   * content-word overlap — and only the ones they reject are sent to the judge, so a set costs at
+   * most one request and usually none. If the judge is unreachable the local verdict stands, so a
+   * missing key or a dropped connection can never block the learner.
+   */
+  async function submitComprehension() {
+    const qs = exam.scenarioQuestions;
+    const localOk = qs.map((q, i) => (ilIsTyped(q) ? ilGradeTyped(typed[i] ?? "", q) : picksScenario[i] === q.correctIndex));
+    const unresolved = qs
+      .map((q, i) => ({ i, q }))
+      .filter(({ i, q }) => ilIsTyped(q) && !localOk[i] && (typed[i] ?? "").trim().length > 0);
+
+    setCompSubmitted(true);
+
+    if (unresolved.length) {
+      setChecking(true);
+      try {
+        const res = await fetch("/api/interactive-listening/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: unresolved.map(({ i, q }) => ({
+              id: i,
+              question: q.question,
+              reference: ilReferenceAnswer(q),
+              answer: typed[i] ?? "",
+            })),
+          }),
+        });
+        const data = (await res.json()) as { results?: { id: number; ok: boolean; whyTh?: string }[] };
+        const ok: Record<number, boolean> = {};
+        const why: Record<number, string> = {};
+        for (const r of data.results ?? []) {
+          ok[r.id] = r.ok;
+          if (!r.ok && r.whyTh) why[r.id] = r.whyTh;
+        }
+        setAiOk(ok);
+        setAiWhy(why);
+        const total = localOk.filter(Boolean).length + Object.values(ok).filter(Boolean).length;
+        if (total === qs.length) sfxCorrect();
+        else sfxWrong();
+      } catch {
+        // keep the local verdict
+        if (localOk.every(Boolean)) sfxCorrect();
+        else sfxWrong();
+      } finally {
+        setChecking(false);
+      }
+    } else if (localOk.every(Boolean)) {
+      sfxCorrect();
+    } else {
+      sfxWrong();
+    }
+  }
 
   /* ── header ─────────────────────────────────────────────────────────── */
   function header() {
@@ -186,7 +248,8 @@ export function InteractiveListeningRunner({
   /* ── stage: scenario ────────────────────────────────────────────────── */
   if (stage === "scenario") {
     const id = "scenario";
-    const done = played.current.has(id);
+    const left3 = playsLeft(id);
+    const done = left3 < IL_MAX_PLAYS;
     return (
       <div className="overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(0,0,0,.12)] ring-1 ring-black/5">
         {header()}
@@ -197,15 +260,15 @@ export function InteractiveListeningRunner({
           <p className="mt-4 rounded-xl bg-amber-50 px-3.5 py-2.5 text-[13px] font-bold text-amber-800">⚠️ {IL_COPY.playOnceTh}</p>
           <button
             type="button"
-            disabled={done || !!playing}
+            disabled={left3 <= 0 || !!playing}
             onClick={() => {
               setStarted(true);
               play(id, exam.scenario, { audioBase64: exam.scenarioAudioBase64, audioMimeType: exam.scenarioAudioMimeType });
             }}
             className="mt-4 w-full rounded-xl py-3.5 text-sm font-black uppercase tracking-wide disabled:bg-slate-200 disabled:text-slate-400"
-            style={!done && !playing ? { background: BRAND, color: YELLOW } : undefined}
+            style={left3 > 0 && !playing ? { background: BRAND, color: YELLOW } : undefined}
           >
-            {playing === id ? "กำลังเล่น…" : done ? "เล่นไปแล้ว" : "▶ ฟังสถานการณ์"}
+            {playing === id ? "กำลังเล่น…" : left3 <= 0 ? "ฟังครบ 3 ครั้งแล้ว" : `▶ ฟังสถานการณ์ (เหลือ ${left3} ครั้ง)`}
           </button>
         </div>
         <div className="flex justify-end border-t border-slate-200 px-5 py-4 sm:px-8">
@@ -231,7 +294,8 @@ export function InteractiveListeningRunner({
     const qs = exam.scenarioQuestions;
     const okFor = (i: number) => {
       const q = qs[i]!;
-      return ilIsTyped(q) ? ilGradeTyped(typed[i] ?? "", q) : picksScenario[i] === q.correctIndex;
+      if (!ilIsTyped(q)) return picksScenario[i] === q.correctIndex;
+      return ilGradeTyped(typed[i] ?? "", q) || aiOk[i] === true;
     };
     const hits = qs.filter((_, i) => okFor(i)).length;
     const ready = qs.every((q, i) => (ilIsTyped(q) ? (typed[i] ?? "").trim().length > 0 : picksScenario[i] != null));
@@ -298,6 +362,7 @@ export function InteractiveListeningRunner({
                           {IL_COPY.bestAnswerTh} {ilReferenceAnswer(q)}
                         </p>
                       ) : null}
+                      {aiWhy[i] ? <p className="mt-0.5 font-semibold text-rose-800">{aiWhy[i]}</p> : null}
                       {q.explanation ? <p className="mt-0.5 text-slate-700">💡 {q.explanation}</p> : null}
                     </div>
                   ) : null}
@@ -311,12 +376,14 @@ export function InteractiveListeningRunner({
           <div className={`px-5 py-4 sm:px-8 ${hits === qs.length ? "bg-[#DCF5E6]" : hits > 0 ? "bg-[#FFF4D6]" : "bg-[#FFE4E6]"}`}>
             <div className="flex items-center gap-4">
               <p className={`flex-1 text-[15px] font-black ${hits === qs.length ? "text-emerald-700" : hits > 0 ? "text-amber-700" : "text-rose-600"}`}>
-                {hits === qs.length ? "✓ เยี่ยมมาก!" : `! ถูก ${hits}/${qs.length}`}
+                {checking ? "กำลังตรวจคำตอบ…" : hits === qs.length ? "✓ เยี่ยมมาก!" : `! ถูก ${hits}/${qs.length}`}
               </p>
               <button
                 type="button"
+                disabled={checking}
                 onClick={() => {
                   sfxTransition();
+                  setPicksScenario((cur) => cur.map((v, i) => (ilIsTyped(qs[i]!) ? (okFor(i) ? qs[i]!.correctIndex : -1) : v)));
                   setStage("turns");
                 }}
                 className={`rounded-xl px-7 py-3 text-sm font-black uppercase tracking-wide text-white ${hits === qs.length ? "bg-emerald-500" : hits > 0 ? "bg-amber-400" : "bg-rose-500"}`}
@@ -330,13 +397,7 @@ export function InteractiveListeningRunner({
             <button
               type="button"
               disabled={!ready}
-              onClick={() => {
-                setCompSubmitted(true);
-                // typed answers are graded here; the MCQ fallback already recorded its pick
-                setPicksScenario((cur) => cur.map((v, i) => (ilIsTyped(qs[i]!) ? (okFor(i) ? qs[i]!.correctIndex : -1) : v)));
-                if (hits === qs.length) sfxCorrect();
-                else sfxWrong();
-              }}
+              onClick={() => void submitComprehension()}
               className="rounded-xl px-9 py-3 text-sm font-black uppercase tracking-wide disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
               style={ready ? { background: BRAND, color: YELLOW } : undefined}
             >
@@ -352,7 +413,8 @@ export function InteractiveListeningRunner({
   if (stage === "turns") {
     const q = exam.mainQuestions[turn]!;
     const id = `turn-${turn}`;
-    const heard = played.current.has(id);
+    const leftT = playsLeft(id);
+    const heard = leftT < IL_MAX_PLAYS;
     const good = turnPick === q.correctIndex;
     const isFirst = turn === 0;
 
@@ -390,11 +452,11 @@ export function InteractiveListeningRunner({
 
             <button
               type="button"
-              disabled={heard || !!playing}
+              disabled={leftT <= 0 || !!playing}
               onClick={() => play(id, q.transcript, { audioBase64: q.audioBase64, audioMimeType: q.audioMimeType })}
               className="mb-4 w-full rounded-xl border-2 border-slate-200 py-3 text-sm font-black text-slate-700 disabled:opacity-50"
             >
-              {playing === id ? "🔊 กำลังเล่น…" : heard ? "เล่นไปแล้ว (ครั้งเดียว)" : "▶ ฟังประโยคนี้"}
+              {playing === id ? "🔊 กำลังเล่น…" : leftT <= 0 ? "ฟังครบ 3 ครั้งแล้ว" : `▶ ฟังประโยคนี้ (เหลือ ${leftT} ครั้ง)`}
             </button>
 
             <div className={`space-y-2.5 ${heard ? "" : "pointer-events-none opacity-40"}`}>
