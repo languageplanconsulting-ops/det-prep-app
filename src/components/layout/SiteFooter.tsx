@@ -42,7 +42,7 @@ const START_LINKS = [
   { href: "/duolingo-english-test/practice", label: "แบบฝึกหัด DET" },
   { href: "/mini-diagnosis/start", label: "เช็กระดับฟรี" },
   { href: "/duolingo-level-test", label: "วัดระดับ Duolingo" },
-  { href: "/pricing", label: "แพ็กเกจและราคา" },
+  { href: "/#course", label: "คอร์สติว DET" },
   { href: "/about", label: "เกี่ยวกับเรา" },
 ];
 

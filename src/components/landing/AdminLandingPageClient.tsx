@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ArticleSection } from "@/components/landing/ArticleSection";
 import { FeedbackShowcase } from "@/components/landing/FeedbackShowcase";
-import { useBillingActions } from "@/hooks/useBillingActions";
 
 function cn(...parts: (string | false | undefined)[]) {
   return parts.filter(Boolean).join(" ");
@@ -127,41 +126,6 @@ const TOOLS: { icon: string; title: string; what: string; benefit: string; highl
     title: "เทคนิคเพิ่มคะแนนสั้นๆ",
     what: "บทเรียนสั้น ๆ (เช่น เรื่อง comma, การเติม -ed / -s) + เทคนิคจำง่าย",
     benefit: "เก็บคะแนนที่หล่นง่าย ๆ คืนมาได้เร็ว โดยไม่ต้องเดาเองว่ากฎไหนสำคัญ",
-  },
-];
-
-const PRICING = [
-  {
-    tier: "free" as const,
-    name: "ฟรี",
-    price: "฿0",
-    note: "ตลอดไป",
-    rows: ["เช็กระดับ (Mini Diagnosis) 1 ครั้ง", "ทดลองแต่ละทักษะ 1 ครั้ง", "ฟีดแบ็กรายข้อ 1 เครดิต"],
-    featured: false,
-  },
-  {
-    tier: "basic" as const,
-    name: "Basic",
-    price: "฿399",
-    note: "/ 30 วัน",
-    rows: ["ฟีดแบ็ก 18 ครั้ง/เดือน", "Mock test 2 ครั้ง"],
-    featured: false,
-  },
-  {
-    tier: "premium" as const,
-    name: "Premium",
-    price: "฿699",
-    note: "/ 30 วัน",
-    rows: ["ฟีดแบ็ก 45 ครั้ง/เดือน", "Mock test 4 ครั้ง", "มินิเลสซัน + เทคนิค (บทมาตรฐาน)"],
-    featured: true,
-  },
-  {
-    tier: "vip" as const,
-    name: "VIP",
-    price: "฿999",
-    note: "/ 30 วัน",
-    rows: ["ฟีดแบ็ก 100 ครั้ง/เดือน", "Mock test 6 ครั้ง", "ฝึกทุก Lane ไม่จำกัด", "มินิเลสซันครบทุกบท (รวมบทขั้นสูง)"],
-    featured: false,
   },
 ];
 
@@ -288,8 +252,6 @@ export function AdminLandingPageClient({
   const [ftLinkedEmail, setFtLinkedEmail] = useState<string | null>(null);
   const [ftErr, setFtErr] = useState<string | null>(null);
   const [stickyOn, setStickyOn] = useState(false);
-  const [paymentErr, setPaymentErr] = useState<string | null>(null);
-  const { user, loading: billingLoading, startUpgradePromptPay } = useBillingActions();
 
   useEffect(() => {
     if (initialFastTrackOpen) {
@@ -303,13 +265,11 @@ export function AdminLandingPageClient({
         setStickyOn(false);
         return;
       }
-      const pricing = document.getElementById("pricing");
       const footer = document.querySelector("footer");
-      if (!pricing || !footer) return;
-      const pricingTop = pricing.offsetTop;
+      if (!footer) return;
       const footerTop = footer.offsetTop;
       const scrollPos = window.scrollY + window.innerHeight;
-      setStickyOn(window.scrollY > 800 && scrollPos < pricingTop && scrollPos < footerTop);
+      setStickyOn(window.scrollY > 800 && scrollPos < footerTop);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -372,24 +332,6 @@ export function AdminLandingPageClient({
     }
   }, [ftEmail, ftName]);
 
-  const openLandingPromptPay = useCallback(
-    async (tier: "basic" | "premium" | "vip") => {
-      try {
-        setPaymentErr(null);
-        await startUpgradePromptPay(tier);
-      } catch (error) {
-        setPaymentErr(
-          error instanceof Error
-            ? error.message
-            : "เปิดหน้าชำระเงิน QR ไม่สำเร็จ กรุณาลองอีกครั้ง",
-        );
-        const pricing = document.getElementById("pricing");
-        pricing?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    },
-    [startUpgradePromptPay],
-  );
-
   return (
     <div className="min-h-screen bg-white text-gray-900 [font-feature-settings:'liga'] [scroll-behavior:smooth]">
       {/* NAV */}
@@ -409,7 +351,7 @@ export function AdminLandingPageClient({
             <a href="#feedback" className="transition-colors hover:text-ep-blue">ฟีดแบ็ก</a>
             <a href="#mock" className="transition-colors hover:text-ep-blue">Mock test</a>
             <a href="#exams" className="transition-colors hover:text-ep-blue">ข้อสอบ</a>
-            <a href="#pricing" className="transition-colors hover:text-ep-blue">แผน</a>
+            <a href="#course" className="transition-colors hover:text-ep-blue">นักเรียนคอร์ส</a>
           </div>
           <div className="flex items-center gap-2">
             <Link
@@ -772,8 +714,9 @@ export function AdminLandingPageClient({
         </div>
       </section>
 
-      {/* COURSE → VIP (opens the real Fast Track modal) */}
-      <section className="mx-auto max-w-3xl px-5 pb-16">
+      {/* COURSE → VIP (opens the real Fast Track modal). This replaced the pricing
+          section: access is sold with the course now, not as a standalone package. */}
+      <section id="course" className="mx-auto max-w-3xl px-5 pb-16">
         <div className="rounded-2xl border-2 border-ep-yellow/70 bg-yellow-50 p-6 text-center sm:p-8">
           <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-ep-yellow">
             <svg className="h-6 w-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -794,121 +737,6 @@ export function AdminLandingPageClient({
           >
             เปิดสิทธิ์ VIP สำหรับนักเรียนคอร์ส →
           </button>
-        </div>
-      </section>
-
-      {/* PRICING */}
-      <section id="pricing" className="bg-gray-50 px-5 py-16">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="mb-2 text-center text-xl font-bold text-gray-900 sm:text-2xl">เริ่มฟรี — อัปเกรดเมื่อพร้อม</h2>
-          <p className="mb-10 text-center text-sm text-gray-500">
-            ไม่มีการตัดเงินอัตโนมัติ · ทุกแผนคือการซื้อ 30 วัน ไม่ใช่ subscription
-          </p>
-
-          {paymentErr ? (
-            <div className="mx-auto mb-8 max-w-2xl rounded-2xl border-2 border-red-200 bg-red-50 p-4 text-left">
-              <p className="text-base font-bold text-red-700">เปิดหน้าชำระเงิน QR ไม่สำเร็จ</p>
-              <p className="mt-1 text-sm font-medium text-gray-700">{paymentErr}</p>
-            </div>
-          ) : null}
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {PRICING.map((p) => (
-              <div
-                key={p.tier}
-                className={cn(
-                  "relative flex flex-col rounded-2xl border bg-white p-5",
-                  p.tier === "free" && "border-2 border-ep-blue",
-                  p.featured && "border-2 border-ep-yellow",
-                  !p.featured && p.tier !== "free" && "border-gray-200",
-                )}
-              >
-                {p.featured ? (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-ep-yellow px-3 py-1 text-xs font-bold text-gray-900">
-                    ยอดนิยม
-                  </div>
-                ) : null}
-                <div className={cn("mb-1", p.featured && "mt-1", p.tier === "free" ? "font-bold text-gray-900" : "font-semibold text-gray-700")}>
-                  {p.name}
-                </div>
-                <div className={cn("mb-1 font-mono font-bold", p.tier === "free" ? "text-3xl text-ep-blue" : "text-2xl text-gray-800")}>
-                  {p.price}
-                </div>
-                <div className="mb-4 text-xs text-gray-400">{p.note}</div>
-                <ul className="mb-5 flex-1 space-y-2 text-xs text-gray-600">
-                  {p.rows.map((r) => (
-                    <li key={r} className="flex gap-2">
-                      <span className="text-green-500">✓</span>
-                      {r}
-                    </li>
-                  ))}
-                </ul>
-
-                {p.tier === "free" ? (
-                  <Link
-                    href="/explore"
-                    className="flex min-h-[44px] w-full items-center justify-center rounded-xl bg-ep-blue px-4 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-blue-800"
-                  >
-                    เริ่มเลย ฟรี
-                  </Link>
-                ) : (
-                  <div className="space-y-2">
-                    {user ? (
-                      <button
-                        type="button"
-                        disabled={billingLoading}
-                        onClick={() => void openLandingPromptPay(p.tier)}
-                        className={cn(
-                          "flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-bold transition-colors disabled:opacity-50",
-                          p.featured
-                            ? "bg-ep-yellow text-gray-900 hover:bg-yellow-400"
-                            : "bg-gray-900 text-white hover:bg-gray-800",
-                        )}
-                      >
-                        ชำระด้วย QR พร้อมเพย์
-                      </button>
-                    ) : (
-                      <Link
-                        href={`/signup?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`}
-                        className={cn(
-                          "flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-bold transition-colors",
-                          p.featured
-                            ? "bg-ep-yellow text-gray-900 hover:bg-yellow-400"
-                            : "bg-gray-900 text-white hover:bg-gray-800",
-                        )}
-                      >
-                        สมัครแล้วชำระด้วย QR พร้อมเพย์
-                      </Link>
-                    )}
-                    <Link
-                      href={
-                        user
-                          ? `/pricing?plan=${p.tier}`
-                          : `/signup?next=${encodeURIComponent(`/pricing?plan=${p.tier}`)}`
-                      }
-                      className="flex min-h-[40px] w-full items-center justify-center rounded-xl border border-gray-300 px-4 py-2 text-center text-xs font-semibold text-gray-600 transition-colors hover:border-ep-blue hover:text-ep-blue"
-                    >
-                      ดูตัวเลือกการชำระเงินทั้งหมด
-                    </Link>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-center text-xs leading-relaxed text-gray-500">
-            <span className="font-semibold text-gray-700">มินิเลสซัน (บทเรียนสั้น ๆ + เทคนิค) เปิดให้ใคร?</span>{" "}
-            Free &amp; Basic ยังไม่รวม · <b className="text-gray-700">Premium</b> เข้าถึงบทมาตรฐาน ·{" "}
-            <b className="text-gray-700">VIP</b> เข้าถึงครบทุกบท รวมบทขั้นสูง
-          </div>
-
-          <p className="mt-3 text-center text-xs text-gray-400">
-            ไม่แน่ใจ?{" "}
-            <Link href="/mini-diagnosis/start" className="font-semibold text-ep-blue hover:underline">
-              ลองเช็กระดับฟรีก่อนเลย
-            </Link>{" "}
-            — ไม่ต้องใส่บัตร เห็นจุดอ่อนก่อนค่อยตัดสินใจ
-          </p>
         </div>
       </section>
 

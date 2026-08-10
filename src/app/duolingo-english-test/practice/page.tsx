@@ -104,10 +104,10 @@ export default function PublicPracticeLandingPage() {
               เช็กระดับก่อนเริ่ม
             </Link>
             <Link
-              href="/pricing"
+              href="/#course"
               className="border-4 border-black bg-white px-6 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#111]"
             >
-              ดูแพ็กเกจ
+              คอร์สติว DET
             </Link>
           </div>
         </section>

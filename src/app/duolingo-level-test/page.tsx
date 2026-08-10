@@ -143,10 +143,10 @@ export default function DuolingoLevelTestPage() {
               คู่มือ DET ฉบับเต็ม
             </Link>
             <Link
-              href="/pricing"
+              href="/#course"
               className="border-4 border-black bg-white px-6 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#111] transition hover:-translate-y-0.5"
             >
-              ดูแพ็กเกจ
+              คอร์สติว DET
             </Link>
           </div>
           <p className="mt-5 text-sm font-bold text-neutral-500">

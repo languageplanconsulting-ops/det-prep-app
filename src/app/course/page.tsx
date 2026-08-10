@@ -126,9 +126,11 @@ function LockedNotice({
           }
         : {
             title: "คอร์สนี้สำหรับสมาชิก VIP Fast Track",
-            body: "อัปเกรดเป็น VIP เพื่อเข้าเรียนคอร์สนี้แบบเต็มรูปแบบ",
-            href: "/pricing",
-            cta: "ดูแพ็กเกจ →",
+            // Sending them to /pricing would just redirect back here — access comes
+            // from verifying course enrollment now, not from buying a package.
+            body: "สิทธิ์ VIP มาพร้อมกับคอร์สติว — ยืนยันอีเมลที่ลงเรียนไว้เพื่อเปิดสิทธิ์",
+            href: "/?fastTrack=1",
+            cta: "เปิดสิทธิ์สำหรับนักเรียนคอร์ส →",
           };
 
   return (

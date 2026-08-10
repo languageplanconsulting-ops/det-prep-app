@@ -13,7 +13,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     "/",
     "/about",
-    "/pricing",
+    // /pricing is gone from here on purpose: it now redirects anonymous crawlers to
+    // /course and is noindex — packages are only sold with the course.
     "/mini-diagnosis/start",
     "/duolingo-english-test",
     "/duolingo-english-test/practice",

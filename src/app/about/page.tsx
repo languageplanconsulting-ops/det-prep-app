@@ -194,10 +194,10 @@ export default function AboutPage() {
                 คู่มือ DET
               </Link>
               <Link
-                href="/pricing"
+                href="/#course"
                 className="rounded-xl border-2 border-gray-200 bg-white px-6 py-3 text-sm font-bold text-neutral-900 shadow-sm transition hover:border-[#004aad]"
               >
-                ดูแพ็กเกจ
+                คอร์สติว DET
               </Link>
             </div>
           </div>

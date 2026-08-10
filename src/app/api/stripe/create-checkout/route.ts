@@ -3,6 +3,8 @@ import type { PaidTier } from "@/lib/stripe";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { buildThaiCheckoutBranding, buildThaiCheckoutText } from "@/lib/stripe-checkout-branding";
 import { getStripe, STRIPE_PLANS } from "@/lib/stripe";
+import { PURCHASES_CLOSED_MESSAGE } from "@/lib/purchases-closed";
+import { isReturningCustomer } from "@/lib/returning-customer";
 import { resolveSiteUrl } from "@/lib/site-url";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
@@ -75,6 +77,12 @@ export async function POST(req: Request) {
   }
   if (user.email?.toLowerCase() !== email.trim().toLowerCase()) {
     return NextResponse.json({ error: "Forbidden: email does not match session" }, { status: 403 });
+  }
+  // Packages are no longer sold to the public — only existing customers may renew.
+  // This runs BEFORE ensureProfileForAuthUser/customer creation below, which writes
+  // stripe_customer_id and would otherwise let a caller self-grant eligibility.
+  if (!(await isReturningCustomer(userId))) {
+    return NextResponse.json({ error: PURCHASES_CLOSED_MESSAGE }, { status: 403 });
   }
 
   try {

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import type { AddOnSku } from "@/lib/paywall-upsell";
 import { ADD_ON_CATALOG } from "@/lib/paywall-upsell";
+import { PURCHASES_CLOSED_MESSAGE } from "@/lib/purchases-closed";
+import { isReturningCustomer } from "@/lib/returning-customer";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { buildThaiCheckoutBranding, buildThaiCheckoutText } from "@/lib/stripe-checkout-branding";
 import { getStripe } from "@/lib/stripe";
@@ -41,6 +43,12 @@ export async function POST(req: Request) {
   } = await supabaseAuth.auth.getUser();
   if (!user?.id || !user.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  // Add-on credits are a customer-only perk now — checked before
+  // ensureStripeCustomerIdForUser, which would otherwise create the very
+  // stripe_customer_id this gate reads.
+  if (!(await isReturningCustomer(user.id))) {
+    return NextResponse.json({ error: PURCHASES_CLOSED_MESSAGE }, { status: 403 });
   }
 
   try {

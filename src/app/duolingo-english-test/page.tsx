@@ -60,10 +60,10 @@ export default function DuolingoEnglishTestHubPage() {
               Start mock test
             </Link>
             <Link
-              href="/pricing"
+              href="/#course"
               className="border-4 border-black bg-[#ffcc00] px-6 py-3 text-sm font-black uppercase tracking-wide text-neutral-900 shadow-[6px_6px_0_0_#111]"
             >
-              View pricing
+              About the course
             </Link>
             <Link
               href="/mini-diagnosis/start"

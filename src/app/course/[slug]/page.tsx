@@ -101,7 +101,7 @@ function LockedNotice({ reason }: { reason: "not_logged_in" | "not_released" | "
         }
       : {
           title: "คอร์สนี้สำหรับสมาชิก VIP Fast Track",
-          body: "อัปเกรดเป็น VIP เพื่อเข้าเรียนคอร์สนี้แบบเต็มรูปแบบ",
+          body: "สิทธิ์ VIP มาพร้อมกับคอร์สติว — ยืนยันอีเมลที่ลงเรียนไว้เพื่อเปิดสิทธิ์",
         };
 
   return (
@@ -111,11 +111,11 @@ function LockedNotice({ reason }: { reason: "not_logged_in" | "not_released" | "
         <p className="mt-3 text-sm text-neutral-600">{copy.body}</p>
         {reason === "needs_vip" && (
           <Link
-            href="/pricing"
+            href="/?fastTrack=1"
             className="mt-6 inline-flex items-center rounded-[4px] border-4 border-black bg-[#FFCC00] px-5 py-2.5 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
             style={{ fontFamily: "var(--font-jetbrains), monospace" }}
           >
-            ดูแพ็กเกจ →
+            เปิดสิทธิ์สำหรับนักเรียนคอร์ส →
           </Link>
         )}
       </div>
