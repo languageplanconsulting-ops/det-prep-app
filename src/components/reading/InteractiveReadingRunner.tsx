@@ -1,0 +1,593 @@
+"use client";
+
+/**
+ * The DET Interactive Reading task, rebuilt beat for beat — and the ONLY reading format in the app.
+ *
+ * There is one engine and one content model. A full set is this runner over one passage with all
+ * six steps; a single-skill drill is the same runner over several passages with one or two steps
+ * selected. That is deliberate: the drills used to have their own invented layouts, prompts and
+ * grading, so a learner practising "หาข้อมูลเฉพาะ" rehearsed something the real test never asks.
+ * Now every screen in ทักษะการอ่าน is literally the exam screen.
+ *
+ * Layout copied from the real thing (docs/reading/det-interactive-reading-item-spec.md): one card,
+ * a clock in the header that re-labels itself as the set shrinks, split screen with the passage
+ * scrolling on the left, one SUBMIT bottom-right, and a full-width coloured bar that takes over the
+ * footer and turns into CONTINUE. The passage grows as you go, and after the cloze step the blanks
+ * are refilled with the CORRECT words even where the learner picked wrong — DET does exactly that.
+ *
+ * Ours: the typeface, #004AAD / #FFCC00, the mascot report, and a Thai explanation inside the
+ * feedback bar. DET explains nothing; that empty space is where the lesson lives.
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { CelebrateMascot } from "@/components/ui/CelebrateMascot";
+import { sfxCelebrate, sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
+import { XP, awardXp } from "@/lib/gamification";
+import { useLessonUserId } from "@/lib/lesson-user";
+import { saveUnitScore } from "@/lib/lessons-progress";
+import { phraseWordRange, wordTokens } from "@/lib/passage-text";
+import {
+  IR_STEP_COUNT,
+  IR_STEP_LABELS_TH,
+  irRemainingLabel,
+  irSeconds,
+  irStepPromptEn,
+  irStepPromptTh,
+  paragraphChunks,
+  resolveParagraph,
+  resolvedParagraphs,
+  type IrSet,
+} from "@/lib/interactive-reading";
+
+type Sel = { para: number; start: number; end: number } | null;
+type Verdict = "correct" | "partial" | "wrong";
+type Slot = { set: IrSet; step: number };
+
+const BRAND = "#004AAD";
+const YELLOW = "#FFCC00";
+const ALL_STEPS = [0, 1, 2, 3, 4, 5];
+
+function mmss(s: number) {
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+/* ── passage words, pointer-selectable ─────────────────────────────────── */
+
+function SelectableParagraph({
+  text,
+  para,
+  sel,
+  answerRange,
+  showAnswer,
+  onDown,
+  onEnter,
+  onUp,
+}: {
+  text: string;
+  para: number;
+  sel: Sel;
+  answerRange: [number, number] | null;
+  showAnswer: boolean;
+  onDown: (para: number, w: number, mouse: boolean) => void;
+  onEnter: (para: number, w: number) => void;
+  onUp: () => void;
+}) {
+  const chunks = text.split(/(\s+)/);
+  let w = -1;
+  return (
+    <p className="mb-4 select-none text-[15px] leading-8 text-slate-800 last:mb-0">
+      {chunks.map((c, i) => {
+        if (!/\S/.test(c)) return <span key={i}>{c}</span>;
+        w += 1;
+        const idx = w;
+        const inAns = showAnswer && answerRange && idx >= answerRange[0] && idx <= answerRange[1];
+        const inSel = sel && sel.para === para && idx >= sel.start && idx <= sel.end;
+        // once the answer is revealed it wins the colour — the learner needs to see the target span
+        const cls = inAns
+          ? "bg-emerald-100 shadow-[inset_0_-2px_0_#10b981]"
+          : inSel
+            ? "bg-[#FFF0A8] shadow-[inset_0_-2px_0_#E6B800]"
+            : "";
+        return (
+          <span
+            key={i}
+            onPointerDown={(e) => onDown(para, idx, e.pointerType === "mouse")}
+            onPointerEnter={() => onEnter(para, idx)}
+            onPointerUp={onUp}
+            className={`cursor-text rounded-[2px] ${cls}`}
+          >
+            {c}
+          </span>
+        );
+      })}
+    </p>
+  );
+}
+
+/* ── one task = one {passage, step} ────────────────────────────────────── */
+
+function TaskCard({
+  set,
+  step,
+  onDone,
+  isLast,
+}: {
+  set: IrSet;
+  step: number;
+  onDone: (score: number) => void;
+  isLast: boolean;
+}) {
+  const [submitted, setSubmitted] = useState(false);
+  const [picks, setPicks] = useState<Record<number, string>>({});
+  const [openBlank, setOpenBlank] = useState<number | null>(null);
+  const [gapPick, setGapPick] = useState<number | null>(null);
+  const [sel, setSel] = useState<Sel>(null);
+  const [ideaPick, setIdeaPick] = useState<number | null>(null);
+  const [titlePick, setTitlePick] = useState<number | null>(null);
+
+  const dragging = useRef(false);
+  const tapAnchor = useRef<{ para: number; w: number } | null>(null);
+
+  const resolved = useMemo(() => resolvedParagraphs(set), [set]);
+  const hl = set.highlights[step === 2 ? 0 : 1]!;
+  const hlPara = resolved[hl.paragraph - 1] ?? "";
+  const hlRange = useMemo(() => phraseWordRange(hlPara, hl.answer), [hlPara, hl.answer]);
+
+  function onDown(para: number, w: number, mouse: boolean) {
+    if (submitted || (step !== 2 && step !== 3)) return;
+    if (mouse) {
+      dragging.current = true;
+      tapAnchor.current = null;
+      setSel({ para, start: w, end: w });
+      return;
+    }
+    const a = tapAnchor.current;
+    if (a && a.para === para) {
+      setSel({ para, start: Math.min(a.w, w), end: Math.max(a.w, w) });
+      tapAnchor.current = null;
+    } else {
+      tapAnchor.current = { para, w };
+      setSel({ para, start: w, end: w });
+    }
+  }
+  function onEnter(para: number, w: number) {
+    if (!dragging.current) return;
+    setSel((cur) => (cur && cur.para === para ? { para, start: Math.min(cur.start, w), end: Math.max(cur.start, w) } : cur));
+  }
+  const onUp = () => {
+    dragging.current = false;
+  };
+
+  const selText = useMemo(() => {
+    if (!sel) return "";
+    return wordTokens(resolved[sel.para - 1] ?? "")
+      .slice(sel.start, sel.end + 1)
+      .map((t) => t.text)
+      .join(" ");
+  }, [sel, resolved]);
+
+  const blankHits = set.blanks.filter((b) => picks[b.n] === b.answer).length;
+
+  const score = useMemo(() => {
+    if (step === 0) return blankHits / set.blanks.length;
+    if (step === 1) return gapPick !== null && set.gap[gapPick]!.correct ? 1 : 0;
+    if (step === 2 || step === 3) {
+      if (!sel || !hlRange || sel.para !== hl.paragraph) return 0;
+      const covers = sel.start <= hlRange[0] && sel.end >= hlRange[1];
+      // DET forgives ragged edges but not a different span — two spare words, no more
+      const extra = sel.end - sel.start - (hlRange[1] - hlRange[0]);
+      return covers && extra <= 2 ? 1 : 0;
+    }
+    if (step === 4) return ideaPick !== null && set.idea[ideaPick]!.correct ? 1 : 0;
+    return titlePick !== null && set.title[titlePick]!.correct ? 1 : 0;
+  }, [step, blankHits, set, gapPick, sel, hlRange, hl.paragraph, ideaPick, titlePick]);
+
+  const verdict: Verdict = score === 1 ? "correct" : step === 0 && score > 0 ? "partial" : "wrong";
+
+  const canSubmit =
+    step === 0
+      ? set.blanks.every((b) => picks[b.n])
+      : step === 1
+        ? gapPick !== null
+        : step === 2 || step === 3
+          ? !!sel
+          : step === 4
+            ? ideaPick !== null
+            : titlePick !== null;
+
+  function submit() {
+    if (!canSubmit || submitted) return;
+    setSubmitted(true);
+    if (score === 1) sfxCorrect();
+    else sfxWrong();
+  }
+
+  /* passage */
+  function passage() {
+    if (step === 0) {
+      return set.paragraphs.slice(0, set.gapAfter).map((p, pi) => (
+        <p key={pi} className="mb-4 text-[15px] leading-9 text-slate-800 last:mb-0">
+          {paragraphChunks(p).map((c, ci) => {
+            if (c.kind === "text") return <span key={ci}>{c.text}</span>;
+            const b = set.blanks.find((x) => x.n === c.n)!;
+            const ok = picks[c.n] === b.answer;
+            return (
+              <span key={ci} className="mx-0.5 inline-flex min-w-[4rem] items-baseline gap-1.5 border-b-2 border-slate-300 px-1 sm:min-w-[7rem]">
+                <span className="rounded border border-slate-300 bg-slate-50 px-1 text-[10px] font-black text-slate-500">{c.n}</span>
+                <span className="font-bold" style={{ color: submitted ? (ok ? "#047857" : "#e11d48") : "#0f172a" }}>
+                  {submitted ? b.answer : (picks[c.n] ?? "")}
+                </span>
+              </span>
+            );
+          })}
+        </p>
+      ));
+    }
+    if (step === 1) {
+      const before = set.paragraphs.slice(0, set.gapAfter).map((p) => resolveParagraph(p, set.blanks));
+      const after = set.paragraphs[set.gapAfter] ? resolveParagraph(set.paragraphs[set.gapAfter]!, set.blanks) : "";
+      return (
+        <>
+          {before.map((p, i) => (
+            <p key={i} className="mb-4 text-[15px] leading-8 text-slate-800">
+              {p}
+            </p>
+          ))}
+          <div className={`my-4 rounded-xl border-2 p-4 text-[15px] leading-8 ${submitted ? "border-emerald-300 bg-emerald-50 text-emerald-900" : "border-slate-200 text-slate-800"}`}>
+            {submitted ? set.gap.find((g) => g.correct)!.text : gapPick !== null ? set.gap[gapPick]!.text : <span className="text-slate-300">…</span>}
+          </div>
+          {after ? <p className="mb-4 text-[15px] leading-8 text-slate-800">{after}</p> : null}
+        </>
+      );
+    }
+    const selectable = step === 2 || step === 3;
+    return resolved.map((p, i) =>
+      selectable ? (
+        <SelectableParagraph
+          key={i}
+          text={p}
+          para={i + 1}
+          sel={sel}
+          answerRange={i + 1 === hl.paragraph ? hlRange : null}
+          showAnswer={submitted}
+          onDown={onDown}
+          onEnter={onEnter}
+          onUp={onUp}
+        />
+      ) : (
+        <p key={i} className="mb-4 text-[15px] leading-8 text-slate-800 last:mb-0">
+          {p}
+        </p>
+      ),
+    );
+  }
+
+  /* options */
+  function card(text: string, active: boolean, onClick: () => void, i: number, state?: "key" | "miss") {
+    const tone =
+      state === "key"
+        ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+        : state === "miss"
+          ? "border-rose-400 bg-rose-50 text-rose-700"
+          : active
+            ? "border-[#004AAD] bg-[#EAF1FF] text-[#004AAD]"
+            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300";
+    return (
+      <button
+        key={i}
+        type="button"
+        disabled={submitted}
+        onClick={onClick}
+        className={`flex w-full items-start gap-3 rounded-xl border-2 p-3.5 text-left text-[14px] font-semibold leading-6 transition disabled:cursor-default ${tone}`}
+      >
+        <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 ${active ? "border-current bg-current shadow-[inset_0_0_0_3px_white]" : "border-slate-300"}`} />
+        <span>{text}</span>
+      </button>
+    );
+  }
+
+  function choiceList(list: { text: string; correct: boolean }[], pick: number | null, set_: (i: number) => void) {
+    return (
+      <div className="space-y-2.5">
+        {list.map((o, i) =>
+          card(o.text, pick === i, () => set_(i), i, submitted ? (o.correct ? "key" : pick === i ? "miss" : undefined) : undefined),
+        )}
+      </div>
+    );
+  }
+
+  function question() {
+    if (step === 0) {
+      return (
+        <div className="space-y-2.5">
+          {set.blanks.map((b) => {
+            const open = openBlank === b.n;
+            const chosen = picks[b.n];
+            const wrong = submitted && chosen !== b.answer;
+            return (
+              <div key={b.n}>
+                <button
+                  type="button"
+                  disabled={submitted}
+                  onClick={() => setOpenBlank(open ? null : b.n)}
+                  className={`flex w-full items-center gap-3 rounded-xl border-2 bg-white px-3.5 py-3 text-left text-[14px] transition disabled:cursor-default ${
+                    wrong ? "border-rose-400" : submitted ? "border-emerald-300" : open ? "border-[#004AAD]" : "border-slate-200"
+                  }`}
+                >
+                  <span className="rounded border border-slate-300 bg-slate-50 px-1.5 text-[10px] font-black text-slate-500">{b.n}</span>
+                  <span className={`flex-1 font-bold ${chosen ? (wrong ? "text-rose-600 line-through" : "text-slate-900") : "text-slate-300"}`}>{chosen ?? "เลือกคำ"}</span>
+                  {wrong ? <span className="font-black text-emerald-700">{b.answer}</span> : null}
+                  {!submitted ? <span className="text-slate-400">{open ? "▲" : "▼"}</span> : null}
+                </button>
+                {open && !submitted ? (
+                  <div className="mt-1 overflow-hidden rounded-xl border-2 border-slate-200">
+                    {b.options.map((o) => (
+                      <button
+                        key={o}
+                        type="button"
+                        onClick={() => {
+                          setPicks((p) => ({ ...p, [b.n]: o }));
+                          setOpenBlank(null);
+                        }}
+                        className="block w-full border-b border-slate-100 bg-white px-4 py-3 text-left text-[14px] font-bold text-slate-800 last:border-0 hover:bg-slate-50"
+                      >
+                        {o}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    if (step === 1) return choiceList(set.gap, gapPick, setGapPick);
+    if (step === 2 || step === 3) {
+      return (
+        <>
+          <p className="text-[15px] font-semibold leading-7 text-slate-800">{hl.questionEn}</p>
+          <p className="mb-3 mt-0.5 text-xs text-slate-500">{hl.questionTh}</p>
+          <div className="min-h-[4.5rem] rounded-xl border-2 border-slate-200 bg-slate-50/60 p-3.5 text-[14px] leading-7 text-slate-800">
+            {selText || <span className="text-slate-400">ลากเมาส์คลุมข้อความในบทอ่าน (บนมือถือ: แตะคำแรก แล้วแตะคำสุดท้าย)</span>}
+          </div>
+        </>
+      );
+    }
+    if (step === 4) return choiceList(set.idea, ideaPick, setIdeaPick);
+    return choiceList(set.title, titlePick, setTitlePick);
+  }
+
+  /* explanation — the part DET never gives */
+  function whyTh(): string {
+    if (step === 0) {
+      const missed = set.blanks.find((b) => picks[b.n] !== b.answer);
+      return missed ? `ช่อง ${missed.n} (${missed.skillTh}) — ${missed.whyTh}` : set.blanks[0]!.whyTh;
+    }
+    if (step === 1) return gapPick !== null && !set.gap[gapPick]!.correct ? set.gap[gapPick]!.whyTh : set.gap.find((o) => o.correct)!.whyTh;
+    if (step === 2 || step === 3) return hl.whyTh;
+    if (step === 4) return ideaPick !== null && !set.idea[ideaPick]!.correct ? set.idea[ideaPick]!.whyTh : set.idea.find((o) => o.correct)!.whyTh;
+    return titlePick !== null && !set.title[titlePick]!.correct ? set.title[titlePick]!.whyTh : set.title.find((o) => o.correct)!.whyTh;
+  }
+
+  function feedback() {
+    const tone =
+      verdict === "correct"
+        ? { bg: "bg-[#DCF5E6]", ink: "text-emerald-700", btn: "bg-emerald-500", label: "เยี่ยมมาก!", mark: "✓" }
+        : verdict === "partial"
+          ? { bg: "bg-[#FFF4D6]", ink: "text-amber-700", btn: "bg-amber-400", label: `ถูกบางส่วน · ${blankHits}/${set.blanks.length}`, mark: "!" }
+          : { bg: "bg-[#FFE4E6]", ink: "text-rose-600", btn: "bg-rose-500", label: "ยังไม่ถูก", mark: "✕" };
+
+    let key: React.ReactNode = null;
+    if (step === 0) {
+      key = (
+        <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[13px]">
+          {set.blanks.map((b) => (
+            <span key={b.n} className={picks[b.n] === b.answer ? "text-slate-400" : "font-black underline decoration-2 underline-offset-2"}>
+              {b.n}. {b.answer}
+            </span>
+          ))}
+        </p>
+      );
+    } else if (verdict !== "correct") {
+      const k =
+        step === 1
+          ? set.gap.find((o) => o.correct)!.text
+          : step === 2 || step === 3
+            ? hl.answer
+            : step === 4
+              ? set.idea.find((o) => o.correct)!.text
+              : set.title.find((o) => o.correct)!.text;
+      key = <p className="mt-1 text-[13px] font-semibold">{k}</p>;
+    }
+
+    return (
+      <div className={`${tone.bg} px-5 py-4 sm:px-8`}>
+        <div className="flex items-start gap-4">
+          <div className="min-w-0 flex-1">
+            <p className={`text-[15px] font-black ${tone.ink}`}>
+              {tone.mark} {tone.label}
+            </p>
+            <div className={tone.ink}>{key}</div>
+            <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-700">💡 {whyTh()}</p>
+          </div>
+          <button type="button" onClick={() => onDone(score)} className={`shrink-0 rounded-xl ${tone.btn} px-7 py-3 text-sm font-black uppercase tracking-wide text-white`}>
+            {isLast ? "ดูสรุป" : "ต่อไป"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="grid lg:grid-cols-2 lg:divide-x lg:divide-slate-200">
+        <div className="relative max-h-[42vh] overflow-y-auto border-b border-slate-200 px-5 py-5 sm:px-8 lg:max-h-[58vh] lg:border-b-0">
+          <p className="mb-3 text-[11px] font-black uppercase tracking-[0.12em] text-slate-400">บทอ่าน</p>
+          {passage()}
+        </div>
+        <div className="max-h-[52vh] overflow-y-auto px-5 py-5 sm:px-8 lg:max-h-[58vh]">
+          <h2 className="mb-1 text-[19px] font-black leading-7 text-slate-900">{irStepPromptTh(step)}</h2>
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{irStepPromptEn(step)}</p>
+          {question()}
+        </div>
+      </div>
+      {submitted ? (
+        feedback()
+      ) : (
+        <div className="flex justify-end border-t border-slate-200 px-5 py-4 sm:px-8">
+          <button
+            type="button"
+            disabled={!canSubmit}
+            onClick={submit}
+            className="rounded-xl px-9 py-3 text-sm font-black uppercase tracking-wide disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+            style={canSubmit ? { background: BRAND, color: YELLOW } : undefined}
+          >
+            ส่งคำตอบ
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ── the runner ────────────────────────────────────────────────────────── */
+
+export function InteractiveReadingRunner({
+  sets,
+  steps = ALL_STEPS,
+  progressTopic = "interactive-reading",
+  backHref = "/practice/lessons/reading-skills",
+  celebrateTitle = "จบชุดแล้ว!",
+  celebrateSub = "นี่คือรูปแบบเดียวกับ Interactive Reading ในข้อสอบจริงทุกขั้นตอน",
+}: {
+  sets: IrSet[];
+  steps?: number[];
+  progressTopic?: string;
+  backHref?: string;
+  celebrateTitle?: string;
+  celebrateSub?: string;
+}) {
+  const uid = useLessonUserId();
+  const plan: Slot[] = useMemo(() => sets.flatMap((s) => steps.map((st) => ({ set: s, step: st }))), [sets, steps]);
+  const timed = steps.length === IR_STEP_COUNT && sets.length === 1;
+
+  const [i, setI] = useState(0);
+  const [scores, setScores] = useState<number[]>([]);
+  const [finished, setFinished] = useState(false);
+  const [left, setLeft] = useState(() => (sets[0] ? irSeconds(sets[0]) : 480));
+  const rewarded = useRef(false);
+
+  const finish = useCallback(
+    (all: number[]) => {
+      setFinished(true);
+      if (rewarded.current) return;
+      rewarded.current = true;
+      sfxCelebrate("md");
+      const pct = plan.length ? Math.round((all.reduce((a, b) => a + b, 0) / plan.length) * 100) : 0;
+      saveUnitScore(uid, progressTopic, sets[0]?.tier ?? "easy", 0, pct).catch(() => {});
+      awardXp(uid, XP.auto(pct)).catch(() => {});
+    },
+    [uid, plan.length, progressTopic, sets],
+  );
+
+  // one clock for the whole set — only in full-set mode, which is what DET times
+  useEffect(() => {
+    if (!timed || finished) return;
+    const t = setInterval(() => {
+      setLeft((s) => {
+        if (s <= 1) {
+          clearInterval(t);
+          setScores((cur) => {
+            finish(cur);
+            return cur;
+          });
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, [timed, finished, finish]);
+
+  function onDone(score: number) {
+    const all = [...scores, score];
+    setScores(all);
+    if (i + 1 >= plan.length) return finish(all);
+    sfxTransition();
+    setI(i + 1);
+  }
+
+  if (!plan.length) {
+    return (
+      <div className="py-16 text-center text-sm text-slate-400">
+        ยังไม่มีบทอ่านในหมวดนี้ ·{" "}
+        <Link href={backHref} className="text-[#004AAD]">
+          กลับ
+        </Link>
+      </div>
+    );
+  }
+
+  if (finished) {
+    const pct = Math.round((scores.reduce((a, b) => a + b, 0) / plan.length) * 100);
+    return (
+      <div className="py-8">
+        <CelebrateMascot title={celebrateTitle} subtitle={celebrateSub} />
+        <div className="mx-auto mt-6 w-full max-w-md rounded-2xl bg-slate-50 p-6">
+          <p className="text-center text-4xl font-black" style={{ color: BRAND }}>
+            {pct}%
+          </p>
+          <div className="mt-4 space-y-1.5">
+            {plan.map((slot, idx) => {
+              const s = scores[idx] ?? 0;
+              return (
+                <div key={idx} className="flex items-center justify-between gap-3 text-xs font-bold">
+                  <span className="min-w-0 flex-1 truncate text-slate-600">
+                    {sets.length > 1 ? `${slot.set.topicTh} · ` : `${idx + 1}. `}
+                    {IR_STEP_LABELS_TH[slot.step]}
+                  </span>
+                  <span className={s === 1 ? "text-emerald-600" : s > 0 ? "text-amber-600" : "text-rose-500"}>
+                    {s === 1 ? "ถูก" : s > 0 ? `${Math.round(s * 100)}%` : "ยังไม่ถูก"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="text-center">
+          <Link href={backHref} className="mt-6 inline-block rounded-xl px-6 py-3 text-sm font-bold" style={{ background: BRAND, color: YELLOW }}>
+            เสร็จแล้ว · กลับไปเลือกชุด
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const slot = plan[i]!;
+  return (
+    <div className="overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(0,0,0,.12)] ring-1 ring-black/5">
+      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-8">
+        {timed ? (
+          <p className="flex items-center gap-2 text-[15px] text-slate-500">
+            <span className="text-lg">🕐</span>
+            <span className="text-lg font-black text-slate-800">{mmss(left)}</span>
+            <span className="font-semibold">{irRemainingLabel(i)}</span>
+          </p>
+        ) : (
+          <p className="text-[15px] font-semibold text-slate-500">
+            <span className="text-lg font-black text-slate-800">
+              {i + 1}/{plan.length}
+            </span>{" "}
+            · {slot.set.topicTh}
+          </p>
+        )}
+        <Link href={backHref} className="text-2xl leading-none text-slate-400 hover:text-slate-600">
+          ✕
+        </Link>
+      </div>
+      <TaskCard key={i} set={slot.set} step={slot.step} onDone={onDone} isLast={i + 1 >= plan.length} />
+    </div>
+  );
+}
