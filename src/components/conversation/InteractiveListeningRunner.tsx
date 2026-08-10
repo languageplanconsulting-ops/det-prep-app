@@ -24,6 +24,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ConversationReportPanel } from "@/components/conversation/ConversationReportPanel";
+import { IlExplanationBlock } from "@/components/conversation/IlExplanationBlock";
 import { computeItemOk } from "@/lib/conversation-scoring";
 import { conversationMaxForExam, saveConversationProgress } from "@/lib/conversation-storage";
 import { cancelConversationSpeech, ensureSpeechVoices, speakConversationLineWithOptionalAudio } from "@/lib/conversation-tts";
@@ -356,14 +357,23 @@ export function InteractiveListeningRunner({
                     </div>
                   )}
                   {compSubmitted ? (
-                    <div className={`mt-2 rounded-xl p-3 text-[13px] leading-6 ${good ? "bg-emerald-50 text-emerald-900" : "bg-rose-50 text-rose-900"}`}>
-                      {!good && ilIsTyped(q) ? (
-                        <p className="font-black">
-                          {IL_COPY.bestAnswerTh} {ilReferenceAnswer(q)}
+                    <div className="mt-2 rounded-xl bg-slate-50 p-3 ring-1 ring-black/5">
+                      {aiWhy[i] ? (
+                        <p className="mb-2.5 rounded-xl border-l-4 border-rose-300 bg-rose-50/70 px-3.5 py-2.5 text-[13px] font-semibold leading-6 text-rose-900">
+                          {aiWhy[i]}
                         </p>
                       ) : null}
-                      {aiWhy[i] ? <p className="mt-0.5 font-semibold text-rose-800">{aiWhy[i]}</p> : null}
-                      {q.explanation ? <p className="mt-0.5 text-slate-700">💡 {q.explanation}</p> : null}
+                      {/*
+                        The learner typed into a blank, so the authored rebuttals of options 1–4 argue
+                        against something they never saw. Only the key's own reasoning survives here —
+                        the block strips the "ข้อ N ถูก เพราะ" stem, so it reads as a plain reason.
+                      */}
+                      <IlExplanationBlock
+                        explanation={q.explanation}
+                        correctText={good ? undefined : ilReferenceAnswer(q)}
+                        correctIndex={q.correctIndex}
+                        hideDistractors
+                      />
                     </div>
                   ) : null}
                 </div>
@@ -492,12 +502,16 @@ export function InteractiveListeningRunner({
             <div className="flex items-start gap-4">
               <div className="min-w-0 flex-1">
                 <p className={`text-[15px] font-black ${good ? "text-emerald-700" : "text-rose-600"}`}>{good ? "✓ เยี่ยมมาก!" : "✕ ยังไม่ถูก"}</p>
-                {!good ? (
-                  <p className="mt-1 text-[13px] font-semibold text-rose-700">
-                    {IL_COPY.bestAnswerTh} {q.options[q.correctIndex]}
-                  </p>
-                ) : null}
-                {q.explanation ? <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-700">💡 {q.explanation}</p> : null}
+                <div className="mt-2 max-w-2xl">
+                  <IlExplanationBlock
+                    explanation={q.explanation}
+                    spokenLine={q.transcript}
+                    chosenText={turnPick != null ? q.options[turnPick] : undefined}
+                    chosenIndex={turnPick}
+                    correctIndex={q.correctIndex}
+                    correctText={good ? undefined : q.options[q.correctIndex]}
+                  />
+                </div>
               </div>
               <button
                 type="button"

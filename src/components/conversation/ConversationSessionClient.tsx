@@ -638,6 +638,7 @@ export function ConversationSessionClient({
                 picked={mainPicks[mainIndex]!}
                 correctIndex={exam.mainQuestions[mainIndex].correctIndex}
                 explanation={exam.mainQuestions[mainIndex].explanation}
+                spokenLine={exam.mainQuestions[mainIndex].transcript}
                 footer={
                   <>
                     <p className="text-[10px] font-black uppercase tracking-wide text-neutral-500">

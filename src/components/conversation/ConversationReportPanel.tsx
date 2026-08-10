@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRevealSfx } from "@/hooks/useRevealSfx";
 import { AdminCoachTip } from "@/components/practice/AdminCoachTip";
+import { IlExplanationBlock } from "@/components/conversation/IlExplanationBlock";
 import { CONVERSATION_SCENARIO_Q_COUNT, CONVERSATION_TOTAL_STEPS } from "@/lib/conversation-constants";
 import { conversationExplanationThai } from "@/lib/conversation-report-helpers";
 import { conversationScore, countConversationCorrect } from "@/lib/conversation-scoring";
@@ -169,9 +170,13 @@ export function ConversationReportPanel({
                     {" · "}
                     Correct: <span className="font-bold">{correctOpt}</span>
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed text-neutral-800">
-                    {conversationExplanationThai(q.explanation)}
-                  </p>
+                  <div className="mt-3">
+                    <IlExplanationBlock
+                      explanation={conversationExplanationThai(q.explanation)}
+                      chosenIndex={pick}
+                      correctIndex={q.correctIndex}
+                    />
+                  </div>
                 </li>
               );
             })}
@@ -233,9 +238,15 @@ export function ConversationReportPanel({
                       );
                     })}
                   </ul>
-                  <p className="mt-3 text-sm leading-relaxed text-neutral-800">
-                    {conversationExplanationThai(mq.explanation)}
-                  </p>
+                  <div className="mt-3">
+                    <IlExplanationBlock
+                      explanation={conversationExplanationThai(mq.explanation)}
+                      spokenLine={mq.transcript}
+                      chosenText={pick != null ? mq.options[pick] : undefined}
+                      chosenIndex={pick}
+                      correctIndex={mq.correctIndex}
+                    />
+                  </div>
                 </li>
               );
             })}

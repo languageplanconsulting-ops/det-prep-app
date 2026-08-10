@@ -1,5 +1,6 @@
 "use client";
 
+import { IlExplanationBlock } from "@/components/conversation/IlExplanationBlock";
 import { conversationExplanationThai } from "@/lib/conversation-report-helpers";
 
 type Props = {
@@ -7,6 +8,8 @@ type Props = {
   picked: number;
   correctIndex: number;
   explanation: string;
+  /** The line that was spoken — lets the reveal name the grammar rule the answer had to follow. */
+  spokenLine?: string;
   /** Rendered under the reason — used for the "next line" CTA in the main dialogue. */
   footer?: React.ReactNode;
 };
@@ -20,6 +23,7 @@ export default function ConversationAnswerReveal({
   picked,
   correctIndex,
   explanation,
+  spokenLine,
   footer,
 }: Props) {
   const isCorrect = picked === correctIndex;
@@ -71,10 +75,14 @@ export default function ConversationAnswerReveal({
       ) : null}
 
       <div className="mt-4 border-t-4 border-dashed border-black/25 pt-3">
-        <p className="text-[10px] font-black uppercase tracking-wide text-neutral-500">ทำไม</p>
-        <p className="mt-1 text-sm leading-relaxed text-neutral-800">
-          {conversationExplanationThai(explanation)}
-        </p>
+        <p className="mb-2 text-[10px] font-black uppercase tracking-wide text-neutral-500">ทำไม</p>
+        <IlExplanationBlock
+          explanation={conversationExplanationThai(explanation)}
+          spokenLine={spokenLine}
+          chosenText={options[picked]}
+          chosenIndex={picked}
+          correctIndex={correctIndex}
+        />
       </div>
 
       {footer ? <div className="mt-4">{footer}</div> : null}
