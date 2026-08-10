@@ -112,11 +112,13 @@ function TaskCard({
   step,
   onDone,
   isLast,
+  glossary,
 }: {
   set: IrSet;
   step: number;
   onDone: (score: number) => void;
   isLast: boolean;
+  glossary?: { word: string; meaningTh: string }[];
 }) {
   const [submitted, setSubmitted] = useState(false);
   const [picks, setPicks] = useState<Record<number, string>>({});
@@ -426,6 +428,15 @@ function TaskCard({
         <div className="relative max-h-[42vh] overflow-y-auto border-b border-slate-200 px-5 py-5 sm:px-8 lg:max-h-[58vh] lg:border-b-0">
           <p className="mb-3 text-[11px] font-black uppercase tracking-[0.12em] text-slate-400">บทอ่าน</p>
           {passage()}
+          {glossary?.length ? (
+            <div className="mt-4 flex flex-wrap gap-1.5 border-t border-slate-100 pt-3">
+              {glossary.map((g) => (
+                <span key={g.word} className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-700 ring-1 ring-black/5">
+                  {g.word} · <span className="text-slate-500">{g.meaningTh}</span>
+                </span>
+              ))}
+            </div>
+          ) : null}
         </div>
         <div className="max-h-[52vh] overflow-y-auto px-5 py-5 sm:px-8 lg:max-h-[58vh]">
           <h2 className="mb-1 text-[19px] font-black leading-7 text-slate-900">{irStepPromptTh(step)}</h2>
@@ -461,6 +472,7 @@ export function InteractiveReadingRunner({
   backHref = "/practice/lessons/reading-skills",
   celebrateTitle = "จบชุดแล้ว!",
   celebrateSub = "นี่คือรูปแบบเดียวกับ Interactive Reading ในข้อสอบจริงทุกขั้นตอน",
+  glossary,
 }: {
   sets: IrSet[];
   steps?: number[];
@@ -468,6 +480,8 @@ export function InteractiveReadingRunner({
   backHref?: string;
   celebrateTitle?: string;
   celebrateSub?: string;
+  /** Reading-exam sets carry a vocabulary list; shown under the passage so it is not lost. */
+  glossary?: { word: string; meaningTh: string }[];
 }) {
   const uid = useLessonUserId();
   const plan: Slot[] = useMemo(() => sets.flatMap((s) => steps.map((st) => ({ set: s, step: st }))), [sets, steps]);
@@ -587,7 +601,7 @@ export function InteractiveReadingRunner({
           ✕
         </Link>
       </div>
-      <TaskCard key={i} set={slot.set} step={slot.step} onDone={onDone} isLast={i + 1 >= plan.length} />
+      <TaskCard key={i} set={slot.set} step={slot.step} onDone={onDone} isLast={i + 1 >= plan.length} glossary={glossary} />
     </div>
   );
 }

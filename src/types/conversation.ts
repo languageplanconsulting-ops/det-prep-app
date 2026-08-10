@@ -11,6 +11,17 @@ export interface ConversationScenarioQuestion {
   audioMimeType?: string;
   /** When true, audio is in IndexedDB (localStorage quota); hydrate before playback. */
   audioInIndexedDb?: boolean;
+  /**
+   * Real-format comprehension: the learner TYPES a short answer into a sentence frame rather than
+   * picking from a list. `{}` marks the blank, e.g. "After school I think I'll {}."
+   * When this is absent the runner falls back to the legacy multiple-choice rendering, so sets
+   * uploaded before the rebuild keep working.
+   */
+  answerTemplate?: string;
+  /** The reference answer for the blank, e.g. "go to graduate school". */
+  answerRef?: string;
+  /** Extra wordings that should also be accepted — grading is deliberately lenient. */
+  answerAccept?: string[];
   options: string[];
   correctIndex: number;
   explanation: string;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ConversationSessionClient } from "@/components/conversation/ConversationSessionClient";
+import { InteractiveListeningRunner } from "@/components/conversation/InteractiveListeningRunner";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
@@ -81,13 +81,12 @@ export function ConversationSessionGate({
       difficulty={difficulty}
       setId={`ic-r${round}-${difficulty}-s${setNumber}`}
     >
-      <ConversationSessionClient
-        key={`${exam.id}-${startWithRedeem}`}
+      <InteractiveListeningRunner
+        key={exam.id}
         exam={exam}
         round={round}
         difficulty={difficulty}
         setNumber={setNumber}
-        startWithRedeem={startWithRedeem}
       />
     </StudySessionBoundary>
   );

@@ -1,16 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
-import {
-  getReadingExamFromSet,
-  getReadingVisibleSetByNumber,
-} from "@/lib/reading-storage";
-import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
-import type { ReadingDifficulty, ReadingExamUnit, ReadingRoundNum } from "@/types/reading";
+import type { ReadingDifficulty, ReadingRoundNum } from "@/types/reading";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
-import { ReadingSessionClient } from "./ReadingSessionClient";
+import { InteractiveReadingRunner } from "@/components/reading/InteractiveReadingRunner";
+import { irSetsByTier, type IrTier } from "@/lib/interactive-reading";
 
 export function ReadingSessionGate({
   round,
@@ -23,47 +17,6 @@ export function ReadingSessionGate({
   setNumber: number;
   examNumber: number;
 }) {
-  const [exam, setExam] = useState<ReadingExamUnit | null | undefined>(undefined);
-  const [totalExams, setTotalExams] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      await ensureCanonicalPracticeContent();
-      if (cancelled) return;
-      const set = getReadingVisibleSetByNumber(round, difficulty, setNumber);
-      if (!set) {
-        setExam(null);
-        return;
-      }
-      setTotalExams(set.exams.length);
-      setExam(getReadingExamFromSet(set, examNumber) ?? null);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [round, difficulty, setNumber, examNumber]);
-
-  if (exam === undefined) {
-    return <LuxuryLoader label="Opening this exam…" />;
-  }
-
-  if (exam === null) {
-    return (
-      <div className="ep-brutal-reading rounded-sm bg-white p-6">
-        <p className="font-bold text-neutral-800">
-          Exam {examNumber} is not in set {setNumber}. Choose another exam from the list.
-        </p>
-        <Link
-          href={`/practice/comprehension/reading/round/${round}/${difficulty}/${setNumber}`}
-          className="ep-interactive mt-4 inline-block text-sm font-bold uppercase tracking-wide text-ep-blue underline-offset-2 hover:underline"
-        >
-          Back to exam list
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <StudySessionBoundary
       skill="comprehension"
@@ -71,15 +24,60 @@ export function ReadingSessionGate({
       difficulty={difficulty}
       setId={`read-r${round}-${difficulty}-s${setNumber}-e${examNumber}`}
     >
-      <ReadingSessionClient
+      <ReadingExamRunner
         key={`${round}-${difficulty}-${setNumber}-${examNumber}`}
         round={round}
         difficulty={difficulty}
         setNumber={setNumber}
         examNumber={examNumber}
-        readingExam={exam}
-        totalExams={totalExams}
       />
     </StudySessionBoundary>
+  );
+}
+
+/**
+ * The exam runs the REAL Interactive Reading task — all six steps, on the validated bank.
+ *
+ * It cannot run the exam's own uploaded content and still be faithful: an exam unit has no cloze
+ * data, offers four options where the real task offers five, and its `mainIdea` block is built on
+ * the opposite logic to the real "select the idea that is expressed" question — its wrong answers
+ * are TRUE details from the passage, which is title-question logic. Relabelling it would teach a
+ * rule the real test punishes. So the exam serves the bank that was authored and validated against
+ * the measured spec. The old exam content is left in storage, untouched.
+ */
+function ReadingExamRunner({
+  round,
+  difficulty,
+  setNumber,
+  examNumber,
+}: {
+  round: ReadingRoundNum;
+  difficulty: ReadingDifficulty;
+  setNumber: number;
+  examNumber: number;
+}) {
+  const tier: IrTier = difficulty === "easy" ? "easy" : difficulty === "hard" ? "advanced" : "medium";
+  const pool = irSetsByTier(tier);
+  const backHref = `/practice/comprehension/reading/round/${round}/${difficulty}/${setNumber}`;
+  if (!pool.length) {
+    return (
+      <div className="rounded-2xl bg-white p-6 ring-1 ring-black/5">
+        <p className="font-bold text-slate-800">ยังไม่มีบทอ่านในระดับนี้</p>
+        <Link href={backHref} className="mt-3 inline-block text-sm font-bold text-[#004AAD]">
+          กลับไปเลือกข้อสอบ
+        </Link>
+      </div>
+    );
+  }
+  // deterministic: the same round/set/exam always opens the same passage
+  const idx = (((round - 1) * 97 + (setNumber - 1) * 13 + (examNumber - 1)) % pool.length + pool.length) % pool.length;
+  return (
+    <InteractiveReadingRunner
+      sets={[pool[idx]!]}
+      progressTopic="reading-exam"
+      backHref={backHref}
+      celebrateTitle="จบข้อสอบแล้ว!"
+      celebrateSub="รูปแบบเดียวกับ Interactive Reading ในข้อสอบจริงครบทั้ง 6 ขั้นตอน"
+    />
   );
 }
