@@ -38,6 +38,16 @@ export type IrHighlight = {
   questionTh: string;
   /** Exact substring of the resolved paragraph. Kept as short as the stem allows. */
   answer: string;
+  /**
+   * Other spans that also count as right, up to three (so four accepted answers in all).
+   *
+   * DET marks a highlight on the span you picked, not on one blessed phrasing, and a
+   * learner who highlights just the meaningful core of a long answer has read correctly.
+   * Every entry is a contiguous sub-span of `answer`, which is what keeps it an exact
+   * substring of the paragraph too. Overshoot is handled by the runner's spare-word
+   * tolerance instead, so nothing here needs to be longer than `answer`.
+   */
+  accept?: string[];
   /** 1-based index into `resolvedParagraphs()`. */
   paragraph: number;
   whyTh: string;

@@ -135,6 +135,18 @@ function TaskCard({
   const hl = set.highlights[step === 2 ? 0 : 1]!;
   const hlPara = resolved[hl.paragraph - 1] ?? "";
   const hlRange = useMemo(() => phraseWordRange(hlPara, hl.answer), [hlPara, hl.answer]);
+  /**
+   * Every span that counts as right: the canonical answer plus its shorter accepted
+   * variants. Grading takes the best of these, while `hlRange` alone stays the span the
+   * feedback bar reveals — the learner should still be shown the full model answer.
+   */
+  const hlTargets = useMemo(
+    () =>
+      [hl.answer, ...(hl.accept ?? [])]
+        .map((phrase) => phraseWordRange(hlPara, phrase))
+        .filter((r): r is [number, number] => r !== null),
+    [hlPara, hl.answer, hl.accept],
+  );
 
   function onDown(para: number, w: number, mouse: boolean) {
     if (submitted || (step !== 2 && step !== 3)) return;
@@ -175,15 +187,18 @@ function TaskCard({
     if (step === 0) return blankHits / set.blanks.length;
     if (step === 1) return gapPick !== null && set.gap[gapPick]!.correct ? 1 : 0;
     if (step === 2 || step === 3) {
-      if (!sel || !hlRange || sel.para !== hl.paragraph) return 0;
-      const covers = sel.start <= hlRange[0] && sel.end >= hlRange[1];
-      // DET forgives ragged edges but not a different span — two spare words, no more
-      const extra = sel.end - sel.start - (hlRange[1] - hlRange[0]);
-      return covers && extra <= 2 ? 1 : 0;
+      if (!sel || sel.para !== hl.paragraph) return 0;
+      // Right if the selection covers ANY accepted span with two spare words at most.
+      // Checking every target is what lets a learner keep the answer tight: highlighting
+      // "gave discounts" out of "He gave discounts" reads the passage correctly, and
+      // grading only the longest phrasing used to mark that wrong.
+      return hlTargets.some(([s, e]) => sel.start <= s && sel.end >= e && sel.end - sel.start - (e - s) <= 2)
+        ? 1
+        : 0;
     }
     if (step === 4) return ideaPick !== null && set.idea[ideaPick]!.correct ? 1 : 0;
     return titlePick !== null && set.title[titlePick]!.correct ? 1 : 0;
-  }, [step, blankHits, set, gapPick, sel, hlRange, hl.paragraph, ideaPick, titlePick]);
+  }, [step, blankHits, set, gapPick, sel, hlTargets, hl.paragraph, ideaPick, titlePick]);
 
   const verdict: Verdict = score === 1 ? "correct" : step === 0 && score > 0 ? "partial" : "wrong";
 
