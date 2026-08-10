@@ -7,7 +7,8 @@ import { getVocabPassageFromSet, getVocabVisibleSetByNumber } from "@/lib/vocab-
 import { LuxuryLoader } from "@/components/ui/LuxuryLoader";
 import type { VocabPassageUnit, VocabRoundNum, VocabSessionLevel } from "@/types/vocab";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
-import { VocabSessionClient } from "./VocabSessionClient";
+import { InteractiveReadingRunner } from "@/components/reading/InteractiveReadingRunner";
+import { vocabToIrSet } from "@/lib/vocab-to-ir";
 
 export function VocabSessionGate({
   round,
@@ -74,15 +75,46 @@ export function VocabSessionGate({
       difficulty={sessionLevel}
       setId={`voc-r${round}-s${setNumber}-l${sessionLevel}-p${passageNumber}`}
     >
-      <VocabSessionClient
+      <VocabExamRunner
         key={`${round}-${sessionLevel}-${setNumber}-${passageNumber}`}
         round={round}
-        sessionLevel={sessionLevel}
         setNumber={setNumber}
+        sessionLevel={sessionLevel}
         passageNumber={passageNumber}
         passage={passage}
-        nextPassageNumber={nextPassageNumber}
       />
     </StudySessionBoundary>
+  );
+}
+
+/**
+ * The vocabulary exercise IS the real test's word-fill step, so it runs the same screen the reading
+ * exam runs — split passage, numbered gaps, one SUBMIT, per-blank partial credit and the answer key
+ * laid out blank by blank. The reading exam no longer runs this step; it belongs here.
+ */
+function VocabExamRunner({
+  round,
+  setNumber,
+  sessionLevel,
+  passageNumber,
+  passage,
+}: {
+  round: VocabRoundNum;
+  setNumber: number;
+  sessionLevel: VocabSessionLevel;
+  passageNumber: number;
+  passage: VocabPassageUnit;
+}) {
+  const { set, steps } = vocabToIrSet(passage, `voc-r${round}-s${setNumber}-p${passageNumber}`);
+  const backHref = `/practice/comprehension/vocabulary/round/${round}/${setNumber}/${sessionLevel}`;
+  return (
+    <InteractiveReadingRunner
+      sets={[set]}
+      steps={steps}
+      progressTopic="vocab-exam"
+      backHref={backHref}
+      celebrateTitle="จบชุดคำศัพท์แล้ว!"
+      celebrateSub="รูปแบบเดียวกับขั้นเติมคำของ Interactive Reading ในข้อสอบจริง"
+    />
   );
 }

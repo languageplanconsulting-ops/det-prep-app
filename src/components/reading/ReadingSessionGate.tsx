@@ -74,6 +74,11 @@ function ReadingExamRunner({
   return (
     <InteractiveReadingRunner
       sets={[pool[idx]!]}
+      // Reading comprehension is the four reading questions only: the missing paragraph, the two
+      // highlight questions, the idea expressed and the best title. The word-fill step is the
+      // VOCABULARY exercise and lives under /practice/comprehension/vocabulary — running it here
+      // too would make a learner do the same task twice under two different names.
+      steps={[1, 2, 3, 4, 5]}
       progressTopic="reading-exam"
       backHref={backHref}
       celebrateTitle="จบข้อสอบแล้ว!"
