@@ -27,6 +27,7 @@ import { XP, awardXp } from "@/lib/gamification";
 import { useLessonUserId } from "@/lib/lesson-user";
 import { saveUnitScore } from "@/lib/lessons-progress";
 import { phraseWordRange, wordTokens } from "@/lib/passage-text";
+import { findEvidence, sentenceContaining, splitSentences, stemMatches, wordKey, type Clue } from "@/lib/interactive-reading-explain";
 import {
   IR_STEP_COUNT,
   IR_STEP_LABELS_TH,
@@ -107,6 +108,15 @@ function SelectableParagraph({
 
 /* ── one task = one {passage, step} ────────────────────────────────────── */
 
+export type IrStepResult = {
+  step: number;
+  score: number;
+  /** What the learner chose or typed, one entry per graded blank (cloze) or one for other steps. */
+  chosen: string[];
+  /** The key, aligned with `chosen`. */
+  correct: string[];
+};
+
 function TaskCard({
   set,
   step,
@@ -116,7 +126,7 @@ function TaskCard({
 }: {
   set: IrSet;
   step: number;
-  onDone: (score: number) => void;
+  onDone: (result: IrStepResult) => void;
   isLast: boolean;
   glossary?: { word: string; meaningTh: string }[];
 }) {
@@ -202,6 +212,26 @@ function TaskCard({
 
   const verdict: Verdict = score === 1 ? "correct" : step === 0 && score > 0 ? "partial" : "wrong";
 
+  /** What to hand back when the learner moves on — the host may need the actual answers. */
+  function result(): IrStepResult {
+    if (step === 0) {
+      return {
+        step,
+        score,
+        chosen: set.blanks.map((b) => picks[b.n] ?? ""),
+        correct: set.blanks.map((b) => b.answer),
+      };
+    }
+    if (step === 1) {
+      return { step, score, chosen: [gapPick !== null ? set.gap[gapPick]!.text : ""], correct: [set.gap.find((g) => g.correct)?.text ?? ""] };
+    }
+    if (step === 2 || step === 3) return { step, score, chosen: [selText], correct: [hl.answer] };
+    if (step === 4) {
+      return { step, score, chosen: [ideaPick !== null ? set.idea[ideaPick]!.text : ""], correct: [set.idea.find((o) => o.correct)?.text ?? ""] };
+    }
+    return { step, score, chosen: [titlePick !== null ? set.title[titlePick]!.text : ""], correct: [set.title.find((o) => o.correct)?.text ?? ""] };
+  }
+
   const canSubmit =
     step === 0
       ? set.blanks.every((b) => picks[b.n])
@@ -223,7 +253,13 @@ function TaskCard({
   /* passage */
   function passage() {
     if (step === 0) {
-      return set.paragraphs.slice(0, set.gapAfter).map((p, pi) => (
+      // Blanks usually live in the opening block, but mock reading passages spread them either side
+      // of the gap — so show every block up to the last one that actually carries a marker.
+      let lastWithBlank = set.gapAfter - 1;
+      set.paragraphs.forEach((p, i) => {
+        if (/\{\d+\}/.test(p)) lastWithBlank = Math.max(lastWithBlank, i);
+      });
+      return set.paragraphs.slice(0, lastWithBlank + 1).map((p, pi) => (
         <p key={pi} className="mb-4 text-[15px] leading-9 text-slate-800 last:mb-0">
           {paragraphChunks(p).map((c, ci) => {
             if (c.kind === "text") return <span key={ci}>{c.text}</span>;
@@ -377,15 +413,102 @@ function TaskCard({
   }
 
   /* explanation — the part DET never gives */
-  function whyTh(): string {
-    if (step === 0) {
-      const missed = set.blanks.find((b) => picks[b.n] !== b.answer);
-      return missed ? `ช่อง ${missed.n} (${missed.skillTh}) — ${missed.whyTh}` : set.blanks[0]!.whyTh;
+
+  /** Why the span the learner actually dragged is not the answer, read off the two ranges. */
+  function highlightMissTh(): string {
+    if (!sel) return "ยังไม่ได้เลือกข้อความ — คำตอบคือช่วงที่ไฮไลต์สีเขียวไว้ในบทอ่าน";
+    if (sel.para !== hl.paragraph) return "ช่วงที่เลือกอยู่คนละย่อหน้ากับคำตอบ — ให้กลับไปหาย่อหน้าที่มีคำจากคำถามก่อน แล้วค่อยเลือกภายในย่อหน้านั้น";
+    if (!hlRange) return "ช่วงที่เลือกไม่ใช่ส่วนที่ตอบคำถามนี้";
+    const [s, e] = hlRange;
+    if (sel.start <= s && sel.end >= e) return "คลุมคำตอบไว้จริง แต่ลากกว้างเกินไป — ตัดส่วนที่ไม่ได้ตอบคำถามออก ให้เหลือเฉพาะช่วงสีเขียว";
+    if (sel.end < s || sel.start > e) return "ช่วงที่เลือกไม่ทับกับคำตอบเลย — ประโยคนี้พูดถึงเรื่องอื่นในบทอ่าน ไม่ได้ตอบสิ่งที่โจทย์ถาม";
+    return "ทับคำตอบแค่บางส่วน — ยังขาดคำที่ตอบคำถามจริง ๆ ให้ลากให้ครบทั้งช่วงสีเขียว";
+  }
+
+  /**
+   * The keyword line: which words in the passage prove the answer, and what they line up with.
+   * Authored `clueEn` wins; otherwise the evidence is derived from shared words and dropped
+   * entirely when the words do not actually back it up.
+   */
+  function clue(): Clue | null {
+    if (step === 1) {
+      const key = set.gap.find((o) => o.correct);
+      if (!key) return null;
+      // what the inserted sentence has to hand over to — the paragraph after the gap
+      const nextPara = resolved[set.gapAfter + 1] ?? resolved[set.gapAfter - 1] ?? "";
+      const sentence = key.clueEn ?? splitSentences(nextPara)[0] ?? nextPara;
+      if (!sentence) return null;
+      const m = stemMatches(key.text, sentence);
+      return {
+        labelTh: resolved[set.gapAfter + 1] ? "ประโยคถัดจากช่องว่าง — คำตอบต้องเชื่อมกับประโยคนี้" : "ประโยคก่อนช่องว่าง — คำตอบต้องต่อจากประโยคนี้",
+        sentence,
+        hits: m.hits,
+        matchedTh: m.words.length ? `คำที่ประโยคคำตอบรับช่วงต่อมา: ${m.words.map((w) => `“${w}”`).join(" · ")}` : undefined,
+      };
     }
-    if (step === 1) return gapPick !== null && !set.gap[gapPick]!.correct ? set.gap[gapPick]!.whyTh : set.gap.find((o) => o.correct)!.whyTh;
-    if (step === 2 || step === 3) return hl.whyTh;
-    if (step === 4) return ideaPick !== null && !set.idea[ideaPick]!.correct ? set.idea[ideaPick]!.whyTh : set.idea.find((o) => o.correct)!.whyTh;
-    return titlePick !== null && !set.title[titlePick]!.correct ? set.title[titlePick]!.whyTh : set.title.find((o) => o.correct)!.whyTh;
+    if (step === 2 || step === 3) {
+      const sentence = hl.clueEn ?? sentenceContaining(hlPara, hl.answer);
+      const m = stemMatches(hl.questionEn, sentence);
+      return {
+        labelTh: "คำในคำถามพาไปเจอประโยคนี้",
+        sentence,
+        hits: m.hits,
+        matchedTh: m.words.length
+          ? `คำจากคำถามที่ไปตรงกับบทอ่าน: ${m.words.map((w) => `“${w}”`).join(" · ")} → คำตอบคือส่วนที่ตอบคำถามในประโยคนี้`
+          : "คำถามถามด้วยคำอื่น (พาราเฟรส) — ต้องหาจากความหมาย ไม่ใช่จากคำที่ซ้ำกัน",
+      };
+    }
+    if (step === 4 || step === 5) {
+      const key = (step === 4 ? set.idea : set.title).find((o) => o.correct);
+      if (!key) return null;
+      if (key.clueEn) {
+        const m = stemMatches(key.text, key.clueEn);
+        return { labelTh: "ประโยคในบทอ่านที่ตัวเลือกนี้พูดซ้ำ", sentence: key.clueEn, hits: m.hits, matchedTh: undefined };
+      }
+      const ev = findEvidence(resolved, key.text, step === 4 ? 2 : 1);
+      if (!ev) return null;
+      return {
+        labelTh: step === 4 ? "ประโยคในบทอ่านที่ตัวเลือกนี้พูดซ้ำ" : "คำหลักของชื่อเรื่องนี้มาจากประโยคนี้",
+        sentence: ev.sentence,
+        hits: ev.hits,
+        matchedTh: `ตรงกับคำในตัวเลือก: ${ev.words.slice(0, 4).map((w) => `“${w}”`).join(" · ")}`,
+      };
+    }
+    return null;
+  }
+
+  /** One ✓ row for the key, then one ✕ row per option the learner had to rule out. */
+  function rows(): ExplainRow[] {
+    if (step === 0) {
+      const rowFor = (b: (typeof set.blanks)[number], mark: ExplainRow["mark"]): ExplainRow => {
+        const para = set.paragraphs.find((p) => new RegExp(`\\{${b.n}\\}`).test(p)) ?? "";
+        const sentence = sentenceContaining(resolveParagraph(para, set.blanks), b.answer);
+        return {
+          mark,
+          head: `ช่อง ${b.n} · ${b.skillTh} → ${b.answer}`,
+          body: b.whyTh,
+          picked: mark === "cross",
+          clue: sentence ? { labelTh: "", sentence, hits: [wordKey(b.answer)] } : undefined,
+        };
+      };
+      const missed = set.blanks.filter((b) => picks[b.n] !== b.answer);
+      if (missed.length) return missed.map((b) => rowFor(b, "cross"));
+      return set.blanks.slice(0, 4).map((b) => rowFor(b, "key"));
+    }
+    if (step === 2 || step === 3) {
+      const out: ExplainRow[] = [{ mark: "key", head: hl.answer, body: hl.whyTh }];
+      if (verdict !== "correct") out.push({ mark: "cross", head: selText || "—", body: highlightMissTh(), picked: true });
+      return out;
+    }
+    const list = step === 1 ? set.gap : step === 4 ? set.idea : set.title;
+    const pick = step === 1 ? gapPick : step === 4 ? ideaPick : titlePick;
+    return [
+      ...list.filter((o) => o.correct).map<ExplainRow>((o) => ({ mark: "key", head: o.text, body: o.whyTh, picked: pick !== null && list[pick] === o })),
+      ...list
+        .map((o, i) => ({ o, i }))
+        .filter(({ o }) => !o.correct)
+        .map<ExplainRow>(({ o, i }) => ({ mark: "cross", head: o.text, body: o.whyTh, picked: pick === i })),
+    ];
   }
 
   function feedback() {
@@ -429,7 +552,7 @@ function TaskCard({
             <div className={tone.ink}>{key}</div>
             <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-700">💡 {whyTh()}</p>
           </div>
-          <button type="button" onClick={() => onDone(score)} className={`shrink-0 rounded-xl ${tone.btn} px-7 py-3 text-sm font-black uppercase tracking-wide text-white`}>
+          <button type="button" onClick={() => onDone(result())} className={`shrink-0 rounded-xl ${tone.btn} px-7 py-3 text-sm font-black uppercase tracking-wide text-white`}>
             {isLast ? "ดูสรุป" : "ต่อไป"}
           </button>
         </div>
@@ -488,6 +611,8 @@ export function InteractiveReadingRunner({
   celebrateTitle = "จบชุดแล้ว!",
   celebrateSub = "นี่คือรูปแบบเดียวกับ Interactive Reading ในข้อสอบจริงทุกขั้นตอน",
   glossary,
+  onFinish,
+  hideReport = false,
 }: {
   sets: IrSet[];
   steps?: number[];
@@ -497,6 +622,10 @@ export function InteractiveReadingRunner({
   celebrateSub?: string;
   /** Reading-exam sets carry a vocabulary list; shown under the passage so it is not lost. */
   glossary?: { word: string; meaningTh: string }[];
+  /** Called once when every step is answered — the mock uses it to build its own score payload. */
+  onFinish?: (results: IrStepResult[]) => void;
+  /** The mock renders its own report, so suppress ours. */
+  hideReport?: boolean;
 }) {
   const uid = useLessonUserId();
   const plan: Slot[] = useMemo(() => sets.flatMap((s) => steps.map((st) => ({ set: s, step: st }))), [sets, steps]);
@@ -504,6 +633,7 @@ export function InteractiveReadingRunner({
 
   const [i, setI] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
+  const [results, setResults] = useState<IrStepResult[]>([]);
   const [finished, setFinished] = useState(false);
   const [left, setLeft] = useState(() => (sets[0] ? irSeconds(sets[0]) : 480));
   const rewarded = useRef(false);
@@ -540,10 +670,15 @@ export function InteractiveReadingRunner({
     return () => clearInterval(t);
   }, [timed, finished, finish]);
 
-  function onDone(score: number) {
-    const all = [...scores, score];
+  function onDone(r: IrStepResult) {
+    const all = [...scores, r.score];
+    const allR = [...results, r];
     setScores(all);
-    if (i + 1 >= plan.length) return finish(all);
+    setResults(allR);
+    if (i + 1 >= plan.length) {
+      onFinish?.(allR);
+      return finish(all);
+    }
     sfxTransition();
     setI(i + 1);
   }
@@ -560,6 +695,7 @@ export function InteractiveReadingRunner({
   }
 
   if (finished) {
+    if (hideReport) return null;
     const pct = Math.round((scores.reduce((a, b) => a + b, 0) / plan.length) * 100);
     return (
       <div className="py-8">

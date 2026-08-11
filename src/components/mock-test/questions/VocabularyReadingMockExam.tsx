@@ -1,52 +1,30 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+/**
+ * Mock test — the reading step, on the real Interactive Reading screen.
+ *
+ * This used to be ten multiple-choice cards in a row: five or six "Q1 — Vocabulary" boxes, then a
+ * yellow missing-paragraph block, then three more cards. The content was already a complete real
+ * task; only the presentation was ours. It now runs the same engine the practice reading and the
+ * reading exam run, so a learner meets one screen everywhere and the mock stops being the odd one
+ * out — which matters most here, because this is the run they treat as the real thing.
+ *
+ * The scoring contract is unchanged. The engine reports what was chosen at every step and this
+ * builds exactly the payload the grader already expects: averageScore0To100, selected_answers,
+ * correct_answers, question_labels, question_prompts. The mock still owns the step clock; the
+ * engine's own timer stays off because it only runs for a full six-step practice set.
+ */
+
+import { useMemo, useRef, useState } from "react";
 
 import { useTimeUpSubmit } from "@/hooks/useTimeUpSubmit";
-import { HighlightedReadingText } from "@/components/reading/ReadingExam";
-import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
-import { shuffleMcOptions } from "@/lib/reading-utils";
+import { InteractiveReadingRunner, type IrStepResult } from "@/components/reading/InteractiveReadingRunner";
+import { mockReadingToIrSet } from "@/lib/mock-test/mock-reading-to-ir";
 import type { VocabularyReadingMockContent } from "@/lib/mock-test/vocabulary-reading-mock";
 import {
   getVocabularyReadingCombinedBlocks,
   getVocabularyReadingBlocks,
-  VOCAB_READING_COMBINED_STEPS,
-  VOCAB_READING_MOCK_STEPS,
 } from "@/lib/mock-test/vocabulary-reading-mock";
-
-const LABELS = [
-  "Q1 — Vocabulary",
-  "Q2 — Vocabulary",
-  "Q3 — Vocabulary",
-  "Q4 — Vocabulary",
-  "Q5 — Vocabulary",
-  "Q6 — Most suitable missing paragraph",
-  "Q7 — Information location",
-  "Q8 — Best title",
-  "Q9 — Main idea",
-] as const;
-
-const COMBINED_LABELS = [
-  "Q1 — Vocabulary",
-  "Q2 — Vocabulary",
-  "Q3 — Vocabulary",
-  "Q4 — Vocabulary",
-  "Q5 — Vocabulary",
-  "Q6 — Vocabulary",
-  "Q7 — Most suitable missing paragraph",
-  "Q8 — Information location",
-  "Q9 — Best title",
-  "Q10 — Main idea",
-] as const;
-
-function fillVocabBlanks(text: string, words: string[]): string {
-  let next = text;
-  words.forEach((w, idx) => {
-    const token = `[BLANK ${idx + 1}]`;
-    next = next.replaceAll(token, w);
-  });
-  return next;
-}
 
 type Props = {
   content: Record<string, unknown>;
@@ -59,380 +37,118 @@ type Props = {
   onSubmit: (payload: unknown) => void;
 };
 
+const STEP_LABEL: Record<number, string> = {
+  1: "Most suitable missing paragraph",
+  2: "Information location",
+  4: "Main idea expressed",
+  5: "Best title",
+};
+
 export function VocabularyReadingMockExam({
   content,
-  completedSteps,
   aggregateMode = false,
   submitting = false,
   timeUp = false,
   onSubmit,
 }: Props) {
   const exam = content as unknown as VocabularyReadingMockContent;
-  const blocks = aggregateMode
-    ? getVocabularyReadingCombinedBlocks(exam)
-    : getVocabularyReadingBlocks(exam);
-  const vocab = exam.highlightedVocab ?? [];
-  const labels = aggregateMode ? COMBINED_LABELS : LABELS;
-  const correctVocabAnswers = (exam.vocabularyQuestions ?? []).slice(0, 6).map((q) => q.correctAnswer);
+  const vocabCount = aggregateMode ? 6 : 5;
+  const blocks = aggregateMode ? getVocabularyReadingCombinedBlocks(exam) : getVocabularyReadingBlocks(exam);
 
-  const [activeWord, setActiveWord] = useState<string | null>(null);
-  /** Step 5: chosen option before Submit (practice reading reveals gap first). */
-  const [missingPick, setMissingPick] = useState<string | null>(null);
-  const [missingReveal, setMissingReveal] = useState(false);
-  const [internalStep, setInternalStep] = useState(0);
-  const [internalAnswers, setInternalAnswers] = useState<string[]>([]);
-  const [localSubmitting, setLocalSubmitting] = useState(false);
-  /** Vocab blank: chosen option shown (green/red) in its box before auto-advance. */
-  const [vocabPick, setVocabPick] = useState<string | null>(null);
-  const [vocabRevealed, setVocabRevealed] = useState(false);
-  const vocabAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { set, steps } = useMemo(
+    () => mockReadingToIrSet(exam, "mock-reading", vocabCount),
+    [exam, vocabCount],
+  );
 
-  // Time up on the 8-minute reading block: hand in the sub-answers collected so
-  // far. Unanswered sub-questions simply score as wrong, which is what the real
-  // exam does when the section clock ends — the mock must not stall here.
-  useTimeUpSubmit(timeUp && aggregateMode, () => {
-    if (vocabAdvanceTimer.current) clearTimeout(vocabAdvanceTimer.current);
-    const partial = [...internalAnswers];
-    if (partial.length === internalStep) {
-      const pendingPick = internalStep < missingSelectionStep ? vocabPick : missingPick;
-      if (pendingPick) partial.push(pendingPick);
+  const [done, setDone] = useState(false);
+  const collected = useRef<IrStepResult[]>([]);
+  const submitted = useRef(false);
+
+  /** Flatten step results into the flat per-sub-question arrays the grader expects. */
+  function buildPayload(results: IrStepResult[]) {
+    const selected: string[] = [];
+    const correct: string[] = [];
+    const labels: string[] = [];
+    const prompts: string[] = [];
+
+    for (const r of results) {
+      if (r.step === 0) {
+        r.chosen.forEach((c, i) => {
+          selected.push(c);
+          correct.push(r.correct[i] ?? "");
+          labels.push(`Q${labels.length + 1} — Vocabulary`);
+          prompts.push(exam.vocabularyQuestions?.[i]?.question ?? "");
+        });
+        continue;
+      }
+      selected.push(r.chosen[0] ?? "");
+      correct.push(r.correct[0] ?? "");
+      labels.push(`Q${labels.length + 1} — ${STEP_LABEL[r.step] ?? "Reading"}`);
+      const block =
+        r.step === 1
+          ? exam.missingParagraph
+          : r.step === 2
+            ? exam.informationLocation
+            : r.step === 4
+              ? exam.mainIdea
+              : exam.bestTitle;
+      prompts.push(block?.question ?? "");
     }
-    let correct = 0;
-    partial.forEach((picked, idx) => {
-      if (idx >= blocks.length) return;
-      if (picked && picked === blocks[idx]?.correctAnswer) correct += 1;
-    });
-    setLocalSubmitting(true);
-    onSubmit({
-      averageScore0To100: blocks.length > 0 ? (correct / blocks.length) * 100 : 0,
+
+    // Score on the engine's verdicts, not on string equality: the highlight step is graded on the
+    // span the learner dragged, which never equals the key character for character.
+    let hits = 0;
+    for (const r of results) hits += r.step === 0 ? r.score * r.chosen.length : r.score;
+    const total = selected.length || blocks.length;
+
+    return {
+      averageScore0To100: total > 0 ? (hits / total) * 100 : 0,
       detail: {
-        total: blocks.length,
-        correct,
-        vocabCount: 6,
-        readingCount: Math.max(0, blocks.length - 6),
-        timedOutAtSubQuestion: internalStep + 1,
+        total,
+        correct: Math.round(hits),
+        vocabCount,
+        readingCount: Math.max(0, total - vocabCount),
       },
-      selected_answers: partial,
-      correct_answers: blocks.map((b) => b.correctAnswer),
-      question_labels: labels.slice(0, blocks.length),
-      question_prompts: blocks.map((b) => b.question),
-    });
-  });
-
-  const step = aggregateMode ? internalStep : completedSteps;
-  const block = blocks[step];
-  const p2Correct = String(exam.missingParagraph?.correctAnswer ?? exam.passage.p2 ?? "");
-  const missingSelectionStep = aggregateMode ? 6 : 5;
-  const vocabAnswers = aggregateMode
-    ? Array.from({ length: 6 }).map((_, idx) => {
-        if (idx < internalAnswers.length) return internalAnswers[idx] ?? "";
-        if (idx === step && vocabRevealed && vocabPick) return vocabPick;
-        return "";
-      })
-    : (exam.vocabularyQuestions ?? []).slice(0, 6).map((q) => q.correctAnswer);
-  const vocabAnswersForDisplay =
-    aggregateMode && step >= missingSelectionStep ? correctVocabAnswers : vocabAnswers;
-  const shouldFillVocabBlanks =
-    aggregateMode && (step > missingSelectionStep || (step === missingSelectionStep && missingReveal));
-  const p1Display = shouldFillVocabBlanks ? fillVocabBlanks(exam.passage.p1, vocabAnswers) : exam.passage.p1;
-  const p3Display = shouldFillVocabBlanks ? fillVocabBlanks(exam.passage.p3, vocabAnswers) : exam.passage.p3;
-
-  useEffect(() => {
-    if (step !== missingSelectionStep) {
-      setMissingPick(null);
-      setMissingReveal(false);
-    }
-  }, [step, missingSelectionStep]);
-
-  useEffect(() => {
-    if (!submitting) {
-      setLocalSubmitting(false);
-    }
-  }, [submitting]);
-
-  useEffect(() => {
-    setVocabPick(null);
-    setVocabRevealed(false);
-  }, [step]);
-
-  useEffect(() => {
-    return () => {
-      if (vocabAdvanceTimer.current) clearTimeout(vocabAdvanceTimer.current);
+      selected_answers: selected,
+      correct_answers: correct,
+      question_labels: labels,
+      question_prompts: prompts,
     };
-  }, []);
+  }
 
-  const shuffled = useMemo(() => {
-    if (!block) return { shuffled: [] as string[], correctIndex: 0 };
-    return shuffleMcOptions(block.options, block.correctAnswer);
-  }, [block]);
-
-  /** Paragraph 2 hidden for vocab (0–4) and missing-paragraph until reveal. */
-  const hideP2 = step <= (aggregateMode ? 5 : 4) || (step === (aggregateMode ? 6 : 5) && !missingReveal);
-
-  const commitChoice = (choice: string) => {
-    if (submitting) return;
-    if (!aggregateMode) {
-      onSubmit({ answer: { step, choice } });
-      return;
-    }
-    const nextAnswers = [...internalAnswers, choice];
-    const endStep = VOCAB_READING_COMBINED_STEPS - 1;
-    if (step >= endStep) {
-      setLocalSubmitting(true);
-      let correct = 0;
-      nextAnswers.forEach((picked, idx) => {
-        if (idx >= blocks.length) return;
-        if (picked && picked === blocks[idx]?.correctAnswer) correct += 1;
-      });
-      const averageScore0To100 = blocks.length > 0 ? (correct / blocks.length) * 100 : 0;
-      onSubmit({
-        averageScore0To100,
-        detail: {
-          total: blocks.length,
-          correct,
-          vocabCount: 6,
-          readingCount: Math.max(0, blocks.length - 6),
-        },
-        selected_answers: nextAnswers,
-        correct_answers: blocks.map((b) => b.correctAnswer),
-        question_labels: labels.slice(0, blocks.length),
-        question_prompts: blocks.map((b) => b.question),
-      });
-      return;
-    }
-    sfxTransition();
-    setInternalAnswers(nextAnswers);
-    setInternalStep((s) => s + 1);
-  };
-
-  const submitChoice = (choice: string) => {
-    if (submitting || localSubmitting) return;
-    commitChoice(choice);
-  };
-
-  const onOptionClick = (opt: string) => {
-    if (submitting || localSubmitting) return;
-    const revealStep = aggregateMode ? 6 : 5;
-    if (step < revealStep) {
-      if (aggregateMode) {
-        if (vocabRevealed) return;
-        if (opt === block.correctAnswer) sfxCorrect();
-        else sfxWrong();
-        setVocabPick(opt);
-        setVocabRevealed(true);
-        vocabAdvanceTimer.current = setTimeout(() => {
-          commitChoice(opt);
-        }, 900);
-        return;
-      }
-      submitChoice(opt);
-      return;
-    }
-    if (step === revealStep) {
-      if (!missingReveal) {
-        if (opt === p2Correct) sfxCorrect();
-        else sfxWrong();
-        setMissingPick(opt);
-        setMissingReveal(true);
-        return;
-      }
-      setMissingPick(opt);
-      return;
-    }
-    submitChoice(opt);
-  };
-
-  const maxSteps = aggregateMode ? VOCAB_READING_COMBINED_STEPS : VOCAB_READING_MOCK_STEPS;
-  if (step >= maxSteps || !block) {
-    return (
-      <p className="text-sm text-neutral-600">Loading next section… / กำลังโหลด…</p>
+  function submitOnce(results: IrStepResult[], timedOutAt?: number) {
+    if (submitted.current) return;
+    submitted.current = true;
+    const payload = buildPayload(results);
+    onSubmit(
+      timedOutAt == null
+        ? payload
+        : { ...payload, detail: { ...payload.detail, timedOutAtSubQuestion: timedOutAt } },
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <section className="ep-brutal-reading rounded-sm bg-white p-5">
-        <h2 className="text-lg font-black uppercase tracking-wide text-ep-blue">
-          Vocabulary + reading (mock)
-          {exam.titleEn?.trim() ? ` · ${exam.titleEn.trim()}` : ""}
-        </h2>
-        {vocab.length > 0 ? (
-          <p className="mt-2 text-xs font-bold text-neutral-600">
-            Tip: highlighted words are clickable for meanings.
-          </p>
-        ) : null}
-        <div className="mt-4 grid gap-5 lg:grid-cols-[1.35fr_1fr]">
-          <div className="space-y-4 text-sm leading-relaxed text-neutral-800">
-          <p className="whitespace-pre-wrap">
-            {aggregateMode ? (
-              renderMockVocabBlanksAsBoxes(
-                exam.passage.p1,
-                vocabAnswersForDisplay,
-                correctVocabAnswers,
-                step >= missingSelectionStep,
-              )
-            ) : (
-              <HighlightedReadingText
-                text={p1Display}
-                vocab={vocab}
-                activeWord={activeWord}
-                setNumber={0}
-                examNumber={0}
-                onPickWord={setActiveWord}
-              />
-            )}
-          </p>
-          {hideP2 ? (
-            <div
-              className="rounded-sm border-4 border-dashed border-black bg-ep-yellow/40 px-4 py-10 text-center text-lg font-black uppercase tracking-widest text-neutral-800"
-              aria-label="Missing paragraph placeholder"
-            >
-              [MISSING PARAGRAPH]
-            </div>
-          ) : (
-            <p className="whitespace-pre-wrap border-l-4 border-ep-blue pl-3">
-              <HighlightedReadingText
-                text={p2Correct}
-                vocab={vocab}
-                activeWord={activeWord}
-                setNumber={0}
-                examNumber={0}
-                onPickWord={setActiveWord}
-              />
-            </p>
-          )}
-          <p className="whitespace-pre-wrap">
-            {aggregateMode ? (
-              renderMockVocabBlanksAsBoxes(
-                exam.passage.p3,
-                vocabAnswersForDisplay,
-                correctVocabAnswers,
-                step >= missingSelectionStep,
-              )
-            ) : (
-              <HighlightedReadingText
-                text={p3Display}
-                vocab={vocab}
-                activeWord={activeWord}
-                setNumber={0}
-                examNumber={0}
-                onPickWord={setActiveWord}
-              />
-            )}
-          </p>
-          </div>
-          <div className="ep-brutal-reading rounded-sm bg-neutral-50 p-4">
-            <p className="ep-stat text-xs font-bold uppercase text-neutral-500">{labels[step]}</p>
-            <p className="mt-2 text-base font-bold text-neutral-900">{block.question}</p>
-            <ul className="mt-4 space-y-2">
-              {shuffled.shuffled.map((opt) => {
-                const isVocabStep = aggregateMode && step < missingSelectionStep;
-                const vocabOptionClass =
-                  isVocabStep && vocabRevealed && vocabPick === opt
-                    ? opt === block.correctAnswer
-                      ? "bg-[#dcfce7]"
-                      : "bg-[#fee2e2]"
-                    : "bg-white";
-                return (
-                  <li key={opt.slice(0, 48) + opt.length}>
-                    <button
-                      type="button"
-                      onClick={() => onOptionClick(opt)}
-                      disabled={submitting || localSubmitting || (isVocabStep && vocabRevealed)}
-                      className={`w-full border-4 border-black px-3 py-3 text-left text-sm font-semibold shadow-[4px_4px_0_0_#000] transition hover:bg-ep-yellow/30 disabled:hover:bg-inherit ${
-                        isVocabStep
-                          ? vocabOptionClass
-                          : step === (aggregateMode ? 6 : 5) && missingReveal && missingPick === opt
-                            ? "bg-ep-yellow/50"
-                            : "bg-white"
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            {step === (aggregateMode ? 6 : 5) && missingReveal && missingPick ? (
-              <button
-                type="button"
-                onClick={() => submitChoice(missingPick)}
-                disabled={submitting || localSubmitting}
-                className="mt-5 w-full border-4 border-black bg-ep-blue px-4 py-3 text-sm font-black uppercase tracking-wide text-white shadow-[4px_4px_0_0_#000] disabled:opacity-50"
-              >
-                {submitting || localSubmitting ? "Submitting..." : "Submit answer / ส่งคำตอบ"}
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </section>
+  // Section clock ended: hand in whatever was answered. Unanswered sub-questions score as wrong,
+  // which is what the real exam does — the mock must never stall on the last screen.
+  useTimeUpSubmit(timeUp, () => {
+    submitOnce(collected.current, collected.current.length + 1);
+  });
 
-      {localSubmitting ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/55 px-4">
-          <div className="w-full max-w-md border-4 border-black bg-white p-6 text-center shadow-[10px_10px_0_0_#111111]">
-            <p className="font-mono text-[10px] font-black uppercase tracking-[0.25em] text-[#004AAD]">
-              Loading
-            </p>
-            <p className="mt-3 text-2xl font-black uppercase text-[#111111]">
-              กำลังประมวลผลคำตอบ
-            </p>
-            <p className="mt-2 text-sm font-bold text-neutral-700">
-              Loading next section...
-            </p>
-          </div>
-        </div>
+  return (
+    <div className="mx-auto w-full max-w-5xl">
+      <InteractiveReadingRunner
+        sets={[set]}
+        steps={steps}
+        hideReport
+        glossary={(exam.highlightedVocab ?? []).map((v) => ({ word: v.word, meaningTh: v.meaningTh }))}
+        onFinish={(results) => {
+          collected.current = results;
+          setDone(true);
+          submitOnce(results);
+        }}
+      />
+      {done || submitting ? (
+        <p className="mt-4 text-center text-sm font-bold text-slate-500">กำลังบันทึกคำตอบ…</p>
       ) : null}
     </div>
   );
-}
-
-function renderMockVocabBlanksAsBoxes(
-  text: string,
-  answers: string[] = [],
-  correctAnswers: string[] = [],
-  lockedCorrect = false,
-) {
-  const re = /\[BLANK\s*(\d+)\]/gi;
-  const out: any[] = [];
-  let last = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = re.exec(text)) !== null) {
-    const idx = match.index ?? 0;
-    if (idx > last) {
-      out.push(<span key={`t-${last}-${idx}`}>{text.slice(last, idx)}</span>);
-    }
-
-    const blankNum = match[1] ?? "";
-    const idxNum = Number(blankNum) - 1;
-    const picked = idxNum >= 0 ? String(answers[idxNum] ?? "").trim() : "";
-    const correctWord = idxNum >= 0 ? String(correctAnswers[idxNum] ?? "").trim() : "";
-
-    let toneClass = "border-dashed border-neutral-400 bg-neutral-100 text-neutral-400";
-    let display = "____";
-    if (lockedCorrect) {
-      toneClass = "border-black bg-[#dcfce7] text-[#166534]";
-      display = correctWord || display;
-    } else if (picked) {
-      const isCorrect = !!correctWord && picked.toLowerCase() === correctWord.toLowerCase();
-      toneClass = isCorrect ? "border-black bg-[#dcfce7] text-[#166534]" : "border-black bg-[#fee2e2] text-[#991b1b]";
-      display = picked;
-    }
-
-    out.push(
-      <span
-        key={`b-${idx}-${blankNum}`}
-        className={`mx-0.5 inline-flex min-w-[3.5rem] items-center justify-center rounded-[8px] border-4 px-2 py-1 font-black tracking-widest shadow-[3px_3px_0_0_#000] ${toneClass}`}
-      >
-        {display}
-      </span>,
-    );
-    last = idx + match[0]!.length;
-  }
-
-  if (last < text.length) {
-    out.push(<span key={`t-${last}-end`}>{text.slice(last)}</span>);
-  }
-
-  return out;
 }
