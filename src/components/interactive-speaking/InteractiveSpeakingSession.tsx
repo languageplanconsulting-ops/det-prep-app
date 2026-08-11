@@ -121,6 +121,7 @@ function interactiveSpeakingTtsTryOrder(): ("deepgram" | "inworld" | "gemini" | 
 async function playQuestionAudioFromApi(
   text: string,
   provider: "deepgram" | "inworld" | "gemini" | "elevenlabs",
+  onPlaybackStart?: () => void,
 ): Promise<boolean> {
   try {
     const res = await fetch("/api/speech-synthesize", {
@@ -150,6 +151,9 @@ async function playQuestionAudioFromApi(
     }
     await new Promise<void>((resolve) => {
       const audio = new Audio(`data:${data.mimeType};base64,${data.audioBase64}`);
+      // `playing` is the first moment sound actually reaches the learner — `play()` resolving only
+      // means the request was accepted. The UI waits for this before it claims to be speaking.
+      audio.onplaying = () => onPlaybackStart?.();
       audio.onended = () => resolve();
       audio.onerror = () => resolve();
       void audio.play().catch(() => resolve());
@@ -164,9 +168,9 @@ async function playQuestionAudioFromApi(
  * Tries providers in order (default: Deepgram → Inworld → Gemini → ElevenLabs).
  * Override with `NEXT_PUBLIC_INTERACTIVE_SPEAKING_TTS_ORDER` (comma-separated: deepgram, inworld, gemini, elevenlabs).
  */
-async function playQuestionTts(text: string): Promise<void> {
+async function playQuestionTts(text: string, onPlaybackStart?: () => void): Promise<void> {
   for (const provider of interactiveSpeakingTtsTryOrder()) {
-    if (await playQuestionAudioFromApi(text, provider)) return;
+    if (await playQuestionAudioFromApi(text, provider, onPlaybackStart)) return;
   }
 }
 
@@ -213,6 +217,13 @@ export function InteractiveSpeakingSession({
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showQuestionHint, setShowQuestionHint] = useState(false);
+  /**
+   * True once sound has actually reached the learner for this turn. The TTS round-trip takes a
+   * second or two, and until it lands there is nothing to listen to — offering the question text in
+   * that window lets a learner read the prompt they were supposed to hear, which is the one thing
+   * this task measures. Audio first, then the text becomes available.
+   */
+  const [audioStarted, setAudioStarted] = useState(false);
 
   const transcriptRef = useRef("");
   const answerCueTurnRef = useRef(0);
@@ -528,8 +539,9 @@ export function InteractiveSpeakingSession({
     transcriptRef.current = "";
     setSubmitError(null);
     setCurrentQ({ en: qEn, th: qTh });
+    setAudioStarted(false);
     setPhase("playing");
-    await playQuestionTts(qEn);
+    await playQuestionTts(qEn, () => setAudioStarted(true));
     setPrepLeft(INTERACTIVE_SPEAKING_PREP_SECONDS);
     setPhase("prep");
   }, [forceStopMedia]);
@@ -956,7 +968,7 @@ export function InteractiveSpeakingSession({
                           <span className="ep-typing-dot" />
                         </div>
                         <p className="mt-3 text-xs font-bold text-neutral-500">
-                          Listen — the question is playing.
+                          {audioStarted ? "Listen — the question is playing." : "Loading the question audio…"}
                         </p>
                       </div>
                     ) : null}
@@ -975,15 +987,18 @@ export function InteractiveSpeakingSession({
                       </p>
                     ) : null}
 
-                    <button
-                      type="button"
-                      onClick={() => setShowQuestionHint((v) => !v)}
-                      className="rounded-sm border-2 border-black bg-ep-yellow px-3 py-1.5 text-xs font-bold shadow-[2px_2px_0_0_#000] hover:bg-ep-yellow/90"
-                    >
-                      {showQuestionHint ? "Hide question text" : "Hint — show question text"}
-                    </button>
+                    {/* The text unlocks only after the audio has been heard — never alongside it. */}
+                    {phase !== "playing" ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowQuestionHint((v) => !v)}
+                        className="rounded-sm border-2 border-black bg-ep-yellow px-3 py-1.5 text-xs font-bold shadow-[2px_2px_0_0_#000] hover:bg-ep-yellow/90"
+                      >
+                        {showQuestionHint ? "Hide question text" : "Hint — show question text"}
+                      </button>
+                    ) : null}
 
-                    {showQuestionHint ? (
+                    {showQuestionHint && phase !== "playing" ? (
                       <div className="rounded-xl border-2 border-black bg-white p-3 shadow-[3px_3px_0_0_#000]">
                         <p className="text-sm font-bold text-neutral-900">{currentQ.en}</p>
                         {currentQ.th.trim() ? (

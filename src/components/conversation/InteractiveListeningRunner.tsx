@@ -92,6 +92,12 @@ export function InteractiveListeningRunner({
   // each clip may be played up to IL_MAX_PLAYS times
   const [playing, setPlaying] = useState<string | null>(null);
   const [plays, setPlays] = useState<Record<string, number>>({});
+  /**
+   * Clips that have finished playing. Gating the written line and the options on this rather than on
+   * "a play was started" is what keeps the task a listening task: while the voice is still speaking
+   * there is nothing to read along with, so there is no reading instead of listening.
+   */
+  const [finished, setFinished] = useState<Record<string, boolean>>({});
   const saved = useRef(false);
   const playsLeft = (id: string) => IL_MAX_PLAYS - (plays[id] ?? 0);
 
@@ -142,12 +148,44 @@ export function InteractiveListeningRunner({
       if (playTimer.current) clearTimeout(playTimer.current);
       playTimer.current = null;
       setPlaying(null);
+      // The line has been heard end to end — only now may it be read.
+      setFinished((cur) => (cur[id] ? cur : { ...cur, [id]: true }));
     };
     // Safety net: some voices never fire onEnd (browser TTS quirks, a clip that fails to decode).
     // Without this the learner sits on a disabled button with the clock running and no way forward.
     playTimer.current = setTimeout(clear, Math.max(8000, Math.min(45000, text.length * 90)));
     speakConversationLineWithOptionalAudio(text, audio, { onEnd: clear, onError: clear });
   }
+
+  /**
+   * A turn's line plays itself the moment the turn opens. Tapping ▶ before every single line was
+   * busywork the real test never asks for — there the audio simply comes at you — and it also meant
+   * the options and the written line sat on screen while the learner had not heard a word yet.
+   *
+   * The scenario screen keeps its button on purpose: that tap is also "I'm ready", and it starts the
+   * one clock the whole task runs on. Everything after it is automatic.
+   */
+  const autoPlayedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (stage !== "turns") return;
+    const q = exam.mainQuestions[turn];
+    if (!q) return;
+    const id = `turn-${turn}`;
+    if (autoPlayedRef.current.has(id)) return;
+    // Let the turn paint before the voice starts, so the learner sees which turn is speaking.
+    // The claim is staked inside the timer, not outside it: StrictMode runs this effect twice in
+    // development, and marking the turn played on the discarded first run would silence it.
+    const t = setTimeout(() => {
+      if (autoPlayedRef.current.has(id)) return;
+      autoPlayedRef.current.add(id);
+      playRef.current(id, q.transcript, { audioBase64: q.audioBase64, audioMimeType: q.audioMimeType });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [stage, turn, exam.mainQuestions]);
+
+  // `play` closes over state that changes every render; the effect above wants the latest one.
+  const playRef = useRef(play);
+  playRef.current = play;
 
   const answeredCount = useMemo(() => {
     const comp = compSubmitted ? exam.scenarioQuestions.length : 0;
@@ -424,7 +462,8 @@ export function InteractiveListeningRunner({
     const q = exam.mainQuestions[turn]!;
     const id = `turn-${turn}`;
     const leftT = playsLeft(id);
-    const heard = leftT < IL_MAX_PLAYS;
+    // The line plays itself; "heard" means it has finished, not that a play was started.
+    const heard = finished[id] === true;
     const good = turnPick === q.correctIndex;
     const isFirst = turn === 0;
 
@@ -442,7 +481,13 @@ export function InteractiveListeningRunner({
                 return (
                   <div key={i}>
                     <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-slate-100 px-3.5 py-2.5 text-[14px] leading-6 text-slate-800">
-                      {i === turn && !heard ? <span className="text-slate-400">— แตะปุ่มฟังเพื่อฟังประโยคนี้ —</span> : m.transcript}
+                      {i === turn && !heard ? (
+                        <span className="text-slate-400">
+                          {playing === id ? "— กำลังพูด… ตั้งใจฟัง —" : "— เตรียมฟัง —"}
+                        </span>
+                      ) : (
+                        m.transcript
+                      )}
                     </div>
                     {answeredPick != null && answeredPick >= 0 ? (
                       <div className="ml-auto mt-2 max-w-[85%] rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-[14px] leading-6 text-white" style={{ background: BRAND }}>
@@ -466,7 +511,11 @@ export function InteractiveListeningRunner({
               onClick={() => play(id, q.transcript, { audioBase64: q.audioBase64, audioMimeType: q.audioMimeType })}
               className="mb-4 w-full rounded-xl border-2 border-slate-200 py-3 text-sm font-black text-slate-700 disabled:opacity-50"
             >
-              {playing === id ? "🔊 กำลังเล่น…" : leftT <= 0 ? "ฟังครบ 3 ครั้งแล้ว" : `▶ ฟังประโยคนี้ (เหลือ ${leftT} ครั้ง)`}
+              {playing === id
+                ? "🔊 กำลังเล่น…"
+                : leftT <= 0
+                  ? "ฟังครบ 3 ครั้งแล้ว"
+                  : `🔁 ฟังอีกครั้ง (เหลือ ${leftT} ครั้ง)`}
             </button>
 
             <div className={`space-y-2.5 ${heard ? "" : "pointer-events-none opacity-40"}`}>

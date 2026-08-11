@@ -164,10 +164,27 @@ const WH = ["what", "where", "when", "who", "whose", "which", "why", "how"];
  * shows initiative?" — and only the last question in it is what the reply has to match.
  */
 function questionSentence(line: string): string {
-  const sentences = (line ?? "").split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
+  // Matched rather than split on a lookbehind: Safari before 16.4 throws a SyntaxError on `(?<=`
+  // while parsing the file, which would take the whole runner down rather than lose one hint.
+  const sentences = ((line ?? "").match(/[^.!?]+[.!?]*/g) ?? []).map((s) => s.trim()).filter(Boolean);
   if (!sentences.length) return "";
   const asked = sentences.filter((s) => s.endsWith("?"));
-  return (asked.length ? asked[asked.length - 1] : sentences[sentences.length - 1])!;
+  const picked = (asked.length ? asked[asked.length - 1] : sentences[sentences.length - 1])!;
+  return stripOpener(picked);
+}
+
+/**
+ * "Hey, how are things going with you today?" asks a *how* question — the greeting in front of it is
+ * not the grammar of the question. A leading comma-clause is dropped when what follows still opens
+ * like a question, which leaves "Right." and "That makes sense." style openers handled by the
+ * sentence split above and greetings glued on with a comma handled here.
+ */
+function stripOpener(sentence: string): string {
+  const m = sentence.match(/^[^,]{1,24},\s*([\s\S]+)$/);
+  if (!m) return sentence;
+  const rest = m[1]!.trim();
+  const head = firstWord(rest);
+  return WH.includes(head) || auxFor(head) ? rest : sentence;
 }
 
 function firstWord(s: string): string {

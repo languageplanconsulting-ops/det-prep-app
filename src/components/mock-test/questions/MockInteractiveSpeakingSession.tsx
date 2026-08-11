@@ -25,7 +25,10 @@ const PREP_SECONDS = 8;
 const MAX_SPEAK_SECONDS = 35;
 
 // ─── TTS helper ───────────────────────────────────────────────────────────────
-async function playTtsQuestion(text: string): Promise<void> {
+async function playTtsQuestion(
+  text: string,
+  onPlaybackStart?: () => void,
+): Promise<void> {
   const providers = [
     "deepgram",
     "inworld",
@@ -49,6 +52,8 @@ async function playTtsQuestion(text: string): Promise<void> {
         const audio = new Audio(
           `data:${data.mimeType};base64,${data.audioBase64}`,
         );
+        // Sound actually reaching the learner — not merely the fetch returning.
+        audio.onplaying = () => onPlaybackStart?.();
         audio.onended = () => resolve();
         audio.onerror = () => resolve();
         void audio.play().catch(() => resolve());
@@ -115,6 +120,8 @@ export function MockInteractiveSpeakingSession({
   const [transcribing, setTranscribing] = useState(false);
   const [browserSttActive, setBrowserSttActive] = useState(false);
   const [showQuestion, setShowQuestion] = useState(false);
+  /** True once sound has actually reached the learner for this turn — see playTtsQuestion. */
+  const [audioStarted, setAudioStarted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ── refs ──
@@ -414,8 +421,9 @@ export function MockInteractiveSpeakingSession({
       setError(null);
       setShowQuestion(false);
       setCurrentQ({ en: qEn, th: qTh });
+      setAudioStarted(false);
       setPhase("playing");
-      await playTtsQuestion(qEn);
+      await playTtsQuestion(qEn, () => setAudioStarted(true));
       setPrepLeft(PREP_SECONDS);
       setRecLeft(MAX_SPEAK_SECONDS);
       setPhase("prep");
@@ -559,16 +567,24 @@ export function MockInteractiveSpeakingSession({
           <p className="text-xs text-neutral-600 leading-relaxed">
             You'll have <strong>{MOCK_IS_TURN_COUNT} turns</strong>. Each turn the system will
             read the question aloud → you get {PREP_SECONDS}s to think → then speak
-            (up to {MAX_SPEAK_SECONDS}s). Your live transcript is shown below the mic.
+            (up to {MAX_SPEAK_SECONDS}s). You'll see the question text and your own words only
+            after you've answered that turn.
           </p>
           {starterTh && (
             <p className="text-xs text-neutral-500">{starterTh}</p>
           )}
+          {/*
+            The opening question used to be printed here in full. In a mock that hands the learner
+            the first prompt in writing before a word of it has been spoken — the same leak the rest
+            of this component now closes.
+          */}
           <div className="rounded-[4px] border-2 border-black bg-white p-3">
             <p className="text-[11px] font-bold uppercase tracking-wide text-[#004AAD] mb-1">
-              Opening question
+              Listen carefully
             </p>
-            <p className="text-sm text-neutral-800">{starterEn}</p>
+            <p className="text-sm text-neutral-800">
+              The first question plays as soon as you start — headphones on.
+            </p>
           </div>
           <button
             type="button"
@@ -605,11 +621,13 @@ export function MockInteractiveSpeakingSession({
           <div className="flex items-center gap-2">
             <div className="h-2.5 w-2.5 rounded-full bg-[#FFCC00] animate-pulse" />
             <p className="text-sm font-black text-[#FFCC00]">
-              Now reading the question aloud…
+              {audioStarted
+                ? "Now reading the question aloud…"
+                : "Loading the question audio…"}
             </p>
           </div>
           <p className="text-xs text-white/70">
-            Listen carefully. Tap "Show question" after for the text.
+            Listen carefully — like the real test, the text stays hidden until you have answered.
           </p>
         </div>
       )}
@@ -630,19 +648,27 @@ export function MockInteractiveSpeakingSession({
         </div>
       )}
 
-      {/* ── RECORDING / REVIEW hint strip ── */}
-      {(phase === "record" ||
-        phase === "review" ||
-        phase === "playing" ||
-        phase === "prep") && (
+      {/*
+        RECORDING / REVIEW strip.
+
+        This is the full mock, not practice: the question text is not a hint you may consult while
+        answering, it is the answer key to a listening task. It unlocks only once this turn has been
+        answered — audio first, text afterwards — so the strip carries the recording timer during
+        `record` and the reveal button only in `review`.
+      */}
+      {(phase === "record" || phase === "review") && (
         <div className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => setShowQuestion((v) => !v)}
-            className="rounded-sm border-2 border-black bg-[#FFCC00] px-3 py-1.5 text-xs font-bold shadow-[2px_2px_0_0_#000] hover:shadow-none transition-shadow"
-          >
-            {showQuestion ? "Hide question" : "Hint — show question"}
-          </button>
+          {phase === "review" ? (
+            <button
+              type="button"
+              onClick={() => setShowQuestion((v) => !v)}
+              className="rounded-sm border-2 border-black bg-[#FFCC00] px-3 py-1.5 text-xs font-bold shadow-[2px_2px_0_0_#000] hover:shadow-none transition-shadow"
+            >
+              {showQuestion ? "Hide question" : "Show the question text"}
+            </button>
+          ) : (
+            <span className="text-xs font-bold text-neutral-500">Answer out loud — speak now.</span>
+          )}
 
           {phase === "record" && (
             <span
@@ -664,8 +690,8 @@ export function MockInteractiveSpeakingSession({
         </div>
       )}
 
-      {/* question reveal */}
-      {showQuestion && (
+      {/* question reveal — answered turns only */}
+      {showQuestion && phase === "review" && (
         <div className="rounded-[4px] border-4 border-dashed border-black bg-neutral-50 p-3">
           <p className="text-sm font-bold text-neutral-900">{currentQ.en}</p>
           {currentQ.th && (
@@ -674,11 +700,33 @@ export function MockInteractiveSpeakingSession({
         </div>
       )}
 
-      {/* ── TRANSCRIPT TEXTAREA ── */}
-      {(phase === "record" || phase === "review") && (
+      {/*
+        Live captioning is a practice affordance, not a test one — reading your own words back while
+        you speak is not something the real test offers, and it turns a speaking turn into a
+        proofreading one. During `record` the learner gets the timer and the stop button only; the
+        transcript surfaces once the turn is answered, still editable before it is handed in.
+      */}
+      {phase === "record" && (
+        <div className="rounded-[4px] border-4 border-dashed border-neutral-300 bg-neutral-50 px-3 py-4 text-center">
+          <p className="text-sm font-black text-neutral-700">
+            {transcribing
+              ? "Transcribing your audio…"
+              : listening
+                ? browserSttActive
+                  ? "🎙 Recording — just speak."
+                  : "🎙 Recording your audio — just speak."
+                : "Getting the microphone ready…"}
+          </p>
+          <p className="mt-1 text-xs text-neutral-500">
+            Your words appear after you finish this turn.
+          </p>
+        </div>
+      )}
+
+      {phase === "review" && (
         <div>
           <label className="block text-xs font-black uppercase tracking-widest text-neutral-600 mb-1.5">
-            Your reply {phase === "record" && listening ? "— live" : ""}
+            Your reply
           </label>
           <textarea
             value={transcript}
@@ -686,20 +734,9 @@ export function MockInteractiveSpeakingSession({
               transcriptRef.current = e.target.value;
               setTranscript(e.target.value);
             }}
-            readOnly={
-              phase === "record" && (listening || transcribing)
-            }
             rows={5}
-            placeholder={
-              phase === "record" && listening
-                ? browserSttActive
-                  ? "Your words appear here as you speak…"
-                  : "Recording in progress…"
-                : transcribing
-                  ? "Transcribing your audio…"
-                  : "Your reply (edit if needed)…"
-            }
-            className="w-full rounded-[4px] border-4 border-black bg-white p-3 text-sm read-only:bg-neutral-50 read-only:opacity-80 focus:outline-none focus:ring-2 focus:ring-[#004AAD]"
+            placeholder="Your reply (edit if needed)…"
+            className="w-full rounded-[4px] border-4 border-black bg-white p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#004AAD]"
           />
         </div>
       )}
