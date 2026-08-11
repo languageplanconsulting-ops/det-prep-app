@@ -139,7 +139,14 @@ export function VocabularyReadingMockExam({
         sets={[set]}
         steps={steps}
         hideReport
+        // The mock owns scoring end to end. Without this the runner would ALSO write a lesson
+        // progress row and award XP mid-exam — practice rewards leaking into a timed mock.
+        hostOwnsProgress
         glossary={(exam.highlightedVocab ?? []).map((v) => ({ word: v.word, meaningTh: v.meaningTh }))}
+        onStepDone={(_r, all) => {
+          // keep the running total so a time-up submits what was actually answered
+          collected.current = all;
+        }}
         onFinish={(results) => {
           collected.current = results;
           setDone(true);

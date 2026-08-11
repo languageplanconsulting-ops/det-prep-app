@@ -5,6 +5,8 @@ import type { ReadingDifficulty, ReadingRoundNum } from "@/types/reading";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { InteractiveReadingRunner } from "@/components/reading/InteractiveReadingRunner";
 import { irSetsByTier, type IrTier } from "@/lib/interactive-reading";
+import { READING_DIFFICULTY_MAX } from "@/lib/reading-constants";
+import { saveReadingAttempt } from "@/lib/reading-storage";
 
 export function ReadingSessionGate({
   round,
@@ -83,6 +85,24 @@ function ReadingExamRunner({
       backHref={backHref}
       celebrateTitle="จบข้อสอบแล้ว!"
       celebrateSub="รูปแบบเดียวกับ Interactive Reading ในข้อสอบจริงครบทั้ง 6 ขั้นตอน"
+      hostOwnsProgress
+      onFinish={(results) => {
+        // The exam keeps its own progress store: it drives the tick on the exam list, the round
+        // stats, and the server-side practice log the study plan reads. Swapping the runner in
+        // dropped both until this was restored.
+        const maxScore = READING_DIFFICULTY_MAX[difficulty];
+        const total = results.length || 1;
+        const correctCount = results.reduce((a, r) => a + r.score, 0);
+        saveReadingAttempt({
+          round,
+          difficulty,
+          setNumber,
+          examNumber,
+          attainedScore: Math.round((correctCount / total) * maxScore),
+          maxScore,
+          correctCount: Math.round(correctCount),
+        });
+      }}
     />
   );
 }

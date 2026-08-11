@@ -27,7 +27,7 @@ import { XP, awardXp } from "@/lib/gamification";
 import { useLessonUserId } from "@/lib/lesson-user";
 import { saveUnitScore } from "@/lib/lessons-progress";
 import { phraseWordRange, wordTokens } from "@/lib/passage-text";
-import { findEvidence, sentenceContaining, splitSentences, stemMatches, wordKey, type Clue } from "@/lib/interactive-reading-explain";
+import { findEvidence, quotedEvidence, sentenceContaining, splitSentences, stemMatches, wordKey, type Clue } from "@/lib/interactive-reading-explain";
 import {
   IR_STEP_COUNT,
   IR_STEP_LABELS_TH,
@@ -103,6 +103,64 @@ function SelectableParagraph({
         );
       })}
     </p>
+  );
+}
+
+/* ── explanation pieces ────────────────────────────────────────────────── */
+
+/** One line of the "why" panel: the key gets ✓, everything the learner had to rule out gets ✕. */
+type ExplainRow = { mark: "key" | "cross"; head: string; body: string; chipTh?: string; clue?: Clue };
+
+/** The clue sentence with the matched words marked, so the keyword is visible, not just described. */
+function marked(sentence: string, hits: string[]) {
+  const keys = new Set(hits.filter(Boolean));
+  return sentence.split(/(\s+)/).map((chunk, i) =>
+    /\S/.test(chunk) && keys.has(wordKey(chunk)) ? (
+      <mark key={i} className="rounded bg-[#FFE68A] px-0.5 font-black text-slate-900">
+        {chunk}
+      </mark>
+    ) : (
+      <span key={i}>{chunk}</span>
+    ),
+  );
+}
+
+function ClueBox({ clue }: { clue: Clue }) {
+  return (
+    <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-2">
+      <p className="text-[11px] font-black uppercase tracking-wide text-amber-700">🔑 {clue.labelTh}</p>
+      <p className="mt-1 text-[13px] leading-6 text-slate-800">{marked(clue.sentence, clue.hits)}</p>
+      {clue.matchedTh ? <p className="mt-1 text-[12px] leading-5 text-slate-600">{clue.matchedTh}</p> : null}
+    </div>
+  );
+}
+
+function ExplainRows({ rows, crossLabelTh }: { rows: ExplainRow[]; crossLabelTh: string }) {
+  const keys = rows.filter((r) => r.mark === "key");
+  const crosses = rows.filter((r) => r.mark === "cross");
+  const row = (r: ExplainRow, i: number) => (
+    <li key={i} className="flex gap-2">
+      <span className={`mt-0.5 shrink-0 text-[13px] font-black ${r.mark === "key" ? "text-emerald-600" : "text-rose-500"}`}>{r.mark === "key" ? "✓" : "✕"}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-bold leading-6 text-slate-900">
+          {r.head}
+          {r.chipTh ? <span className="ml-1.5 rounded bg-slate-200 px-1.5 py-0.5 align-middle text-[10px] font-black text-slate-600">{r.chipTh}</span> : null}
+        </p>
+        {r.body ? <p className="text-[13px] leading-6 text-slate-700">{r.body}</p> : null}
+        {r.clue ? <p className="mt-0.5 text-[12px] leading-6 text-slate-500">{marked(r.clue.sentence, r.clue.hits)}</p> : null}
+      </div>
+    </li>
+  );
+  return (
+    <>
+      <ul className="space-y-2">{keys.map(row)}</ul>
+      {crosses.length ? (
+        <>
+          <p className="mb-1.5 mt-3 text-[11px] font-black uppercase tracking-wide text-slate-500">{crossLabelTh}</p>
+          <ul className="space-y-2">{crosses.map(row)}</ul>
+        </>
+      ) : null}
+    </>
   );
 }
 
@@ -194,7 +252,7 @@ function TaskCard({
   const blankHits = set.blanks.filter((b) => picks[b.n] === b.answer).length;
 
   const score = useMemo(() => {
-    if (step === 0) return blankHits / set.blanks.length;
+    if (step === 0) return set.blanks.length ? blankHits / set.blanks.length : 0;
     if (step === 1) return gapPick !== null && set.gap[gapPick]!.correct ? 1 : 0;
     if (step === 2 || step === 3) {
       if (!sel || sel.para !== hl.paragraph) return 0;
@@ -443,7 +501,9 @@ function TaskCard({
         labelTh: resolved[set.gapAfter + 1] ? "ประโยคถัดจากช่องว่าง — คำตอบต้องเชื่อมกับประโยคนี้" : "ประโยคก่อนช่องว่าง — คำตอบต้องต่อจากประโยคนี้",
         sentence,
         hits: m.hits,
-        matchedTh: m.words.length ? `คำที่ประโยคคำตอบรับช่วงต่อมา: ${m.words.map((w) => `“${w}”`).join(" · ")}` : undefined,
+        matchedTh: m.words.length
+          ? `คำที่ประโยคคำตอบรับช่วงต่อมา: ${m.words.map((w) => `“${w}”`).join(" · ")}`
+          : "ข้อนี้ไม่มีคำซ้ำให้จับ — ต้องดูความต่อเนื่องของความหมาย ว่าประโยคไหนทำให้ประโยคนี้มีที่มา",
       };
     }
     if (step === 2 || step === 3) {
@@ -461,11 +521,20 @@ function TaskCard({
     if (step === 4 || step === 5) {
       const key = (step === 4 ? set.idea : set.title).find((o) => o.correct);
       if (!key) return null;
-      if (key.clueEn) {
-        const m = stemMatches(key.text, key.clueEn);
-        return { labelTh: "ประโยคในบทอ่านที่ตัวเลือกนี้พูดซ้ำ", sentence: key.clueEn, hits: m.hits, matchedTh: undefined };
+      // an authored clue wins, then a sentence the Thai explanation already quotes, then word overlap
+      const pinned = key.clueEn ?? quotedEvidence(key.whyTh, resolved);
+      if (pinned) {
+        const m = stemMatches(key.text, pinned);
+        return {
+          labelTh: step === 4 ? "ประโยคในบทอ่านที่ตัวเลือกนี้พูดซ้ำ" : "คำหลักของชื่อเรื่องนี้มาจากประโยคนี้",
+          sentence: pinned,
+          hits: m.hits,
+          matchedTh: m.words.length ? `ตรงกับคำในตัวเลือก: ${m.words.slice(0, 4).map((w) => `“${w}”`).join(" · ")}` : "ตัวเลือกที่ถูกคือการพูดประโยคนี้ใหม่ด้วยคำอื่น",
+        };
       }
-      const ev = findEvidence(resolved, key.text, step === 4 ? 2 : 1);
+      // two hits minimum for a title too: a 3-word title shares one generic word with half the
+      // passage, and pointing at the wrong sentence teaches the wrong move
+      const ev = findEvidence(resolved, key.text, 2);
       if (!ev) return null;
       return {
         labelTh: step === 4 ? "ประโยคในบทอ่านที่ตัวเลือกนี้พูดซ้ำ" : "คำหลักของชื่อเรื่องนี้มาจากประโยคนี้",
@@ -487,7 +556,8 @@ function TaskCard({
           mark,
           head: `ช่อง ${b.n} · ${b.skillTh} → ${b.answer}`,
           body: b.whyTh,
-          picked: mark === "cross",
+          // the head shows the KEY, so the chip has to name what the learner actually put there
+          chipTh: mark === "cross" ? (picks[b.n] ? `คุณตอบ ${picks[b.n]}` : "ไม่ได้ตอบ") : undefined,
           clue: sentence ? { labelTh: "", sentence, hits: [wordKey(b.answer)] } : undefined,
         };
       };
@@ -497,17 +567,17 @@ function TaskCard({
     }
     if (step === 2 || step === 3) {
       const out: ExplainRow[] = [{ mark: "key", head: hl.answer, body: hl.whyTh }];
-      if (verdict !== "correct") out.push({ mark: "cross", head: selText || "—", body: highlightMissTh(), picked: true });
+      if (verdict !== "correct") out.push({ mark: "cross", head: selText || "—", body: highlightMissTh(), chipTh: "ที่คุณไฮไลต์" });
       return out;
     }
     const list = step === 1 ? set.gap : step === 4 ? set.idea : set.title;
     const pick = step === 1 ? gapPick : step === 4 ? ideaPick : titlePick;
     return [
-      ...list.filter((o) => o.correct).map<ExplainRow>((o) => ({ mark: "key", head: o.text, body: o.whyTh, picked: pick !== null && list[pick] === o })),
+      ...list.filter((o) => o.correct).map<ExplainRow>((o) => ({ mark: "key", head: o.text, body: o.whyTh, chipTh: pick !== null && list[pick] === o ? "ที่คุณเลือก" : undefined })),
       ...list
         .map((o, i) => ({ o, i }))
         .filter(({ o }) => !o.correct)
-        .map<ExplainRow>(({ o, i }) => ({ mark: "cross", head: o.text, body: o.whyTh, picked: pick === i })),
+        .map<ExplainRow>(({ o, i }) => ({ mark: "cross", head: o.text, body: o.whyTh, chipTh: pick === i ? "ที่คุณเลือก" : undefined })),
     ];
   }
 
@@ -519,9 +589,9 @@ function TaskCard({
           ? { bg: "bg-[#FFF4D6]", ink: "text-amber-700", btn: "bg-amber-400", label: `ถูกบางส่วน · ${blankHits}/${set.blanks.length}`, mark: "!" }
           : { bg: "bg-[#FFE4E6]", ink: "text-rose-600", btn: "bg-rose-500", label: "ยังไม่ถูก", mark: "✕" };
 
-    let key: React.ReactNode = null;
-    if (step === 0) {
-      key = (
+    // the cloze answer strip stays — six to ten words are easier to scan in a row than as rows
+    const key =
+      step === 0 ? (
         <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[13px]">
           {set.blanks.map((b) => (
             <span key={b.n} className={picks[b.n] === b.answer ? "text-slate-400" : "font-black underline decoration-2 underline-offset-2"}>
@@ -529,19 +599,9 @@ function TaskCard({
             </span>
           ))}
         </p>
-      );
-    } else if (verdict !== "correct") {
-      const k =
-        step === 1
-          ? set.gap.find((o) => o.correct)!.text
-          : step === 2 || step === 3
-            ? hl.answer
-            : step === 4
-              ? set.idea.find((o) => o.correct)!.text
-              : set.title.find((o) => o.correct)!.text;
-      key = <p className="mt-1 text-[13px] font-semibold">{k}</p>;
-    }
+      ) : null;
 
+    const c = clue();
     return (
       <div className={`${tone.bg} px-5 py-4 sm:px-8`}>
         <div className="flex items-start gap-4">
@@ -550,7 +610,10 @@ function TaskCard({
               {tone.mark} {tone.label}
             </p>
             <div className={tone.ink}>{key}</div>
-            <p className="mt-2 max-w-2xl text-[13px] leading-6 text-slate-700">💡 {whyTh()}</p>
+            <div className="mt-2 max-h-[34vh] max-w-2xl overflow-y-auto rounded-xl bg-white/70 p-3.5 ring-1 ring-black/5">
+              {c ? <ClueBox clue={c} /> : null}
+              <ExplainRows rows={rows()} crossLabelTh={step === 0 ? "ช่องที่ยังผิด" : "ทำไมข้ออื่นถึงผิด"} />
+            </div>
           </div>
           <button type="button" onClick={() => onDone(result())} className={`shrink-0 rounded-xl ${tone.btn} px-7 py-3 text-sm font-black uppercase tracking-wide text-white`}>
             {isLast ? "ดูสรุป" : "ต่อไป"}
@@ -612,7 +675,9 @@ export function InteractiveReadingRunner({
   celebrateSub = "นี่คือรูปแบบเดียวกับ Interactive Reading ในข้อสอบจริงทุกขั้นตอน",
   glossary,
   onFinish,
+  onStepDone,
   hideReport = false,
+  hostOwnsProgress = false,
 }: {
   sets: IrSet[];
   steps?: number[];
@@ -624,8 +689,20 @@ export function InteractiveReadingRunner({
   glossary?: { word: string; meaningTh: string }[];
   /** Called once when every step is answered — the mock uses it to build its own score payload. */
   onFinish?: (results: IrStepResult[]) => void;
+  /**
+   * Called as each step is answered. The mock needs this: its section clock can end mid-set, and it
+   * has to hand in what was answered so far. Waiting for onFinish would submit an empty result and
+   * score a half-finished attempt as zero.
+   */
+  onStepDone?: (result: IrStepResult, all: IrStepResult[]) => void;
   /** The mock renders its own report, so suppress ours. */
   hideReport?: boolean;
+  /**
+   * Set when the host records the attempt itself (the reading exam and the vocabulary exercise keep
+   * their own progress stores, which drive their hub ticks, round stats and the server-side practice
+   * log). Without this the runner would also write a lesson-progress row under a topic nothing reads.
+   */
+  hostOwnsProgress?: boolean;
 }) {
   const uid = useLessonUserId();
   const plan: Slot[] = useMemo(() => sets.flatMap((s) => steps.map((st) => ({ set: s, step: st }))), [sets, steps]);
@@ -645,10 +722,12 @@ export function InteractiveReadingRunner({
       rewarded.current = true;
       sfxCelebrate("md");
       const pct = plan.length ? Math.round((all.reduce((a, b) => a + b, 0) / plan.length) * 100) : 0;
-      saveUnitScore(uid, progressTopic, sets[0]?.tier ?? "easy", 0, pct).catch(() => {});
-      awardXp(uid, XP.auto(pct)).catch(() => {});
+      if (!hostOwnsProgress) {
+        saveUnitScore(uid, progressTopic, sets[0]?.tier ?? "easy", 0, pct).catch(() => {});
+        awardXp(uid, XP.auto(pct)).catch(() => {});
+      }
     },
-    [uid, plan.length, progressTopic, sets],
+    [uid, plan.length, progressTopic, sets, hostOwnsProgress],
   );
 
   // one clock for the whole set — only in full-set mode, which is what DET times
@@ -675,6 +754,7 @@ export function InteractiveReadingRunner({
     const allR = [...results, r];
     setScores(all);
     setResults(allR);
+    onStepDone?.(r, allR);
     if (i + 1 >= plan.length) {
       onFinish?.(allR);
       return finish(all);

@@ -9,6 +9,8 @@ import type { VocabPassageUnit, VocabRoundNum, VocabSessionLevel } from "@/types
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { InteractiveReadingRunner } from "@/components/reading/InteractiveReadingRunner";
 import { vocabToIrSet } from "@/lib/vocab-to-ir";
+import { VOCAB_SESSION_MAX } from "@/lib/vocab-constants";
+import { saveVocabAttempt } from "@/lib/vocab-storage";
 
 export function VocabSessionGate({
   round,
@@ -115,6 +117,24 @@ function VocabExamRunner({
       backHref={backHref}
       celebrateTitle="จบชุดคำศัพท์แล้ว!"
       celebrateSub="รูปแบบเดียวกับขั้นเติมคำของ Interactive Reading ในข้อสอบจริง"
+      hostOwnsProgress
+      onFinish={(results) => {
+        // Vocabulary keeps its own progress store — the passage list ticks and the round summary
+        // read it, and it posts the practice attempt the study plan uses.
+        const maxScore = VOCAB_SESSION_MAX[sessionLevel];
+        const cloze = results.find((r) => r.step === 0);
+        const totalBlanks = cloze?.chosen.length ?? 0;
+        const correctCount = cloze ? Math.round(cloze.score * totalBlanks) : 0;
+        saveVocabAttempt({
+          round,
+          sessionLevel,
+          setNumber,
+          passageNumber,
+          attainedScore: totalBlanks ? Math.round((correctCount / totalBlanks) * maxScore) : 0,
+          maxScore,
+          correctCount,
+        });
+      }}
     />
   );
 }
