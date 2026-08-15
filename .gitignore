@@ -65,3 +65,5 @@ tmp/
 
 # one-off audit/debug scripts kept locally, never part of the app
 scratchpad-*.mjs
+content-bank-backup-*.json
+generated-reading-exams/

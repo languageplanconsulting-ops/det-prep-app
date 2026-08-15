@@ -20,6 +20,7 @@
  * this reason.
  */
 import type { IrChoice, IrSet } from "@/lib/interactive-reading";
+import { derivedWrongWhyTh } from "@/lib/interactive-reading-explain";
 import type { ReadingExamUnit, ReadingMcBlock } from "@/types/reading";
 
 /** Admin content marks clickable vocab with markdown bold; the old renderer leaked the asterisks. */
@@ -29,7 +30,13 @@ export function stripVocabMarkers(s: string): string {
 
 const PLACEHOLDER = /^\s*\[?\s*missing paragraph\s*\]?\s*$/i;
 
-function choices(block: ReadingMcBlock, whyForWrong: string): IrChoice[] {
+/**
+ * Exam content explains the KEY only, so every distractor used to carry one identical sentence —
+ * which reads as filler once the feedback bar lists them side by side. Each wrong option gets its
+ * own line instead, built from a fact about that option: which of its content words the passage
+ * never uses. The shared string stays as the tail, because it still names the trap the task sets.
+ */
+function choices(block: ReadingMcBlock, passage: string, ruleTh: string): IrChoice[] {
   const key = stripVocabMarkers(block.correctAnswer);
   return block.options.map((o) => {
     const text = stripVocabMarkers(o);
@@ -37,7 +44,8 @@ function choices(block: ReadingMcBlock, whyForWrong: string): IrChoice[] {
     return {
       text,
       correct,
-      whyTh: correct ? (block.explanationThai ?? "") : whyForWrong,
+      // uploads often explain nothing; the rule the task tests is a better ✓ line than a blank one
+      whyTh: correct ? (block.explanationThai?.trim() || ruleTh) : derivedWrongWhyTh(text, passage, ruleTh),
     };
   });
 }
@@ -60,9 +68,12 @@ export function readingExamToIrSet(
   const paragraphs = middleIsPlaceholder ? [p1, p3] : [p1, p2, p3];
   const gapAfter = 1;
 
+  const passageText = paragraphs.join(" ");
+
   const gap = choices(
     exam.missingSentence,
-    "ประโยคนี้อ่านแล้วลื่น แต่ไม่เชื่อมกับย่อหน้าถัดไป — ให้ดูว่าประโยคไหนทำให้ย่อหน้าหลังช่องว่างมีที่มา",
+    passageText,
+    "ต้องเลือกประโยคที่ทำให้ย่อหน้าหลังช่องว่างมีที่มา",
   );
 
   // the resolved passage the runner will render: paragraphs with the key sentence inserted
@@ -79,7 +90,7 @@ export function readingExamToIrSet(
       questionTh: "",
       answer,
       paragraph: paraIndex >= 0 ? paraIndex + 1 : 1,
-      whyTh: exam.informationLocation.explanationThai ?? "",
+      whyTh: exam.informationLocation.explanationThai?.trim() || "คำตอบคือช่วงข้อความที่ตอบคำถามโดยตรง ไม่ใช่ทั้งประโยคที่มันอยู่",
     },
     { questionEn: "", questionTh: "", answer: "", paragraph: 1, whyTh: "" },
   ];
@@ -98,13 +109,16 @@ export function readingExamToIrSet(
     blanks: [],
     gap,
     highlights,
+    // idea and title are judged against the passage the learner ends up reading — gap sentence included
     idea: choices(
       exam.mainIdea,
-      "ข้อนี้ไม่ใช่สิ่งที่บทอ่านกล่าวไว้ — อาจจริงบางส่วน แคบเกินไป หรือเป็นการเหมารวมเกินกว่าที่เขียนไว้",
+      resolved.join(" "),
+      "ต้องเป็นสิ่งที่บทอ่านกล่าวไว้จริง",
     ),
     title: choices(
       exam.bestTitle,
-      "ชื่อเรื่องต้องครอบคลุมทั้งบทอ่าน ข้อนี้แคบเกินไป กว้างเกินไป หรือจับผิดประเด็น",
+      resolved.join(" "),
+      "ชื่อเรื่องต้องครอบคลุมทั้งบทอ่าน",
     ),
   };
 

@@ -27,7 +27,18 @@ import { XP, awardXp } from "@/lib/gamification";
 import { useLessonUserId } from "@/lib/lesson-user";
 import { saveUnitScore } from "@/lib/lessons-progress";
 import { phraseWordRange, wordTokens } from "@/lib/passage-text";
-import { findEvidence, quotedEvidence, sentenceContaining, splitSentences, stemMatches, wordKey, type Clue } from "@/lib/interactive-reading-explain";
+import {
+  classifyWrong,
+  findEvidence,
+  glossTh,
+  keywordPairTh,
+  quotedEvidence,
+  sentenceContaining,
+  splitSentences,
+  stemMatches,
+  wordKey,
+  type Clue,
+} from "@/lib/interactive-reading-explain";
 import {
   IR_STEP_COUNT,
   IR_STEP_LABELS_TH,
@@ -108,8 +119,22 @@ function SelectableParagraph({
 
 /* ── explanation pieces ────────────────────────────────────────────────── */
 
-/** One line of the "why" panel: the key gets ✓, everything the learner had to rule out gets ✕. */
-type ExplainRow = { mark: "key" | "cross"; head: string; body: string; chipTh?: string; clue?: Clue };
+/**
+ * One line of the "why" panel.
+ *
+ * `head` is the thing being judged (a keyword, an option, a blank), `tagTh` the standard verdict it
+ * gets, `detailTh` an optional short parenthetical, `noteTh` a grey line of its own (the cloze step
+ * has no rival options, so its authored reason still earns the room).
+ */
+type ExplainRow = {
+  mark: "key" | "cross";
+  head: string;
+  tagTh?: string;
+  detailTh?: string;
+  noteTh?: string;
+  chipTh?: string;
+  clue?: Clue;
+};
 
 /** The clue sentence with the matched words marked, so the keyword is visible, not just described. */
 function marked(sentence: string, hits: string[]) {
@@ -128,9 +153,8 @@ function marked(sentence: string, hits: string[]) {
 function ClueBox({ clue }: { clue: Clue }) {
   return (
     <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-2">
-      <p className="text-[11px] font-black uppercase tracking-wide text-amber-700">🔑 {clue.labelTh}</p>
-      <p className="mt-1 text-[13px] leading-6 text-slate-800">{marked(clue.sentence, clue.hits)}</p>
-      {clue.matchedTh ? <p className="mt-1 text-[12px] leading-5 text-slate-600">{clue.matchedTh}</p> : null}
+      <p className="text-[13px] font-black leading-6 text-amber-800">🔑 {clue.headTh}</p>
+      <p className="mt-0.5 text-[13px] leading-6 text-slate-800">{marked(clue.sentence, clue.hits)}</p>
     </div>
   );
 }
@@ -142,12 +166,14 @@ function ExplainRows({ rows, crossLabelTh }: { rows: ExplainRow[]; crossLabelTh:
     <li key={i} className="flex gap-2">
       <span className={`mt-0.5 shrink-0 text-[13px] font-black ${r.mark === "key" ? "text-emerald-600" : "text-rose-500"}`}>{r.mark === "key" ? "✓" : "✕"}</span>
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] font-bold leading-6 text-slate-900">
-          {r.head}
+        <p className="text-[13px] leading-6">
+          <span className="font-black text-slate-900">{r.head}</span>
+          {r.tagTh ? <span className="text-slate-700"> = {r.tagTh}</span> : null}
+          {r.detailTh ? <span className="text-slate-500"> ({r.detailTh})</span> : null}
           {r.chipTh ? <span className="ml-1.5 rounded bg-slate-200 px-1.5 py-0.5 align-middle text-[10px] font-black text-slate-600">{r.chipTh}</span> : null}
         </p>
-        {r.body ? <p className="text-[13px] leading-6 text-slate-700">{r.body}</p> : null}
-        {r.clue ? <p className="mt-0.5 text-[12px] leading-6 text-slate-500">{marked(r.clue.sentence, r.clue.hits)}</p> : null}
+        {r.noteTh ? <p className="text-[12px] leading-6 text-slate-600">{r.noteTh}</p> : null}
+        {r.clue ? <p className="text-[12px] leading-6 text-slate-500">{marked(r.clue.sentence, r.clue.hits)}</p> : null}
       </div>
     </li>
   );
@@ -472,23 +498,27 @@ function TaskCard({
 
   /* explanation — the part DET never gives */
 
-  /** Why the span the learner actually dragged is not the answer, read off the two ranges. */
-  function highlightMissTh(): string {
-    if (!sel) return "ยังไม่ได้เลือกข้อความ — คำตอบคือช่วงที่ไฮไลต์สีเขียวไว้ในบทอ่าน";
-    if (sel.para !== hl.paragraph) return "ช่วงที่เลือกอยู่คนละย่อหน้ากับคำตอบ — ให้กลับไปหาย่อหน้าที่มีคำจากคำถามก่อน แล้วค่อยเลือกภายในย่อหน้านั้น";
-    if (!hlRange) return "ช่วงที่เลือกไม่ใช่ส่วนที่ตอบคำถามนี้";
+  /** Why the span the learner dragged is not the answer, read off the two ranges — as a short tag. */
+  function highlightMissTagTh(): string {
+    if (!sel) return "ยังไม่ได้เลือกข้อความ";
+    if (sel.para !== hl.paragraph) return "อยู่คนละย่อหน้ากับคำตอบ";
+    if (!hlRange) return "ไม่ใช่ส่วนที่ตอบคำถาม";
     const [s, e] = hlRange;
-    if (sel.start <= s && sel.end >= e) return "คลุมคำตอบไว้จริง แต่ลากกว้างเกินไป — ตัดส่วนที่ไม่ได้ตอบคำถามออก ให้เหลือเฉพาะช่วงสีเขียว";
-    if (sel.end < s || sel.start > e) return "ช่วงที่เลือกไม่ทับกับคำตอบเลย — ประโยคนี้พูดถึงเรื่องอื่นในบทอ่าน ไม่ได้ตอบสิ่งที่โจทย์ถาม";
-    return "ทับคำตอบแค่บางส่วน — ยังขาดคำที่ตอบคำถามจริง ๆ ให้ลากให้ครบทั้งช่วงสีเขียว";
+    if (sel.start <= s && sel.end >= e) return "คลุมกว้างเกินไป";
+    if (sel.end < s || sel.start > e) return "ไม่ใช่ส่วนที่ตอบคำถาม";
+    return "ยังไม่ครบช่วงคำตอบ";
   }
 
   /**
-   * The keyword line: which words in the passage prove the answer, and what they line up with.
-   * Authored `clueEn` wins; otherwise the evidence is derived from shared words and dropped
-   * entirely when the words do not actually back it up.
+   * The keyword line — `A = B (ความหมาย) ในประโยคนี้`, over the sentence that proves it.
+   *
+   * Authored `clueEn` wins, then a sentence the Thai explanation already quotes, then shared words.
+   * When the words do not actually line up the mapping is dropped rather than faked: a
+   * missing-sentence item is logic, not vocabulary, so it gets "what it has to connect to" instead.
    */
   function clue(): Clue | null {
+    const pair = (fromEn: string, toEn: string) => keywordPairTh(fromEn, toEn, glossary);
+
     if (step === 1) {
       const key = set.gap.find((o) => o.correct);
       if (!key) return null;
@@ -498,86 +528,89 @@ function TaskCard({
       if (!sentence) return null;
       const m = stemMatches(key.text, sentence);
       return {
-        labelTh: resolved[set.gapAfter + 1] ? "ประโยคถัดจากช่องว่าง — คำตอบต้องเชื่อมกับประโยคนี้" : "ประโยคก่อนช่องว่าง — คำตอบต้องต่อจากประโยคนี้",
+        headTh: m.words.length ? `${pair(m.words[0]!, m.words[0]!)} ในประโยคที่ต้องเชื่อมถึง` : "ต้องเชื่อมกับประโยคนี้",
         sentence,
         hits: m.hits,
-        matchedTh: m.words.length
-          ? `คำที่ประโยคคำตอบรับช่วงต่อมา: ${m.words.map((w) => `“${w}”`).join(" · ")}`
-          : "ข้อนี้ไม่มีคำซ้ำให้จับ — ต้องดูความต่อเนื่องของความหมาย ว่าประโยคไหนทำให้ประโยคนี้มีที่มา",
       };
     }
     if (step === 2 || step === 3) {
       const sentence = hl.clueEn ?? sentenceContaining(hlPara, hl.answer);
       const m = stemMatches(hl.questionEn, sentence);
+      const marked = m.words[0];
+      const gloss = marked ? glossTh(marked, glossary) : null;
       return {
-        labelTh: "คำในคำถามพาไปเจอประโยคนี้",
+        headTh: marked ? `${marked} (คำในคำถาม${gloss ? ` · ${gloss}` : ""}) ในประโยคนี้` : "คำถามถามด้วยคำอื่น — หาจากความหมายในประโยคนี้",
         sentence,
         hits: m.hits,
-        matchedTh: m.words.length
-          ? `คำจากคำถามที่ไปตรงกับบทอ่าน: ${m.words.map((w) => `“${w}”`).join(" · ")} → คำตอบคือส่วนที่ตอบคำถามในประโยคนี้`
-          : "คำถามถามด้วยคำอื่น (พาราเฟรส) — ต้องหาจากความหมาย ไม่ใช่จากคำที่ซ้ำกัน",
       };
     }
     if (step === 4 || step === 5) {
       const key = (step === 4 ? set.idea : set.title).find((o) => o.correct);
       if (!key) return null;
-      // an authored clue wins, then a sentence the Thai explanation already quotes, then word overlap
       const pinned = key.clueEn ?? quotedEvidence(key.whyTh, resolved);
-      if (pinned) {
-        const m = stemMatches(key.text, pinned);
-        return {
-          labelTh: step === 4 ? "ประโยคในบทอ่านที่ตัวเลือกนี้พูดซ้ำ" : "คำหลักของชื่อเรื่องนี้มาจากประโยคนี้",
-          sentence: pinned,
-          hits: m.hits,
-          matchedTh: m.words.length ? `ตรงกับคำในตัวเลือก: ${m.words.slice(0, 4).map((w) => `“${w}”`).join(" · ")}` : "ตัวเลือกที่ถูกคือการพูดประโยคนี้ใหม่ด้วยคำอื่น",
-        };
-      }
-      // two hits minimum for a title too: a 3-word title shares one generic word with half the
+      // two hits minimum even for a title: a 3-word title shares one generic word with half the
       // passage, and pointing at the wrong sentence teaches the wrong move
-      const ev = findEvidence(resolved, key.text, 2);
+      const ev = pinned ? { sentence: pinned, ...stemMatches(key.text, pinned) } : findEvidence(resolved, key.text, 2);
       if (!ev) return null;
+      const from = ev.words[0];
+      const to = ev.hits[0] ? (ev.sentence.split(/\s+/).find((w) => wordKey(w) === ev.hits[0]) ?? from) : from;
       return {
-        labelTh: step === 4 ? "ประโยคในบทอ่านที่ตัวเลือกนี้พูดซ้ำ" : "คำหลักของชื่อเรื่องนี้มาจากประโยคนี้",
+        headTh: from && to ? `${pair(from, to.replace(/[^A-Za-z']/g, ""))} ในประโยคนี้` : "ตัวเลือกที่ถูกคือการพูดประโยคนี้ใหม่ด้วยคำอื่น",
         sentence: ev.sentence,
         hits: ev.hits,
-        matchedTh: `ตรงกับคำในตัวเลือก: ${ev.words.slice(0, 4).map((w) => `“${w}”`).join(" · ")}`,
       };
     }
     return null;
   }
 
-  /** One ✓ row for the key, then one ✕ row per option the learner had to rule out. */
+  /** One ✓ row for the key, then one `keyword = หมวดที่ผิด` row per option ruled out. */
   function rows(): ExplainRow[] {
+    const passageText = resolved.join(" ");
+
     if (step === 0) {
       const rowFor = (b: (typeof set.blanks)[number], mark: ExplainRow["mark"]): ExplainRow => {
         const para = set.paragraphs.find((p) => new RegExp(`\\{${b.n}\\}`).test(p)) ?? "";
         const sentence = sentenceContaining(resolveParagraph(para, set.blanks), b.answer);
+        const gloss = glossTh(b.answer, glossary);
         return {
           mark,
-          head: `ช่อง ${b.n} · ${b.skillTh} → ${b.answer}`,
-          body: b.whyTh,
+          head: `ช่อง ${b.n} · ${b.answer}${gloss ? ` (${gloss})` : ""}`,
+          noteTh: b.whyTh,
           // the head shows the KEY, so the chip has to name what the learner actually put there
           chipTh: mark === "cross" ? (picks[b.n] ? `คุณตอบ ${picks[b.n]}` : "ไม่ได้ตอบ") : undefined,
-          clue: sentence ? { labelTh: "", sentence, hits: [wordKey(b.answer)] } : undefined,
+          clue: sentence ? { headTh: "", sentence, hits: [wordKey(b.answer)] } : undefined,
         };
       };
       const missed = set.blanks.filter((b) => picks[b.n] !== b.answer);
       if (missed.length) return missed.map((b) => rowFor(b, "cross"));
       return set.blanks.slice(0, 4).map((b) => rowFor(b, "key"));
     }
+
     if (step === 2 || step === 3) {
-      const out: ExplainRow[] = [{ mark: "key", head: hl.answer, body: hl.whyTh }];
-      if (verdict !== "correct") out.push({ mark: "cross", head: selText || "—", body: highlightMissTh(), chipTh: "ที่คุณไฮไลต์" });
+      const out: ExplainRow[] = [{ mark: "key", head: `คำตอบ: ${hl.answer}` }];
+      if (verdict !== "correct") out.push({ mark: "cross", head: selText || "—", tagTh: highlightMissTagTh(), chipTh: "ที่คุณไฮไลต์" });
       return out;
     }
+
     const list = step === 1 ? set.gap : step === 4 ? set.idea : set.title;
     const pick = step === 1 ? gapPick : step === 4 ? ideaPick : titlePick;
     return [
-      ...list.filter((o) => o.correct).map<ExplainRow>((o) => ({ mark: "key", head: o.text, body: o.whyTh, chipTh: pick !== null && list[pick] === o ? "ที่คุณเลือก" : undefined })),
+      ...list
+        .filter((o) => o.correct)
+        .map<ExplainRow>((o) => ({ mark: "key", head: o.text, chipTh: pick !== null && list[pick] === o ? "ที่คุณเลือก" : undefined })),
       ...list
         .map((o, i) => ({ o, i }))
         .filter(({ o }) => !o.correct)
-        .map<ExplainRow>(({ o, i }) => ({ mark: "cross", head: o.text, body: o.whyTh, chipTh: pick === i ? "ที่คุณเลือก" : undefined })),
+        .map<ExplainRow>(({ o, i }) => {
+          const c = classifyWrong(o.whyTh, o.text, passageText);
+          return {
+            mark: "cross",
+            head: c.keywordEn,
+            tagTh: c.tagTh,
+            detailTh: c.detailTh,
+            chipTh: pick === i ? "ที่คุณเลือก" : undefined,
+          };
+        }),
     ];
   }
 
@@ -612,7 +645,10 @@ function TaskCard({
             <div className={tone.ink}>{key}</div>
             <div className="mt-2 max-h-[34vh] max-w-2xl overflow-y-auto rounded-xl bg-white/70 p-3.5 ring-1 ring-black/5">
               {c ? <ClueBox clue={c} /> : null}
-              <ExplainRows rows={rows()} crossLabelTh={step === 0 ? "ช่องที่ยังผิด" : "ทำไมข้ออื่นถึงผิด"} />
+              <ExplainRows
+                rows={rows()}
+                crossLabelTh={step === 0 ? "ช่องที่ยังผิด" : step === 2 || step === 3 ? "ที่คุณไฮไลต์ผิดเพราะ" : "ข้ออื่นผิดเพราะ"}
+              />
             </div>
           </div>
           <button type="button" onClick={() => onDone(result())} className={`shrink-0 rounded-xl ${tone.btn} px-7 py-3 text-sm font-black uppercase tracking-wide text-white`}>

@@ -13,6 +13,7 @@
  *     the passage; when it is not, that step is dropped rather than shown as something it isn't
  */
 import type { IrSet } from "@/lib/interactive-reading";
+import { derivedWrongWhyTh } from "@/lib/interactive-reading-explain";
 import type { VocabularyReadingMockContent } from "@/lib/mock-test/vocabulary-reading-mock";
 import type { ReadingMcBlock } from "@/types/reading";
 
@@ -30,12 +31,18 @@ function markPassage(text: string, startAt: number): { text: string; used: numbe
   return { text: out, used: n - startAt };
 }
 
-function choices(block: ReadingMcBlock, wrongWhyTh: string) {
+/**
+ * Mock content explains the key only, so each distractor is given its own line the same way the
+ * exam converter does: name the content words this option uses that the passage never does, then
+ * fall through to the trap the task sets. Identical sentences under every ✕ read as filler.
+ */
+function choices(block: ReadingMcBlock, passage: string, ruleTh: string) {
   const key = stripMarkers(block.correctAnswer);
   return block.options.map((o) => {
     const text = stripMarkers(o);
     const correct = text === key;
-    return { text, correct, whyTh: correct ? (block.explanationThai ?? "") : wrongWhyTh };
+    // uploads often explain nothing; the rule the task tests is a better ✓ line than a blank one
+    return { text, correct, whyTh: correct ? (block.explanationThai?.trim() || ruleTh) : derivedWrongWhyTh(text, passage, ruleTh) };
   });
 }
 
@@ -57,9 +64,14 @@ export function mockReadingToIrSet(
     whyTh: q.explanationThai ?? "",
   }));
 
+  // `{n}` markers have to be filled in before an option's words are checked against the passage,
+  // or every cloze answer would look like a word the passage never uses
+  const filled = (t: string) => t.replace(/\{(\d+)\}/g, (_m, d: string) => blanks.find((b) => b.n === Number(d))?.answer ?? "");
+
   const gap = choices(
     content.missingParagraph,
-    "ประโยคนี้อ่านแล้วลื่น แต่ไม่เชื่อมกับย่อหน้าถัดไป — ให้ดูว่าย่อหน้าไหนทำให้เนื้อความต่อกันได้",
+    paragraphs.map(filled).join(" "),
+    "ต้องเลือกย่อหน้าที่ทำให้เนื้อความก่อนและหลังช่องว่างต่อกันได้",
   );
 
   const resolved = [...paragraphs];
@@ -90,17 +102,20 @@ export function mockReadingToIrSet(
         questionTh: "",
         answer,
         paragraph: paraIndex >= 0 ? paraIndex + 1 : 1,
-        whyTh: content.informationLocation.explanationThai ?? "",
+        whyTh: content.informationLocation.explanationThai?.trim() || "คำตอบคือช่วงข้อความที่ตอบคำถามโดยตรง ไม่ใช่ทั้งประโยคที่มันอยู่",
       },
       { questionEn: "", questionTh: "", answer: "", paragraph: 1, whyTh: "" },
     ],
+    // idea and title are judged against the passage the learner ends up reading — gap sentence included
     idea: choices(
       content.mainIdea,
-      "ข้อนี้ไม่ใช่สิ่งที่บทอ่านกล่าวไว้ — อาจจริงบางส่วน แคบเกินไป หรือเหมารวมเกินกว่าที่เขียนไว้",
+      resolved.map(filled).join(" "),
+      "ต้องเป็นสิ่งที่บทอ่านกล่าวไว้จริง",
     ),
     title: choices(
       content.bestTitle,
-      "ชื่อเรื่องต้องครอบคลุมทั้งบทอ่าน ข้อนี้แคบเกินไป กว้างเกินไป หรือจับผิดประเด็น",
+      resolved.map(filled).join(" "),
+      "ชื่อเรื่องต้องครอบคลุมทั้งบทอ่าน",
     ),
   };
 

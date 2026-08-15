@@ -31,7 +31,12 @@ export type IrBlank = {
   whyTh: string;
 };
 
-export type IrChoice = { text: string; correct: boolean; whyTh: string };
+/**
+ * `clueEn` pins the passage span that proves (or kills) the option, for the feedback bar's keyword
+ * line. It is optional everywhere: when it is missing the runner derives the evidence sentence from
+ * the words the option and the passage share, so the whole bank works without re-authoring.
+ */
+export type IrChoice = { text: string; correct: boolean; whyTh: string; clueEn?: string };
 
 export type IrHighlight = {
   questionEn: string;
@@ -51,6 +56,8 @@ export type IrHighlight = {
   /** 1-based index into `resolvedParagraphs()`. */
   paragraph: number;
   whyTh: string;
+  /** See `IrChoice.clueEn` — here it names the span that tells you WHERE to look. */
+  clueEn?: string;
 };
 
 export type IrSet = {
