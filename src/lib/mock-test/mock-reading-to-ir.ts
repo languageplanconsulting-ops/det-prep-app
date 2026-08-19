@@ -107,7 +107,11 @@ export function mockReadingToIrSet(
   resolved.splice(1, 0, gap.find((g) => g.correct)?.text ?? "");
 
   const answer = stripMarkers(content.informationLocation.correctAnswer);
-  const paraIndex = resolved.findIndex((p) => p.includes(answer));
+  // Match against the passage the learner will actually be dragging over — blanks filled in. The
+  // runner resolves `{n}` before it looks the span up, so testing the marked text here rejected
+  // every answer that happens to contain a cloze word ("fall asleep in one city and {4} in
+  // another") and silently dropped the step from most of the sets.
+  const paraIndex = resolved.map(filled).findIndex((p) => p.includes(answer));
   const hlQuestion = (content.informationLocation.question ?? "").trim();
 
   const steps: number[] = [];
