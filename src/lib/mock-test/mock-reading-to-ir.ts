@@ -6,11 +6,16 @@
  * best title and the main idea. It was rendered as ten multiple-choice cards in a row; this maps it
  * onto the real screen without touching the content or the score payload.
  *
- * Two shapes differ from a practice set and are handled here:
+ * Three shapes differ from a practice set and are handled here:
  *   · the blanks sit either side of the gap ([BLANK 1..3] in p1, [BLANK 4..6] in p3), so the cloze
  *     step has to show both blocks — the runner walks to the last block carrying a marker
+ *   · the older sets carry more blanks than the mock grades (up to ten). Only the first `vocabCount`
+ *     become slots; the rest are written back into the passage as the word itself, because a marker
+ *     with no question behind it renders as a slot the learner can never fill
  *   · the information-location answer is only usable as a highlight when it is a verbatim span of
- *     the passage; when it is not, that step is dropped rather than shown as something it isn't
+ *     the passage AND the upload actually carries the question; when either is missing that step is
+ *     dropped rather than shown as something it isn't — half the sets have no `question` field, and
+ *     a highlight prompt with nothing to answer is the one screen a learner cannot get past
  */
 import type { IrSet } from "@/lib/interactive-reading";
 import { derivedWrongWhyTh } from "@/lib/interactive-reading-explain";
@@ -21,12 +26,29 @@ function stripMarkers(s: string): string {
   return s.replace(/\*\*\s*(.*?)\s*\*\*/g, "$1");
 }
 
-/** `[BLANK 1]` → `{1}`, renumbered in reading order across the whole passage. */
-function markPassage(text: string, startAt: number): { text: string; used: number } {
+const BLANK_MARKER = /\[\s*BLANK(?:\s*\d+)?\s*\]/gi;
+
+function countBlanks(text: string): number {
+  return (text.match(BLANK_MARKER) ?? []).length;
+}
+
+/**
+ * `[BLANK 1]` → `{1}`, renumbered in reading order across the whole passage.
+ *
+ * Markers past `limit` are not slots: they are replaced by `fill`, the word that belongs there.
+ * The runner looks every `{n}` up in `blanks`, so an unmatched marker is a dead slot on the one
+ * screen the learner cannot skip.
+ */
+function markPassage(
+  text: string,
+  startAt: number,
+  limit: number,
+  fill: (n: number) => string,
+): { text: string; used: number } {
   let n = startAt;
-  const out = stripMarkers(text).replace(/\[\s*BLANK(?:\s*\d+)?\s*\]/gi, () => {
+  const out = stripMarkers(text).replace(BLANK_MARKER, () => {
     n += 1;
-    return `{${n}}`;
+    return n <= limit ? `{${n}}` : fill(n);
   });
   return { text: out, used: n - startAt };
 }
@@ -51,11 +73,18 @@ export function mockReadingToIrSet(
   id: string,
   vocabCount: number,
 ): { set: IrSet; steps: number[] } {
-  const a = markPassage(content.passage.p1, 0);
-  const b = markPassage(content.passage.p3, a.used);
+  const authored = content.vocabularyQuestions ?? [];
+  // A blank only exists when BOTH a marker and a question back it: older sets carry ten markers for
+  // six graded questions, and one set carries fewer markers than questions.
+  const markers = countBlanks(content.passage.p1) + countBlanks(content.passage.p3);
+  const graded = Math.min(vocabCount, authored.length, markers);
+  const fill = (n: number) => stripMarkers(authored[n - 1]?.correctAnswer ?? "");
+
+  const a = markPassage(content.passage.p1, 0, graded, fill);
+  const b = markPassage(content.passage.p3, a.used, graded, fill);
   const paragraphs = [a.text, b.text];
 
-  const vocab = content.vocabularyQuestions.slice(0, vocabCount);
+  const vocab = authored.slice(0, graded);
   const blanks = vocab.map((q, i) => ({
     n: i + 1,
     options: q.options.slice(),
@@ -79,11 +108,12 @@ export function mockReadingToIrSet(
 
   const answer = stripMarkers(content.informationLocation.correctAnswer);
   const paraIndex = resolved.findIndex((p) => p.includes(answer));
+  const hlQuestion = (content.informationLocation.question ?? "").trim();
 
   const steps: number[] = [];
   if (blanks.length) steps.push(0);
   steps.push(1);
-  if (paraIndex >= 0 && answer.length >= 3) steps.push(2);
+  if (hlQuestion && paraIndex >= 0 && answer.length >= 3) steps.push(2);
   steps.push(4, 5);
 
   const set: IrSet = {
@@ -98,7 +128,7 @@ export function mockReadingToIrSet(
     gap,
     highlights: [
       {
-        questionEn: content.informationLocation.question,
+        questionEn: hlQuestion,
         questionTh: "",
         answer,
         paragraph: paraIndex >= 0 ? paraIndex + 1 : 1,

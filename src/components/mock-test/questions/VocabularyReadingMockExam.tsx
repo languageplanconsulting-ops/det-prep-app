@@ -59,6 +59,9 @@ export function VocabularyReadingMockExam({
     () => mockReadingToIrSet(exam, "mock-reading", vocabCount),
     [exam, vocabCount],
   );
+  // What the engine actually asks, which is not always what the upload declares: a set with fewer
+  // blanks in the passage than questions grades fewer blanks, and the report's split has to match.
+  const gradedVocabCount = set.blanks.length;
 
   const [done, setDone] = useState(false);
   const collected = useRef<IrStepResult[]>([]);
@@ -106,8 +109,8 @@ export function VocabularyReadingMockExam({
       detail: {
         total,
         correct: Math.round(hits),
-        vocabCount,
-        readingCount: Math.max(0, total - vocabCount),
+        vocabCount: gradedVocabCount,
+        readingCount: Math.max(0, total - gradedVocabCount),
       },
       selected_answers: selected,
       correct_answers: correct,

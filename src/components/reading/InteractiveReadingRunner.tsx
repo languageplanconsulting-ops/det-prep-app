@@ -347,7 +347,10 @@ function TaskCard({
         <p key={pi} className="mb-4 text-[15px] leading-9 text-slate-800 last:mb-0">
           {paragraphChunks(p).map((c, ci) => {
             if (c.kind === "text") return <span key={ci}>{c.text}</span>;
-            const b = set.blanks.find((x) => x.n === c.n)!;
+            // A marker with no blank behind it is bad content, not a reason to lose the run: show
+            // the slot as unfillable rather than throwing away a timed mock mid-question.
+            const b = set.blanks.find((x) => x.n === c.n);
+            if (!b) return <span key={ci}>___</span>;
             const ok = picks[c.n] === b.answer;
             return (
               <span key={ci} className="mx-0.5 inline-flex min-w-[4rem] items-baseline gap-1.5 border-b-2 border-slate-300 px-1 sm:min-w-[7rem]">

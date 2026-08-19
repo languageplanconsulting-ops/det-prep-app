@@ -42,6 +42,9 @@ export function wordKey(w: string): string {
 export function contentWords(s: string): { surface: string; key: string }[] {
   const out: { surface: string; key: string }[] = [];
   const seen = new Set<string>();
+  // Uploaded content is not always complete — an absent question must read as "no words", never
+  // take down the screen it was going to be explained on.
+  if (typeof s !== "string" || !s) return out;
   for (const raw of s.split(/\s+/)) {
     const surface = raw.replace(/^[^A-Za-z0-9']+|[^A-Za-z0-9']+$/g, "");
     if (surface.length < 3) continue;
