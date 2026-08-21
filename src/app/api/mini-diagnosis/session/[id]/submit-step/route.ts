@@ -13,8 +13,8 @@ import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import type { FitbMissingWord } from "@/types/fitb";
 
 const GRADING_MODEL_FALLBACKS = [
-  "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
+  "gemini-3.6-flash",
+  "gemini-3.1-flash-lite",
   "gpt-4o-mini",
   "claude-haiku-4-5",
 ] as const;

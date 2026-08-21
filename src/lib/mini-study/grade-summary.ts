@@ -45,7 +45,7 @@ export async function gradeConversationSummary(params: {
   if (!apiKey) throw new Error("Gemini API key missing");
   const client = new GoogleGenerativeAI(apiKey);
   const model = client.getGenerativeModel({
-    model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash-lite",
+    model: process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite",
     systemInstruction: SYSTEM,
     generationConfig: {
       temperature: 0.3,

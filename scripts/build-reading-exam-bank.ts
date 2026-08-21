@@ -198,7 +198,7 @@ function problems(ex: ReadingExamUnit, d: Difficulty): string[] {
 async function generate(d: Difficulty, n: number, avoid: string[], angles: string[]): Promise<ReadingExamUnit[]> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY missing");
-  const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
   const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
     method: "POST",
     headers: { "content-type": "application/json" },

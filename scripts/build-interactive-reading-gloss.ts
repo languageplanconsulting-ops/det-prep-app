@@ -59,7 +59,7 @@ function keywordsInBank(): string[] {
 async function askGemini(words: string[]): Promise<Record<string, string>> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY missing — add it to .env.local");
-  const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
   const prompt = [
     "You are writing a Thai glossary for Thai learners of English preparing for the Duolingo English Test.",
     "For each English word below, give ONE short Thai meaning — the sense a B1–C1 reading passage would use.",

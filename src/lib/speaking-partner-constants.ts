@@ -5,7 +5,7 @@ export const SPEAKING_PARTNER_FOLLOWUP_COUNT = 5;
 export const SPEAKING_PARTNER_TURN_COUNT = 1 + SPEAKING_PARTNER_FOLLOWUP_COUNT;
 
 /** Gemini model for generating follow-up questions only (grading uses admin-selected model). */
-export const SPEAKING_PARTNER_NEXT_QUESTION_GEMINI_MODEL = "gemini-2.5-flash-lite";
+export const SPEAKING_PARTNER_NEXT_QUESTION_GEMINI_MODEL = "gemini-3.1-flash-lite";
 
 /** Countdown before recording starts (after the question is shown / audio plays). */
 export const SPEAKING_PARTNER_PREP_SECONDS = 2;

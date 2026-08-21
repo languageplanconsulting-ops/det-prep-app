@@ -182,7 +182,7 @@ export async function generateDialogueSummaryReportWithGemini(params: {
   wordCount: number;
 }): Promise<{ report: DialogueSummaryAttemptReport; usage: GradingLlmUsage | null }> {
   const { apiKey, attemptId, exam, summary, submittedAt, wordCount } = params;
-  const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
 
   const { raw, usage } = await generateGradingJsonObject({
     model: modelName,

@@ -60,7 +60,7 @@ export async function POST(req: Request) {
   const items = Array.isArray(raw) ? raw.filter(isItem).slice(0, 12) : [];
   if (!items.length) return NextResponse.json({ results: [] });
 
-  const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
   const keys = resolveGradingKeysFromRequest(req, model);
 
   try {

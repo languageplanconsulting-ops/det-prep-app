@@ -18,7 +18,7 @@ export async function transcribeEnglishAudioWithGemini(params: {
   mimeType: string;
   model?: string;
 }): Promise<{ transcript: string; usage: GradingLlmUsage | null }> {
-  const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
   const genAI = new GoogleGenerativeAI(params.apiKey);
   const model = genAI.getGenerativeModel({
     model: modelName,

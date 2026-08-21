@@ -139,7 +139,7 @@ export async function generateSpeakingPartnerReportWithGemini(params: {
     throw new Error(`Expected exactly ${SPEAKING_PARTNER_TURN_COUNT} turns.`);
   }
 
-  const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
 
   const userPayload = JSON.stringify(
     {
