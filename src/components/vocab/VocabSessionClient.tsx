@@ -38,13 +38,17 @@ export function VocabSessionClient({
   const [resultRows, setResultRows] = useState<VocabExamResultRow[] | null>(null);
 
   const maxScore = VOCAB_SESSION_MAX[sessionLevel];
+  const blankCount = passage.blanks.length;
   const setListHref = `/practice/comprehension/vocabulary/round/${round}/${setNumber}/${sessionLevel}`;
   const bankHref = "/practice/comprehension/vocabulary";
   const inRunner = !!onRunnerComplete;
 
   const onComplete = (rows: VocabExamResultRow[]) => {
-    const correctCount = rows.filter((r) => r.isCorrect).length;
-    const attainedScore = Math.round((correctCount / 6) * maxScore);
+    // Count can never exceed the number of blanks — clamp so a "8 out of 6" can't slip through.
+    const correctCount = Math.min(rows.filter((r) => r.isCorrect).length, rows.length);
+    // Blank count varies by contentLevel (easy/medium 10, hard 8) — divide by the passage's own
+    // blanks, never a constant, or a 10-blank passage scores 167%.
+    const attainedScore = rows.length > 0 ? Math.round((correctCount / rows.length) * maxScore) : 0;
     saveVocabAttempt({
       round,
       sessionLevel,
@@ -85,13 +89,14 @@ export function VocabSessionClient({
           <span />
         )}
         <p className="ep-stat text-xs text-neutral-500">
-          Max {maxScore} pts · 6 blanks
+          Max {maxScore} pts · {blankCount} blank{blankCount === 1 ? "" : "s"}
         </p>
       </div>
 
       {phase === "exam" ? (
         <div key={`exam-${examKey}`} className="ep-step-slide-in">
           <VocabExam
+            round={round}
             passage={passage}
             setNumber={setNumber}
             passageNumber={passageNumber}

@@ -29,7 +29,7 @@ export interface VocabPassageUnit {
   /** Use `[BLANK]` for each gap, or numbered `[BLANK 1]` … `[BLANK N]` (normalized on import). */
   passageText: string;
   blanks: VocabBlankQuestion[];
-  /** Six entries, same order as blanks / blanks in the passage. */
+  /** One entry per blank, same order as `blanks` (count varies by contentLevel). */
   correctWords: VocabCorrectWordEntry[];
 }
 

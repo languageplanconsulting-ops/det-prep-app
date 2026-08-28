@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
+  VOCAB_BLANK_COUNT_BY_LEVEL,
   VOCAB_CONTENT_LEVEL_LABEL,
   VOCAB_MAX_PASSAGES_PER_SET,
   VOCAB_SESSION_LABEL,
@@ -87,8 +88,8 @@ export function VocabSetPassageList({
         <h1 className="mt-2 text-2xl font-black tracking-tight">Choose a test</h1>
         <p className="mt-2 text-sm text-neutral-600">
           {tests.length} test{tests.length === 1 ? "" : "s"} at this level (target about 10–20 per
-          level in a full bank). Each test has six blanks. Scoring cap:{" "}
-          <strong>{maxScore}</strong> points.
+          level in a full bank). Each test has {VOCAB_BLANK_COUNT_BY_LEVEL[sessionLevel]} blanks.
+          Scoring cap: <strong>{maxScore}</strong> points.
         </p>
         {overCap ? (
           <p className="mt-2 text-sm font-bold text-red-700">

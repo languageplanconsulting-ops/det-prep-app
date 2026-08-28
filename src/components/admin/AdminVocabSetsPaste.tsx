@@ -3,8 +3,17 @@
 import { useEffect, useState } from "react";
 import { appendAdminUploadLog } from "@/lib/admin-upload-log";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
-import { normalizeVocabSetsIncoming, parseVocabSetsJson } from "@/lib/vocab-admin";
-import { VOCAB_MAX_PASSAGES_PER_SET, VOCAB_ROUND_NUMBERS } from "@/lib/vocab-constants";
+import {
+  checkVocabSpecConformance,
+  normalizeVocabSetsIncoming,
+  parseVocabSetsJson,
+} from "@/lib/vocab-admin";
+import {
+  VOCAB_BLANK_COUNT_BY_LEVEL,
+  VOCAB_MAX_PASSAGES_PER_SET,
+  VOCAB_OPTIONS_PER_BLANK,
+  VOCAB_ROUND_NUMBERS,
+} from "@/lib/vocab-constants";
 import {
   clearEntireVocabBankAndOccupancy,
   countVocabSetsInBank,
@@ -233,8 +242,15 @@ export function AdminVocabSetsPaste() {
           passages: passagesMeta,
         },
       });
+      // Off-spec passages still import (old 4-option backups must stay restorable) — this only
+      // tells the user at a glance whether the paste they just made follows the item-writing spec.
+      const spec = checkVocabSpecConformance(grouped);
+      const specNote =
+        spec.offSpec === 0
+          ? " All passages match the spec shape."
+          : ` ⚠︎ ${spec.offSpec}/${spec.total} passage(s) off spec (${spec.wrongBlankCount} wrong blank count, ${spec.wrongOptionCount} not 5 options each) — imported anyway.`;
       setMessage(
-        `Imported R${selectedRound} slot ${selectedSet} (${selectedDifficulty}) with ${passageTotal} passage(s). Total groups in browser: ${countVocabSetsInBank()}.${
+        `Imported R${selectedRound} slot ${selectedSet} (${selectedDifficulty}) with ${passageTotal} passage(s). Total groups in browser: ${countVocabSetsInBank()}.${specNote}${
           logResult.ok ? "" : ` (${logResult.error})`
         }`,
       );
@@ -360,7 +376,14 @@ export function AdminVocabSetsPaste() {
         <code className="ep-stat text-xs">meaningTh</code> (the word&apos;s Thai meaning) — it&apos;s shown as the
         answer when learners quiz themselves on saved notebook vocab. Without it, the quiz falls back to the
         English synonym list instead of a real Thai translation.
-        Max {VOCAB_MAX_PASSAGES_PER_SET} passages per slot.
+        Max {VOCAB_MAX_PASSAGES_PER_SET} passages per slot (all difficulties counted together).
+      </p>
+      <p className="mb-2 text-xs font-bold text-neutral-700">
+        Spec shape: {VOCAB_OPTIONS_PER_BLANK} options on every blank ·{" "}
+        {VOCAB_BLANK_COUNT_BY_LEVEL.easy} blanks for easy · {VOCAB_BLANK_COUNT_BY_LEVEL.medium} for
+        medium · {VOCAB_BLANK_COUNT_BY_LEVEL.hard} for hard · a real{" "}
+        <code className="ep-stat text-xs">titleEn</code> topic name. Off-spec JSON still imports (so
+        old backups restore) — the import message counts what drifted.
       </p>
       <textarea
         value={text}
@@ -447,19 +470,27 @@ export function AdminVocabSetsPaste() {
           </p>
         ) : (
           <ul className="mt-2 space-y-2">
-            {difficultyPassages.map((p) => (
-              <li
-                key={`${p.passageNumber}-${p.titleEn ?? "untitled"}`}
-                className="rounded-[4px] border border-black bg-white px-3 py-2 text-sm"
-              >
-                <p className="font-bold">
-                  Passage {p.passageNumber}: {p.titleEn ?? "Untitled"}
-                </p>
-                <p className="text-xs text-neutral-600">
-                  Blanks: {p.blanks.length} · Correct words: {p.correctWords.length}
-                </p>
-              </li>
-            ))}
+            {difficultyPassages.map((p) => {
+              const offSpec = checkVocabSpecConformance([
+                { setNumber: selectedSet, passages: [p] },
+              ]).offSpec;
+              return (
+                <li
+                  key={`${p.passageNumber}-${p.titleEn ?? "untitled"}`}
+                  className="rounded-[4px] border border-black bg-white px-3 py-2 text-sm"
+                >
+                  <p className="font-bold">
+                    Passage {p.passageNumber}: {p.titleEn ?? "Untitled"}
+                  </p>
+                  <p className="text-xs text-neutral-600">
+                    Blanks: {p.blanks.length} · Correct words: {p.correctWords.length}
+                    {offSpec > 0 ? (
+                      <span className="ml-1 font-bold text-red-700">· off spec</span>
+                    ) : null}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

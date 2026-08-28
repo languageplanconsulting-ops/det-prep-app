@@ -5,7 +5,11 @@ import type {
   VocabPassageContentLevel,
   VocabSet,
 } from "@/types/vocab";
-import { VOCAB_MAX_PASSAGES_PER_SET } from "@/lib/vocab-constants";
+import {
+  VOCAB_BLANK_COUNT_BY_LEVEL,
+  VOCAB_MAX_PASSAGES_PER_SET,
+  VOCAB_OPTIONS_PER_BLANK,
+} from "@/lib/vocab-constants";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return v !== null && typeof v === "object" && !Array.isArray(v);
@@ -149,6 +153,40 @@ export function normalizeVocabSetsIncoming(items: VocabSet[]): VocabSet[] {
       }
       return { setNumber, passages: sorted };
     });
+}
+
+export type VocabSpecConformance = {
+  total: number;
+  /** Passages whose blank count doesn't match VOCAB_BLANK_COUNT_BY_LEVEL for their contentLevel. */
+  wrongBlankCount: number;
+  /** Passages with at least one blank that doesn't offer exactly 5 options. */
+  wrongOptionCount: number;
+  /** Passages failing either check — the headline number. */
+  offSpec: number;
+};
+
+/**
+ * Non-fatal shape audit against docs/reading-vocabulary/question-spec.md.
+ *
+ * The parser deliberately still accepts the old 4-option, 5–7-blank bank so the user can re-import
+ * a backup JSON to restore, so this is the only place that tells them a fresh paste drifted off spec.
+ */
+export function checkVocabSpecConformance(sets: VocabSet[]): VocabSpecConformance {
+  let wrongBlankCount = 0;
+  let wrongOptionCount = 0;
+  let offSpec = 0;
+  let total = 0;
+  for (const set of sets) {
+    for (const p of set.passages) {
+      total += 1;
+      const badBlanks = p.blanks.length !== VOCAB_BLANK_COUNT_BY_LEVEL[p.contentLevel];
+      const badOptions = p.blanks.some((b) => b.options.length !== VOCAB_OPTIONS_PER_BLANK);
+      if (badBlanks) wrongBlankCount += 1;
+      if (badOptions) wrongOptionCount += 1;
+      if (badBlanks || badOptions) offSpec += 1;
+    }
+  }
+  return { total, wrongBlankCount, wrongOptionCount, offSpec };
 }
 
 export function parseVocabSetsJson(text: string): VocabSet[] {

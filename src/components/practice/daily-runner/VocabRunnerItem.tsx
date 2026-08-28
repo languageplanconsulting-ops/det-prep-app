@@ -46,9 +46,13 @@ export function VocabRunnerItem({
         return;
       }
       const set = getVocabVisibleSetByNumber(setNumber, round);
-      const passages = set?.passages ?? [];
+      const all = set?.passages ?? [];
+      // One slot now holds every difficulty (20 passages per contentLevel), so pick inside the
+      // requested level — otherwise the runner scores a hard passage against the easy cap.
+      const atLevel = all.filter((p) => p.contentLevel === difficulty);
+      const passages = atLevel.length > 0 ? atLevel : all;
       const passageNumber = passages.length > 0 ? pickOne(passages).passageNumber : 1;
-      const passage = set ? getVocabPassageFromSet(set, passageNumber) : undefined;
+      const passage = set ? getVocabPassageFromSet(set, passageNumber, difficulty) : undefined;
       if (!alive) return;
       if (!passage) {
         setState({ status: "error" });

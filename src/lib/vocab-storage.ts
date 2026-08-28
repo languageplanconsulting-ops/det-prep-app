@@ -509,10 +509,22 @@ export function getVocabRoundStats(round: VocabRoundNum): {
   };
 }
 
+/**
+ * Passage numbers restart at 1 inside each contentLevel of a slot, so a slot holding all three
+ * levels has three passages numbered 1. Pass `contentLevel` whenever the caller knows it —
+ * without it the lookup returns whichever level sorts first (easy).
+ */
 export function getVocabPassageFromSet(
   set: VocabSet,
   passageNumber: number,
+  contentLevel?: VocabSessionLevel,
 ): VocabPassageUnit | undefined {
+  if (contentLevel) {
+    const atLevel = set.passages.find(
+      (p) => p.passageNumber === passageNumber && p.contentLevel === contentLevel,
+    );
+    if (atLevel) return atLevel;
+  }
   return set.passages.find((p) => p.passageNumber === passageNumber);
 }
 

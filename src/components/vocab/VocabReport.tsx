@@ -23,6 +23,21 @@ import type {
   VocabSessionLevel,
 } from "@/types/vocab";
 
+/**
+ * Breaks one Thai explanation string into short, scannable bullet points — ADHD-friendly review.
+ * Splits on sentence stops, the Thai middot, dashes and newlines, drops empties, trims each piece.
+ */
+function explanationBullets(text: string): string[] {
+  if (!text?.trim()) return [];
+  // The meaning is already shown on its own line ("แปลว่า …"), so drop a leading gloss clause
+  // to avoid repeating it as the first bullet.
+  const body = text.replace(/^\s*แปลว่า\s*[‘'’"][^‘'’".]+[’'‘"]\s*/, "");
+  return body
+    .split(/\n+|(?<=[。.!?])\s+|\s+·\s+|\s+—\s+|·/)
+    .map((s) => s.replace(/^[-•·\s]+/, "").trim())
+    .filter((s) => s.length > 0);
+}
+
 export function VocabReport({
   round,
   sessionLevel,
@@ -54,14 +69,18 @@ export function VocabReport({
     sfxCelebrate("md");
   }, []);
   const maxScore = VOCAB_SESSION_MAX[sessionLevel];
-  const correctCount = rows.filter((r) => r.isCorrect).length;
-  const score = Math.round((correctCount / 6) * maxScore);
-  const coachText =
-    correctCount === 6
-      ? "เต็ม 6/6! คุณเข้าใจบริบทของทุกช่องเลย เก่งมากจริงๆ 🎉"
-      : correctCount >= 4
-        ? `ทำได้ดีมาก — ถูก ${correctCount} จาก 6 ช่อง ลองอ่านคำอธิบายของช่องที่ผิดด้านล่าง แล้วสังเกตว่าทำไมคำนั้นถึงเข้ากับประโยคได้ดีกว่า`
-        : `ไม่เป็นไรเลย ${correctCount} จาก 6 ช่อง เป็นจุดเริ่มต้นที่ดี — เคล็ดลับคือ อ่านทั้งประโยคก่อนเดา แล้วดูว่าคำไหนเข้ากับความหมายและไวยากรณ์ ลองดูคำอธิบายทีละข้อด้านล่างนะ`;
+  // Blank count varies by contentLevel (easy/medium 10, hard 8), so every ratio below is against
+  // the passage's own blanks — a constant would score a 10-blank passage over 100%.
+  const blankCount = rows.length;
+  // Count can never exceed the number of blanks — clamp so a "8 out of 6" can't display.
+  const correctCount = Math.min(rows.filter((r) => r.isCorrect).length, blankCount);
+  const score = blankCount > 0 ? Math.round((correctCount / blankCount) * maxScore) : 0;
+  const allCorrect = blankCount > 0 && correctCount === blankCount;
+  const coachText = allCorrect
+    ? `เต็ม ${correctCount}/${blankCount}! คุณเข้าใจบริบทของทุกช่องเลย เก่งมากจริงๆ 🎉`
+    : correctCount >= Math.ceil(blankCount * 0.6)
+      ? `ทำได้ดีมาก — ถูก ${correctCount} จาก ${blankCount} ช่อง ลองอ่านคำอธิบายของช่องที่ผิดด้านล่าง แล้วสังเกตว่าทำไมคำนั้นถึงเข้ากับประโยคได้ดีกว่า`
+      : `ไม่เป็นไรเลย ${correctCount} จาก ${blankCount} ช่อง เป็นจุดเริ่มต้นที่ดี — เคล็ดลับคือ อ่านทั้งประโยคก่อนเดา แล้วดูว่าคำไหนเข้ากับความหมายและไวยากรณ์ ลองดูคำอธิบายทีละข้อด้านล่างนะ`;
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-neutral-900">
@@ -75,70 +94,93 @@ export function VocabReport({
               SCORE: {score}/{maxScore}
             </p>
             <p className="mt-2 text-sm text-neutral-600">
-              {correctCount} of 6 correct · weighted by your chosen level.
+              {correctCount} of {blankCount} correct · weighted by your chosen level.
             </p>
           </header>
 
-          <CelebrateMascot title={correctCount === 6 ? "เต็ม 6/6! 🎉" : "ทำได้ดีมาก!"} />
+          <CelebrateMascot
+            title={allCorrect ? `เต็ม ${correctCount}/${blankCount}! 🎉` : "ทำได้ดีมาก!"}
+          />
           <CoachBubble>{coachText}</CoachBubble>
 
           <section className="ep-brutal-reading rounded-sm border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#000]">
-            <h2 className="text-lg font-black uppercase tracking-tight text-neutral-900">
-              Question review
-            </h2>
-            <ul className="mt-6 space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-black uppercase tracking-tight text-neutral-900">
+                ทบทวนทีละช่อง
+              </h2>
+              <div className="flex items-center gap-2 text-xs font-black">
+                <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-emerald-800">
+                  ✅ ถูก {correctCount}
+                </span>
+                <span className="rounded-full bg-red-100 px-2.5 py-1 text-red-800">
+                  ❌ ทบทวน {blankCount - correctCount}
+                </span>
+              </div>
+            </div>
+            <p className="mt-1.5 text-sm text-neutral-600">
+              อ่านทีละช่องแบบสั้น ๆ — สังเกตว่าทำไมคำที่ถูกถึงเข้ากับประโยคได้ดีกว่า
+            </p>
+            <ul className="mt-5 space-y-4">
               {rows.map((r, i) => {
                 const stagger = staggerIn(i);
+                const meaningTh =
+                  passage.correctWords[i]?.meaningTh?.trim() ||
+                  (passage.correctWords[i]?.synonyms.length
+                    ? passage.correctWords[i]!.synonyms.join(", ")
+                    : "");
+                const bullets = explanationBullets(r.explanationThai);
                 return (
                 <li
                   key={r.blankIndex}
-                  className={`ep-brutal-reading rounded-sm border-4 p-5 shadow-[4px_4px_0_0_#000] ${
-                    r.isCorrect
-                      ? "border-emerald-600 bg-emerald-50/90"
-                      : "border-red-600 bg-red-50/90"
+                  className={`ep-brutal-reading rounded-sm border-4 p-4 shadow-[4px_4px_0_0_#000] ${
+                    r.isCorrect ? "border-emerald-600 bg-emerald-50/90" : "border-red-600 bg-red-50/90"
                   } ${stagger.className}`}
                   style={stagger.style}
                 >
-                  <p
-                    className={`ep-stat text-xs font-bold uppercase tracking-[0.2em] ${
-                      r.isCorrect ? "text-emerald-800" : "text-red-800"
-                    }`}
-                  >
-                    Blank {r.blankIndex}
+                  {/* line 1 — verdict + blank number */}
+                  <p className={`flex items-center gap-2 text-sm font-black ${r.isCorrect ? "text-emerald-800" : "text-red-800"}`}>
+                    <span className="text-base">{r.isCorrect ? "✅" : "❌"}</span>
+                    ช่อง {r.blankIndex}
+                    <span className="font-semibold text-neutral-500">· {r.isCorrect ? "ถูกต้อง" : "ยังไม่ถูก"}</span>
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-neutral-900">{r.question}</p>
-                  <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
-                    <div
-                      className={`rounded-sm border-4 bg-white p-3 shadow-[2px_2px_0_0_#000] ${
-                        r.isCorrect ? "border-emerald-700" : "border-red-700"
-                      }`}
-                    >
-                      <p
-                        className={`ep-stat text-[10px] font-bold uppercase ${
-                          r.isCorrect ? "text-emerald-800" : "text-red-800"
-                        }`}
-                      >
-                        Your answer
-                      </p>
-                      <p
-                        className={`mt-1 font-medium ${
-                          r.isCorrect ? "text-emerald-950" : "text-red-950"
-                        }`}
-                      >
-                        {r.userAnswer || "—"}
-                      </p>
+
+                  {/* the answer at a glance */}
+                  <ul className="mt-2.5 space-y-1.5 text-sm">
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 font-black text-emerald-700">✔</span>
+                      <span className="text-neutral-900">
+                        <span className="font-bold">คำที่ถูก:</span>{" "}
+                        <span className="rounded bg-emerald-100 px-1.5 py-0.5 font-black text-emerald-800">
+                          {r.correctAnswer}
+                        </span>
+                        {meaningTh ? <span className="text-neutral-600"> — แปลว่า {meaningTh}</span> : null}
+                      </span>
+                    </li>
+                    {!r.isCorrect ? (
+                      <li className="flex items-start gap-2">
+                        <span className="mt-0.5 font-black text-red-600">✘</span>
+                        <span className="text-neutral-900">
+                          <span className="font-bold">คุณตอบ:</span>{" "}
+                          <span className="font-semibold text-red-700 line-through">{r.userAnswer || "—"}</span>
+                        </span>
+                      </li>
+                    ) : null}
+                  </ul>
+
+                  {/* why — split into little bullets */}
+                  {bullets.length > 0 ? (
+                    <div className="mt-3 rounded-lg border-2 border-black/10 bg-white/80 p-3">
+                      <p className="text-[11px] font-black uppercase tracking-wide text-ep-blue">ทำไมถึงใช่ 💡</p>
+                      <ul className="mt-1.5 space-y-1.5">
+                        {bullets.map((b, bi) => (
+                          <li key={bi} className="flex items-start gap-2 text-[13px] leading-6 text-neutral-800">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-ep-blue" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                    <div className="rounded-sm border-4 border-black bg-ep-yellow/35 p-3 shadow-[2px_2px_0_0_#000]">
-                      <p className="ep-stat text-[10px] font-bold uppercase text-neutral-700">
-                        Correct answer
-                      </p>
-                      <p className="mt-1 font-medium text-neutral-900">{r.correctAnswer}</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 rounded-sm border-4 border-black bg-white p-3 text-sm shadow-[2px_2px_0_0_#000]">
-                    <p className="font-bold text-ep-blue">Explanation (ไทย)</p>
-                    <p className="mt-2 whitespace-pre-wrap text-neutral-800">{r.explanationThai}</p>
-                  </div>
+                  ) : null}
                 </li>
                 );
               })}
