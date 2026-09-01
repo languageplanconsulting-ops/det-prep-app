@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
+import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import {
   canAccessDifficulty,
   canAccessFeature,
@@ -55,7 +56,10 @@ function withAudioUrls(payload: unknown, siteOrigin: string): unknown {
 
 export async function GET(request: Request) {
   const { user, supabase } = await getRequestAuthUser(request);
-  if (!user) {
+  // Admins may be signed in with the simple admin code only (no Supabase session) — that used
+  // to 401 here, which the timed-random roller reported as "ต้องเข้าสู่ระบบก่อน". Let them in.
+  const adminAccess = await getAdminAccess(request);
+  if (!user && !adminAccess.ok) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -84,10 +88,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Query set is required for meta" }, { status: 400 });
   }
 
-  const adminAccess = await getAdminAccess();
-  const profile = adminAccess.ok
-    ? null
-    : await readAuthoritativeProfile(user.id, supabase, "tier, tier_expires_at, vip_granted_by_course");
+  const profile =
+    adminAccess.ok || !user
+      ? null
+      : await readAuthoritativeProfile(user.id, supabase, "tier, tier_expires_at, vip_granted_by_course");
   const tier = adminAccess.ok
     ? "vip"
     : resolveEffectiveTierFromProfile({
@@ -117,7 +121,9 @@ export async function GET(request: Request) {
   }
 
   try {
-    const { snapshot, updatedAt } = await fetchPracticeContentSnapshot(supabase);
+    // A code-only admin has no Supabase session, so read the shared bank with the service role.
+    const contentClient = !user && adminAccess.ok ? createServiceRoleSupabase() : supabase;
+    const { snapshot, updatedAt } = await fetchPracticeContentSnapshot(contentClient);
     const siteOrigin = getSiteUrl().origin;
 
     if (listOnly) {
