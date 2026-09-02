@@ -6,7 +6,12 @@ import { useSearchParams } from "next/navigation";
 
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { DailyPracticeRunner } from "@/components/practice/daily-runner/DailyPracticeRunner";
-import { DAILY_SKILL_META, type DailyPlanSkill } from "@/lib/study-plan/daily-plan";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
+import {
+  DAILY_SKILL_META,
+  DAILY_SKILL_STUDY_SKILL,
+  type DailyPlanSkill,
+} from "@/lib/study-plan/daily-plan";
 
 const VALID_SKILLS = Object.keys(DAILY_SKILL_META) as DailyPlanSkill[];
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -87,5 +92,13 @@ function DailyRunPageInner() {
     );
   }
 
-  return <DailyPracticeRunner date={date} onlySkill={onlySkill} effectiveTier={effectiveTier} />;
+  return (
+    <StudySessionBoundary
+      skill={onlySkill ? DAILY_SKILL_STUDY_SKILL[onlySkill] : "literacy"}
+      exerciseType="daily_practice"
+      setId={onlySkill ? `${date}:${onlySkill}` : date}
+    >
+      <DailyPracticeRunner date={date} onlySkill={onlySkill} effectiveTier={effectiveTier} />
+    </StudySessionBoundary>
+  );
 }

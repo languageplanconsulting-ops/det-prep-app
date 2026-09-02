@@ -12,6 +12,7 @@
  */
 
 import { InteractiveReadingRunner } from "@/components/reading/InteractiveReadingRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { IR_SETS, IR_STEP_LABELS_TH, irProjectForSteps, irStepPromptEn } from "@/lib/interactive-reading";
 import { DRILLS, type DrillKind } from "@/lib/reading-drills";
 
@@ -27,13 +28,15 @@ export function ReadingDrillPage({ kind }: { kind: DrillKind }) {
         <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{irStepPromptEn(d.steps[0]!)}</p>
         <p className="mt-2 text-[13px] leading-6 text-slate-700">{d.teachTh}</p>
       </div>
-      <InteractiveReadingRunner
-        sets={sets}
-        steps={d.steps}
-        progressTopic={`ir-${kind}`}
-        celebrateTitle="ฝึกครบแล้ว!"
-        celebrateSub={`คุณฝึก ${d.th} ด้วยหน้าจอและเกณฑ์เดียวกับข้อสอบจริง`}
-      />
+      <StudySessionBoundary skill="comprehension" exerciseType="lesson_reading_skills" setId={kind}>
+        <InteractiveReadingRunner
+          sets={sets}
+          steps={d.steps}
+          progressTopic={`ir-${kind}`}
+          celebrateTitle="ฝึกครบแล้ว!"
+          celebrateSub={`คุณฝึก ${d.th} ด้วยหน้าจอและเกณฑ์เดียวกับข้อสอบจริง`}
+        />
+      </StudySessionBoundary>
     </main>
   );
 }

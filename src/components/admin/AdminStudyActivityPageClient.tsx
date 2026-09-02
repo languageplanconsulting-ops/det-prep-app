@@ -27,21 +27,21 @@ type StudyRow = {
   report_payload: Record<string, unknown> | null;
 };
 
-const EXERCISE_OPTIONS = [
-  "all",
-  "read_then_write",
-  "read_then_speak",
-  "write_about_photo",
-  "speak_about_photo",
-  "interactive_speaking",
-] as const;
+/**
+ * The filter list is derived from the rows themselves, not hardcoded. Every learner-facing
+ * activity now opens a study session (exams, mock tests, บทเรียน lessons, the daily-practice
+ * and timed-random runners, mini-study, notebook review), so a fixed list would silently hide
+ * whole features the moment one is added.
+ */
+function exerciseLabel(type: string): string {
+  return type.replace(/_/g, " ");
+}
 
 export function AdminStudyActivityPageClient() {
   const [rows, setRows] = useState<StudyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [exerciseFilter, setExerciseFilter] =
-    useState<(typeof EXERCISE_OPTIONS)[number]>("all");
+  const [exerciseFilter, setExerciseFilter] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -64,6 +64,17 @@ export function AdminStudyActivityPageClient() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  /** Every exercise_type present in the data, most-used first. */
+  const exerciseOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      const type = row.exercise_type?.trim();
+      if (!type) continue;
+      counts.set(type, (counts.get(type) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }, [rows]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -91,7 +102,8 @@ export function AdminStudyActivityPageClient() {
           Study activity dashboard
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-neutral-600">
-          Recent learner activity across speaking and writing-style exercises, including saved
+          Every learner activity that opens a study session — exams, mock tests, บทเรียน lessons,
+          daily-practice and timed-random runs, mini-study, and notebook review — with saved
           scores, learner submissions, and compact report snapshots when available.
         </p>
       </header>
@@ -111,14 +123,13 @@ export function AdminStudyActivityPageClient() {
             Exercise
             <select
               value={exerciseFilter}
-              onChange={(e) =>
-                setExerciseFilter(e.target.value as (typeof EXERCISE_OPTIONS)[number])
-              }
+              onChange={(e) => setExerciseFilter(e.target.value)}
               className="mt-2 w-full border-2 border-black bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal"
             >
-              {EXERCISE_OPTIONS.map((option) => (
+              <option value="all">All activity ({exerciseOptions.length} types)</option>
+              {exerciseOptions.map(([option, count]) => (
                 <option key={option} value={option}>
-                  {option === "all" ? "All production tasks" : option}
+                  {exerciseLabel(option)} ({count})
                 </option>
               ))}
             </select>

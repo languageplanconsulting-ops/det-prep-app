@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { RealWordLessonRunner } from "@/components/lessons/RealWordLessonRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import type { RealWordTier } from "@/lib/realword-lesson";
 
 function isTier(s: string): s is RealWordTier {
@@ -27,7 +28,13 @@ export default async function RealWordLessonUnitPage({
 
   return (
     <main className="mx-auto max-w-xl px-4 py-7 sm:px-6">
-      <RealWordLessonRunner tier={tierRaw} unit={unit} />
+      <StudySessionBoundary
+        skill="literacy"
+        exerciseType="lesson_real_word"
+        setId={`${tierRaw}:${unit}`}
+      >
+        <RealWordLessonRunner tier={tierRaw} unit={unit} />
+      </StudySessionBoundary>
     </main>
   );
 }

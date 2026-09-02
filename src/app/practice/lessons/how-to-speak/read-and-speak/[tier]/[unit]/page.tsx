@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ReadSpeakLessonRunner } from "@/components/lessons/ReadSpeakLessonRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import type { ReadSpeakTier } from "@/lib/readspeak-lessons";
 
 function isTier(s: string): s is ReadSpeakTier {
@@ -25,7 +26,13 @@ export default async function ReadSpeakUnitPage({
   }
   return (
     <main className="mx-auto max-w-xl px-4 py-7 sm:px-6">
-      <ReadSpeakLessonRunner tier={tierRaw} unit={unit} />
+      <StudySessionBoundary
+        skill="production"
+        exerciseType="lesson_read_then_speak"
+        setId={`${tierRaw}:${unit}`}
+      >
+        <ReadSpeakLessonRunner tier={tierRaw} unit={unit} />
+      </StudySessionBoundary>
     </main>
   );
 }

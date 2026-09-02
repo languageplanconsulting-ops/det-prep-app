@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PhotoWriteLessonRunner } from "@/components/lessons/PhotoWriteLessonRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import type { PhotoWriteTier } from "@/lib/photo-write-lessons";
 
 function isTier(s: string): s is PhotoWriteTier {
@@ -25,7 +26,13 @@ export default async function PhotoWriteUnitPage({
   }
   return (
     <main className="mx-auto max-w-xl px-4 py-7 sm:px-6">
-      <PhotoWriteLessonRunner tier={tierRaw} unit={unit} />
+      <StudySessionBoundary
+        skill="production"
+        exerciseType="lesson_write_about_photo"
+        setId={`${tierRaw}:${unit}`}
+      >
+        <PhotoWriteLessonRunner tier={tierRaw} unit={unit} />
+      </StudySessionBoundary>
     </main>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DictationLessonRunner } from "@/components/lessons/DictationLessonRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import type { DictationTier } from "@/lib/dictation-lessons";
 
 function isTier(s: string): s is DictationTier {
@@ -27,7 +28,13 @@ export default async function DictationLessonUnitPage({
 
   return (
     <main className="mx-auto max-w-xl px-4 py-7 sm:px-6">
-      <DictationLessonRunner tier={tierRaw} unit={unit} />
+      <StudySessionBoundary
+        skill="literacy"
+        exerciseType="lesson_dictation"
+        setId={`${tierRaw}:${unit}`}
+      >
+        <DictationLessonRunner tier={tierRaw} unit={unit} />
+      </StudySessionBoundary>
     </main>
   );
 }
