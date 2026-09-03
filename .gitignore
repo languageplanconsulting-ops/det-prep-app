@@ -67,3 +67,4 @@ tmp/
 scratchpad-*.mjs
 content-bank-backup-*.json
 generated-reading-exams/
+.env*

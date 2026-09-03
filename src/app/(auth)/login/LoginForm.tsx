@@ -55,6 +55,16 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
     return () => window.removeEventListener("hashchange", go);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const error = new URLSearchParams(window.location.search).get("error");
+    if (error === "link_invalid" || error === "auth_failed") {
+      setErr(
+        "This reset link is invalid or has already been used — please request a new one. / ลิงก์รีเซ็ตหมดอายุหรือถูกใช้ไปแล้ว กรุณากดขอลิงก์ใหม่อีกครั้ง",
+      );
+    }
+  }, []);
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr("");
