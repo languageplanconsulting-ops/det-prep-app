@@ -67,9 +67,15 @@ export async function GET(req: Request) {
   if (!access.ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const svc = createServiceRoleSupabase();
-  const { data, error } = await svc.from("photo_speak_items").select("id").eq("is_active", true);
+  // head:true asks Postgres for the count and sends no rows back. The admin
+  // workspace polls this every 5s, so shipping 190 ids each time was ~5GB/month
+  // of egress from a single tab left open.
+  const { count, error } = await svc
+    .from("photo_speak_items")
+    .select("id", { count: "exact", head: true })
+    .eq("is_active", true);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ count: data?.length ?? 0 });
+  return NextResponse.json({ count: count ?? 0 });
 }
 
 export async function POST(req: Request) {
