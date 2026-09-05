@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AdminLandingPageClient } from "@/components/landing/AdminLandingPageClient";
+import { FastTrackLanding } from "@/components/landing/FastTrackLanding";
 
 export const metadata: Metadata = {
   title: "Duolingo English Test Prep Thailand | Mock Test, Instant Feedback, Guide",
@@ -18,5 +18,5 @@ export default async function Home({ searchParams }: HomeProps) {
   const initialFastTrackOpen =
     ftRaw === "1" || (Array.isArray(ftRaw) && ftRaw[0] === "1");
 
-  return <AdminLandingPageClient initialFastTrackOpen={initialFastTrackOpen} />;
+  return <FastTrackLanding initialFastTrackOpen={initialFastTrackOpen} />;
 }
