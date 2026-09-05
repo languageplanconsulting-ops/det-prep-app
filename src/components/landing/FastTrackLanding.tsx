@@ -289,7 +289,7 @@ const BODY_HTML = `<div class="wrap">
         Duolingo English Test · Fast Track
       </span>
       <h1>เรียนคอร์สแล้ว<br>มา<em>ลงสนามจริง</em>กัน</h1>
-      <p class="sub">แพลตฟอร์มฝึกของคอร์ส <b>English Plan Duolingo Fast Track</b> — เอาแพเทิร์นที่เรียนมา ลองใช้จริง แล้วรู้จุดอ่อนใน 1 นาที</p>
+      <p class="sub">แพลตฟอร์มฝึกของคอร์ส <b>English Plan Duolingo Fast Track</b> — เอา Pattern ที่เรียนมา ลองใช้จริง แล้วรู้จุดอ่อนใน 1 นาที</p>
       <div class="cta-row">
         <a class="btn btn-p btn-lg" href="/mini-diagnosis/start">เช็กระดับฟรี</a>
         <a class="btn btn-y btn-lg" href="https://www.language-plan.com/courses/duolingo-fast-track">ดูคอร์ส Fast Track</a>
@@ -352,19 +352,19 @@ const BODY_HTML = `<div class="wrap">
   <!-- ============ LOOP ============ -->
   <section class="s">
     <div class="head">
-      <h2>คอร์สสอน<em>แพเทิร์น</em><br>ที่นี่คือที่ที่คุณเอาไปใช้</h2>
-      <p class="lede">รู้แพเทิร์นแล้วยังไม่พอ — ต้องรู้ว่าเวลาลงสนามจริงและเวลาเดิน คุณพลาดตรงไหน</p>
+      <h2>คอร์สสอน <em>Pattern</em><br>ที่นี่คือที่ที่คุณเอาไปใช้</h2>
+      <p class="lede">รู้ Pattern แล้วยังไม่พอ — ต้องรู้ว่าเวลาลงสนามจริงและเวลาเดิน คุณพลาดตรงไหน</p>
     </div>
     <div class="loop">
       <div class="step">
         <svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FFCC00"/>
           <path d="M19 22h22M19 30h22M19 38h14" stroke="#6B5500" stroke-width="3.4" stroke-linecap="round"/></svg>
-        <h3>เรียนแพเทิร์น</h3><p>คอร์ส Fast Track ให้แพเทิร์นเขียนระดับ 130+ มาเป็นโครง</p>
+        <h3>เรียน Pattern</h3><p>คอร์ส Fast Track ให้ Pattern เขียนระดับ 130+ มาเป็นโครง</p>
       </div>
       <div class="step">
         <svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#004AAD"/>
           <path d="M36 18l7 7-16 16-9 2 2-9 16-16z" stroke="#fff" stroke-width="3.4" fill="none" stroke-linejoin="round"/></svg>
-        <h3>ลงสนามจริง</h3><p>เอาแพเทิร์นมาตอบโจทย์จริง จับเวลาเหมือนสอบ</p>
+        <h3>ลงสนามจริง</h3><p>เอา Pattern มาตอบโจทย์จริง จับเวลาเหมือนสอบ</p>
       </div>
       <div class="step">
         <svg class="ring" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#FFCC00"/>
@@ -854,7 +854,7 @@ const BODY_HTML = `<div class="wrap">
 
     <div class="say b">Duolingo บอกคุณว่าได้กี่คะแนน<br>เราบอกว่า<span style="color:#FFCC00">ทำไม</span></div>
     <p class="lede" style="text-align:center;max-width:62ch;margin:34px auto 0">
-      รายงานทางการให้ตัวเลขกับคะแนนแยกหมวดมา แล้วหยุดแค่นั้น
+      Official report ของ Duolingo ให้ตัวเลขกับคะแนนแยกหมวดมา แล้วหยุดแค่นั้น
       มันไม่บอกว่าข้อไหนที่คุณพลาด ประโยคไหนที่ฉุดคะแนน และพรุ่งนี้ควรฝึกอะไรต่อ
     </p>
   </section>
