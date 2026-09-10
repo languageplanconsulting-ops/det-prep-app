@@ -471,7 +471,15 @@ export function saveDictationAttempt(args: {
     userId: getCurrentBrowserUserId() ?? undefined,
   };
   m[k] = next;
-  localStorage.setItem(DICTATION_PROGRESS_KEY, JSON.stringify(m));
+  // Never let a full or blocked localStorage (iOS private mode, quota reached)
+  // throw here — that would abort submitPractice before it shows the report, and
+  // the learner just sees a frozen "submit does nothing" screen. The score is
+  // also sent to the server below, so a failed local write only loses the cache.
+  try {
+    localStorage.setItem(DICTATION_PROGRESS_KEY, JSON.stringify(m));
+  } catch (err) {
+    console.warn("[dictation] could not persist progress locally:", err);
+  }
   emitDictationUpdate();
   void postPracticeAttempt({
     taskType: "dictation",

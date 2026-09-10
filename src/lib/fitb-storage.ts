@@ -363,7 +363,15 @@ export function saveFitbProgress(args: {
     userId: getCurrentBrowserUserId() ?? undefined,
   };
   m[k] = next;
-  localStorage.setItem(FITB_PROGRESS_KEY, JSON.stringify(m));
+  // Never let a full or blocked localStorage (iOS private mode, quota reached)
+  // throw here — that would abort submitAttempt before it shows the report, and
+  // the learner just sees a frozen "submit does nothing" screen. The score is
+  // also sent to the server below, so a failed local write only loses the cache.
+  try {
+    localStorage.setItem(FITB_PROGRESS_KEY, JSON.stringify(m));
+  } catch (err) {
+    console.warn("[fitb] could not persist progress locally:", err);
+  }
   emitFitbUpdate();
   void postPracticeAttempt({
     taskType: "fill_in_blanks",
