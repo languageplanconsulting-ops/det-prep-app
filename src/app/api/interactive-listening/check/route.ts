@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateGradingJsonObject } from "@/lib/grading-llm-generate";
+import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
   const items = Array.isArray(raw) ? raw.filter(isItem).slice(0, 12) : [];
   if (!items.length) return NextResponse.json({ results: [] });
 
-  const model = process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
+  const model = await resolveGeminiTextModel();
   const keys = resolveGradingKeysFromRequest(req, model);
 
   try {

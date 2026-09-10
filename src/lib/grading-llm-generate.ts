@@ -128,6 +128,74 @@ export async function generateGradingJsonCompletion(opts: {
 }
 
 /**
+ * When the admin-selected provider can't serve the request at all, we fall back
+ * to another provider we have a key for. These are the fallback models, one per
+ * provider — chosen to be cheap and currently live.
+ */
+const FALLBACK_GEMINI_MODEL = "gemini-flash-latest";
+const FALLBACK_ANTHROPIC_MODEL = "claude-haiku-4-5";
+const FALLBACK_OPENAI_MODEL = "gpt-4o-mini";
+
+/**
+ * True when the *provider itself* cannot serve this request — as opposed to a
+ * transient blip (retry same model) or a bad payload (fail fast). These are the
+ * cases where switching to another provider is the only thing that helps:
+ *  - out of money: Gemini "prepayment credits are depleted" (429),
+ *    Anthropic "credit balance is too low" (400), OpenAI insufficient_quota,
+ *  - the pinned model was retired: Gemini 404 "no longer available",
+ *  - the key is rejected: 401 / 403.
+ * A 429 quota, a retired model, and a depleted balance all took the whole app
+ * down at once in production — every AI-graded part failing together — because
+ * there was nowhere else to go. This is what gives us somewhere to go.
+ */
+function isProviderUnavailableError(err: unknown): boolean {
+  const status = (err as { status?: number })?.status;
+  if (status === 401 || status === 403 || status === 404 || status === 429) return true;
+  const msg = String((err as Error)?.message ?? err).toLowerCase();
+  return (
+    msg.includes("credit balance is too low") ||
+    msg.includes("credits are depleted") ||
+    msg.includes("prepayment credits") ||
+    msg.includes("insufficient_quota") ||
+    msg.includes("quota") ||
+    msg.includes("resource_exhausted") ||
+    msg.includes("no longer available") ||
+    msg.includes("not_found") ||
+    msg.includes("permission") ||
+    msg.includes("api key")
+  );
+}
+
+function providerOfModel(model: string): "anthropic" | "openai" | "gemini" {
+  if (isAnthropicGradingModel(model)) return "anthropic";
+  if (isOpenAiGradingModel(model)) return "openai";
+  return "gemini";
+}
+
+/**
+ * Ordered list of models to try: the admin's choice first, then a fallback for
+ * every other provider we hold a key for. Deduped by model id, so a provider
+ * that is already the primary isn't retried pointlessly.
+ */
+function buildGradingModelChain(primaryModel: string, keys: GradingLlmKeys): string[] {
+  const chain: string[] = [];
+  const add = (model: string, hasKey: boolean) => {
+    if (!hasKey) return;
+    const trimmed = model.trim();
+    if (!trimmed || chain.includes(trimmed)) return;
+    chain.push(trimmed);
+  };
+  const primaryProvider = providerOfModel(primaryModel);
+  // The primary's own key was validated upstream by resolveGradingKeysFromRequest.
+  add(primaryModel, true);
+  add(FALLBACK_GEMINI_MODEL, !!keys.geminiApiKey?.trim());
+  add(FALLBACK_ANTHROPIC_MODEL, !!keys.anthropicApiKey?.trim());
+  add(FALLBACK_OPENAI_MODEL, !!keys.openAiApiKey?.trim());
+  void primaryProvider;
+  return chain;
+}
+
+/**
  * Provider hiccups that are worth another attempt: overload / rate limit /
  * gateway blips and dropped sockets. A 400 or a bad API key is not retryable —
  * retrying those just burns the learner's wait.
@@ -192,6 +260,45 @@ export async function generateGradingJsonObject(opts: {
   deadlineAt?: number;
 }): Promise<GradingJsonObjectResult> {
   const label = opts.operation ?? "grading";
+  const chain = buildGradingModelChain(opts.model, opts.keys);
+  let lastError: unknown;
+
+  for (let i = 0; i < chain.length; i++) {
+    const model = chain[i]!;
+    try {
+      return await gradeWithSingleModel({ ...opts, model, label });
+    } catch (err) {
+      lastError = err;
+      const isLast = i === chain.length - 1;
+      // Only switch providers when this one genuinely can't serve us (out of
+      // credit, retired model, rejected key). A bad payload or an unparseable
+      // reply would fail on every provider, so we don't burn the chain on it.
+      if (isLast || !isProviderUnavailableError(err)) break;
+      if (!hasTimeForAnotherAttempt(opts.deadlineAt, 0)) {
+        console.warn(`[${label}] out of time budget, not falling back`);
+        break;
+      }
+      console.warn(
+        `[${label}] provider for "${model}" unavailable, falling back to "${chain[i + 1]}":`,
+        err instanceof Error ? err.message : err,
+      );
+    }
+  }
+
+  throw lastError;
+}
+
+/** One model, with transient-error and unparseable-JSON retries against that same model. */
+async function gradeWithSingleModel(opts: {
+  model: string;
+  keys: GradingLlmKeys;
+  systemInstruction: string;
+  userPayload: string;
+  temperature?: number;
+  label: string;
+  deadlineAt?: number;
+}): Promise<GradingJsonObjectResult> {
+  const { label } = opts;
   let lastError: unknown;
   let lastAttemptMs = 0;
 
@@ -213,6 +320,9 @@ export async function generateGradingJsonObject(opts: {
     } catch (err) {
       lastAttemptMs = Date.now() - startedAt;
       lastError = err;
+      // A provider-unavailable error should stop the same-model retries so the
+      // caller can switch providers instead of waiting out a dead one.
+      if (isProviderUnavailableError(err)) break;
       // A parse failure means we already paid for the tokens — the response
       // just wasn't usable. Both that and a transient provider error are worth
       // one more ask; anything else (bad key, 400) fails fast.
