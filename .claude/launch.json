@@ -4,39 +4,68 @@
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000,
       "autoPort": true
     },
     {
       "name": "static-previews",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["--yes", "serve", "public", "-l", "4599"],
+      "runtimeArgs": [
+        "--yes",
+        "serve",
+        "public",
+        "-l",
+        "4599"
+      ],
       "port": 4599
     },
     {
       "name": "mobile-web",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8081"],
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8081"
+      ],
       "port": 8081
     },
     {
       "name": "mobile-web-2",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8082"],
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8082"
+      ],
       "port": 8082
     },
     {
       "name": "mobile-web-3",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8083"],
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/ongjui/Downloads/det-mobile && npx expo start --web --port 8083"
+      ],
       "port": 8083
     },
     {
       "name": "mobile-web-dist",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd /Users/ongjui/Downloads/det-mobile && npx serve dist -p 8095 -s"],
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/ongjui/Downloads/det-mobile && npx serve dist -p 8095 -s"
+      ],
       "port": 8095
+    },
+    {
+      "name": "embed-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "/Users/ongjui/det-video-build/web/preview/serve.mjs"
+      ],
+      "port": 8899
     }
   ]
 }

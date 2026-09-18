@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
-import { MINI_DIAGNOSIS_STEP_COUNT } from "@/lib/mini-diagnosis/sequence";
+import { MINI_DIAGNOSIS_FREE_LIFETIME_LIMIT, MINI_DIAGNOSIS_STEP_COUNT } from "@/lib/mini-diagnosis/sequence";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 
@@ -42,5 +42,29 @@ export async function GET() {
     .eq("is_active", true)
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ sets: mapCompleteSets(data) });
+
+  const { data: me } = await supabase.from("profiles").select("role,tier").eq("id", user.id).maybeSingle();
+  const isAdmin = me?.role === "admin";
+  const isFreeTier = !isAdmin && (me?.tier ?? "free") === "free";
+
+  const { data: latestResult, count: resultCount } = await supabase
+    .from("mini_diagnosis_results")
+    .select("session_id,actual_total,level_label,created_at", { count: "exact" })
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return NextResponse.json({
+    sets: mapCompleteSets(data),
+    latestResult: latestResult
+      ? {
+          sessionId: latestResult.session_id as string,
+          total: latestResult.actual_total as number,
+          levelLabel: latestResult.level_label as string,
+          createdAt: latestResult.created_at as string,
+        }
+      : null,
+    freeLimitReached: isFreeTier && (resultCount ?? 0) >= MINI_DIAGNOSIS_FREE_LIFETIME_LIMIT,
+  });
 }

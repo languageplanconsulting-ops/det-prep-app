@@ -29,6 +29,7 @@ import {
   scoreRungJsonShape,
   scoreRungRulePrompt,
 } from "@/lib/score-rung-prompt";
+import { GRAMMAR_TOPIC_PROMPT_LIST } from "@/lib/grammar-topics";
 
 function pointsOn160(percent: number, weight: number): number {
   return Math.round(percent * weight * 1.6 * 10) / 10;
@@ -113,7 +114,7 @@ Total 0-160 = (0.4*G + 0.3*V + 0.2*C + 0.1*T) × 1.6, each subscore 0-100.
 
 For EACH criterion summary, include (A) brief assessment and (B) a line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" plus a concrete action tied to THIS learner's wording.
 
-Breakdown items: use issueEn, issueTh. excerpt = exact short quote from the relevant punctuated section. suggestionEn / suggestionTh = concrete fix (bilingual). grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement"). It must lead the fix so the learner knows which rule to revise before reading the explanation. Keep it under ~6 words.
+Breakdown items: use issueEn, issueTh. excerpt = exact short quote from the relevant punctuated section. suggestionEn = the FULL corrected version of the excerpt, in ENGLISH — a real rewritten phrase/sentence the learner could use instead (e.g. excerpt "the thing that make my dog special is" → suggestionEn "the thing that makes my dog special is"). Never abstract advice with no example, and never a Thai translation. suggestionTh = a SHORT Thai explanation of what to change and why; it must quote the corrected English inline and must NEVER be a Thai translation of the learner's sentence — a Thai rendering of the sentence is not a fix and is useless to the learner. If you cannot write a concrete corrected English version, drop that breakdown item entirely. grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement"). It must lead the fix so the learner knows which rule to revise before reading the explanation. Keep it under ~6 words. Also include grammarTopicEn — the SAME topic named in English, chosen from this fixed list so one habit always gets one name across every exam: ${GRAMMAR_TOPIC_PROMPT_LIST}. Pick the closest entry; never invent a new label.
 
 Grammar bands: ~30% A1–A2 issues; ~50% B1–B2; ~70% clean; ~90% ≥1 complex structure; 100% ≥3 complex structures.
 
@@ -198,6 +199,7 @@ function buildUserPayload(
         grammarBreakdown: [
           {
             grammarTopicTh: "string — short Thai grammar topic that leads the fix, e.g. การใช้ if I were",
+            grammarTopicEn: "string — canonical English grammar topic from the allowed list, e.g. Articles",
             excerpt: "string",
             issueEn: "string",
             issueTh: "string",
@@ -354,7 +356,7 @@ export async function generateWritingReportWithGemini(params: {
     followUps.map(() => "");
 
   const modelName =
-    params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+    params.model ?? process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
 
   const { raw, usage } = await generateGradingJsonObject({
     model: modelName,

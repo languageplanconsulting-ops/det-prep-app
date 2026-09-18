@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>English in Chunks — อังกฤษเป็นก้อน</title>
+<style>
+@page{ size:A4; margin:20mm 17mm 20mm 17mm; }
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+body{margin:0; font-family:Georgia,"Charter",serif; font-size:10.6pt; line-height:1.5; color:#1B2A33}
+
+/* ---------- tokens ---------- */
+:root{
+  --ink:#1B2A33; --ink2:#4B5C66; --ink3:#7C8A92;
+  --teal:#0E5E5B; --teal-t:#E3EFEC; --teal-l:#B7D5CE;
+  --red:#AE3427;  --red-t:#F8E7E3;  --red-l:#E8BDB4;
+  --gold:#8A6212; --gold-t:#F6EEDC; --gold-l:#E0CB9B;
+  --gray:#F1F3F1; --rule:#D6DBD7;
+}
+.sans{font-family:"Avenir Next","Avenir","Helvetica Neue",sans-serif}
+.th{font-family:"Sukhumvit Set","Thonburi","Sukhumvit Set",sans-serif; font-size:10.2pt}
+.mono{font-family:Menlo,Consolas,monospace}
+
+
+/* ---------- structure ---------- */
+.page-break{page-break-before:always}
+h1,h2,h3,h4{font-family:"Avenir Next","Avenir",sans-serif; margin:0; text-wrap:balance}
+p{margin:0 0 6pt}
+.lead{font-size:11.4pt; line-height:1.55; color:var(--ink2)}
+
+/* part opener */
+.partopen{page-break-before:always; page-break-after:always; padding-top:58mm}
+.partopen .kicker{font-family:"Avenir Next",sans-serif; font-size:8.6pt; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--teal); margin-bottom:9mm}
+.partopen .pnum{font-family:"Avenir Next",sans-serif; font-weight:600; font-size:64pt;
+  line-height:.85; color:var(--teal-l); letter-spacing:-.03em}
+.partopen h1{font-size:30pt; font-weight:600; line-height:1.06; letter-spacing:-.02em; margin-top:6mm}
+.partopen .thline{font-family:"Sukhumvit Set",sans-serif; font-size:15pt; color:var(--teal); margin-top:4mm}
+.partopen .blurb{margin-top:10mm; padding-top:6mm; border-top:1.6pt solid var(--teal);
+  max-width:118mm; color:var(--ink2); font-size:10.6pt}
+.partopen ul{margin:5mm 0 0; padding-left:14pt; color:var(--ink2); font-size:10pt}
+
+/* chapter opener */
+.chap{page-break-before:always}
+.chap-head{border-bottom:1.6pt solid var(--ink); padding-bottom:4mm; margin-bottom:7mm}
+.chap-head .cn{font-family:"Avenir Next",sans-serif; font-size:8.4pt; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--teal); font-weight:600}
+.chap-head h2{font-size:19pt; font-weight:600; letter-spacing:-.015em; margin-top:2.5mm; line-height:1.12}
+.chap-head .thsub{font-family:"Sukhumvit Set",sans-serif; font-size:12pt; color:var(--ink2); margin-top:1.5mm}
+
+h3{font-size:12.4pt; font-weight:600; margin:9mm 0 3mm; color:var(--ink)}
+h3 .num{color:var(--teal); font-weight:600; margin-right:5pt}
+h4{font-size:10.4pt; font-weight:600; margin:6mm 0 2mm; letter-spacing:.01em}
+
+/* ---------- tables ---------- */
+table{width:100%; border-collapse:collapse; margin:4mm 0 6mm; font-size:9.6pt}
+th{font-family:"Avenir Next",sans-serif; font-size:7.6pt; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink3); text-align:left; padding:0 6pt 3pt; border-bottom:1pt solid var(--ink)}
+td{padding:4.2pt 6pt; border-bottom:.4pt solid var(--rule); vertical-align:top}
+tr{break-inside:avoid}
+td.en{font-family:"Avenir Next",sans-serif; font-weight:600; font-size:9.8pt; white-space:nowrap}
+td.th{font-family:"Sukhumvit Set",sans-serif; font-size:9.6pt; color:var(--ink)}
+td.ex{font-style:italic; color:var(--ink2); font-size:9.4pt}
+td.c{text-align:center; width:1%; white-space:nowrap}
+.us{display:inline-block; font-family:"Avenir Next",sans-serif; font-size:6.8pt; font-weight:600;
+  letter-spacing:.08em; padding:1pt 3.4pt; border-radius:2pt; background:var(--teal-t); color:var(--teal)}
+.sep{display:inline-block; font-family:"Avenir Next",sans-serif; font-size:6.8pt;
+  letter-spacing:.06em; padding:1pt 3.4pt; border-radius:2pt; background:var(--gray); color:var(--ink3)}
+.warn{display:inline-block; font-family:"Avenir Next",sans-serif; font-size:6.8pt; font-weight:600;
+  letter-spacing:.06em; padding:1pt 3.4pt; border-radius:2pt; background:var(--red-t); color:var(--red)}
+
+/* ---------- boxes ---------- */
+.box{break-inside:avoid; border:.8pt solid var(--rule); border-radius:3pt;
+  padding:4.5mm 5mm; margin:5mm 0; background:#FBFCFB}
+.box .bt{font-family:"Avenir Next",sans-serif; font-size:8pt; font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; margin-bottom:2.5mm}
+.box.tip{background:var(--gold-t); border-color:var(--gold-l)} .box.tip .bt{color:var(--gold)}
+.box.trap{background:var(--red-t); border-color:var(--red-l)} .box.trap .bt{color:var(--red)}
+.box.rule{background:var(--teal-t); border-color:var(--teal-l)} .box.rule .bt{color:var(--teal)}
+.box p:last-child{margin-bottom:0}
+
+.bad{color:var(--red); font-family:"Avenir Next",sans-serif; font-weight:500}
+.bad s{text-decoration-thickness:.8pt}
+.good{color:var(--teal); font-family:"Avenir Next",sans-serif; font-weight:600}
+.xr{display:flex; flex-wrap:wrap; align-items:baseline; gap:1mm 2.5mm; margin:2mm 0}
+.xr .m{font-family:"Avenir Next",sans-serif; font-weight:700; font-size:10pt}
+.xr .m.x{color:var(--red)} .xr .m.v{color:var(--teal)}
+
+/* ---------- exercises ---------- */
+.ex-block{break-inside:avoid-page; border-left:2.4pt solid var(--teal); padding:0 0 0 5mm; margin:7mm 0}
+.ex-head{font-family:"Avenir Next",sans-serif; font-size:9pt; font-weight:600; color:var(--teal);
+  letter-spacing:.05em; margin-bottom:1mm}
+.ex-inst{font-size:9.4pt; color:var(--ink2); margin-bottom:3mm}
+.ex-inst .th{color:var(--ink3)}
+ol.q{margin:0; padding-left:16pt; font-size:9.8pt}
+ol.q li{margin-bottom:3.4pt; padding-left:2pt; break-inside:avoid}
+.blank{display:inline-block; min-width:23mm; border-bottom:.6pt solid var(--ink3); margin:0 2pt}
+.blank.sm{min-width:15mm} .blank.lg{min-width:42mm}
+.opts{font-family:"Avenir Next",sans-serif; font-size:8.8pt; color:var(--ink2)}
+.wordbank{background:var(--gray); border-radius:3pt; padding:3mm 4mm; margin:0 0 3.5mm;
+  font-family:"Avenir Next",sans-serif; font-size:9pt; line-height:1.7; color:var(--ink)}
+.wordbank b{font-family:"Avenir Next",sans-serif; font-size:7.4pt; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink3); font-weight:600; display:block; margin-bottom:1mm}
+
+/* ---------- cover ---------- */
+.cover{height:257mm; position:relative; page-break-after:always}
+.cover .band{position:absolute; left:-17mm; right:-17mm; top:-20mm; height:104mm; background:var(--teal)}
+.cover .bandtxt{position:absolute; top:20mm; left:0; right:0; color:#fff}
+.cover .kick{font-family:"Avenir Next",sans-serif; font-size:8.6pt; letter-spacing:.3em;
+  text-transform:uppercase; opacity:.8}
+.cover h1{font-family:"Avenir Next",sans-serif; font-size:44pt; font-weight:600; line-height:.98;
+  letter-spacing:-.03em; margin-top:7mm; color:#fff}
+.cover .thai-title{font-family:"Sukhumvit Set",sans-serif; font-size:23pt; margin-top:5mm; color:#B7D5CE}
+.cover .mid{position:absolute; top:112mm; left:0; right:0}
+.cover .mid h2{font-family:"Avenir Next",sans-serif; font-size:14.5pt; font-weight:500; line-height:1.45;
+  color:var(--ink); max-width:130mm}
+.cover .rule{width:34mm; height:2.4pt; background:var(--red); margin:8mm 0}
+.cover .three{display:grid; grid-template-columns:repeat(3,1fr); gap:5mm; margin-top:10mm}
+.cover .three > div{border-top:1pt solid var(--ink); padding-top:3mm}
+.cover .three .n{font-family:"Avenir Next",sans-serif; font-size:22pt; font-weight:600; color:var(--teal); line-height:1}
+.cover .three .l{font-family:"Avenir Next",sans-serif; font-size:8.6pt; color:var(--ink2); margin-top:1.5mm}
+.cover .three .t{font-family:"Sukhumvit Set",sans-serif; font-size:8.6pt; color:var(--ink3)}
+.cover .foot{position:absolute; bottom:0; left:0; right:0; font-family:"Avenir Next",sans-serif;
+  font-size:9pt; color:var(--ink2); border-top:.8pt solid var(--rule); padding-top:3mm}
+
+/* ---------- toc ---------- */
+.toc h2{font-size:22pt; font-weight:600; letter-spacing:-.02em; margin-bottom:1mm}
+.toc .tsub{font-family:"Sukhumvit Set",sans-serif; font-size:11pt; color:var(--ink2); margin-bottom:8mm}
+.toc-part{font-family:"Avenir Next",sans-serif; font-size:8.4pt; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--teal); font-weight:600; margin:7mm 0 2.5mm; padding-bottom:1.5mm; border-bottom:.8pt solid var(--teal-l)}
+.toc-row{display:flex; align-items:baseline; gap:2mm; font-size:10pt; margin-bottom:2.2mm}
+.toc-row .t{font-family:"Avenir Next",sans-serif}
+.toc-row .t .thn{font-family:"Sukhumvit Set",sans-serif; color:var(--ink3); font-size:9pt}
+.toc-row .dots{flex:1; border-bottom:.5pt dotted var(--ink3); transform:translateY(-2pt)}
+.toc-row .pg{font-family:"Avenir Next",sans-serif; font-variant-numeric:tabular-nums; color:var(--ink2); font-size:9.4pt}
+
+/* ---------- answer key ---------- */
+.key{column-count:2; column-gap:9mm; font-size:8.8pt}
+.key h4{margin:0 0 1.5mm; font-size:9.4pt; color:var(--teal); break-after:avoid}
+.key .kg{break-inside:avoid; margin-bottom:4mm}
+.key ol{margin:0; padding-left:13pt}
+.key li{margin-bottom:1pt}
+.two{column-count:2; column-gap:8mm}
+.stats-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:.8pt solid var(--rule);
+  border-radius:3pt; overflow:hidden; margin:5mm 0}
+.stats-strip div{padding:3.5mm 4mm; border-right:.4pt solid var(--rule)}
+.stats-strip div:last-child{border-right:0}
+.stats-strip .n{font-family:"Avenir Next",sans-serif; font-size:17pt; font-weight:600; color:var(--teal); line-height:1}
+.stats-strip .l{font-size:8.4pt; color:var(--ink2); margin-top:1.5mm; line-height:1.3}
+</style></head><body>
+
+<!-- ==================== COVER ==================== -->
+<section class="cover">
+  <div class="band"></div>
+  <div class="bandtxt">
+    <div class="kick">American English · CEFR A2–B1 · For Thai Learners</div>
+    <h1>English<br>in Chunks</h1>
+    <div class="thai-title">อังกฤษเป็นก้อน</div>
+  </div>
+  <div class="mid">
+    <h2>Phrasal Verbs, Idioms, and the Prepositions<br>Thai Speakers Get Wrong</h2>
+    <div class="rule"></div>
+    <p class="th" style="font-size:11pt; max-width:128mm; color:#4B5C66">
+      ท่องศัพท์มาเป็นพันคำ แต่ยังพูดไม่ออก — ปัญหาไม่ได้อยู่ที่จำนวนคำ
+      แต่อยู่ที่คุณยังไม่ได้เรียน “ก้อนคำ” ที่เจ้าของภาษาใช้จริง หนังสือเล่มนี้รวบรวมไว้ให้ครบ
+      พร้อมกับดักที่คนไทยพลาดบ่อยที่สุด
+    </p>
+    <div class="three">
+      <div><div class="n">170</div><div class="l">Phrasal verbs</div><div class="t">คำกริยาวลี</div></div>
+      <div><div class="n">80</div><div class="l">Idioms &amp; chunks</div><div class="t">สำนวนและวลี</div></div>
+      <div><div class="n">50</div><div class="l">Preposition traps</div><div class="t">กับดักบุพบท</div></div>
+    </div>
+  </div>
+  <div class="foot">
+    <span style="float:right">Workbook Edition · with Answer Key</span>
+    Built on corpus research: COCA · Oxford 3000 (American) · Cambridge B1
+  </div>
+</section>

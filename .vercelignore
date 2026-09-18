@@ -1,0 +1,9 @@
+# Keep deployments small — never upload these to Vercel
+content-bank-backup-*.json
+content-bank-snapshot-backup-*.json
+conversation-bank-backup-*.json
+*-backup-*.json
+docs/
+generated-reading-exams/
+tmp/
+scratchpad-*.mjs

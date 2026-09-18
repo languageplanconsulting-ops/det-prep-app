@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { sfxReveal } from "@/lib/exam-sfx";
 import { ConfettiBurst } from "@/components/mini-diagnosis/steps/ui";
-import { ResultFrictionPrompt } from "@/components/mini-diagnosis/ResultFrictionPrompt";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 
 // ─── Types (verbatim) ─────────────────────────────────────────────────────────
@@ -769,9 +768,6 @@ export function AdminMiniDiagnosisResultsClient({ sessionId }: { sessionId: stri
           นี่คือแบบทดสอบขนาดสั้น ความแม่นของคะแนนจะไม่เท่า full mock test —
           ใช้ผลนี้เพื่อดูว่าเด่นด้านไหนและควรแก้จุดไหนก่อน
         </p>
-
-        {/* one open question about friction — universal, optional, dismissible */}
-        <ResultFrictionPrompt />
 
         {/* quiet secondary row */}
         <div className="flex items-center justify-center gap-4 pb-6 text-xs">

@@ -13,11 +13,17 @@ import { TeacherSamplePlayer } from "@/components/speaking-samples/TeacherSample
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { SpeechPunctuationNote } from "@/components/speaking/SpeechPunctuationNote";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
+import { PersistentWeaknessModal } from "@/components/practice/PersistentWeaknessModal";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useSpeechCapture } from "@/hooks/useSpeechCapture";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
+import {
+  GRADING_PENDING_TH,
+  readGradingSubmitResponse,
+  waitForGradingJob,
+} from "@/lib/grading-wait";
 import { pullContentBankSnapshotFromSupabase } from "@/lib/content-bank-sync";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
@@ -95,6 +101,7 @@ export function ReadSpeakSession({
   );
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [waitingForGrade, setWaitingForGrade] = useState(false);
   const [questionScoreTick, setQuestionScoreTick] = useState(0);
 
   const capture = useSpeechCapture();
@@ -230,15 +237,30 @@ export function ReadSpeakSession({
           source: attemptSource,
         }),
       });
-      const data = (await res.json()) as { error?: string } & Partial<SpeakingAttemptReport>;
-      if (!res.ok) {
-        throw new Error(data.error || `Grading failed (${res.status})`);
+      const outcome = await readGradingSubmitResponse<SpeakingAttemptReport>(res);
+      let report: SpeakingAttemptReport;
+      if (outcome.kind === "pending") {
+        // The recording's transcript is saved server-side. Waiting IS the retry
+        // — every poll runs another grading pass — so this is reassurance.
+        setWaitingForGrade(true);
+        const waited = await waitForGradingJob<SpeakingAttemptReport>(outcome.attemptId);
+        setWaitingForGrade(false);
+        if (waited.kind === "abandoned") throw new Error(waited.message);
+        if (waited.kind === "still-working") {
+          setSubmitError(
+            "ยังตรวจไม่เสร็จ แต่งานของคุณถูกเก็บไว้แล้ว — กลับมาดูผลได้ในอีกสักครู่",
+          );
+          return;
+        }
+        report = waited.report;
+      } else {
+        report = outcome.report;
       }
-      if (!data.attemptId || data.score160 === undefined) {
+      if (!report.attemptId || report.score160 === undefined) {
         throw new Error("Invalid response from grading service");
       }
       vipGate.recordSuccessfulAiSubmit();
-      await goToReport(data as SpeakingAttemptReport);
+      await goToReport(report);
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -252,8 +274,13 @@ export function ReadSpeakSession({
       exerciseType="read_then_speak"
       setId={`r${round}-${topicId}`}
     >
+    {!embedded ? <PersistentWeaknessModal skill="speaking" /> : null}
     <div className={embedded ? "relative space-y-6" : "relative mx-auto max-w-3xl space-y-6 px-4 py-8"}>
-      {submitting ? <GradingProgressLoader eyebrow="Grading your speaking" /> : null}
+      {submitting ? (
+        <GradingProgressLoader
+          eyebrow={waitingForGrade ? GRADING_PENDING_TH : "Grading your speaking"}
+        />
+      ) : null}
       {!embedded ? (
         <Link href={roundBase} className="text-sm font-bold text-ep-blue hover:underline">
           ← Round {round} topics

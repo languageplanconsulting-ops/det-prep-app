@@ -88,8 +88,19 @@ export async function POST(req: Request) {
       .eq("user_id", user.id);
     if (countError) return NextResponse.json({ error: countError.message }, { status: 500 });
     if ((count ?? 0) >= MINI_DIAGNOSIS_FREE_LIFETIME_LIMIT) {
+      const { data: latestResult } = await supabase
+        .from("mini_diagnosis_results")
+        .select("session_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
       return NextResponse.json(
-        { error: "Free users can take the mini diagnosis once to check their level." },
+        {
+          error: "คุณใช้สิทธิ์ทำ Mini Diagnosis ฟรีไปแล้ว ดูผลที่เคยทำได้เลย",
+          code: "free_limit_reached",
+          sessionId: latestResult?.session_id ?? null,
+        },
         { status: 403 },
       );
     }

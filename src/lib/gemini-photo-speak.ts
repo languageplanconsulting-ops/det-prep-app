@@ -26,6 +26,7 @@ import {
   scoreRungJsonShape,
   scoreRungRulePrompt,
 } from "@/lib/score-rung-prompt";
+import { GRAMMAR_TOPIC_PROMPT_LIST } from "@/lib/grammar-topics";
 
 function pointsOn160(percent: number, weight: number): number {
   return Math.round(percent * weight * 1.6 * 10) / 10;
@@ -155,7 +156,7 @@ ${toPerfectRulePrompt("punctuatedTranscript", true)}
 
 For EACH criterion summary, include (A) brief assessment and (B) a line starting with "How to improve your [grammar/vocabulary/coherence/task] score:" plus a concrete action tied to THIS learner's wording.
 
-Breakdowns (EVERY item MUST have): excerpt (exact quote), issueEn/issueTh (spoken-language focus — never punctuation/capitalization/spelling), suggestionEn/suggestionTh — MANDATORY on every single item, the FULL corrected version of the excerpt (a real rewritten sentence or phrase), never just abstract advice with no example shown. If you cannot write a concrete corrected version, do not include that breakdown item at all. For vocabulary, suggest better words or collocations when possible${targetVocabulary && targetVocabulary.length > 0 ? " — but see the TARGET VOCABULARY LIST rule below first: it overrides this for any word already on that list" : ""}. grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement"). It must lead the fix so the learner knows which rule to revise. Keep it under ~6 words.
+Breakdowns (EVERY item MUST have): excerpt (exact quote), issueEn/issueTh (spoken-language focus — never punctuation/capitalization/spelling), suggestionEn/suggestionTh — MANDATORY on every single item, the FULL corrected version of the excerpt (a real rewritten sentence or phrase), never just abstract advice with no example shown. If you cannot write a concrete corrected version, do not include that breakdown item at all. For vocabulary, suggest better words or collocations when possible${targetVocabulary && targetVocabulary.length > 0 ? " — but see the TARGET VOCABULARY LIST rule below first: it overrides this for any word already on that list" : ""}. grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement"). It must lead the fix so the learner knows which rule to revise. Keep it under ~6 words. Also include grammarTopicEn — the SAME topic named in English, chosen from this fixed list so one habit always gets one name across every exam: ${GRAMMAR_TOPIC_PROMPT_LIST}. Pick the closest entry; never invent a new label.
 
 Priority for feedback:
 - Prioritize grammar corrections first, then vocabulary upgrades.
@@ -216,6 +217,7 @@ function buildUserPayload(
         grammarBreakdown: [
           {
             grammarTopicTh: "string — short Thai grammar topic that leads the fix, e.g. การใช้ if I were",
+            grammarTopicEn: "string — canonical English grammar topic from the allowed list, e.g. Articles",
             excerpt: "string",
             issueEn: "string",
             issueTh: "string",
@@ -326,7 +328,7 @@ export async function generatePhotoSpeakReportWithGemini(params: {
   } = params;
 
   const modelName =
-    params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+    params.model ?? process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
 
   const { raw, usage } = await generateGradingJsonObject({
     model: modelName,

@@ -17,6 +17,7 @@ import {
   taskRubricPrompt,
   toPerfectRulePrompt,
 } from "@/lib/speaking-rubric-prompt";
+import { GRAMMAR_TOPIC_PROMPT_LIST } from "@/lib/grammar-topics";
 
 function pointsOn160(percent: number, weight: number): number {
   return Math.round(percent * weight * 1.6 * 10) / 10;
@@ -122,7 +123,7 @@ Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, task
 - excerpt: exact short quote from the ${scoreText} (use quotation marks in JSON string only).
 - issueEn / issueTh: what is wrong (bilingual, spoken-language focus — never punctuation/capitalization/spelling).
 - suggestionEn / suggestionTh: MANDATORY on every single item — the FULL corrected version of the excerpt (a real rewritten sentence or phrase the learner could say instead), not just abstract advice like "fix the tense" with no example shown. For vocabulary, name 1–3 better words or collocations. If you cannot write a concrete corrected version, do not include that breakdown item at all.
-- grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement", "การใช้ a/an/the"). This must lead the fix so the learner knows which rule to revise before reading the explanation. Keep it under ~6 words.
+- grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic this fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple", "Subject–verb agreement", "การใช้ a/an/the"). This must lead the fix so the learner knows which rule to revise before reading the explanation. Keep it under ~6 words. Also include grammarTopicEn — the SAME topic named in English, chosen from this fixed list so one habit always gets one name across every exam: ${GRAMMAR_TOPIC_PROMPT_LIST}. Pick the closest entry; never invent a new label.
 
 Priority for feedback:
 - Prioritize grammar corrections first, then vocabulary upgrades.
@@ -195,6 +196,7 @@ function buildUserPayload(
         grammarBreakdown: [
           {
             grammarTopicTh: "string — short Thai grammar topic that leads the fix, e.g. การใช้ if I were",
+            grammarTopicEn: "string — canonical English grammar topic from the allowed list, e.g. Articles",
             excerpt: `string exact from ${scoreText}`,
             issueEn: "string",
             issueTh: "string",
@@ -300,7 +302,7 @@ export async function generateSpeakingReportWithGemini(params: {
   } = params;
 
   const modelName =
-    params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+    params.model ?? process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
 
   const { raw, usage } = await generateGradingJsonObject({
     model: modelName,
