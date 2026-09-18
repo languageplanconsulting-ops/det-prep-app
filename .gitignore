@@ -69,3 +69,4 @@ content-bank-backup-*.json
 content-bank-snapshot-backup-*.json
 conversation-bank-backup-*.json
 generated-reading-exams/
+.env*

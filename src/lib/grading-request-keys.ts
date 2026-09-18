@@ -17,26 +17,30 @@ export function resolveGradingKeysFromRequest(req: Request, model: string): Reso
   const openai =
     process.env.OPENAI_API_KEY?.trim() || req.headers.get("x-openai-api-key")?.trim() || "";
 
+  // Always carry every key we have, regardless of which provider is primary. If the
+  // primary provider is out of credit or retired, generateGradingJsonObject falls back
+  // to another provider — but only for keys we actually pass through here.
   if (isAnthropicGradingModel(model)) {
     if (!anthropic) {
       throw new Error(
         "No Anthropic key. Set ANTHROPIC_API_KEY for Claude grading (or x-anthropic-api-key on the request).",
       );
     }
-    return { geminiApiKey: "", anthropicApiKey: anthropic, openAiApiKey: openai || undefined };
-  }
-  if (isOpenAiGradingModel(model)) {
+  } else if (isOpenAiGradingModel(model)) {
     if (!openai) {
       throw new Error(
         "No OpenAI key. Set OPENAI_API_KEY for ChatGPT grading (or x-openai-api-key on the request).",
       );
     }
-    return { geminiApiKey: "", anthropicApiKey: anthropic || undefined, openAiApiKey: openai };
-  }
-  if (!gemini) {
+  } else if (!gemini) {
     throw new Error(
       "No Gemini key. Set GEMINI_API_KEY (or x-gemini-api-key) for Gemini grading models.",
     );
   }
-  return { geminiApiKey: gemini, anthropicApiKey: anthropic || undefined, openAiApiKey: openai || undefined };
+
+  return {
+    geminiApiKey: gemini,
+    anthropicApiKey: anthropic || undefined,
+    openAiApiKey: openai || undefined,
+  };
 }
