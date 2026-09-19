@@ -91,7 +91,10 @@ export async function POST(request: Request) {
       if (!id) {
         return NextResponse.json({ error: "Missing id" }, { status: 400 });
       }
-      const r = await approveFastTrackPending(id, adminId);
+      const monthsRaw = body?.months;
+      const months =
+        monthsRaw == null ? undefined : Number(monthsRaw);
+      const r = await approveFastTrackPending(id, adminId, months);
       if (!r.ok) {
         return NextResponse.json({ error: r.error }, { status: 400 });
       }

@@ -103,9 +103,14 @@ export async function listFastTrackPending(): Promise<FastTrackPendingRow[]> {
   return (data ?? []) as FastTrackPendingRow[];
 }
 
+export const FAST_TRACK_MIN_MONTHS = 1;
+export const FAST_TRACK_MAX_MONTHS = 7;
+export const FAST_TRACK_DEFAULT_MONTHS = 6;
+
 export async function approveFastTrackPending(
   id: string,
   adminId: string | null,
+  months: number = FAST_TRACK_DEFAULT_MONTHS,
 ): Promise<
   | { ok: true; emailSent: boolean; emailError?: string }
   | { ok: false; error: string }
@@ -123,16 +128,26 @@ export async function approveFastTrackPending(
   if ((row.status as string) !== "pending") {
     return { ok: false, error: "This request was already processed." };
   }
+  if (
+    !Number.isInteger(months) ||
+    months < FAST_TRACK_MIN_MONTHS ||
+    months > FAST_TRACK_MAX_MONTHS
+  ) {
+    return {
+      ok: false,
+      error: `Access length must be ${FAST_TRACK_MIN_MONTHS}–${FAST_TRACK_MAX_MONTHS} months.`,
+    };
+  }
 
   const norm = normalizeEmail(row.email as string);
   const submittedAt = new Date(row.submitted_at as string);
   const grantExpiresAt = new Date(submittedAt);
-  grantExpiresAt.setMonth(grantExpiresAt.getMonth() + 6);
+  grantExpiresAt.setMonth(grantExpiresAt.getMonth() + months);
   const expiresIso = grantExpiresAt.toISOString();
   const password = generateAccessPassword();
   const fn = row.full_name as string | null;
 
-  const notes = `Duolingo Fast Track (admin verified)${fn?.trim() ? ` — ${fn.trim()}` : ""}`;
+  const notes = `Duolingo Fast Track (admin verified, ${months} mo)${fn?.trim() ? ` — ${fn.trim()}` : ""}`;
 
   const { error: upsertError } = await supabase.from("vip_course_grants").upsert(
     {
