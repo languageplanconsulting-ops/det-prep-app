@@ -1,6 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { MiniStudySessionClient } from "@/components/mini-study/MiniStudySessionClient";
 import { getMiniStudySession } from "@/lib/mini-study/content";
+import { canUseMiniStudy } from "@/lib/mini-study/access";
 
 export default async function MiniStudySessionPage({
   params,
@@ -10,5 +11,6 @@ export default async function MiniStudySessionPage({
   const { sessionId } = await params;
   const session = getMiniStudySession(sessionId);
   if (!session) notFound();
+  if (!(await canUseMiniStudy())) redirect("/pricing");
   return <MiniStudySessionClient session={session} />;
 }

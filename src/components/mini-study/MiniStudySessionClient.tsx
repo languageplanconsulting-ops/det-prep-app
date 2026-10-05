@@ -18,8 +18,8 @@ import { MiniStudySummaryPhase } from "./MiniStudySummaryPhase";
 type Props = { session: MiniStudySession };
 
 export function MiniStudySessionClient({ session }: Props) {
-  const { isAdmin, previewEligible, loading } = useEffectiveTier();
-  const adminLike = isAdmin || previewEligible;
+  const { effectiveTier, isAdmin, previewEligible, loading } = useEffectiveTier();
+  const canUseMiniStudy = isAdmin || previewEligible || effectiveTier === "vip";
   const [started, setStarted] = useState(false);
 
   if (loading) {
@@ -30,16 +30,16 @@ export function MiniStudySessionClient({ session }: Props) {
     );
   }
 
-  if (!adminLike) {
+  if (!canUseMiniStudy) {
     return (
       <main className="mx-auto max-w-5xl px-4 py-10">
         <div className="rounded-2xl bg-[#fff7d1] p-6 shadow-sm ring-1 ring-[#FFCC00]/40">
           <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
-            Admin only
+            VIP members only
           </p>
           <h1 className="mt-2 text-2xl font-black">Mini Study Session</h1>
           <p className="mt-2 text-sm text-neutral-700">
-            This feature is in admin preview.
+            Mini Study is available to VIP members.
           </p>
           <Link
             href="/practice"

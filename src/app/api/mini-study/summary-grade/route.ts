@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { getAdminAccess } from "@/lib/admin-auth";
 import { gradeConversationSummary } from "@/lib/mini-study/grade-summary";
+import { canUseMiniStudy } from "@/lib/mini-study/access";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
-  // Admin gate — matches the rest of the app (DB role OR admin-code cookie).
-  const auth = await getAdminAccess();
-  if (!auth.ok) {
-    return NextResponse.json({ error: "Admin only" }, { status: 403 });
+  if (!(await canUseMiniStudy(req))) {
+    return NextResponse.json({ error: "VIP membership required" }, { status: 403 });
   }
 
   let body: unknown;
