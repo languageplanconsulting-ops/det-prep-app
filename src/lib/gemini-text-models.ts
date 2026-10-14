@@ -12,7 +12,7 @@ export type GeminiTextModelOption = { id: string; label: string };
 export const GEMINI_TEXT_MODEL_OPTIONS: GeminiTextModelOption[] = [
   {
     id: "gemini-flash-latest",
-    label: "Gemini Flash (latest, default — auto-follows Google's current Flash)",
+    label: "Gemini Flash (latest alias — can land on a free-tier-only model; not the default)",
   },
   {
     id: "claude-haiku-4-5",
@@ -24,15 +24,22 @@ export const GEMINI_TEXT_MODEL_OPTIONS: GeminiTextModelOption[] = [
   { id: "gemini-pro-latest", label: "Gemini Pro (latest)" },
 ];
 
-export const DEFAULT_GEMINI_TEXT_MODEL = "gemini-flash-latest";
+/**
+ * Pinned on purpose. The `gemini-flash-latest` alias now resolves to Google's newest
+ * Flash (3.8), and for this account that model — like the 3-flash-preview — only gets
+ * a free-tier daily allowance (20 requests/day) even with prepay credit loaded, so every
+ * grade after the 20th failed. 3.6 Flash and the Flash-Lite family are billed normally.
+ * Flash-Lite (via the ladder in grading-escalation) is the safety net if this gets retired.
+ */
+export const DEFAULT_GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 
 /**
- * Last Gemini rung of the grading ladder — a heavier model to fall to when the
- * fast one keeps failing. Uses the `gemini-pro-latest` alias (kept in the list
- * above so it stays an allowed id) so Google's retirements don't silently cost
- * the ladder its final attempt.
+ * Last Gemini rung of the grading ladder. Flash-Lite on purpose: it is billed
+ * normally and has its own quota bucket, so it still answers when the main Flash
+ * is overloaded or out of quota. (`gemini-pro-latest` was the previous rung, but
+ * on this account it only gets a free-tier allowance, so it 429'd every time.)
  */
-export const HEAVY_GEMINI_FALLBACK_MODEL = "gemini-pro-latest";
+export const HEAVY_GEMINI_FALLBACK_MODEL = "gemini-flash-lite-latest";
 
 const ALLOWED_IDS = new Set(GEMINI_TEXT_MODEL_OPTIONS.map((o) => o.id));
 
