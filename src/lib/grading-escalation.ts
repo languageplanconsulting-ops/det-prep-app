@@ -5,6 +5,17 @@ import {
   isAnthropicGradingModel,
 } from "@/lib/grading-llm-generate";
 import { DEFAULT_GEMINI_TEXT_MODEL } from "@/lib/gemini-text-models";
+
+/**
+ * Last-resort Gemini rung. Flash-Lite has its own quota bucket, so it can still
+ * answer when the main Flash model's daily quota is spent. (The previous last
+ * rung, gemini-2.5-pro, has been retired and has no free-tier quota.)
+ */
+const LAST_RESORT_GEMINI_MODEL = "gemini-flash-lite-latest";
+
+/** Provider messages that mean "out of money / quota" rather than a passing blip. */
+const CAPACITY_EXHAUSTED_RE =
+  /credit balance is too low|credits are depleted|prepayment credits|insufficient_quota|quota exceeded|exceeded your current quota|resource_exhausted/i;
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 
 /**
@@ -46,6 +57,21 @@ export class AllGradingAttemptsFailedError extends Error {
     this.name = "AllGradingAttemptsFailedError";
     this.failures = failures;
   }
+
+  /** True when the failures point at spent quota / credit, not a passing blip. */
+  get capacityExhausted(): boolean {
+    return this.failures.some((f) => CAPACITY_EXHAUSTED_RE.test(f));
+  }
+
+  /**
+   * Learner-facing copy. Telling someone to "submit again" while our AI quota is
+   * spent just burns their patience, so say plainly that it is on our side.
+   */
+  get userMessage(): string {
+    return this.capacityExhausted
+      ? "ระบบตรวจ AI ของเราใช้โควตาเต็มชั่วคราว ไม่ใช่ความผิดของคุณ งานของคุณยังอยู่ครบ — ทีมงานได้รับแจ้งแล้ว กรุณาลองใหม่ภายหลัง (Our AI feedback service has hit its capacity on our side — it's not you. Your work is safe and we're on it. Please try again later.)"
+      : "ระบบตรวจกำลังไม่ว่างชั่วคราว งานของคุณยังอยู่ครบ — กดส่งอีกครั้งได้เลย (Grading is briefly busy. Your work is safe — please submit again.)";
+  }
 }
 
 /**
@@ -67,11 +93,11 @@ export function buildModelLadder(
   // Cross-provider first — the most independent second opinion available.
   if (isAnthropicGradingModel(primary)) {
     push(DEFAULT_GEMINI_TEXT_MODEL, hasGemini);
-    push("gemini-2.5-pro", hasGemini);
+    push(LAST_RESORT_GEMINI_MODEL, hasGemini);
   } else {
     push("claude-haiku-4-5", hasClaude);
     push(DEFAULT_GEMINI_TEXT_MODEL, hasGemini);
-    push("gemini-2.5-pro", hasGemini);
+    push(LAST_RESORT_GEMINI_MODEL, hasGemini);
   }
   return ladder;
 }

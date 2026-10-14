@@ -250,8 +250,7 @@ export async function POST(req: Request) {
       console.error("[photo-speak-report] all models failed:", e.failures.join(" | "));
       return NextResponse.json(
         {
-          error:
-            "ระบบตรวจกำลังไม่ว่างชั่วคราว งานของคุณยังอยู่ครบ — กดส่งอีกครั้งได้เลย (Grading is briefly busy. Your work is safe — please submit again.)",
+          error: e.userMessage,
           retryable: true,
         },
         { status: 503 },

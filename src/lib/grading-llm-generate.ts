@@ -132,7 +132,7 @@ export async function generateGradingJsonCompletion(opts: {
  * to another provider we have a key for. These are the fallback models, one per
  * provider — chosen to be cheap and currently live.
  */
-const FALLBACK_GEMINI_MODEL = "gemini-flash-latest";
+const FALLBACK_GEMINI_MODEL = "gemini-flash-lite-latest";
 const FALLBACK_ANTHROPIC_MODEL = "claude-haiku-4-5";
 const FALLBACK_OPENAI_MODEL = "gpt-4o-mini";
 
