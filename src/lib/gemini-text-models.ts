@@ -33,6 +33,14 @@ export const GEMINI_TEXT_MODEL_OPTIONS: GeminiTextModelOption[] = [
  */
 export const DEFAULT_GEMINI_TEXT_MODEL = "gemini-3.6-flash";
 
+/**
+ * Last Gemini rung of the grading ladder. Flash-Lite on purpose: it is billed
+ * normally and has its own quota bucket, so it still answers when the main Flash
+ * is overloaded or out of quota. (`gemini-pro-latest` was the previous rung, but
+ * on this account it only gets a free-tier allowance, so it 429'd every time.)
+ */
+export const HEAVY_GEMINI_FALLBACK_MODEL = "gemini-flash-lite-latest";
+
 const ALLOWED_IDS = new Set(GEMINI_TEXT_MODEL_OPTIONS.map((o) => o.id));
 
 export function isAllowedGeminiTextModel(id: string): boolean {

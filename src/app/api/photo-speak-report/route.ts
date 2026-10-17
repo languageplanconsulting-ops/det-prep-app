@@ -12,13 +12,24 @@ import {
   gradeWithEscalation,
   gradingDeadlineFrom,
 } from "@/lib/grading-escalation";
+import {
+  GRADING_PENDING_MESSAGE_EN,
+  GRADING_PENDING_MESSAGE_TH,
+  claimGradingJob,
+  completeGradingJob,
+} from "@/lib/grading-jobs";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
+import {
+  gradingFailureResponseBody,
+  logGradingFailure,
+} from "@/lib/grading-failure-log";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
 import { recordDataCollectionSubmission } from "@/lib/data-collection";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+import { recordAttemptWeakness } from "@/lib/production-weakness";
 
 type PhotoSpeakProgressRow = {
   latest_score160: number;
@@ -78,6 +89,10 @@ export const maxDuration = 300;
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
+  // Visible to the catch block: did we durably store the learner's work?
+  let jobClaimed = false;
+  // Hoisted so a total grading failure can be attributed to the learner who hit it.
+  let userId: string | null = null;
   let body: unknown;
   try {
     body = await req.json();
@@ -148,7 +163,7 @@ export async function POST(req: Request) {
   try {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
-    const userId = await getOptionalAuthUserId(req);
+    userId = await getOptionalAuthUserId(req);
     const taskType: "write_about_photo" | "speak_about_photo" =
       originHub === "speak-about-photo" ? "speak_about_photo" : "write_about_photo";
     // Admins / preview-eligible accounts don't consume real feedback credits.
@@ -160,6 +175,32 @@ export async function POST(req: Request) {
       }
     }
     const serverProgress = userId ? await getPhotoSpeakProgress(userId, itemId, taskType) : null;
+    // Save the learner's work BEFORE grading. From here on, a failure can
+    // never lose it — worst case the job stays pending and is retried.
+    const job = await claimGradingJob({
+      userId,
+      surface: taskType,
+      attemptId,
+      payload: {
+        itemId,
+        titleEn,
+        titleTh: typeof titleTh === "string" ? titleTh : "",
+        promptEn,
+        promptTh: typeof promptTh === "string" ? promptTh : "",
+        imageUrl: imageUrl.trim(),
+        taskKeywords,
+        targetVocabulary: targetVocabList,
+        prepMinutes,
+        transcript,
+      },
+    });
+    // Idempotency: a double-tap or client retry returns the finished report
+    // instead of grading — and charging — twice.
+    jobClaimed = job != null;
+    if (job?.status === "done" && job.report) {
+      return NextResponse.json(job.report);
+    }
+
     const graded = await gradeWithEscalation({
       operation: "photo_speak_report",
       models: buildModelLadder(model, keys),
@@ -201,11 +242,13 @@ export async function POST(req: Request) {
         },
       });
     }
+    let creditCharged = false;
     if (userId && !adminBypass && !isPlacement) {
       const charged = await chargeAiCreditForUser(userId, taskType);
       if (!charged.ok) {
         return NextResponse.json({ error: "Could not apply feedback credit after grading" }, { status: 500 });
       }
+      creditCharged = true;
       // previousScore160 comes from our own server-tracked progress, not the client body —
       // a client-supplied value here would let a user spoof their "previous" score to farm
       // improvement-reward credits.
@@ -221,6 +264,20 @@ export async function POST(req: Request) {
         report.rewardBonus = rewardBonus;
       }
     }
+    // The report is real and final — store it so the waiting screen (and any
+    // later re-open) resolves instantly, and the job is never re-graded.
+    if (job) {
+      await completeGradingJob({ attemptId, report, creditCharged });
+    }
+    // Recorded here, not only in completeGradingJob: grading_jobs may not exist
+    // in this database, and if it doesn't, that hook never fires. The recorder
+    // ignores an attempt id it has already counted, so both paths running is safe.
+    await recordAttemptWeakness({
+      userId,
+      surface: taskType,
+      attemptId: typeof attemptId === "string" ? attemptId : "",
+      grammarBreakdown: report.grammar?.breakdown ?? [],
+    });
     await recordDataCollectionSubmission({
       userId,
       examType: taskType,
@@ -247,14 +304,26 @@ export async function POST(req: Request) {
     // Every model failed. Never a fabricated score — tell the client this is
     // temporary so it can re-ask while the learner's work is still on screen.
     if (e instanceof AllGradingAttemptsFailedError) {
+      // Not an error for the learner: their answer is stored, so the client
+      // shows the waiting screen and polls until the real report exists.
       console.error("[photo-speak-report] all models failed:", e.failures.join(" | "));
-      return NextResponse.json(
-        {
-          error: e.userMessage,
-          retryable: true,
-        },
-        { status: 503 },
-      );
+      logGradingFailure({ operation: "photo_speak_report", userId, attemptId, error: e });
+      // Only promise "still grading" when the work is genuinely stored — a job
+      // we failed to claim (e.g. migration 049 not deployed yet) has nothing to
+      // retry, and telling the learner to wait for a report that will never
+      // arrive is worse than asking them to send again.
+      if (jobClaimed) {
+        return NextResponse.json(
+          {
+            status: "pending",
+            attemptId,
+            messageTh: GRADING_PENDING_MESSAGE_TH,
+            messageEn: GRADING_PENDING_MESSAGE_EN,
+          },
+          { status: 202 },
+        );
+      }
+      return NextResponse.json(gradingFailureResponseBody(e), { status: 503 });
     }
     const message = normalizeGradingErrorMessage(e);
     console.error("[photo-speak-report]", e);

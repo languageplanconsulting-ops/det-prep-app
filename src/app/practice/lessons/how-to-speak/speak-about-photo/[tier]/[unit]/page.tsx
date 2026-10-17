@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SpeakPhotoLessonRunner } from "@/components/lessons/SpeakPhotoLessonRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import type { SpeakPhotoTier } from "@/lib/speakphoto-lessons";
 
 function isTier(s: string): s is SpeakPhotoTier {
@@ -25,7 +26,13 @@ export default async function SpeakPhotoUnitPage({
   }
   return (
     <main className="mx-auto max-w-xl px-4 py-7 sm:px-6">
-      <SpeakPhotoLessonRunner tier={tierRaw} unit={unit} />
+      <StudySessionBoundary
+        skill="production"
+        exerciseType="lesson_speak_about_photo"
+        setId={`${tierRaw}:${unit}`}
+      >
+        <SpeakPhotoLessonRunner tier={tierRaw} unit={unit} />
+      </StudySessionBoundary>
     </main>
   );
 }

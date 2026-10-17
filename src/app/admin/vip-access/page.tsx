@@ -47,6 +47,9 @@ type PreviewRow = {
 
 type TabId = "list" | "add" | "stats" | "activity";
 
+const FAST_TRACK_MONTH_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
+const FAST_TRACK_DEFAULT_MONTHS = 6;
+
 type FastTrackPendingRow = {
   id: string;
   email: string;
@@ -231,6 +234,9 @@ export default function AdminVIPAccessPage() {
     [],
   );
   const [fastTrackBusyId, setFastTrackBusyId] = useState<string | null>(null);
+  const [fastTrackMonths, setFastTrackMonths] = useState<Record<string, number>>(
+    {},
+  );
 
   const loadStudyActivity = useCallback(async () => {
     setStudyLoading(true);
@@ -384,8 +390,9 @@ export default function AdminVIPAccessPage() {
   }
 
   async function approveFastTrack(id: string) {
+    const months = fastTrackMonths[id] ?? FAST_TRACK_DEFAULT_MONTHS;
     const ok = window.confirm(
-      "Grant 6 months VIP from their request date, set password, and email the student? / ให้ VIP 6 เดือนนับจากวันส่งคำขอ และส่งอีเมลให้นักเรียน?",
+      `Grant ${months} month${months === 1 ? "" : "s"} VIP from their request date, set password, and email the student? / ให้ VIP ${months} เดือนนับจากวันส่งคำขอ และส่งอีเมลให้นักเรียน?`,
     );
     if (!ok) return;
     setFastTrackBusyId(id);
@@ -394,7 +401,7 @@ export default function AdminVIPAccessPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ action: "fast-track-approve", id }),
+        body: JSON.stringify({ action: "fast-track-approve", id, months }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
@@ -544,9 +551,10 @@ export default function AdminVIPAccessPage() {
               Pending Fast Track (Duolingo) / รออนุมัติ Fast Track
             </h2>
             <p className="mt-1 text-sm text-neutral-700">
-              Students submit from the landing page. Approve to grant 6 months VIP from their
-              request date, create their password, and send the English Plan email. / นักเรียนส่งจาก
-              Landing — กดอนุมัติเพื่อให้ VIP 6 เดือนนับจากวันส่งคำขอ สร้างรหัสผ่าน และส่งอีเมล
+              Students submit from the landing page. Pick how long (1–7 months, default 6) and
+              approve to grant VIP from their request date, create their password, and send the
+              English Plan email. / นักเรียนส่งจาก Landing — เลือกจำนวนเดือน (1–7, ค่าเริ่มต้น 6)
+              แล้วกดอนุมัติเพื่อให้ VIP นับจากวันส่งคำขอ สร้างรหัสผ่าน และส่งอีเมล
             </p>
             {fastTrackPending.filter((r) => r.status === "pending").length ===
             0 ? (
@@ -585,7 +593,25 @@ export default function AdminVIPAccessPage() {
                             {new Date(r.submitted_at).toISOString().slice(0, 16).replace("T", " ")}
                           </td>
                           <td className="px-3 py-2">
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <select
+                                aria-label="VIP access length"
+                                value={fastTrackMonths[r.id] ?? FAST_TRACK_DEFAULT_MONTHS}
+                                disabled={fastTrackBusyId === r.id}
+                                onChange={(e) =>
+                                  setFastTrackMonths((m) => ({
+                                    ...m,
+                                    [r.id]: Number(e.target.value),
+                                  }))
+                                }
+                                className="rounded-[4px] border-2 border-black bg-white px-1 py-1 text-xs font-black text-neutral-900 disabled:opacity-50"
+                              >
+                                {FAST_TRACK_MONTH_OPTIONS.map((n) => (
+                                  <option key={n} value={n}>
+                                    {n} เดือน
+                                  </option>
+                                ))}
+                              </select>
                               <button
                                 type="button"
                                 disabled={fastTrackBusyId === r.id}

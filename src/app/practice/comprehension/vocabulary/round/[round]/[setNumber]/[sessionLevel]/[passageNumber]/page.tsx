@@ -33,7 +33,7 @@ export default async function VocabExamPage({
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <main className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6">
       <VocabSessionGate
         round={round}
         sessionLevel={sessionLevel}

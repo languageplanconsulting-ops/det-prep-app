@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { InteractiveReadingRunner } from "@/components/reading/InteractiveReadingRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { irSetById } from "@/lib/interactive-reading";
 
 export default async function InteractiveReadingSetPage({ params }: { params: Promise<{ set: string }> }) {
@@ -17,7 +18,9 @@ export default async function InteractiveReadingSetPage({ params }: { params: Pr
   }
   return (
     <main className="mx-auto max-w-6xl px-3 py-5 sm:px-6">
-      <InteractiveReadingRunner sets={[set]} />
+      <StudySessionBoundary skill="comprehension" exerciseType="lesson_interactive_reading" setId={id}>
+        <InteractiveReadingRunner sets={[set]} />
+      </StudySessionBoundary>
     </main>
   );
 }

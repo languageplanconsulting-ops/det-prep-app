@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { NotebookMatchingGame } from "@/components/notebook/NotebookMatchingGame";
 import { NotebookVocabQuiz } from "@/components/notebook/NotebookVocabQuiz";
 import { NotebookProductionReportFullView } from "@/components/notebook/NotebookProductionReportFullView";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { NotebookSpeakingHighlightCard } from "@/components/notebook/NotebookSpeakingHighlightCard";
 import { tryParseNotebookProductionReport } from "@/lib/notebook-production-report-parse";
 import {
@@ -520,6 +521,18 @@ export function NotebookListV2() {
         document.body,
       )
         : null}
+
+      {/* Reviewing the notebook is study time too — log it like any other exercise so it
+          shows up in the admin activity reports. One boundary covers all three modes. */}
+      {reviewMode !== "closed" && reviewMode !== "choice" ? (
+        <StudySessionBoundary
+          skill="literacy"
+          exerciseType={`notebook_review_${reviewMode}`}
+          setId={null}
+        >
+          {null}
+        </StudySessionBoundary>
+      ) : null}
 
       {/* Matching game — self-portals internally, see NotebookMatchingGame.tsx */}
       {reviewMode === "match" ? (

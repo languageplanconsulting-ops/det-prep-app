@@ -101,6 +101,13 @@ export default function AdminPage() {
             Study activity dashboard →
           </Link>
           <Link
+            href="/admin/production-weakness"
+            className="inline-flex items-center rounded-[4px] border-4 border-black bg-amber-100 px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
+            style={{ fontFamily: "var(--font-jetbrains), monospace" }}
+          >
+            Repeated grammar habits →
+          </Link>
+          <Link
             href="/admin/executive"
             className="inline-flex items-center rounded-[4px] border-4 border-black bg-[#FFCC00] px-4 py-2 font-black uppercase tracking-wide text-neutral-900 shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-none"
             style={{ fontFamily: "var(--font-jetbrains), monospace" }}

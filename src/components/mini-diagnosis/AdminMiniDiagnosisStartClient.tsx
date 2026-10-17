@@ -13,6 +13,13 @@ type SetRow = {
   stepCount: number;
 };
 
+type LatestResult = {
+  sessionId: string;
+  total: number;
+  levelLabel: string;
+  createdAt: string;
+};
+
 // ---------------------------------------------------------------------------
 // Mock result preview shown BEFORE the sign-in wall so users see the value
 // ---------------------------------------------------------------------------
@@ -128,6 +135,39 @@ function AuthWallPanel({ onSignIn }: { onSignIn: () => void }) {
 }
 
 // ---------------------------------------------------------------------------
+// Shown when the user already has a result — the only reliable way back to it,
+// since nothing else in the app links to /mini-diagnosis/results/[sessionId].
+// ---------------------------------------------------------------------------
+function MyResultBanner({ result }: { result: LatestResult }) {
+  return (
+    <div className="flex flex-col gap-4 rounded-2xl bg-[#004AAD]/6 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-[#004AAD]">
+          ผลของคุณ
+        </p>
+        <div className="mt-1 flex items-end gap-1.5">
+          <span className="font-mono text-2xl font-black text-[#004AAD]">
+            {result.total}
+          </span>
+          <span className="mb-0.5 font-mono text-sm font-bold text-neutral-400">
+            /160
+          </span>
+          <span className="mb-0.5 text-sm font-semibold text-neutral-600">
+            · {result.levelLabel}
+          </span>
+        </div>
+      </div>
+      <Link
+        href={`/mini-diagnosis/results/${result.sessionId}`}
+        className="shrink-0 rounded-2xl bg-[#004AAD] px-6 py-3 text-center text-sm font-bold text-white shadow-sm transition hover:bg-[#003a8c] active:scale-[0.97]"
+      >
+        ดูผลของฉัน →
+      </Link>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main export — same props + contract as MiniDiagnosisStartClient
 // ---------------------------------------------------------------------------
 export function AdminMiniDiagnosisStartClient() {
@@ -138,6 +178,8 @@ export function AdminMiniDiagnosisStartClient() {
   const [error, setError] = useState<string | null>(null);
   const [needsAuth, setNeedsAuth] = useState(false);
   const [confirmSet, setConfirmSet] = useState<SetRow | null>(null);
+  const [latestResult, setLatestResult] = useState<LatestResult | null>(null);
+  const [freeLimitReached, setFreeLimitReached] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -162,6 +204,8 @@ export function AdminMiniDiagnosisStartClient() {
       const json = (await res.json().catch(() => ({}))) as {
         sets?: SetRow[];
         error?: string;
+        latestResult?: LatestResult | null;
+        freeLimitReached?: boolean;
       };
       if (!res.ok) {
         if (res.status === 401) {
@@ -172,6 +216,8 @@ export function AdminMiniDiagnosisStartClient() {
         return;
       }
       setSets(json.sets ?? []);
+      setLatestResult(json.latestResult ?? null);
+      setFreeLimitReached(Boolean(json.freeLimitReached));
       setLoading(false);
     })();
   }, []);
@@ -189,9 +235,18 @@ export function AdminMiniDiagnosisStartClient() {
     const json = (await res.json().catch(() => ({}))) as {
       sessionId?: string;
       error?: string;
+      code?: string;
     };
     setStartingId(null);
     if (!res.ok || !json.sessionId) {
+      if (json.code === "free_limit_reached") {
+        setFreeLimitReached(true);
+        setError(null);
+        if (!latestResult && json.sessionId) {
+          router.push(`/mini-diagnosis/results/${json.sessionId}`);
+        }
+        return;
+      }
       setError(json.error ?? "Could not start mini diagnosis.");
       if (res.status === 401) {
         router.push(`/login?next=${encodeURIComponent("/mini-diagnosis/start")}`);
@@ -297,6 +352,12 @@ export function AdminMiniDiagnosisStartClient() {
               เลือกชุดแล้วกด Start เพื่อเริ่มทำข้อสอบ
             </p>
 
+            {!loading && !needsAuth && latestResult ? (
+              <div className="mt-6">
+                <MyResultBanner result={latestResult} />
+              </div>
+            ) : null}
+
             <div className="mt-6 space-y-4">
               {loading ? (
                 <div className="rounded-2xl bg-neutral-50 px-5 py-8 text-sm font-semibold text-neutral-400">
@@ -304,6 +365,10 @@ export function AdminMiniDiagnosisStartClient() {
                 </div>
               ) : needsAuth ? (
                 <AuthWallPanel onSignIn={handleSignIn} />
+              ) : freeLimitReached ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-5 py-8 text-center text-sm font-semibold text-neutral-500">
+                  คุณใช้สิทธิ์ทำ Mini Diagnosis ฟรีไปแล้ว ดูผลของคุณด้านบนได้เลย
+                </div>
               ) : sets.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 px-5 py-8 text-sm font-semibold text-neutral-400">
                   ยังไม่มีชุดแบบทดสอบที่เปิดใช้งาน / No active set yet.

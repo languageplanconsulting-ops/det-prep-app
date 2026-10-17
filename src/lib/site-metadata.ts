@@ -66,6 +66,12 @@ export function buildDefaultMetadata(): Metadata {
     alternates: {
       canonical: absoluteUrl("/"),
     },
+    // Google Search Console ownership proof. Set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION in
+    // Vercel to the content= value Search Console hands you for the "HTML tag" method;
+    // Next renders it into <head> on every page. Left unset it emits nothing.
+    verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+      : undefined,
     openGraph: {
       type: "website",
       siteName: SITE_NAME,

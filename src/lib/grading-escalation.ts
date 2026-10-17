@@ -1,21 +1,15 @@
 import "server-only";
 
 import {
+  gradingProviderOf,
   hasTimeForAnotherAttempt,
   isAnthropicGradingModel,
+  isPermanentProviderKeyError,
 } from "@/lib/grading-llm-generate";
-import { DEFAULT_GEMINI_TEXT_MODEL } from "@/lib/gemini-text-models";
-
-/**
- * Last-resort Gemini rung. Flash-Lite has its own quota bucket, so it can still
- * answer when the main Flash model's daily quota is spent. (The previous last
- * rung, gemini-2.5-pro, has been retired and has no free-tier quota.)
- */
-const LAST_RESORT_GEMINI_MODEL = "gemini-flash-lite-latest";
-
-/** Provider messages that mean "out of money / quota" rather than a passing blip. */
-const CAPACITY_EXHAUSTED_RE =
-  /credit balance is too low|credits are depleted|prepayment credits|insufficient_quota|quota exceeded|exceeded your current quota|resource_exhausted/i;
+import {
+  DEFAULT_GEMINI_TEXT_MODEL,
+  HEAVY_GEMINI_FALLBACK_MODEL,
+} from "@/lib/gemini-text-models";
 import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 
 /**
@@ -50,27 +44,26 @@ export type EscalatedGrade<T> = {
  * route can tell the client "ask again" rather than "you did something wrong".
  */
 export class AllGradingAttemptsFailedError extends Error {
-  readonly retryable = true;
   readonly failures: string[];
-  constructor(failures: string[]) {
-    super("Grading service is busy right now.");
+  /**
+   * Every provider we can reach rejected the ACCOUNT, not the request — a
+   * denied project, a revoked key, an empty balance. Submitting again cannot
+   * help, so the learner must not be told to try again: that is an endless
+   * loop with their work held hostage at the end of it.
+   */
+  readonly permanent: boolean;
+  /** False exactly when `permanent` — kept so callers read one flag, not two. */
+  readonly retryable: boolean;
+  constructor(failures: string[], permanent = false) {
+    super(
+      permanent
+        ? "Grading is unavailable: no AI provider is reachable with the configured keys."
+        : "Grading service is busy right now.",
+    );
     this.name = "AllGradingAttemptsFailedError";
     this.failures = failures;
-  }
-
-  /** True when the failures point at spent quota / credit, not a passing blip. */
-  get capacityExhausted(): boolean {
-    return this.failures.some((f) => CAPACITY_EXHAUSTED_RE.test(f));
-  }
-
-  /**
-   * Learner-facing copy. Telling someone to "submit again" while our AI quota is
-   * spent just burns their patience, so say plainly that it is on our side.
-   */
-  get userMessage(): string {
-    return this.capacityExhausted
-      ? "ระบบตรวจ AI ของเราใช้โควตาเต็มชั่วคราว ไม่ใช่ความผิดของคุณ งานของคุณยังอยู่ครบ — ทีมงานได้รับแจ้งแล้ว กรุณาลองใหม่ภายหลัง (Our AI feedback service has hit its capacity on our side — it's not you. Your work is safe and we're on it. Please try again later.)"
-      : "ระบบตรวจกำลังไม่ว่างชั่วคราว งานของคุณยังอยู่ครบ — กดส่งอีกครั้งได้เลย (Grading is briefly busy. Your work is safe — please submit again.)";
+    this.permanent = permanent;
+    this.retryable = !permanent;
   }
 }
 
@@ -91,13 +84,17 @@ export function buildModelLadder(
   const hasClaude = Boolean(keys.anthropicApiKey?.trim());
 
   // Cross-provider first — the most independent second opinion available.
+  // The last rung is a heavier Gemini, and it must be one Google still serves:
+  // it sat on gemini-2.5-pro until August 2026, by which point that id only
+  // ever answered "no longer available to new users" — a rung that cannot
+  // succeed is not a fallback, it is a slower way to fail.
   if (isAnthropicGradingModel(primary)) {
     push(DEFAULT_GEMINI_TEXT_MODEL, hasGemini);
-    push(LAST_RESORT_GEMINI_MODEL, hasGemini);
+    push(HEAVY_GEMINI_FALLBACK_MODEL, hasGemini);
   } else {
     push("claude-haiku-4-5", hasClaude);
     push(DEFAULT_GEMINI_TEXT_MODEL, hasGemini);
-    push(LAST_RESORT_GEMINI_MODEL, hasGemini);
+    push(HEAVY_GEMINI_FALLBACK_MODEL, hasGemini);
   }
   return ladder;
 }
@@ -120,13 +117,26 @@ export async function gradeWithEscalation<T>(opts: {
 }): Promise<EscalatedGrade<T>> {
   const failures: string[] = [];
   let lastAttemptMs = 0;
+  // Providers that have already rejected our credentials this run. The ladder
+  // deliberately revisits a provider (Gemini sits at rung 1 AND rung 3), which
+  // is right when a single model is overloaded and wrong when the whole key is
+  // denied — then rung 3 is a guaranteed second failure, paid for in the
+  // learner's waiting time and in budget that rung 2 might have used.
+  const deadProviders = new Set<string>();
+  let sawOnlyPermanentFailures = true;
 
   for (let i = 0; i < opts.models.length; i++) {
     const model = opts.models[i]!;
+    const provider = gradingProviderOf(model);
+    if (deadProviders.has(provider)) {
+      failures.push(`skipped ${model}: ${provider} key already rejected`);
+      continue;
+    }
     // Never start a rung we can't finish — being killed mid-attempt by the
     // platform is exactly the failure we're removing.
     if (i > 0 && !hasTimeForAnotherAttempt(opts.deadlineAt, lastAttemptMs)) {
       failures.push(`skipped ${model}: out of time budget`);
+      sawOnlyPermanentFailures = false;
       break;
     }
     const startedAt = Date.now();
@@ -148,6 +158,11 @@ export async function gradeWithEscalation<T>(opts: {
     } catch (err) {
       lastAttemptMs = Date.now() - startedAt;
       failures.push(`${model}: ${err instanceof Error ? err.message : String(err)}`);
+      if (isPermanentProviderKeyError(err)) {
+        deadProviders.add(provider);
+      } else {
+        sawOnlyPermanentFailures = false;
+      }
     }
   }
 
@@ -155,7 +170,7 @@ export async function gradeWithEscalation<T>(opts: {
     `[${opts.operation}] ALL MODELS FAILED:`,
     failures.join(" | "),
   );
-  throw new AllGradingAttemptsFailedError(failures);
+  throw new AllGradingAttemptsFailedError(failures, sawOnlyPermanentFailures);
 }
 
 /**

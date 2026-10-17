@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ReadWriteLessonRunner } from "@/components/lessons/ReadWriteLessonRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import type { ReadWriteTier } from "@/lib/readwrite-lessons";
 
 function isTier(s: string): s is ReadWriteTier {
@@ -25,7 +26,13 @@ export default async function ReadWriteUnitPage({
   }
   return (
     <main className="mx-auto max-w-xl px-4 py-7 sm:px-6">
-      <ReadWriteLessonRunner tier={tierRaw} unit={unit} />
+      <StudySessionBoundary
+        skill="production"
+        exerciseType="lesson_read_then_write"
+        setId={`${tierRaw}:${unit}`}
+      >
+        <ReadWriteLessonRunner tier={tierRaw} unit={unit} />
+      </StudySessionBoundary>
     </main>
   );
 }

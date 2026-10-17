@@ -1,0 +1,2107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>English in Chunks — อังกฤษเป็นก้อน</title>
+<style>
+@page{ size:A4; margin:20mm 17mm 20mm 17mm; }
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact; print-color-adjust:exact}
+body{margin:0; font-family:Georgia,"Charter",serif; font-size:10.6pt; line-height:1.5; color:#1B2A33}
+
+/* ---------- tokens ---------- */
+:root{
+  --ink:#1B2A33; --ink2:#4B5C66; --ink3:#7C8A92;
+  --teal:#0E5E5B; --teal-t:#E3EFEC; --teal-l:#B7D5CE;
+  --red:#AE3427;  --red-t:#F8E7E3;  --red-l:#E8BDB4;
+  --gold:#8A6212; --gold-t:#F6EEDC; --gold-l:#E0CB9B;
+  --gray:#F1F3F1; --rule:#D6DBD7;
+}
+.sans{font-family:"Avenir Next","Avenir","Helvetica Neue",sans-serif}
+.th{font-family:"Sukhumvit Set","Thonburi","Sukhumvit Set",sans-serif; font-size:10.2pt}
+.mono{font-family:Menlo,Consolas,monospace}
+
+
+/* ---------- structure ---------- */
+.page-break{page-break-before:always}
+h1,h2,h3,h4{font-family:"Avenir Next","Avenir",sans-serif; margin:0; text-wrap:balance}
+p{margin:0 0 6pt}
+.lead{font-size:11.4pt; line-height:1.55; color:var(--ink2)}
+
+/* part opener */
+.partopen{page-break-before:always; page-break-after:always; padding-top:58mm}
+.partopen .kicker{font-family:"Avenir Next",sans-serif; font-size:8.6pt; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--teal); margin-bottom:9mm}
+.partopen .pnum{font-family:"Avenir Next",sans-serif; font-weight:600; font-size:64pt;
+  line-height:.85; color:var(--teal-l); letter-spacing:-.03em}
+.partopen h1{font-size:30pt; font-weight:600; line-height:1.06; letter-spacing:-.02em; margin-top:6mm}
+.partopen .thline{font-family:"Sukhumvit Set",sans-serif; font-size:15pt; color:var(--teal); margin-top:4mm}
+.partopen .blurb{margin-top:10mm; padding-top:6mm; border-top:1.6pt solid var(--teal);
+  max-width:118mm; color:var(--ink2); font-size:10.6pt}
+.partopen ul{margin:5mm 0 0; padding-left:14pt; color:var(--ink2); font-size:10pt}
+
+/* chapter opener */
+.chap{page-break-before:always}
+.chap-head{border-bottom:1.6pt solid var(--ink); padding-bottom:4mm; margin-bottom:7mm}
+.chap-head .cn{font-family:"Avenir Next",sans-serif; font-size:8.4pt; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--teal); font-weight:600}
+.chap-head h2{font-size:19pt; font-weight:600; letter-spacing:-.015em; margin-top:2.5mm; line-height:1.12}
+.chap-head .thsub{font-family:"Sukhumvit Set",sans-serif; font-size:12pt; color:var(--ink2); margin-top:1.5mm}
+
+h3{font-size:12.4pt; font-weight:600; margin:9mm 0 3mm; color:var(--ink)}
+h3 .num{color:var(--teal); font-weight:600; margin-right:5pt}
+h4{font-size:10.4pt; font-weight:600; margin:6mm 0 2mm; letter-spacing:.01em}
+
+/* ---------- tables ---------- */
+table{width:100%; border-collapse:collapse; margin:4mm 0 6mm; font-size:9.6pt}
+th{font-family:"Avenir Next",sans-serif; font-size:7.6pt; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink3); text-align:left; padding:0 6pt 3pt; border-bottom:1pt solid var(--ink)}
+td{padding:4.2pt 6pt; border-bottom:.4pt solid var(--rule); vertical-align:top}
+tr{break-inside:avoid}
+td.en{font-family:"Avenir Next",sans-serif; font-weight:600; font-size:9.8pt; white-space:nowrap}
+td.th{font-family:"Sukhumvit Set",sans-serif; font-size:9.6pt; color:var(--ink)}
+td.ex{font-style:italic; color:var(--ink2); font-size:9.4pt}
+td.c{text-align:center; width:1%; white-space:nowrap}
+.us{display:inline-block; font-family:"Avenir Next",sans-serif; font-size:6.8pt; font-weight:600;
+  letter-spacing:.08em; padding:1pt 3.4pt; border-radius:2pt; background:var(--teal-t); color:var(--teal)}
+.sep{display:inline-block; font-family:"Avenir Next",sans-serif; font-size:6.8pt;
+  letter-spacing:.06em; padding:1pt 3.4pt; border-radius:2pt; background:var(--gray); color:var(--ink3)}
+.warn{display:inline-block; font-family:"Avenir Next",sans-serif; font-size:6.8pt; font-weight:600;
+  letter-spacing:.06em; padding:1pt 3.4pt; border-radius:2pt; background:var(--red-t); color:var(--red)}
+
+/* ---------- boxes ---------- */
+.box{break-inside:avoid; border:.8pt solid var(--rule); border-radius:3pt;
+  padding:4.5mm 5mm; margin:5mm 0; background:#FBFCFB}
+.box .bt{font-family:"Avenir Next",sans-serif; font-size:8pt; font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; margin-bottom:2.5mm}
+.box.tip{background:var(--gold-t); border-color:var(--gold-l)} .box.tip .bt{color:var(--gold)}
+.box.trap{background:var(--red-t); border-color:var(--red-l)} .box.trap .bt{color:var(--red)}
+.box.rule{background:var(--teal-t); border-color:var(--teal-l)} .box.rule .bt{color:var(--teal)}
+.box p:last-child{margin-bottom:0}
+
+.bad{color:var(--red); font-family:"Avenir Next",sans-serif; font-weight:500}
+.bad s{text-decoration-thickness:.8pt}
+.good{color:var(--teal); font-family:"Avenir Next",sans-serif; font-weight:600}
+.xr{display:flex; flex-wrap:wrap; align-items:baseline; gap:1mm 2.5mm; margin:2mm 0}
+.xr .m{font-family:"Avenir Next",sans-serif; font-weight:700; font-size:10pt}
+.xr .m.x{color:var(--red)} .xr .m.v{color:var(--teal)}
+
+/* ---------- exercises ---------- */
+.ex-block{break-inside:avoid-page; border-left:2.4pt solid var(--teal); padding:0 0 0 5mm; margin:7mm 0}
+.ex-head{font-family:"Avenir Next",sans-serif; font-size:9pt; font-weight:600; color:var(--teal);
+  letter-spacing:.05em; margin-bottom:1mm}
+.ex-inst{font-size:9.4pt; color:var(--ink2); margin-bottom:3mm}
+.ex-inst .th{color:var(--ink3)}
+ol.q{margin:0; padding-left:16pt; font-size:9.8pt}
+ol.q li{margin-bottom:3.4pt; padding-left:2pt; break-inside:avoid}
+.blank{display:inline-block; min-width:23mm; border-bottom:.6pt solid var(--ink3); margin:0 2pt}
+.blank.sm{min-width:15mm} .blank.lg{min-width:42mm}
+.opts{font-family:"Avenir Next",sans-serif; font-size:8.8pt; color:var(--ink2)}
+.wordbank{background:var(--gray); border-radius:3pt; padding:3mm 4mm; margin:0 0 3.5mm;
+  font-family:"Avenir Next",sans-serif; font-size:9pt; line-height:1.7; color:var(--ink)}
+.wordbank b{font-family:"Avenir Next",sans-serif; font-size:7.4pt; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink3); font-weight:600; display:block; margin-bottom:1mm}
+
+/* ---------- cover ---------- */
+.cover{height:257mm; position:relative; page-break-after:always}
+.cover .band{position:absolute; left:-17mm; right:-17mm; top:-20mm; height:104mm; background:var(--teal)}
+.cover .bandtxt{position:absolute; top:20mm; left:0; right:0; color:#fff}
+.cover .kick{font-family:"Avenir Next",sans-serif; font-size:8.6pt; letter-spacing:.3em;
+  text-transform:uppercase; opacity:.8}
+.cover h1{font-family:"Avenir Next",sans-serif; font-size:44pt; font-weight:600; line-height:.98;
+  letter-spacing:-.03em; margin-top:7mm; color:#fff}
+.cover .thai-title{font-family:"Sukhumvit Set",sans-serif; font-size:23pt; margin-top:5mm; color:#B7D5CE}
+.cover .mid{position:absolute; top:112mm; left:0; right:0}
+.cover .mid h2{font-family:"Avenir Next",sans-serif; font-size:14.5pt; font-weight:500; line-height:1.45;
+  color:var(--ink); max-width:130mm}
+.cover .rule{width:34mm; height:2.4pt; background:var(--red); margin:8mm 0}
+.cover .three{display:grid; grid-template-columns:repeat(3,1fr); gap:5mm; margin-top:10mm}
+.cover .three > div{border-top:1pt solid var(--ink); padding-top:3mm}
+.cover .three .n{font-family:"Avenir Next",sans-serif; font-size:22pt; font-weight:600; color:var(--teal); line-height:1}
+.cover .three .l{font-family:"Avenir Next",sans-serif; font-size:8.6pt; color:var(--ink2); margin-top:1.5mm}
+.cover .three .t{font-family:"Sukhumvit Set",sans-serif; font-size:8.6pt; color:var(--ink3)}
+.cover .foot{position:absolute; bottom:0; left:0; right:0; font-family:"Avenir Next",sans-serif;
+  font-size:9pt; color:var(--ink2); border-top:.8pt solid var(--rule); padding-top:3mm}
+
+/* ---------- toc ---------- */
+.toc h2{font-size:22pt; font-weight:600; letter-spacing:-.02em; margin-bottom:1mm}
+.toc .tsub{font-family:"Sukhumvit Set",sans-serif; font-size:11pt; color:var(--ink2); margin-bottom:8mm}
+.toc-part{font-family:"Avenir Next",sans-serif; font-size:8.4pt; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--teal); font-weight:600; margin:7mm 0 2.5mm; padding-bottom:1.5mm; border-bottom:.8pt solid var(--teal-l)}
+.toc-row{display:flex; align-items:baseline; gap:2mm; font-size:10pt; margin-bottom:2.2mm}
+.toc-row .t{font-family:"Avenir Next",sans-serif}
+.toc-row .t .thn{font-family:"Sukhumvit Set",sans-serif; color:var(--ink3); font-size:9pt}
+.toc-row .dots{flex:1; border-bottom:.5pt dotted var(--ink3); transform:translateY(-2pt)}
+.toc-row .pg{font-family:"Avenir Next",sans-serif; font-variant-numeric:tabular-nums; color:var(--ink2); font-size:9.4pt}
+
+/* ---------- answer key ---------- */
+.key{column-count:2; column-gap:9mm; font-size:8.8pt}
+.key h4{margin:0 0 1.5mm; font-size:9.4pt; color:var(--teal); break-after:avoid}
+.key .kg{break-inside:avoid; margin-bottom:4mm}
+.key ol{margin:0; padding-left:13pt}
+.key li{margin-bottom:1pt}
+.two{column-count:2; column-gap:8mm}
+.stats-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:.8pt solid var(--rule);
+  border-radius:3pt; overflow:hidden; margin:5mm 0}
+.stats-strip div{padding:3.5mm 4mm; border-right:.4pt solid var(--rule)}
+.stats-strip div:last-child{border-right:0}
+.stats-strip .n{font-family:"Avenir Next",sans-serif; font-size:17pt; font-weight:600; color:var(--teal); line-height:1}
+.stats-strip .l{font-size:8.4pt; color:var(--ink2); margin-top:1.5mm; line-height:1.3}
+</style></head><body>
+
+<!-- ==================== COVER ==================== -->
+<section class="cover">
+  <div class="band"></div>
+  <div class="bandtxt">
+    <div class="kick">American English · CEFR A2–B1 · For Thai Learners</div>
+    <h1>English<br>in Chunks</h1>
+    <div class="thai-title">อังกฤษเป็นก้อน</div>
+  </div>
+  <div class="mid">
+    <h2>Phrasal Verbs, Idioms, and the Prepositions<br>Thai Speakers Get Wrong</h2>
+    <div class="rule"></div>
+    <p class="th" style="font-size:11pt; max-width:128mm; color:#4B5C66">
+      ท่องศัพท์มาเป็นพันคำ แต่ยังพูดไม่ออก — ปัญหาไม่ได้อยู่ที่จำนวนคำ
+      แต่อยู่ที่คุณยังไม่ได้เรียน “ก้อนคำ” ที่เจ้าของภาษาใช้จริง หนังสือเล่มนี้รวบรวมไว้ให้ครบ
+      พร้อมกับดักที่คนไทยพลาดบ่อยที่สุด
+    </p>
+    <div class="three">
+      <div><div class="n">170</div><div class="l">Phrasal verbs</div><div class="t">คำกริยาวลี</div></div>
+      <div><div class="n">80</div><div class="l">Idioms &amp; chunks</div><div class="t">สำนวนและวลี</div></div>
+      <div><div class="n">50</div><div class="l">Preposition traps</div><div class="t">กับดักบุพบท</div></div>
+    </div>
+  </div>
+  <div class="foot">
+    <span style="float:right">Workbook Edition · with Answer Key</span>
+    Built on corpus research: COCA · Oxford 3000 (American) · Cambridge B1
+  </div>
+</section>
+<!-- ==================== CONTENTS ==================== -->
+<section class="page-break toc">
+  <h2>Contents</h2>
+  <div class="tsub">สารบัญ</div>
+
+  <div class="toc-part">Getting Started</div>
+  <div class="toc-row"><span class="t">Why You Still Can’t Speak <span class="thn">· ทำไมท่องศัพท์แล้วยังพูดไม่ออก</span></span><span class="dots"></span><span class="pg" data-anchor="Why You Still Can’t Speak">3</span></div>
+  <div class="toc-row"><span class="t">How to Use This Book <span class="thn">· วิธีใช้หนังสือเล่มนี้</span></span><span class="dots"></span><span class="pg" data-anchor="How to Use This Book">5</span></div>
+
+  <div class="toc-part">Part One · Phrasal Verbs · คำกริยาวลี</div>
+  <div class="toc-row"><span class="t">1 · How Phrasal Verbs Actually Work <span class="thn">· กลไกของคำกริยาวลี</span></span><span class="dots"></span><span class="pg" data-anchor="How Phrasal Verbs Actually Work">8</span></div>
+  <div class="toc-row"><span class="t">2 · Home &amp; Everyday Life <span class="thn">· บ้านและชีวิตประจำวัน</span></span><span class="dots"></span><span class="pg" data-anchor="Home &amp; Everyday Life">11</span></div>
+  <div class="toc-row"><span class="t">3 · Travel &amp; Getting Around <span class="thn">· การเดินทาง</span></span><span class="dots"></span><span class="pg" data-anchor="Travel &amp; Getting Around">14</span></div>
+  <div class="toc-row"><span class="t">4 · School, Work &amp; Study <span class="thn">· เรียนและทำงาน</span></span><span class="dots"></span><span class="pg" data-anchor="School, Work &amp; Study">16</span></div>
+  <div class="toc-row"><span class="t">5 · People, Feelings &amp; Friendship <span class="thn">· คน ความรู้สึก มิตรภาพ</span></span><span class="dots"></span><span class="pg" data-anchor="People, Feelings &amp; Friendship">18</span></div>
+  <div class="toc-row"><span class="t">6 · Plans, Problems &amp; the Phone <span class="thn">· แผน ปัญหา โทรศัพท์</span></span><span class="dots"></span><span class="pg" data-anchor="Plans, Problems &amp; the Phone">20</span></div>
+  <div class="toc-row"><span class="t">7 · Say It the American Way <span class="thn">· พูดแบบอเมริกัน</span></span><span class="dots"></span><span class="pg" data-anchor="Say It the American Way">22</span></div>
+  <div class="toc-row"><span class="t">Review Test One <span class="thn">· แบบทดสอบท้ายภาคหนึ่ง</span></span><span class="dots"></span><span class="pg" data-anchor="Review Test One">24</span></div>
+
+  <div class="toc-part">Part Two · Idioms &amp; Everyday Chunks · สำนวนและวลี</div>
+  <div class="toc-row"><span class="t">8 · Thirty Idioms Americans Really Say <span class="thn">· สำนวนที่ใช้จริง 30 สำนวน</span></span><span class="dots"></span><span class="pg" data-anchor="Thirty Idioms Americans Really Say">26</span></div>
+  <div class="toc-row"><span class="t">9 · Conversation Chunks <span class="thn">· วลีสำหรับบทสนทนา</span></span><span class="dots"></span><span class="pg" data-anchor="Conversation Chunks">28</span></div>
+  <div class="toc-row"><span class="t">10 · Sounding American <span class="thn">· ฟังให้ทัน พูดให้ลื่น</span></span><span class="dots"></span><span class="pg" data-anchor="Sounding American">31</span></div>
+  <div class="toc-row"><span class="t">Review Test Two <span class="thn">· แบบทดสอบท้ายภาคสอง</span></span><span class="dots"></span><span class="pg" data-anchor="Review Test Two">33</span></div>
+
+  <div class="toc-part">Part Three · Prepositions — The Thai Trap Zone · กับดักบุพบท</div>
+  <div class="toc-row"><span class="t">11 · Why Thai Speakers Get Prepositions Wrong <span class="thn">· ทำไมคนไทยผิดตรงนี้</span></span><span class="dots"></span><span class="pg" data-anchor="Why Thai Speakers Get Prepositions Wrong">35</span></div>
+  <div class="toc-row"><span class="t">12 · Verb + Preposition <span class="thn">· กริยา + บุพบท</span></span><span class="dots"></span><span class="pg" data-anchor="Verb + Preposition">37</span></div>
+  <div class="toc-row"><span class="t">13 · Adjective + Preposition <span class="thn">· คุณศัพท์ + บุพบท</span></span><span class="dots"></span><span class="pg" data-anchor="Adjective + Preposition">39</span></div>
+  <div class="toc-row"><span class="t">14 · Noun + Preposition <span class="thn">· คำนาม + บุพบท</span></span><span class="dots"></span><span class="pg" data-anchor="Noun + Preposition">41</span></div>
+  <div class="toc-row"><span class="t">15 · The Fifteen Deadliest Mistakes <span class="thn">· 15 ข้อผิดที่ร้ายแรงที่สุด</span></span><span class="dots"></span><span class="pg" data-anchor="The Fifteen Deadliest Mistakes">43</span></div>
+  <div class="toc-row"><span class="t">Review Test Three <span class="thn">· แบบทดสอบท้ายภาคสาม</span></span><span class="dots"></span><span class="pg" data-anchor="Review Test Three">45</span></div>
+
+  <div class="toc-part">Reference</div>
+  <div class="toc-row"><span class="t">Answer Key <span class="thn">· เฉลย</span></span><span class="dots"></span><span class="pg" data-anchor="Answer Key">46</span></div>
+  <div class="toc-row"><span class="t">Sources &amp; Further Reading <span class="thn">· แหล่งอ้างอิง</span></span><span class="dots"></span><span class="pg" data-anchor="Sources &amp; Further Reading">50</span></div>
+</section>
+
+<!-- ==================== INTRO ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Getting Started</div>
+    <h2>Why You Still Can’t Speak</h2>
+    <div class="thsub">ทำไมท่องศัพท์มาเป็นพัน แต่ยังพูดไม่ออก</div>
+  </div>
+
+  <p class="lead">You have studied English for ten years. You know <i>decision</i>, you know <i>make</i>,
+  you know <i>mistake</i>. So why does <span class="bad">“I did a mistake”</span> still come out of your mouth?</p>
+
+  <p class="th" style="font-size:10.6pt">เพราะภาษาอังกฤษไม่ได้ถูกเก็บไว้ในหัวเจ้าของภาษาเป็น “คำเดี่ยว ๆ”
+  แต่เก็บเป็น <b>ก้อน (chunks)</b> — กลุ่มคำที่มาด้วยกันเสมอ เช่น <i>make a mistake</i>, <i>pick up</i>,
+  <i>depend on</i> เจ้าของภาษาไม่ได้ประกอบประโยคทีละคำ เขาหยิบก้อนสำเร็จรูปมาใช้เลย
+  คนที่ท่องศัพท์เดี่ยวมาเป็นพันคำจึงยังพูดไม่ลื่น เพราะขาดก้อนพวกนี้</p>
+
+  <h3><span class="num">§</span>The numbers behind this book</h3>
+  <p>Everything in this book is chosen from corpus research — real counts of what Americans actually say,
+  not what textbooks assume they say.</p>
+
+  <div class="stats-strip">
+    <div><div class="n">2,580</div><div class="l">words to cover B1<br><span class="th" style="font-size:8pt">Oxford 3000 (American)</span></div></div>
+    <div><div class="n">809</div><div class="l">new words in the A2→B1 step<br><span class="th" style="font-size:8pt">ช่วงที่คุณอยู่ตอนนี้</span></div></div>
+    <div><div class="n">150</div><div class="l">phrasal verbs = 75% of all use<br><span class="th" style="font-size:8pt">PHaVE List · COCA</span></div></div>
+    <div><div class="n">94</div><div class="l">phrasal verbs in the whole Cambridge B1 exam<br><span class="th" style="font-size:8pt">นับจากรายการจริง</span></div></div>
+  </div>
+
+  <div class="box rule">
+    <div class="bt">The single most useful fact in this book</div>
+    <p>Only <b>150 phrasal verbs</b> account for more than <b>75%</b> of every phrasal verb an American
+    actually says. And just <b>25</b> of them cover a third. You do not need a dictionary of 3,000
+    phrasal verbs. You need these.</p>
+    <p class="th" style="margin-top:2mm">คำกริยาวลีเพียง 150 คำ ครอบคลุมการใช้งานจริงเกิน 75%
+    และแค่ 25 คำแรกก็ครอบคลุมถึงหนึ่งในสามแล้ว — ไม่ต้องท่องเป็นพัน ท่องให้ถูกตัวก็พอ</p>
+  </div>
+
+  <h3><span class="num">§</span>The Thai problem nobody fixes</h3>
+  <p>Research on Thai learners is blunt about the cause of error: <b>transfer from Thai</b> is the number-one
+  source of mistakes, and the worst damage happens in three places.</p>
+
+  <table>
+    <tr><th style="width:34%">The trap</th><th style="width:33%">Why Thai causes it</th><th>Typical error</th></tr>
+    <tr><td class="en" style="white-space:normal">Missing preposition</td>
+        <td class="th">กริยาไทยรับกรรมตรง ๆ ไม่ต้องมีคำเชื่อม</td>
+        <td class="bad">✗ <s>I listen music</s></td></tr>
+    <tr><td class="en" style="white-space:normal">ทำ = do / make / take / have</td>
+        <td class="th">คำเดียวในไทย กลายเป็นสี่คำในอังกฤษ</td>
+        <td class="bad">✗ <s>do a mistake</s></td></tr>
+    <tr><td class="en" style="white-space:normal">Wrong adjective partner</td>
+        <td class="th">หนัก / แรง / ใหญ่ แปลได้หลายคำ</td>
+        <td class="bad">✗ <s>strong rain</s></td></tr>
+  </table>
+
+  <p>Part Three of this book is built entirely around that first row, because it is where Thai speakers
+  lose the most marks and sound the least natural. Most books hide the mistake. This one prints it in red
+  next to the fix — <b>you have already automated the error, so you have to see it to overwrite it.</b></p>
+
+  <div class="box tip">
+    <div class="bt">A promise about this book</div>
+    <p>Every single item here was chosen because it is <i>frequent</i>, not because it is colorful.
+    You will not find <i>“it’s raining cats and dogs”</i> in these pages. Americans do not say it.
+    You will find <i>“no big deal,”</i> which they say constantly.</p>
+    <p class="th" style="margin-top:2mm">ทุกสำนวนในเล่มนี้คัดจากความถี่การใช้จริง ไม่ใช่ความแปลกตา
+    สำนวนดัง ๆ ในหนังสือเรียนที่ฝรั่งไม่พูดกันแล้ว เราตัดออกหมด</p>
+  </div>
+</section>
+
+<!-- ==================== HOW TO USE ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Getting Started</div>
+    <h2>How to Use This Book</h2>
+    <div class="thsub">วิธีใช้หนังสือเล่มนี้ให้ได้ผลจริง</div>
+  </div>
+
+  <h3><span class="num">1</span>The three tiers — and what they mean for you</h3>
+  <p>Not every item deserves the same effort. Every entry in this book is graded.</p>
+  <table>
+    <tr><th style="width:14%">Tier</th><th style="width:30%">What it means</th><th style="width:26%">ต้องทำอะไร</th><th>How to study it</th></tr>
+    <tr><td class="en">T1</td><td>You must be able to <b>say</b> it</td><td class="th">พูดได้ เขียนได้</td><td>Drill until automatic. Use it this week.</td></tr>
+    <tr><td class="en">T2</td><td>You must be able to <b>write</b> it</td><td class="th">เขียนได้ ฟังออก</td><td>Learn it, use it in writing.</td></tr>
+    <tr><td class="en">T3</td><td>You only need to <b>understand</b> it</td><td class="th">แค่เข้าใจตอนเจอ</td><td>Read it once. Do <b>not</b> memorize.</td></tr>
+  </table>
+
+  <div class="box trap">
+    <div class="bt">Do not waste your time</div>
+    <p>The most common way Thai students waste study hours is memorizing <b>T3</b> items as hard as
+    <b>T1</b> items. Tier 3 is recognition only. Meet it, understand it, move on.</p>
+    <p class="th" style="margin-top:2mm">ข้อผิดพลาดที่พบบ่อยที่สุดคือทุ่มเวลาท่องคำ T3 เท่ากับ T1
+    คำ T3 แค่ “อ่านเข้าใจ” ก็พอ ไม่ต้องท่อง</p>
+  </div>
+
+  <h3><span class="num">2</span>Symbols you will see</h3>
+  <table>
+    <tr><th style="width:22%">Symbol</th><th style="width:38%">Meaning</th><th>ความหมาย</th></tr>
+    <tr><td><span class="us">US</span></td><td>American form; the British say it differently</td><td class="th">แบบอเมริกัน อังกฤษพูดคนละแบบ</td></tr>
+    <tr><td><span class="sep">SEP</span></td><td>Separable — the object can go in the middle</td><td class="th">แยกได้ กรรมแทรกกลางได้</td></tr>
+    <tr><td><span class="warn">TRAP</span></td><td>Thai speakers get this wrong very often</td><td class="th">จุดที่คนไทยผิดบ่อยมาก</td></tr>
+    <tr><td><span class="bad">✗ <s>wrong</s></span> / <span class="good">✓ right</span></td><td>The error, then the fix</td><td class="th">แบบผิด แล้วตามด้วยแบบถูก</td></tr>
+  </table>
+
+  <h3><span class="num">3</span>How to actually study a chapter</h3>
+  <ol class="q" style="font-size:10pt">
+    <li><b>Read the list once</b> without trying to memorize. Just meet the items. <span class="th">อ่านผ่าน ๆ ก่อน ยังไม่ต้องท่อง</span></li>
+    <li><b>Cover the Thai column</b> and say the meaning aloud. Then cover the English and do the reverse. <span class="th">ปิดคอลัมน์ไทย แล้วทายความหมาย จากนั้นสลับ</span></li>
+    <li><b>Do the exercises without looking back.</b> Guessing and being wrong teaches more than copying. <span class="th">ทำแบบฝึกหัดโดยไม่เปิดดู เดาผิดได้ความรู้มากกว่าลอก</span></li>
+    <li><b>Check the answer key</b> at the back — and read <i>why</i>, not just <i>what</i>.</li>
+    <li><b>Come back in three days.</b> Spaced review produced <b>three times</b> the retention of cramming in controlled studies. <span class="th">กลับมาทบทวนอีกครั้งใน 3 วัน การทบทวนแบบเว้นช่วงให้ผลดีกว่าการอัดรวดเดียวถึง 3 เท่า</span></li>
+  </ol>
+
+  <div class="box tip">
+    <div class="bt">Two senses. Never five.</div>
+    <p>Most phrasal verbs have five or six dictionary meanings. Corpus evidence shows that for almost all
+    of them, <b>two meanings cover more than 75%</b> of real use. This book gives you two. If a dictionary
+    offers you a third, ignore it until you meet it in real life.</p>
+    <p class="th" style="margin-top:2mm">คำกริยาวลีส่วนใหญ่มี 5–6 ความหมายในพจนานุกรม
+    แต่ในการใช้จริง แค่ 2 ความหมายแรกครอบคลุมเกิน 75% เล่มนี้จึงให้แค่ 2 — พอแล้ว</p>
+  </div>
+</section>
+<!-- ==================== PART 1 OPENER ==================== -->
+<section class="partopen">
+  <div class="kicker">Part One</div>
+  <div class="pnum">01</div>
+  <h1>Phrasal<br>Verbs</h1>
+  <div class="thline">คำกริยาวลี</div>
+  <div class="blurb">
+    <p>A phrasal verb is a verb plus a small word — <i>up, out, on, off</i> — that together mean something
+    new. They are the single most “native-sounding” thing in English, and the single hardest thing to
+    look up in a dictionary.</p>
+    <p class="th">คำกริยาวลีคือ กริยา + คำเล็ก ๆ ที่รวมกันแล้วได้ความหมายใหม่
+    เป็นสิ่งที่ทำให้ภาษาฟังดูเป็นเจ้าของภาษาที่สุด และเป็นสิ่งที่เปิดพจนานุกรมแล้วงงที่สุด</p>
+    <ul>
+      <li>Only 8 particles do half of all the work</li>
+      <li>Two meanings per verb — never five</li>
+      <li>The pronoun rule that fixes most written errors</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ==================== CH 1 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter One</div>
+    <h2>How Phrasal Verbs Actually Work</h2>
+    <div class="thsub">กลไกของคำกริยาวลี — เข้าใจครั้งเดียว ใช้ได้ทั้งเล่ม</div>
+  </div>
+
+  <h3><span class="num">1.1</span>The particle carries the meaning</h3>
+  <p>Thai students usually try to memorize phrasal verbs as random pairs. They are not random. The
+  <b>particle</b> — the little word — carries a consistent idea, and once you know the idea, dozens of
+  verbs become predictable.</p>
+  <p class="th">นักเรียนไทยส่วนใหญ่ท่องคำกริยาวลีแบบสุ่ม ทั้งที่จริงมันมีระบบ
+  “คำเล็ก” ที่ตามหลังกริยา คือตัวที่แบกความหมายไว้ พอเข้าใจแนวคิดของมันครั้งเดียว
+  คำอีกหลายสิบคำก็เดาได้ทันที</p>
+
+  <div class="box rule">
+    <div class="bt">The fact that saves you months</div>
+    <p>Corpus research found that <b>20 verbs combined with only 8 particles</b> —
+    <span class="mono">out · up · on · back · down · in · over · off</span> — account for
+    <b>more than half</b> of every phrasal verb in English.</p>
+    <p class="th" style="margin-top:2mm">งานวิจัยพบว่า กริยา 20 ตัว จับคู่กับคำเล็กเพียง 8 คำ
+    ครอบคลุมคำกริยาวลีทั้งหมดในภาษาอังกฤษเกินครึ่ง</p>
+  </div>
+
+  <h3><span class="num">1.2</span>The eight particles</h3>
+  <table>
+    <tr><th style="width:11%">Particle</th><th style="width:23%">Core idea</th><th style="width:24%">ตัวช่วยจำ</th><th>Examples</th></tr>
+    <tr><td class="en">up</td><td>finishing · increasing · upward</td><td class="th">จนเสร็จ · เพิ่มขึ้น · ขึ้นบน</td><td class="ex">eat up, clean up, fill up, grow up, turn up</td></tr>
+    <tr><td class="en">out</td><td>outward · removing · discovering</td><td class="th">ออกไป · เอาออก · ค้นพบ</td><td class="ex">find out, take out, figure out, run out</td></tr>
+    <tr><td class="en">on</td><td>continuing · contact</td><td class="th">ต่อเนื่อง · แตะติด</td><td class="ex">go on, keep on, put on, hold on</td></tr>
+    <tr><td class="en">off</td><td>separating · stopping</td><td class="th">แยกออก · หยุด</td><td class="ex">turn off, take off, set off, call off</td></tr>
+    <tr><td class="en">down</td><td>downward · reducing · recording</td><td class="th">ลง · ลดลง · จดบันทึก</td><td class="ex">write down, calm down, cut down, break down</td></tr>
+    <tr><td class="en">in</td><td>entering · inside</td><td class="th">เข้าไป · ข้างใน</td><td class="ex">get in, check in, hand in, move in</td></tr>
+    <tr><td class="en">back</td><td>returning</td><td class="th">กลับ</td><td class="ex">come back, give back, call back, pay back</td></tr>
+    <tr><td class="en">over</td><td>across · reviewing · transferring</td><td class="th">ข้าม · ทบทวน · โอนย้าย</td><td class="ex">go over, come over, take over, get over</td></tr>
+  </table>
+
+  <div class="box tip">
+    <div class="bt">Try it yourself</div>
+    <p>You already know what <i>up</i> means now. So what do you think <b>drink up</b>, <b>finish up</b>,
+    and <b>use up</b> mean? You did not memorize those three — you worked them out. That is the whole point.</p>
+    <p class="th" style="margin-top:2mm">คุณเพิ่งเข้าใจความหมายของ <i>up</i> แล้วลองเดาสิว่า
+    <i>drink up · finish up · use up</i> แปลว่าอะไร — คุณไม่ได้ท่องสามคำนี้ แต่คุณ “คิดออก” เอง นั่นแหละคือประเด็น</p>
+  </div>
+
+  <h3><span class="num">1.3</span>Separable, inseparable, and the pronoun rule</h3>
+  <p>Some phrasal verbs let the object sit in the middle. Some never do. And there is one rule that Thai
+  students break in writing more than any other.</p>
+  <table>
+    <tr><th style="width:24%">Type</th><th style="width:38%">Rule</th><th>Example</th></tr>
+    <tr><td class="en" style="white-space:normal">Separable <span class="sep">SEP</span></td>
+        <td>A noun object can go either side</td>
+        <td class="ex">Turn off the light. / Turn the light off.</td></tr>
+    <tr><td class="en" style="white-space:normal">Inseparable</td>
+        <td>Never split it</td>
+        <td class="ex">Look after him. <span class="bad">✗ <s>Look him after</s></span></td></tr>
+    <tr><td class="en" style="white-space:normal">Three-word</td>
+        <td>Never split it</td>
+        <td class="ex">Put up with it. <span class="bad">✗ <s>Put it up with</s></span></td></tr>
+  </table>
+
+  <div class="box trap">
+    <div class="bt">The one rule to memorize</div>
+    <p style="font-size:11.4pt"><b>If the object is a pronoun</b> — <i>it, him, her, them, me, us</i> —
+    <b>and the verb is separable, you MUST split it.</b></p>
+    <div class="xr"><span class="m v">✓</span><span class="good">Turn it off.</span></div>
+    <div class="xr"><span class="m x">✗</span><span class="bad"><s>Turn off it.</s></span></div>
+    <p class="th" style="margin-top:2mm">ถ้ากรรมเป็นสรรพนาม (it, him, her, them, me, us)
+    และคำกริยาวลีนั้นแยกได้ — <b>ต้องแยกเสมอ</b> ห้ามวางไว้ท้าย
+    กฎข้อเดียวนี้แก้ข้อผิดพลาดในการเขียนของคนไทยได้มากที่สุด</p>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 1A · The particle tells you the meaning</div>
+    <div class="ex-inst">Match each phrasal verb to its meaning using what you learned about particles. <span class="th">จับคู่โดยใช้ความหมายของคำเล็ก</span></div>
+    <div class="wordbank"><b>Meanings</b>
+      a. to discover &nbsp;· &nbsp; b. to return something &nbsp;· &nbsp; c. to become calm &nbsp;· &nbsp; d. to review
+      &nbsp;· &nbsp; e. to stop a machine &nbsp;· &nbsp; f. to enter a hotel &nbsp;· &nbsp; g. to finish something completely
+      &nbsp;· &nbsp; h. to continue</div>
+    <ol class="q">
+      <li>find out <span class="blank sm"></span></li>
+      <li>give back <span class="blank sm"></span></li>
+      <li>calm down <span class="blank sm"></span></li>
+      <li>go over <span class="blank sm"></span></li>
+      <li>turn off <span class="blank sm"></span></li>
+      <li>check in <span class="blank sm"></span></li>
+      <li>eat up <span class="blank sm"></span></li>
+      <li>keep on <span class="blank sm"></span></li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 1B · The pronoun rule</div>
+    <div class="ex-inst">Rewrite each sentence, replacing the object with a pronoun. <span class="th">เขียนใหม่ โดยเปลี่ยนกรรมเป็นสรรพนาม</span></div>
+    <ol class="q">
+      <li>Please turn off <u>the radio</u>. → Please <span class="blank lg"></span></li>
+      <li>I threw away <u>the old boxes</u>. → I <span class="blank lg"></span></li>
+      <li>She picked up <u>her sister</u>. → She <span class="blank lg"></span></li>
+      <li>Write down <u>the address</u>. → <span class="blank lg"></span></li>
+      <li>He gave back <u>my book</u>. → He <span class="blank lg"></span></li>
+      <li>Can you fill out <u>this form</u>? → Can you <span class="blank lg"></span>?</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 1C · Right or wrong?</div>
+    <div class="ex-inst">Write ✓ if the sentence is correct, ✗ if it is wrong. <span class="th">ถูกใส่ ✓ ผิดใส่ ✗</span></div>
+    <ol class="q">
+      <li>I looked it up in the dictionary. <span class="blank sm"></span></li>
+      <li>She looked her little brother after. <span class="blank sm"></span></li>
+      <li>Turn on it, please. <span class="blank sm"></span></li>
+      <li>We put up with the noise for a year. <span class="blank sm"></span></li>
+      <li>He took off his shoes. <span class="blank sm"></span></li>
+      <li>Please pick up me at seven. <span class="blank sm"></span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== CH 2 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Two</div>
+    <h2>Home &amp; Everyday Life</h2>
+    <div class="thsub">บ้านและชีวิตประจำวัน — 30 คำที่ใช้ทุกวัน</div>
+  </div>
+
+  <p class="lead">These are the phrasal verbs you will use before you leave the house each morning.
+  Almost all of them are Tier 1: you must be able to say them without thinking.</p>
+
+  <h4>Waking up and getting ready · ตื่นนอนและเตรียมตัว</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">wake up</td><td class="th">ตื่นนอน; ปลุก</td><td class="ex">Wake up! It’s already nine.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">get up</td><td class="th">ลุกขึ้น, ลุกจากเตียง</td><td class="ex">I get up at six every day.</td><td></td></tr>
+    <tr><td class="en">go off</td><td class="th">(นาฬิกาปลุก) ดัง</td><td class="ex">My alarm went off at five.</td><td></td></tr>
+    <tr><td class="en">get dressed</td><td class="th">แต่งตัว</td><td class="ex">Get dressed — we’re leaving.</td><td></td></tr>
+    <tr><td class="en">put on</td><td class="th">สวมใส่</td><td class="ex">Put on your jacket, it’s cold.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">take off</td><td class="th">ถอด (เสื้อผ้า, รองเท้า)</td><td class="ex">Take off your shoes at the door.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">try on</td><td class="th">ลองใส่</td><td class="ex">Can I try on these jeans?</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">hurry up</td><td class="th">รีบหน่อย</td><td class="ex">Hurry up, we’re going to be late.</td><td></td></tr>
+  </table>
+
+  <h4>Around the house · งานบ้าน</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">turn on</td><td class="th">เปิด (ไฟ, เครื่องใช้)</td><td class="ex">Can you turn on the AC?</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">turn off</td><td class="th">ปิด (ไฟ, เครื่องใช้)</td><td class="ex">Don’t forget to turn off the lights.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">turn up / down</td><td class="th">เพิ่ม / ลดเสียง</td><td class="ex">Turn the music down, please.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">clean up</td><td class="th">เก็บกวาด ทำความสะอาด</td><td class="ex">Clean up your room, please.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">put away</td><td class="th">เก็บเข้าที่</td><td class="ex">Put away your clothes.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">throw away</td><td class="th">ทิ้ง</td><td class="ex">Don’t throw away that box.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">take out</td><td class="th">เอาออกไป (ขยะ)</td><td class="ex">Please take out the trash.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">put down</td><td class="th">วางลง</td><td class="ex">Put down your phone and listen.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">pick up</td><td class="th">หยิบขึ้นมา; ไปรับ</td><td class="ex">Pick up your toys off the floor.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">get rid of</td><td class="th">กำจัด, เอาไปให้พ้น</td><td class="ex">I need to get rid of these old books.</td><td></td></tr>
+    <tr><td class="en">run out of</td><td class="th">…หมด</td><td class="ex">We ran out of milk.</td><td class="c"><span class="warn">TRAP</span></td></tr>
+    <tr><td class="en">fill up</td><td class="th">เติมให้เต็ม</td><td class="ex">Fill up the water bottle.</td><td></td></tr>
+    <tr><td class="en">put together</td><td class="th">ประกอบเข้าด้วยกัน</td><td class="ex">He put the desk together himself.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">break down</td><td class="th">(เครื่องใช้) เสีย</td><td class="ex">The washing machine broke down.</td><td></td></tr>
+  </table>
+
+  <h4>Coming and going · เข้าออกบ้าน</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">go out</td><td class="th">ออกไปข้างนอก</td><td class="ex">We went out for dinner.</td><td></td></tr>
+    <tr><td class="en">come home</td><td class="th">กลับถึงบ้าน</td><td class="ex">What time did you come home?</td><td class="c"><span class="warn">TRAP</span></td></tr>
+    <tr><td class="en">get back</td><td class="th">กลับมาถึง</td><td class="ex">I’ll get back around eight.</td><td></td></tr>
+    <tr><td class="en">stay up</td><td class="th">อยู่ดึก ไม่ยอมนอน</td><td class="ex">I stayed up until 2 a.m.</td><td></td></tr>
+    <tr><td class="en">lie down</td><td class="th">นอนลง เอนตัวลง</td><td class="ex">I need to lie down for a while.</td><td></td></tr>
+    <tr><td class="en">move in / move out</td><td class="th">ย้ายเข้า / ย้ายออก</td><td class="ex">We moved in last April.</td><td></td></tr>
+    <tr><td class="en">come over</td><td class="th">แวะมาที่บ้าน</td><td class="ex">Come over for dinner tonight.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">eat out</td><td class="th">กินข้าวนอกบ้าน</td><td class="ex">We eat out every Friday.</td><td></td></tr>
+  </table>
+
+  <div class="box trap">
+    <div class="bt">Two traps in this chapter</div>
+    <div class="xr"><span class="m x">✗</span><span class="bad"><s>We ran out milk.</s></span></div>
+    <div class="xr"><span class="m v">✓</span><span class="good">We ran out <u>of</u> milk.</span> <span class="th">ต้องมี of เสมอเมื่อมีสิ่งของตามมา</span></div>
+    <div class="xr" style="margin-top:3mm"><span class="m x">✗</span><span class="bad"><s>I came to home late.</s></span></div>
+    <div class="xr"><span class="m v">✓</span><span class="good">I came home late.</span> <span class="th">home ไม่ต้องมี to นำหน้า</span></div>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 2A · Complete the morning</div>
+    <div class="ex-inst">Fill each blank with a phrasal verb from this chapter. Change the tense if you need to. <span class="th">เติมคำกริยาวลี ปรับรูปกาลตามความเหมาะสม</span></div>
+    <ol class="q">
+      <li>My alarm <span class="blank"></span> at six, but I didn’t <span class="blank"></span> until seven.</li>
+      <li>It’s freezing outside — <span class="blank"></span> your coat.</li>
+      <li>Please <span class="blank"></span> your shoes before you come inside.</li>
+      <li>Can you <span class="blank"></span> the light? It’s too dark in here.</li>
+      <li>We <span class="blank"></span> coffee this morning, so I had tea instead.</li>
+      <li>The kids need to <span class="blank"></span> their toys before dinner.</li>
+      <li>Don’t <span class="blank"></span> that receipt — I need it.</li>
+      <li>Whose turn is it to <span class="blank"></span> the trash?</li>
+      <li>My laptop <span class="blank"></span> yesterday, so I’m using my phone.</li>
+      <li>I <span class="blank"></span> until 2 a.m. finishing my report.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 2B · Choose the right particle</div>
+    <div class="ex-inst">Circle the correct particle. <span class="th">เลือกคำเล็กที่ถูกต้อง</span></div>
+    <ol class="q">
+      <li>Please clean <span class="opts">(up / off / in)</span> the kitchen after you cook.</li>
+      <li>She put <span class="opts">(down / away / out)</span> her groceries in the fridge.</li>
+      <li>Could you turn the volume <span class="opts">(down / off / back)</span>? It’s too loud.</li>
+      <li>We ran <span class="opts">(out of / off / over)</span> rice last night.</li>
+      <li>I want to get <span class="opts">(rid of / off / out)</span> this old sofa.</li>
+      <li>They moved <span class="opts">(in / on / up)</span> next door last month.</li>
+      <li>Come <span class="opts">(over / up / in)</span> tonight — I’m cooking.</li>
+      <li>He picked <span class="opts">(up / on / out)</span> the coins from the floor.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 2C · Translate into English</div>
+    <div class="ex-inst">Use a phrasal verb from this chapter in each answer. <span class="th">แปลเป็นอังกฤษ โดยใช้คำกริยาวลีในบทนี้</span></div>
+    <ol class="q">
+      <li class="th">ช่วยปิดแอร์หน่อยได้ไหม <span class="blank lg"></span></li>
+      <li class="th">น้ำมันหมดแล้ว <span class="blank lg"></span></li>
+      <li class="th">เมื่อคืนฉันนอนดึกมาก <span class="blank lg"></span></li>
+      <li class="th">เก็บของเล่นเข้าที่ด้วยนะ <span class="blank lg"></span></li>
+      <li class="th">คืนนี้มาบ้านฉันไหม <span class="blank lg"></span></li>
+      <li class="th">อย่าทิ้งกล่องนั้นนะ <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+<!-- ==================== CH 3 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Three</div>
+    <h2>Travel &amp; Getting Around</h2>
+    <div class="thsub">การเดินทาง — คำที่ต้องใช้ตั้งแต่ออกจากบ้านถึงสนามบิน</div>
+  </div>
+
+  <h4>Vehicles: the in/on rule · ขึ้นลงยานพาหนะ</h4>
+  <div class="box rule">
+    <div class="bt">Small vehicle = IN · Large vehicle = ON</div>
+    <p>You <b>get in</b> a car or a taxi (small, you sit down inside). You <b>get on</b> a bus, a train,
+    a plane or a bike (large, or you can stand up).</p>
+    <p class="th" style="margin-top:2mm">รถเล็กที่ต้องก้มเข้าไปนั่ง ใช้ <b>get in / get out of</b> ·
+    รถใหญ่ที่เดินขึ้นไปได้ ใช้ <b>get on / get off</b> — จำง่าย ๆ ว่า “ยืนได้ = on”</p>
+  </div>
+
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">get in / get out of</td><td class="th">ขึ้น / ลง (รถเก๋ง แท็กซี่)</td><td class="ex">Get in — I’ll drive you.</td><td></td></tr>
+    <tr><td class="en">get on / get off</td><td class="th">ขึ้น / ลง (รถเมล์ รถไฟ)</td><td class="ex">Get off at the next stop.</td><td></td></tr>
+    <tr><td class="en">take off</td><td class="th">(เครื่องบิน) ทะยานขึ้น</td><td class="ex">The plane takes off at noon.</td><td></td></tr>
+    <tr><td class="en">set off</td><td class="th">ออกเดินทาง</td><td class="ex">We set off at dawn.</td><td></td></tr>
+    <tr><td class="en">head out</td><td class="th">ออกไป เริ่มออกเดินทาง</td><td class="ex">Let’s head out before traffic starts.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">drop off</td><td class="th">ไปส่ง (คนหรือของ)</td><td class="ex">Can you drop me off at school?</td><td class="c"><span class="us">US</span> <span class="sep">SEP</span></td></tr>
+    <tr><td class="en">pick up</td><td class="th">ไปรับ</td><td class="ex">I’ll pick you up at seven.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">pull over</td><td class="th">จอดรถเข้าข้างทาง</td><td class="ex">The police told him to pull over.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">slow down</td><td class="th">ชะลอความเร็ว</td><td class="ex">Slow down — there’s a school here.</td><td></td></tr>
+    <tr><td class="en">break down</td><td class="th">(รถ) เสียกลางทาง</td><td class="ex">My car broke down on the highway.</td><td></td></tr>
+    <tr><td class="en">fill up</td><td class="th">เติมน้ำมันให้เต็ม</td><td class="ex">Let’s fill up before we go.</td><td></td></tr>
+    <tr><td class="en">hold up</td><td class="th">ทำให้ล่าช้า</td><td class="ex">Traffic held us up for an hour.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">run over</td><td class="th">ขับรถทับ</td><td class="ex">A car almost ran over the dog.</td><td></td></tr>
+  </table>
+
+  <h4>Hotels, airports and trips · ที่พักและทริป</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">check in / check out</td><td class="th">เช็คอิน / เช็คเอาท์</td><td class="ex">We checked in at three.</td><td></td></tr>
+    <tr><td class="en">look for</td><td class="th">มองหา ตามหา</td><td class="ex">I’m looking for platform nine.</td><td class="c"><span class="warn">TRAP</span></td></tr>
+    <tr><td class="en">look out</td><td class="th">ระวัง!</td><td class="ex">Look out! There’s a car.</td><td></td></tr>
+    <tr><td class="en">get lost</td><td class="th">หลงทาง</td><td class="ex">We got lost in the old town.</td><td></td></tr>
+    <tr><td class="en">go back</td><td class="th">กลับไป</td><td class="ex">I want to go back to Chiang Mai.</td><td></td></tr>
+    <tr><td class="en">come back</td><td class="th">กลับมา</td><td class="ex">She came back from Japan last night.</td><td></td></tr>
+    <tr><td class="en">see off</td><td class="th">ไปส่งที่สนามบิน/สถานี</td><td class="ex">We went to see her off.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">take a trip</td><td class="th">ไปเที่ยว</td><td class="ex">We took a trip to Chiang Rai.</td><td class="c"><span class="us">US</span></td></tr>
+  </table>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 3A · A day of travel</div>
+    <div class="ex-inst">Complete the story with phrasal verbs from this chapter. <span class="th">เติมคำกริยาวลีให้เรื่องสมบูรณ์</span></div>
+    <ol class="q">
+      <li>We <span class="blank"></span> at five in the morning to avoid the traffic.</li>
+      <li>My dad <span class="blank"></span> me <span class="blank sm"></span> at the bus station.</li>
+      <li>I <span class="blank"></span> the bus at Victory Monument and <span class="blank"></span> twenty minutes later.</li>
+      <li>Halfway there, the bus <span class="blank"></span> and we waited an hour.</li>
+      <li>We finally <span class="blank"></span> to the hotel at nine at night.</li>
+      <li>The next morning we <span class="blank"></span> in the old town for two hours.</li>
+      <li>I was <span class="blank"></span> a pharmacy but I couldn’t find one.</li>
+      <li>Our flight <span class="blank"></span> at 6 a.m., so we barely slept.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 3B · IN or ON?</div>
+    <div class="ex-inst">Write <i>in / out of</i> or <i>on / off</i>. <span class="th">เติม in/out of หรือ on/off</span></div>
+    <ol class="q">
+      <li>She got <span class="blank sm"></span> the taxi and gave the driver the address.</li>
+      <li>We got <span class="blank sm"></span> the train at Bang Sue.</li>
+      <li>Please get <span class="blank sm"></span> the bus at the next stop.</li>
+      <li>He got <span class="blank sm"></span> the car and slammed the door.</li>
+      <li>They got <span class="blank sm"></span> the plane two hours before takeoff.</li>
+      <li>I got <span class="blank sm"></span> my bike and rode home.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== CH 4 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Four</div>
+    <h2>School, Work &amp; Study</h2>
+    <div class="thsub">เรียนและทำงาน — รวมคำที่ใช้ในห้องเรียนและออฟฟิศ</div>
+  </div>
+
+  <h4>Studying · การเรียน</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">find out</td><td class="th">หาคำตอบ สืบให้รู้</td><td class="ex">I need to find out when it starts.</td><td></td></tr>
+    <tr><td class="en">figure out</td><td class="th">คิดออก แก้โจทย์ได้</td><td class="ex">I can’t figure out this problem.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">look up</td><td class="th">เปิดหา (ในดิกฯ, เน็ต)</td><td class="ex">Look it up online.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">write down</td><td class="th">จดลง</td><td class="ex">Write down your phone number.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">go over</td><td class="th">ทบทวน ตรวจดูอีกครั้ง</td><td class="ex">Let’s go over the answers.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">turn in</td><td class="th">ส่ง (การบ้าน งาน)</td><td class="ex">Turn in your homework tomorrow.</td><td class="c"><span class="us">US</span> <span class="sep">SEP</span></td></tr>
+    <tr><td class="en">hand in / hand out</td><td class="th">ส่ง / แจก</td><td class="ex">The teacher handed out the tests.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">cross out</td><td class="th">ขีดฆ่า</td><td class="ex">Cross out the wrong answer.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">keep up with</td><td class="th">ตามให้ทัน</td><td class="ex">I can’t keep up with this class.</td><td></td></tr>
+    <tr><td class="en">fall behind</td><td class="th">ตามไม่ทัน ล้าหลัง</td><td class="ex">He fell behind after being sick.</td><td></td></tr>
+    <tr><td class="en">catch up</td><td class="th">ตามให้ทัน (หลังจากตกไป)</td><td class="ex">I studied all weekend to catch up.</td><td></td></tr>
+    <tr><td class="en">drop out of</td><td class="th">ออกกลางคัน</td><td class="ex">He dropped out of college.</td><td></td></tr>
+    <tr><td class="en">sign up for</td><td class="th">สมัคร ลงชื่อเข้าร่วม</td><td class="ex">I signed up for a Spanish class.</td><td class="c"><span class="warn">TRAP</span></td></tr>
+    <tr><td class="en">work on</td><td class="th">ทำ / ปรับปรุง (งาน ทักษะ)</td><td class="ex">I’m working on my pronunciation.</td><td class="c"><span class="warn">TRAP</span></td></tr>
+  </table>
+
+  <h4>At work · ที่ทำงาน</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">fill out</td><td class="th">กรอก (แบบฟอร์ม)</td><td class="ex">Please fill out this form.</td><td class="c"><span class="us">US</span> <span class="sep">SEP</span></td></tr>
+    <tr><td class="en">set up</td><td class="th">จัดตั้ง ติดตั้ง</td><td class="ex">She set up her own business.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">take over</td><td class="th">เข้ามาทำแทน</td><td class="ex">A new manager took over.</td><td></td></tr>
+    <tr><td class="en">take on</td><td class="th">รับ (งาน ความรับผิดชอบ)</td><td class="ex">She took on too much work.</td><td></td></tr>
+    <tr><td class="en">carry out</td><td class="th">ดำเนินการ ทำตามแผน</td><td class="ex">They carried out a survey.</td><td></td></tr>
+    <tr><td class="en">point out</td><td class="th">ชี้ให้เห็น ชี้ประเด็น</td><td class="ex">She pointed out my mistake.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">turn down</td><td class="th">ปฏิเสธ (ข้อเสนอ)</td><td class="ex">He turned down the job offer.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">lay off</td><td class="th">ปลดพนักงาน</td><td class="ex">The company laid off 50 people.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">carry on</td><td class="th">ทำต่อไป</td><td class="ex">Carry on with your work.</td><td></td></tr>
+  </table>
+
+  <div class="box trap">
+    <div class="bt">Three prepositions Thai students drop</div>
+    <div class="xr"><span class="m x">✗</span><span class="bad"><s>I signed up a class.</s></span> &nbsp;<span class="m v">✓</span><span class="good">signed up <u>for</u> a class</span></div>
+    <div class="xr"><span class="m x">✗</span><span class="bad"><s>He dropped out school.</s></span> &nbsp;<span class="m v">✓</span><span class="good">dropped out <u>of</u> school</span></div>
+    <div class="xr"><span class="m x">✗</span><span class="bad"><s>I’m working my English.</s></span> &nbsp;<span class="m v">✓</span><span class="good">working <u>on</u> my English</span></div>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 4A · In the classroom</div>
+    <div class="ex-inst">Complete with a phrasal verb from this chapter. <span class="th">เติมคำกริยาวลีจากบทนี้</span></div>
+    <ol class="q">
+      <li>If you don’t know the word, <span class="blank"></span> it <span class="blank sm"></span> in the dictionary.</li>
+      <li>Everyone must <span class="blank"></span> their essays by Friday.</li>
+      <li>Let’s <span class="blank"></span> the answers together before the test.</li>
+      <li>I missed two weeks of class, so I <span class="blank"></span> badly.</li>
+      <li>Can you <span class="blank"></span> what time the library closes?</li>
+      <li>I <span class="blank"></span> a photography course last semester.</li>
+      <li>She <span class="blank"></span> three mistakes in my report.</li>
+      <li>You need to <span class="blank"></span> your grammar before the exam.</li>
+      <li>Please <span class="blank"></span> this application and return it to the office.</li>
+      <li>He <span class="blank"></span> the offer because the salary was too low.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 4B · Fix the missing word</div>
+    <div class="ex-inst">Each sentence is missing one small word. Rewrite it correctly. <span class="th">แต่ละประโยคขาดคำเล็กไปหนึ่งคำ เขียนใหม่ให้ถูก</span></div>
+    <ol class="q">
+      <li>I signed up the yoga class. <span class="blank lg"></span></li>
+      <li>She dropped out university last year. <span class="blank lg"></span></li>
+      <li>He is working his listening skills. <span class="blank lg"></span></li>
+      <li>I can’t keep up my classmates. <span class="blank lg"></span></li>
+      <li>We ran out paper. <span class="blank lg"></span></li>
+      <li>Please look the answer in your book. <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== CH 5 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Five</div>
+    <h2>People, Feelings &amp; Friendship</h2>
+    <div class="thsub">คน ความรู้สึก และมิตรภาพ</div>
+  </div>
+
+  <h4>Relationships · ความสัมพันธ์</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">get along with</td><td class="th">เข้ากันได้</td><td class="ex">I get along with my roommate.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">hang out</td><td class="th">ไปเที่ยวเล่น ใช้เวลาด้วยกัน</td><td class="ex">We hung out at the mall.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">get together</td><td class="th">นัดเจอกัน รวมตัว</td><td class="ex">Let’s get together this weekend.</td><td></td></tr>
+    <tr><td class="en">run into</td><td class="th">บังเอิญเจอ</td><td class="ex">I ran into my old teacher.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">show up</td><td class="th">โผล่มา มาตามนัด</td><td class="ex">He didn’t show up for class.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">break up with</td><td class="th">เลิกกับ (แฟน)</td><td class="ex">She broke up with him last month.</td><td></td></tr>
+    <tr><td class="en">split up</td><td class="th">แยกทางกัน</td><td class="ex">My parents split up when I was ten.</td><td></td></tr>
+    <tr><td class="en">make up</td><td class="th">คืนดีกัน; แต่งเรื่อง</td><td class="ex">They fought, then made up.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">look after</td><td class="th">ดูแล</td><td class="ex">Can you look after my dog?</td><td></td></tr>
+    <tr><td class="en">bring up</td><td class="th">เลี้ยงดู; หยิบยกเรื่องขึ้นมา</td><td class="ex">Don’t bring that up again.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">grow up</td><td class="th">เติบโต โตขึ้น</td><td class="ex">I grew up in Khon Kaen.</td><td></td></tr>
+    <tr><td class="en">look up to</td><td class="th">นับถือ ยกย่อง</td><td class="ex">I look up to my older sister.</td><td></td></tr>
+    <tr><td class="en">count on</td><td class="th">พึ่งพาได้ ไว้ใจได้</td><td class="ex">You can count on me.</td><td></td></tr>
+    <tr><td class="en">keep in touch</td><td class="th">ติดต่อกันไว้</td><td class="ex">Let’s keep in touch.</td><td class="c"><span class="warn">TRAP</span></td></tr>
+  </table>
+
+  <h4>Feelings · อารมณ์ความรู้สึก</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">calm down</td><td class="th">ใจเย็นลง สงบลง</td><td class="ex">Calm down and tell me what happened.</td><td></td></tr>
+    <tr><td class="en">cheer up</td><td class="th">ทำให้ร่าเริงขึ้น</td><td class="ex">Cheer up! It’s not that bad.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">chill out</td><td class="th">ชิล ๆ ใจเย็น ๆ</td><td class="ex">Just chill out, we have time.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">cheer on</td><td class="th">เชียร์ ให้กำลังใจ</td><td class="ex">The crowd cheered her on.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">give up</td><td class="th">ยอมแพ้; เลิก (นิสัย)</td><td class="ex">Don’t give up! You’re almost there.</td><td></td></tr>
+    <tr><td class="en">get over</td><td class="th">ทำใจได้; หายป่วย</td><td class="ex">It took months to get over it.</td><td></td></tr>
+    <tr><td class="en">go through</td><td class="th">ผ่านช่วงยากลำบาก</td><td class="ex">She’s going through a hard time.</td><td></td></tr>
+    <tr><td class="en">let down</td><td class="th">ทำให้ผิดหวัง</td><td class="ex">I won’t let you down.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">put up with</td><td class="th">ทน อดทนกับ</td><td class="ex">I can’t put up with this noise.</td><td></td></tr>
+    <tr><td class="en">stand out</td><td class="th">โดดเด่น</td><td class="ex">Her work really stands out.</td><td></td></tr>
+  </table>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 5A · Friends and feelings</div>
+    <div class="ex-inst">Complete with a phrasal verb. <span class="th">เติมคำกริยาวลีให้ถูกต้อง</span></div>
+    <ol class="q">
+      <li>Guess who I <span class="blank"></span> at the market yesterday!</li>
+      <li>We waited an hour but she never <span class="blank"></span>.</li>
+      <li>I <span class="blank"></span> in a small town near the border.</li>
+      <li>Don’t worry — you can <span class="blank"></span> me.</li>
+      <li>They had a big fight, but they <span class="blank"></span> the next day.</li>
+      <li>He’s <span class="blank"></span> a really difficult time right now.</li>
+      <li>I can’t <span class="blank"></span> the neighbors’ music any longer.</li>
+      <li>Even after five years, she still hasn’t <span class="blank"></span> him.</li>
+      <li>You promised. Please don’t <span class="blank"></span> me <span class="blank sm"></span>.</li>
+      <li>I really <span class="blank"></span> my grandmother — she raised six children alone.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 5B · American or British?</div>
+    <div class="ex-inst">Circle the American form. <span class="th">วงคำแบบอเมริกัน</span></div>
+    <ol class="q">
+      <li>I <span class="opts">(get on with / get along with)</span> my classmates.</li>
+      <li>We <span class="opts">(hang out / go about)</span> at the coffee shop after class.</li>
+      <li>I <span class="opts">(ran into / came upon)</span> an old friend downtown.</li>
+      <li>She didn’t <span class="opts">(turn up / show up)</span> to the party.</li>
+      <li>Please <span class="opts">(fill in / fill out)</span> this form.</li>
+      <li>Can you <span class="opts">(tidy up / clean up)</span> the kitchen?</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== CH 6 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Six</div>
+    <h2>Plans, Problems &amp; the Phone</h2>
+    <div class="thsub">การนัดหมาย ปัญหา และการโทรศัพท์</div>
+  </div>
+
+  <h4>Making and changing plans · นัดหมายและเปลี่ยนแผน</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">come up</td><td class="th">(เรื่อง) โผล่ขึ้นมา เกิดขึ้น</td><td class="ex">Something came up, so I can’t come.</td><td></td></tr>
+    <tr><td class="en">put off</td><td class="th">เลื่อนออกไป</td><td class="ex">They put off the meeting until Friday.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">call off</td><td class="th">ยกเลิก</td><td class="ex">They called off the concert.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">end up</td><td class="th">ลงเอย สุดท้ายก็…</td><td class="ex">We ended up staying home.</td><td></td></tr>
+    <tr><td class="en">turn out</td><td class="th">ปรากฏว่า กลายเป็นว่า</td><td class="ex">It turned out to be a great day.</td><td></td></tr>
+    <tr><td class="en">work out</td><td class="th">ลงเอยด้วยดี; ออกกำลังกาย</td><td class="ex">Don’t worry, it’ll work out.</td><td class="c"><span class="us">US</span></td></tr>
+    <tr><td class="en">go ahead</td><td class="th">เชิญเลย ทำต่อไปได้</td><td class="ex">Go ahead, ask me anything.</td><td></td></tr>
+    <tr><td class="en">stick to</td><td class="th">ยึดมั่น ทำตาม (แผน)</td><td class="ex">Let’s stick to the original plan.</td><td></td></tr>
+  </table>
+
+  <h4>Problems and solutions · ปัญหาและการแก้ไข</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">deal with</td><td class="th">รับมือ จัดการกับ</td><td class="ex">I’ll deal with it tomorrow.</td><td></td></tr>
+    <tr><td class="en">sort out</td><td class="th">จัดการให้เรียบร้อย</td><td class="ex">Let’s sort out this mess.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">look into</td><td class="th">สืบสวน ตรวจสอบ</td><td class="ex">We’ll look into the problem.</td><td></td></tr>
+    <tr><td class="en">mess up</td><td class="th">ทำพัง ทำพลาด</td><td class="ex">I really messed up the interview.</td><td class="c"><span class="us">US</span> <span class="sep">SEP</span></td></tr>
+    <tr><td class="en">give in</td><td class="th">ยอมจำนน</td><td class="ex">Don’t give in to pressure.</td><td></td></tr>
+    <tr><td class="en">cut down on</td><td class="th">ลดปริมาณ</td><td class="ex">I’m cutting down on sugar.</td><td></td></tr>
+    <tr><td class="en">get through</td><td class="th">ผ่านพ้นไปได้</td><td class="ex">We’ll get through this together.</td><td></td></tr>
+    <tr><td class="en">rule out</td><td class="th">ตัดออกจากตัวเลือก</td><td class="ex">We can’t rule out that idea yet.</td><td class="c"><span class="sep">SEP</span></td></tr>
+  </table>
+
+  <h4>On the phone · โทรศัพท์</h4>
+  <table>
+    <tr><th style="width:23%">Phrasal verb</th><th style="width:24%">ความหมาย</th><th style="width:38%">Example</th><th style="width:15%">Notes</th></tr>
+    <tr><td class="en">call back</td><td class="th">โทรกลับ</td><td class="ex">I’ll call you back later.</td><td class="c"><span class="us">US</span> <span class="sep">SEP</span></td></tr>
+    <tr><td class="en">hang up</td><td class="th">วางสาย</td><td class="ex">She hung up before I answered.</td><td></td></tr>
+    <tr><td class="en">hold on</td><td class="th">รอสักครู่</td><td class="ex">Hold on, I’ll check.</td><td></td></tr>
+    <tr><td class="en">put through</td><td class="th">ต่อสายให้</td><td class="ex">I’ll put you through to sales.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">cut off</td><td class="th">สายหลุด ตัดขาด</td><td class="ex">Sorry, we got cut off.</td><td class="c"><span class="sep">SEP</span></td></tr>
+    <tr><td class="en">get back to</td><td class="th">ติดต่อกลับ</td><td class="ex">I’ll get back to you by Monday.</td><td></td></tr>
+    <tr><td class="en">log in / log out</td><td class="th">เข้าระบบ / ออกจากระบบ</td><td class="ex">You need to log in first.</td><td></td></tr>
+    <tr><td class="en">back up</td><td class="th">สำรองข้อมูล</td><td class="ex">Back up your files every week.</td><td class="c"><span class="sep">SEP</span></td></tr>
+  </table>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 6A · Changing plans</div>
+    <div class="ex-inst">Complete each sentence. <span class="th">เติมให้สมบูรณ์</span></div>
+    <ol class="q">
+      <li>I’m sorry, something <span class="blank"></span> at work — can we meet tomorrow?</li>
+      <li>Because of the rain, they <span class="blank"></span> the whole event.</li>
+      <li>We planned to go to the beach but we <span class="blank"></span> watching movies at home.</li>
+      <li>It <span class="blank"></span> that the restaurant was closed on Mondays.</li>
+      <li>Let’s not <span class="blank"></span> this decision any longer.</li>
+      <li>Don’t panic — I’m sure everything will <span class="blank"></span>.</li>
+      <li>I’ll <span class="blank"></span> you <span class="blank sm"></span> as soon as I know the details.</li>
+      <li>Can you <span class="blank"></span> a second? Someone’s at the door.</li>
+      <li>I completely <span class="blank"></span> the presentation this morning.</li>
+      <li>We should <span class="blank"></span> the plan we agreed on last week.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 6B · Write the dialogue</div>
+    <div class="ex-inst">Complete this phone conversation with phrasal verbs. <span class="th">เติมบทสนทนาทางโทรศัพท์</span></div>
+    <ol class="q">
+      <li>A: Hello, can I speak to Ms. Chen? — B: <span class="blank"></span> a moment, I’ll <span class="blank"></span> you <span class="blank sm"></span>.</li>
+      <li>A: Sorry, I think we got <span class="blank"></span> earlier.</li>
+      <li>B: She’s in a meeting. Can she <span class="blank"></span> you <span class="blank sm"></span> this afternoon?</li>
+      <li>A: Sure. I’ll be here until five. — B: Great, she’ll <span class="blank"></span> to you before then.</li>
+    </ol>
+  </div>
+</section>
+<!-- ==================== CH 7 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Seven</div>
+    <h2>Say It the American Way</h2>
+    <div class="thsub">พูดแบบอเมริกัน — คู่ที่ตำราไทยมักสอนเป็นแบบอังกฤษ</div>
+  </div>
+
+  <p class="lead">Most textbooks sold in Thailand teach British forms by default, then students watch
+  American movies and get confused. Here is the swap list.</p>
+  <p class="th">ตำราส่วนใหญ่ในไทยสอนแบบอังกฤษโดยไม่บอก แล้วนักเรียนไปดูหนังอเมริกันก็งง
+  ตารางนี้คือคู่ที่ต้องสลับ</p>
+
+  <div class="box rule">
+    <div class="bt">How to use this chapter</div>
+    <p><b>Produce the American form. Recognize the British form.</b> You do not need to avoid British
+    English — you need to understand it when you hear it, and not mix the two in your own speech.</p>
+    <p class="th" style="margin-top:2mm">พูดแบบอเมริกัน แต่ “ฟังออก” แบบอังกฤษ
+    ไม่ต้องหลีกเลี่ยงอังกฤษ แค่อย่าใช้ปนกันเอง</p>
+  </div>
+
+  <h4>Phrasal verbs · คำกริยาวลี</h4>
+  <table>
+    <tr><th style="width:27%">Say this <span style="color:#0E5E5B">(American)</span></th><th style="width:25%">Not this <span style="color:#7C8A92">(British)</span></th><th style="width:20%">ความหมาย</th><th>Example</th></tr>
+    <tr><td class="en">fill out a form</td><td>fill in a form</td><td class="th">กรอกแบบฟอร์ม</td><td class="ex">Fill out the application.</td></tr>
+    <tr><td class="en">figure out</td><td>work out</td><td class="th">คิดออก</td><td class="ex">I figured out the answer.</td></tr>
+    <tr><td class="en">get along with</td><td>get on with</td><td class="th">เข้ากันได้</td><td class="ex">I get along with everyone.</td></tr>
+    <tr><td class="en">call (someone) up</td><td>ring up</td><td class="th">โทรหา</td><td class="ex">Call me up tonight.</td></tr>
+    <tr><td class="en">call back</td><td>ring back</td><td class="th">โทรกลับ</td><td class="ex">He never called back.</td></tr>
+    <tr><td class="en">do the dishes</td><td>wash up</td><td class="th">ล้างจาน</td><td class="ex">I’ll do the dishes.</td></tr>
+    <tr><td class="en">clean up</td><td>tidy up</td><td class="th">เก็บกวาด</td><td class="ex">Clean up this mess.</td></tr>
+    <tr><td class="en">line up</td><td>queue up</td><td class="th">เข้าแถว</td><td class="ex">Everyone lined up outside.</td></tr>
+    <tr><td class="en">take out the trash</td><td>put out the rubbish</td><td class="th">เอาขยะไปทิ้ง</td><td class="ex">Take out the trash, please.</td></tr>
+    <tr><td class="en">turn in homework</td><td>hand in homework</td><td class="th">ส่งการบ้าน</td><td class="ex">Turn in your essay Friday.</td></tr>
+    <tr><td class="en">give someone a ride</td><td>give someone a lift</td><td class="th">ไปส่งด้วยรถ</td><td class="ex">Can you give me a ride?</td></tr>
+    <tr><td class="en">stop by / come by</td><td>pop round</td><td class="th">แวะมา</td><td class="ex">Stop by after work.</td></tr>
+  </table>
+
+  <h4>Everyday nouns · คำนามที่ต่างกัน</h4>
+  <table class="two" style="column-count:1">
+    <tr><th style="width:25%">American</th><th style="width:25%">British</th><th style="width:22%">ไทย</th><th>American</th></tr>
+    <tr><td class="en">fall</td><td>autumn</td><td class="th">ฤดูใบไม้ร่วง</td><td class="ex">in the fall</td></tr>
+    <tr><td class="en">movie</td><td>film</td><td class="th">หนัง</td><td class="ex">a good movie</td></tr>
+    <tr><td class="en">movie theater</td><td>cinema</td><td class="th">โรงหนัง</td><td class="ex">go to the movie theater</td></tr>
+    <tr><td class="en">apartment</td><td>flat</td><td class="th">อพาร์ตเมนต์</td><td class="ex">a one-bedroom apartment</td></tr>
+    <tr><td class="en">elevator</td><td>lift</td><td class="th">ลิฟต์</td><td class="ex">take the elevator</td></tr>
+    <tr><td class="en">gas / gas station</td><td>petrol / petrol station</td><td class="th">น้ำมัน / ปั๊ม</td><td class="ex">stop for gas</td></tr>
+    <tr><td class="en">parking lot</td><td>car park</td><td class="th">ที่จอดรถ</td><td class="ex">in the parking lot</td></tr>
+    <tr><td class="en">subway</td><td>underground</td><td class="th">รถไฟใต้ดิน</td><td class="ex">take the subway</td></tr>
+    <tr><td class="en">trash can</td><td>dustbin</td><td class="th">ถังขยะ</td><td class="ex">put it in the trash can</td></tr>
+    <tr><td class="en">cookie</td><td>biscuit</td><td class="th">คุกกี้</td><td class="ex">chocolate chip cookies</td></tr>
+    <tr><td class="en">French fries</td><td>chips</td><td class="th">เฟรนช์ฟรายส์</td><td class="ex">a side of fries</td></tr>
+    <tr><td class="en">drugstore</td><td>chemist</td><td class="th">ร้านขายยา</td><td class="ex">go to the drugstore</td></tr>
+    <tr><td class="en">pants</td><td>trousers</td><td class="th">กางเกง</td><td class="ex">a pair of pants</td></tr>
+    <tr><td class="en">soccer</td><td>football</td><td class="th">ฟุตบอล</td><td class="ex">play soccer</td></tr>
+    <tr><td class="en">vacation</td><td>holiday</td><td class="th">วันหยุดพักผ่อน</td><td class="ex">go on vacation</td></tr>
+    <tr><td class="en">math</td><td>maths</td><td class="th">คณิตศาสตร์</td><td class="ex">a math test</td></tr>
+  </table>
+
+  <div class="box tip">
+    <div class="bt">Spelling and one grammar point</div>
+    <p><b>Spelling:</b> <i>color</i> not <i>colour</i> · <i>favorite</i> not <i>favourite</i> ·
+    <i>realize</i> not <i>realise</i> · <i>center</i> not <i>centre</i> · <i>traveled</i> not <i>travelled</i>.</p>
+    <p style="margin-top:2mm"><b>Grammar:</b> Americans say <b>gotten</b> as the past participle of <i>get</i>.
+    <i>“My English has gotten better.”</i> The British say <i>“has got better.”</i> This one word instantly
+    marks your English as American.</p>
+    <p class="th" style="margin-top:2mm">คำเดียวที่บอกได้ทันทีว่าคุณใช้อังกฤษแบบอเมริกันคือ <b>gotten</b>
+    — <i>My English has gotten better.</i></p>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 7A · Make it American</div>
+    <div class="ex-inst">Rewrite each sentence in American English. <span class="th">เขียนใหม่เป็นแบบอเมริกัน</span></div>
+    <ol class="q">
+      <li>Please fill in this form. <span class="blank lg"></span></li>
+      <li>I get on well with my colleagues. <span class="blank lg"></span></li>
+      <li>Can you give me a lift to the station? <span class="blank lg"></span></li>
+      <li>We queued up for twenty minutes. <span class="blank lg"></span></li>
+      <li>I’ll ring you back after lunch. <span class="blank lg"></span></li>
+      <li>He’s tidying up his flat. <span class="blank lg"></span></li>
+      <li>We watched a film at the cinema. <span class="blank lg"></span></li>
+      <li>The car park is behind the petrol station. <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== REVIEW TEST 1 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Part One</div>
+    <h2>Review Test One</h2>
+    <div class="thsub">แบบทดสอบท้ายภาคหนึ่ง · 30 ข้อ · เต็ม 30 คะแนน</div>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section A · Choose the correct particle (10 marks)</div>
+    <ol class="q">
+      <li>Don’t forget to turn <span class="opts">(off / out / down)</span> the lights before you leave.</li>
+      <li>I need to find <span class="opts">(out / up / on)</span> what time the store opens.</li>
+      <li>She grew <span class="opts">(on / up / over)</span> in a small village.</li>
+      <li>We ran <span class="opts">(out of / off / over)</span> paper in the printer.</li>
+      <li>Please write <span class="opts">(down / in / up)</span> my number.</li>
+      <li>My car broke <span class="opts">(down / off / up)</span> on the way to work.</li>
+      <li>He didn’t show <span class="opts">(on / up / in)</span> for the interview.</li>
+      <li>Let’s go <span class="opts">(over / on / by)</span> the answers together.</li>
+      <li>I can’t put <span class="opts">(up with / on with / off with)</span> this noise.</li>
+      <li>They called <span class="opts">(off / down / out)</span> the game because of rain.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section B · Correct the mistake (8 marks)</div>
+    <div class="ex-inst">Each sentence has one error. Rewrite it correctly. <span class="th">แต่ละข้อมีที่ผิดหนึ่งจุด เขียนใหม่ให้ถูก</span></div>
+    <ol class="q">
+      <li>Please turn off it before you go. <span class="blank lg"></span></li>
+      <li>I signed up a cooking class. <span class="blank lg"></span></li>
+      <li>She looked her sister after all weekend. <span class="blank lg"></span></li>
+      <li>We ran out milk again. <span class="blank lg"></span></li>
+      <li>He came to home at midnight. <span class="blank lg"></span></li>
+      <li>I’m working my pronunciation. <span class="blank lg"></span></li>
+      <li>Can you pick up me at eight? <span class="blank lg"></span></li>
+      <li>They dropped out school last year. <span class="blank lg"></span></li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section C · Complete the sentence (7 marks)</div>
+    <ol class="q">
+      <li>My alarm didn’t <span class="blank"></span>, so I overslept.</li>
+      <li>I <span class="blank"></span> an old classmate at the mall yesterday.</li>
+      <li>The meeting was <span class="blank"></span> until next Tuesday.</li>
+      <li>Please <span class="blank"></span> your homework before Friday.</li>
+      <li>It <span class="blank"></span> that she was right all along.</li>
+      <li>Let’s <span class="blank"></span> this weekend — I haven’t seen you in months.</li>
+      <li>He’s trying to <span class="blank"></span> on coffee.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section D · Say it the American way (5 marks)</div>
+    <ol class="q">
+      <li>fill in a form → <span class="blank lg"></span></li>
+      <li>ring someone back → <span class="blank lg"></span></li>
+      <li>get on with someone → <span class="blank lg"></span></li>
+      <li>tidy up your room → <span class="blank lg"></span></li>
+      <li>give someone a lift → <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+<!-- ==================== PART 2 OPENER ==================== -->
+<section class="partopen">
+  <div class="kicker">Part Two</div>
+  <div class="pnum">02</div>
+  <h1>Idioms &amp;<br>Everyday Chunks</h1>
+  <div class="thline">สำนวนและวลีที่ใช้จริง</div>
+  <div class="blurb">
+    <p>Every idiom in this part passed three tests: Americans really say it, a B1 learner can guess it
+    from context, and you can use it without sounding strange. Famous textbook idioms that failed those
+    tests were cut.</p>
+    <p class="th">ทุกสำนวนในภาคนี้ผ่านเกณฑ์สามข้อ — คนอเมริกันพูดจริง เดาจากบริบทได้ และคุณเอาไปใช้แล้วไม่แปลก
+    สำนวนดัง ๆ ที่ไม่ผ่านเกณฑ์ เราตัดทิ้งหมด</p>
+    <ul>
+      <li>No “raining cats and dogs.” Nobody says it.</li>
+      <li>Conversation chunks sorted by what you are trying to <i>do</i></li>
+      <li>The reduced forms that make listening so hard</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ==================== CH 8 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Eight</div>
+    <h2>Thirty Idioms Americans Really Say</h2>
+    <div class="thsub">30 สำนวนที่ได้ยินจริงในชีวิตประจำวัน</div>
+  </div>
+
+  <div class="box trap">
+    <div class="bt">Idioms your textbook taught you — that nobody uses</div>
+    <p><span class="bad"><s>It’s raining cats and dogs.</s></span> ·
+       <span class="bad"><s>kick the bucket</s></span> ·
+       <span class="bad"><s>as busy as a bee</s></span> ·
+       <span class="bad"><s>a piece of my mind</s></span></p>
+    <p class="th" style="margin-top:2mm">สำนวนเหล่านี้อยู่ในหนังสือเรียนไทยมาสามสิบปี
+    แต่คนอเมริกันแทบไม่พูดกันแล้ว ใช้ไปจะฟังดูเหมือนอ่านมาจากตำรา</p>
+  </div>
+
+  <h4>Set 1 · Reacting and reassuring · ตอบรับและปลอบใจ</h4>
+  <table>
+    <tr><th style="width:26%">Idiom</th><th style="width:26%">ความหมาย</th><th>Example</th></tr>
+    <tr><td class="en">a piece of cake</td><td class="th">ง่ายมาก หมู ๆ</td><td class="ex">The test was a piece of cake.</td></tr>
+    <tr><td class="en">no big deal</td><td class="th">เรื่องเล็ก ไม่เป็นไร</td><td class="ex">You forgot? No big deal.</td></tr>
+    <tr><td class="en">no worries</td><td class="th">ไม่เป็นไร สบายมาก</td><td class="ex">“Sorry I’m late.” “No worries.”</td></tr>
+    <tr><td class="en">take it easy</td><td class="th">ใจเย็น ๆ; พักผ่อนบ้าง</td><td class="ex">Take it easy, you’ve been working all week.</td></tr>
+    <tr><td class="en">hang in there</td><td class="th">สู้ ๆ อดทนไว้</td><td class="ex">Hang in there — only two more weeks.</td></tr>
+    <tr><td class="en">don’t sweat it</td><td class="th">ไม่ต้องเครียด</td><td class="ex">Don’t sweat it, I’ll fix it.</td></tr>
+    <tr><td class="en">that’s a relief</td><td class="th">โล่งอกไปที</td><td class="ex">She’s okay? That’s a relief.</td></tr>
+    <tr><td class="en">it happens</td><td class="th">มันก็เกิดขึ้นได้</td><td class="ex">Everyone makes mistakes. It happens.</td></tr>
+    <tr><td class="en">my bad</td><td class="th">ผิดที่ฉันเอง</td><td class="ex">My bad — I gave you the wrong address.</td></tr>
+    <tr><td class="en">for sure</td><td class="th">แน่นอน</td><td class="ex">“Will you be there?” “For sure.”</td></tr>
+  </table>
+
+  <h4>Set 2 · Decisions, plans and money · ตัดสินใจ วางแผน เรื่องเงิน</h4>
+  <table>
+    <tr><th style="width:26%">Idiom</th><th style="width:26%">ความหมาย</th><th>Example</th></tr>
+    <tr><td class="en">it’s up to you</td><td class="th">แล้วแต่คุณเลย</td><td class="ex">Thai or Japanese? It’s up to you.</td></tr>
+    <tr><td class="en">make up your mind</td><td class="th">ตัดสินใจซะที</td><td class="ex">Hurry up and make up your mind.</td></tr>
+    <tr><td class="en">sounds like a plan</td><td class="th">ตกลงตามนั้น</td><td class="ex">“Seven o’clock?” “Sounds like a plan.”</td></tr>
+    <tr><td class="en">give it a shot</td><td class="th">ลองดูสักตั้ง</td><td class="ex">I’ve never surfed, but I’ll give it a shot.</td></tr>
+    <tr><td class="en">call it a day</td><td class="th">พอแค่นี้ก่อน เลิกงาน</td><td class="ex">It’s late — let’s call it a day.</td></tr>
+    <tr><td class="en">hit the road</td><td class="th">ออกเดินทาง ไปละ</td><td class="ex">We should hit the road before six.</td></tr>
+    <tr><td class="en">I’m broke</td><td class="th">ถังแตก ไม่มีเงิน</td><td class="ex">I can’t go out — I’m broke.</td></tr>
+    <tr><td class="en">cost an arm and a leg</td><td class="th">แพงหูฉี่</td><td class="ex">That phone cost an arm and a leg.</td></tr>
+    <tr><td class="en">it’s on me / my treat</td><td class="th">เดี๋ยวเลี้ยงเอง</td><td class="ex">Put your wallet away — it’s on me.</td></tr>
+    <tr><td class="en">let’s split it</td><td class="th">หารกันนะ</td><td class="ex">The bill’s 800 baht — let’s split it.</td></tr>
+  </table>
+
+  <h4>Set 3 · People, time and situations · คน เวลา สถานการณ์</h4>
+  <table>
+    <tr><th style="width:26%">Idiom</th><th style="width:26%">ความหมาย</th><th>Example</th></tr>
+    <tr><td class="en">once in a while</td><td class="th">นาน ๆ ที</td><td class="ex">I eat out once in a while.</td></tr>
+    <tr><td class="en">out of the blue</td><td class="th">อยู่ ๆ ก็ ไม่ทันตั้งตัว</td><td class="ex">She called me out of the blue.</td></tr>
+    <tr><td class="en">sooner or later</td><td class="th">ไม่ช้าก็เร็ว</td><td class="ex">He’ll find out sooner or later.</td></tr>
+    <tr><td class="en">better late than never</td><td class="th">มาช้าดีกว่าไม่มา</td><td class="ex">You finally called! Better late than never.</td></tr>
+    <tr><td class="en">I’m running late</td><td class="th">ฉันจะสายแล้ว</td><td class="ex">Start without me — I’m running late.</td></tr>
+    <tr><td class="en">on the same page</td><td class="th">คิดตรงกัน เข้าใจตรงกัน</td><td class="ex">Let’s make sure we’re on the same page.</td></tr>
+    <tr><td class="en">break the ice</td><td class="th">ละลายพฤติกรรม ทำลายความเงียบ</td><td class="ex">He told a joke to break the ice.</td></tr>
+    <tr><td class="en">under the weather</td><td class="th">ไม่ค่อยสบาย</td><td class="ex">I’m feeling a little under the weather.</td></tr>
+    <tr><td class="en">get the hang of it</td><td class="th">เริ่มจับทางได้</td><td class="ex">Give it a week — you’ll get the hang of it.</td></tr>
+    <tr><td class="en">a couple of</td><td class="th">สองสาม…</td><td class="ex">I’ll be there in a couple of minutes.</td></tr>
+  </table>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 8A · Choose the idiom</div>
+    <div class="ex-inst">Complete each mini-dialogue with an idiom from this chapter. <span class="th">เติมสำนวนให้บทสนทนาสมบูรณ์</span></div>
+    <ol class="q">
+      <li>“I’m so sorry, I forgot to bring your book.” — “<span class="blank lg"></span>. Bring it tomorrow.”</li>
+      <li>“Was the exam difficult?” — “No, it was <span class="blank lg"></span>.”</li>
+      <li>“I haven’t decided where to eat.” — “Well, <span class="blank lg"></span> — I’m fine with anything.”</li>
+      <li>“I’ve been studying for six hours.” — “<span class="blank lg"></span>. Take a break.”</li>
+      <li>“How much was your ticket?” — “Don’t ask. It <span class="blank lg"></span>.”</li>
+      <li>“Are you coming to dinner?” — “I can’t, sorry. <span class="blank lg"></span> until payday.”</li>
+      <li>“Only three weeks until the exam.” — “<span class="blank lg"></span>, you’re almost done.”</li>
+      <li>“Should we stop working now?” — “Yeah, let’s <span class="blank lg"></span>.”</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 8B · Match the meaning</div>
+    <div class="ex-inst">Write the letter of the correct meaning. <span class="th">จับคู่ความหมาย</span></div>
+    <div class="wordbank"><b>Meanings</b>
+      a. suddenly and unexpectedly &nbsp;·&nbsp; b. I will pay &nbsp;·&nbsp; c. slightly sick
+      &nbsp;·&nbsp; d. we understand each other &nbsp;·&nbsp; e. occasionally
+      &nbsp;·&nbsp; f. to start becoming skilled &nbsp;·&nbsp; g. to make people relax at the start
+      &nbsp;·&nbsp; h. eventually, it will happen</div>
+    <ol class="q">
+      <li>out of the blue <span class="blank sm"></span></li>
+      <li>under the weather <span class="blank sm"></span></li>
+      <li>on the same page <span class="blank sm"></span></li>
+      <li>once in a while <span class="blank sm"></span></li>
+      <li>it’s on me <span class="blank sm"></span></li>
+      <li>break the ice <span class="blank sm"></span></li>
+      <li>get the hang of it <span class="blank sm"></span></li>
+      <li>sooner or later <span class="blank sm"></span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== CH 9 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Nine</div>
+    <h2>Conversation Chunks</h2>
+    <div class="thsub">วลีสำหรับบทสนทนา — จัดตามสิ่งที่คุณกำลังจะ “ทำ”</div>
+  </div>
+
+  <p class="lead">You never think <i>“I need an expression starting with H.”</i> You think
+  <i>“I need to disagree politely.”</i> That is how this chapter is organized.</p>
+
+  <h4>Giving your opinion · แสดงความคิดเห็น</h4>
+  <table>
+    <tr><th style="width:32%">Chunk</th><th style="width:30%">ความหมาย</th><th>When to use it</th></tr>
+    <tr><td class="en">I think (that)…</td><td class="th">ฉันคิดว่า</td><td class="ex">the safe default</td></tr>
+    <tr><td class="en">In my opinion, …</td><td class="th">ในความเห็นของฉัน</td><td class="ex">writing, formal speaking</td></tr>
+    <tr><td class="en">I feel like…</td><td class="th">ฉันรู้สึกว่า</td><td class="ex">very common in American speech</td></tr>
+    <tr><td class="en">If you ask me, …</td><td class="th">ถ้าถามฉันนะ</td><td class="ex">casual, adds personality</td></tr>
+    <tr><td class="en">To be honest, …</td><td class="th">บอกตามตรง</td><td class="ex">before a mild criticism</td></tr>
+    <tr><td class="en">The way I see it, …</td><td class="th">ในมุมที่ฉันมอง</td><td class="ex">stating a considered view</td></tr>
+    <tr><td class="en">It depends.</td><td class="th">แล้วแต่ ขึ้นอยู่กับ</td><td class="ex">avoiding a yes/no answer</td></tr>
+    <tr><td class="en">I’m not sure, but…</td><td class="th">ไม่แน่ใจนะ แต่</td><td class="ex">softening a guess</td></tr>
+  </table>
+
+  <h4>Agreeing and disagreeing · เห็นด้วยและไม่เห็นด้วย</h4>
+  <table>
+    <tr><th style="width:32%">Chunk</th><th style="width:30%">ความหมาย</th><th>Strength</th></tr>
+    <tr><td class="en">Exactly!</td><td class="th">ใช่เลย!</td><td class="ex">strong agreement</td></tr>
+    <tr><td class="en">I totally agree.</td><td class="th">เห็นด้วยสุด ๆ</td><td class="ex">strong agreement</td></tr>
+    <tr><td class="en">That’s a good point.</td><td class="th">เป็นประเด็นที่ดี</td><td class="ex">partial agreement</td></tr>
+    <tr><td class="en">I know what you mean.</td><td class="th">เข้าใจที่พูดเลย</td><td class="ex">sympathy, not full agreement</td></tr>
+    <tr><td class="en">I see your point, but…</td><td class="th">เข้าใจนะ แต่</td><td class="ex">polite disagreement</td></tr>
+    <tr><td class="en">I’m not so sure about that.</td><td class="th">ไม่ค่อยแน่ใจนะ</td><td class="ex">soft disagreement</td></tr>
+    <tr><td class="en">I don’t think so.</td><td class="th">ไม่คิดอย่างนั้นนะ</td><td class="ex">clear disagreement</td></tr>
+    <tr><td class="en">Actually, …</td><td class="th">ที่จริงแล้ว</td><td class="ex">correcting politely</td></tr>
+  </table>
+
+  <div class="box tip">
+    <div class="bt">The politeness ladder</div>
+    <p>Thai speakers often sound blunter in English than they intend, because Thai politeness particles
+    (ครับ / ค่ะ / นะ) have no direct English equivalent. English does it with <b>softening chunks</b> instead.</p>
+    <p style="margin-top:2mm"><span class="bad">✗ <s>You are wrong.</s></span> →
+    <span class="good">✓ I see your point, but I’m not so sure about that.</span></p>
+    <p class="th" style="margin-top:2mm">ความสุภาพในภาษาไทยอยู่ที่คำลงท้าย ในภาษาอังกฤษอยู่ที่ “วลีนำ”
+    ถ้าไม่ใส่วลีนำ ประโยคจะฟังดูห้วนกว่าที่คุณตั้งใจมาก</p>
+  </div>
+
+  <h4>Suggesting and planning · ชวนและวางแผน</h4>
+  <table>
+    <tr><th style="width:32%">Chunk</th><th style="width:30%">ความหมาย</th><th>Grammar note</th></tr>
+    <tr><td class="en">How about…?</td><td class="th">เอา…ไหม</td><td class="ex">+ V-ing or a noun</td></tr>
+    <tr><td class="en">Why don’t we…?</td><td class="th">ทำไมเราไม่…ล่ะ</td><td class="ex">+ base verb</td></tr>
+    <tr><td class="en">Let’s…</td><td class="th">…กันเถอะ</td><td class="ex">+ base verb</td></tr>
+    <tr><td class="en">Do you want to…?</td><td class="th">อยาก…ไหม</td><td class="ex">+ base verb</td></tr>
+    <tr><td class="en">I’d rather…</td><td class="th">ฉันอยาก…มากกว่า</td><td class="ex">+ base verb (no <i>to</i>)</td></tr>
+    <tr><td class="en">I feel like…</td><td class="th">อยากจะ…</td><td class="ex">+ V-ing</td></tr>
+    <tr><td class="en">Sounds good to me.</td><td class="th">ฟังดูดีนะ</td><td class="ex">accepting</td></tr>
+    <tr><td class="en">Let me think about it.</td><td class="th">ขอคิดดูก่อน</td><td class="ex">polite delay</td></tr>
+  </table>
+
+  <h4>Connecting your ideas · เชื่อมความคิด</h4>
+  <p>These are what actually move a speaking score from A2 to B1. A student with simple grammar and good
+  linking sounds better than a student with complex grammar and none.</p>
+  <table class="two" style="column-count:2; font-size:9pt">
+    <tr><td class="en">First of all, …</td><td class="th">อย่างแรกเลย</td></tr>
+    <tr><td class="en">For example, …</td><td class="th">ตัวอย่างเช่น</td></tr>
+    <tr><td class="en">Also, …</td><td class="th">อีกอย่างหนึ่ง</td></tr>
+    <tr><td class="en">On the other hand, …</td><td class="th">ในทางกลับกัน</td></tr>
+    <tr><td class="en">However, …</td><td class="th">อย่างไรก็ตาม</td></tr>
+    <tr><td class="en">That’s why…</td><td class="th">เพราะอย่างนั้น…</td></tr>
+    <tr><td class="en">As a result, …</td><td class="th">ผลก็คือ</td></tr>
+    <tr><td class="en">In fact, …</td><td class="th">ที่จริงแล้ว</td></tr>
+    <tr><td class="en">Anyway, …</td><td class="th">เอาเป็นว่า</td></tr>
+    <tr><td class="en">By the way, …</td><td class="th">อ้อ อีกเรื่องหนึ่ง</td></tr>
+    <tr><td class="en">Speaking of…</td><td class="th">พูดถึง…แล้ว</td></tr>
+    <tr><td class="en">To sum up, …</td><td class="th">สรุปแล้ว</td></tr>
+    <tr><td class="en">At the end of the day, …</td><td class="th">สุดท้ายแล้ว</td></tr>
+    <tr><td class="en">All in all, …</td><td class="th">โดยรวมแล้ว</td></tr>
+  </table>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 9A · Soften the sentence</div>
+    <div class="ex-inst">Rewrite each blunt sentence using a chunk from this chapter. <span class="th">เขียนใหม่ให้สุภาพขึ้น โดยใช้วลีในบทนี้</span></div>
+    <ol class="q">
+      <li>You are wrong. <span class="blank lg"></span></li>
+      <li>No. I don’t want to. <span class="blank lg"></span></li>
+      <li>Your idea is bad. <span class="blank lg"></span></li>
+      <li>I want pizza, not sushi. <span class="blank lg"></span></li>
+      <li>Decide now. <span class="blank lg"></span></li>
+      <li>I cannot answer that. <span class="blank lg"></span></li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 9B · Build a 60-second answer</div>
+    <div class="ex-inst">Answer the question aloud using <b>at least four</b> connecting chunks. Write your notes below.
+    <span class="th">ตอบคำถามด้วยเสียง โดยใช้วลีเชื่อมอย่างน้อย 4 วลี</span></div>
+    <p style="font-size:9.8pt; margin-top:2mm"><b>Question:</b> <i>Is it better to live in a big city or a small town?</i></p>
+    <ol class="q">
+      <li><span class="opts">First of all,</span> <span class="blank lg"></span> <span class="blank lg"></span></li>
+      <li><span class="opts">For example,</span> <span class="blank lg"></span> <span class="blank lg"></span></li>
+      <li><span class="opts">On the other hand,</span> <span class="blank lg"></span> <span class="blank lg"></span></li>
+      <li><span class="opts">At the end of the day,</span> <span class="blank lg"></span> <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== CH 10 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Ten</div>
+    <h2>Sounding American</h2>
+    <div class="thsub">ฟังให้ทัน พูดให้ลื่น — คำที่ฝรั่งกลืนจนคุณฟังไม่ออก</div>
+  </div>
+
+  <p class="lead">This chapter is mostly for <b>listening</b>. Americans do not pronounce these words the
+  way they are written, and students who have never met the reduced forms fail listening tests they should
+  have passed.</p>
+  <p class="th">บทนี้เน้น “การฟัง” เป็นหลัก คนอเมริกันไม่ได้ออกเสียงตามตัวเขียน
+  นักเรียนที่ไม่เคยเจอรูปย่อพวกนี้จะฟังไม่ออกทั้งที่รู้ศัพท์ทุกคำ</p>
+
+  <table>
+    <tr><th style="width:24%">Written</th><th style="width:24%">What you hear</th><th style="width:26%">ไทย</th><th>Example</th></tr>
+    <tr><td class="en">going to</td><td class="en" style="color:#0E5E5B">gonna</td><td class="th">จะ</td><td class="ex">I’m gonna call her.</td></tr>
+    <tr><td class="en">want to</td><td class="en" style="color:#0E5E5B">wanna</td><td class="th">อยากจะ</td><td class="ex">Do you wanna go?</td></tr>
+    <tr><td class="en">got to / have to</td><td class="en" style="color:#0E5E5B">gotta</td><td class="th">ต้อง</td><td class="ex">I gotta run.</td></tr>
+    <tr><td class="en">kind of</td><td class="en" style="color:#0E5E5B">kinda</td><td class="th">ประมาณว่า ค่อนข้าง</td><td class="ex">It’s kinda cold.</td></tr>
+    <tr><td class="en">sort of</td><td class="en" style="color:#0E5E5B">sorta</td><td class="th">ค่อนข้างจะ</td><td class="ex">I sorta agree.</td></tr>
+    <tr><td class="en">a lot of</td><td class="en" style="color:#0E5E5B">a lotta</td><td class="th">เยอะ</td><td class="ex">A lotta people came.</td></tr>
+    <tr><td class="en">let me</td><td class="en" style="color:#0E5E5B">lemme</td><td class="th">ขอ…หน่อย</td><td class="ex">Lemme see that.</td></tr>
+    <tr><td class="en">give me</td><td class="en" style="color:#0E5E5B">gimme</td><td class="th">เอามาให้หน่อย</td><td class="ex">Gimme a second.</td></tr>
+    <tr><td class="en">don’t know</td><td class="en" style="color:#0E5E5B">dunno</td><td class="th">ไม่รู้</td><td class="ex">I dunno.</td></tr>
+    <tr><td class="en">what are you</td><td class="en" style="color:#0E5E5B">whatcha</td><td class="th">คุณกำลัง…อะไร</td><td class="ex">Whatcha doing?</td></tr>
+    <tr><td class="en">did you</td><td class="en" style="color:#0E5E5B">didja</td><td class="th">คุณ…หรือเปล่า</td><td class="ex">Didja eat yet?</td></tr>
+    <tr><td class="en">could have</td><td class="en" style="color:#0E5E5B">coulda</td><td class="th">น่าจะ…ได้</td><td class="ex">You coulda told me.</td></tr>
+    <tr><td class="en">should have</td><td class="en" style="color:#0E5E5B">shoulda</td><td class="th">น่าจะ…</td><td class="ex">I shoulda studied.</td></tr>
+    <tr><td class="en">would have</td><td class="en" style="color:#0E5E5B">woulda</td><td class="th">คงจะ…</td><td class="ex">She woulda come.</td></tr>
+    <tr><td class="en">out of</td><td class="en" style="color:#0E5E5B">outta</td><td class="th">ออกจาก</td><td class="ex">Get outta here.</td></tr>
+    <tr><td class="en">because</td><td class="en" style="color:#0E5E5B">’cause / cuz</td><td class="th">เพราะว่า</td><td class="ex">Cuz I was tired.</td></tr>
+    <tr><td class="en">them</td><td class="en" style="color:#0E5E5B">’em</td><td class="th">พวกเขา (กรรม)</td><td class="ex">I saw ’em yesterday.</td></tr>
+    <tr><td class="en">have gotten</td><td class="en" style="color:#0E5E5B">gotten</td><td class="th">ได้…แล้ว (US เท่านั้น)</td><td class="ex">It’s gotten better.</td></tr>
+  </table>
+
+  <div class="box trap">
+    <div class="bt">Say these four. Do not write any of them.</div>
+    <p>Use <b>gonna · wanna · gotta · kinda</b> freely in speech — they are completely standard in spoken
+    American English. Everything else on this page is for <b>listening only</b>. A B1 student who writes
+    <i>“I shoulda studied”</i> in an essay loses marks.</p>
+    <p class="th" style="margin-top:2mm">พูดได้ 4 คำ: gonna · wanna · gotta · kinda
+    ที่เหลือ “ฟังให้ออก” พอ อย่าเขียนลงในงานเขียนเด็ดขาด</p>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 10A · Write it properly</div>
+    <div class="ex-inst">Rewrite each spoken sentence in full written English. <span class="th">เขียนรูปเต็มให้ถูกต้อง</span></div>
+    <ol class="q">
+      <li>I’m gonna call you later. <span class="blank lg"></span></li>
+      <li>Whatcha doing tonight? <span class="blank lg"></span></li>
+      <li>I gotta finish this report. <span class="blank lg"></span></li>
+      <li>You shoulda told me earlier. <span class="blank lg"></span></li>
+      <li>Lemme check my calendar. <span class="blank lg"></span></li>
+      <li>There were a lotta people outside. <span class="blank lg"></span></li>
+      <li>I dunno where she went. <span class="blank lg"></span></li>
+      <li>Didja see that? <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== REVIEW TEST 2 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Part Two</div>
+    <h2>Review Test Two</h2>
+    <div class="thsub">แบบทดสอบท้ายภาคสอง · 20 ข้อ</div>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section A · Complete the dialogue (8 marks)</div>
+    <ol class="q">
+      <li>“Sorry, I broke your cup.” — “<span class="blank lg"></span>, it was old anyway.”</li>
+      <li>“Where should we eat?” — “<span class="blank lg"></span>. I’m happy with anything.”</li>
+      <li>“I’ve been sick all week.” — “<span class="blank lg"></span>. Get some rest.”</li>
+      <li>“Do you want to meet at eight?” — “<span class="blank lg"></span>.”</li>
+      <li>“How was the exam?” — “Honestly? <span class="blank lg"></span>.”</li>
+      <li>“He called me after five years, completely unexpected.” — “Wow, <span class="blank lg"></span>.”</li>
+      <li>“I still can’t use this software properly.” — “Give it time, you’ll <span class="blank lg"></span>.”</li>
+      <li>“I’ll pay for dinner tonight.” — “No, <span class="blank lg"></span>.”</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section B · Choose the better chunk (6 marks)</div>
+    <div class="ex-inst">Which one sounds more polite and natural? <span class="th">ข้อไหนสุภาพและเป็นธรรมชาติกว่า</span></div>
+    <ol class="q">
+      <li><span class="opts">(a) You are wrong. &nbsp; (b) I’m not so sure about that.</span></li>
+      <li><span class="opts">(a) I want coffee, not tea. &nbsp; (b) I’d rather have coffee.</span></li>
+      <li><span class="opts">(a) Decide now. &nbsp; (b) Take your time.</span></li>
+      <li><span class="opts">(a) That is a bad idea. &nbsp; (b) I see your point, but I think there might be a problem.</span></li>
+      <li><span class="opts">(a) No. &nbsp; (b) Let me think about it.</span></li>
+      <li><span class="opts">(a) Your English is bad. &nbsp; (b) To be honest, your grammar needs some work.</span></li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section C · Spoken to written (6 marks)</div>
+    <ol class="q">
+      <li>I wanna go home. <span class="blank lg"></span></li>
+      <li>It’s kinda expensive. <span class="blank lg"></span></li>
+      <li>We coulda won that game. <span class="blank lg"></span></li>
+      <li>Gimme five minutes. <span class="blank lg"></span></li>
+      <li>I saw ’em at the mall. <span class="blank lg"></span></li>
+      <li>Cuz I forgot my wallet. <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+<!-- ==================== PART 3 OPENER ==================== -->
+<section class="partopen">
+  <div class="kicker">Part Three</div>
+  <div class="pnum">03</div>
+  <h1>Prepositions:<br>The Thai<br>Trap Zone</h1>
+  <div class="thline">กับดักบุพบท — จุดที่คนไทยผิดมากที่สุด</div>
+  <div class="blurb">
+    <p>This is the part of English where Thai speakers lose the most marks, sound the least natural, and
+    make the same mistake for twenty years without anyone correcting it.</p>
+    <p class="th">นี่คือจุดที่คนไทยเสียคะแนนมากที่สุด ฟังดูไม่เป็นธรรมชาติที่สุด
+    และผิดซ้ำ ๆ มายี่สิบปีโดยไม่มีใครแก้ให้</p>
+    <ul>
+      <li>Why your brain deletes the preposition</li>
+      <li>50 patterns, sorted by what comes before them</li>
+      <li>The 15 mistakes that matter most</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ==================== CH 11 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Eleven</div>
+    <h2>Why Thai Speakers Get Prepositions Wrong</h2>
+    <div class="thsub">ทำไมสมองเราถึง “ลบ” คำเชื่อมทิ้งโดยอัตโนมัติ</div>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Start here · Diagnostic Test</div>
+    <div class="ex-inst">Before you read this chapter, do this test. Do not guess carefully — answer fast,
+    the way you would speak. <span class="th">ทำก่อนอ่านบทนี้ ตอบเร็ว ๆ แบบที่คุณจะพูดจริง</span></div>
+    <ol class="q">
+      <li>I love to listen <span class="blank sm"></span> music before bed.</li>
+      <li>Please wait <span class="blank sm"></span> me at the entrance.</li>
+      <li>It depends <span class="blank sm"></span> the weather.</li>
+      <li>She’s very good <span class="blank sm"></span> math.</li>
+      <li>He’s married <span class="blank sm"></span> a teacher.</li>
+      <li>I’m interested <span class="blank sm"></span> photography.</li>
+      <li>What’s the reason <span class="blank sm"></span> the delay?</li>
+      <li>This is very different <span class="blank sm"></span> the other one.</li>
+      <li>We arrived <span class="blank sm"></span> Bangkok at midnight.</li>
+      <li>I paid <span class="blank sm"></span> the tickets already.</li>
+      <li>Can you explain it <span class="blank sm"></span> me again?</li>
+      <li>Let’s discuss <span class="blank sm"></span> the problem tomorrow.</li>
+      <li>Please answer <span class="blank sm"></span> my question.</li>
+    </ol>
+    <p style="font-size:9pt; color:#7C8A92; margin-top:3mm">Answers on the answer-key page. Two of these
+    thirteen are <b>traps</b> — the correct answer is “nothing at all.” <span class="th">สองข้อในนี้ คำตอบที่ถูกคือ “ไม่ต้องเติมอะไรเลย”</span></p>
+  </div>
+
+  <h3><span class="num">11.1</span>The cause: Thai verbs don’t need a bridge</h3>
+  <p>In Thai, the verb takes its object directly. <b>ฟังเพลง</b> is literally <i>listen-music</i>. There is
+  no small connecting word, because Thai does not need one. Your brain has spent your whole life building
+  sentences that way — so when you speak English fast, the connecting word simply does not appear.</p>
+  <div class="box trap">
+    <div class="bt">The mechanism</div>
+    <table style="margin:0">
+      <tr><th style="width:26%">Thai</th><th style="width:26%">Literal translation</th><th>What comes out in English</th></tr>
+      <tr><td class="th">ฟังเพลง</td><td class="ex">listen–music</td><td class="bad">✗ <s>I listen music.</s></td></tr>
+      <tr><td class="th">รอฉัน</td><td class="ex">wait–me</td><td class="bad">✗ <s>Wait me.</s></td></tr>
+      <tr><td class="th">ขึ้นอยู่กับอากาศ</td><td class="ex">depend–with–weather</td><td class="bad">✗ <s>It depends the weather.</s></td></tr>
+    </table>
+    <p class="th" style="margin-top:2.5mm">สังเกตข้อสาม: ภาษาไทยมี “กับ” อยู่แล้ว แต่พอแปลเป็นอังกฤษ
+    คนไทยกลับหายไป เพราะ “กับ” ไม่ได้แปลตรงเป็น <i>with</i> — มันคือ <b>on</b></p>
+  </div>
+
+  <h3><span class="num">11.2</span>What the research found</h3>
+  <p>Studies of Thai learners’ writing agree on three things:</p>
+  <ol class="q" style="font-size:10pt">
+    <li><b>L1 transfer is the number-one cause</b> of collocation and preposition error — not carelessness,
+    not lack of vocabulary. <span class="th">สาเหตุอันดับหนึ่งคือการถ่ายโอนจากภาษาแม่</span></li>
+    <li>The <b>highest error counts</b> of all fall on <b>noun + preposition</b> and
+    <b>adjective + preposition</b> — exactly Chapters 13 and 14 of this book.
+    <span class="th">จุดที่ผิดมากที่สุดคือ คำนาม/คุณศัพท์ + บุพบท</span></li>
+    <li>Thai students most often <b>omit</b> a required preposition, rather than choosing the wrong one.
+    <span class="th">ส่วนใหญ่ “ลืมใส่” มากกว่า “ใส่ผิด”</span></li>
+  </ol>
+
+  <h3><span class="num">11.3</span>Why you cannot fix this by learning rules</h3>
+  <p>There is no logical rule that explains why it is <i>good <b>at</b> English</i> but <i>bad <b>at</b> math</i>
+  and <i>interested <b>in</b> art</i> and <i>famous <b>for</b> its beaches</i>. These are
+  <b>fixed partnerships</b>. You do not reason them out — you learn them as one unit, exactly like a word.</p>
+
+  <div class="box rule">
+    <div class="bt">Learn the whole chunk, never the parts</div>
+    <p>Do not learn <i>depend</i> and then wonder which preposition to add. Learn
+    <b>“depend on”</b> as if it were a single six-letter word. Say it aloud as one unit. Write it as one unit.</p>
+    <p class="th" style="margin-top:2mm">อย่าท่อง <i>depend</i> แล้วค่อยมาคิดว่าเติมอะไร
+    ให้ท่อง <b>depend on</b> เป็นคำเดียวไปเลย พูดออกเสียงติดกัน เขียนติดกัน</p>
+  </div>
+
+  <div class="box tip">
+    <div class="bt">The two traps in the diagnostic test</div>
+    <p>English has a handful of verbs that look like they need a preposition but must <b>not</b> have one.
+    The two most dangerous for Thai students:</p>
+    <div class="xr"><span class="m x">✗</span><span class="bad"><s>discuss about the problem</s></span> &nbsp;<span class="m v">✓</span><span class="good">discuss the problem</span></div>
+    <div class="xr"><span class="m x">✗</span><span class="bad"><s>answer to my question</s></span> &nbsp;<span class="m v">✓</span><span class="good">answer my question</span></div>
+    <p style="margin-top:2mm">Others in this group: <b>enter</b> (not <i>enter into</i> a room),
+    <b>marry</b> (not <i>marry with</i>), <b>call</b>, <b>tell</b>, <b>ask</b>, <b>join</b>, <b>reach</b>, <b>contact</b>.</p>
+    <p class="th" style="margin-top:2mm">กริยากลุ่มนี้ “ห้ามใส่” บุพบท — คนไทยมักใส่เกิน เพราะแปลจากไทยตรง ๆ</p>
+  </div>
+</section>
+
+<!-- ==================== CH 12 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Twelve</div>
+    <h2>Verb + Preposition</h2>
+    <div class="thsub">กริยา + บุพบท — กลุ่มที่ “ลืมใส่” บ่อยที่สุด</div>
+  </div>
+
+  <table>
+    <tr><th style="width:27%">Learn as one chunk</th><th style="width:20%">ความหมาย</th><th style="width:26%">Thai-influenced error</th><th>Example</th></tr>
+    <tr><td class="en">listen <u>to</u></td><td class="th">ฟัง</td><td class="bad"><s>listen music</s></td><td class="ex">I listen to music every night.</td></tr>
+    <tr><td class="en">wait <u>for</u></td><td class="th">รอ</td><td class="bad"><s>wait me</s></td><td class="ex">Wait for me downstairs.</td></tr>
+    <tr><td class="en">look <u>at</u></td><td class="th">มองดู</td><td class="bad"><s>look this</s></td><td class="ex">Look at this photo.</td></tr>
+    <tr><td class="en">look <u>for</u></td><td class="th">ตามหา</td><td class="bad"><s>look my keys</s></td><td class="ex">I’m looking for my keys.</td></tr>
+    <tr><td class="en">depend <u>on</u></td><td class="th">ขึ้นอยู่กับ</td><td class="bad"><s>depend the weather</s></td><td class="ex">It depends on the price.</td></tr>
+    <tr><td class="en">belong <u>to</u></td><td class="th">เป็นของ</td><td class="bad"><s>belong me</s></td><td class="ex">This phone belongs to Nan.</td></tr>
+    <tr><td class="en">agree <u>with</u></td><td class="th">เห็นด้วยกับ (คน)</td><td class="bad"><s>agree to you</s></td><td class="ex">I agree with you.</td></tr>
+    <tr><td class="en">apologize <u>for</u></td><td class="th">ขอโทษเรื่อง</td><td class="bad"><s>apologize about</s></td><td class="ex">He apologized for being late.</td></tr>
+    <tr><td class="en">apply <u>for</u></td><td class="th">สมัคร</td><td class="bad"><s>apply a job</s></td><td class="ex">She applied for the job.</td></tr>
+    <tr><td class="en">ask <u>for</u></td><td class="th">ขอ</td><td class="bad"><s>ask help</s></td><td class="ex">Ask for help if you need it.</td></tr>
+    <tr><td class="en">pay <u>for</u></td><td class="th">จ่ายค่า</td><td class="bad"><s>pay the ticket</s></td><td class="ex">I paid for lunch.</td></tr>
+    <tr><td class="en">search <u>for</u></td><td class="th">ค้นหา</td><td class="bad"><s>search my phone</s></td><td class="ex">They searched for survivors.</td></tr>
+    <tr><td class="en">believe <u>in</u></td><td class="th">เชื่อใน</td><td class="bad"><s>believe on</s></td><td class="ex">I believe in you.</td></tr>
+    <tr><td class="en">care <u>about</u></td><td class="th">ใส่ใจ แคร์</td><td class="bad"><s>care to</s></td><td class="ex">She really cares about her students.</td></tr>
+    <tr><td class="en">complain <u>about</u></td><td class="th">บ่นเรื่อง</td><td class="bad"><s>complain for</s></td><td class="ex">He complained about the noise.</td></tr>
+    <tr><td class="en">concentrate <u>on</u></td><td class="th">ตั้งสมาธิกับ</td><td class="bad"><s>concentrate in</s></td><td class="ex">Concentrate on your work.</td></tr>
+    <tr><td class="en">rely <u>on</u></td><td class="th">พึ่งพา</td><td class="bad"><s>rely to</s></td><td class="ex">You can rely on him.</td></tr>
+    <tr><td class="en">talk <u>about</u></td><td class="th">คุยเรื่อง</td><td class="bad"><s>talk the problem</s></td><td class="ex">Let’s talk about it later.</td></tr>
+    <tr><td class="en">think <u>about</u></td><td class="th">คิดเรื่อง</td><td class="bad"><s>think to</s></td><td class="ex">I’m thinking about moving.</td></tr>
+    <tr><td class="en">worry <u>about</u></td><td class="th">กังวลเรื่อง</td><td class="bad"><s>worry for</s></td><td class="ex">Don’t worry about it.</td></tr>
+    <tr><td class="en">arrive <u>in / at</u></td><td class="th">มาถึง</td><td class="bad"><s>arrive to Bangkok</s></td><td class="ex">We arrived in Tokyo. / at the airport.</td></tr>
+    <tr><td class="en">explain <u>to</u> (someone)</td><td class="th">อธิบายให้…ฟัง</td><td class="bad"><s>explain me</s></td><td class="ex">Explain it to me again.</td></tr>
+  </table>
+
+  <div class="box rule">
+    <div class="bt">arrive IN or arrive AT?</div>
+    <p><b>arrive in</b> + a city or country (a big space you are inside).<br>
+       <b>arrive at</b> + a specific place (a building, a station, an event).</p>
+    <p class="th" style="margin-top:2mm">เมืองหรือประเทศ ใช้ <b>in</b> · สถานที่เฉพาะเจาะจง ใช้ <b>at</b>
+    · และไม่มี <i>arrive to</i> ในภาษาอังกฤษเลย</p>
+  </div>
+
+  <div class="box trap">
+    <div class="bt">Verbs that take NO preposition · กริยาที่ห้ามใส่บุพบท</div>
+    <p><b>discuss</b> · <b>answer</b> · <b>marry</b> · <b>enter</b> · <b>join</b> · <b>call</b> ·
+    <b>tell</b> · <b>reach</b> · <b>contact</b> · <b>attend</b></p>
+    <div class="xr"><span class="m x">✗</span><span class="bad"><s>We discussed about the budget.</s></span></div>
+    <div class="xr"><span class="m v">✓</span><span class="good">We discussed the budget.</span></div>
+    <div class="xr" style="margin-top:2mm"><span class="m x">✗</span><span class="bad"><s>She married with a doctor.</s></span></div>
+    <div class="xr"><span class="m v">✓</span><span class="good">She married a doctor.</span> &nbsp;<span style="font-size:9pt">— but ✓ <b>She is married <u>to</u> a doctor.</b></span></div>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 12A · Add the preposition — or leave it empty</div>
+    <div class="ex-inst">Write the correct preposition, or <b>Ø</b> if none is needed.
+    <span class="th">เติมบุพบท หรือเขียน Ø ถ้าไม่ต้องใส่</span></div>
+    <ol class="q">
+      <li>I’m waiting <span class="blank sm"></span> the bus.</li>
+      <li>She listens <span class="blank sm"></span> podcasts on the train.</li>
+      <li>We discussed <span class="blank sm"></span> the new plan for two hours.</li>
+      <li>It depends <span class="blank sm"></span> how much time we have.</li>
+      <li>He applied <span class="blank sm"></span> three different jobs.</li>
+      <li>Please answer <span class="blank sm"></span> the question.</li>
+      <li>Who paid <span class="blank sm"></span> dinner?</li>
+      <li>They arrived <span class="blank sm"></span> Chiang Mai on Sunday.</li>
+      <li>Can you explain this <span class="blank sm"></span> me?</li>
+      <li>I don’t agree <span class="blank sm"></span> that idea.</li>
+      <li>She married <span class="blank sm"></span> her college boyfriend.</li>
+      <li>Stop worrying <span class="blank sm"></span> the exam.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 12B · Find and fix</div>
+    <div class="ex-inst">Each sentence has one preposition error. Rewrite it. <span class="th">แต่ละข้อผิดหนึ่งจุด แก้ให้ถูก</span></div>
+    <ol class="q">
+      <li>I always listen music while I study. <span class="blank lg"></span></li>
+      <li>Please wait me — I’m almost ready. <span class="blank lg"></span></li>
+      <li>We talked about the problem for hours and discussed about the solution too. <span class="blank lg"></span></li>
+      <li>This bag belongs my sister. <span class="blank lg"></span></li>
+      <li>You should concentrate in your studies. <span class="blank lg"></span></li>
+      <li>They arrived to the hotel very late. <span class="blank lg"></span></li>
+      <li>Can you explain me the rules? <span class="blank lg"></span></li>
+      <li>He apologized about being rude. <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== CH 13 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Thirteen</div>
+    <h2>Adjective + Preposition</h2>
+    <div class="thsub">คุณศัพท์ + บุพบท — หนึ่งในสองจุดที่ผิดมากที่สุด</div>
+  </div>
+
+  <p class="lead">Research on Thai learners found the highest error counts of all in this pattern and the
+  next one. These are pure memorization — there is no rule.</p>
+
+  <table>
+    <tr><th style="width:28%">Learn as one chunk</th><th style="width:20%">ความหมาย</th><th style="width:24%">Thai-influenced error</th><th>Example</th></tr>
+    <tr><td class="en">good <u>at</u> / bad <u>at</u></td><td class="th">เก่ง / ไม่เก่งเรื่อง</td><td class="bad"><s>good in English</s></td><td class="ex">She’s good at cooking.</td></tr>
+    <tr><td class="en">interested <u>in</u></td><td class="th">สนใจ</td><td class="bad"><s>interested about</s></td><td class="ex">I’m interested in history.</td></tr>
+    <tr><td class="en">afraid <u>of</u></td><td class="th">กลัว</td><td class="bad"><s>afraid to dogs</s></td><td class="ex">He’s afraid of heights.</td></tr>
+    <tr><td class="en">married <u>to</u></td><td class="th">แต่งงานกับ</td><td class="bad"><s>married with</s></td><td class="ex">She’s married to an engineer.</td></tr>
+    <tr><td class="en">proud <u>of</u></td><td class="th">ภูมิใจใน</td><td class="bad"><s>proud with</s></td><td class="ex">I’m so proud of you.</td></tr>
+    <tr><td class="en">responsible <u>for</u></td><td class="th">รับผิดชอบ</td><td class="bad"><s>responsible of</s></td><td class="ex">You’re responsible for the budget.</td></tr>
+    <tr><td class="en">similar <u>to</u></td><td class="th">คล้ายกับ</td><td class="bad"><s>similar with</s></td><td class="ex">This is similar to mine.</td></tr>
+    <tr><td class="en">different <u>from</u></td><td class="th">ต่างจาก</td><td class="bad"><s>different with</s></td><td class="ex">Thai is different from Lao.</td></tr>
+    <tr><td class="en">tired <u>of</u></td><td class="th">เบื่อ</td><td class="bad"><s>tired with</s></td><td class="ex">I’m tired of waiting.</td></tr>
+    <tr><td class="en">worried <u>about</u></td><td class="th">เป็นห่วง</td><td class="bad"><s>worried for</s></td><td class="ex">She’s worried about her son.</td></tr>
+    <tr><td class="en">famous <u>for</u></td><td class="th">มีชื่อเสียงเรื่อง</td><td class="bad"><s>famous of</s></td><td class="ex">Phuket is famous for its beaches.</td></tr>
+    <tr><td class="en">full <u>of</u></td><td class="th">เต็มไปด้วย</td><td class="bad"><s>full with</s></td><td class="ex">The room was full of people.</td></tr>
+    <tr><td class="en">excited <u>about</u></td><td class="th">ตื่นเต้นเรื่อง</td><td class="bad"><s>excited with</s></td><td class="ex">I’m excited about the trip.</td></tr>
+    <tr><td class="en">satisfied <u>with</u></td><td class="th">พอใจกับ</td><td class="bad"><s>satisfied about</s></td><td class="ex">Are you satisfied with the result?</td></tr>
+    <tr><td class="en">ready <u>for</u></td><td class="th">พร้อมสำหรับ</td><td class="bad"><s>ready to the test</s></td><td class="ex">Are you ready for the test?</td></tr>
+    <tr><td class="en">angry <u>at / with</u></td><td class="th">โกรธ</td><td class="bad"><s>angry to me</s></td><td class="ex">She’s angry at me.</td></tr>
+    <tr><td class="en">sorry <u>about / for</u></td><td class="th">เสียใจเรื่อง</td><td class="bad"><s>sorry of</s></td><td class="ex">I’m sorry about the delay.</td></tr>
+    <tr><td class="en">used <u>to</u></td><td class="th">ชินกับ</td><td class="bad"><s>used with</s></td><td class="ex">I’m used to the heat now.</td></tr>
+  </table>
+
+  <div class="box tip">
+    <div class="bt">good AT but interested IN — a memory hook</div>
+    <p><b>at</b> = a skill you aim at (good at, bad at, terrible at, great at)<br>
+       <b>in</b> = a subject you go into (interested in, involved in, experienced in)<br>
+       <b>of</b> = a feeling something causes in you (afraid of, proud of, tired of, full of)<br>
+       <b>about</b> = a topic in your head (worried about, excited about, sorry about)</p>
+    <p class="th" style="margin-top:2mm">ไม่ใช่กฎตายตัว แต่ช่วยจำได้จริง — ทักษะที่เล็ง = at ·
+    เรื่องที่เข้าไป = in · ความรู้สึกที่เกิดจากสิ่งนั้น = of · หัวข้อที่คิดวนอยู่ = about</p>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 13A · Complete the chunk</div>
+    <ol class="q">
+      <li>My brother is very good <span class="blank sm"></span> fixing motorcycles.</li>
+      <li>Are you interested <span class="blank sm"></span> joining our club?</li>
+      <li>She’s married <span class="blank sm"></span> a doctor from Khon Kaen.</li>
+      <li>Bangkok is famous <span class="blank sm"></span> its street food.</li>
+      <li>I’m really proud <span class="blank sm"></span> what you’ve achieved.</li>
+      <li>This restaurant is completely different <span class="blank sm"></span> the one downtown.</li>
+      <li>He’s afraid <span class="blank sm"></span> speaking in public.</li>
+      <li>Don’t be angry <span class="blank sm"></span> me — it wasn’t my fault.</li>
+      <li>I’m getting used <span class="blank sm"></span> waking up early.</li>
+      <li>Who is responsible <span class="blank sm"></span> locking the door?</li>
+      <li>The customers weren’t satisfied <span class="blank sm"></span> the service.</li>
+      <li>I’m so tired <span class="blank sm"></span> hearing the same excuse.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 13B · Translate</div>
+    <div class="ex-inst">Translate into English. Every answer needs an adjective + preposition chunk.
+    <span class="th">แปลเป็นอังกฤษ ทุกข้อต้องใช้ คุณศัพท์ + บุพบท</span></div>
+    <ol class="q">
+      <li class="th">เธอเก่งภาษาอังกฤษมาก <span class="blank lg"></span></li>
+      <li class="th">ผมสนใจเรื่องประวัติศาสตร์ <span class="blank lg"></span></li>
+      <li class="th">แม่เป็นห่วงเรื่องสุขภาพของพ่อ <span class="blank lg"></span></li>
+      <li class="th">เชียงใหม่มีชื่อเสียงเรื่องกาแฟ <span class="blank lg"></span></li>
+      <li class="th">ผมภูมิใจในตัวลูกมาก <span class="blank lg"></span></li>
+      <li class="th">อันนี้ต่างจากอันนั้นนิดหน่อย <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== CH 14 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Fourteen</div>
+    <h2>Noun + Preposition</h2>
+    <div class="thsub">คำนาม + บุพบท — จุดที่ผิดสูงสุดพอ ๆ กับบทที่แล้ว</div>
+  </div>
+
+  <p class="lead">The Thai word <b>ของ</b> covers most possession and relation, so Thai speakers default to
+  <i>of</i> for everything. English does not.</p>
+
+  <table>
+    <tr><th style="width:30%">Learn as one chunk</th><th style="width:20%">ความหมาย</th><th style="width:22%">Thai default error</th><th>Example</th></tr>
+    <tr><td class="en">the reason <u>for</u></td><td class="th">เหตุผลของ</td><td class="bad"><s>reason of</s></td><td class="ex">What’s the reason for the change?</td></tr>
+    <tr><td class="en">the solution <u>to</u></td><td class="th">ทางแก้ของ</td><td class="bad"><s>solution of</s></td><td class="ex">There’s no easy solution to this.</td></tr>
+    <tr><td class="en">the answer <u>to</u></td><td class="th">คำตอบของ</td><td class="bad"><s>answer of</s></td><td class="ex">The answer to question 3 is B.</td></tr>
+    <tr><td class="en">the key <u>to</u></td><td class="th">กุญแจสู่</td><td class="bad"><s>key of success</s></td><td class="ex">Practice is the key to fluency.</td></tr>
+    <tr><td class="en">an increase <u>in</u></td><td class="th">การเพิ่มขึ้นของ</td><td class="bad"><s>increase of</s></td><td class="ex">There’s been an increase in prices.</td></tr>
+    <tr><td class="en">an effect <u>on</u></td><td class="th">ผลกระทบต่อ</td><td class="bad"><s>effect to</s></td><td class="ex">Sleep has a big effect on memory.</td></tr>
+    <tr><td class="en">interest <u>in</u></td><td class="th">ความสนใจใน</td><td class="bad"><s>interest of</s></td><td class="ex">She has no interest in politics.</td></tr>
+    <tr><td class="en">a problem <u>with</u></td><td class="th">ปัญหาเรื่อง</td><td class="bad"><s>problem of</s></td><td class="ex">I have a problem with my laptop.</td></tr>
+    <tr><td class="en">a relationship <u>with</u></td><td class="th">ความสัมพันธ์กับ</td><td class="bad"><s>relationship to</s></td><td class="ex">He has a good relationship with his boss.</td></tr>
+    <tr><td class="en">experience <u>in / with</u></td><td class="th">ประสบการณ์ด้าน</td><td class="bad"><s>experience of teaching</s></td><td class="ex">She has experience in marketing.</td></tr>
+    <tr><td class="en">an expert <u>on / in</u></td><td class="th">ผู้เชี่ยวชาญด้าน</td><td class="bad"><s>expert side</s></td><td class="ex">He’s an expert on Thai history.</td></tr>
+    <tr><td class="en">the difference <u>between</u> A <u>and</u> B</td><td class="th">ความต่างระหว่าง</td><td class="bad"><s>difference of A and B</s></td><td class="ex">the difference between <i>make</i> and <i>do</i></td></tr>
+    <tr><td class="en">a chance <u>of</u> / <u>to</u></td><td class="th">โอกาสที่จะ</td><td class="bad"><s>chance for do</s></td><td class="ex">There’s a chance of rain. / a chance to try.</td></tr>
+    <tr><td class="en">the advantage <u>of</u></td><td class="th">ข้อดีของ</td><td class="bad"><s>advantage in</s></td><td class="ex">The advantage of living here is the cost.</td></tr>
+    <tr><td class="en">a demand <u>for</u></td><td class="th">ความต้องการใน</td><td class="bad"><s>demand of</s></td><td class="ex">There’s high demand for nurses.</td></tr>
+    <tr><td class="en">the cause <u>of</u></td><td class="th">สาเหตุของ</td><td class="ex">— (this one <i>is</i> of)</td><td class="ex">the cause of the accident</td></tr>
+  </table>
+
+  <div class="box trap">
+    <div class="bt">The “expert side” error</div>
+    <p>Thai uses <b>ด้าน</b> (“side”) for a field of expertise: <i>ผู้เชี่ยวชาญด้านการตลาด</i>. Translated
+    literally this becomes <span class="bad"><s>expert side marketing</s></span>. In English it is
+    <span class="good">an expert <u>on</u> marketing</span> or <span class="good">an expert <u>in</u> marketing</span>.</p>
+    <p class="th" style="margin-top:2mm">คำว่า “ด้าน” ในภาษาไทยแปลตรงเป็น <i>side</i> ไม่ได้
+    ต้องใช้ <b>on</b> หรือ <b>in</b></p>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 14A · Complete the chunk</div>
+    <ol class="q">
+      <li>What’s the reason <span class="blank sm"></span> the delay?</li>
+      <li>We still haven’t found a solution <span class="blank sm"></span> the problem.</li>
+      <li>There has been a sharp increase <span class="blank sm"></span> the number of tourists.</li>
+      <li>Diet has a huge effect <span class="blank sm"></span> your energy levels.</li>
+      <li>Do you know the difference <span class="blank sm"></span> <i>make</i> <span class="blank sm"></span> <i>do</i>?</li>
+      <li>I’m having a problem <span class="blank sm"></span> my internet connection.</li>
+      <li>She has ten years of experience <span class="blank sm"></span> hotel management.</li>
+      <li>Hard work is the key <span class="blank sm"></span> success.</li>
+      <li>He’s an expert <span class="blank sm"></span> Southeast Asian art.</li>
+      <li>The main advantage <span class="blank sm"></span> this plan is the cost.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 14B · Of, to, for, in, with — choose</div>
+    <div class="ex-inst">Only one is correct in each pair. Circle it. <span class="th">วงข้อที่ถูก</span></div>
+    <ol class="q">
+      <li>the answer <span class="opts">(of / to)</span> the question</li>
+      <li>the reason <span class="opts">(for / of)</span> his absence</li>
+      <li>an interest <span class="opts">(of / in)</span> music</li>
+      <li>a problem <span class="opts">(of / with)</span> the engine</li>
+      <li>the cause <span class="opts">(of / for)</span> the fire</li>
+      <li>an effect <span class="opts">(to / on)</span> the environment</li>
+      <li>a relationship <span class="opts">(to / with)</span> your teacher</li>
+      <li>a demand <span class="opts">(of / for)</span> housing</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== CH 15 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Chapter Fifteen</div>
+    <h2>The Fifteen Deadliest Mistakes</h2>
+    <div class="thsub">15 ข้อผิดที่ร้ายแรงที่สุด — ถ้าจำได้แค่หน้าเดียว ให้จำหน้านี้</div>
+  </div>
+
+  <p class="lead">If you remember nothing else from this book, remember these fifteen. They are the errors
+  Thai speakers make most often, in the highest-stakes situations — interviews, exams, and first impressions.</p>
+
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:31%">Never say</th><th style="width:31%">Always say</th><th>ไทย</th></tr>
+    <tr><td class="c">1</td><td class="bad">✗ <s>I listen music.</s></td><td class="good">✓ I listen <u>to</u> music.</td><td class="th">ฟังเพลง</td></tr>
+    <tr><td class="c">2</td><td class="bad">✗ <s>Wait me.</s></td><td class="good">✓ Wait <u>for</u> me.</td><td class="th">รอฉัน</td></tr>
+    <tr><td class="c">3</td><td class="bad">✗ <s>It depends the weather.</s></td><td class="good">✓ It depends <u>on</u> the weather.</td><td class="th">ขึ้นอยู่กับอากาศ</td></tr>
+    <tr><td class="c">4</td><td class="bad">✗ <s>I’m good in English.</s></td><td class="good">✓ I’m good <u>at</u> English.</td><td class="th">เก่งภาษาอังกฤษ</td></tr>
+    <tr><td class="c">5</td><td class="bad">✗ <s>She’s married with him.</s></td><td class="good">✓ She’s married <u>to</u> him.</td><td class="th">แต่งงานกับเขา</td></tr>
+    <tr><td class="c">6</td><td class="bad">✗ <s>different with</s></td><td class="good">✓ different <u>from</u></td><td class="th">ต่างจาก</td></tr>
+    <tr><td class="c">7</td><td class="bad">✗ <s>We discussed about it.</s></td><td class="good">✓ We discussed it. <span style="font-size:8pt">(no preposition)</span></td><td class="th">คุยเรื่องนั้น</td></tr>
+    <tr><td class="c">8</td><td class="bad">✗ <s>We arrived to Bangkok.</s></td><td class="good">✓ We arrived <u>in</u> Bangkok.</td><td class="th">มาถึงกรุงเทพ</td></tr>
+    <tr><td class="c">9</td><td class="bad">✗ <s>Explain me.</s></td><td class="good">✓ Explain it <u>to</u> me.</td><td class="th">อธิบายให้ฉันฟัง</td></tr>
+    <tr><td class="c">10</td><td class="bad">✗ <s>the reason of</s></td><td class="good">✓ the reason <u>for</u></td><td class="th">เหตุผลของ</td></tr>
+    <tr><td class="c">11</td><td class="bad">✗ <s>I play internet.</s></td><td class="good">✓ I go <u>online</u>. / I use the internet.</td><td class="th">เล่นเน็ต</td></tr>
+    <tr><td class="c">12</td><td class="bad">✗ <s>I did a mistake.</s></td><td class="good">✓ I <u>made</u> a mistake.</td><td class="th">ทำผิดพลาด</td></tr>
+    <tr><td class="c">13</td><td class="bad">✗ <s>I am boring.</s> <span style="font-size:8pt">(= you are dull)</span></td><td class="good">✓ I am bor<u>ed</u>.</td><td class="th">ฉันเบื่อ</td></tr>
+    <tr><td class="c">14</td><td class="bad">✗ <s>I am headache.</s></td><td class="good">✓ I <u>have</u> a headache.</td><td class="th">ฉันปวดหัว</td></tr>
+    <tr><td class="c">15</td><td class="bad">✗ <s>Open the light.</s></td><td class="good">✓ <u>Turn on</u> the light.</td><td class="th">เปิดไฟ</td></tr>
+  </table>
+
+  <div class="box rule">
+    <div class="bt">How to actually kill an old habit</div>
+    <p><b>1.</b> Choose <b>three</b> from this list — not fifteen.
+       <b>2.</b> Write each one on your phone lock screen for a week.
+       <b>3.</b> Every time you catch yourself about to say the wrong one, stop and say the right one aloud.
+       <b>4.</b> Next week, choose three more.</p>
+    <p class="th" style="margin-top:2mm">เลือกทีละ 3 ข้อ ไม่ใช่ 15 ข้อพร้อมกัน
+    เขียนไว้ที่หน้าจอล็อกมือถือหนึ่งสัปดาห์ พอจับได้ว่ากำลังจะพูดผิด ให้หยุดแล้วพูดแบบถูกออกเสียงดัง ๆ
+    สัปดาห์ถัดไปค่อยเปลี่ยนอีก 3 ข้อ</p>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Exercise 15A · The final error hunt</div>
+    <div class="ex-inst">Eight of these twelve sentences contain an error. Find and correct them. Four are already correct.
+    <span class="th">มี 8 ข้อที่ผิด และ 4 ข้อที่ถูกอยู่แล้ว</span></div>
+    <ol class="q">
+      <li>I’m waiting for my friend outside the mall. <span class="blank lg"></span></li>
+      <li>She is very interested about Korean dramas. <span class="blank lg"></span></li>
+      <li>We discussed about the schedule this morning. <span class="blank lg"></span></li>
+      <li>My laptop is different from yours. <span class="blank lg"></span></li>
+      <li>He’s married with a woman from Nakhon Sawan. <span class="blank lg"></span></li>
+      <li>Can you explain me this rule? <span class="blank lg"></span></li>
+      <li>What is the reason of your decision? <span class="blank lg"></span></li>
+      <li>I made a big mistake yesterday. <span class="blank lg"></span></li>
+      <li>The movie was so long. I was very boring. <span class="blank lg"></span></li>
+      <li>Please open the air conditioner. <span class="blank lg"></span></li>
+      <li>They arrived to the station at nine. <span class="blank lg"></span></li>
+      <li>It depends on how much it costs. <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ==================== REVIEW TEST 3 ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Part Three</div>
+    <h2>Review Test Three</h2>
+    <div class="thsub">แบบทดสอบท้ายภาคสาม · 25 ข้อ</div>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section A · Fill in the preposition, or write Ø (12 marks)</div>
+    <ol class="q">
+      <li>He’s responsible <span class="blank sm"></span> the whole department.</li>
+      <li>I’m not very good <span class="blank sm"></span> remembering names.</li>
+      <li>Let’s discuss <span class="blank sm"></span> this after lunch.</li>
+      <li>There’s been an increase <span class="blank sm"></span> traffic accidents.</li>
+      <li>Are you excited <span class="blank sm"></span> your new job?</li>
+      <li>This tastes similar <span class="blank sm"></span> the one we had yesterday.</li>
+      <li>She apologized <span class="blank sm"></span> forgetting my birthday.</li>
+      <li>We arrived <span class="blank sm"></span> the airport three hours early.</li>
+      <li>He answered <span class="blank sm"></span> all my questions patiently.</li>
+      <li>I’m tired <span class="blank sm"></span> explaining the same thing.</li>
+      <li>What’s the solution <span class="blank sm"></span> this problem?</li>
+      <li>You can always rely <span class="blank sm"></span> her.</li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section B · Correct the sentence (8 marks)</div>
+    <ol class="q">
+      <li>I listen music every morning. <span class="blank lg"></span></li>
+      <li>My mother is worried for my grades. <span class="blank lg"></span></li>
+      <li>Phuket is famous of its beaches. <span class="blank lg"></span></li>
+      <li>The room was full with students. <span class="blank lg"></span></li>
+      <li>What is the difference of these two words? <span class="blank lg"></span></li>
+      <li>I am interesting in learning Japanese. <span class="blank lg"></span></li>
+      <li>He did a serious mistake in the report. <span class="blank lg"></span></li>
+      <li>Please close the light before you sleep. <span class="blank lg"></span></li>
+    </ol>
+  </div>
+
+  <div class="ex-block">
+    <div class="ex-head">Section C · Translate (5 marks)</div>
+    <ol class="q">
+      <li class="th">มันขึ้นอยู่กับสภาพอากาศ <span class="blank lg"></span></li>
+      <li class="th">ผมเก่งเรื่องคณิตศาสตร์ <span class="blank lg"></span></li>
+      <li class="th">เธอกำลังรอเพื่อนอยู่ <span class="blank lg"></span></li>
+      <li class="th">เหตุผลของการยกเลิกคืออะไร <span class="blank lg"></span></li>
+      <li class="th">ผมชินกับอากาศร้อนแล้ว <span class="blank lg"></span></li>
+    </ol>
+  </div>
+</section>
+<!-- ==================== ANSWER KEY ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Reference</div>
+    <h2>Answer Key</h2>
+    <div class="thsub">เฉลย — อ่าน “เหตุผล” ด้วย ไม่ใช่แค่ดูคำตอบ</div>
+  </div>
+
+  <div class="box tip">
+    <div class="bt">How to use the key</div>
+    <p>Where a question has more than one natural answer, alternatives are shown after a slash.
+    For translation and speaking tasks, your wording may differ — check that the <b>chunk</b> is right,
+    not that every word matches.</p>
+    <p class="th" style="margin-top:2mm">ข้อที่ตอบได้หลายแบบจะคั่นด้วย “/”
+    ข้อแปลและข้อพูด สำนวนอาจต่างกันได้ ให้ตรวจว่า “ก้อนคำ” ถูกไหม ไม่ต้องตรงทุกคำ</p>
+  </div>
+
+  <div class="key">
+    <div class="kg"><h4>Exercise 1A</h4><ol>
+      <li>a</li><li>b</li><li>c</li><li>d</li><li>e</li><li>f</li><li>g</li><li>h</li></ol></div>
+
+    <div class="kg"><h4>Exercise 1B</h4><ol>
+      <li>Please turn it off.</li><li>I threw them away.</li><li>She picked her up.</li>
+      <li>Write it down.</li><li>He gave it back.</li><li>Can you fill it out?</li></ol></div>
+
+    <div class="kg"><h4>Exercise 1C</h4><ol>
+      <li>✓</li><li>✗ — looked <i>after</i> her little brother (inseparable)</li>
+      <li>✗ — Turn <i>it on</i> (pronoun must split)</li><li>✓</li><li>✓</li>
+      <li>✗ — pick <i>me up</i> (pronoun must split)</li></ol></div>
+
+    <div class="kg"><h4>Exercise 2A</h4><ol>
+      <li>went off … get up</li><li>put on</li><li>take off</li><li>turn on</li><li>ran out of</li>
+      <li>put away</li><li>throw away</li><li>take out</li><li>broke down</li><li>stayed up</li></ol></div>
+
+    <div class="kg"><h4>Exercise 2B</h4><ol>
+      <li>up</li><li>away</li><li>down</li><li>out of</li><li>rid of</li><li>in</li><li>over</li><li>up</li></ol></div>
+
+    <div class="kg"><h4>Exercise 2C</h4><ol>
+      <li>Could you turn off the AC? / Can you turn the air conditioner off?</li>
+      <li>We ran out of gas. / We’ve run out of gas.</li>
+      <li>I stayed up very late last night.</li>
+      <li>Please put away your toys. / Put your toys away.</li>
+      <li>Do you want to come over tonight?</li>
+      <li>Don’t throw away that box. / Don’t throw that box away.</li></ol></div>
+
+    <div class="kg"><h4>Exercise 3A</h4><ol>
+      <li>set off / headed out</li><li>dropped … off</li><li>got on … got off</li><li>broke down</li>
+      <li>got back</li><li>got lost</li><li>looking for</li><li>took off</li></ol></div>
+
+    <div class="kg"><h4>Exercise 3B</h4><ol>
+      <li>in / into</li><li>on</li><li>off</li><li>in / into</li><li>on</li><li>on</li></ol>
+      <p style="margin-top:1.5mm">Small vehicle = <b>in</b> · large vehicle = <b>on</b>.</p></div>
+
+    <div class="kg"><h4>Exercise 4A</h4><ol>
+      <li>look … up</li><li>turn in / hand in</li><li>go over</li><li>fell behind</li><li>find out</li>
+      <li>signed up for</li><li>pointed out</li><li>work on</li><li>fill out</li><li>turned down</li></ol></div>
+
+    <div class="kg"><h4>Exercise 4B</h4><ol>
+      <li>signed up <b>for</b> the yoga class</li><li>dropped out <b>of</b> university</li>
+      <li>working <b>on</b> his listening skills</li><li>keep up <b>with</b> my classmates</li>
+      <li>ran out <b>of</b> paper</li><li>look <b>up</b> the answer / look the answer <b>up</b></li></ol></div>
+
+    <div class="kg"><h4>Exercise 5A</h4><ol>
+      <li>ran into</li><li>showed up</li><li>grew up</li><li>count on</li><li>made up</li>
+      <li>going through</li><li>put up with</li><li>gotten over</li><li>let … down</li><li>look up to</li></ol></div>
+
+    <div class="kg"><h4>Exercise 5B</h4><ol>
+      <li>get along with</li><li>hang out</li><li>ran into</li><li>show up</li><li>fill out</li><li>clean up</li></ol></div>
+
+    <div class="kg"><h4>Exercise 6A</h4><ol>
+      <li>came up</li><li>called off</li><li>ended up</li><li>turned out</li><li>put off</li>
+      <li>work out</li><li>call … back</li><li>hold on</li><li>messed up</li><li>stick to</li></ol></div>
+
+    <div class="kg"><h4>Exercise 6B</h4><ol>
+      <li>Hold on … put … through</li><li>cut off</li><li>call … back</li><li>get back</li></ol></div>
+
+    <div class="kg"><h4>Exercise 7A</h4><ol>
+      <li>Please fill out this form.</li><li>I get along well with my colleagues.</li>
+      <li>Can you give me a ride to the station?</li><li>We lined up for twenty minutes.</li>
+      <li>I’ll call you back after lunch.</li><li>He’s cleaning up his apartment.</li>
+      <li>We watched a movie at the movie theater.</li>
+      <li>The parking lot is behind the gas station.</li></ol></div>
+
+    <div class="kg"><h4>Review Test One · A</h4><ol>
+      <li>off</li><li>out</li><li>up</li><li>out of</li><li>down</li><li>down</li><li>up</li>
+      <li>over</li><li>up with</li><li>off</li></ol></div>
+
+    <div class="kg"><h4>Review Test One · B</h4><ol>
+      <li>Please turn it off before you go.</li><li>I signed up for a cooking class.</li>
+      <li>She looked after her sister all weekend.</li><li>We ran out of milk again.</li>
+      <li>He came home at midnight.</li><li>I’m working on my pronunciation.</li>
+      <li>Can you pick me up at eight?</li><li>They dropped out of school last year.</li></ol></div>
+
+    <div class="kg"><h4>Review Test One · C</h4><ol>
+      <li>go off</li><li>ran into</li><li>put off</li><li>turn in / hand in</li><li>turned out</li>
+      <li>get together</li><li>cut down</li></ol></div>
+
+    <div class="kg"><h4>Review Test One · D</h4><ol>
+      <li>fill out a form</li><li>call someone back</li><li>get along with someone</li>
+      <li>clean up your room</li><li>give someone a ride</li></ol></div>
+
+    <div class="kg"><h4>Exercise 8A</h4><ol>
+      <li>No big deal / No worries</li><li>a piece of cake</li><li>it’s up to you</li>
+      <li>Take it easy</li><li>cost an arm and a leg</li><li>I’m broke</li>
+      <li>Hang in there</li><li>call it a day</li></ol></div>
+
+    <div class="kg"><h4>Exercise 8B</h4><ol>
+      <li>a</li><li>c</li><li>d</li><li>e</li><li>b</li><li>g</li><li>f</li><li>h</li></ol></div>
+
+    <div class="kg"><h4>Exercise 9A <span style="font-weight:400; color:#7C8A92">(sample answers)</span></h4><ol>
+      <li>I see your point, but I’m not so sure about that.</li>
+      <li>I’d rather not, if that’s okay.</li>
+      <li>That’s a good point, but I think there might be a problem with it.</li>
+      <li>I’d rather have pizza.</li>
+      <li>Take your time, but could you let me know soon?</li>
+      <li>Let me think about it and get back to you.</li></ol></div>
+
+    <div class="kg"><h4>Exercise 9B</h4>
+      <p>Answers will vary. Check that you used at least four connecting chunks and that each one
+      introduces a genuinely new idea — not the same point repeated.</p></div>
+
+    <div class="kg"><h4>Exercise 10A</h4><ol>
+      <li>I am going to call you later.</li><li>What are you doing tonight?</li>
+      <li>I have to / have got to finish this report.</li><li>You should have told me earlier.</li>
+      <li>Let me check my calendar.</li><li>There were a lot of people outside.</li>
+      <li>I don’t know where she went.</li><li>Did you see that?</li></ol></div>
+
+    <div class="kg"><h4>Review Test Two · A <span style="font-weight:400; color:#7C8A92">(sample)</span></h4><ol>
+      <li>No worries / No big deal</li><li>It’s up to you</li><li>Take it easy</li>
+      <li>Sounds like a plan</li><li>it was a piece of cake</li><li>that was out of the blue</li>
+      <li>get the hang of it</li><li>it’s on me / it’s my treat</li></ol></div>
+
+    <div class="kg"><h4>Review Test Two · B</h4><ol>
+      <li>b</li><li>b</li><li>b</li><li>b</li><li>b</li><li>b</li></ol>
+      <p style="margin-top:1.5mm">In every pair, (b) uses a softening chunk. English carries politeness
+      in these chunks, the way Thai carries it in ครับ / ค่ะ / นะ.</p></div>
+
+    <div class="kg"><h4>Review Test Two · C</h4><ol>
+      <li>I want to go home.</li><li>It’s kind of expensive.</li><li>We could have won that game.</li>
+      <li>Give me five minutes.</li><li>I saw them at the mall.</li><li>Because I forgot my wallet.</li></ol></div>
+
+    <div class="kg"><h4>Diagnostic Test (Ch. 11)</h4><ol>
+      <li>to</li><li>for</li><li>on</li><li>at</li><li>to</li><li>in</li><li>for</li><li>from</li>
+      <li>in</li><li>for</li><li>to</li><li><b>Ø</b> — discuss takes no preposition</li>
+      <li><b>Ø</b> — answer takes no preposition</li></ol>
+      <p style="margin-top:1.5mm"><b>10–13 correct:</b> strong. <b>6–9:</b> normal for B1 — Part Three is
+      exactly what you need. <b>Under 6:</b> do Chapter 15 first, then come back.</p></div>
+
+    <div class="kg"><h4>Exercise 12A</h4><ol>
+      <li>for</li><li>to</li><li><b>Ø</b></li><li>on</li><li>for</li><li><b>Ø</b></li><li>for</li>
+      <li>in</li><li>to</li><li>with</li><li><b>Ø</b></li><li>about</li></ol></div>
+
+    <div class="kg"><h4>Exercise 12B</h4><ol>
+      <li>I always listen <b>to</b> music while I study.</li>
+      <li>Please wait <b>for</b> me — I’m almost ready.</li>
+      <li>…and discussed the solution too. <span style="color:#7C8A92">(delete <i>about</i>)</span></li>
+      <li>This bag belongs <b>to</b> my sister.</li>
+      <li>You should concentrate <b>on</b> your studies.</li>
+      <li>They arrived <b>at</b> the hotel very late.</li>
+      <li>Can you explain the rules <b>to</b> me?</li>
+      <li>He apologized <b>for</b> being rude.</li></ol></div>
+
+    <div class="kg"><h4>Exercise 13A</h4><ol>
+      <li>at</li><li>in</li><li>to</li><li>for</li><li>of</li><li>from</li><li>of</li>
+      <li>at / with</li><li>to</li><li>for</li><li>with</li><li>of</li></ol></div>
+
+    <div class="kg"><h4>Exercise 13B</h4><ol>
+      <li>She is very good at English.</li><li>I’m interested in history.</li>
+      <li>My mother is worried about my father’s health.</li>
+      <li>Chiang Mai is famous for its coffee.</li>
+      <li>I’m very proud of my child.</li>
+      <li>This one is a little different from that one.</li></ol></div>
+
+    <div class="kg"><h4>Exercise 14A</h4><ol>
+      <li>for</li><li>to</li><li>in</li><li>on</li><li>between … and</li><li>with</li><li>in</li>
+      <li>to</li><li>on / in</li><li>of</li></ol></div>
+
+    <div class="kg"><h4>Exercise 14B</h4><ol>
+      <li>to</li><li>for</li><li>in</li><li>with</li><li>of</li><li>on</li><li>with</li><li>for</li></ol></div>
+
+    <div class="kg"><h4>Exercise 15A</h4><ol>
+      <li>✓ correct</li>
+      <li>interested <b>in</b> Korean dramas</li>
+      <li>We discussed the schedule. <span style="color:#7C8A92">(delete <i>about</i>)</span></li>
+      <li>✓ correct</li>
+      <li>He’s married <b>to</b> a woman from Nakhon Sawan.</li>
+      <li>Can you explain this rule <b>to</b> me?</li>
+      <li>the reason <b>for</b> your decision</li>
+      <li>✓ correct</li>
+      <li>I was very <b>bored</b>.</li>
+      <li>Please <b>turn on</b> the air conditioner.</li>
+      <li>They arrived <b>at</b> the station at nine.</li>
+      <li>✓ correct</li></ol></div>
+
+    <div class="kg"><h4>Review Test Three · A</h4><ol>
+      <li>for</li><li>at</li><li><b>Ø</b></li><li>in</li><li>about</li><li>to</li><li>for</li>
+      <li>at</li><li><b>Ø</b></li><li>of</li><li>to</li><li>on</li></ol></div>
+
+    <div class="kg"><h4>Review Test Three · B</h4><ol>
+      <li>I listen <b>to</b> music every morning.</li>
+      <li>My mother is worried <b>about</b> my grades.</li>
+      <li>Phuket is famous <b>for</b> its beaches.</li>
+      <li>The room was full <b>of</b> students.</li>
+      <li>the difference <b>between</b> these two words</li>
+      <li>I am <b>interested</b> in learning Japanese.</li>
+      <li>He <b>made</b> a serious mistake in the report.</li>
+      <li>Please <b>turn off</b> the light before you sleep.</li></ol></div>
+
+    <div class="kg"><h4>Review Test Three · C</h4><ol>
+      <li>It depends on the weather.</li><li>I’m good at math.</li>
+      <li>She’s waiting for a friend.</li><li>What’s the reason for the cancellation?</li>
+      <li>I’m used to the hot weather now.</li></ol></div>
+  </div>
+</section>
+
+<!-- ==================== SOURCES ==================== -->
+<section class="chap">
+  <div class="chap-head">
+    <div class="cn">Reference</div>
+    <h2>Sources &amp; Further Reading</h2>
+    <div class="thsub">แหล่งอ้างอิง — ทุกตัวเลขในเล่มนี้มาจากงานวิจัยจริง</div>
+  </div>
+
+  <p class="lead">Nothing in this book was chosen by instinct. Every list was filtered through corpus
+  frequency data, and every claim about Thai learners comes from published error analysis.</p>
+
+  <h4>Vocabulary size and CEFR levels</h4>
+  <table>
+    <tr><th style="width:38%">Source</th><th>What it gave this book</th></tr>
+    <tr><td class="en" style="white-space:normal">Milton, J. &amp; Alexiou, T. — <i>Vocabulary size and the CEFR</i></td>
+        <td>B1 learners command roughly <b>2,500–3,000 word families</b>, typically ~2,750 — stable across languages.</td></tr>
+    <tr><td class="en" style="white-space:normal">Oxford University Press — <i>The Oxford 3000 by CEFR level (American English)</i></td>
+        <td>Counted directly: A1 = 902, A2 = 869, B1 = 809 headwords. <b>2,580 to cover B1</b>; the A2→B1 step is <b>809 new words</b>.</td></tr>
+    <tr><td class="en" style="white-space:normal">Cambridge Assessment English — <i>B1 Preliminary Vocabulary List</i> (Aug 2025)</td>
+        <td>Counted directly: the official B1 exam list contains only <b>94 phrasal verbs</b> and 45 British/American variant pairs.</td></tr>
+  </table>
+
+  <h4>Phrasal verbs</h4>
+  <table>
+    <tr><th style="width:38%">Source</th><th>What it gave this book</th></tr>
+    <tr><td class="en" style="white-space:normal">Garnier, M. &amp; Schmitt, N. (2015) — <i>The PHaVE List</i>, <i>Language Teaching Research</i></td>
+        <td>Built on <b>COCA (American English)</b>: <b>150 phrasal verbs cover 75%+</b> of all occurrences, and two senses cover 75%+ of each verb. This is why the book teaches two senses, never five.</td></tr>
+    <tr><td class="en" style="white-space:normal">Gardner, D. &amp; Davies, M. (2007) — <i>Pointing Out Frequent Phrasal Verbs</i>, <i>TESOL Quarterly</i></td>
+        <td>100 phrasal verbs = <b>51.4%</b> of all use; 25 = nearly a third; 20 verbs + <b>8 particles</b> = 50.4%. This is the basis of Chapter 1.</td></tr>
+    <tr><td class="en" style="white-space:normal">Liu, D. (2011) — <i>The Most Frequently Used English Phrasal Verbs in American and British English</i>, <i>TESOL Quarterly</i></td>
+        <td>Cross-variety comparison behind Chapter 7’s American/British swap list.</td></tr>
+  </table>
+
+  <h4>Collocations and multi-word items</h4>
+  <table>
+    <tr><th style="width:38%">Source</th><th>What it gave this book</th></tr>
+    <tr><td class="en" style="white-space:normal">Shin, D. &amp; Nation, P. (2008) — <i>Beyond single words</i>, <i>ELT Journal</i></td>
+        <td>The first 100 pivot words alone yield <b>2,052 collocations</b> — proof that a textbook must choose a principle rather than try to be complete.</td></tr>
+    <tr><td class="en" style="white-space:normal">Martinez, R. &amp; Schmitt, N. (2012) — <i>A Phrasal Expressions List</i>, <i>Applied Linguistics</i></td>
+        <td>The <b>505 most frequent non-transparent multi-word expressions</b> — the filter that removed “raining cats and dogs” from Part Two.</td></tr>
+  </table>
+
+  <h4>Thai learners specifically</h4>
+  <table>
+    <tr><th style="width:38%">Source</th><th>What it gave this book</th></tr>
+    <tr><td class="en" style="white-space:normal">Boonraksa, T. &amp; Naisena, S. (2022) — <i>A Study on English Collocation Errors of Thai EFL Students</i></td>
+        <td><b>L1 transfer is the number-one error source.</b> Adjective + noun was the worst lexical pattern at <b>21.31%</b> of violations.</td></tr>
+    <tr><td class="en" style="white-space:normal">Yumanee, C. — <i>Analysis of Collocational Errors of Thai EFL Students</i>, <i>LEARN Journal</i></td>
+        <td>Highest error counts fall on <b>noun + preposition</b> and <b>adjective + preposition</b>, and Thai students most often <b>omit</b> a required preposition. This is the entire rationale for Part Three.</td></tr>
+  </table>
+
+  <h4>Learning and retention</h4>
+  <table>
+    <tr><th style="width:38%">Source</th><th>What it gave this book</th></tr>
+    <tr><td class="en" style="white-space:normal">Research on spaced vs. massed vocabulary learning (ERIC review; classroom studies)</td>
+        <td>Spaced review produced about <b>three times</b> the retention of cramming — the basis of the “come back in three days” instruction and the recycling design.</td></tr>
+  </table>
+
+  <div class="box rule">
+    <div class="bt">A note for teachers</div>
+    <p>Every item in this book carries five hidden tags — form, frequency tier, theme, Thai-trap type, and
+    register — so any page can be regenerated as a worksheet for a specific weakness: <i>all Tier-1
+    preposition traps</i>, or <i>every American/British pair</i>, or <i>spoken chunks only</i>.</p>
+    <p class="th" style="margin-top:2mm">ทุกคำในเล่มนี้มีแท็กกำกับ 5 มิติ ครูสามารถดึงออกมาทำใบงานเฉพาะจุดอ่อนได้
+    เช่น “กับดักบุพบทระดับ T1 ทั้งหมด” หรือ “คู่อเมริกัน–อังกฤษทั้งหมด”</p>
+  </div>
+
+  <p style="margin-top:10mm; font-size:9pt; color:#7C8A92; text-align:center">
+    English in Chunks · อังกฤษเป็นก้อน — Workbook Edition<br>
+    American English · CEFR A2–B1 · Compiled 2026
+  </p>
+</section>
+</body></html>

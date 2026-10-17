@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CampusVocabLessonRunner } from "@/components/lessons/CampusVocabLessonRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { campusVocabScenario } from "@/lib/campus-vocab";
 
 export default async function CampusVocabScenarioPage({ params }: { params: Promise<{ id: string }> }) {
@@ -16,7 +17,13 @@ export default async function CampusVocabScenarioPage({ params }: { params: Prom
   }
   return (
     <main className="mx-auto max-w-xl px-4 py-7 sm:px-6">
-      <CampusVocabLessonRunner scenarioId={id} />
+      <StudySessionBoundary
+        skill="comprehension"
+        exerciseType="lesson_campus_vocab"
+        setId={id}
+      >
+        <CampusVocabLessonRunner scenarioId={id} />
+      </StudySessionBoundary>
     </main>
   );
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { TimedRandomSession } from "@/components/practice/TimedRandomSession";
+import { DAILY_SKILL_STUDY_SKILL } from "@/lib/study-plan/daily-plan";
 import { TIMED_SKILL_META, isTimedSkill, type TimedDifficulty } from "@/lib/practice-timed-random";
 
 const VALID_DURATIONS = [5, 10, 15, 20, 30];
@@ -37,12 +39,18 @@ export default async function TimedRandomPage({
 
   return (
     <main className="mx-auto min-h-[calc(100vh-4rem)] max-w-3xl">
-      <TimedRandomSession
-        skill={skill}
-        difficulty={difficulty}
-        durationMin={durationMin}
-        hubHref={hubHref}
-      />
+      <StudySessionBoundary
+        skill={DAILY_SKILL_STUDY_SKILL[skill]}
+        exerciseType={`timed_random_${skill}`}
+        setId={`${durationMin}min:${difficulty}`}
+      >
+        <TimedRandomSession
+          skill={skill}
+          difficulty={difficulty}
+          durationMin={durationMin}
+          hubHref={hubHref}
+        />
+      </StudySessionBoundary>
     </main>
   );
 }

@@ -2,7 +2,9 @@ import "server-only";
 
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
-const LIMIT = 400;
+// Every learner-facing activity logs a session now (lessons, daily/timed runners, notebook
+// review included), so 400 rows covered far less calendar time than it used to.
+const LIMIT = 1200;
 
 export type AdminStudyActivityItem = {
   id: string;

@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { MiniStudySessionClient } from "@/components/mini-study/MiniStudySessionClient";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 import { getMiniStudySession } from "@/lib/mini-study/content";
 import { canUseMiniStudy } from "@/lib/mini-study/access";
 
@@ -12,5 +13,9 @@ export default async function MiniStudySessionPage({
   const session = getMiniStudySession(sessionId);
   if (!session) notFound();
   if (!(await canUseMiniStudy())) redirect("/pricing");
-  return <MiniStudySessionClient session={session} />;
+  return (
+    <StudySessionBoundary skill="comprehension" exerciseType="mini_study" setId={sessionId}>
+      <MiniStudySessionClient session={session} />
+    </StudySessionBoundary>
+  );
 }

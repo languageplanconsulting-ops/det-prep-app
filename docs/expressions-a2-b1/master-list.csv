@@ -1,0 +1,686 @@
+item,thai,form,tier,unit,group,flags,example,notes
+go on,ดำเนินต่อไป; เกิดขึ้น,PV,T1,U13,phrasal verb,,"Please go on, I'm listening. / What's going on?",
+pick up,หยิบขึ้นมา; ไปรับ (คน/ของ),PV,T1,U06,phrasal verb,SEPARABLE,Can you pick me up at seven?,separable
+find out,"หาคำตอบ, สืบให้รู้",PV,T1,U04,phrasal verb,,I need to find out what time it starts.,
+come back,กลับมา,PV,T1,U06,phrasal verb,,She came back from Chiang Mai last night.,
+go back,กลับไป,PV,T1,U06,phrasal verb,,I want to go back to that restaurant.,
+come up,"เกิดขึ้น, โผล่ขึ้นมา (เรื่อง)",PV,T1,U13,phrasal verb,,"Something came up, so I can't come.",
+come out,ออกมา; ออกวางจำหน่าย,PV,T1,U09,phrasal verb,,The new phone comes out in May.,
+go out,ออกไปข้างนอก; ออกเดต,PV,T1,U14,phrasal verb,,We went out for dinner.,
+grow up,"เติบโต, โตขึ้น",PV,T1,U02,phrasal verb,,I grew up in Khon Kaen.,
+set up,จัดตั้ง; ติดตั้ง,PV,T1,U11,phrasal verb,SEPARABLE,She set up her own business.,separable
+work out,ออกกำลังกาย; ลงเอยด้วยดี,PV,T1,U08,phrasal verb,US,I work out three times a week.,"🇺🇸 for ""exercise"""
+turn out,"ปรากฏว่า, กลายเป็นว่า",PV,T1,U13,phrasal verb,,It turned out to be a great day.,
+take out,เอาออก; พาไปข้างนอก,PV,T1,U01,phrasal verb,US,Please take out the trash.,🇺🇸 UK: put out the rubbish
+get out,"ออกไป, ออกจาก",PV,T1,U06,phrasal verb,,Get out of the car.,
+get up,"ลุกขึ้น, ตื่นนอน",PV,T1,U01,phrasal verb,,I get up at six every day.,
+get back,กลับมา; ได้คืน,PV,T1,U06,phrasal verb,,What time did you get back?,
+get in,เข้าไป (รถ/บ้าน),PV,T1,U06,phrasal verb,,Get in — I'll drive you.,small vehicles
+get on,ขึ้น (รถเมล์/เครื่องบิน),PV,T1,U06,phrasal verb,,We got on the bus at Victory Monument.,large vehicles
+get off,ลงจาก (รถเมล์/รถไฟ),PV,T1,U06,phrasal verb,,Get off at the next stop.,
+put on,สวมใส่; เปิด (เพลง),PV,T1,U01,phrasal verb,SEPARABLE,"Put on your jacket, it's cold.",separable
+take off,ถอด (เสื้อผ้า); (เครื่องบิน) ขึ้น,PV,T1,U01,phrasal verb,SEPARABLE,Take off your shoes at the door.,separable (sense 1)
+turn on,เปิด (ไฟ/เครื่องใช้),PV,T1,U01,phrasal verb,SEPARABLE,Can you turn on the AC?,separable
+turn off,ปิด (ไฟ/เครื่องใช้),PV,T1,U01,phrasal verb,SEPARABLE,Don't forget to turn off the lights.,separable
+turn up,"โผล่มา, มาถึง; เพิ่มเสียง",PV,T1,U14,phrasal verb,,He turned up an hour late.,
+turn down,ปฏิเสธ; ลดเสียง,PV,T1,U11,phrasal verb,SEPARABLE,She turned down the job offer.,separable
+give up,ยอมแพ้; เลิก (นิสัย),PV,T1,U12,phrasal verb,,Don't give up! You're almost there.,
+give back,คืนให้,PV,T1,U05,phrasal verb,SEPARABLE,Give me back my pen.,separable
+look for,"มองหา, ตามหา",PV,T1,U05,phrasal verb,TRAP,I'm looking for my keys.,⚠️ not find
+look at,มองดู,PV,T1,U07,phrasal verb,TRAP,Look at this photo.,⚠️ T-PREP
+look after,ดูแล,PV,T1,U02,phrasal verb,,Can you look after my dog?,
+look up,เปิดหา (ในดิกฯ/อินเทอร์เน็ต),PV,T1,U04,phrasal verb,SEPARABLE,Look it up online.,separable
+look forward to,ตั้งตารอ,PV,T1,U14,phrasal verb,TRAP,I'm looking forward to seeing you.,⚠️ + V-ing
+wake up,ตื่นนอน; ปลุก,PV,T1,U01,phrasal verb,,Wake up! It's already nine.,
+sit down,นั่งลง,PV,T1,U04,phrasal verb,,Please sit down.,
+stand up,ยืนขึ้น,PV,T1,U04,phrasal verb,,Everyone stood up when she came in.,
+lie down,"นอนลง, เอนตัวลง",PV,T1,U08,phrasal verb,,I need to lie down for a while.,
+write down,"จดลง, เขียนลง",PV,T1,U04,phrasal verb,SEPARABLE,Write down your phone number.,separable
+figure out,"คิดออก, หาคำตอบได้",PV,T1,U13,phrasal verb,US,I can't figure out this problem.,🇺🇸 UK: work out
+fill out,กรอก (แบบฟอร์ม),PV,T1,U11,phrasal verb,US,Please fill out this form.,🇺🇸 UK: fill in
+hang out,"ไปเที่ยวเล่น, ใช้เวลาด้วยกัน",PV,T1,U14,phrasal verb,US;SPK,We hung out at the mall.,🇺🇸 SPK
+hang up,วางสาย (โทรศัพท์),PV,T1,U09,phrasal verb,,She hung up before I could answer.,
+call back,โทรกลับ,PV,T1,U09,phrasal verb,US,I'll call you back later.,🇺🇸 UK: ring back
+show up,"โผล่มา, มาตามนัด",PV,T1,U14,phrasal verb,US;SPK,He didn't show up for class.,🇺🇸 SPK
+end up,"ลงเอย, สุดท้ายก็…",PV,T1,U13,phrasal verb,,We ended up staying home.,+ V-ing
+run out (of),หมด (ของ/เวลา),PV,T1,U03,phrasal verb,TRAP,We ran out of milk.,⚠️ T-PREP: of
+check in,เช็คอิน (โรงแรม/สนามบิน),PV,T1,U06,phrasal verb,,We checked in at 3 p.m.,
+check out,เช็คเอาท์; ลองดูสิ,PV,T1,U06,phrasal verb,US;SPK,Check out this new cafe!,🇺🇸 sense 2 SPK
+clean up,"เก็บกวาด, ทำความสะอาด",PV,T1,U01,phrasal verb,US,"Clean up your room, please.",🇺🇸 UK: tidy up
+throw away,ทิ้ง,PV,T1,U01,phrasal verb,SEPARABLE,Don't throw away that box.,separable
+put away,เก็บเข้าที่,PV,T1,U01,phrasal verb,SEPARABLE,Put away your clothes.,separable
+put off,"เลื่อนออกไป, ผัดวันประกันพรุ่ง",PV,T1,U13,phrasal verb,,They put off the meeting until Friday.,+ V-ing
+try on,ลองใส่ (เสื้อผ้า),PV,T1,U05,phrasal verb,SEPARABLE,Can I try on these jeans?,separable
+get along (with),เข้ากันได้,PV,T1,U14,phrasal verb,US,I get along with my roommate.,🇺🇸 UK: get on with
+break down,(รถ/เครื่อง) เสีย; ร้องไห้โฮ,PV,T1,U06,phrasal verb,,My car broke down on the highway.,
+break up,เลิกกัน (แฟน),PV,T1,U02,phrasal verb,,They broke up last month.,+ with
+bring up,เลี้ยงดู; หยิบยกเรื่องขึ้นมา,PV,T1,U02,phrasal verb,SEPARABLE,Don't bring that up again.,separable
+make up,แต่งเรื่อง; คืนดีกัน,PV,T1,U12,phrasal verb,SEPARABLE,He made up an excuse.,separable
+take care of,"ดูแล, จัดการ",PV,T1,U02,phrasal verb,,I'll take care of it.,
+go over,"ทบทวน, ตรวจดูอีกครั้ง",PV,T1,U04,phrasal verb,US,Let's go over the answers.,🇺🇸
+come on,เร็วเข้า; ไม่เอาน่า,PV,T1,U14,phrasal verb,SPK,"Come on, we're late!",SPK
+carry out,"ดำเนินการ, ทำ (แผน/การวิจัย)",PV,T2,U15,phrasal verb,WRI,They carried out a survey.,WRI
+carry on,ทำต่อไป,PV,T2,U11,phrasal verb,,Carry on with your work.,
+point out,"ชี้ให้เห็น, ชี้ประเด็น",PV,T2,U16,phrasal verb,WRI;SEPARABLE,She pointed out my mistake.,WRI · separable
+take over,"เข้ามาทำแทน, เทคโอเวอร์",PV,T2,U11,phrasal verb,,A new manager took over.,
+take up,เริ่มทำ (งานอดิเรก); กินเวลา/พื้นที่,PV,T2,U07,phrasal verb,,I took up running last year.,
+take on,รับ (งาน/ความรับผิดชอบ),PV,T2,U11,phrasal verb,,She took on too much work.,
+set off,ออกเดินทาง; ทำให้ดัง/ระเบิด,PV,T2,U06,phrasal verb,,We set off at dawn.,
+set out,ออกเดินทาง; ตั้งใจจะทำ,PV,T2,U13,phrasal verb,WRI,He set out to break the record.,WRI
+hold on,รอสักครู่,PV,T2,U09,phrasal verb,SPK,"Hold on, I'll check.",SPK
+hold up,ทำให้ล่าช้า,PV,T2,U06,phrasal verb,SEPARABLE,Traffic held us up.,separable
+put up with,"ทน, อดทนกับ",PV,T2,U12,phrasal verb,,I can't put up with this noise.,
+put down,วางลง,PV,T2,U01,phrasal verb,SEPARABLE,Put down that knife.,separable
+get rid of,"กำจัด, เอาออกไป",PV,T2,U01,phrasal verb,,I need to get rid of these old books.,
+get over,ทำใจได้; หายป่วย,PV,T2,U12,phrasal verb,,It took her months to get over it.,
+get through,ผ่านพ้นไปได้; ติดต่อได้,PV,T2,U12,phrasal verb,,We'll get through this together.,
+get together,"รวมตัวกัน, นัดเจอกัน",PV,T2,U14,phrasal verb,,Let's get together this weekend.,
+go off,(นาฬิกา) ดัง; (อาหาร) เสีย,PV,T2,U01,phrasal verb,,My alarm went off at five.,
+go ahead,เชิญเลย; ดำเนินการต่อ,PV,T2,U16,phrasal verb,SPK,"Go ahead, ask me anything.",SPK
+go through,ผ่าน (ความยากลำบาก); ตรวจดู,PV,T2,U12,phrasal verb,,She's going through a hard time.,
+come across,บังเอิญเจอ,PV,T2,U07,phrasal verb,,I came across an old photo.,
+come along,มาด้วยกัน; คืบหน้าไปด้วยดี,PV,T2,U14,phrasal verb,,Do you want to come along?,
+come over,แวะมา (ที่บ้าน),PV,T2,U14,phrasal verb,US,Come over for dinner tonight.,🇺🇸
+bring back,เอากลับมา; ทำให้นึกถึง,PV,T2,U07,phrasal verb,SEPARABLE,This song brings back memories.,separable
+cut down (on),ลด (ปริมาณ),PV,T2,U08,phrasal verb,,I'm cutting down on sugar.,
+cut off,"ตัดขาด, ตัด (การเชื่อมต่อ)",PV,T2,U09,phrasal verb,SEPARABLE,We got cut off.,separable
+drop off,ไปส่ง (คน/ของ),PV,T2,U06,phrasal verb,US;SEPARABLE,Can you drop me off at school?,🇺🇸 separable
+drop out,ออกกลางคัน (เรียน),PV,T2,U04,phrasal verb,,He dropped out of college.,+ of
+eat out,กินข้าวนอกบ้าน,PV,T2,U03,phrasal verb,,We eat out on Fridays.,
+fill up,เติมให้เต็ม,PV,T2,U06,phrasal verb,,"Fill up the tank, please.",
+give in,"ยอมจำนน, ยอมแพ้",PV,T2,U12,phrasal verb,,Don't give in to pressure.,
+give out,แจก,PV,T2,U04,phrasal verb,SEPARABLE,The teacher gave out the papers.,separable
+hand in,ส่ง (งาน/เอกสาร),PV,T2,U04,phrasal verb,SEPARABLE,Hand in your essays by Friday.,separable
+hand out,แจก,PV,T2,U05,phrasal verb,SEPARABLE,They handed out free samples.,separable
+turn in,ส่ง (การบ้าน); เข้านอน,PV,T2,U04,phrasal verb,US,Turn in your homework tomorrow.,🇺🇸 UK: hand in
+keep on,ทำต่อไปเรื่อยๆ,PV,T2,U12,phrasal verb,,He kept on talking.,+ V-ing
+keep up (with),ตามให้ทัน,PV,T2,U15,phrasal verb,,I can't keep up with the news.,
+let down,ทำให้ผิดหวัง,PV,T2,U12,phrasal verb,SEPARABLE,I won't let you down.,separable
+look out,ระวัง!,PV,T2,U06,phrasal verb,SPK,Look out! There's a car.,SPK
+look into,"สืบสวน, ตรวจสอบ",PV,T2,U13,phrasal verb,,We'll look into the problem.,
+look up to,"นับถือ, ยกย่อง",PV,T2,U02,phrasal verb,,I look up to my older sister.,
+make out,"มองออก, ฟังออก",PV,T2,U16,phrasal verb,,I couldn't make out what he said.,
+move in / move out,ย้ายเข้า / ย้ายออก,PV,T2,U01,phrasal verb,,We moved in last April.,
+pass out,"เป็นลม, หมดสติ",PV,T2,U08,phrasal verb,,He passed out from the heat.,
+pay back,"จ่ายคืน, ใช้หนี้",PV,T2,U05,phrasal verb,SEPARABLE,I'll pay you back on Friday.,separable
+pick out,เลือกออกมา,PV,T2,U05,phrasal verb,SEPARABLE,Pick out a shirt you like.,separable
+put together,ประกอบเข้าด้วยกัน,PV,T2,U01,phrasal verb,SEPARABLE,He put the desk together himself.,separable
+run into,บังเอิญเจอ (คน),PV,T2,U14,phrasal verb,US,I ran into my old teacher.,🇺🇸
+save up,เก็บเงิน,PV,T2,U05,phrasal verb,,I'm saving up for a laptop.,+ for
+sign up (for),"สมัคร, ลงชื่อเข้าร่วม",PV,T2,U04,phrasal verb,TRAP,I signed up for a Spanish class.,⚠️ T-PREP: for
+sort out,จัดการให้เรียบร้อย,PV,T2,U13,phrasal verb,SEPARABLE,Let's sort out this mess.,separable
+stay up,"อยู่ดึก, ไม่นอน",PV,T2,U01,phrasal verb,,I stayed up until 2 a.m.,
+take back,เอาคืน; ถอนคำพูด,PV,T2,U05,phrasal verb,SEPARABLE,I take back what I said.,separable
+try out,ทดลองใช้,PV,T2,U09,phrasal verb,SEPARABLE,Try out the new app.,separable
+warm up,"อุ่นเครื่อง, วอร์มอัพ",PV,T2,U08,phrasal verb,,Warm up before you run.,
+wear out,ใช้จนสึก; ทำให้เหนื่อยมาก,PV,T2,U05,phrasal verb,,These shoes are worn out.,
+work on,ทำ / ปรับปรุง (งาน/ทักษะ),PV,T2,U04,phrasal verb,TRAP,I'm working on my pronunciation.,⚠️ T-PREP: on
+calm down,"ใจเย็นๆ, สงบลง",PV,T2,U12,phrasal verb,,Calm down and tell me what happened.,
+cheer up,ทำให้ร่าเริงขึ้น,PV,T2,U12,phrasal verb,SEPARABLE,Cheer up! It's not that bad.,separable
+chill out,"ชิลๆ, ใจเย็นๆ",PV,T2,U12,phrasal verb,US;SPK,"Just chill out, we have time.",🇺🇸 SPK
+catch up (with),ตามให้ทัน; อัปเดตข่าวคราวกัน,PV,T2,U14,phrasal verb,,Let's catch up over coffee.,
+account for,"อธิบาย, เป็นสาเหตุของ",PV,T3,U15,phrasal verb,,,
+add up,บวกรวม; ฟังดูสมเหตุสมผล,PV,T3,U05,phrasal verb,,,
+back up,สำรองข้อมูล; สนับสนุน,PV,T3,U09,phrasal verb,,,
+bring about,ทำให้เกิด,PV,T3,U15,phrasal verb,,,
+build up,สะสมเพิ่มขึ้น,PV,T3,U15,phrasal verb,,,
+burn down,ไฟไหม้จนวอด,PV,T3,U15,phrasal verb,,,
+call for,"เรียกร้อง, ต้องการ",PV,T3,U16,phrasal verb,,,
+call off,ยกเลิก,PV,T3,U13,phrasal verb,,,
+come down with,เริ่มป่วยเป็น (ไข้หวัด),PV,T3,U08,phrasal verb,,,
+count on,"พึ่งพา, ไว้ใจได้",PV,T3,U14,phrasal verb,,,
+cross out,ขีดฆ่า,PV,T3,U04,phrasal verb,,,
+deal with,"รับมือ, จัดการกับ",PV,T3,U13,phrasal verb,,,
+do without,อยู่ได้โดยไม่มี,PV,T3,U05,phrasal verb,,,
+dress up,แต่งตัวสวยๆ,PV,T3,U07,phrasal verb,,,
+fall apart,"พังทลาย, แตกสลาย",PV,T3,U13,phrasal verb,,,
+fall behind,"ตามไม่ทัน, ล้าหลัง",PV,T3,U04,phrasal verb,,,
+get away with,รอดตัวไปได้ (ทั้งที่ทำผิด),PV,T3,U15,phrasal verb,,,
+give away,ยกให้ฟรี; เผยความลับ,PV,T3,U05,phrasal verb,,,
+head out,"ออกไป, เริ่มเดินทาง 🇺🇸",PV,T3,U06,phrasal verb,,,
+hurry up,รีบหน่อย,PV,T3,U01,phrasal verb,,,
+kick off,เริ่มต้น (งาน/การแข่ง),PV,T3,U07,phrasal verb,,,
+knock down,ทุบทิ้ง; ชนล้ม,PV,T3,U15,phrasal verb,,,
+lay off,ปลดพนักงาน,PV,T3,U11,phrasal verb,,,
+leave out,"ละเว้น, ไม่รวมไว้",PV,T3,U16,phrasal verb,,,
+line up,เข้าแถว 🇺🇸 (UK: queue up),PV,T3,U05,phrasal verb,,,
+live up to,ทำได้ตามที่คาดหวัง,PV,T3,U12,phrasal verb,,,
+log in / log out,เข้าระบบ / ออกจากระบบ,PV,T3,U09,phrasal verb,,,
+make up for,ชดเชย,PV,T3,U12,phrasal verb,,,
+mess up,"ทำพัง, ทำพลาด 🇺🇸",PV,T3,U13,phrasal verb,,,
+narrow down,ลดตัวเลือกให้แคบลง,PV,T3,U13,phrasal verb,,,
+pull over,จอดรถข้างทาง 🇺🇸,PV,T3,U06,phrasal verb,,,
+put through,ต่อสาย (โทรศัพท์),PV,T3,U09,phrasal verb,,,
+rule out,ตัดออกจากความเป็นไปได้,PV,T3,U13,phrasal verb,,,
+run over,ขับรถทับ,PV,T3,U06,phrasal verb,,,
+see off,ไปส่ง (ที่สนามบิน/สถานี),PV,T3,U06,phrasal verb,,,
+settle down,ตั้งรกราก; สงบลง,PV,T3,U02,phrasal verb,,,
+slow down,ช้าลง,PV,T3,U06,phrasal verb,,,
+speak up,พูดดังขึ้น; พูดออกมา,PV,T3,U16,phrasal verb,,,
+split up,"แยกกัน, เลิกกัน",PV,T3,U02,phrasal verb,,,
+stand out,โดดเด่น,PV,T3,U12,phrasal verb,,,
+stick to,"ยึดมั่น, ทำตาม (แผน)",PV,T3,U13,phrasal verb,,,
+take apart,แยกชิ้นส่วน,PV,T3,U01,phrasal verb,,,
+throw up,อาเจียน,PV,T3,U08,phrasal verb,,,
+turn into,กลายเป็น,PV,T3,U15,phrasal verb,,,
+watch out,ระวัง,PV,T3,U06,phrasal verb,,,
+wipe out,"กวาดล้าง, ทำลายสิ้น",PV,T3,U15,phrasal verb,,,
+base on,"อ้างอิงจาก, ตั้งอยู่บน",PV,T3,U16,phrasal verb,,,
+break in,งัดเข้าบ้าน,PV,T3,U15,phrasal verb,,,
+give way,หลีกทางให้,PV,T3,U06,phrasal verb,,,
+wrap up,ห่อ; สรุปจบ,PV,T3,U13,phrasal verb,,,
+make a decision,ตัดสินใจ,COL-VN,T1,,MAKE,TRAP,,❌ do a decision
+make a mistake,ทำผิดพลาด,COL-VN,T1,,MAKE,TRAP,,❌ do a mistake
+make a plan,วางแผน,COL-VN,T1,,MAKE,,,
+make an appointment,นัดหมาย,COL-VN,T1,,MAKE,TRAP,,❌ do an appointment
+make progress,มีความคืบหน้า,COL-VN,T1,,MAKE,,,
+make an effort,พยายาม,COL-VN,T1,,MAKE,TRAP,,❌ do an effort
+make friends,"ผูกมิตร, มีเพื่อนใหม่",COL-VN,T1,,MAKE,TRAP,,❌ make friend (ต้องเติม s)
+make money,หาเงิน,COL-VN,T1,,MAKE,TRAP,,❌ earn money ก็ได้ แต่ make ธรรมชาติกว่า
+make noise,ส่งเสียงดัง,COL-VN,T1,,MAKE,,,
+make sense,"เข้าท่า, สมเหตุสมผล",COL-VN,T1,,MAKE,,,
+make sure,ทำให้แน่ใจ,COL-VN,T1,,MAKE,,,
+make a difference,สร้างความแตกต่าง,COL-VN,T2,,MAKE,,,
+make a mess,"ทำรก, ทำเลอะเทอะ",COL-VN,T2,,MAKE,,,
+make a promise,ให้สัญญา,COL-VN,T2,,MAKE,,,
+make a suggestion,เสนอแนะ,COL-VN,T2,,MAKE,,,
+make a choice,เลือก,COL-VN,T2,,MAKE,,,
+make a call,โทรศัพท์,COL-VN,T1,,MAKE,US,,🇺🇸
+make a reservation,จองโต๊ะ/ห้อง,COL-VN,T2,,MAKE,US,,🇺🇸 UK: book a table
+make a list,ทำรายการ,COL-VN,T2,,MAKE,,,
+make time (for),เจียดเวลาให้,COL-VN,T2,,MAKE,,,
+make a living,หาเลี้ยงชีพ,COL-VN,T2,,MAKE,,,
+make an excuse,หาข้ออ้าง,COL-VN,T2,,MAKE,,,
+make a complaint,ร้องเรียน,COL-VN,T2,,MAKE,,,
+make room (for),เปิดพื้นที่ให้,COL-VN,T3,,MAKE,,,
+make up your mind,ตัดสินใจให้ได้,COL-VN,T1,,MAKE,,,
+make a speech,กล่าวสุนทรพจน์,COL-VN,T3,,MAKE,,,
+make a joke,เล่นมุก,COL-VN,T2,,MAKE,,,
+make dinner,ทำอาหารเย็น,COL-VN,T1,,MAKE,,,
+make a wish,อธิษฐาน,COL-VN,T3,,MAKE,,,
+make a comment,แสดงความคิดเห็น,COL-VN,T3,,MAKE,,,
+do homework,ทำการบ้าน,COL-VN,T1,,DO,TRAP,,❌ make homework
+do your best,ทำให้ดีที่สุด,COL-VN,T1,,DO,,,
+do the dishes,ล้างจาน,COL-VN,T1,,DO,US,,🇺🇸 UK: wash up
+do the laundry,ซักผ้า,COL-VN,T1,,DO,US,,🇺🇸
+do exercise,ออกกำลังกาย,COL-VN,T1,,DO,TRAP,,❌ play exercise
+do research,ทำวิจัย,COL-VN,T2,,DO,,,
+do business (with),ทำธุรกิจ,COL-VN,T2,,DO,,,
+do (someone) a favor,ช่วยเหลือ,COL-VN,T2,,DO,US,,🇺🇸 UK spelling favour
+do damage,สร้างความเสียหาย,COL-VN,T3,,DO,,,
+do well / do badly,ทำได้ดี / ทำได้แย่,COL-VN,T1,,DO,,,
+do the shopping,ไปจ่ายตลาด,COL-VN,T2,,DO,,,
+do housework,ทำงานบ้าน,COL-VN,T1,,DO,,,
+do a job,ทำงาน (ชิ้นหนึ่ง),COL-VN,T2,,DO,,,
+do an experiment,ทำการทดลอง,COL-VN,T3,,DO,,,
+do nothing,ไม่ทำอะไรเลย,COL-VN,T1,,DO,,,
+do your hair,ทำผม,COL-VN,T2,,DO,,,
+do the math,คำนวณดู,COL-VN,T3,,DO,US,,🇺🇸 UK: do the maths
+do chores,ทำงานบ้านจิปาถะ,COL-VN,T2,,DO,US,,🇺🇸
+do a course,เรียนคอร์ส,COL-VN,T3,,DO,,,
+do the cooking,ทำหน้าที่ทำอาหาร,COL-VN,T2,,DO,,,
+take a break,พัก,COL-VN,T1,,TAKE,TRAP,,❌ have a break (UK ใช้ได้ แต่ US นิยม take)
+take a look (at),ลองดู,COL-VN,T1,,TAKE,,,
+take a photo,ถ่ายรูป,COL-VN,T1,,TAKE,TRAP,,❌ shoot a photo
+take a shower,อาบน้ำ (ฝักบัว),COL-VN,T1,,TAKE,US,,🇺🇸 UK: have a shower
+take a bath,อาบน้ำ (แช่),COL-VN,T1,,TAKE,US,,🇺🇸
+take the bus / train,นั่งรถเมล์ / รถไฟ,COL-VN,T1,,TAKE,TRAP,,❌ ride the bus (ได้แต่ take เป็นกลางกว่า)
+take a seat,นั่งลง (สุภาพ),COL-VN,T1,,TAKE,,,
+take care of,ดูแล,COL-VN,T1,,TAKE,,,
+take time,ใช้เวลา,COL-VN,T1,,TAKE,,,
+take a test / an exam,สอบ,COL-VN,T1,,TAKE,US,,🇺🇸 UK: sit an exam
+take notes,จดโน้ต,COL-VN,T1,,TAKE,,,
+take part in,เข้าร่วม,COL-VN,T1,,TAKE,TRAP,,⚠️ T-PREP: in
+take place,"เกิดขึ้น, จัดขึ้น",COL-VN,T2,,TAKE,,,
+take a walk,เดินเล่น,COL-VN,T1,,TAKE,US,,🇺🇸 UK: go for a walk
+take a nap,งีบหลับ,COL-VN,T1,,TAKE,US,,🇺🇸
+take medicine,กินยา,COL-VN,T1,,TAKE,TRAP,,❌ eat medicine
+take a chance,เสี่ยงดู,COL-VN,T2,,TAKE,,,
+take turns,ผลัดกัน,COL-VN,T2,,TAKE,,,
+take responsibility (for),รับผิดชอบ,COL-VN,T2,,TAKE,TRAP,,⚠️ T-PREP: for
+take advantage of,ใช้ประโยชน์จาก,COL-VN,T3,,TAKE,,,
+take a class,ลงเรียนวิชา,COL-VN,T1,,TAKE,US,,🇺🇸
+take a trip,ไปเที่ยว,COL-VN,T2,,TAKE,US,,🇺🇸
+take a message,รับฝากข้อความ,COL-VN,T2,,TAKE,,,
+take a deep breath,หายใจลึกๆ,COL-VN,T2,,TAKE,,,
+take it easy,"ใจเย็นๆ, พักผ่อนบ้าง",COL-VN,T1,,TAKE,US;SPK,,SPK 🇺🇸
+take your time,ค่อยๆ ทำ ไม่ต้องรีบ,COL-VN,T1,,TAKE,,,
+take an order,รับออร์เดอร์,COL-VN,T2,,TAKE,,,
+take the elevator,ขึ้นลิฟต์,COL-VN,T2,,TAKE,US,,🇺🇸 UK: take the lift
+have breakfast / lunch / dinner,กินข้าวเช้า/เที่ยง/เย็น,COL-VN,T1,,HAVE,TRAP,,❌ eat breakfast ใช้ได้แต่ have เป็นกลางกว่า
+have fun,สนุก,COL-VN,T1,,HAVE,TRAP,,❌ play fun
+have a good time,สนุกสนาน,COL-VN,T1,,HAVE,,,
+have a party,จัดปาร์ตี้,COL-VN,T1,,HAVE,TRAP,,❌ make a party
+have a problem (with),มีปัญหา,COL-VN,T1,,HAVE,TRAP,,⚠️ T-PREP: with
+have an idea,มีไอเดีย,COL-VN,T1,,HAVE,,,
+have a look (at),ดูหน่อย,COL-VN,T1,,HAVE,,,
+have a chance (to),มีโอกาส,COL-VN,T1,,HAVE,,,
+have a headache,ปวดหัว,COL-VN,T1,,HAVE,TRAP,,❌ I am headache
+have a cold,เป็นหวัด,COL-VN,T1,,HAVE,TRAP,,❌ I am cold (= หนาว!)
+have a fever,มีไข้,COL-VN,T1,,HAVE,,,
+have an accident,ประสบอุบัติเหตุ,COL-VN,T2,,HAVE,,,
+have a meeting,ประชุม,COL-VN,T1,,HAVE,,,
+have experience (in),มีประสบการณ์,COL-VN,T2,,HAVE,TRAP,,⚠️ T-PREP: in
+have time,มีเวลา,COL-VN,T1,,HAVE,,,
+have a baby,มีลูก,COL-VN,T2,,HAVE,,,
+have a dream,ฝัน,COL-VN,T2,,HAVE,,,
+have an argument (with),ทะเลาะกัน,COL-VN,T2,,HAVE,,,
+have a feeling,รู้สึกว่า,COL-VN,T2,,HAVE,,,
+have a choice,มีทางเลือก,COL-VN,T2,,HAVE,,,
+have an appointment,มีนัด,COL-VN,T1,,HAVE,,,
+have a drink,ดื่มอะไรสักหน่อย,COL-VN,T1,,HAVE,,,
+have a rest,พักผ่อน,COL-VN,T2,,HAVE,,,
+have an effect (on),ส่งผลต่อ,COL-VN,T3,,HAVE,TRAP,,⚠️ T-PREP: on
+have a hard time,"ลำบาก, มีช่วงเวลาที่ยาก",COL-VN,T2,,HAVE,US,,🇺🇸
+get a job,ได้งาน,COL-VN,T1,,GET,,,
+get married (to),แต่งงาน,COL-VN,T1,,GET,TRAP,,⚠️ T-PREP: to not with
+get lost,หลงทาง,COL-VN,T1,,GET,,,
+get ready (for),เตรียมพร้อม,COL-VN,T1,,GET,,,
+get dressed,แต่งตัว,COL-VN,T1,,GET,,,
+get angry (at/with),โกรธ,COL-VN,T1,,GET,,,
+get better / worse,ดีขึ้น / แย่ลง,COL-VN,T1,,GET,,,
+get tired,เหนื่อย,COL-VN,T1,,GET,,,
+get hungry,หิว,COL-VN,T1,,GET,,,
+get home,ถึงบ้าน,COL-VN,T1,,GET,TRAP,,❌ get to home
+get to work / school,ไปถึงที่ทำงาน/โรงเรียน,COL-VN,T1,,GET,,,
+get permission,ได้รับอนุญาต,COL-VN,T2,,GET,,,
+get a chance (to),ได้โอกาส,COL-VN,T2,,GET,,,
+get an email / a call,ได้รับอีเมล / สายโทรเข้า,COL-VN,T1,,GET,,,
+get in trouble,"มีปัญหา, โดนดุ",COL-VN,T2,,GET,US,,🇺🇸
+get a haircut,ไปตัดผม,COL-VN,T1,,GET,US,,🇺🇸
+get sick,ป่วย,COL-VN,T1,,GET,US,,🇺🇸 UK: get ill
+get used to,"คุ้นเคยกับ, ชินกับ",COL-VN,T2,,GET,TRAP,,⚠️ + V-ing
+get old,แก่ขึ้น,COL-VN,T2,,GET,,,
+get dark,ฟ้ามืด,COL-VN,T2,,GET,,,
+get a good grade,ได้เกรดดี,COL-VN,T1,,GET,US,,🇺🇸 UK: get a good mark
+get directions,ถามทาง,COL-VN,T2,,GET,US,,🇺🇸
+get in shape,ทำให้ฟิต,COL-VN,T3,,GET,US,,🇺🇸
+get a ride,ติดรถไปด้วย,COL-VN,T2,,GET,US,,🇺🇸 UK: get a lift
+get involved (in),เข้าไปมีส่วนร่วม,COL-VN,T3,,GET,TRAP,,⚠️ T-PREP: in
+give (someone) a ride,ไปส่ง (ด้วยรถ),COL-VN,T1,,GIVE,US,,🇺🇸 UK: a lift
+give advice,ให้คำแนะนำ,COL-VN,T1,,GIVE,TRAP,,❌ give an advice (นับไม่ได้)
+give an example,ยกตัวอย่าง,COL-VN,T1,,GIVE,,,
+give a presentation,นำเสนอ,COL-VN,T2,,GIVE,,,
+give permission,อนุญาต,COL-VN,T2,,GIVE,,,
+give (someone) a hand,ช่วยเหลือ,COL-VN,T2,,GIVE,SPK,,SPK
+give a speech,กล่าวสุนทรพจน์,COL-VN,T3,,GIVE,,,
+give birth (to),คลอดลูก,COL-VN,T3,,GIVE,,,
+give (someone) a call,โทรหา,COL-VN,T1,,GIVE,US,,🇺🇸
+give an answer,ตอบ,COL-VN,T2,,GIVE,,,
+give a reason,ให้เหตุผล,COL-VN,T2,,GIVE,,,
+give your opinion,แสดงความเห็น,COL-VN,T1,,GIVE,,,
+go shopping,ไปช้อปปิ้ง,COL-VN,T1,,GO / COME,TRAP,,⚠️ go + V-ing สำหรับกิจกรรม
+go swimming,ไปว่ายน้ำ,COL-VN,T1,,GO / COME,,,
+go running / jogging,ไปวิ่ง,COL-VN,T1,,GO / COME,,,
+go on vacation,ไปเที่ยวพักร้อน,COL-VN,T1,,GO / COME,US,,🇺🇸 UK: go on holiday
+go on a trip,ไปทริป,COL-VN,T2,,GO / COME,,,
+go online,เล่นอินเทอร์เน็ต,COL-VN,T1,,GO / COME,TRAP,,⚠️ ❌ play internet
+go to bed,เข้านอน,COL-VN,T1,,GO / COME,TRAP,,❌ go to the bed
+go to work / school,ไปทำงาน / ไปโรงเรียน,COL-VN,T1,,GO / COME,TRAP,,❌ go to the school
+go for a walk,ไปเดินเล่น,COL-VN,T1,,GO / COME,,,
+go abroad,ไปต่างประเทศ,COL-VN,T2,,GO / COME,TRAP,,❌ go to abroad
+go wrong,ผิดพลาด,COL-VN,T2,,GO / COME,,,
+go crazy,บ้าไปแล้ว,COL-VN,T2,,GO / COME,SPK,,SPK
+come true,เป็นจริง,COL-VN,T2,,GO / COME,,,
+come first,"มาก่อน, สำคัญที่สุด",COL-VN,T3,,GO / COME,,,
+come to an end,สิ้นสุดลง,COL-VN,T3,,GO / COME,,,
+come home,กลับบ้าน,COL-VN,T1,,GO / COME,TRAP,,❌ come to home
+pay attention (to),"ตั้งใจฟัง, ใส่ใจ",COL-VN,T1,,PAY / SPEND / SAVE / COST,TRAP,,⚠️ T-PREP: to
+pay a bill,จ่ายบิล,COL-VN,T1,,PAY / SPEND / SAVE / COST,,,
+pay in cash,จ่ายเงินสด,COL-VN,T1,,PAY / SPEND / SAVE / COST,,,
+pay by credit card,จ่ายด้วยบัตรเครดิต,COL-VN,T1,,PAY / SPEND / SAVE / COST,TRAP,,⚠️ by card แต่ in cash
+pay the rent,จ่ายค่าเช่า,COL-VN,T2,,PAY / SPEND / SAVE / COST,,,
+pay a visit,ไปเยี่ยม,COL-VN,T3,,PAY / SPEND / SAVE / COST,,,
+spend money (on),ใช้เงินไปกับ,COL-VN,T1,,PAY / SPEND / SAVE / COST,TRAP,,⚠️ T-PREP: on
+spend time (V-ing),ใช้เวลาไปกับ,COL-VN,T1,,PAY / SPEND / SAVE / COST,TRAP,,⚠️ + V-ing
+save money,เก็บเงิน,COL-VN,T1,,PAY / SPEND / SAVE / COST,,,
+save time,ประหยัดเวลา,COL-VN,T2,,PAY / SPEND / SAVE / COST,,,
+waste money / time,เสียเงิน / เสียเวลา,COL-VN,T1,,PAY / SPEND / SAVE / COST,,,
+cost a lot,ราคาแพงมาก,COL-VN,T1,,PAY / SPEND / SAVE / COST,,,
+afford to (buy),มีเงินพอที่จะ,COL-VN,T2,,PAY / SPEND / SAVE / COST,,,
+earn a salary,ได้เงินเดือน,COL-VN,T2,,PAY / SPEND / SAVE / COST,,,
+a good deal,"ดีลดี, คุ้มค่า",COL-VN,T2,,PAY / SPEND / SAVE / COST,US;SPK,,🇺🇸 SPK
+on sale,ลดราคา,COL-VN,T1,,PAY / SPEND / SAVE / COST,US,,🇺🇸 (UK on sale = วางขาย)
+keep a promise,รักษาสัญญา,COL-VN,T2,,KEEP / BREAK / CATCH / RUN,,,
+keep a secret,เก็บความลับ,COL-VN,T2,,KEEP / BREAK / CATCH / RUN,,,
+keep in touch (with),ติดต่อกันไว้,COL-VN,T1,,KEEP / BREAK / CATCH / RUN,TRAP,,⚠️ T-PREP: with
+keep quiet,เงียบไว้,COL-VN,T2,,KEEP / BREAK / CATCH / RUN,,,
+keep calm,ใจเย็นไว้,COL-VN,T2,,KEEP / BREAK / CATCH / RUN,,,
+keep a diary,เขียนไดอารี่,COL-VN,T3,,KEEP / BREAK / CATCH / RUN,,,
+break a promise,ผิดสัญญา,COL-VN,T2,,KEEP / BREAK / CATCH / RUN,,,
+break the law,ทำผิดกฎหมาย,COL-VN,T2,,KEEP / BREAK / CATCH / RUN,,,
+break the rules,ผิดกฎ,COL-VN,T2,,KEEP / BREAK / CATCH / RUN,,,
+break a record,ทำลายสถิติ,COL-VN,T3,,KEEP / BREAK / CATCH / RUN,,,
+catch a cold,เป็นหวัด,COL-VN,T1,,KEEP / BREAK / CATCH / RUN,TRAP,,❌ get a cold ก็ได้
+catch the bus / train,ขึ้นรถทัน,COL-VN,T1,,KEEP / BREAK / CATCH / RUN,,,
+catch fire,ไฟไหม้,COL-VN,T3,,KEEP / BREAK / CATCH / RUN,,,
+run a business,บริหารธุรกิจ,COL-VN,T2,,KEEP / BREAK / CATCH / RUN,,,
+run late,"สาย, ช้ากว่ากำหนด",COL-VN,T2,,KEEP / BREAK / CATCH / RUN,US;SPK,,🇺🇸 SPK
+run errands,ไปทำธุระ,COL-VN,T2,,KEEP / BREAK / CATCH / RUN,US,,🇺🇸
+go online / use the internet,เล่นเน็ต,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,TRAP,,Thai error: play internet
+use the computer / play computer games,เล่นคอมพิวเตอร์,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,TRAP,,Thai error: play computer
+be on Facebook / check Facebook,เล่นเฟซบุ๊ก,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,TRAP,,Thai error: play Facebook
+text on LINE / chat on LINE,เล่นไลน์,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,TRAP,,Thai error: play line
+play an instrument / play the guitar,เล่นดนตรี,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,TRAP,,Thai error: play music (ตัวเอง)
+play a game on my phone ✅ (อันนี้ถูก),เล่นเกม,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,TRAP,,Thai error: play a game on phone
+play in the water / go swimming,เล่นน้ำ,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,TRAP,,Thai error: play water
+watch a horror movie,ดูหนังผี,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,TRAP,,Thai error: play ghost
+play soccer / basketball,เล่นฟุตบอล 🇺🇸 (UK: football),COL-VN,T1,,PLAY / WATCH / LISTEN / READ,US,,
+play the guitar / the piano,เล่นกีตาร์ / เปียโน (ต้องมี the),COL-VN,T1,,PLAY / WATCH / LISTEN / READ,,,
+play a game,เล่นเกม,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,,,
+watch TV,ดูทีวี (ไม่มี the),COL-VN,T1,,PLAY / WATCH / LISTEN / READ,,,
+watch a movie,ดูหนัง 🇺🇸 (UK: film),COL-VN,T1,,PLAY / WATCH / LISTEN / READ,US,,
+listen to music,ฟังเพลง,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,TRAP,,
+listen to the radio,ฟังวิทยุ,COL-VN,T2,,PLAY / WATCH / LISTEN / READ,,,
+read a book / a magazine,อ่านหนังสือ / นิตยสาร,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,,,
+take a picture,ถ่ายรูป,COL-VN,T1,,PLAY / WATCH / LISTEN / READ,,,
+surf the web,เล่นเว็บ,COL-VN,T2,,PLAY / WATCH / LISTEN / READ,,,
+heavy rain,ฝนตกหนัก,COL-AN,T1,,Adjective + Noun,TRAP;TRAP-ADJ,,🎯 ❌ strong rain / big rain
+heavy traffic,รถติดหนัก,COL-AN,T1,,Adjective + Noun,TRAP;TRAP-ADJ,,🎯 ❌ much traffic
+heavy snow,หิมะตกหนัก,COL-AN,T2,,Adjective + Noun,,,
+strong wind,ลมแรง,COL-AN,T1,,Adjective + Noun,TRAP;TRAP-ADJ,,🎯 ❌ heavy wind
+strong coffee,กาแฟเข้ม,COL-AN,T1,,Adjective + Noun,TRAP;TRAP-ADJ,,🎯 ❌ thick coffee
+strong opinion,ความเห็นที่หนักแน่น,COL-AN,T2,,Adjective + Noun,,,
+strong accent,สำเนียงจัด,COL-AN,T2,,Adjective + Noun,,,
+close friend,เพื่อนสนิท,COL-AN,T1,,Adjective + Noun,TRAP;TRAP-ADJ,,🎯 ❌ near friend
+best friend,เพื่อนที่ดีที่สุด,COL-AN,T1,,Adjective + Noun,,,
+old friend,เพื่อนเก่า,COL-AN,T1,,Adjective + Noun,,,
+hard work,งานหนัก,COL-AN,T1,,Adjective + Noun,,,
+hard time,ช่วงเวลาที่ยากลำบาก,COL-AN,T2,,Adjective + Noun,US,,🇺🇸
+big difference,ความแตกต่างมาก,COL-AN,T1,,Adjective + Noun,TRAP;TRAP-ADJ,,🎯 ❌ much difference
+big mistake,ความผิดพลาดใหญ่,COL-AN,T1,,Adjective + Noun,,,
+high price,ราคาสูง,COL-AN,T1,,Adjective + Noun,TRAP;TRAP-ADJ,,🎯 ❌ expensive price
+low price,ราคาถูก,COL-AN,T1,,Adjective + Noun,TRAP;TRAP-ADJ,,🎯 ❌ cheap price
+high salary,เงินเดือนสูง,COL-AN,T2,,Adjective + Noun,,,
+wide range (of),หลากหลาย,COL-AN,T2,,Adjective + Noun,,,
+main reason,เหตุผลหลัก,COL-AN,T1,,Adjective + Noun,,,
+main problem,ปัญหาหลัก,COL-AN,T1,,Adjective + Noun,,,
+common problem,ปัญหาที่พบบ่อย,COL-AN,T2,,Adjective + Noun,,,
+serious problem,ปัญหาร้ายแรง,COL-AN,T1,,Adjective + Noun,,,
+serious injury,บาดเจ็บสาหัส,COL-AN,T2,,Adjective + Noun,,,
+terrible accident,อุบัติเหตุร้ายแรง,COL-AN,T2,,Adjective + Noun,,,
+fast food,ฟาสต์ฟู้ด,COL-AN,T1,,Adjective + Noun,,,
+junk food,อาหารขยะ,COL-AN,T1,,Adjective + Noun,US,,🇺🇸
+healthy diet,อาหารเพื่อสุขภาพ,COL-AN,T1,,Adjective + Noun,,,
+balanced diet,อาหารสมดุล,COL-AN,T2,,Adjective + Noun,,,
+busy schedule,ตารางแน่น,COL-AN,T2,,Adjective + Noun,US,,🇺🇸
+free time,เวลาว่าง,COL-AN,T1,,Adjective + Noun,,,
+full-time job,งานประจำ,COL-AN,T1,,Adjective + Noun,,,
+part-time job,งานพาร์ทไทม์,COL-AN,T1,,Adjective + Noun,,,
+first impression,ความประทับใจแรก,COL-AN,T2,,Adjective + Noun,,,
+bright idea,ไอเดียเจ๋ง,COL-AN,T2,,Adjective + Noun,,,
+good idea,ความคิดที่ดี,COL-AN,T1,,Adjective + Noun,,,
+deep sleep,หลับลึก,COL-AN,T2,,Adjective + Noun,,,
+light rain,ฝนตกปรอยๆ,COL-AN,T2,,Adjective + Noun,,,
+loud noise,เสียงดัง,COL-AN,T1,,Adjective + Noun,TRAP;TRAP-ADJ,,🎯 ❌ big noise
+crowded place,ที่แออัด,COL-AN,T2,,Adjective + Noun,,,
+delicious meal,มื้ออร่อย,COL-AN,T1,,Adjective + Noun,,,
+spicy food,อาหารเผ็ด,COL-AN,T1,,Adjective + Noun,,,
+local food,อาหารท้องถิ่น,COL-AN,T1,,Adjective + Noun,,,
+special occasion,โอกาสพิเศษ,COL-AN,T2,,Adjective + Noun,,,
+public transportation,ขนส่งสาธารณะ,COL-AN,T1,,Adjective + Noun,US,,🇺🇸 UK: public transport
+daily routine,กิจวัตรประจำวัน,COL-AN,T1,,Adjective + Noun,,,
+social media,โซเชียลมีเดีย,COL-AN,T1,,Adjective + Noun,,,
+bad habit,นิสัยเสีย,COL-AN,T1,,Adjective + Noun,,,
+good news / bad news,ข่าวดี / ข่าวร้าย,COL-AN,T1,,Adjective + Noun,TRAP,,❌ a good news (นับไม่ได้)
+hot weather,อากาศร้อน,COL-AN,T1,,Adjective + Noun,,,
+heavy meal,มื้อหนัก,COL-AN,T3,,Adjective + Noun,,,
+long weekend,วันหยุดยาว,COL-AN,T2,,Adjective + Noun,,,
+early morning,เช้าตรู่,COL-AN,T1,,Adjective + Noun,,,
+late night,ดึก,COL-AN,T1,,Adjective + Noun,,,
+next-door neighbor,เพื่อนบ้านติดกัน,COL-AN,T3,,Adjective + Noun,US,,🇺🇸 spelling
+great experience,ประสบการณ์ที่ดีมาก,COL-AN,T1,,Adjective + Noun,,,
+useful information,ข้อมูลที่มีประโยชน์,COL-AN,T1,,Adjective + Noun,TRAP,,❌ informations
+important decision,การตัดสินใจสำคัญ,COL-AN,T1,,Adjective + Noun,,,
+difficult situation,สถานการณ์ยาก,COL-AN,T2,,Adjective + Noun,,,
+regular exercise,ออกกำลังกายสม่ำเสมอ,COL-AN,T2,,Adjective + Noun,,,
+serious relationship,ความสัมพันธ์จริงจัง,COL-AN,T2,,Adjective + Noun,,,
+a little tired / a bit tired,เหนื่อยนิดหน่อย,COL-AA,T1,,intensity ladder,,,ladder ▁ weak
+fairly easy,ค่อนข้างง่าย,COL-AA,T2,,intensity ladder,,,ladder ▂
+pretty good,ค่อนข้างดี 🇺🇸 SPK,COL-AA,T1,,intensity ladder,US;SPK,,ladder ▃
+quite expensive,ค่อนข้างแพง,COL-AA,T1,,intensity ladder,,,ladder ▄
+really good,ดีจริงๆ,COL-AA,T1,,intensity ladder,,,ladder ▅
+very important,สำคัญมาก,COL-AA,T1,,intensity ladder,,,ladder ▆
+extremely important,สำคัญอย่างยิ่ง,COL-AA,T2,,intensity ladder,,,ladder ▇
+absolutely amazing,สุดยอดไปเลย,COL-AA,T1,,intensity ladder,,,ladder █ top
+totally wrong,ผิดเต็มๆ,COL-AA,T1,,intensity ladder,,,ladder █ top
+completely different,ต่างกันโดยสิ้นเชิง,COL-AA,T1,,intensity ladder,,,ladder █ top
+absolutely right / wrong,ถูกเผง / ผิดเต็มๆ,COL-AA,T1,,Adverb + Adjective,,,
+completely free,ฟรีสนิท,COL-AA,T2,,Adverb + Adjective,,,
+totally different,ต่างกันสิ้นเชิง,COL-AA,T1,,Adverb + Adjective,,,
+highly recommended,แนะนำอย่างยิ่ง,COL-AA,T2,,Adverb + Adjective,,,
+fully booked,จองเต็มแล้ว,COL-AA,T2,,Adverb + Adjective,,,
+well known,เป็นที่รู้จักดี,COL-AA,T2,,Adverb + Adjective,,,
+widely used,ใช้กันแพร่หลาย,COL-AA,T3,,Adverb + Adjective,,,
+badly hurt / badly injured,บาดเจ็บสาหัส,COL-AA,T2,,Adverb + Adjective,,,
+perfectly normal,ปกติดีทุกอย่าง,COL-AA,T2,,Adverb + Adjective,,,
+deeply sorry,เสียใจอย่างสุดซึ้ง,COL-AA,T3,,Adverb + Adjective,,,
+seriously ill,ป่วยหนัก,COL-AA,T3,,Adverb + Adjective,,,
+closely related,เกี่ยวข้องกันอย่างใกล้ชิด,COL-AA,T3,,Adverb + Adjective,,,
+clearly wrong,ผิดชัดเจน,COL-AA,T3,,Adverb + Adjective,,,
+easily available,หาได้ง่าย,COL-AA,T3,,Adverb + Adjective,,,
+hardly ever,แทบจะไม่เคย,COL-AA,T1,,Adverb + Adjective,,,
+almost always,เกือบตลอด,COL-AA,T1,,Adverb + Adjective,,,
+pretty much,เกือบจะทั้งหมด 🇺🇸 SPK,COL-AA,T1,,Adverb + Adjective,US;SPK,,
+kind of / sort of,"ประมาณว่า, ค่อนข้างจะ 🇺🇸 SPK",COL-AA,T1,,Adverb + Adjective,US;SPK,,
+way too expensive,แพงเกินไปมาก 🇺🇸 SPK,COL-AA,T1,,Adverb + Adjective,US;SPK,,
+a whole lot better,ดีขึ้นเยอะเลย 🇺🇸 SPK,COL-AA,T2,,Adverb + Adjective,US;SPK,,
+listen to music,ฟังเพลง,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: listen music
+wait for someone,รอใคร,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: wait someone
+look at something,มองดู,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: look something
+depend on,ขึ้นอยู่กับ,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: depend the weather
+belong to,เป็นของ,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: belong me
+agree with someone,เห็นด้วยกับ,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: agree to someone
+apologize for,ขอโทษเรื่อง,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: apologize about
+apply for a job,สมัครงาน,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: apply a job
+arrive in a city / arrive at a place,มาถึง,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: arrive to Bangkok
+ask for help,ขอความช่วยเหลือ,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: ask help
+believe in,เชื่อใน,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: believe on
+care about,ใส่ใจ,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: care for (คนละความหมาย)
+complain about,บ่นเรื่อง,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: complain for
+concentrate on,ตั้งสมาธิกับ,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: concentrate in
+pay for something,จ่ายค่า,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: pay something
+rely on,พึ่งพา,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: rely to
+search for,ค้นหา,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: search something
+talk about,คุยเรื่อง,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: talk with the problem
+think about,คิดถึงเรื่อง,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: think to
+worry about,กังวลเรื่อง,COL-P,T1,,4A. Verb + preposition,TRAP,,Thai error: worry for
+good at / bad at,เก่ง / ไม่เก่งเรื่อง,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: good in English
+interested in,สนใจใน,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: interested about
+afraid of,กลัว,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: afraid to (+ noun)
+married to,แต่งงานกับ,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: married with
+proud of,ภูมิใจใน,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: proud with
+responsible for,รับผิดชอบ,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: responsible of
+similar to,คล้ายกับ,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: similar with
+different from,ต่างจาก,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: different with
+tired of,เบื่อ,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: tired with
+worried about,เป็นห่วง,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: worried for
+famous for,มีชื่อเสียงเรื่อง,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: famous of
+full of,เต็มไปด้วย,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: full with
+excited about,ตื่นเต้นเรื่อง,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: excited for (พอได้ใน US SPK)
+satisfied with,พอใจกับ,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: satisfied about
+ready for,พร้อมสำหรับ,COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: ready to (+ noun ผิด)
+into something,"ชอบ, อิน 🇺🇸 SPK",COL-P,T1,,4B. Adjective + preposition,TRAP,,Thai error: UK: keen on
+reason for,เหตุผลของ,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: reason of
+solution to a problem,ทางแก้,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: solution of
+answer to a question,คำตอบของ,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: answer of
+increase in,การเพิ่มขึ้นของ,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: increase of
+effect on,ผลกระทบต่อ,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: effect to
+interest in,ความสนใจใน,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: interest of
+advantage of,ข้อดีของ,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: advantage in
+difference between A and B,ความแตกต่างระหว่าง,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: difference of
+problem with,ปัญหาเรื่อง,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: problem of
+experience in / with,ประสบการณ์ด้าน,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: experience of (ต่างความหมาย)
+expert on / in,ผู้เชี่ยวชาญด้าน,COL-P,T1,,4C. Noun + preposition,TRAP,,"Thai error: expert side (จาก ""ด้าน"")"
+chance of / chance to,โอกาสที่จะ,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: chance for doing
+relationship with,ความสัมพันธ์กับ,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: relationship to
+the key to success,กุญแจสู่,COL-P,T1,,4C. Noun + preposition,TRAP,,Thai error: the key of
+How's it going?,เป็นไงบ้าง,FUNC,T1,,Starting & ending a conversation,US;SPK,,SPK 🇺🇸
+What's up?,ว่าไง / มีอะไรเหรอ,FUNC,T1,,Starting & ending a conversation,US;SPK,,SPK 🇺🇸
+Long time no see.,ไม่ได้เจอกันนานเลย,FUNC,T1,,Starting & ending a conversation,SPK,,SPK
+How have you been?,ช่วงนี้เป็นไงบ้าง,FUNC,T1,,Starting & ending a conversation,,,NEU
+Nice to meet you.,ยินดีที่ได้รู้จัก,FUNC,T1,,Starting & ending a conversation,,,NEU
+I gotta go. / I have to run.,ต้องไปแล้ว,FUNC,T1,,Starting & ending a conversation,US;SPK,,SPK 🇺🇸
+Talk to you later.,ไว้คุยกันใหม่,FUNC,T1,,Starting & ending a conversation,US;SPK,,SPK 🇺🇸
+Take care.,ดูแลตัวเองนะ,FUNC,T1,,Starting & ending a conversation,,,NEU
+See you around.,ไว้เจอกัน,FUNC,T2,,Starting & ending a conversation,SPK,,SPK
+Let's keep in touch.,ติดต่อกันไว้นะ,FUNC,T1,,Starting & ending a conversation,,,NEU
+It was nice talking to you.,ดีใจที่ได้คุยกัน,FUNC,T2,,Starting & ending a conversation,,,NEU
+Say hi to your family for me.,ฝากทักทายครอบครัวด้วย,FUNC,T2,,Starting & ending a conversation,SPK,,SPK
+I think (that)…,ฉันคิดว่า,FUNC,T1,,Giving an opinion,,,NEU
+"In my opinion, …",ในความเห็นของฉัน,FUNC,T1,,Giving an opinion,,,NEU
+"If you ask me, …",ถ้าถามฉันนะ,FUNC,T2,,Giving an opinion,SPK,,SPK
+I feel like…,ฉันรู้สึกว่า,FUNC,T1,,Giving an opinion,US;SPK,,SPK 🇺🇸
+It seems to me that…,ดูเหมือนว่า,FUNC,T2,,Giving an opinion,WRI,,WRI
+"From my point of view, …",จากมุมมองของฉัน,FUNC,T2,,Giving an opinion,WRI,,WRI
+"As far as I know, …",เท่าที่ฉันรู้,FUNC,T2,,Giving an opinion,,,NEU
+I'd say…,ฉันว่านะ,FUNC,T1,,Giving an opinion,SPK,,SPK
+"Personally, I…",ส่วนตัวแล้วฉัน,FUNC,T2,,Giving an opinion,,,NEU
+"The way I see it, …",ในมุมที่ฉันมอง,FUNC,T2,,Giving an opinion,SPK,,SPK
+"I'm not sure, but…",ไม่แน่ใจนะ แต่,FUNC,T1,,Giving an opinion,,,NEU
+"To be honest, …",บอกตามตรงนะ,FUNC,T1,,Giving an opinion,SPK,,SPK
+It depends.,แล้วแต่ / ขึ้นอยู่กับ,FUNC,T1,,Giving an opinion,SPK,,SPK
+That's just my opinion.,ก็แค่ความเห็นของฉันนะ,FUNC,T2,,Giving an opinion,SPK,,SPK
+I agree (with you).,เห็นด้วย,FUNC,T1,,Agreeing & disagreeing,,,NEU
+Exactly!,ใช่เลย!,FUNC,T1,,Agreeing & disagreeing,SPK,,SPK
+That's a good point.,เป็นประเด็นที่ดี,FUNC,T1,,Agreeing & disagreeing,,,NEU
+I totally agree.,เห็นด้วยสุดๆ,FUNC,T1,,Agreeing & disagreeing,SPK,,SPK
+You're right.,คุณพูดถูก,FUNC,T1,,Agreeing & disagreeing,,,NEU
+Me too. / Me neither.,ฉันก็เหมือนกัน / ฉันก็ไม่เหมือนกัน,FUNC,T1,,Agreeing & disagreeing,SPK,,SPK
+I know what you mean.,เข้าใจที่พูดเลย,FUNC,T1,,Agreeing & disagreeing,SPK,,SPK
+We're on the same page.,เราคิดตรงกัน,FUNC,T2,,Agreeing & disagreeing,US;SPK,,SPK 🇺🇸
+I'm not so sure about that.,ไม่ค่อยแน่ใจนะ,FUNC,T1,,Agreeing & disagreeing,,,NEU
+"I see your point, but…",เข้าใจนะ แต่,FUNC,T1,,Agreeing & disagreeing,,,NEU
+I don't think so.,ไม่คิดอย่างนั้นนะ,FUNC,T1,,Agreeing & disagreeing,,,NEU
+"Actually, …",จริงๆ แล้ว,FUNC,T1,,Agreeing & disagreeing,SPK,,SPK
+I'm afraid I disagree.,เกรงว่าจะไม่เห็นด้วย,FUNC,T2,,Agreeing & disagreeing,WRI,,WRI/NEU
+That's not quite right.,ยังไม่ถูกซะทีเดียว,FUNC,T2,,Agreeing & disagreeing,,,NEU
+How about (V-ing)…?,เอา…ไหม,FUNC,T1,,Making suggestions & plans,SPK,,SPK
+What about…?,แล้ว…ล่ะ,FUNC,T1,,Making suggestions & plans,SPK,,SPK
+Let's…,ไป…กันเถอะ,FUNC,T1,,Making suggestions & plans,SPK,,SPK
+Why don't we…?,ทำไมเราไม่…ล่ะ,FUNC,T1,,Making suggestions & plans,SPK,,SPK
+Do you want to…?,อยาก…ไหม,FUNC,T1,,Making suggestions & plans,SPK,,SPK
+We could always…,เราก็…ได้นะ,FUNC,T2,,Making suggestions & plans,SPK,,SPK
+I'd rather…,ฉันอยาก…มากกว่า,FUNC,T1,,Making suggestions & plans,,,NEU
+I feel like (V-ing)…,อยากจะ…,FUNC,T1,,Making suggestions & plans,US;SPK,,SPK 🇺🇸
+Sounds good to me.,ฟังดูดีนะ,FUNC,T1,,Making suggestions & plans,SPK,,SPK
+Works for me.,โอเคสำหรับฉัน,FUNC,T2,,Making suggestions & plans,US;SPK,,SPK 🇺🇸
+It's up to you.,แล้วแต่คุณเลย,FUNC,T1,,Making suggestions & plans,SPK,,SPK
+Let me think about it.,ขอคิดดูก่อน,FUNC,T1,,Making suggestions & plans,,,NEU
+Are you free on…?,ว่างวัน…ไหม,FUNC,T1,,Making suggestions & plans,,,NEU
+Let's say around seven.,เอาประมาณทุ่มนึงนะ,FUNC,T2,,Making suggestions & plans,SPK,,SPK
+Could you help me with…?,ช่วยเรื่อง…หน่อยได้ไหม,FUNC,T1,,Asking for help & clarification,,,NEU
+Do you mind if I…?,จะว่าอะไรไหมถ้าฉัน…,FUNC,T1,,Asking for help & clarification,,,NEU
+Can you say that again?,พูดอีกทีได้ไหม,FUNC,T1,,Asking for help & clarification,SPK,,SPK
+"Sorry, I didn't catch that.",ขอโทษ ฟังไม่ทัน,FUNC,T1,,Asking for help & clarification,SPK,,SPK
+What do you mean (by that)?,หมายความว่ายังไง,FUNC,T1,,Asking for help & clarification,SPK,,SPK
+Could you speak more slowly?,พูดช้าลงหน่อยได้ไหม,FUNC,T1,,Asking for help & clarification,,,NEU
+How do you say … in English?,…ภาษาอังกฤษพูดว่าอะไร,FUNC,T1,,Asking for help & clarification,,,NEU
+What does … mean?,…แปลว่าอะไร,FUNC,T1,,Asking for help & clarification,,,NEU
+Let me get this straight.,ขอทำความเข้าใจก่อนนะ,FUNC,T3,,Asking for help & clarification,US;SPK,,SPK 🇺🇸
+"In other words, …",พูดอีกอย่างคือ,FUNC,T2,,Asking for help & clarification,,,NEU
+Does that make sense?,เข้าใจไหม / อธิบายชัดไหม,FUNC,T1,,Asking for help & clarification,SPK,,SPK
+"Just to be clear, …",ขอให้ชัดเจนนะว่า,FUNC,T2,,Asking for help & clarification,,,NEU
+I'm sorry about…,ขอโทษเรื่อง…,FUNC,T1,,Apologizing & responding,,,NEU
+My bad.,ผิดที่ฉันเอง,FUNC,T2,,Apologizing & responding,US;SPK,,SPK 🇺🇸
+I didn't mean to.,ไม่ได้ตั้งใจ,FUNC,T1,,Apologizing & responding,SPK,,SPK
+It was my fault.,เป็นความผิดของฉัน,FUNC,T1,,Apologizing & responding,,,NEU
+Sorry to bother you.,ขอโทษที่รบกวน,FUNC,T1,,Apologizing & responding,,,NEU
+No worries.,ไม่เป็นไร,FUNC,T1,,Apologizing & responding,US;SPK,,SPK 🇺🇸
+That's okay. / It's fine.,ไม่เป็นไร,FUNC,T1,,Apologizing & responding,SPK,,SPK
+No big deal.,เรื่องเล็ก,FUNC,T1,,Apologizing & responding,US;SPK,,SPK 🇺🇸
+Don't worry about it.,ไม่ต้องกังวลเลย,FUNC,T1,,Apologizing & responding,SPK,,SPK
+It happens.,มันก็เกิดขึ้นได้,FUNC,T2,,Apologizing & responding,SPK,,SPK
+I'm so excited about…,ตื่นเต้นมากกับ,FUNC,T1,,Talking about feelings,SPK,,SPK
+I can't wait to…,รอไม่ไหวแล้วที่จะ,FUNC,T1,,Talking about feelings,SPK,,SPK
+I'm worried about…,เป็นห่วงเรื่อง,FUNC,T1,,Talking about feelings,,,NEU
+I'm sick of…,เบื่อ…เต็มทีแล้ว,FUNC,T2,,Talking about feelings,SPK,,SPK
+I'm fed up with…,เอือมระอากับ,FUNC,T2,,Talking about feelings,SPK,,SPK
+It drives me crazy.,ทำเอาฉันจะบ้า,FUNC,T2,,Talking about feelings,SPK,,SPK
+I'm in a bad mood.,อารมณ์ไม่ดี,FUNC,T1,,Talking about feelings,SPK,,SPK
+I'm stressed out.,เครียดมาก,FUNC,T1,,Talking about feelings,US;SPK,,SPK 🇺🇸
+I feel much better now.,รู้สึกดีขึ้นเยอะแล้ว,FUNC,T1,,Talking about feelings,,,NEU
+That's a relief.,โล่งอกไปที,FUNC,T2,,Talking about feelings,SPK,,SPK
+I'm proud of you.,ภูมิใจในตัวคุณนะ,FUNC,T1,,Talking about feelings,,,NEU
+It broke my heart.,ใจสลาย,FUNC,T2,,Talking about feelings,SPK,,SPK
+I'm over it.,ทำใจได้แล้ว,FUNC,T2,,Talking about feelings,US;SPK,,SPK 🇺🇸
+I'm getting used to it.,เริ่มชินแล้ว,FUNC,T1,,Talking about feelings,,,NEU
+once in a while,นานๆ ที,FUNC,T1,,"Time, frequency & sequencing",,,NEU
+every now and then,เป็นครั้งคราว,FUNC,T2,,"Time, frequency & sequencing",,,NEU
+from time to time,เป็นระยะๆ,FUNC,T2,,"Time, frequency & sequencing",,,NEU
+most of the time,ส่วนใหญ่,FUNC,T1,,"Time, frequency & sequencing",,,NEU
+all the time,ตลอดเวลา,FUNC,T1,,"Time, frequency & sequencing",SPK,,SPK
+hardly ever,แทบไม่เคย,FUNC,T1,,"Time, frequency & sequencing",,,NEU
+the other day,วันก่อน,FUNC,T1,,"Time, frequency & sequencing",SPK,,SPK
+sooner or later,ไม่ช้าก็เร็ว,FUNC,T2,,"Time, frequency & sequencing",,,NEU
+in the long run,ในระยะยาว,FUNC,T3,,"Time, frequency & sequencing",WRI,,WRI
+at the same time,ในเวลาเดียวกัน,FUNC,T1,,"Time, frequency & sequencing",,,NEU
+right away,ทันทีเลย,FUNC,T1,,"Time, frequency & sequencing",US;SPK,,SPK 🇺🇸
+in a minute,"เดี๋ยวนะ, อีกแป๊บ",FUNC,T1,,"Time, frequency & sequencing",SPK,,SPK
+ahead of time,ล่วงหน้า,FUNC,T2,,"Time, frequency & sequencing",US,,NEU 🇺🇸
+by the time…,พอถึงตอนที่…,FUNC,T2,,"Time, frequency & sequencing",,,NEU
+"First of all, …",อย่างแรกเลย,FUNC,T1,,Discourse markers,,,NEU
+"For example, …",ตัวอย่างเช่น,FUNC,T1,,Discourse markers,,,NEU
+"Also, … / And another thing, …",อีกอย่างนึง,FUNC,T1,,Discourse markers,,,NEU
+"On the other hand, …",ในทางกลับกัน,FUNC,T2,,Discourse markers,WRI,,WRI
+"However, …",อย่างไรก็ตาม,FUNC,T2,,Discourse markers,WRI,,WRI
+That's why…,นั่นแหละคือเหตุผลที่,FUNC,T1,,Discourse markers,SPK,,SPK
+"Because of that, …",เพราะอย่างนั้น,FUNC,T1,,Discourse markers,,,NEU
+"As a result, …",ผลก็คือ,FUNC,T2,,Discourse markers,WRI,,WRI
+"In fact, …",จริงๆ แล้ว,FUNC,T1,,Discourse markers,,,NEU
+"Anyway, …",เอาเป็นว่า / ยังไงก็ตาม,FUNC,T1,,Discourse markers,SPK,,SPK
+"By the way, …",อ้อ อีกอย่างนึง,FUNC,T1,,Discourse markers,SPK,,SPK
+Speaking of…,พูดถึง…แล้ว,FUNC,T2,,Discourse markers,SPK,,SPK
+"To sum up, …",สรุปแล้ว,FUNC,T2,,Discourse markers,WRI,,WRI
+"All in all, …",โดยรวมแล้ว,FUNC,T2,,Discourse markers,,,NEU
+"At the end of the day, …",สุดท้ายแล้ว,FUNC,T2,,Discourse markers,US;SPK,,SPK 🇺🇸
+a piece of cake,"ง่ายมาก, หมูๆ",IDM,T1,,Everyday American idioms (A2–B1 only),SPK,,SPK
+no big deal,เรื่องเล็ก,IDM,T1,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+it's up to you,แล้วแต่คุณ,IDM,T1,,Everyday American idioms (A2–B1 only),SPK,,SPK
+make up your mind,ตัดสินใจซะที,IDM,T1,,Everyday American idioms (A2–B1 only),SPK,,SPK
+take it easy,ใจเย็นๆ / พักบ้าง,IDM,T1,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+hang in there,สู้ๆ อดทนไว้,IDM,T1,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+keep in touch,ติดต่อกันนะ,IDM,T1,,Everyday American idioms (A2–B1 only),,,NEU
+better late than never,มาช้าดีกว่าไม่มา,IDM,T2,,Everyday American idioms (A2–B1 only),,,NEU
+out of the blue,อยู่ๆ ก็ (ไม่คาดคิด),IDM,T2,,Everyday American idioms (A2–B1 only),SPK,,SPK
+once in a lifetime,ครั้งเดียวในชีวิต,IDM,T2,,Everyday American idioms (A2–B1 only),,,NEU
+get the hang of it,เริ่มจับทางได้,IDM,T2,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+call it a day,"พอแค่นี้ก่อน, เลิกงาน",IDM,T2,,Everyday American idioms (A2–B1 only),SPK,,SPK
+hit the road,ออกเดินทาง,IDM,T2,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+I'm broke,ถังแตก,IDM,T1,,Everyday American idioms (A2–B1 only),SPK,,SPK
+cost an arm and a leg,แพงหูฉี่,IDM,T2,,Everyday American idioms (A2–B1 only),SPK,,SPK
+break the ice,"ทำลายความเงียบ, ละลายพฤติกรรม",IDM,T2,,Everyday American idioms (A2–B1 only),SPK,,SPK
+on the same page,คิดตรงกัน,IDM,T2,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+under the weather,ไม่ค่อยสบาย,IDM,T2,,Everyday American idioms (A2–B1 only),SPK,,SPK
+a couple of,สองสามอัน,IDM,T1,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+for sure,แน่นอน,IDM,T1,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+no way,ไม่มีทาง!,IDM,T1,,Everyday American idioms (A2–B1 only),SPK,,SPK
+you bet,แน่นอนเลย,IDM,T2,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+sounds like a plan,ตกลงตามนั้น,IDM,T2,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+my treat / it's on me,เดี๋ยวเลี้ยงเอง,IDM,T2,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+let's split the bill,หารกันนะ,IDM,T2,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+I'm running late,ฉันจะสายแล้ว,IDM,T1,,Everyday American idioms (A2–B1 only),SPK,,SPK
+give it a shot / give it a try,ลองดูหน่อย,IDM,T1,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+in the long run,ในระยะยาว,IDM,T3,,Everyday American idioms (A2–B1 only),,,NEU
+second-hand,มือสอง,IDM,T1,,Everyday American idioms (A2–B1 only),,,NEU
+pretty much,เกือบจะทั้งหมด,IDM,T1,,Everyday American idioms (A2–B1 only),US;SPK,,SPK 🇺🇸
+gonna,จะ,FUNC,T2,,reduced spoken forms,SPK;US,,full form: going to
+wanna,อยากจะ,FUNC,T2,,reduced spoken forms,SPK;US,,full form: want to
+gotta,ต้อง,FUNC,T2,,reduced spoken forms,SPK;US,,full form: got to / have got to
+kinda,ประมาณว่า,FUNC,T2,,reduced spoken forms,SPK;US,,full form: kind of
+sorta,ค่อนข้างจะ,FUNC,T2,,reduced spoken forms,SPK;US,,full form: sort of
+a lotta,เยอะ,FUNC,T2,,reduced spoken forms,SPK;US,,full form: a lot of
+lemme,ขอ… หน่อย,FUNC,T2,,reduced spoken forms,SPK;US,,full form: let me
+gimme,เอามาให้หน่อย,FUNC,T2,,reduced spoken forms,SPK;US,,full form: give me
+dunno,ไม่รู้,FUNC,T2,,reduced spoken forms,SPK;US,,full form: don't know
+whatcha,คุณกำลัง…อะไร,FUNC,T2,,reduced spoken forms,SPK;US,,full form: what are you
+didja,คุณ…หรือเปล่า,FUNC,T2,,reduced spoken forms,SPK;US,,full form: did you
+coulda,น่าจะ…ได้,FUNC,T2,,reduced spoken forms,SPK;US,,full form: could have
+shoulda,น่าจะ…,FUNC,T2,,reduced spoken forms,SPK;US,,full form: should have
+woulda,คงจะ…,FUNC,T2,,reduced spoken forms,SPK;US,,full form: would have
+outta,ออกจาก,FUNC,T2,,reduced spoken forms,SPK;US,,full form: out of
+'cause / cuz,เพราะว่า,FUNC,T2,,reduced spoken forms,SPK;US,,full form: because
+'em,พวกเขา,FUNC,T2,,reduced spoken forms,SPK;US,,full form: them
+I gotta,ฉันมี…,FUNC,T2,,reduced spoken forms,SPK;US,,full form: I have got a
+y'all (Southern US),พวกคุณ,FUNC,T2,,reduced spoken forms,SPK;US,,full form: you all
+gotten (🇺🇸 only),ฉันดีขึ้นแล้ว,FUNC,T2,,reduced spoken forms,SPK;US,,full form: I've gotten better

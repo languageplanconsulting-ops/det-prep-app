@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GrammarLevelRunner } from "@/components/lessons/GrammarLevelRunner";
+import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
 
 const VALID_LEVELS = ["easy", "medium", "hard"];
 
@@ -17,7 +18,13 @@ export default async function GrammarLevelPage({ params }: { params: Promise<{ l
   }
   return (
     <main className="mx-auto max-w-xl px-4 py-7 sm:px-6">
-      <GrammarLevelRunner level={level} />
+      <StudySessionBoundary
+        skill="literacy"
+        exerciseType="lesson_grammar_fitb"
+        setId={level}
+      >
+        <GrammarLevelRunner level={level} />
+      </StudySessionBoundary>
     </main>
   );
 }

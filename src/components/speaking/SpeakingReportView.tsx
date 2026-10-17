@@ -82,20 +82,14 @@ function SpeakingCriterionBlock({
                 <p className="ep-stat text-[10px] font-bold uppercase tracking-wide text-ep-blue">
                   {th ? "คำแนะนำ" : "Suggestion"}
                 </p>
-                {th ? (
-                  <p className="mt-1 text-neutral-800">
-                    {(b.suggestionTh?.trim() ? b.suggestionTh : b.suggestionEn) ?? ""}
+                {b.suggestionEn?.trim() ? (
+                  <p className="mt-1 font-medium text-neutral-900">{b.suggestionEn}</p>
+                ) : null}
+                {b.suggestionTh?.trim() ? (
+                  <p className={`mt-1 ${th && !b.suggestionEn?.trim() ? "text-neutral-800" : "text-neutral-600"}`}>
+                    {b.suggestionTh}
                   </p>
-                ) : (
-                  <>
-                    {b.suggestionEn?.trim() ? (
-                      <p className="mt-1 font-medium text-neutral-900">{b.suggestionEn}</p>
-                    ) : null}
-                    {b.suggestionTh?.trim() ? (
-                      <p className="mt-1 text-neutral-600">{b.suggestionTh}</p>
-                    ) : null}
-                  </>
-                )}
+                ) : null}
               </div>
             ) : null}
             <div className="relative z-10 mt-2">

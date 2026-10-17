@@ -665,7 +665,7 @@ function TaskCard({
   return (
     <>
       <div className="grid lg:grid-cols-2 lg:divide-x lg:divide-slate-200">
-        <div className="relative max-h-[42vh] overflow-y-auto border-b border-slate-200 px-5 py-5 sm:px-8 lg:max-h-[58vh] lg:border-b-0">
+        <div className="relative max-h-[42vh] overflow-y-auto border-b border-slate-200 px-5 py-5 sm:px-8 lg:max-h-[74vh] lg:border-b-0">
           <p className="mb-3 text-[11px] font-black uppercase tracking-[0.12em] text-slate-400">บทอ่าน</p>
           {passage()}
           {glossary?.length ? (
@@ -678,7 +678,7 @@ function TaskCard({
             </div>
           ) : null}
         </div>
-        <div className="max-h-[52vh] overflow-y-auto px-5 py-5 sm:px-8 lg:max-h-[58vh]">
+        <div className="max-h-[52vh] overflow-y-auto px-5 py-5 sm:px-8 lg:max-h-[74vh]">
           <h2 className="mb-1 text-[19px] font-black leading-7 text-slate-900">{irStepPromptTh(step)}</h2>
           <p className="mb-4 text-[11px] font-semibold uppercase tracking-wide text-slate-400">{irStepPromptEn(step)}</p>
           {question()}

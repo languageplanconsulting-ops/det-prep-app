@@ -10,14 +10,30 @@ import { generateInteractiveSpeakingReportWithGemini } from "@/lib/gemini-intera
 import { INTERACTIVE_SPEAKING_TURN_COUNT } from "@/lib/interactive-speaking-constants";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { normalizeGradingErrorMessage } from "@/lib/grading-error-message";
+import {
+  AllGradingAttemptsFailedError,
+  buildModelLadder,
+  gradeWithEscalation,
+  gradingDeadlineFrom,
+} from "@/lib/grading-escalation";
+import {
+  gradingFailureResponseBody,
+  logGradingFailure,
+} from "@/lib/grading-failure-log";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
 import { getOptionalAuthUserId } from "@/lib/route-auth-user";
+import { recordAttemptWeakness } from "@/lib/production-weakness";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { recordDataCollectionSubmission } from "@/lib/data-collection";
 
-export const maxDuration = 120;
+// Room for the whole escalation ladder (retries, then other models) instead of
+// being killed mid-attempt and throwing the learner's recording away.
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
+  const startedAt = Date.now();
+  // Hoisted so a total grading failure can be attributed to the learner who hit it.
+  let userId: string | null = null;
   let body: unknown;
   try {
     body = await req.json();
@@ -86,7 +102,7 @@ export async function POST(req: Request) {
   try {
     const model = await resolveGeminiTextModel();
     const keys = resolveGradingKeysFromRequest(req, model);
-    const userId = await getOptionalAuthUserId(req);
+    userId = await getOptionalAuthUserId(req);
     // Admins / preview-eligible accounts don't consume real feedback credits.
     const adminBypass = (await getAdminAccess(req)).ok;
     // Honor an existing reservation: if the learner already reserved a credit
@@ -103,17 +119,28 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: credit.reason ?? "Feedback quota reached" }, { status: 402 });
       }
     }
-    const { report, usage } = await generateInteractiveSpeakingReportWithGemini({
-      apiKey: keys.geminiApiKey,
-      anthropicApiKey: keys.anthropicApiKey,
-      model,
-      attemptId,
-      scenarioId,
-      scenarioTitleEn: scenarioTitleEn.trim(),
-      scenarioTitleTh: typeof scenarioTitleTh === "string" ? scenarioTitleTh.trim() : "",
-      prepMinutes,
-      turns,
+    // Was a single un-laddered call: when the Gemini key was denied in August
+    // 2026 every other exercise recovered on Claude and this one alone stayed
+    // broken, because it had no second rung to fall to.
+    const graded = await gradeWithEscalation({
+      operation: "interactive_speaking_report",
+      models: buildModelLadder(model, keys),
+      deadlineAt: gradingDeadlineFrom(startedAt, maxDuration),
+      runAi: (m, deadlineAt) =>
+        generateInteractiveSpeakingReportWithGemini({
+          apiKey: keys.geminiApiKey,
+          anthropicApiKey: keys.anthropicApiKey,
+          model: m,
+          attemptId,
+          scenarioId,
+          scenarioTitleEn: scenarioTitleEn.trim(),
+          scenarioTitleTh: typeof scenarioTitleTh === "string" ? scenarioTitleTh.trim() : "",
+          prepMinutes,
+          turns,
+          deadlineAt,
+        }),
     });
+    const { report, usage } = graded;
     if (usage) {
       scheduleApiUsageLog({
         userId,
@@ -122,7 +149,12 @@ export async function POST(req: Request) {
         model: usage.model,
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
-        meta: { attemptId, scenarioId },
+        meta: {
+          attemptId,
+          scenarioId,
+          gradeSource: graded.source,
+          ...(graded.failures.length ? { recoveredFrom: graded.failures } : {}),
+        },
       });
     }
     if (userId && !adminBypass && !isPlacement) {
@@ -172,6 +204,14 @@ export async function POST(req: Request) {
         report.rewardBonus = rewardBonus;
       }
     }
+    // Interactive speaking is the one production exercise that doesn't go
+    // through grading_jobs, so it records its own grammar topics here.
+    await recordAttemptWeakness({
+      userId,
+      surface: "interactive_speaking",
+      attemptId: typeof attemptId === "string" ? attemptId : "",
+      grammarBreakdown: report.grammar?.breakdown ?? [],
+    });
     await recordDataCollectionSubmission({
       userId,
       examType: "interactive_speaking",
@@ -185,6 +225,16 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(report);
   } catch (e) {
+    if (e instanceof AllGradingAttemptsFailedError) {
+      console.error("[interactive-speaking-report] all models failed:", e.failures.join(" | "));
+      logGradingFailure({
+        operation: "interactive_speaking_report",
+        userId,
+        attemptId: typeof attemptId === "string" ? attemptId : null,
+        error: e,
+      });
+      return NextResponse.json(gradingFailureResponseBody(e), { status: 503 });
+    }
     const message = normalizeGradingErrorMessage(e);
     console.error("[interactive-speaking-report]", e);
     return NextResponse.json({ error: message }, { status: 500 });

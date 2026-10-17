@@ -13,10 +13,16 @@ import {
 } from "@/lib/course-plan/photo-pattern-bank";
 import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
+import { PersistentWeaknessModal } from "@/components/practice/PersistentWeaknessModal";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { useVipAiFeedbackGate } from "@/hooks/useVipAiFeedbackGate";
+import {
+  GRADING_PENDING_TH,
+  readGradingSubmitResponse,
+  waitForGradingJob,
+} from "@/lib/grading-wait";
 import { stashReportForNavigation } from "@/lib/grading-report-handoff";
 import { getStoredGeminiKey } from "@/lib/gemini-key-storage";
 import { finalizeLatestStudySession } from "@/lib/study-tracker";
@@ -107,6 +113,7 @@ export function PhotoAssessmentSession({
   const latestProgress = item?.progress ?? null;
 
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [waitingForGrade, setWaitingForGrade] = useState(false);
   const [loadingPercent, setLoadingPercent] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
@@ -184,15 +191,32 @@ export function PhotoAssessmentSession({
           source: attemptSource,
         }),
       });
-      const data = (await res.json()) as { error?: string } & Partial<PhotoSpeakAttemptReport>;
-      if (!res.ok) throw new Error(data.error || `Grading failed (${res.status})`);
-      if (!data.attemptId || data.score160 === undefined || data.kind !== "photo-speak") {
+      const outcome = await readGradingSubmitResponse<PhotoSpeakAttemptReport>(res);
+      let graded: PhotoSpeakAttemptReport;
+      if (outcome.kind === "pending") {
+        // The answer is saved server-side. Waiting IS the retry — every poll
+        // runs another grading pass — so this is reassurance, not an error.
+        setWaitingForGrade(true);
+        const waited = await waitForGradingJob<PhotoSpeakAttemptReport>(outcome.attemptId);
+        setWaitingForGrade(false);
+        if (waited.kind === "abandoned") throw new Error(waited.message);
+        if (waited.kind === "still-working") {
+          setSubmitError(
+            "ยังตรวจไม่เสร็จ แต่งานของคุณถูกเก็บไว้แล้ว — กลับมาดูผลได้ในอีกสักครู่",
+          );
+          return;
+        }
+        graded = waited.report;
+      } else {
+        graded = outcome.report;
+      }
+      if (!graded.attemptId || graded.score160 === undefined || graded.kind !== "photo-speak") {
         throw new Error("Invalid response from grading service");
       }
 
       setLoadingPercent(100);
       vipGate.recordSuccessfulAiSubmit();
-      const report = data as PhotoSpeakAttemptReport;
+      const report = graded;
       try {
         await finalizeLatestStudySession({
           exerciseType: mode === "speak" ? "speak_about_photo" : "write_about_photo",
@@ -267,6 +291,7 @@ export function PhotoAssessmentSession({
       exerciseType={mode === "speak" ? "speak_about_photo" : "write_about_photo"}
       setId={item.id}
     >
+      {!embedded ? <PersistentWeaknessModal skill={mode === "speak" ? "speaking" : "writing"} /> : null}
       <div className={embedded ? "relative space-y-6" : "relative mx-auto max-w-3xl space-y-6 px-4 py-8"}>
         {!embedded ? (
           <Link
@@ -418,7 +443,12 @@ export function PhotoAssessmentSession({
           {submitError ? <p className="mt-3 text-sm font-bold text-red-700">{submitError}</p> : null}
         </BrutalPanel>
 
-        {submitting ? <GradingProgressLoader eyebrow="Grading your response" variant="premium" /> : null}
+        {submitting ? (
+          <GradingProgressLoader
+            eyebrow={waitingForGrade ? GRADING_PENDING_TH : "Grading your response"}
+            variant="premium"
+          />
+        ) : null}
       </div>
     </StudySessionBoundary>
   );

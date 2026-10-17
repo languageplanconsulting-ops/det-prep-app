@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GradingProgressLoader } from "@/components/ui/GradingProgressLoader";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { StudySessionBoundary } from "@/components/practice/StudySessionBoundary";
+import { PersistentWeaknessModal } from "@/components/practice/PersistentWeaknessModal";
 import { InteractiveSpeakingHintPanel } from "@/components/interactive-speaking/InteractiveSpeakingHintPanel";
 import { TeacherSamplePlayer } from "@/components/speaking-samples/TeacherSamplePlayer";
 import { VipAiFeedbackQuotaBanner } from "@/components/vip/VipAiFeedbackQuotaBanner";
@@ -846,6 +847,7 @@ export function InteractiveSpeakingSession({
       exerciseType="interactive_speaking"
       setId={scenario.id}
     >
+      {!embedded ? <PersistentWeaknessModal skill="speaking" /> : null}
       <div className={`min-h-screen ${LANDING_PAGE_GRID_BG}`}>
         <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
           <VipAiFeedbackQuotaBanner />

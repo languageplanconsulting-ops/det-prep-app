@@ -32,6 +32,23 @@ export const DAILY_SKILL_META: Record<
   realword: { emoji: "🔤", th: "คำจริง", taskType: "real_english_word" },
 };
 
+/**
+ * The `study_sessions.skill` bucket each daily skill belongs to. The daily runner and the
+ * timed-random runner embed these exercises inline (no SessionGate around them), so they
+ * open the study session themselves — this is the mapping onto the five values the
+ * `study_sessions.skill` check constraint allows.
+ */
+export const DAILY_SKILL_STUDY_SKILL: Record<
+  DailyPlanSkill,
+  "literacy" | "comprehension"
+> = {
+  dictation: "literacy",
+  fitb: "literacy",
+  realword: "literacy",
+  vocab: "comprehension",
+  reading: "comprehension",
+};
+
 /** All task_types that count as "daily exam practice" for progress/improvement stats. */
 export const DAILY_EXAM_TASK_TYPES: string[] = Object.values(DAILY_SKILL_META).map(
   (m) => m.taskType,

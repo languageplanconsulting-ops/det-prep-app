@@ -127,6 +127,46 @@ export async function generateGradingJsonCompletion(opts: {
   return { text, usage };
 }
 
+/** Which provider actually serves this model id. */
+export function gradingProviderOf(model: string): "anthropic" | "openai" | "gemini" {
+  if (isAnthropicGradingModel(model)) return "anthropic";
+  if (isOpenAiGradingModel(model)) return "openai";
+  return "gemini";
+}
+
+/**
+ * The failure is with the ACCOUNT, not this request: a revoked or denied key,
+ * a blocked project, an exhausted balance. Every other model on the same
+ * provider will fail the same way, so there is nothing to gain by asking again
+ * — not on a retry, and not on the next rung of the ladder.
+ *
+ * Deliberately narrow. A 404 ("model retired") is permanent too, but it is
+ * about ONE model: the provider's other models may still answer.
+ */
+export function isPermanentProviderKeyError(err: unknown): boolean {
+  // Checked FIRST, and it wins. A rate-limit body says "check your plan and
+  // billing details" in the same breath as "retry in 59s" — read that as a
+  // dead key and one busy minute takes the provider off the ladder for the
+  // rest of the request, including rungs that have their own quota.
+  if (isTransientProviderError(err)) return false;
+  const status = (err as { status?: number })?.status;
+  if (status === 401 || status === 403) return true;
+  // The Google SDK folds the status into the message ("[403 Forbidden] …")
+  // instead of exposing it, so the text is the only thing left to read.
+  const msg = String((err as Error)?.message ?? err).toLowerCase();
+  return (
+    msg.includes("permission_denied") ||
+    msg.includes("denied access") ||
+    msg.includes("api key not valid") ||
+    msg.includes("invalid api key") ||
+    msg.includes("invalid_api_key") ||
+    msg.includes("authentication_error") ||
+    msg.includes("credit balance is too low") ||
+    msg.includes("[401 ") ||
+    msg.includes("[403 ")
+  );
+}
+
 /**
  * When the admin-selected provider can't serve the request at all, we fall back
  * to another provider we have a key for. These are the fallback models, one per
@@ -326,7 +366,8 @@ async function gradeWithSingleModel(opts: {
       // A parse failure means we already paid for the tokens — the response
       // just wasn't usable. Both that and a transient provider error are worth
       // one more ask; anything else (bad key, 400) fails fast.
-      const retryable = usage != null || isTransientProviderError(err);
+      const retryable =
+        !isPermanentProviderKeyError(err) && (usage != null || isTransientProviderError(err));
       if (!retryable || attempt === RETRY_BACKOFF_MS.length) break;
       console.warn(
         `[${label}] attempt ${attempt + 1} failed (${usage != null ? "unparseable JSON" : "provider error"}), retrying:`,

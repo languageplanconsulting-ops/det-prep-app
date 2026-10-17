@@ -19,6 +19,7 @@ import {
   toPerfectRulePrompt,
 } from "@/lib/speaking-rubric-prompt";
 import type { SpeakingTranscriptHighlight, SpeakingVocabularyUpgrade } from "@/types/speaking";
+import { GRAMMAR_TOPIC_PROMPT_LIST } from "@/lib/grammar-topics";
 
 function pointsOn160(percent: number, weight: number): number {
   return Math.round(percent * weight * 1.6 * 10) / 10;
@@ -106,7 +107,7 @@ Breakdown items (grammarBreakdown, vocabularyBreakdown, coherenceBreakdown, task
 - excerpt: exact short quote from the punctuated answer containing the issue.
 - issueEn / issueTh: what is wrong (bilingual, spoken-language focus — never punctuation/capitalization/spelling).
 - suggestionEn / suggestionTh: MANDATORY on every single item — the FULL corrected version of the excerpt (a real rewritten sentence or phrase the learner could say instead), never just abstract advice like "use past tense" with no example. If you cannot write a concrete corrected version, do not include that breakdown item at all.
-- grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic that fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple") so the learner knows which rule to revise before reading the explanation.
+- grammarBreakdown items ONLY: also include grammarTopicTh — a SHORT Thai name of the grammar rule/topic that fix is about, leading with "การใช้…" where natural (e.g. "การใช้ if I were", "Past simple") so the learner knows which rule to revise before reading the explanation. Also include grammarTopicEn — the SAME topic named in English, chosen from this fixed list so one habit always gets one name across every exam: ${GRAMMAR_TOPIC_PROMPT_LIST}. Pick the closest entry; never invent a new label.
 
 Priority for feedback:
 - Prioritize grammar corrections first, then vocabulary upgrades.
@@ -146,6 +147,8 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
   scenarioTitleTh: string;
   prepMinutes: number;
   turns: TurnInput[];
+  /** Absolute wall-clock deadline, so a retry is never started mid-timeout. */
+  deadlineAt?: number;
 }): Promise<{ report: InteractiveSpeakingAttemptReport; usage: GradingLlmUsage | null }> {
   const { apiKey, attemptId, scenarioId, scenarioTitleEn, scenarioTitleTh, prepMinutes, turns } =
     params;
@@ -154,7 +157,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
     throw new Error(`Expected exactly ${INTERACTIVE_SPEAKING_TURN_COUNT} turns.`);
   }
 
-  const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const modelName = params.model ?? process.env.GEMINI_MODEL ?? "gemini-3.6-flash";
 
   const userPayload = JSON.stringify(
     {
@@ -223,6 +226,7 @@ export async function generateInteractiveSpeakingReportWithGemini(params: {
     userPayload,
     temperature: 0.35,
     operation: "interactive_speaking_report",
+    deadlineAt: params.deadlineAt,
   });
 
   const g = clampPercent(raw.grammarScorePercent);
