@@ -277,6 +277,15 @@ const CSS = `
   footer{padding:30px 0 50px;text-align:center;font-size:13.5px;color:var(--ink-3)}
 
   .ftl svg text{font-family:var(--font-mitr),var(--font-sarabun),sans-serif}
+
+  /* ---- Testimonials / real student proof ---- */
+  #reviews .rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:30px}
+  @media(max-width:760px){#reviews .rev-grid{grid-template-columns:1fr}}
+  .rev-card{background:#fff;border:2px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 2px 0 var(--line);display:flex;flex-direction:column}
+  .rev-card blockquote{margin:0 0 14px;font-size:15.5px;line-height:1.75;color:var(--ink)}
+  .rev-card .rev-hi{background:var(--yel-t);border-radius:4px;padding:0 4px;font-weight:600;color:var(--yel-ink)}
+  .rev-card figcaption{font-family:var(--font-mitr),sans-serif;font-weight:600;font-size:13px;color:var(--blue);margin:0 0 14px}
+  .rev-card img{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);margin-top:auto}
 `;
 
 const BODY_HTML = `<div class="wrap">
@@ -857,6 +866,31 @@ const BODY_HTML = `<div class="wrap">
       Official report ของ Duolingo ให้ตัวเลขกับคะแนนแยกหมวดมา แล้วหยุดแค่นั้น
       มันไม่บอกว่าข้อไหนที่คุณพลาด ประโยคไหนที่ฉุดคะแนน และพรุ่งนี้ควรฝึกอะไรต่อ
     </p>
+  </section>
+
+  <!-- ============ Testimonials / real student proof ============ -->
+  <section class="s" id="reviews">
+    <div class="head">
+      <h2>เสียงจริงจากนักเรียน <em>English Plan</em></h2>
+      <p class="lede">ครูและวิธีสอนเดียวกับที่อยู่เบื้องหลังแพลตฟอร์มนี้ — นี่คือผลจริงจากนักเรียนที่เรียนกับพี่ดอย</p>
+    </div>
+    <div class="rev-grid">
+      <figure class="rev-card">
+        <blockquote>
+          &ldquo;ประทับใจสุด ๆ คือ Writing ของพี่ดอยครับ ผมเริ่มจากแค่ band 5.5 พอได้มาเรียนกับพี่ดอย ได้เทคนิคการเขียน แนวคิด pattern ทำให้ภายใน 3–4 เดือน ผมกระโดดมา <span class="rev-hi">7–7.5</span> ได้เลยครับ ... ส่วนคอร์ส reading &amp; speaking พี่ดอยช่วยผมเยอะมาก ทำให้เข้าใจจริง ๆ ว่าข้อสอบต้องการวัดอะไร&rdquo;
+        </blockquote>
+        <figcaption>— นักเรียนคอร์สเขียน/อ่าน/พูด · ผลสอบ IELTS Writing 5.5 → 7.5</figcaption>
+        <img src="/images/reviews/featured-chat.png" alt="ข้อความรีวิวจากนักเรียน English Plan เล่าว่าคะแนน IELTS Writing เพิ่มจาก band 5.5 เป็น 7.5 ภายใน 3–4 เดือน หลังเรียนเทคนิคการเขียนแบบ pattern กับพี่ดอย" loading="lazy" width="1480" height="520">
+      </figure>
+      <figure class="rev-card">
+        <blockquote>
+          &ldquo;พี่ดอย ผมไปสอบมาเมื่อวาน คะแนนออกแล้ว ได้ตามเป้าแล้วครับ — Speaking เพิ่มจาก <span class="rev-hi">6 → 6.5</span> และ Reading <span class="rev-hi">6.0 → 7.0</span>&rdquo;
+        </blockquote>
+        <figcaption>— นักเรียน English Plan · ผลสอบ IELTS Overall 7.0 (Listening 7.5 · Reading 7.0 · Writing 7.5 · Speaking 6.5)</figcaption>
+        <img src="/images/reviews/featured-score.png" alt="ภาพผลสอบ IELTS ของนักเรียน English Plan คะแนนรวม overall band 7 โดย Listening 7.5, Reading 7.0, Writing 7.5 และ Speaking 6.5" loading="lazy" width="1480" height="360">
+      </figure>
+    </div>
+    <p class="cap" style="text-align:center;margin-top:22px">ผลสอบข้างต้นเป็นผลสอบ IELTS ของนักเรียนที่เรียนกับครูผู้สอนคนเดียวกับที่ออกแบบคอร์ส Duolingo English Test Fast Track · ผลลัพธ์ของแต่ละคนแตกต่างกันได้</p>
   </section>
 
   <!-- ============ CTA ============ -->
