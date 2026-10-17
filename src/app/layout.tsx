@@ -18,6 +18,7 @@ import { SoundToggle } from "@/components/ui/SoundToggle";
 import { VipApiCreditNotebookNotice } from "@/components/vip/VipApiCreditNotebookNotice";
 import { EffectiveTierProvider } from "@/hooks/useEffectiveTier";
 import { buildDefaultMetadata } from "@/lib/site-metadata";
+import { SiteStructuredData } from "@/components/seo/SiteStructuredData";
 import "./globals.css";
 
 const inter = Inter({
@@ -57,6 +58,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrains.variable} ${ibmPlexThai.variable} min-h-screen font-sans text-neutral-900 antialiased`}
       >
         <NavigationProgress />
+        <SiteStructuredData />
         <EffectiveTierProvider>
           <ActivityTracker />
           <AdminSoftSkin />
