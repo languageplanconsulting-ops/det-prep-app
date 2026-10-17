@@ -12,6 +12,14 @@ import { createRouteHandlerSupabase } from "@/lib/supabase-route";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import type { FitbMissingWord } from "@/types/fitb";
 
+/** Mini diagnosis leans on grammar + vocabulary; coherence/task are lenient and inflated scores. */
+const MINI_DIAGNOSIS_SPEAKING_WEIGHTS = {
+  grammar: 0.45,
+  vocabulary: 0.4,
+  coherence: 0.08,
+  taskRelevancy: 0.07,
+} as const;
+
 const GRADING_MODEL_FALLBACKS = [
   "gemini-3.6-flash",
   "gemini-3.1-flash-lite",
@@ -210,7 +218,10 @@ async function scoreMiniDiagnosisAnswer({
     ? crypto.randomUUID()
     : `mini-diagnosis-${Date.now()}-${step.step_index}`;
 
-  try {
+  // AI-graded steps must never fall back to a made-up score: if every grading
+  // model fails this throws, the step is NOT recorded, and the caller returns 503
+  // so the learner can resubmit instead of getting a free score.
+  {
     if (taskType === "write_about_photo") {
       const transcript = String((answer as { text?: unknown })?.text ?? answer ?? "");
       const imageUrl = String(content.image_url ?? "");
@@ -263,6 +274,7 @@ async function scoreMiniDiagnosisAnswer({
           transcript,
           punctuateBeforeScoring: true,
           spokenFillerLenient: true,
+          weights: MINI_DIAGNOSIS_SPEAKING_WEIGHTS,
         }),
       );
       return {
@@ -276,8 +288,6 @@ async function scoreMiniDiagnosisAnswer({
         },
       };
     }
-  } catch (error) {
-    console.error("[mini-diagnosis-submit-step] AI grading fallback to heuristic", error);
   }
 
   return { score: heuristicScore(taskType, answer, correct, content), review: null };
@@ -367,13 +377,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     });
   }
 
-  const scored = await scoreMiniDiagnosisAnswer({
-    req,
-    taskType: step.task_type,
-    answer: body.answer,
-    correct: step.correct_answer,
-    step,
-  });
+  let scored: Awaited<ReturnType<typeof scoreMiniDiagnosisAnswer>>;
+  try {
+    scored = await scoreMiniDiagnosisAnswer({
+      req,
+      taskType: step.task_type,
+      answer: body.answer,
+      correct: step.correct_answer,
+      step,
+    });
+  } catch (error) {
+    console.error("[mini-diagnosis-submit-step] AI grading failed; step not recorded", error);
+    return NextResponse.json(
+      {
+        error:
+          "ระบบตรวจคะแนนขัดข้องชั่วคราว คำตอบของคุณยังไม่ถูกบันทึก กรุณากดส่งอีกครั้งในอีกสักครู่ (AI grading is temporarily unavailable — your answer was not saved, please submit again shortly.)",
+      },
+      { status: 503 },
+    );
+  }
   const next = [
     ...prev,
     {

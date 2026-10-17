@@ -22,14 +22,25 @@ function pointsOn160(percent: number, weight: number): number {
   return Math.round(percent * weight * 1.6 * 10) / 10;
 }
 
-function to160(g: number, v: number, c: number, t: number): number {
-  const sum =
-    SPEAKING_RUBRIC_WEIGHTS.grammar * g +
-    SPEAKING_RUBRIC_WEIGHTS.vocabulary * v +
-    SPEAKING_RUBRIC_WEIGHTS.coherence * c +
-    SPEAKING_RUBRIC_WEIGHTS.taskRelevancy * t;
+export type SpeakingRubricWeights = {
+  grammar: number;
+  vocabulary: number;
+  coherence: number;
+  taskRelevancy: number;
+};
+
+function to160(
+  g: number,
+  v: number,
+  c: number,
+  t: number,
+  w: SpeakingRubricWeights = SPEAKING_RUBRIC_WEIGHTS,
+): number {
+  const sum = w.grammar * g + w.vocabulary * v + w.coherence * c + w.taskRelevancy * t;
   return Math.round(sum * 1.6);
 }
+
+const pct = (x: number) => Math.round(x * 1000) / 10;
 
 function clampPercent(n: unknown): number {
   const x = typeof n === "number" ? n : Number(n);
@@ -81,7 +92,9 @@ function criterion(
 function buildSystemInstruction(options?: {
   punctuateBeforeScoring?: boolean;
   spokenFillerLenient?: boolean;
+  weights?: SpeakingRubricWeights;
 }): string {
+  const w = options?.weights ?? SPEAKING_RUBRIC_WEIGHTS;
   const punctuateBeforeScoring = options?.punctuateBeforeScoring === true;
   const spokenFillerLenient = options?.spokenFillerLenient === true;
   const workflow = punctuateBeforeScoring
@@ -111,8 +124,8 @@ ${workflow}${fillerRule}
 
 PUNCTUATION POLICY (mandatory): The transcript is from speech recognition — the learner SPOKE, they did not type. Punctuation, capitalization, sentence boundaries, and spelling are NOT part of the learner's performance — the exact spelling/casing in the transcript was chosen by the speech-recognition engine, not the learner. Completely disregard all of this when scoring: never raise or lower ANY subscore (grammar, vocabulary, coherence, task) because of punctuation, capitalization, sentence-boundary formatting, or spelling, and NEVER list a punctuation, capitalization, or spelling issue in any breakdown or improvement point.
 
-Score four criteria with weights: grammar 30%, vocabulary 25%, coherence 25%, task relevancy 20%.
-Total 0-160 = (0.3*G + 0.25*V + 0.25*C + 0.2*T) * 1.6, each subscore 0-100.
+Score four criteria with weights: grammar ${pct(w.grammar)}%, vocabulary ${pct(w.vocabulary)}%, coherence ${pct(w.coherence)}%, task relevancy ${pct(w.taskRelevancy)}%.
+Total 0-160 = (${w.grammar}*G + ${w.vocabulary}*V + ${w.coherence}*C + ${w.taskRelevancy}*T) * 1.6, each subscore 0-100.
 
 For EACH criterion summary (grammarSummaryEn/Th, etc.), include TWO parts:
 (A) One-sentence assessment.
@@ -280,6 +293,8 @@ export async function generateSpeakingReportWithGemini(params: {
   speakingRound?: SpeakingRoundNum;
   punctuateBeforeScoring?: boolean;
   spokenFillerLenient?: boolean;
+  /** Override the default grammar/vocab/coherence/task weights (must sum to 1). */
+  weights?: SpeakingRubricWeights;
   /** Wall-clock deadline for internal retries (Date.now() ms). */
   deadlineAt?: number;
 }): Promise<{ report: SpeakingAttemptReport; usage: GradingLlmUsage | null }> {
@@ -297,6 +312,7 @@ export async function generateSpeakingReportWithGemini(params: {
     speakingRound = 1,
     punctuateBeforeScoring = false,
     spokenFillerLenient = false,
+    weights = SPEAKING_RUBRIC_WEIGHTS,
   } = params;
 
   const modelName =
@@ -312,6 +328,7 @@ export async function generateSpeakingReportWithGemini(params: {
     systemInstruction: buildSystemInstruction({
       punctuateBeforeScoring,
       spokenFillerLenient,
+      weights,
     }),
     userPayload: buildUserPayload(
       topicTitleEn,
@@ -335,7 +352,7 @@ export async function generateSpeakingReportWithGemini(params: {
   if (boost) {
     t = Math.min(100, t + 10);
   }
-  const score160 = to160(g, v, c, t);
+  const score160 = to160(g, v, c, t, weights);
 
   const mapBreak = (arr: unknown) =>
     asArr(arr)
@@ -365,7 +382,7 @@ export async function generateSpeakingReportWithGemini(params: {
 
   const grammar = criterion(
     "grammar",
-    SPEAKING_RUBRIC_WEIGHTS.grammar,
+    weights.grammar,
     g,
     {
       en: String(raw.grammarSummaryEn ?? ""),
@@ -377,7 +394,7 @@ export async function generateSpeakingReportWithGemini(params: {
 
   const vocabulary = criterion(
     "vocabulary",
-    SPEAKING_RUBRIC_WEIGHTS.vocabulary,
+    weights.vocabulary,
     v,
     {
       en: String(raw.vocabularySummaryEn ?? ""),
@@ -389,7 +406,7 @@ export async function generateSpeakingReportWithGemini(params: {
 
   const coherence = criterion(
     "coherence",
-    SPEAKING_RUBRIC_WEIGHTS.coherence,
+    weights.coherence,
     c,
     {
       en: String(raw.coherenceSummaryEn ?? ""),
@@ -401,7 +418,7 @@ export async function generateSpeakingReportWithGemini(params: {
 
   const taskRelevancy = criterion(
     "task",
-    SPEAKING_RUBRIC_WEIGHTS.taskRelevancy,
+    weights.taskRelevancy,
     t,
     {
       en: String(raw.taskSummaryEn ?? ""),

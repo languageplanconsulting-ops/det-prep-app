@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, IBM_Plex_Sans_Thai } from "next/font/google";
 import { LoginWelcomeModalGate } from "@/components/auth/LoginWelcomeModalGate";
+import { VipPretestNudgeModal } from "@/components/auth/VipPretestNudgeModal";
 import { JulyAnnouncementModal } from "@/components/announcements/JulyAnnouncementModal";
 import { BrowserRecommendationBanner } from "@/components/announcements/BrowserRecommendationBanner";
 import { AdminSoftSkin } from "@/components/admin/AdminSoftSkin";
@@ -67,6 +68,7 @@ export default function RootLayout({
           <MainNav />
           <LoginWelcomeModalGate />
           <JulyAnnouncementModal />
+          <VipPretestNudgeModal />
           <BrowserRecommendationBanner />
           <VipApiCreditNotebookNotice />
           <PlanExpiryNotice />
