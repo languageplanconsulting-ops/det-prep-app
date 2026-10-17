@@ -83,6 +83,8 @@ export type WeaknessExample = {
   wrong: string;
   better: string;
   at: string;
+  /** Which exam it happened in (e.g. "write_about_photo"). Absent on examples saved before this existed. */
+  surface?: string;
 };
 
 /** The row key a report item's topic maps to — same canonicalisation the recorder uses. */
@@ -209,7 +211,9 @@ export async function recordAttemptWeakness(args: {
   if (!args.userId || !skill) return;
 
   try {
-    const topics = extractAttemptTopics(args.grammarBreakdown);
+    const topics = extractAttemptTopics(args.grammarBreakdown).map((t) =>
+      t.example ? { ...t, example: { ...t.example, surface: args.surface ?? undefined } } : t,
+    );
     const supabase = createServiceRoleSupabase();
     // One atomic call: counts increment, and everything this attempt could have
     // caught but didn't ages one step closer to being forgotten. A clean attempt

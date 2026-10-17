@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import { WeaknessDrill } from "@/components/reports/WeaknessDrill";
 import { AddToNotebookButton } from "@/components/writing/AddToNotebookButton";
 import { BrutalPanel } from "@/components/ui/BrutalPanel";
 import { NOTEBOOK_BUILTIN } from "@/lib/notebook-storage";
@@ -24,7 +23,15 @@ type RepeatInfo = {
   index: number;
   occurrenceCount: number;
   firstSeenAt: string;
-  previousExample: { wrong: string; better: string } | null;
+  previousExample: { wrong: string; better: string; surface?: string } | null;
+};
+
+const EXAM_LABEL: Record<string, string> = {
+  read_then_write: "Read & Write",
+  write_about_photo: "Write About the Photo",
+  read_then_speak: "Read, Then Speak",
+  speak_about_photo: "Speak About the Photo",
+  interactive_speaking: "Interactive Speaking",
 };
 
 function thaiDate(iso: string): string {
@@ -107,21 +114,25 @@ export function GrammarFixesPanel({
             {repeat ? (
               <div className="mb-2 rounded-sm border-2 border-amber-500 bg-amber-50 px-2 py-1.5 text-xs">
                 <p className="font-black text-amber-900">
-                  🔁 ข้อผิดพลาดเดิม — คุณทำผิดข้อนี้มาแล้ว {repeat.occurrenceCount} ครั้ง
+                  🔁 คุณเคยทำผิดข้อนี้แล้ว {repeat.occurrenceCount} ครั้ง
                   {thaiDate(repeat.firstSeenAt) ? ` (ตั้งแต่ ${thaiDate(repeat.firstSeenAt)})` : ""}
                 </p>
-                <p className="mt-0.5 text-amber-800">
-                  You have made this mistake {repeat.occurrenceCount} times now.
-                </p>
                 {repeat.previousExample ? (
-                  <p className="mt-1 text-amber-900">
-                    ครั้งก่อนคุณเขียนว่า: <span className="font-semibold">“{repeat.previousExample.wrong}”</span>
+                  <div className="mt-1 space-y-0.5 text-amber-900">
+                    <p>
+                      ครั้งก่อน
+                      {repeat.previousExample.surface && EXAM_LABEL[repeat.previousExample.surface]
+                        ? ` ในข้อสอบ ${EXAM_LABEL[repeat.previousExample.surface]}`
+                        : ""}{" "}
+                      คุณเขียนว่า: <span className="font-semibold text-red-700">“{repeat.previousExample.wrong}”</span>
+                    </p>
                     {repeat.previousExample.better ? (
-                      <>
-                        {" "}→ <span className="font-semibold text-emerald-800">“{repeat.previousExample.better}”</span>
-                      </>
+                      <p>
+                        ที่ถูกคือ:{" "}
+                        <span className="font-semibold text-emerald-800">“{repeat.previousExample.better}”</span>
+                      </p>
                     ) : null}
-                  </p>
+                  </div>
                 ) : null}
               </div>
             ) : null}
@@ -168,18 +179,6 @@ export function GrammarFixesPanel({
                 }}
               />
             </div>
-            {repeat ? (
-              <WeaknessDrill
-                source={{
-                  topicEn: item.topicEn,
-                  topicTh: item.topicTh,
-                  wrong: item.wrong,
-                  betterEn: item.betterEn,
-                  noteTh: item.noteTh,
-                  noteEn: item.noteEn,
-                }}
-              />
-            ) : null}
           </li>
           );
         })}
