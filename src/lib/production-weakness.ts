@@ -78,12 +78,30 @@ export function normalizeProductionTopicKey(topicEn: string, topicTh: string): s
     .slice(0, 120);
 }
 
+/** One concrete instance of a mistake, kept so a later report can quote it back. */
+export type WeaknessExample = {
+  wrong: string;
+  better: string;
+  at: string;
+  /** Which exam it happened in (e.g. "write_about_photo"). Absent on examples saved before this existed. */
+  surface?: string;
+};
+
+/** The row key a report item's topic maps to — same canonicalisation the recorder uses. */
+export function topicKeyFor(topicEn: string, topicTh: string): string {
+  const en = canonicalizeGrammarTopicEn(topicEn) || canonicalizeGrammarTopicEn(topicTh) || topicEn;
+  return normalizeProductionTopicKey(en, topicTh);
+}
+
 export type ProductionTopic = {
   topicKey: string;
   topicEn: string;
   topicTh: string;
   scope: "all" | "writing";
+  example?: WeaknessExample;
 };
+
+const EXAMPLE_MAX_CHARS = 160;
 
 /**
  * The grammar topics in one graded report, deduped. A learner who drops five
@@ -104,11 +122,15 @@ export function extractAttemptTopics(grammarBreakdown: CriterionBreakdownPoint[]
     const topicKey = normalizeProductionTopicKey(topicEn, topicTh);
     if (!topicKey || seen.has(topicKey)) continue;
     seen.add(topicKey);
+    const wrong = (item.excerpt ?? "").trim().slice(0, EXAMPLE_MAX_CHARS);
+    const better = (item.suggestionEn ?? "").trim().slice(0, EXAMPLE_MAX_CHARS);
     topics.push({
       topicKey,
       topicEn,
       topicTh,
       scope: isWritingOnlyTopic(topicEn, topicTh) ? "writing" : "all",
+      // First instance per topic is enough: the history keeps the last few attempts.
+      ...(wrong ? { example: { wrong, better, at: new Date().toISOString() } } : {}),
     });
   }
   return topics;
@@ -189,7 +211,9 @@ export async function recordAttemptWeakness(args: {
   if (!args.userId || !skill) return;
 
   try {
-    const topics = extractAttemptTopics(args.grammarBreakdown);
+    const topics = extractAttemptTopics(args.grammarBreakdown).map((t) =>
+      t.example ? { ...t, example: { ...t.example, surface: args.surface ?? undefined } } : t,
+    );
     const supabase = createServiceRoleSupabase();
     // One atomic call: counts increment, and everything this attempt could have
     // caught but didn't ages one step closer to being forgotten. A clean attempt
@@ -205,5 +229,75 @@ export async function recordAttemptWeakness(args: {
     if (error) throw new Error(error.message);
   } catch (e) {
     console.error("[production-weakness] record skipped:", e);
+  }
+}
+
+export type TopicHistory = {
+  /** Index into the `items` the caller passed, so it can match results back. */
+  index: number;
+  /** Attempts in which this mistake appeared, INCLUDING the one being viewed. */
+  occurrenceCount: number;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  /** A different, earlier instance of the same mistake, if one was stored. */
+  previousExample: WeaknessExample | null;
+};
+
+/**
+ * "You've made this mistake N times" for the topics in one report.
+ * Only topics that have recurred (count >= 2) are returned — a first-time
+ * mistake is not a pattern. Returns [] on any failure; the report renders as before.
+ */
+export async function fetchTopicHistory(args: {
+  userId: string;
+  items: { topicEn: string; topicTh: string; wrong: string }[];
+}): Promise<TopicHistory[]> {
+  try {
+    const keyed = args.items.map((it, index) => {
+      const topicEn =
+        canonicalizeGrammarTopicEn(it.topicEn) || canonicalizeGrammarTopicEn(it.topicTh) || it.topicEn;
+      return { index, wrong: it.wrong, key: normalizeProductionTopicKey(topicEn, it.topicTh) };
+    });
+    const keys = [...new Set(keyed.map((k) => k.key).filter(Boolean))];
+    if (keys.length === 0) return [];
+
+    const supabase = createServiceRoleSupabase();
+    const base = () =>
+      supabase.from("production_weakness_history");
+    let res = await base()
+      .select("topic_key, occurrence_count, first_seen_at, last_seen_at, examples")
+      .eq("user_id", args.userId)
+      .in("topic_key", keys)
+      .gte("occurrence_count", PRODUCTION_WEAKNESS_MIN_OCCURRENCES);
+    if (res.error) {
+      // Migration 051 (the `examples` column) may not be deployed yet — the
+      // counts are still worth showing without the "last time you wrote" quote.
+      res = (await base()
+        .select("topic_key, occurrence_count, first_seen_at, last_seen_at")
+        .eq("user_id", args.userId)
+        .in("topic_key", keys)
+        .gte("occurrence_count", PRODUCTION_WEAKNESS_MIN_OCCURRENCES)) as typeof res;
+    }
+    if (res.error) throw new Error(res.error.message);
+    const data = res.data as Record<string, unknown>[] | null;
+
+    const byKey = new Map((data ?? []).map((r) => [String(r.topic_key), r]));
+    const out: TopicHistory[] = [];
+    for (const k of keyed) {
+      const row = byKey.get(k.key);
+      if (!row) continue;
+      const examples = Array.isArray(row.examples) ? (row.examples as WeaknessExample[]) : [];
+      out.push({
+        index: k.index,
+        occurrenceCount: Number(row.occurrence_count ?? 0),
+        firstSeenAt: String(row.first_seen_at),
+        lastSeenAt: String(row.last_seen_at),
+        previousExample: examples.find((e) => e?.wrong && e.wrong !== k.wrong) ?? null,
+      });
+    }
+    return out;
+  } catch (e) {
+    console.error("[production-weakness] history skipped:", e);
+    return [];
   }
 }
