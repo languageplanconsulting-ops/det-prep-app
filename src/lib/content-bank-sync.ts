@@ -124,20 +124,124 @@ export async function pushContentBankSnapshotToSupabase(): Promise<{
     data && typeof (data as { updated_at?: unknown }).updated_at === "string"
       ? (data as { updated_at: string }).updated_at
       : now;
+  lastPull = null; // force the next pull to re-check the server after our own publish
   return { ok: true, serverUpdatedAt };
 }
 
-export async function pullContentBankSnapshotFromSupabase(): Promise<{
+type PullResult = {
   ok: boolean;
   applied: number;
   error?: string;
   /** When the global snapshot was last written on the server (ISO). */
   serverUpdatedAt: string | null;
-}> {
+};
+
+/**
+ * The published banks are ~2.7 MB. Pulling them on every page load, from several components,
+ * for every learner was the main source of Supabase egress. So:
+ *  1. concurrent callers share one in-flight pull,
+ *  2. a pull is reused for PULL_REUSE_MS,
+ *  3. we first read only `updated_at` (bytes) and, if it matches the copy cached in IndexedDB,
+ *     apply that copy locally instead of downloading the payload again.
+ */
+const PULL_REUSE_MS = 5 * 60_000;
+const SNAPSHOT_DB = "ep-content-bank-cache";
+const SNAPSHOT_STORE = "snapshot";
+const SNAPSHOT_KEY = "global";
+
+type CachedSnapshot = { updatedAt: string; payload: ContentBankSnapshot };
+
+let pullInflight: Promise<PullResult> | null = null;
+let lastPull: { at: number; result: PullResult } | null = null;
+
+function openSnapshotDb(): Promise<IDBDatabase | null> {
+  return new Promise((resolve) => {
+    try {
+      if (typeof indexedDB === "undefined") return resolve(null);
+      const req = indexedDB.open(SNAPSHOT_DB, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore(SNAPSHOT_STORE);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+async function readCachedSnapshot(): Promise<CachedSnapshot | null> {
+  const db = await openSnapshotDb();
+  if (!db) return null;
+  return new Promise((resolve) => {
+    try {
+      const req = db.transaction(SNAPSHOT_STORE, "readonly").objectStore(SNAPSHOT_STORE).get(SNAPSHOT_KEY);
+      req.onsuccess = () => {
+        const v = req.result as CachedSnapshot | undefined;
+        resolve(v && typeof v.updatedAt === "string" && v.payload ? v : null);
+      };
+      req.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    } finally {
+      db.close();
+    }
+  });
+}
+
+async function writeCachedSnapshot(value: CachedSnapshot): Promise<void> {
+  const db = await openSnapshotDb();
+  if (!db) return;
+  await new Promise<void>((resolve) => {
+    try {
+      const tx = db.transaction(SNAPSHOT_STORE, "readwrite");
+      tx.objectStore(SNAPSHOT_STORE).put(value, SNAPSHOT_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+      tx.onabort = () => resolve();
+    } catch {
+      resolve();
+    } finally {
+      db.close();
+    }
+  });
+}
+
+async function applyAndReconcile(snapshot: ContentBankSnapshot): Promise<number> {
+  const applied = applyLocalContentBankSnapshot(snapshot);
+  try {
+    await reconcileDictationBankAfterContentPull();
+  } catch (err) {
+    console.warn("[content-bank-sync] Dictation reconcile after pull failed", err);
+  }
+  return applied;
+}
+
+async function doPull(): Promise<PullResult> {
   const supabase = getBrowserSupabase();
   if (!supabase) {
     return { ok: false, applied: 0, error: "Supabase not configured", serverUpdatedAt: null };
   }
+
+  // Cheap probe: timestamp only.
+  const probe = await supabase
+    .from("content_bank_snapshots")
+    .select("updated_at")
+    .eq("id", "global")
+    .maybeSingle();
+  if (probe.error) {
+    return { ok: false, applied: 0, error: probe.error.message, serverUpdatedAt: null };
+  }
+  const probedAt =
+    probe.data && typeof (probe.data as { updated_at?: unknown }).updated_at === "string"
+      ? (probe.data as { updated_at: string }).updated_at
+      : null;
+  if (!probedAt) return { ok: true, applied: 0, serverUpdatedAt: null };
+
+  const cached = await readCachedSnapshot();
+  if (cached && cached.updatedAt === probedAt) {
+    const applied = await applyAndReconcile(cached.payload);
+    return { ok: true, applied, serverUpdatedAt: probedAt };
+  }
+
   const { data, error } = await supabase
     .from("content_bank_snapshots")
     .select("payload, updated_at")
@@ -154,11 +258,26 @@ export async function pullContentBankSnapshotFromSupabase(): Promise<{
     return { ok: true, applied: 0, serverUpdatedAt };
   }
   const snapshot = data.payload as ContentBankSnapshot;
-  const applied = applyLocalContentBankSnapshot(snapshot);
-  try {
-    await reconcileDictationBankAfterContentPull();
-  } catch (err) {
-    console.warn("[content-bank-sync] Dictation reconcile after pull failed", err);
+  const applied = await applyAndReconcile(snapshot);
+  if (serverUpdatedAt) {
+    void writeCachedSnapshot({ updatedAt: serverUpdatedAt, payload: snapshot });
   }
   return { ok: true, applied, serverUpdatedAt };
+}
+
+export async function pullContentBankSnapshotFromSupabase(): Promise<PullResult> {
+  if (lastPull && lastPull.result.ok && Date.now() - lastPull.at < PULL_REUSE_MS) {
+    return lastPull.result;
+  }
+  if (!pullInflight) {
+    pullInflight = doPull()
+      .then((result) => {
+        if (result.ok) lastPull = { at: Date.now(), result };
+        return result;
+      })
+      .finally(() => {
+        pullInflight = null;
+      });
+  }
+  return pullInflight;
 }
