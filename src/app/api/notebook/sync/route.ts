@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { getRequestAuthUser } from "@/lib/supabase-request-client";
 import type { NotebookEntry } from "@/types/writing";
 
 // Per-user data — must never be cached/shared across requests.
@@ -20,13 +20,11 @@ function isNotebookEntryLike(o: unknown): o is NotebookEntry {
 
 /**
  * Upsert one notebook card to Supabase (signed-in users). Enables admin to view learner notebooks.
+ * Accepts the web cookie session or a mobile Bearer token.
  */
 export async function POST(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await getRequestAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -67,10 +65,7 @@ export async function POST(req: Request) {
  */
 export async function PUT(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await getRequestAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -117,10 +112,7 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await getRequestAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -149,12 +141,9 @@ export async function DELETE(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await getRequestAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

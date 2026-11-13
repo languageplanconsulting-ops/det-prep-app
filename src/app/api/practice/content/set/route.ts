@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { dictationHintTh } from "@/lib/dictation-hints-th";
 
 import { getAdminAccess } from "@/lib/admin-auth";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
@@ -185,10 +186,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Set not found", skill, round, set }, { status: 404 });
     }
 
-    const payload =
+    let payload =
       skill === "dictation" || skill === "conversation"
         ? withAudioUrls(data, siteOrigin)
         : data;
+    // Thai version of the dictation hint for the app's Thai UI (English stays in hintText).
+    if (skill === "dictation" && payload && typeof payload === "object" && !Array.isArray(payload)) {
+      const item = payload as { hintText?: unknown };
+      payload = {
+        ...item,
+        hintTextTh: dictationHintTh(typeof item.hintText === "string" ? item.hintText : null),
+      };
+    }
 
     return NextResponse.json({
       skill,

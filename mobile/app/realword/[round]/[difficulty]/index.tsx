@@ -3,8 +3,10 @@ import { useLocalSearchParams } from "expo-router";
 import { PracticeSetList } from "../../../../components/PracticeSetList";
 import { REALWORD_MAX_SCORE } from "../../../../lib/realword-constants";
 import type { RealWordDifficulty } from "../../../../lib/types";
+import { setListHeader, useI18n } from "../../../../lib/i18n";
 
 export default function RealWordSetListScreen() {
+  const { t } = useI18n();
   const { round, difficulty } = useLocalSearchParams<{ round: string; difficulty: string }>();
   const roundNum = Number(round);
   const diff = difficulty as RealWordDifficulty;
@@ -15,7 +17,7 @@ export default function RealWordSetListScreen() {
       skill="realword"
       round={roundNum}
       difficulty={diff}
-      header={`Round ${roundNum} · ${difficulty} · max ${cap} pts`}
+      header={setListHeader(t, roundNum, difficulty, cap)}
       href={(setNumber) => `/realword/${round}/${difficulty}/${setNumber}`}
       progress={{ taskType: "real_english_word", contentSkill: "realword" }}
     />

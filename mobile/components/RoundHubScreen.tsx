@@ -1,8 +1,11 @@
+import type { Href } from "expo-router";
 import { ScrollView, StyleSheet, Text } from "react-native";
 
 import { LuxuryPressable } from "./LuxuryPressable";
 import { useLuxuryRouter } from "../hooks/useLuxuryRouter";
 import { PRACTICE_ROUNDS } from "../lib/fitb-constants";
+import { roundLabel, useI18n } from "../lib/i18n";
+import { FadeInItem } from "./Motion";
 
 export default function RoundHubScreen({
   title,
@@ -14,22 +17,25 @@ export default function RoundHubScreen({
   basePath: string;
 }) {
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.sub}>{subtitle}</Text>
-      {PRACTICE_ROUNDS.map((round) => (
-        <LuxuryPressable
-          key={round}
-          style={styles.row}
-          sound="none"
-          scaleTo={0.98}
-          onPress={() => push(`${basePath}/${round}`)}
-        >
-          <Text style={styles.rowTitle}>Round {round}</Text>
-          <Text style={styles.chev}>›</Text>
-        </LuxuryPressable>
+      {PRACTICE_ROUNDS.map((round, i) => (
+        <FadeInItem key={round} index={i} step={60}>
+          <LuxuryPressable
+            key={round}
+            style={styles.row}
+            sound="none"
+            scaleTo={0.98}
+            onPress={() => push(`${basePath}/${round}` as Href)}
+          >
+            <Text style={styles.rowTitle}>{roundLabel(t, round)}</Text>
+            <Text style={styles.chev}>›</Text>
+          </LuxuryPressable>
+        </FadeInItem>
       ))}
     </ScrollView>
   );

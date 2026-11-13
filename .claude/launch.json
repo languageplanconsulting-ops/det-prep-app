@@ -12,6 +12,15 @@
       "autoPort": true
     },
     {
+      "name": "mobile-expo-web-local",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/natchanon/Developer/det-prep-app/mobile && npx expo start --web --port 8084"
+      ],
+      "port": 8084
+    },
+    {
       "name": "static-previews",
       "runtimeExecutable": "npx",
       "runtimeArgs": [

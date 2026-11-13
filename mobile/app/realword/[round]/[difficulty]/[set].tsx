@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -20,6 +19,9 @@ import { buildContentKey } from "../../../../lib/practice-progress";
 import { REALWORD_MAX_SCORE } from "../../../../lib/realword-constants";
 import { realWordCounts, realWordRunScore } from "../../../../lib/realword-scoring";
 import type { RealWordDifficulty, RealWordSet } from "../../../../lib/types";
+import { LOAD_FAILED, errorText, scoreLine, setLine, useI18n } from "../../../../lib/i18n";
+import { ScreenLoader } from "../../../../components/MascotLoader";
+import { AnimatedScore, FadeInItem, ResultMascot } from "../../../../components/Motion";
 
 function shuffleWordSet(wordSet: RealWordSet): RealWordSet {
   const words = [...wordSet.words];
@@ -36,6 +38,7 @@ export default function RealWordSessionScreen() {
     difficulty: string;
     set: string;
   }>();
+  const { t } = useI18n();
   const roundNum = Number(round);
   const diff = difficulty as RealWordDifficulty;
   const setNumber = Number(set);
@@ -74,7 +77,7 @@ export default function RealWordSessionScreen() {
       sessionIdRef.current = sid;
       startedAt.current = Date.now();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load set");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -140,18 +143,12 @@ export default function RealWordSessionScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error || !sessionSet) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error ?? "Set unavailable"}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
       </View>
     );
   }
@@ -162,41 +159,48 @@ export default function RealWordSessionScreen() {
 
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <Text style={styles.score}>
-          Score: {Math.round(report.score)}/{maxScore}
-        </Text>
+        <ResultMascot ratio={maxScore > 0 ? Math.round(report.score) / maxScore : 0} message={maxScore > 0 && Math.round(report.score) / maxScore >= 0.75 ? t("เก่งมาก! ทำได้ดีเยี่ยมเลย 🎉", "Great job — excellent work! 🎉") : t("ใกล้แล้ว! ดูจุดที่พลาดด้านล่าง แล้วลองอีกครั้งนะ 💪", "Almost there! Review the misses below and try again 💪")} />
+        <AnimatedScore
+          value={Math.round(report.score)}
+          max={maxScore}
+          format={(n, m) => scoreLine(t, n, m)}
+          style={styles.score}
+        />
         <Text style={styles.stat}>
-          Found {report.UR} of {report.R} real words · Trap clicks: {report.M}
+          {t(
+            `เจอคำจริง ${report.UR} จาก ${report.R} คำ · แตะคำลวง ${report.M} ครั้ง`,
+            `Found ${report.UR} of ${report.R} real words · Trap clicks: ${report.M}`,
+          )}
         </Text>
 
         {missed.length > 0 ? (
           <View style={styles.block}>
-            <Text style={styles.blockTitle}>Missed real words</Text>
+            <Text style={styles.blockTitle}>{t("คำจริงที่พลาดไป", "Missed real words")}</Text>
             <Text style={styles.words}>{missed.map((w) => w.word).join(", ")}</Text>
           </View>
         ) : null}
 
         {traps.length > 0 ? (
           <View style={styles.block}>
-            <Text style={styles.blockTitle}>Trap words clicked</Text>
+            <Text style={styles.blockTitle}>{t("คำลวงที่แตะไป", "Trap words clicked")}</Text>
             <Text style={styles.words}>{traps.map((w) => w.word).join(", ")}</Text>
           </View>
         ) : null}
 
         <View style={styles.block}>
-          <Text style={styles.blockTitle}>Vocabulary review</Text>
+          <Text style={styles.blockTitle}>{t("ทบทวนคำศัพท์", "Vocabulary review")}</Text>
           {sessionSet.words
             .filter((w) => w.is_real)
-            .map((w) => (
-              <View key={w.word} style={styles.vocabRow}>
+            .map((w, i) => (
+              <FadeInItem key={w.word} index={i + 2} style={styles.vocabRow}>
                 <Text style={styles.vocabWord}>{w.word}</Text>
                 <Text style={styles.vocabTh}>{w.explanationThai}</Text>
-              </View>
+              </FadeInItem>
             ))}
         </View>
 
         <LuxuryPressable style={styles.btn} onPress={retry}>
-          <Text style={styles.btnText}>Try again</Text>
+          <Text style={styles.btnText}>{t("ทำอีกครั้ง", "Try again")}</Text>
         </LuxuryPressable>
       </ScrollView>
     );
@@ -205,10 +209,15 @@ export default function RealWordSessionScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.meta}>
-        Round {roundNum} · {difficulty} · Set {setNumber}
+        {setLine(t, roundNum, difficulty, setNumber)}
       </Text>
-      <Text style={styles.hint}>Tap every word you believe is real English. Avoid traps.</Text>
-      <Text style={styles.count}>Selected: {selected.size}</Text>
+      <Text style={styles.hint}>
+        {t(
+          "แตะทุกคำที่คิดว่าเป็นคำภาษาอังกฤษจริง ระวังคำลวง",
+          "Tap every word you believe is real English. Avoid traps.",
+        )}
+      </Text>
+      <Text style={styles.count}>{t(`เลือกแล้ว: ${selected.size}`, `Selected: ${selected.size}`)}</Text>
 
       <View style={styles.grid}>
         {sessionSet.words.map((w, i) => {
@@ -226,7 +235,7 @@ export default function RealWordSessionScreen() {
       </View>
 
       <LuxuryPressable style={styles.btn} sound="submit" onPress={() => void submit()}>
-        <Text style={styles.btnText}>Submit</Text>
+        <Text style={styles.btnText}>{t("ส่งคำตอบ", "Submit")}</Text>
       </LuxuryPressable>
     </ScrollView>
   );

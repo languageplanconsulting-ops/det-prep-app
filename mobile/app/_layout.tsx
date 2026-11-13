@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 
 import { UiFeedbackProvider } from "../components/UiFeedbackProvider";
 import { AuthProvider } from "../lib/auth-context";
+import { LanguageProvider, useI18n } from "../lib/i18n";
 import { LUXURY_STACK_ANIMATION_MS } from "../lib/luxury-motion";
 
 const luxuryScreen = {
@@ -19,8 +20,20 @@ const luxuryScreen = {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <UiFeedbackProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <UiFeedbackProvider>
+          <RootStack />
+        </UiFeedbackProvider>
+      </AuthProvider>
+    </LanguageProvider>
+  );
+}
+
+function RootStack() {
+  const { t } = useI18n();
+  return (
+    <>
         <StatusBar style="light" />
         <Stack
           screenOptions={{
@@ -33,112 +46,111 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="index" />
-          <Stack.Screen name="login" options={{ ...luxuryScreen, headerShown: true, title: "Sign in" }} />
+          <Stack.Screen name="login" options={{ ...luxuryScreen, headerShown: true, title: t("เข้าสู่ระบบ", "Sign in") }} />
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="dictation/index" options={{ ...luxuryScreen, title: "Dictation" }} />
+          <Stack.Screen name="dictation/index" options={{ ...luxuryScreen, title: t("ตามคำบอก", "Dictation") }} />
           <Stack.Screen
             name="dictation/[round]/[difficulty]/index"
-            options={{ ...luxuryScreen, title: "Dictation sets" }}
+            options={{ ...luxuryScreen, title: t("ชุดตามคำบอก", "Dictation sets") }}
           />
           <Stack.Screen
             name="dictation/[round]/[difficulty]/[set]"
-            options={{ ...luxuryScreen, title: "Dictation" }}
+            options={{ ...luxuryScreen, title: t("ตามคำบอก", "Dictation") }}
           />
-          <Stack.Screen name="fitb/index" options={{ ...luxuryScreen, title: "Fill in the blank" }} />
+          <Stack.Screen name="fitb/index" options={{ ...luxuryScreen, title: t("เติมคำในช่องว่าง", "Fill in the blank") }} />
           <Stack.Screen
             name="fitb/[round]/[difficulty]/index"
-            options={{ ...luxuryScreen, title: "FITB sets" }}
+            options={{ ...luxuryScreen, title: t("ชุดเติมคำ", "FITB sets") }}
           />
           <Stack.Screen
             name="fitb/[round]/[difficulty]/[set]"
-            options={{ ...luxuryScreen, title: "Fill in the blank" }}
+            options={{ ...luxuryScreen, title: t("เติมคำในช่องว่าง", "Fill in the blank") }}
           />
-          <Stack.Screen name="reading/index" options={{ ...luxuryScreen, title: "Reading" }} />
+          <Stack.Screen name="reading/index" options={{ ...luxuryScreen, title: t("การอ่าน", "Reading") }} />
           <Stack.Screen
             name="reading/[round]/[difficulty]/index"
-            options={{ ...luxuryScreen, title: "Reading sets" }}
+            options={{ ...luxuryScreen, title: t("ชุดการอ่าน", "Reading sets") }}
           />
           <Stack.Screen
             name="reading/[round]/[difficulty]/[set]/index"
-            options={{ ...luxuryScreen, title: "Exams" }}
+            options={{ ...luxuryScreen, title: t("ข้อสอบ", "Exams") }}
           />
           <Stack.Screen
             name="reading/[round]/[difficulty]/[set]/[exam]"
-            options={{ ...luxuryScreen, title: "Reading" }}
+            options={{ ...luxuryScreen, title: t("การอ่าน", "Reading") }}
           />
-          <Stack.Screen name="vocab/index" options={{ ...luxuryScreen, title: "Vocabulary" }} />
+          <Stack.Screen name="vocab/index" options={{ ...luxuryScreen, title: t("คำศัพท์", "Vocabulary") }} />
           <Stack.Screen
             name="vocab/[round]/index"
-            options={{ ...luxuryScreen, title: "Vocabulary level" }}
+            options={{ ...luxuryScreen, title: t("ระดับคำศัพท์", "Vocabulary level") }}
           />
           <Stack.Screen
             name="vocab/[round]/[level]/index"
-            options={{ ...luxuryScreen, title: "Vocab sets" }}
+            options={{ ...luxuryScreen, title: t("ชุดคำศัพท์", "Vocab sets") }}
           />
           <Stack.Screen
             name="vocab/[round]/[level]/[set]/index"
-            options={{ ...luxuryScreen, title: "Passages" }}
+            options={{ ...luxuryScreen, title: t("บทความ", "Passages") }}
           />
           <Stack.Screen
             name="vocab/[round]/[level]/[set]/[passage]"
-            options={{ ...luxuryScreen, title: "Vocabulary" }}
+            options={{ ...luxuryScreen, title: t("คำศัพท์", "Vocabulary") }}
           />
-          <Stack.Screen name="realword/index" options={{ ...luxuryScreen, title: "Real word" }} />
+          <Stack.Screen name="realword/index" options={{ ...luxuryScreen, title: t("คำจริง / คำลวง", "Real word") }} />
           <Stack.Screen
             name="realword/[round]/[difficulty]/index"
-            options={{ ...luxuryScreen, title: "Real word sets" }}
+            options={{ ...luxuryScreen, title: t("ชุดคำจริง", "Real word sets") }}
           />
           <Stack.Screen
             name="realword/[round]/[difficulty]/[set]"
-            options={{ ...luxuryScreen, title: "Real word" }}
+            options={{ ...luxuryScreen, title: t("คำจริง / คำลวง", "Real word") }}
           />
           <Stack.Screen
             name="conversation/index"
-            options={{ ...luxuryScreen, title: "Conversation" }}
+            options={{ ...luxuryScreen, title: t("บทสนทนา", "Conversation") }}
           />
           <Stack.Screen
             name="conversation/[round]/index"
-            options={{ ...luxuryScreen, title: "Conversation round" }}
+            options={{ ...luxuryScreen, title: t("รอบบทสนทนา", "Conversation round") }}
           />
           <Stack.Screen
             name="conversation/[round]/[difficulty]/index"
-            options={{ ...luxuryScreen, title: "Conversation sets" }}
+            options={{ ...luxuryScreen, title: t("ชุดบทสนทนา", "Conversation sets") }}
           />
           <Stack.Screen
             name="conversation/[round]/[difficulty]/[set]"
-            options={{ ...luxuryScreen, title: "Conversation" }}
+            options={{ ...luxuryScreen, title: t("บทสนทนา", "Conversation") }}
           />
           <Stack.Screen
             name="dialogue-summary/index"
-            options={{ ...luxuryScreen, title: "Dialogue summary" }}
+            options={{ ...luxuryScreen, title: t("ฟังแล้วสรุป", "Dialogue summary") }}
           />
           <Stack.Screen
             name="dialogue-summary/[round]/[difficulty]/index"
-            options={{ ...luxuryScreen, title: "Summary sets" }}
+            options={{ ...luxuryScreen, title: t("ชุดสรุปบทสนทนา", "Summary sets") }}
           />
           <Stack.Screen
             name="dialogue-summary/[round]/[difficulty]/[set]"
-            options={{ ...luxuryScreen, title: "Write summary" }}
+            options={{ ...luxuryScreen, title: t("เขียนสรุป", "Write summary") }}
           />
           <Stack.Screen
             name="interactive-speaking/index"
-            options={{ ...luxuryScreen, title: "Interactive speaking" }}
+            options={{ ...luxuryScreen, title: t("พูดโต้ตอบ", "Interactive speaking") }}
           />
           <Stack.Screen
             name="interactive-speaking/[round]/index"
-            options={{ ...luxuryScreen, title: "Scenarios" }}
+            options={{ ...luxuryScreen, title: t("สถานการณ์", "Scenarios") }}
           />
           <Stack.Screen
             name="interactive-speaking/[round]/[scenarioId]"
-            options={{ ...luxuryScreen, title: "Speaking" }}
+            options={{ ...luxuryScreen, title: t("การพูด", "Speaking") }}
           />
-          <Stack.Screen name="lessons/index" options={{ ...luxuryScreen, title: "บทเรียน" }} />
+          <Stack.Screen name="lessons/index" options={{ ...luxuryScreen, title: t("บทเรียน", "Lessons") }} />
           <Stack.Screen
             name="lessons/[scenarioId]"
-            options={{ ...luxuryScreen, title: "ฟังสถานการณ์" }}
+            options={{ ...luxuryScreen, title: t("ฟังสถานการณ์", "Campus listening") }}
           />
         </Stack>
-      </UiFeedbackProvider>
-    </AuthProvider>
+    </>
   );
 }

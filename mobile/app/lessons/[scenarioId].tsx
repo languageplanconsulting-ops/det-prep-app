@@ -25,6 +25,7 @@ import {
   sfxWrong,
 } from "../../lib/exam-sfx-mobile";
 import { syncNotebookEntry } from "../../lib/notebook-sync";
+import { useI18n } from "../../lib/i18n";
 
 const MAX_PLAYS = 3;
 
@@ -32,6 +33,7 @@ export default function CampusListeningLessonScreen() {
   const { scenarioId } = useLocalSearchParams<{ scenarioId: string }>();
   const scenario = getCampusScenario(scenarioId ?? "");
   const { back } = useLuxuryRouter();
+  const { t } = useI18n();
 
   const [phase, setPhase] = useState<CampusLessonPhase>("intro");
   const [questionIdx, setQuestionIdx] = useState(0);
@@ -80,7 +82,7 @@ export default function CampusListeningLessonScreen() {
       setPlaying(true);
       await sound.playAsync();
     } catch (e) {
-      setAudioError(e instanceof Error ? e.message : "Could not play audio");
+      setAudioError(e instanceof Error ? e.message : "เล่นเสียงไม่ได้ / Could not play audio");
       setPlaying(false);
     } finally {
       setLoadingAudio(false);
@@ -128,7 +130,7 @@ export default function CampusListeningLessonScreen() {
       setNotebookDone(true);
       sfxCorrect();
     } catch (e) {
-      setAudioError(e instanceof Error ? e.message : "Notebook sync failed");
+      setAudioError(e instanceof Error ? e.message : "บันทึกลงสมุดไม่สำเร็จ / Notebook sync failed");
     } finally {
       setNotebookBusy(false);
     }
@@ -148,9 +150,9 @@ export default function CampusListeningLessonScreen() {
   if (!scenario) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>ไม่พบบทเรียนนี้</Text>
+        <Text style={styles.errorText}>{t("ไม่พบบทเรียนนี้", "Lesson not found")}</Text>
         <LuxuryPressable style={styles.primaryBtn} onPress={() => back()}>
-          <Text style={styles.primaryBtnText}>กลับ</Text>
+          <Text style={styles.primaryBtnText}>{t("กลับ", "Back")}</Text>
         </LuxuryPressable>
       </View>
     );
@@ -198,7 +200,7 @@ export default function CampusListeningLessonScreen() {
               setPhase("listen");
             }}
           >
-            <Text style={styles.primaryBtnText}>เริ่มฟังสถานการณ์</Text>
+            <Text style={styles.primaryBtnText}>{t("เริ่มฟังสถานการณ์", "Start listening")}</Text>
           </LuxuryPressable>
         </View>
       ) : null}
@@ -229,7 +231,9 @@ export default function CampusListeningLessonScreen() {
                 />
               ))}
               <Text style={styles.playsText}>
-                {playsLeft > 0 ? `ฟังได้อีก ${playsLeft} ครั้ง` : "ฟังครบแล้ว"}
+                {playsLeft > 0
+                  ? t(`ฟังได้อีก ${playsLeft} ครั้ง`, `${playsLeft} plays left`)
+                  : t("ฟังครบแล้ว", "No plays left")}
               </Text>
             </View>
             {audioError ? <Text style={styles.warn}>{audioError}</Text> : null}
@@ -239,7 +243,7 @@ export default function CampusListeningLessonScreen() {
             disabled={!hasListened}
             onPress={() => goToCoach(0)}
           >
-            <Text style={styles.primaryBtnText}>ไปตอบคำถาม →</Text>
+            <Text style={styles.primaryBtnText}>{t("ไปตอบคำถาม →", "Go to questions →")}</Text>
           </LuxuryPressable>
         </View>
       ) : null}
@@ -278,7 +282,7 @@ export default function CampusListeningLessonScreen() {
               checkAnswer();
             }}
           >
-            <Text style={styles.primaryBtnText}>ตรวจคำตอบ</Text>
+            <Text style={styles.primaryBtnText}>{t("ตรวจคำตอบ", "Check answer")}</Text>
           </LuxuryPressable>
         </View>
       ) : null}
@@ -288,12 +292,12 @@ export default function CampusListeningLessonScreen() {
           {lastCorrect ? (
             <>
               <View style={styles.okCard}>
-                <Text style={styles.okTitle}>ถูกต้อง! 🎉</Text>
+                <Text style={styles.okTitle}>{t("ถูกต้อง! 🎉", "Correct! 🎉")}</Text>
                 <Text style={styles.okWord}>{currentQ.correctWord}</Text>
               </View>
               <LuxuryPressable style={styles.primaryBtn} onPress={continueAfterFeedback}>
                 <Text style={styles.primaryBtnText}>
-                  {questionIdx < 2 ? "ข้อถัดไป →" : "จบบทเรียน"}
+                  {questionIdx < 2 ? t("ข้อถัดไป →", "Next question →") : t("จบบทเรียน", "Finish lesson")}
                 </Text>
               </LuxuryPressable>
             </>
@@ -312,11 +316,13 @@ export default function CampusListeningLessonScreen() {
                 onPress={() => void addToNotebook()}
               >
                 <Text style={styles.secondaryBtnText}>
-                  {notebookDone ? "บันทึกในสมุดแล้ว ✓" : "เพิ่มลงสมุดจด"}
+                  {notebookDone
+                    ? t("บันทึกในสมุดแล้ว ✓", "Saved to notebook ✓")
+                    : t("เพิ่มลงสมุดจด", "Add to notebook")}
                 </Text>
               </LuxuryPressable>
               <LuxuryPressable style={styles.primaryBtn} onPress={continueAfterFeedback}>
-                <Text style={styles.primaryBtnText}>เข้าใจแล้ว — ต่อไป</Text>
+                <Text style={styles.primaryBtnText}>{t("เข้าใจแล้ว — ต่อไป", "Got it — next")}</Text>
               </LuxuryPressable>
             </>
           )}
@@ -331,7 +337,7 @@ export default function CampusListeningLessonScreen() {
             sub="Great job finishing this campus listening lesson."
           />
           <LuxuryPressable style={styles.primaryBtn} onPress={() => back()}>
-            <Text style={styles.primaryBtnText}>กลับรายการบทเรียน</Text>
+            <Text style={styles.primaryBtnText}>{t("กลับรายการบทเรียน", "Back to lessons")}</Text>
           </LuxuryPressable>
         </View>
       ) : null}

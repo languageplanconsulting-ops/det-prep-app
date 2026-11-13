@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -24,6 +23,9 @@ import {
 } from "../../../../lib/conversation-constants";
 import { computeItemOk, conversationScore } from "../../../../lib/conversation-scoring";
 import type { ConversationDifficulty, ConversationExam } from "../../../../lib/types";
+import { LOAD_FAILED, errorText, scoreLine, useI18n } from "../../../../lib/i18n";
+import { ScreenLoader } from "../../../../components/MascotLoader";
+import { AnimatedScore, FadeInItem, ResultMascot } from "../../../../components/Motion";
 
 type Stage = "intro" | "scenario" | "main" | "report";
 
@@ -33,6 +35,7 @@ export default function ConversationSessionScreen() {
     difficulty: string;
     set: string;
   }>();
+  const { t } = useI18n();
   const roundNum = Number(round);
   const diff = difficulty as ConversationDifficulty;
   const setNumber = Number(set);
@@ -78,7 +81,7 @@ export default function ConversationSessionScreen() {
       sessionIdRef.current = sid;
       startedAt.current = Date.now();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load set");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -130,46 +133,47 @@ export default function ConversationSessionScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error || !exam) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error ?? "Set unavailable"}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
       </View>
     );
   }
 
   if (stage === "report") {
     const labels = [
-      ...exam.scenarioQuestions.map((_, i) => `Scenario Q${i + 1}`),
-      ...exam.mainQuestions.map((_, i) => `Main Q${i + 1}`),
+      ...exam.scenarioQuestions.map((_, i) => t(`คำถามสถานการณ์ ข้อ ${i + 1}`, `Scenario Q${i + 1}`)),
+      ...exam.mainQuestions.map((_, i) => t(`คำถามหลัก ข้อ ${i + 1}`, `Main Q${i + 1}`)),
     ];
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <Text style={styles.score}>
-          Score: {score}/{maxScore}
-        </Text>
+        <ResultMascot ratio={maxScore > 0 ? score / maxScore : 0} message={maxScore > 0 && score / maxScore >= 0.75 ? t("เก่งมาก! ทำได้ดีเยี่ยมเลย 🎉", "Great job — excellent work! 🎉") : t("ใกล้แล้ว! ดูจุดที่พลาดด้านล่าง แล้วลองอีกครั้งนะ 💪", "Almost there! Review the misses below and try again 💪")} />
+        <AnimatedScore
+          value={score}
+          max={maxScore}
+          format={(n, m) => scoreLine(t, n, m)}
+          style={styles.score}
+        />
         <Text style={styles.hint}>
-          {itemOk.filter(Boolean).length}/{itemOk.length} correct
+          {t(
+            `ถูก ${itemOk.filter(Boolean).length}/${itemOk.length} ข้อ`,
+            `${itemOk.filter(Boolean).length}/${itemOk.length} correct`,
+          )}
         </Text>
         {labels.map((label, i) => (
-          <View key={label} style={styles.reportRow}>
+          <FadeInItem key={label} index={i + 1} style={styles.reportRow}>
             <Text style={[styles.reportLabel, itemOk[i] ? styles.ok : styles.bad]}>
-              {label} — {itemOk[i] ? "Correct" : "Wrong"}
+              {label} — {itemOk[i] ? t("ถูก", "Correct") : t("ผิด", "Wrong")}
             </Text>
             <Text style={styles.reportExp}>
               {i < CONVERSATION_SCENARIO_Q_COUNT
                 ? exam.scenarioQuestions[i]!.explanation
                 : exam.mainQuestions[i - CONVERSATION_SCENARIO_Q_COUNT]!.explanation}
             </Text>
-          </View>
+          </FadeInItem>
         ))}
       </ScrollView>
     );
@@ -180,15 +184,17 @@ export default function ConversationSessionScreen() {
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
         <Text style={styles.meta}>{exam.title}</Text>
         <Text style={styles.note}>
-          Read the scenario below. On the website you would listen first — audio is not bundled in
-          the mobile API yet.
+          {t(
+            "อ่านสถานการณ์ด้านล่าง (บนเว็บไซต์จะได้ฟังเสียงก่อน — ในแอปยังไม่มีเสียง)",
+            "Read the scenario below. On the website you would listen first — audio is not bundled in the mobile API yet.",
+          )}
         </Text>
         <View style={styles.passageBox}>
           <Text style={styles.scenario}>{exam.scenario}</Text>
         </View>
         {exam.highlightedWords.length > 0 ? (
           <View style={styles.vocabBox}>
-            <Text style={styles.vocabTitle}>Key vocabulary</Text>
+            <Text style={styles.vocabTitle}>{t("คำศัพท์สำคัญ", "Key vocabulary")}</Text>
             {exam.highlightedWords.map((h) => (
               <Text key={h.word} style={styles.vocabLine}>
                 <Text style={styles.vocabWord}>{h.word}</Text> — {h.translation}
@@ -197,7 +203,9 @@ export default function ConversationSessionScreen() {
           </View>
         ) : null}
         <LuxuryPressable style={styles.btn} onPress={() => setStage("scenario")}>
-          <Text style={styles.btnText}>Answer scenario questions →</Text>
+          <Text style={styles.btnText}>
+            {t("ตอบคำถามสถานการณ์ →", "Answer scenario questions →")}
+          </Text>
         </LuxuryPressable>
       </ScrollView>
     );
@@ -208,7 +216,10 @@ export default function ConversationSessionScreen() {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
         <Text style={styles.step}>
-          Scenario question {scenarioStep + 1}/{CONVERSATION_SCENARIO_Q_COUNT}
+          {t(
+            `คำถามสถานการณ์ ${scenarioStep + 1}/${CONVERSATION_SCENARIO_Q_COUNT}`,
+            `Scenario question ${scenarioStep + 1}/${CONVERSATION_SCENARIO_Q_COUNT}`,
+          )}
         </Text>
         <Text style={styles.question}>{q.question}</Text>
         {q.options.map((opt, j) => (
@@ -238,10 +249,13 @@ export default function ConversationSessionScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.step}>
-        Main question {mainStep + 1}/{CONVERSATION_MAIN_Q_COUNT}
+        {t(
+          `คำถามหลัก ${mainStep + 1}/${CONVERSATION_MAIN_Q_COUNT}`,
+          `Main question ${mainStep + 1}/${CONVERSATION_MAIN_Q_COUNT}`,
+        )}
       </Text>
       <View style={styles.passageBox}>
-        <Text style={styles.transcriptLabel}>Dialogue</Text>
+        <Text style={styles.transcriptLabel}>{t("บทสนทนา", "Dialogue")}</Text>
         <Text style={styles.transcript}>{mq.transcript}</Text>
       </View>
       <Text style={styles.question}>{mq.question}</Text>

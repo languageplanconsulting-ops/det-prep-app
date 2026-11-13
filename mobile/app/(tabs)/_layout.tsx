@@ -1,7 +1,9 @@
 import { Tabs } from "expo-router";
 import { type GestureResponderEvent, type StyleProp, type ViewStyle } from "react-native";
 
+import { LanguageToggle } from "../../components/LanguageToggle";
 import { LuxuryPressable } from "../../components/LuxuryPressable";
+import { useI18n } from "../../lib/i18n";
 
 function LuxuryTabBarButton({
   children,
@@ -26,6 +28,7 @@ function LuxuryTabBarButton({
 }
 
 export default function TabsLayout() {
+  const { t } = useI18n();
   return (
     <Tabs
       screenOptions={{
@@ -45,10 +48,11 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontWeight: "700", fontSize: 11 },
         tabBarButton: (props) => <LuxuryTabBarButton {...props} />,
         animation: "shift",
+        headerRight: () => <LanguageToggle onDark />,
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Practice", headerTitle: "English Plan" }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+      <Tabs.Screen name="index" options={{ title: t("ฝึก", "Practice"), headerTitle: "English Plan" }} />
+      <Tabs.Screen name="profile" options={{ title: t("โปรไฟล์", "Profile") }} />
     </Tabs>
   );
 }

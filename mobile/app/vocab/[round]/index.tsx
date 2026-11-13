@@ -4,26 +4,33 @@ import { ScrollView, StyleSheet, Text } from "react-native";
 import { LuxuryPressable } from "../../../components/LuxuryPressable";
 import { useLuxuryRouter } from "../../../hooks/useLuxuryRouter";
 import { VOCAB_SESSION_LEVELS, VOCAB_SESSION_MAX } from "../../../lib/vocab-constants";
+import { difficultyLabel, maxPointsLabel, roundLabel, useI18n } from "../../../lib/i18n";
+import { FadeInItem } from "../../../components/Motion";
 
 export default function VocabLevelPickerScreen() {
   const { round } = useLocalSearchParams<{ round: string }>();
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Round {round}</Text>
-      <Text style={styles.sub}>Choose difficulty — scoring uses this level’s cap.</Text>
-      {VOCAB_SESSION_LEVELS.map((level) => (
-        <LuxuryPressable
-          key={level}
-          style={styles.row}
-          sound="none"
-          scaleTo={0.98}
-          onPress={() => push(`/vocab/${round}/${level}`)}
-        >
-          <Text style={styles.rowTitle}>{level}</Text>
-          <Text style={styles.cap}>max {VOCAB_SESSION_MAX[level]} pts</Text>
-        </LuxuryPressable>
+      <Text style={styles.title}>{roundLabel(t, round)}</Text>
+      <Text style={styles.sub}>
+        {t("เลือกระดับความยาก — คะแนนสูงสุดขึ้นกับระดับ", "Choose difficulty — scoring uses this level’s cap.")}
+      </Text>
+      {VOCAB_SESSION_LEVELS.map((level, i) => (
+        <FadeInItem key={level} index={i} step={60}>
+          <LuxuryPressable
+            key={level}
+            style={styles.row}
+            sound="none"
+            scaleTo={0.98}
+            onPress={() => push(`/vocab/${round}/${level}`)}
+          >
+            <Text style={styles.rowTitle}>{difficultyLabel(t, level)}</Text>
+            <Text style={styles.cap}>{maxPointsLabel(t, VOCAB_SESSION_MAX[level])}</Text>
+          </LuxuryPressable>
+        </FadeInItem>
       ))}
     </ScrollView>
   );

@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -15,6 +14,8 @@ import { fetchPracticeSetMeta } from "../../../../../lib/api";
 import { packSubIndexed } from "../../../../../lib/practice-progress";
 import { VOCAB_SESSION_MAX } from "../../../../../lib/vocab-constants";
 import type { VocabSessionLevel, VocabSet } from "../../../../../lib/types";
+import { LOAD_FAILED, difficultyLabel, errorText, useI18n } from "../../../../../lib/i18n";
+import { ScreenLoader } from "../../../../../components/MascotLoader";
 
 export default function VocabPassageListScreen() {
   const { round, level, set } = useLocalSearchParams<{
@@ -23,6 +24,7 @@ export default function VocabPassageListScreen() {
     set: string;
   }>();
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
   const roundNum = Number(round);
   const sessionLevel = level as VocabSessionLevel;
   const setNumber = Number(set);
@@ -47,7 +49,7 @@ export default function VocabPassageListScreen() {
       });
       setVocabSet(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load set");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -57,20 +59,14 @@ export default function VocabPassageListScreen() {
     void load();
   }, [load]);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error || !vocabSet) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error ?? "Set unavailable"}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
         <LuxuryPressable style={styles.retry} onPress={() => void load()}>
-          <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.retryText}>{t("ลองใหม่", "Retry")}</Text>
         </LuxuryPressable>
       </View>
     );
@@ -89,11 +85,19 @@ export default function VocabPassageListScreen() {
       keyExtractor={(p) => String(p.passageNumber)}
       ListHeaderComponent={
         <Text style={styles.header}>
-          Set {setNumber} · {level} · max {cap} pts · 6 blanks each
+          {t(
+            `ชุดที่ ${setNumber} · ${difficultyLabel(t, level)} · สูงสุด ${cap} คะแนน · บทละ 6 ช่อง`,
+            `Set ${setNumber} · ${difficultyLabel(t, level)} · max ${cap} pts · 6 blanks each`,
+          )}
         </Text>
       }
       ListEmptyComponent={
-        <Text style={styles.empty}>No passages at this level in set {setNumber}.</Text>
+        <Text style={styles.empty}>
+          {t(
+            `ชุดที่ ${setNumber} ยังไม่มีบทความระดับนี้`,
+            `No passages at this level in set ${setNumber}.`,
+          )}
+        </Text>
       }
       renderItem={({ item }) => (
         <LuxuryPressable
@@ -105,12 +109,14 @@ export default function VocabPassageListScreen() {
           }
         >
           <Text style={styles.rowTitle}>
-            Passage {item.passageNumber}
+            {t(`บทความ ${item.passageNumber}`, `Passage ${item.passageNumber}`)}
             {item.titleEn ? ` — ${item.titleEn}` : ""}
           </Text>
           {(() => {
             const best = bestPct.get(packSubIndexed(setNumber, item.passageNumber));
-            return best != null ? <Text style={styles.best}>Best {Math.round(best)}%</Text> : null;
+            return best != null ? <Text style={styles.best}>
+                {t("ดีที่สุด", "Best")} {Math.round(best)}%
+              </Text> : null;
           })()}
           <Text style={styles.chev}>›</Text>
         </LuxuryPressable>

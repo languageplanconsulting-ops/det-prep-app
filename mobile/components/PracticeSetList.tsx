@@ -1,6 +1,6 @@
+import type { Href } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -12,7 +12,10 @@ import { LuxuryTile } from "./LuxuryTile";
 import { useBestScores } from "../hooks/useBestScores";
 import { useLuxuryRouter } from "../hooks/useLuxuryRouter";
 import { fetchPracticeSetList } from "../lib/api";
+import { useI18n } from "../lib/i18n";
 import type { PracticeSkillId } from "../lib/types";
+import { ScreenLoader } from "./MascotLoader";
+import { FadeInItem } from "./Motion";
 
 type Props = {
   skill: PracticeSkillId;
@@ -26,6 +29,7 @@ type Props = {
 
 export function PracticeSetList({ skill, round, difficulty, header, href, progress }: Props) {
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
   const [setNumbers, setSetNumbers] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +51,7 @@ export function PracticeSetList({ skill, round, difficulty, header, href, progre
       });
       setSetNumbers(nums);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load sets");
+      setError(e instanceof Error ? e.message : t("โหลดชุดข้อสอบไม่สำเร็จ", "Failed to load sets"));
     } finally {
       setLoading(false);
     }
@@ -57,20 +61,14 @@ export function PracticeSetList({ skill, round, difficulty, header, href, progre
     void load();
   }, [load]);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error) {
     return (
       <View style={styles.center}>
         <Text style={styles.error}>{error}</Text>
         <LuxuryPressable style={styles.retry} onPress={() => void load()}>
-          <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.retryText}>{t("ลองใหม่", "Retry")}</Text>
         </LuxuryPressable>
       </View>
     );
@@ -88,17 +86,19 @@ export function PracticeSetList({ skill, round, difficulty, header, href, progre
         const available = setNumbers.includes(setNumber);
         const best = bestPct.get(setNumber);
         const subtitle = !available
-          ? "No data"
+          ? t("ยังไม่มีข้อสอบ", "No data")
           : best != null
-            ? `Best ${Math.round(best)}%`
-            : "Open";
+            ? t(`ดีที่สุด ${Math.round(best)}%`, `Best ${Math.round(best)}%`)
+            : t("เริ่มทำ", "Open");
         return (
-          <LuxuryTile
-            title={`Set ${setNumber}`}
-            subtitle={subtitle}
-            disabled={!available}
-            onPress={() => push(href(setNumber))}
-          />
+          <FadeInItem index={setNumber - 1} step={25} style={{ flex: 1 }}>
+            <LuxuryTile
+              title={t(`ชุดที่ ${setNumber}`, `Set ${setNumber}`)}
+              subtitle={subtitle}
+              disabled={!available}
+              onPress={() => push(href(setNumber) as Href)}
+            />
+          </FadeInItem>
         );
       }}
     />

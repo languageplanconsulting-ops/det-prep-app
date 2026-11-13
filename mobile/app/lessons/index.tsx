@@ -8,9 +8,11 @@ import {
   CAMPUS_LISTENING_SCENARIOS,
 } from "../../lib/campus-listening-lessons";
 import { getCompletedScenarioIds } from "../../lib/campus-lesson-progress";
+import { useI18n } from "../../lib/i18n";
 
 export default function LessonsHubScreen() {
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
   const [done, setDone] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -20,14 +22,17 @@ export default function LessonsHubScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.hero}>
-        <Text style={styles.heroLabel}>บทเรียน · Mobile only</Text>
-        <Text style={styles.heroTitle}>ฟังสถานการณ์ในมหาวิทยาลัย</Text>
+        <Text style={styles.heroLabel}>{t("บทเรียน · เฉพาะในแอป", "Lessons · app only")}</Text>
+        <Text style={styles.heroTitle}>{t("ฟังสถานการณ์ในมหาวิทยาลัย", "Campus listening")}</Text>
         <Text style={styles.heroSub}>
-          ฟังบทสนทนาในวิทยาเขต แล้วเติมคำศัพท์จากความหมายที่ได้ยิน — 20 สถานการณ์ × 3 คำถาม
+          {t(
+            "ฟังบทสนทนาในวิทยาเขต แล้วเติมคำศัพท์จากความหมายที่ได้ยิน — 20 สถานการณ์ × 3 คำถาม",
+            "Listen to campus conversations, then fill in vocabulary from what you hear — 20 scenarios × 3 questions.",
+          )}
         </Text>
       </View>
 
-      <Text style={styles.sectionTitle}>สถานการณ์ทั้งหมด</Text>
+      <Text style={styles.sectionTitle}>{t("สถานการณ์ทั้งหมด", "All scenarios")}</Text>
       <View style={styles.card}>
         {CAMPUS_LISTENING_SCENARIOS.map((sc, i) => {
           const completed = done.has(sc.id);
@@ -57,7 +62,10 @@ export default function LessonsHubScreen() {
       </View>
 
       <Text style={styles.footnote}>
-        พี่ดอยจะแนะนำก่อนทุกข้อ · ตอบผิดจะสอนคำศัพท์และบันทึกลงสมุดได้
+        {t(
+          "พี่ดอยจะแนะนำก่อนทุกข้อ · ตอบผิดจะสอนคำศัพท์และบันทึกลงสมุดได้",
+          "Coach Doi guides every question · wrong answers teach the word and can be saved to your notebook.",
+        )}
       </Text>
     </ScrollView>
   );

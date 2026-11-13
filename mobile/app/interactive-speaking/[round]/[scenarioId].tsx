@@ -2,7 +2,6 @@ import { Audio } from "expo-av";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -36,6 +35,10 @@ import type {
   InteractiveSpeakingScenario,
   InteractiveSpeakingTurnRecord,
 } from "../../../lib/types";
+import { errorText, LOAD_FAILED, scoreLine, useI18n } from "../../../lib/i18n";
+import { ScreenLoader } from "../../../components/MascotLoader";
+import { MascotLoader } from "../../../components/MascotLoader";
+import { AnimatedScore, FadeInItem, ResultMascot } from "../../../components/Motion";
 
 type Phase = "intro" | "prep" | "record" | "review" | "grading" | "report";
 
@@ -55,6 +58,7 @@ function randomAttemptId(): string {
 
 export default function InteractiveSpeakingSessionScreen() {
   const { round, scenarioId } = useLocalSearchParams<{ round: string; scenarioId: string }>();
+  const { t } = useI18n();
   const attemptId = useMemo(() => randomAttemptId(), []);
 
   const [scenario, setScenario] = useState<InteractiveSpeakingScenario | null>(null);
@@ -90,7 +94,7 @@ export default function InteractiveSpeakingSessionScreen() {
       sessionIdRef.current = sid;
       startedAt.current = Date.now();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load scenario");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -141,7 +145,12 @@ export default function InteractiveSpeakingSessionScreen() {
   const beginRecording = async () => {
     const ok = await ensureMicPermission();
     if (!ok) {
-      setError("Microphone permission required. You can type your answer on the review screen.");
+      setError(
+        t(
+          "ต้องอนุญาตให้ใช้ไมโครโฟน — หรือพิมพ์คำตอบในหน้าถัดไปแทนได้",
+          "Microphone permission required. You can type your answer on the review screen.",
+        ),
+      );
       setPhase("record");
       return;
     }
@@ -151,7 +160,7 @@ export default function InteractiveSpeakingSessionScreen() {
       setIsRecording(true);
       setPhase("record");
     } catch {
-      setError("Could not start recording. Type your answer instead.");
+      setError(t("เริ่มอัดเสียงไม่ได้ — พิมพ์คำตอบแทนได้", "Could not start recording. Type your answer instead."));
       setPhase("record");
     }
   };
@@ -175,7 +184,7 @@ export default function InteractiveSpeakingSessionScreen() {
         setTranscript((prev) => [prev.trim(), text.trim()].filter(Boolean).join(" ").trim());
       }
     } catch {
-      setError("Transcription failed. Edit your answer below.");
+      setError(t("แปลงเสียงเป็นข้อความไม่สำเร็จ — แก้คำตอบด้านล่างได้", "Transcription failed. Edit your answer below."));
     } finally {
       setTranscribing(false);
       setPhase("review");
@@ -191,14 +200,14 @@ export default function InteractiveSpeakingSessionScreen() {
       setCompleted([]);
       beginTurn(scenario.starterQuestionEn, scenario.starterQuestionTh);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start session");
+      setError(e instanceof Error ? e.message : t("เริ่มทำไม่สำเร็จ", "Could not start session"));
     }
   };
 
   const submitTurn = async () => {
     const trimmed = transcript.trim();
     if (countWords(trimmed) < 3) {
-      setError("Speak or type at least a few words.");
+      setError(t("พูดหรือพิมพ์อย่างน้อยสักสองสามคำ", "Speak or type at least a few words."));
       return;
     }
     setError(null);
@@ -244,7 +253,7 @@ export default function InteractiveSpeakingSessionScreen() {
         }
       } catch (e) {
         setPhase("review");
-        setError(e instanceof Error ? e.message : "Grading failed");
+        setError(e instanceof Error ? e.message : t("ตรวจไม่สำเร็จ", "Grading failed"));
       }
       return;
     }
@@ -268,22 +277,16 @@ export default function InteractiveSpeakingSessionScreen() {
       beginTurn(questionEn, questionTh);
     } catch (e) {
       setPhase("review");
-      setError(e instanceof Error ? e.message : "Could not load next question");
+      setError(e instanceof Error ? e.message : t("โหลดคำถามถัดไปไม่สำเร็จ", "Could not load next question"));
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error && !scenario) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
       </View>
     );
   }
@@ -291,29 +294,35 @@ export default function InteractiveSpeakingSessionScreen() {
   if (!scenario) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>Scenario unavailable</Text>
+        <Text style={styles.error}>{errorText(t, null)}</Text>
       </View>
     );
   }
 
   if (phase === "report" && report) {
     const criteria = [
-      { label: "Task", r: report.taskRelevancy },
-      { label: "Grammar", r: report.grammar },
-      { label: "Coherence", r: report.coherence },
-      { label: "Vocabulary", r: report.vocabulary },
+      { label: t("ตอบตรงโจทย์", "Task"), r: report.taskRelevancy },
+      { label: t("ไวยากรณ์", "Grammar"), r: report.grammar },
+      { label: t("ความต่อเนื่อง", "Coherence"), r: report.coherence },
+      { label: t("คำศัพท์", "Vocabulary"), r: report.vocabulary },
     ];
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <Text style={styles.score}>Score: {Math.round(report.score160)}/160</Text>
-        {criteria.map(({ label, r }) => (
-          <View key={label} style={styles.criterion}>
+        <ResultMascot ratio={160 > 0 ? Math.round(report.score160) / 160 : 0} message={160 > 0 && Math.round(report.score160) / 160 >= 0.75 ? t("เก่งมาก! ทำได้ดีเยี่ยมเลย 🎉", "Great job — excellent work! 🎉") : t("ใกล้แล้ว! ดูจุดที่พลาดด้านล่าง แล้วลองอีกครั้งนะ 💪", "Almost there! Review the misses below and try again 💪")} />
+        <AnimatedScore
+          value={Math.round(report.score160)}
+          max={160}
+          format={(n, m) => scoreLine(t, n, m)}
+          style={styles.score}
+        />
+        {criteria.map(({ label, r }, i) => (
+          <FadeInItem key={label} index={i + 1} style={styles.criterion}>
             <Text style={styles.criterionTitle}>
               {label} — {Math.round(r.scorePercent)}%
             </Text>
             <Text style={styles.criterionEn}>{r.summary.en}</Text>
             <Text style={styles.criterionTh}>{r.summary.th}</Text>
-          </View>
+          </FadeInItem>
         ))}
       </ScrollView>
     );
@@ -322,8 +331,11 @@ export default function InteractiveSpeakingSessionScreen() {
   if (phase === "grading" && !report) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-        <Text style={styles.grading}>Working…</Text>
+        {turn >= INTERACTIVE_SPEAKING_TURN_COUNT ? (
+          <MascotLoader grading label={t("AI กำลังตรวจคำตอบของคุณ", "Grading your answers")} />
+        ) : (
+          <MascotLoader label={t("กำลังเตรียมคำถามถัดไป", "Preparing the next question")} />
+        )}
       </View>
     );
   }
@@ -334,11 +346,14 @@ export default function InteractiveSpeakingSessionScreen() {
         <Text style={styles.title}>{scenario.titleEn}</Text>
         <Text style={styles.titleTh}>{scenario.titleTh}</Text>
         <Text style={styles.note}>
-          Round {round} · 6 turns · Uses VIP AI credits when you submit for feedback.
+          {t(
+            `รอบ ${round} · 6 รอบคำถาม · ใช้เครดิต AI ของ VIP เมื่อส่งตรวจ`,
+            `Round ${round} · 6 turns · Uses VIP AI credits when you submit for feedback.`,
+          )}
         </Text>
         {error ? <Text style={styles.formError}>{error}</Text> : null}
         <LuxuryPressable style={styles.btn} onPress={() => void startExam()}>
-          <Text style={styles.btnText}>Start scenario</Text>
+          <Text style={styles.btnText}>{t("เริ่มสถานการณ์", "Start scenario")}</Text>
         </LuxuryPressable>
       </ScrollView>
     );
@@ -347,48 +362,61 @@ export default function InteractiveSpeakingSessionScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.meta}>
-        Turn {turn}/{INTERACTIVE_SPEAKING_TURN_COUNT}
+        {t(
+          `คำถามที่ ${turn}/${INTERACTIVE_SPEAKING_TURN_COUNT}`,
+          `Turn ${turn}/${INTERACTIVE_SPEAKING_TURN_COUNT}`,
+        )}
       </Text>
       <Text style={styles.question}>{currentQ.en}</Text>
       {currentQ.th ? <Text style={styles.questionTh}>{currentQ.th}</Text> : null}
 
       {phase === "prep" ? (
-        <Text style={styles.countdown}>Get ready… {prepLeft}</Text>
+        <Text style={styles.countdown}>
+          {t(`เตรียมตัว… ${prepLeft}`, `Get ready… ${prepLeft}`)}
+        </Text>
       ) : null}
 
       {phase === "record" ? (
         <View style={styles.recordBox}>
           <Text style={styles.countdown}>
-            {isRecording ? `Recording… ${recLeft}s` : "Tap stop when finished"}
+            {isRecording
+              ? t(`กำลังอัดเสียง… ${recLeft} วินาที`, `Recording… ${recLeft}s`)
+              : t("แตะหยุดเมื่อพูดจบ", "Tap stop when finished")}
           </Text>
           {isRecording ? (
             <LuxuryPressable style={styles.stopBtn} onPress={() => void stopRecording()}>
-              <Text style={styles.stopBtnText}>Stop recording</Text>
+              <Text style={styles.stopBtnText}>{t("หยุดอัดเสียง", "Stop recording")}</Text>
             </LuxuryPressable>
           ) : (
             <LuxuryPressable style={styles.stopBtn} onPress={() => setPhase("review")}>
-              <Text style={styles.stopBtnText}>Skip to type answer</Text>
+              <Text style={styles.stopBtnText}>{t("ข้ามไปพิมพ์คำตอบ", "Skip to type answer")}</Text>
             </LuxuryPressable>
           )}
-          {transcribing ? <Text style={styles.hint}>Transcribing…</Text> : null}
+          {transcribing ? (
+            <Text style={styles.hint}>{t("กำลังแปลงเสียงเป็นข้อความ…", "Transcribing…")}</Text>
+          ) : null}
         </View>
       ) : null}
 
       {(phase === "review" || phase === "record") && !isRecording ? (
         <>
-          <Text style={styles.prompt}>Your answer (edit if needed)</Text>
+          <Text style={styles.prompt}>
+            {t("คำตอบของคุณ (แก้ไขได้)", "Your answer (edit if needed)")}
+          </Text>
           <TextInput
             style={styles.input}
             multiline
             value={transcript}
             onChangeText={setTranscript}
-            placeholder="Your spoken answer…"
+            placeholder={t("คำตอบที่คุณพูด…", "Your spoken answer…")}
             textAlignVertical="top"
           />
           {error ? <Text style={styles.formError}>{error}</Text> : null}
           <LuxuryPressable style={styles.btn} sound="submit" onPress={() => void submitTurn()}>
             <Text style={styles.btnText}>
-              {turn < INTERACTIVE_SPEAKING_TURN_COUNT ? "Next turn →" : "Submit for grading"}
+              {turn < INTERACTIVE_SPEAKING_TURN_COUNT
+                ? t("คำถามถัดไป →", "Next turn →")
+                : t("ส่งให้ AI ตรวจ", "Submit for grading")}
             </Text>
           </LuxuryPressable>
         </>

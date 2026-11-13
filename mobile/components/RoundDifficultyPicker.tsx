@@ -1,8 +1,11 @@
+import type { Href } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { LuxuryPressable } from "../components/LuxuryPressable";
 import { useLuxuryRouter } from "../hooks/useLuxuryRouter";
 import { PRACTICE_ROUNDS } from "../lib/fitb-constants";
+import { difficultyLabel, maxPointsLabel, roundLabel, useI18n } from "../lib/i18n";
+import { FadeInItem } from "./Motion";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -20,15 +23,16 @@ export function RoundDifficultyPicker({
   maxScores: Record<Difficulty, number>;
 }) {
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.sub}>{subtitle}</Text>
 
-      {PRACTICE_ROUNDS.map((round) => (
-        <View key={round} style={styles.roundBlock}>
-          <Text style={styles.roundTitle}>Round {round}</Text>
+      {PRACTICE_ROUNDS.map((round, i) => (
+        <FadeInItem key={round} index={i} step={60} style={styles.roundBlock}>
+          <Text style={styles.roundTitle}>{roundLabel(t, round)}</Text>
           <View style={styles.diffRow}>
             {difficulties.map((diff) => (
               <LuxuryPressable
@@ -36,14 +40,14 @@ export function RoundDifficultyPicker({
                 style={styles.diffBtn}
                 sound="none"
                 scaleTo={0.94}
-                onPress={() => push(`${basePath}/${round}/${diff}`)}
+                onPress={() => push(`${basePath}/${round}/${diff}` as Href)}
               >
-                <Text style={styles.diffLabel}>{diff}</Text>
-                <Text style={styles.diffCap}>max {maxScores[diff]} pts</Text>
+                <Text style={styles.diffLabel}>{difficultyLabel(t, diff)}</Text>
+                <Text style={styles.diffCap}>{maxPointsLabel(t, maxScores[diff])}</Text>
               </LuxuryPressable>
             ))}
           </View>
-        </View>
+        </FadeInItem>
       ))}
     </ScrollView>
   );

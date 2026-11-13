@@ -4,103 +4,110 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { LuxuryPressable } from "../../components/LuxuryPressable";
 import { useLuxuryRouter } from "../../hooks/useLuxuryRouter";
+import { useI18n } from "../../lib/i18n";
+import { FadeInItem } from "../../components/Motion";
 
-const LITERACY = [
-  { key: "dictation", title: "ตามคำบอก", sub: "Dictation", href: "/dictation" as const },
-  { key: "fitb", title: "เติมคำในช่องว่าง", sub: "Fill in the blank", href: "/fitb" as const },
-  { key: "realword", title: "คำจริง / คำลวง", sub: "Real word", href: "/realword" as const },
-] as const;
+type Translate = ReturnType<typeof useI18n>["t"];
+type Row = { title: string; sub: string; href: Href };
 
-const COMPREHENSION = [
-  { title: "ศัพท์", sub: "Vocabulary", href: "/vocab" as const },
-  { title: "การอ่าน", sub: "Reading", href: "/reading" as const },
-] as const;
+// Thai mode: Thai title + English task name. English mode: English title + Thai name.
+const row = (t: Translate, th: string, en: string, href: Href): Row => ({
+  title: t(th, en),
+  sub: t(en, th),
+  href,
+});
 
-const CONVERSATION = [
-  { title: "บทสนทนาโต้ตอบ", sub: "Interactive conversation", href: "/conversation" as const },
-  { title: "ฟังแล้วสรุป", sub: "Dialogue → summary", href: "/dialogue-summary" as const },
-] as const;
+const literacy = (t: Translate): Row[] => [
+  row(t, "ตามคำบอก", "Dictation", "/dictation"),
+  row(t, "เติมคำในช่องว่าง", "Fill in the blank", "/fitb"),
+  row(t, "คำจริง / คำลวง", "Real word", "/realword"),
+];
 
-const LESSONS = [
+const comprehension = (t: Translate): Row[] => [
+  row(t, "คำศัพท์", "Vocabulary", "/vocab"),
+  row(t, "การอ่าน", "Reading", "/reading"),
+];
+
+const conversation = (t: Translate): Row[] => [
+  row(t, "บทสนทนาโต้ตอบ", "Interactive conversation", "/conversation"),
+  row(t, "ฟังแล้วสรุป", "Dialogue → summary", "/dialogue-summary"),
+];
+
+const lessons = (t: Translate): Row[] => [
   {
-    title: "ฟังสถานการณ์ในมหาวิทยาลัย",
-    sub: "Campus listening · บทเรียน",
+    title: t("ฟังสถานการณ์ในมหาวิทยาลัย", "Campus listening"),
+    sub: t("Campus listening · บทเรียน", "ฟังสถานการณ์ในมหาวิทยาลัย · Lessons"),
     href: "/lessons" as Href,
   },
-] as const;
+];
 
-const PRODUCTION = [
-  { title: "พูดโต้ตอบ", sub: "Interactive speaking", href: "/interactive-speaking" as const },
-] as const;
+const production = (t: Translate): Row[] => [
+  row(t, "พูดโต้ตอบ", "Interactive speaking", "/interactive-speaking"),
+];
 
 export default function PracticeHubScreen() {
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
+
+  const rows = (list: Row[]) =>
+    list.map((r) => (
+      <HubRow key={r.title} title={r.title} sub={r.sub} onPress={() => push(r.href)} />
+    ));
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <View style={styles.hero}>
-        <Text style={styles.heroLabel}>แพ็กของคุณ</Text>
-        <Text style={styles.heroTitle}>Practice hub</Text>
-        <Text style={styles.heroSub}>Questions sync from the same database as the website.</Text>
-      </View>
+      <FadeInItem index={0} style={styles.hero}>
+        <Text style={styles.heroLabel}>{t("แพ็กของคุณ", "Your plan")}</Text>
+        <Text style={styles.heroTitle}>{t("ศูนย์ฝึก", "Practice hub")}</Text>
+        <Text style={styles.heroSub}>
+          {t(
+            "ข้อสอบดึงจากฐานข้อมูลเดียวกับเว็บไซต์ คะแนนซิงก์กันทั้งสองฝั่ง",
+            "Questions and scores sync with the website.",
+          )}
+        </Text>
+      </FadeInItem>
 
-      <Section title="Literacy" sub="ตามคำบอก · เติมคำ · คำจริง">
-        {LITERACY.map((row) => (
-          <HubRow
-            key={row.key}
-            title={row.title}
-            sub={row.sub}
-            onPress={() => push(row.href)}
-          />
-        ))}
+      <Section
+        index={1}
+        title={t("การอ่านเขียนพื้นฐาน", "Literacy")}
+        sub={t("ตามคำบอก · เติมคำ · คำจริง", "Dictation · Fill in the blank · Real word")}
+      >
+        {rows(literacy(t))}
       </Section>
 
-      <Section title="Comprehension" sub="ศัพท์ & การอ่าน">
-        {COMPREHENSION.map((row) => (
-          <HubRow
-            key={row.sub}
-            title={row.title}
-            sub={row.sub}
-            onPress={() => push(row.href)}
-          />
-        ))}
+      <Section
+        index={2}
+        title={t("ความเข้าใจ", "Comprehension")}
+        sub={t("คำศัพท์ & การอ่าน", "Vocabulary & reading")}
+      >
+        {rows(comprehension(t))}
       </Section>
 
-      <Section title="Conversation" sub="ฟังแล้วตอบ">
-        {CONVERSATION.map((row) => (
-          <HubRow
-            key={row.sub}
-            title={row.title}
-            sub={row.sub}
-            onPress={() => push(row.href)}
-          />
-        ))}
+      <Section title={t("บทสนทนา", "Conversation")} index={3} sub={t("ฟังแล้วตอบ", "Listen and respond")}>
+        {rows(conversation(t))}
       </Section>
 
-      <Section title="บทเรียน" sub="เรียนรู้ทีละสถานการณ์ · mobile only">
-        {LESSONS.map((row) => (
-          <HubRow
-            key={row.sub}
-            title={row.title}
-            sub={row.sub}
-            onPress={() => push(row.href)}
-          />
-        ))}
+      <Section
+        index={4}
+        title={t("บทเรียน", "Lessons")}
+        sub={t("เรียนรู้ทีละสถานการณ์ · เฉพาะในแอป", "One scenario at a time · app only")}
+      >
+        {rows(lessons(t))}
       </Section>
 
-      <Section title="Production" sub="พูด & เขียน (AI graded)">
-        {PRODUCTION.map((row) => (
-          <HubRow
-            key={row.sub}
-            title={row.title}
-            sub={row.sub}
-            onPress={() => push(row.href)}
-          />
-        ))}
+      <Section
+        index={5}
+        title={t("การพูดและเขียน", "Production")}
+        sub={t("พูด & เขียน (AI ตรวจให้)", "Speaking & writing (AI graded)")}
+      >
+        {rows(production(t))}
       </Section>
 
       <Text style={styles.footnote}>
-        Write-about-photo, speak-about-photo, and mock test — same APIs, mobile UI coming next.
+        {t(
+          "เขียนจากภาพ, พูดจากภาพ และข้อสอบจำลอง — กำลังจะมาในแอปเร็วๆ นี้",
+          "Write-about-photo, speak-about-photo, and mock test — coming to the app next.",
+        )}
       </Text>
     </ScrollView>
   );
@@ -109,18 +116,20 @@ export default function PracticeHubScreen() {
 function Section({
   title,
   sub,
+  index = 0,
   children,
 }: {
   title: string;
   sub: string;
+  index?: number;
   children: ReactNode;
 }) {
   return (
-    <View style={styles.section}>
+    <FadeInItem index={index} step={70} style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
       <Text style={styles.sectionSub}>{sub}</Text>
       <View style={styles.card}>{children}</View>
-    </View>
+    </FadeInItem>
   );
 }
 
@@ -135,6 +144,8 @@ function HubRow({
   soon?: boolean;
   onPress?: () => void;
 }) {
+  const { t } = useI18n();
+  const soonLabel = t("เร็วๆ นี้", "Soon");
   return (
     <LuxuryPressable
       style={styles.row}
@@ -147,7 +158,7 @@ function HubRow({
         <Text style={styles.rowTitle}>{title}</Text>
         <Text style={styles.rowSub}>{sub}</Text>
       </View>
-      {soon ? <Text style={styles.soon}>Soon</Text> : <Text style={styles.chev}>›</Text>}
+      {soon ? <Text style={styles.soon}>{soonLabel}</Text> : <Text style={styles.chev}>›</Text>}
     </LuxuryPressable>
   );
 }

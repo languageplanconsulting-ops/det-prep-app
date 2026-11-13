@@ -7,28 +7,36 @@ import {
   CONVERSATION_DIFFICULTIES,
   CONVERSATION_FULL_SCORE,
 } from "../../../lib/conversation-constants";
+import { difficultyLabel, roundLabel, useI18n } from "../../../lib/i18n";
+import { FadeInItem } from "../../../components/Motion";
 
 export default function ConversationLevelPickerScreen() {
   const { round } = useLocalSearchParams<{ round: string }>();
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Round {round}</Text>
+      <Text style={styles.title}>{roundLabel(t, round)}</Text>
       <Text style={styles.sub}>
-        Max {CONVERSATION_FULL_SCORE} pts per set · 3 scenario + 5 main questions.
+        {t(
+          `สูงสุด ${CONVERSATION_FULL_SCORE} คะแนนต่อชุด · คำถามสถานการณ์ 3 ข้อ + คำถามหลัก 5 ข้อ`,
+          `Max ${CONVERSATION_FULL_SCORE} pts per set · 3 scenario + 5 main questions.`,
+        )}
       </Text>
-      {CONVERSATION_DIFFICULTIES.map((level) => (
-        <LuxuryPressable
-          key={level}
-          style={styles.row}
-          sound="none"
-          scaleTo={0.98}
-          onPress={() => push(`/conversation/${round}/${level}`)}
-        >
-          <Text style={styles.rowTitle}>{level}</Text>
-          <Text style={styles.chev}>›</Text>
-        </LuxuryPressable>
+      {CONVERSATION_DIFFICULTIES.map((level, i) => (
+        <FadeInItem key={level} index={i} step={60}>
+          <LuxuryPressable
+            key={level}
+            style={styles.row}
+            sound="none"
+            scaleTo={0.98}
+            onPress={() => push(`/conversation/${round}/${level}`)}
+          >
+            <Text style={styles.rowTitle}>{difficultyLabel(t, level)}</Text>
+            <Text style={styles.chev}>›</Text>
+          </LuxuryPressable>
+        </FadeInItem>
       ))}
     </ScrollView>
   );

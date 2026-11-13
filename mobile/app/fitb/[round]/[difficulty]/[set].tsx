@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -23,6 +22,16 @@ import {
   gradeFitbBlank,
 } from "../../../../lib/fitb-scoring";
 import type { FitbBlankGrade, FitbDifficulty, FitbSet } from "../../../../lib/types";
+import { LOAD_FAILED, errorText, scoreLine, setLine, useI18n } from "../../../../lib/i18n";
+import { ScreenLoader } from "../../../../components/MascotLoader";
+import { AnimatedScore, FadeInItem, ResultMascot } from "../../../../components/Motion";
+
+function gradeLabel(t: (th: string, en: string) => string, grade: string | undefined): string {
+  if (grade === "exact") return t("ถูกต้อง", "exact");
+  if (grade === "close") return t("เกือบถูก", "close");
+  if (grade === "wrong") return t("ผิด", "wrong");
+  return grade ?? "";
+}
 
 export default function FitbSessionScreen() {
   const { round, difficulty, set } = useLocalSearchParams<{
@@ -30,6 +39,7 @@ export default function FitbSessionScreen() {
     difficulty: string;
     set: string;
   }>();
+  const { t } = useI18n();
   const roundNum = Number(round);
   const diff = difficulty as FitbDifficulty;
   const setNumber = Number(set);
@@ -81,7 +91,7 @@ export default function FitbSessionScreen() {
       sessionIdRef.current = sid;
       startedAt.current = Date.now();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load set");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -157,18 +167,12 @@ export default function FitbSessionScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error || !fitbSet) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error ?? "Set unavailable"}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
       </View>
     );
   }
@@ -176,23 +180,32 @@ export default function FitbSessionScreen() {
   if (phase === "report") {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <Text style={styles.score}>
-          Score: {detScore}/{maxScore}
-        </Text>
+        <ResultMascot ratio={maxScore > 0 ? detScore / maxScore : 0} message={maxScore > 0 && detScore / maxScore >= 0.75 ? t("เก่งมาก! ทำได้ดีเยี่ยมเลย 🎉", "Great job — excellent work! 🎉") : t("ใกล้แล้ว! ดูจุดที่พลาดด้านล่าง แล้วลองอีกครั้งนะ 💪", "Almost there! Review the misses below and try again 💪")} />
+        <AnimatedScore
+          value={detScore}
+          max={maxScore}
+          format={(n, m) => scoreLine(t, n, m)}
+          style={styles.score}
+        />
         {fitbSet.missingWords.map((mw, i) => (
-          <View key={i} style={styles.reportRow}>
+          <FadeInItem key={i} index={i + 1} style={styles.reportRow}>
             <Text style={styles.reportGrade}>
-              Blank {i + 1}: {grades[i]} {clueUsed[i] ? "(clue used)" : ""}
+              {t(`ช่องที่ ${i + 1}`, `Blank ${i + 1}`)}: {gradeLabel(t, grades[i])}{" "}
+              {clueUsed[i] ? t("(ใช้คำใบ้)", "(clue used)") : ""}
             </Text>
-            <Text style={styles.reportAnswer}>You: {userAnswers[i]}</Text>
-            <Text style={styles.reportCorrect}>Answer: {mw.correctWord}</Text>
+            <Text style={styles.reportAnswer}>
+              {t("คุณตอบ", "You")}: {userAnswers[i]}
+            </Text>
+            <Text style={styles.reportCorrect}>
+              {t("เฉลย", "Answer")}: {mw.correctWord}
+            </Text>
             {mw.explanationThai ? (
               <Text style={styles.reportTh}>{mw.explanationThai}</Text>
             ) : null}
-          </View>
+          </FadeInItem>
         ))}
         <LuxuryPressable style={styles.btn} onPress={() => setPhase("quiz")}>
-          <Text style={styles.btnText}>Try again</Text>
+          <Text style={styles.btnText}>{t("ทำอีกครั้ง", "Try again")}</Text>
         </LuxuryPressable>
       </ScrollView>
     );
@@ -203,7 +216,7 @@ export default function FitbSessionScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.meta}>
-        Round {roundNum} · {difficulty} · Set {setNumber}
+        {setLine(t, roundNum, difficulty, setNumber)}
       </Text>
 
       <View style={styles.passage}>
@@ -236,7 +249,7 @@ export default function FitbSessionScreen() {
                   autoCorrect={false}
                 />
                 <LuxuryPressable onPress={() => toggleClue(bi)} style={styles.clueBtn}>
-                  <Text style={styles.clueBtnText}>{clueVisible[bi] ? "Hide" : "Clue"}</Text>
+                  <Text style={styles.clueBtnText}>{clueVisible[bi] ? t("ซ่อน", "Hide") : t("คำใบ้", "Clue")}</Text>
                 </LuxuryPressable>
                 {clueVisible[bi] ? (
                   <Text style={styles.clueText}> {mw.clue}</Text>
@@ -252,7 +265,7 @@ export default function FitbSessionScreen() {
         disabled={!canSubmit}
         sound="submit" onPress={() => void submit()}
       >
-        <Text style={styles.btnText}>Check answer</Text>
+        <Text style={styles.btnText}>{t("ตรวจคำตอบ", "Check answer")}</Text>
       </LuxuryPressable>
     </ScrollView>
   );

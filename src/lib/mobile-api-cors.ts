@@ -4,6 +4,13 @@ import { NextResponse, type NextRequest } from "next/server";
 function isExpoDevOrigin(origin: string | null): boolean {
   if (!origin) return false;
   if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+  // Dev only: the Expo web build opened on a phone over the home Wi-Fi (e.g. http://192.168.1.35:8084)
+  if (
+    process.env.NODE_ENV !== "production" &&
+    /^http:\/\/(192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(origin)
+  ) {
+    return true;
+  }
   // Deployed Expo web build on Vercel
   if (origin === "https://det-mobile.vercel.app") return true;
   // Any Vercel preview deployments for the mobile project

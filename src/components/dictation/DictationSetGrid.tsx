@@ -7,6 +7,7 @@ import {
   DICTATION_SET_COUNT,
 } from "@/lib/dictation-constants";
 import { defaultDictationFullBank } from "@/lib/dictationData";
+import { dictationHintTh } from "@/lib/dictation-hints-th";
 import { ensureCanonicalPracticeContent } from "@/lib/practice-content/client";
 import {
   ensureDictationBankReady,
@@ -87,7 +88,7 @@ export function DictationSetGrid({
             <p className="mt-1 text-xl font-black">Set {setNumber}</p>
             <p className="ep-stat mt-2 text-xs font-bold text-neutral-800">{scoreLine}</p>
             <p className="mt-1 text-[10px] text-neutral-500 truncate" title={set.hintText}>
-              {set.hintText}
+              {dictationHintTh(set.hintText) ?? set.hintText}
             </p>
           </FreeQuotaLockedLink>
         );

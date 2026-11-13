@@ -14,6 +14,8 @@ export interface DictationItem {
   audioUrl?: string;
   transcript: string;
   hintText: string;
+  /** Thai version of hintText, added by the API when a translation exists. */
+  hintTextTh?: string | null;
 }
 
 export type FitbBlankGrade = "exact" | "close" | "wrong";

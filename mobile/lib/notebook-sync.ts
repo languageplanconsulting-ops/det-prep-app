@@ -19,7 +19,8 @@ async function authHeaders(): Promise<HeadersInit> {
 
 export type MobileNotebookEntry = {
   id: string;
-  source: "mini-study-lesson";
+  /** Same source labels as the website notebook (src/types/writing.ts NotebookEntry). */
+  source: "mini-study-lesson" | "reading-comprehension";
   categoryIds: string[];
   titleEn: string;
   titleTh: string;

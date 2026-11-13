@@ -7,6 +7,7 @@ import { StickyExamCTA } from "@/components/practice/StickyExamCTA";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { getDictationAudioDataUrlByItemId } from "@/lib/dictation-audio-indexeddb";
 import { dictationScoreFromDiff, diffDictationChars } from "@/lib/dictation-diff";
+import { dictationHintTh } from "@/lib/dictation-hints-th";
 import { sfxCorrect, sfxTransition, sfxWrong } from "@/lib/exam-sfx";
 import { dictationMaxForDifficulty, saveDictationAttempt } from "@/lib/dictation-storage";
 import type { DictationDifficulty, DictationItem, DictationRoundNum } from "@/types/dictation";
@@ -263,7 +264,7 @@ export function DictationSessionClient({
               ← Sets
             </Link>
             <p className="ep-stat text-xs text-neutral-500">
-              Round {round} · set {setNumber} · {item.hintText}
+              Round {round} · set {setNumber} · {dictationHintTh(item.hintText) ?? item.hintText}
             </p>
           </div>
         )}

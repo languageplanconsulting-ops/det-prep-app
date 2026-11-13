@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -20,6 +19,27 @@ import type {
   ReadingExamUnit,
   ReadingQuestionKey,
 } from "../../../../../lib/types";
+import { LOAD_FAILED, errorText, scoreLine, useI18n } from "../../../../../lib/i18n";
+import { ScreenLoader } from "../../../../../components/MascotLoader";
+import { AnimatedScore, FadeInItem, ResultMascot } from "../../../../../components/Motion";
+import { sfxCorrect, sfxWrong } from "../../../../../lib/exam-sfx-mobile";
+import { syncNotebookEntry } from "../../../../../lib/notebook-sync";
+import { findVocab, stripStars, type HighlightVocab } from "../../../../../lib/vocab-match";
+import { RichPassageText } from "../../../../../components/RichPassageText";
+import { WordCard } from "../../../../../components/WordCard";
+
+/** Question type label in the current language (row data keeps the English label). */
+function questionLabel(
+  t: (th: string, en: string) => string,
+  key: string,
+  fallback: string,
+): string {
+  if (key === "missingSentence") return t("ข้อ 1 — ย่อหน้าที่หายไป", "Q1 — Missing paragraph");
+  if (key === "informationLocation") return t("ข้อ 2 — ตำแหน่งของข้อมูล", "Q2 — Information location");
+  if (key === "bestTitle") return t("ข้อ 3 — ชื่อเรื่องที่เหมาะที่สุด", "Q3 — Best title");
+  if (key === "mainIdea") return t("ข้อ 4 — ใจความสำคัญ", "Q4 — Main idea");
+  return fallback;
+}
 
 const ORDER: {
   key: ReadingQuestionKey;
@@ -43,6 +63,7 @@ export default function ReadingSessionScreen() {
     set: string;
     exam: string;
   }>();
+  const { t } = useI18n();
   const roundNum = Number(round);
   const diff = difficulty as ReadingDifficulty;
   const setNumber = Number(set);
@@ -59,6 +80,9 @@ export default function ReadingSessionScreen() {
   const [answers, setAnswers] = useState<Partial<Record<ReadingQuestionKey, string>>>({});
   const [rows, setRows] = useState<ReadingExamResultRow[]>([]);
   const [score, setScore] = useState(0);
+  // Tapped passage highlight (word card) + words saved to the notebook this session.
+  const [cardPhrase, setCardPhrase] = useState<string | null>(null);
+  const [savedWords, setSavedWords] = useState<Set<string>>(() => new Set());
   const startedAt = useRef(Date.now());
   const sessionIdRef = useRef<string | null>(null);
 
@@ -93,7 +117,7 @@ export default function ReadingSessionScreen() {
       sessionIdRef.current = sid;
       startedAt.current = Date.now();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load exam");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -103,18 +127,12 @@ export default function ReadingSessionScreen() {
     void load();
   }, [load]);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error || !readingExam) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error ?? "Exam unavailable"}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
       </View>
     );
   }
@@ -184,24 +202,33 @@ export default function ReadingSessionScreen() {
   if (phase === "report") {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <Text style={styles.score}>
-          Score: {score}/{maxScore}
-        </Text>
-        {rows.map((row) => (
-          <View key={row.key} style={styles.reportRow}>
+        <ResultMascot ratio={maxScore > 0 ? score / maxScore : 0} message={maxScore > 0 && score / maxScore >= 0.75 ? t("เก่งมาก! ทำได้ดีเยี่ยมเลย 🎉", "Great job — excellent work! 🎉") : t("ใกล้แล้ว! ดูจุดที่พลาดด้านล่าง แล้วลองอีกครั้งนะ 💪", "Almost there! Review the misses below and try again 💪")} />
+        <AnimatedScore
+          value={score}
+          max={maxScore}
+          format={(n, m) => scoreLine(t, n, m)}
+          style={styles.score}
+        />
+        {rows.map((row, i) => (
+          <FadeInItem key={row.key} index={i + 1} style={styles.reportRow}>
             <Text style={[styles.reportLabel, row.isCorrect ? styles.ok : styles.bad]}>
-              {row.label} — {row.isCorrect ? "Correct" : "Wrong"}
+              {questionLabel(t, row.key, row.label)} —{" "}
+              {row.isCorrect ? t("ถูก", "Correct") : t("ผิด", "Wrong")}
             </Text>
-            <Text style={styles.reportQ}>{row.question}</Text>
-            <Text style={styles.reportA}>You: {row.userAnswer || "—"}</Text>
-            <Text style={styles.reportC}>Answer: {row.correctAnswer}</Text>
+            <Text style={styles.reportQ}>{stripStars(row.question)}</Text>
+            <Text style={styles.reportA}>
+              {t("คุณตอบ", "You")}: {stripStars(row.userAnswer) || "—"}
+            </Text>
+            <Text style={styles.reportC}>
+              {t("เฉลย", "Answer")}: {stripStars(row.correctAnswer)}
+            </Text>
             {row.explanationThai ? (
               <Text style={styles.reportTh}>{row.explanationThai}</Text>
             ) : null}
-          </View>
+          </FadeInItem>
         ))}
         <LuxuryPressable style={styles.btn} onPress={() => setPhase("quiz")}>
-          <Text style={styles.btnText}>Review passage</Text>
+          <Text style={styles.btnText}>{t("ทบทวนบทความ", "Review passage")}</Text>
         </LuxuryPressable>
       </ScrollView>
     );
@@ -209,25 +236,69 @@ export default function ReadingSessionScreen() {
 
   const { passage } = readingExam;
   const correctP2 = readingExam.missingSentence.correctAnswer;
+  const cardVocab = cardPhrase ? findVocab(cardPhrase, readingExam.highlightedVocab) : null;
+  const wordKey = (w: string) => w.trim().toLowerCase();
+  const isSaved = (phrase: string, vocab: HighlightVocab | null) =>
+    savedWords.has(wordKey(phrase)) || (vocab ? savedWords.has(wordKey(vocab.word)) : false);
+
+  const saveWord = async (v: HighlightVocab) => {
+    await syncNotebookEntry({
+      id: `reading-r${roundNum}-${diff}-s${setNumber}-e${examNumber}-${wordKey(v.word).replace(/\s+/g, "-")}`,
+      source: "reading-comprehension",
+      categoryIds: ["all", "vocabulary"],
+      titleEn: v.word,
+      titleTh: v.meaningTh,
+      bodyEn: `${v.meaningEn}\n\nExample: ${v.example}`,
+      bodyTh: `${v.meaningTh}\n\nตัวอย่าง: ${v.example}`,
+      userNote: "#reading",
+      createdAt: new Date().toISOString(),
+    });
+    setSavedWords((prev) => {
+      const next = new Set(prev);
+      next.add(wordKey(v.word));
+      if (cardPhrase) next.add(wordKey(cardPhrase));
+      return next;
+    });
+  };
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.meta}>
-        Set {setNumber} · Exam {examNumber} · Step {step + 1}/4
+        {t(
+          `ชุดที่ ${setNumber} · ข้อสอบ ${examNumber} · ขั้นที่ ${step + 1}/4`,
+          `Set ${setNumber} · Exam ${examNumber} · Step ${step + 1}/4`,
+        )}
       </Text>
 
       <View style={styles.passageBox}>
-        <Text style={styles.para}>{passage.p1}</Text>
+        <RichPassageText
+          text={passage.p1}
+          style={styles.para}
+          savedWords={savedWords}
+          onPressWord={setCardPhrase}
+        />
         {step === 0 && !q1Revealed ? (
-          <Text style={styles.paraHidden}>[Paragraph 2 hidden until Q1 answered]</Text>
+          <Text style={styles.paraHidden}>
+            {t("[ย่อหน้าที่ 2 จะแสดงหลังตอบข้อ 1]", "[Paragraph 2 hidden until Q1 answered]")}
+          </Text>
         ) : (
-          <Text style={styles.para}>{passage.p2}</Text>
+          <RichPassageText
+            text={passage.p2}
+            style={styles.para}
+            savedWords={savedWords}
+            onPressWord={setCardPhrase}
+          />
         )}
-        <Text style={styles.para}>{passage.p3}</Text>
+        <RichPassageText
+          text={passage.p3}
+          style={styles.para}
+          savedWords={savedWords}
+          onPressWord={setCardPhrase}
+        />
       </View>
 
-      <Text style={styles.qLabel}>{current.label}</Text>
-      <Text style={styles.question}>{block.question}</Text>
+      <Text style={styles.qLabel}>{questionLabel(t, current.key, current.label)}</Text>
+      <Text style={styles.question}>{stripStars(block.question)}</Text>
 
       {shuffled.map((option) => (
         <LuxuryPressable
@@ -240,6 +311,11 @@ export default function ReadingSessionScreen() {
           ]}
           onPress={() => {
             if (step === 0) {
+              // Q1 reveals the real paragraph 2 right away — chime right/wrong once.
+              if (!q1Revealed) {
+                if (option === correctP2) sfxCorrect();
+                else sfxWrong();
+              }
               setAnswers((a) => ({ ...a, missingSentence: option }));
               setQ1Revealed(true);
             } else {
@@ -247,13 +323,14 @@ export default function ReadingSessionScreen() {
             }
           }}
         >
-          <Text style={styles.optionText}>{option}</Text>
+          <Text style={styles.optionText}>{stripStars(option)}</Text>
         </LuxuryPressable>
       ))}
 
       {step === 0 && q1Revealed ? (
         <Text style={styles.revealNote}>
-          Correct paragraph 2: {answers.missingSentence === correctP2 ? "✓" : "✗"} (revealed above)
+          {t("ย่อหน้าที่ 2 ที่ถูกต้อง", "Correct paragraph 2")}:{" "}
+          {answers.missingSentence === correctP2 ? "✓" : "✗"} {t("(แสดงด้านบนแล้ว)", "(revealed above)")}
         </Text>
       ) : null}
 
@@ -262,8 +339,16 @@ export default function ReadingSessionScreen() {
         disabled={!canAdvance}
         onPress={goNext}
       >
-        <Text style={styles.btnText}>{step < 3 ? "Next" : "Finish"}</Text>
+        <Text style={styles.btnText}>{step < 3 ? t("ถัดไป", "Next") : t("เสร็จสิ้น", "Finish")}</Text>
       </LuxuryPressable>
+
+      <WordCard
+        phrase={cardPhrase}
+        vocab={cardVocab}
+        saved={cardPhrase ? isSaved(cardPhrase, cardVocab) : false}
+        onSave={saveWord}
+        onClose={() => setCardPhrase(null)}
+      />
     </ScrollView>
   );
 }

@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -28,6 +27,18 @@ import type {
   DialogueSummaryDifficulty,
   DialogueSummaryExam,
 } from "../../../../lib/types";
+import { LOAD_FAILED, errorText, scoreLine, useI18n } from "../../../../lib/i18n";
+import { ScreenLoader } from "../../../../components/MascotLoader";
+import { MascotLoader } from "../../../../components/MascotLoader";
+import { AnimatedScore, FadeInItem, ResultMascot } from "../../../../components/Motion";
+
+function criterionLabel(t: (th: string, en: string) => string, key: string): string {
+  if (key === "Relevancy") return t("ความตรงประเด็น", "Relevancy");
+  if (key === "Grammar") return t("ไวยากรณ์", "Grammar");
+  if (key === "Flow") return t("ความลื่นไหล", "Flow");
+  if (key === "Vocabulary") return t("คำศัพท์", "Vocabulary");
+  return key;
+}
 
 function randomAttemptId(): string {
   return `ds_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -39,6 +50,7 @@ export default function DialogueSummarySessionScreen() {
     difficulty: string;
     set: string;
   }>();
+  const { t } = useI18n();
   const roundNum = Number(round);
   const diff = difficulty as DialogueSummaryDifficulty;
   const setNumber = Number(set);
@@ -79,7 +91,7 @@ export default function DialogueSummarySessionScreen() {
       sessionIdRef.current = sid;
       startedAt.current = Date.now();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load set");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -91,7 +103,12 @@ export default function DialogueSummarySessionScreen() {
 
   const submit = async () => {
     if (!exam || !meetsMin) {
-      setError(`Write at least ${DIALOGUE_SUMMARY_MIN_WORDS} words.`);
+      setError(
+        t(
+          `เขียนอย่างน้อย ${DIALOGUE_SUMMARY_MIN_WORDS} คำ`,
+          `Write at least ${DIALOGUE_SUMMARY_MIN_WORDS} words.`,
+        ),
+      );
       return;
     }
     setError(null);
@@ -131,22 +148,16 @@ export default function DialogueSummarySessionScreen() {
       }
     } catch (e) {
       setPhase("write");
-      setError(e instanceof Error ? e.message : "Grading failed");
+      setError(e instanceof Error ? e.message : t("ตรวจไม่สำเร็จ", "Grading failed"));
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error && !exam) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
       </View>
     );
   }
@@ -154,7 +165,7 @@ export default function DialogueSummarySessionScreen() {
   if (!exam) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>Set unavailable</Text>
+        <Text style={styles.error}>{errorText(t, null)}</Text>
       </View>
     );
   }
@@ -162,9 +173,10 @@ export default function DialogueSummarySessionScreen() {
   if (phase === "grading") {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-        <Text style={styles.grading}>Grading your summary…</Text>
-        <Text style={styles.gradingSub}>Uses AI credits on your account.</Text>
+        <MascotLoader grading label={t("AI กำลังตรวจสรุปของคุณ", "Grading your summary")} />
+        <Text style={styles.gradingSub}>
+          {t("ใช้เครดิต AI ในบัญชีของคุณ", "Uses AI credits on your account.")}
+        </Text>
       </View>
     );
   }
@@ -179,20 +191,27 @@ export default function DialogueSummarySessionScreen() {
 
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <Text style={styles.score}>
-          Score: {Math.round(report.score160)}/{DIALOGUE_SUMMARY_MAX_SCORE}
-        </Text>
+        <ResultMascot ratio={DIALOGUE_SUMMARY_MAX_SCORE > 0 ? Math.round(report.score160) / DIALOGUE_SUMMARY_MAX_SCORE : 0} message={DIALOGUE_SUMMARY_MAX_SCORE > 0 && Math.round(report.score160) / DIALOGUE_SUMMARY_MAX_SCORE >= 0.75 ? t("เก่งมาก! ทำได้ดีเยี่ยมเลย 🎉", "Great job — excellent work! 🎉") : t("ใกล้แล้ว! ดูจุดที่พลาดด้านล่าง แล้วลองอีกครั้งนะ 💪", "Almost there! Review the misses below and try again 💪")} />
+        <AnimatedScore
+          value={Math.round(report.score160)}
+          max={DIALOGUE_SUMMARY_MAX_SCORE}
+          format={(n, m) => scoreLine(t, n, m)}
+          style={styles.score}
+        />
         {report.gradingSource ? (
-          <Text style={styles.source}>Graded via {report.gradingSource}</Text>
+          <Text style={styles.source}>
+            {t("ตรวจโดย", "Graded via")} {report.gradingSource}
+          </Text>
         ) : null}
-        {criteria.map(({ key, r }) => (
-          <View key={key} style={styles.criterion}>
+        {criteria.map(({ key, r }, i) => (
+          <FadeInItem key={key} index={i + 1} style={styles.criterion}>
             <Text style={styles.criterionTitle}>
-              {key} — {Math.round(r.scorePercent)}% (~{r.pointsOn160} pts)
+              {criterionLabel(t, key)} — {Math.round(r.scorePercent)}% (~{r.pointsOn160}{" "}
+              {t("คะแนน", "pts")})
             </Text>
             <Text style={styles.criterionEn}>{r.summary.en}</Text>
             <Text style={styles.criterionTh}>{r.summary.th}</Text>
-          </View>
+          </FadeInItem>
         ))}
       </ScrollView>
     );
@@ -201,12 +220,12 @@ export default function DialogueSummarySessionScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.meta}>
-        {exam.titleEn} · Set {setNumber}
+        {exam.titleEn} · {t(`ชุดที่ ${setNumber}`, `Set ${setNumber}`)}
       </Text>
       {exam.titleTh ? <Text style={styles.titleTh}>{exam.titleTh}</Text> : null}
 
       <View style={styles.block}>
-        <Text style={styles.blockTitle}>Scenario</Text>
+        <Text style={styles.blockTitle}>{t("สถานการณ์", "Scenario")}</Text>
         {exam.scenarioSentences.map((s, i) => (
           <Text key={i} style={styles.line}>
             {s}
@@ -215,7 +234,7 @@ export default function DialogueSummarySessionScreen() {
       </View>
 
       <View style={styles.block}>
-        <Text style={styles.blockTitle}>Dialogue</Text>
+        <Text style={styles.blockTitle}>{t("บทสนทนา", "Dialogue")}</Text>
         {exam.dialogue.map((t, i) => (
           <View key={i} style={styles.turn}>
             <Text style={styles.speaker}>{t.speaker}</Text>
@@ -225,17 +244,25 @@ export default function DialogueSummarySessionScreen() {
       </View>
 
       <Text style={styles.prompt}>
-        Write a summary in your own words (min {DIALOGUE_SUMMARY_MIN_WORDS} words).
+        {t(
+          `เขียนสรุปด้วยคำของคุณเอง (อย่างน้อย ${DIALOGUE_SUMMARY_MIN_WORDS} คำ)`,
+          `Write a summary in your own words (min ${DIALOGUE_SUMMARY_MIN_WORDS} words).`,
+        )}
       </Text>
       <Text style={styles.wordCount}>
-        {wordCount} word{wordCount === 1 ? "" : "s"}
-        {!meetsMin ? ` · need ${DIALOGUE_SUMMARY_MIN_WORDS - wordCount} more` : ""}
+        {t(`${wordCount} คำ`, `${wordCount} word${wordCount === 1 ? "" : "s"}`)}
+        {!meetsMin
+          ? t(
+              ` · ต้องเขียนเพิ่มอีก ${DIALOGUE_SUMMARY_MIN_WORDS - wordCount} คำ`,
+              ` · need ${DIALOGUE_SUMMARY_MIN_WORDS - wordCount} more`,
+            )
+          : ""}
       </Text>
 
       <TextInput
         style={styles.input}
         multiline
-        placeholder="Your summary…"
+        placeholder={t("สรุปของคุณ…", "Your summary…")}
         value={summary}
         onChangeText={setSummary}
         autoCapitalize="sentences"
@@ -250,7 +277,7 @@ export default function DialogueSummarySessionScreen() {
         disabled={!meetsMin}
         sound="submit" onPress={() => void submit()}
       >
-        <Text style={styles.btnText}>Submit for grading</Text>
+        <Text style={styles.btnText}>{t("ส่งให้ AI ตรวจ", "Submit for grading")}</Text>
       </LuxuryPressable>
     </ScrollView>
   );

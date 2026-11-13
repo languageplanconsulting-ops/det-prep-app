@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,6 +14,10 @@ import { buildContentKey, packSubIndexed } from "../../../../../lib/practice-pro
 import { shuffleMcOptions } from "../../../../../lib/reading-utils";
 import { VOCAB_SESSION_MAX } from "../../../../../lib/vocab-constants";
 import type { VocabExamResultRow, VocabPassageUnit, VocabSessionLevel } from "../../../../../lib/types";
+import { LOAD_FAILED, errorText, scoreLine, useI18n } from "../../../../../lib/i18n";
+import { ScreenLoader } from "../../../../../components/MascotLoader";
+import { AnimatedScore, FadeInItem, ResultMascot } from "../../../../../components/Motion";
+import { sfxCorrect, sfxWrong } from "../../../../../lib/exam-sfx-mobile";
 
 export default function VocabSessionScreen() {
   const { round, level, set, passage } = useLocalSearchParams<{
@@ -23,6 +26,7 @@ export default function VocabSessionScreen() {
     set: string;
     passage: string;
   }>();
+  const { t } = useI18n();
   const roundNum = Number(round);
   const sessionLevel = level as VocabSessionLevel;
   const setNumber = Number(set);
@@ -73,7 +77,7 @@ export default function VocabSessionScreen() {
       sessionIdRef.current = sid;
       startedAt.current = Date.now();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load passage");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -83,18 +87,12 @@ export default function VocabSessionScreen() {
     void load();
   }, [load]);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error || !passageUnit) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error ?? "Passage unavailable"}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
       </View>
     );
   }
@@ -104,7 +102,10 @@ export default function VocabSessionScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.error}>
-          Invalid passage: expected {blankCount} [BLANK] markers.
+          {t(
+            `บทความไม่ถูกต้อง: ต้องมีเครื่องหมาย [BLANK] ${blankCount} จุด`,
+            `Invalid passage: expected ${blankCount} [BLANK] markers.`,
+          )}
         </Text>
       </View>
     );
@@ -115,6 +116,9 @@ export default function VocabSessionScreen() {
 
   const selectOption = async (option: string) => {
     const correct = currentBlank.correctAnswer;
+    // The right word is filled in straight away, so give right/wrong feedback now.
+    if (option === correct) sfxCorrect();
+    else sfxWrong();
     const nextPicks = [...userPicks, option];
     const nextFilled = [...filledCorrect, correct];
 
@@ -171,20 +175,29 @@ export default function VocabSessionScreen() {
   if (phase === "report") {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <Text style={styles.score}>
-          Score: {score}/{maxScore}
-        </Text>
-        {rows.map((row) => (
-          <View key={row.blankIndex} style={styles.reportRow}>
+        <ResultMascot ratio={maxScore > 0 ? score / maxScore : 0} message={maxScore > 0 && score / maxScore >= 0.75 ? t("เก่งมาก! ทำได้ดีเยี่ยมเลย 🎉", "Great job — excellent work! 🎉") : t("ใกล้แล้ว! ดูจุดที่พลาดด้านล่าง แล้วลองอีกครั้งนะ 💪", "Almost there! Review the misses below and try again 💪")} />
+        <AnimatedScore
+          value={score}
+          max={maxScore}
+          format={(n, m) => scoreLine(t, n, m)}
+          style={styles.score}
+        />
+        {rows.map((row, i) => (
+          <FadeInItem key={row.blankIndex} index={i + 1} style={styles.reportRow}>
             <Text style={[styles.reportLabel, row.isCorrect ? styles.ok : styles.bad]}>
-              Blank {row.blankIndex} — {row.isCorrect ? "Correct" : "Wrong"}
+              {t(`ช่องที่ ${row.blankIndex}`, `Blank ${row.blankIndex}`)} —{" "}
+              {row.isCorrect ? t("ถูก", "Correct") : t("ผิด", "Wrong")}
             </Text>
-            <Text style={styles.reportA}>You: {row.userAnswer}</Text>
-            <Text style={styles.reportC}>Answer: {row.correctAnswer}</Text>
+            <Text style={styles.reportA}>
+              {t("คุณตอบ", "You")}: {row.userAnswer}
+            </Text>
+            <Text style={styles.reportC}>
+              {t("เฉลย", "Answer")}: {row.correctAnswer}
+            </Text>
             {row.explanationThai ? (
               <Text style={styles.reportTh}>{row.explanationThai}</Text>
             ) : null}
-          </View>
+          </FadeInItem>
         ))}
       </ScrollView>
     );
@@ -193,7 +206,10 @@ export default function VocabSessionScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.meta}>
-        Set {setNumber} · Passage {passageNumber} · Blank {questionIndex + 1}/{blankCount}
+        {t(
+          `ชุดที่ ${setNumber} · บทความ ${passageNumber} · ช่องที่ ${questionIndex + 1}/${blankCount}`,
+          `Set ${setNumber} · Passage ${passageNumber} · Blank ${questionIndex + 1}/${blankCount}`,
+        )}
       </Text>
 
       <View style={styles.passageBox}>
@@ -216,6 +232,7 @@ export default function VocabSessionScreen() {
       {shuffled.map((option) => (
         <LuxuryPressable
           key={option}
+          sound="none"
           style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
           onPress={() => void selectOption(option)}
         >

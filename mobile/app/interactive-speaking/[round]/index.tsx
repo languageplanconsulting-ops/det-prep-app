@@ -1,7 +1,6 @@
 import { useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -12,10 +11,13 @@ import { LuxuryPressable } from "../../../components/LuxuryPressable";
 import { useLuxuryRouter } from "../../../hooks/useLuxuryRouter";
 import { fetchInteractiveSpeakingScenarios, fetchPracticeAttempts } from "../../../lib/api";
 import type { InteractiveSpeakingScenario } from "../../../lib/types";
+import { LOAD_FAILED, errorText, roundLabel, useI18n } from "../../../lib/i18n";
+import { ScreenLoader } from "../../../components/MascotLoader";
 
 export default function InteractiveSpeakingScenarioListScreen() {
   const { round } = useLocalSearchParams<{ round: string }>();
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
   const roundNum = Number(round);
   const [scenarios, setScenarios] = useState<InteractiveSpeakingScenario[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +50,7 @@ export default function InteractiveSpeakingScenarioListScreen() {
       const items = await fetchInteractiveSpeakingScenarios(roundNum);
       setScenarios(items);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load scenarios");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -58,20 +60,14 @@ export default function InteractiveSpeakingScenarioListScreen() {
     void load();
   }, [load]);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
         <LuxuryPressable style={styles.retry} onPress={() => void load()}>
-          <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.retryText}>{t("ลองใหม่", "Retry")}</Text>
         </LuxuryPressable>
       </View>
     );
@@ -84,9 +80,14 @@ export default function InteractiveSpeakingScenarioListScreen() {
       data={scenarios}
       keyExtractor={(s) => s.id}
       ListHeaderComponent={
-        <Text style={styles.header}>Round {roundNum} · {scenarios.length} scenario(s)</Text>
+        <Text style={styles.header}>
+          {roundLabel(t, roundNum)} ·{" "}
+          {t(`${scenarios.length} สถานการณ์`, `${scenarios.length} scenario(s)`)}
+        </Text>
       }
-      ListEmptyComponent={<Text style={styles.empty}>No scenarios uploaded for this round yet.</Text>}
+      ListEmptyComponent={<Text style={styles.empty}>
+          {t("รอบนี้ยังไม่มีสถานการณ์", "No scenarios uploaded for this round yet.")}
+        </Text>}
       renderItem={({ item }) => (
         <LuxuryPressable
           style={styles.row}
@@ -99,7 +100,9 @@ export default function InteractiveSpeakingScenarioListScreen() {
             {item.titleTh}
           </Text>
           {latestScore.has(item.id) ? (
-            <Text style={styles.last}>Last score {Math.round(latestScore.get(item.id)!)}/160</Text>
+            <Text style={styles.last}>
+              {t("คะแนนล่าสุด", "Last score")} {Math.round(latestScore.get(item.id)!)}/160
+            </Text>
           ) : null}
         </LuxuryPressable>
       )}

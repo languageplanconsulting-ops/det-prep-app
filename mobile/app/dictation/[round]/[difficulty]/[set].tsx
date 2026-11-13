@@ -2,7 +2,6 @@ import { Audio } from "expo-av";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,6 +21,9 @@ import {
 } from "../../../../lib/dictation-diff";
 import { DICTATION_MAX_SCORE } from "../../../../lib/dictation-constants";
 import type { DictationDifficulty, DictationItem } from "../../../../lib/types";
+import { LOAD_FAILED, errorText, scoreLine, setLine, useI18n } from "../../../../lib/i18n";
+import { ScreenLoader } from "../../../../components/MascotLoader";
+import { AnimatedScore, FadeInItem, ResultMascot } from "../../../../components/Motion";
 
 export default function DictationSessionScreen() {
   const { round, difficulty, set } = useLocalSearchParams<{
@@ -29,6 +31,7 @@ export default function DictationSessionScreen() {
     difficulty: string;
     set: string;
   }>();
+  const { t, lang } = useI18n();
   const roundNum = Number(round);
   const diff = difficulty as DictationDifficulty;
   const setNumber = Number(set);
@@ -65,7 +68,7 @@ export default function DictationSessionScreen() {
       sessionIdRef.current = sid;
       startedAt.current = Date.now();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load set");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -142,18 +145,12 @@ export default function DictationSessionScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error || !item) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error ?? "Set unavailable"}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
       </View>
     );
   }
@@ -161,10 +158,16 @@ export default function DictationSessionScreen() {
   if (phase === "report") {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-        <Text style={styles.score}>
-          Score: {Math.round(score)}/{maxScore}
+        <ResultMascot ratio={maxScore > 0 ? Math.round(score) / maxScore : 0} message={maxScore > 0 && Math.round(score) / maxScore >= 0.75 ? t("เก่งมาก! ทำได้ดีเยี่ยมเลย 🎉", "Great job — excellent work! 🎉") : t("ใกล้แล้ว! ดูจุดที่พลาดด้านล่าง แล้วลองอีกครั้งนะ 💪", "Almost there! Review the misses below and try again 💪")} />
+        <AnimatedScore
+          value={Math.round(score)}
+          max={maxScore}
+          format={(n, m) => scoreLine(t, n, m)}
+          style={styles.score}
+        />
+        <Text style={styles.hint}>
+          {t("ตรวจแบบเดียวกับเว็บไซต์ (เทียบทีละตัวอักษร)", "Same grading as the website (character diff).")}
         </Text>
-        <Text style={styles.hint}>Same grading as the website (character diff).</Text>
         <View style={styles.reportBox}>
           {segments.map((seg, i) => (
             <Text
@@ -180,10 +183,10 @@ export default function DictationSessionScreen() {
             </Text>
           ))}
         </View>
-        <Text style={styles.answerLabel}>Answer</Text>
+        <Text style={styles.answerLabel}>{t("เฉลย", "Answer")}</Text>
         <Text style={styles.transcript}>{item.transcript}</Text>
         <LuxuryPressable style={styles.btn} onPress={() => setPhase("practice")}>
-          <Text style={styles.btnText}>Try again</Text>
+          <Text style={styles.btnText}>{t("ทำอีกครั้ง", "Try again")}</Text>
         </LuxuryPressable>
       </ScrollView>
     );
@@ -192,21 +195,28 @@ export default function DictationSessionScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.meta}>
-        Round {roundNum} · {difficulty} · Set {setNumber}
+        {setLine(t, roundNum, difficulty, setNumber)}
       </Text>
-      <Text style={styles.hintText}>{item.hintText}</Text>
+      <Text style={styles.hintText}>
+        {lang === "th" ? (item.hintTextTh ?? item.hintText) : item.hintText}
+      </Text>
 
       <LuxuryPressable style={styles.playBtn} onPress={() => void togglePlay()}>
-        <Text style={styles.playBtnText}>{playing ? "Pause" : "Play audio"}</Text>
+        <Text style={styles.playBtnText}>{playing ? t("หยุด", "Pause") : t("เล่นเสียง", "Play audio")}</Text>
       </LuxuryPressable>
       {!audioUri ? (
-        <Text style={styles.warn}>No audio URL — use the website or check admin upload.</Text>
+        <Text style={styles.warn}>
+          {t(
+            "ไม่พบไฟล์เสียง — ลองทำบนเว็บไซต์ หรือตรวจสอบการอัปโหลดของแอดมิน",
+            "No audio URL — use the website or check admin upload.",
+          )}
+        </Text>
       ) : null}
 
       <TextInput
         style={styles.input}
         multiline
-        placeholder="Type what you hear…"
+        placeholder={t("พิมพ์สิ่งที่ได้ยิน…", "Type what you hear…")}
         value={userText}
         onChangeText={setUserText}
         autoCapitalize="none"
@@ -214,7 +224,7 @@ export default function DictationSessionScreen() {
       />
 
       <LuxuryPressable style={styles.btn} sound="submit" onPress={() => void submit()}>
-        <Text style={styles.btnText}>Check answer</Text>
+        <Text style={styles.btnText}>{t("ตรวจคำตอบ", "Check answer")}</Text>
       </LuxuryPressable>
     </ScrollView>
   );

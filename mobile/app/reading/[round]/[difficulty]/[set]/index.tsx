@@ -1,7 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -15,6 +14,8 @@ import { fetchPracticeSetMeta } from "../../../../../lib/api";
 import { packSubIndexed } from "../../../../../lib/practice-progress";
 import { READING_DIFFICULTY_MAX } from "../../../../../lib/reading-constants";
 import type { ReadingDifficulty, ReadingSet } from "../../../../../lib/types";
+import { LOAD_FAILED, errorText, useI18n } from "../../../../../lib/i18n";
+import { ScreenLoader } from "../../../../../components/MascotLoader";
 
 export default function ReadingExamListScreen() {
   const { round, difficulty, set } = useLocalSearchParams<{
@@ -23,6 +24,7 @@ export default function ReadingExamListScreen() {
     set: string;
   }>();
   const { push } = useLuxuryRouter();
+  const { t } = useI18n();
   const roundNum = Number(round);
   const diff = difficulty as ReadingDifficulty;
   const setNumber = Number(set);
@@ -48,7 +50,7 @@ export default function ReadingExamListScreen() {
       });
       setReadingSet(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load set");
+      setError(e instanceof Error ? e.message : LOAD_FAILED);
     } finally {
       setLoading(false);
     }
@@ -58,20 +60,14 @@ export default function ReadingExamListScreen() {
     void load();
   }, [load]);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#004AAD" />
-      </View>
-    );
-  }
+  if (loading) return <ScreenLoader />;
 
   if (error || !readingSet) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error ?? "Set unavailable"}</Text>
+        <Text style={styles.error}>{errorText(t, error)}</Text>
         <LuxuryPressable style={styles.retry} onPress={() => void load()}>
-          <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.retryText}>{t("ลองใหม่", "Retry")}</Text>
         </LuxuryPressable>
       </View>
     );
@@ -88,10 +84,13 @@ export default function ReadingExamListScreen() {
       keyExtractor={(row) => String(row.examNumber)}
       ListHeaderComponent={
         <Text style={styles.header}>
-          Set {setNumber} · {exams.length} exam(s) · max {cap} pts each
+          {t(
+            `ชุดที่ ${setNumber} · ${exams.length} ข้อสอบ · ข้อสอบละสูงสุด ${cap} คะแนน`,
+            `Set ${setNumber} · ${exams.length} exam(s) · max ${cap} pts each`,
+          )}
         </Text>
       }
-      ListEmptyComponent={<Text style={styles.empty}>No exams in this set yet.</Text>}
+      ListEmptyComponent={<Text style={styles.empty}>{t("ชุดนี้ยังไม่มีข้อสอบ", "No exams in this set yet.")}</Text>}
       renderItem={({ item }) => (
         <LuxuryPressable
           style={styles.row}
@@ -102,12 +101,14 @@ export default function ReadingExamListScreen() {
           }
         >
           <Text style={styles.rowTitle}>
-            Exam {item.examNumber}
+            {t(`ข้อสอบ ${item.examNumber}`, `Exam ${item.examNumber}`)}
             {item.exam.titleEn ? ` — ${item.exam.titleEn}` : ""}
           </Text>
           {(() => {
             const best = bestPct.get(packSubIndexed(setNumber, item.examNumber));
-            return best != null ? <Text style={styles.best}>Best {Math.round(best)}%</Text> : null;
+            return best != null ? <Text style={styles.best}>
+                {t("ดีที่สุด", "Best")} {Math.round(best)}%
+              </Text> : null;
           })()}
           <Text style={styles.chev}>›</Text>
         </LuxuryPressable>

@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { StyleSheet, Switch, Text, TextInput, View } from "react-native";
 
+import { LanguageToggle } from "../../components/LanguageToggle";
 import { LuxuryPressable } from "../../components/LuxuryPressable";
 import { useLuxuryRouter } from "../../hooks/useLuxuryRouter";
 import { useAuth } from "../../lib/auth-context";
 import { getAdminToken } from "../../lib/admin-unlock";
 import { clearAdminUnlock, unlockWithAdminCode } from "../../lib/api";
 import { getSfxMuted, setSfxMuted, sfxTap } from "../../lib/exam-sfx-mobile";
+import { useI18n } from "../../lib/i18n";
 
 export default function ProfileScreen() {
   const { user, tier, quota, signOut, refreshQuota } = useAuth();
   const { replace } = useLuxuryRouter();
+  const { t } = useI18n();
   const [sfxMuted, setSfxMutedState] = useState(false);
   const [adminCode, setAdminCode] = useState("");
   const [adminBusy, setAdminBusy] = useState(false);
@@ -27,24 +30,29 @@ export default function ProfileScreen() {
   return (
     <View style={styles.screen}>
       <View style={styles.card}>
-        <Text style={styles.label}>Signed in</Text>
+        <Text style={styles.label}>{t("เข้าสู่ระบบแล้ว", "Signed in")}</Text>
         <Text style={styles.email}>{user?.email ?? "—"}</Text>
-        <Text style={styles.tier}>Plan: {displayTier ?? "—"}</Text>
+        <Text style={styles.tier}>
+          {t("แพ็กเกจ", "Plan")}: {displayTier ?? "—"}
+        </Text>
         {quota ? (
           <Text style={styles.quota}>
-            AI credits: {quota.ai.totalRemaining} / {quota.ai.totalLimit}
+            {t("เครดิต AI", "AI credits")}: {quota.ai.totalRemaining} / {quota.ai.totalLimit}
           </Text>
         ) : null}
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.switchTitle}>Admin unlock</Text>
+        <Text style={styles.switchTitle}>{t("ปลดล็อกแอดมิน", "Admin unlock")}</Text>
         <Text style={styles.switchSub}>
-          Enter admin code for VIP access (all skills, unlimited AI grading).
+          {t(
+            "ใส่รหัสแอดมินเพื่อใช้สิทธิ์ VIP (ทุกทักษะ, AI ตรวจไม่จำกัด)",
+            "Enter admin code for VIP access (all skills, unlimited AI grading).",
+          )}
         </Text>
         {adminUnlocked ? (
           <>
-            <Text style={styles.adminOk}>Admin access active</Text>
+            <Text style={styles.adminOk}>{t("เปิดสิทธิ์แอดมินแล้ว", "Admin access active")}</Text>
             <LuxuryPressable
               style={styles.adminBtnSecondary}
               onPress={async () => {
@@ -54,14 +62,16 @@ export default function ProfileScreen() {
                 await refreshQuota();
               }}
             >
-              <Text style={styles.adminBtnSecondaryText}>Remove admin unlock</Text>
+              <Text style={styles.adminBtnSecondaryText}>
+                {t("ยกเลิกสิทธิ์แอดมิน", "Remove admin unlock")}
+              </Text>
             </LuxuryPressable>
           </>
         ) : (
           <>
             <TextInput
               style={styles.adminInput}
-              placeholder="Admin code"
+              placeholder={t("รหัสแอดมิน", "Admin code")}
               autoCapitalize="none"
               autoCorrect={false}
               secureTextEntry
@@ -87,17 +97,27 @@ export default function ProfileScreen() {
                 await refreshQuota();
               }}
             >
-              <Text style={styles.adminBtnText}>{adminBusy ? "…" : "Unlock VIP access"}</Text>
+              <Text style={styles.adminBtnText}>{adminBusy ? "…" : t("ปลดล็อก VIP", "Unlock VIP access")}</Text>
             </LuxuryPressable>
           </>
         )}
       </View>
 
       <View style={styles.card}>
+        <Text style={styles.switchTitle}>{t("ภาษา", "Language")}</Text>
+        <Text style={[styles.switchSub, { marginBottom: 10 }]}>
+          {t("ภาษาของเมนูและคำอธิบาย (ข้อสอบยังเป็นภาษาอังกฤษ)", "Menus and instructions (exam content stays in English)")}
+        </Text>
+        <LanguageToggle />
+      </View>
+
+      <View style={styles.card}>
         <View style={styles.switchRow}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.switchTitle}>Sound effects</Text>
-            <Text style={styles.switchSub}>Tap & navigation sounds (like Duolingo)</Text>
+            <Text style={styles.switchTitle}>{t("เสียงเอฟเฟกต์", "Sound effects")}</Text>
+            <Text style={styles.switchSub}>
+              {t("เสียงตอนแตะและเปลี่ยนหน้า", "Tap & navigation sounds")}
+            </Text>
           </View>
           <Switch
             value={!sfxMuted}
@@ -122,7 +142,7 @@ export default function ProfileScreen() {
           replace("/login");
         }}
       >
-        <Text style={styles.btnText}>Sign out</Text>
+        <Text style={styles.btnText}>{t("ออกจากระบบ", "Sign out")}</Text>
       </LuxuryPressable>
     </View>
   );
