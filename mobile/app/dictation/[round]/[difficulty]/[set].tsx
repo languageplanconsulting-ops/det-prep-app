@@ -1,4 +1,4 @@
-import { Audio } from "expo-av";
+import { Sound } from "../../../../lib/audio-player";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -41,7 +41,7 @@ export default function DictationSessionScreen() {
   const [segments, setSegments] = useState<CharDisplaySegment[]>([]);
   const [score, setScore] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef<Sound | null>(null);
   const startedAt = useRef(Date.now());
   const sessionIdRef = useRef<string | null>(null);
 
@@ -96,7 +96,7 @@ export default function DictationSessionScreen() {
         }
       }
       if (!soundRef.current) {
-        const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
+        const { sound } = await Sound.createAsync({ uri: audioUri });
         soundRef.current = sound;
       }
       await soundRef.current!.playAsync();
