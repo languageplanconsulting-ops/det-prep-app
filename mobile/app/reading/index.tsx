@@ -1,5 +1,5 @@
 import { RoundDifficultyPicker } from "../../components/RoundDifficultyPicker";
-import { READING_DIFFICULTIES, READING_DIFFICULTY_MAX } from "../../lib/reading-constants";
+import { READING_DIFFICULTIES, READING_DIFFICULTY_MAX, READING_ROUNDS } from "../../lib/reading-constants";
 import { useI18n } from "../../lib/i18n";
 
 export default function ReadingHubScreen() {
@@ -11,6 +11,7 @@ export default function ReadingHubScreen() {
       basePath="/reading"
       difficulties={READING_DIFFICULTIES}
       maxScores={READING_DIFFICULTY_MAX}
+      rounds={READING_ROUNDS}
     />
   );
 }

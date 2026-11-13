@@ -27,7 +27,8 @@ import { createClient } from "@supabase/supabase-js";
 import type { ReadingExamUnit, ReadingSet } from "../src/types/reading";
 
 const TARGET_PER_DIFFICULTY = 30;
-const ROUNDS = ["1", "2", "3", "4", "5"] as const;
+// round 5 was retired for reading (hidden in the apps), so the generator and uploader skip it
+const ROUNDS = ["1", "2", "3", "4"] as const;
 const DIFFICULTIES = ["easy", "medium", "hard"] as const;
 const EXAMS_PER_SET = 5;
 const BATCH = 5;

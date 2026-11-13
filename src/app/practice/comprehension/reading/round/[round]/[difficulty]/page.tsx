@@ -5,7 +5,7 @@ import type { ReadingDifficulty, ReadingRoundNum } from "@/types/reading";
 
 function parseRound(s: string): ReadingRoundNum | undefined {
   const n = Number(s);
-  if (n === 1 || n === 2 || n === 3 || n === 4 || n === 5) return n;
+  if (n === 1 || n === 2 || n === 3 || n === 4) return n;
   return undefined;
 }
 

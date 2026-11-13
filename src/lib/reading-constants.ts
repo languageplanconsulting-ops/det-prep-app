@@ -6,6 +6,12 @@ export const READING_DIFFICULTIES: ReadingDifficulty[] = ["easy", "medium", "har
 
 export const READING_ROUND_NUMBERS: ReadingRoundNum[] = [1, 2, 3, 4, 5];
 
+/**
+ * Rounds learners and admins can see. Round 5 was retired (it never had enough exams), so it is
+ * hidden everywhere while the storage shape above keeps its slot for old saved data.
+ */
+export const READING_ACTIVE_ROUND_NUMBERS: ReadingRoundNum[] = [1, 2, 3, 4];
+
 /** Target number of exams per set (content guideline). */
 export const READING_RECOMMENDED_EXAMS_PER_SET = 10;
 

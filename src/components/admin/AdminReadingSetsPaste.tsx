@@ -7,6 +7,7 @@ import { normalizeReadingSetsIncoming, parseReadingSetsJson } from "@/lib/readin
 import {
   READING_DIFFICULTY_LABEL,
   READING_HUB_SET_COUNT,
+  READING_ACTIVE_ROUND_NUMBERS,
   READING_ROUND_NUMBERS,
 } from "@/lib/reading-constants";
 import {
@@ -230,7 +231,7 @@ export function AdminReadingSetsPaste() {
             onChange={(e) => setSelectedRound(Number(e.target.value) as ReadingRoundNum)}
             className="mt-1 w-full border-2 border-black bg-white px-2 py-2 text-sm font-bold"
           >
-            {READING_ROUND_NUMBERS.map((r) => (
+            {READING_ACTIVE_ROUND_NUMBERS.map((r) => (
               <option key={r} value={r}>
                 Round {r}
               </option>

@@ -8,7 +8,7 @@ import { RoundsExplainer } from "@/components/practice/RoundsExplainer";
 import { HubMomentumStrip } from "@/components/practice/HubMomentumStrip";
 import { TimedRandomLauncher } from "@/components/practice/TimedRandomLauncher";
 import { HubBoostsBadge } from "@/components/practice/HubBoostsBadge";
-import { READING_DIFFICULTIES, READING_ROUND_NUMBERS } from "@/lib/reading-constants";
+import { READING_ACTIVE_ROUND_NUMBERS, READING_DIFFICULTIES } from "@/lib/reading-constants";
 import { EnhancedRoundCard } from "@/components/practice/EnhancedRoundCard";
 import { getReadingRoundStats, loadReadingVisibleBank } from "@/lib/reading-storage";
 import type { ReadingRoundNum } from "@/types/reading";
@@ -45,7 +45,7 @@ export function ReadingRoundsHub() {
 
   const recommendedRound: ReadingRoundNum | null = (() => {
     void v;
-    for (const r of READING_ROUND_NUMBERS) {
+    for (const r of READING_ACTIVE_ROUND_NUMBERS) {
       const s = getReadingRoundStats(r);
       if (s.setsAttempted === 0) return r;
     }
@@ -75,8 +75,8 @@ export function ReadingRoundsHub() {
         />
         <TimedRandomLauncher skill="reading" />
         <RoundsExplainer />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {READING_ROUND_NUMBERS.map((round) => (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {READING_ACTIVE_ROUND_NUMBERS.map((round) => (
             <RoundCard
               key={`${round}-${v}`}
               round={round}
@@ -97,15 +97,15 @@ export function ReadingRoundsHub() {
         </p>
         <h1 className="mt-2 text-3xl font-black tracking-tight">English Plan — comprehension</h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-600">
-          Five rounds. Each round has Easy / Medium / Hard sets. Averages use your best score on each exam as a
+          Four rounds. Each round has Easy / Medium / Hard sets. Averages use your best score on each exam as a
           percent of that exam&apos;s max; the date is your most recent attempt in that round.
         </p>
       </header>
 
       <section className="space-y-4">
         <h2 className="text-lg font-black uppercase tracking-wide">Rounds</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {READING_ROUND_NUMBERS.map((round) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {READING_ACTIVE_ROUND_NUMBERS.map((round) => (
             <RoundCard key={`${round}-${v}`} round={round} />
           ))}
         </div>

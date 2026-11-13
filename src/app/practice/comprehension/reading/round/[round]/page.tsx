@@ -4,7 +4,7 @@ import type { ReadingRoundNum } from "@/types/reading";
 
 function parseRound(s: string): ReadingRoundNum | undefined {
   const n = Number(s);
-  if (n === 1 || n === 2 || n === 3 || n === 4 || n === 5) return n;
+  if (n === 1 || n === 2 || n === 3 || n === 4) return n;
   return undefined;
 }
 
@@ -14,7 +14,7 @@ export default async function ReadingRoundPage({ params }: { params: Promise<{ r
   if (!round) {
     return (
       <main className="mx-auto max-w-lg px-4 py-12 text-center">
-        <p className="font-bold">Round must be 1–5.</p>
+        <p className="font-bold">Round must be 1–4.</p>
         <Link href="/practice/comprehension/reading" className="mt-4 inline-block text-ep-blue">
           Back
         </Link>

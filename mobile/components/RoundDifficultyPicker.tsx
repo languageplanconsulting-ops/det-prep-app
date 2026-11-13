@@ -15,12 +15,15 @@ export function RoundDifficultyPicker({
   basePath,
   difficulties,
   maxScores,
+  rounds = PRACTICE_ROUNDS,
 }: {
   title: string;
   subtitle: string;
   basePath: string;
   difficulties: Difficulty[];
   maxScores: Record<Difficulty, number>;
+  /** Which rounds to list; defaults to all practice rounds. */
+  rounds?: readonly number[];
 }) {
   const { push } = useLuxuryRouter();
   const { t } = useI18n();
@@ -30,7 +33,7 @@ export function RoundDifficultyPicker({
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.sub}>{subtitle}</Text>
 
-      {PRACTICE_ROUNDS.map((round, i) => (
+      {rounds.map((round, i) => (
         <FadeInItem key={round} index={i} step={60} style={styles.roundBlock}>
           <Text style={styles.roundTitle}>{roundLabel(t, round)}</Text>
           <View style={styles.diffRow}>
