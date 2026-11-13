@@ -17,6 +17,7 @@ export default function RealWordSetListScreen() {
       difficulty={diff}
       header={`Round ${roundNum} · ${difficulty} · max ${cap} pts`}
       href={(setNumber) => `/realword/${round}/${difficulty}/${setNumber}`}
+      progress={{ taskType: "real_english_word", contentSkill: "realword" }}
     />
   );
 }

@@ -204,6 +204,33 @@ export async function POST(req: Request) {
         report.rewardBonus = rewardBonus;
       }
     }
+    // Record the score in practice_attempts so the website and the mobile app
+    // both see it (this route grades for both). Best-effort: never block the report.
+    if (userId && !isPlacement) {
+      try {
+        const { createServiceRoleSupabase } = await import("@/lib/supabase-admin");
+        const fromApp = req.headers.get("authorization")?.startsWith("Bearer ") ?? false;
+        const { error: attemptError } = await createServiceRoleSupabase()
+          .from("practice_attempts")
+          .insert({
+            user_id: userId,
+            source: fromApp ? "app" : "web",
+            task_type: "interactive_speaking",
+            score_pct: (report.score160 / 160) * 100,
+            detail: {
+              attemptId,
+              scenarioId,
+              score160: report.score160,
+              contentKey: `interactive_speaking:${scenarioId}`,
+            },
+          });
+        if (attemptError) {
+          console.error("[interactive-speaking-report] practice_attempts", attemptError.message);
+        }
+      } catch (err) {
+        console.error("[interactive-speaking-report] practice_attempts", err);
+      }
+    }
     // Interactive speaking is the one production exercise that doesn't go
     // through grading_jobs, so it records its own grammar topics here.
     await recordAttemptWeakness({

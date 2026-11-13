@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SoftHubHeader } from "@/components/practice/SoftHubHeader";
 import { useEffectiveTier } from "@/hooks/useEffectiveTier";
 import { LANDING_PAGE_GRID_BG } from "@/lib/landing-page-visual";
+import { fetchPracticeAttempts } from "@/lib/practice-attempts-sync";
 import {
   loadAllInteractiveSpeakingReports,
   loadInteractiveSpeakingScenarios,
@@ -55,6 +56,21 @@ function buildLatestByScenario(): Map<string, InteractiveSpeakingAttemptReport> 
   return map;
 }
 
+type ServerLatest = { score160: number; submittedAt: string };
+
+/** Latest server-recorded score per scenario (covers attempts made on the mobile app). */
+async function fetchServerLatestByScenario(): Promise<Map<string, ServerLatest>> {
+  const map = new Map<string, ServerLatest>();
+  // Newest first, so the first hit per scenario is the latest.
+  for (const a of await fetchPracticeAttempts("interactive_speaking")) {
+    const scenarioId = a.detail?.scenarioId;
+    const score160 = a.detail?.score160;
+    if (typeof scenarioId !== "string" || typeof score160 !== "number") continue;
+    if (!map.has(scenarioId)) map.set(scenarioId, { score160, submittedAt: a.created_at });
+  }
+  return map;
+}
+
 export function InteractiveSpeakingHub() {
   const { isAdmin, previewEligible } = useEffectiveTier();
   const soft = true;
@@ -83,6 +99,17 @@ export function InteractiveSpeakingHub() {
   }, []);
 
   const latestByScenario = useMemo(() => buildLatestByScenario(), [reportTick, scenarios]);
+  const [serverLatest, setServerLatest] = useState<Map<string, ServerLatest>>(() => new Map());
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchServerLatestByScenario().then((m) => {
+      if (!cancelled) setServerLatest(m);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [reportTick]);
 
   if (soft) {
     return (
@@ -113,6 +140,12 @@ export function InteractiveSpeakingHub() {
               scenarios.map((s) => {
                 const latest = latestByScenario.get(s.id);
                 const needsRedeem = latest != null && latest.score160 < 160;
+                // Prefer the local full report; fall back to the server score (e.g. done on mobile).
+                const server = serverLatest.get(s.id);
+                const shown =
+                  latest && (!server || Date.parse(latest.submittedAt) >= Date.parse(server.submittedAt))
+                    ? latest
+                    : server ?? null;
                 const practiceHref = `/practice/production/interactive-speaking/${s.id}`;
                 const redeemHref = `${practiceHref}?redeem=1`;
                 const reportHref = latest
@@ -128,12 +161,12 @@ export function InteractiveSpeakingHub() {
                       <div className="min-w-0 flex-1">
                         <h2 className="text-lg font-bold text-slate-900">{s.titleEn}</h2>
                         <p className="mt-0.5 text-sm text-slate-500">{s.titleTh}</p>
-                        {latest ? (
+                        {shown ? (
                           <p className="mt-2 text-xs">
                             <span className="font-bold text-emerald-600">
-                              คะแนนล่าสุด {latest.score160}/160
+                              คะแนนล่าสุด {shown.score160}/160
                             </span>{" "}
-                            · <span className="text-slate-500">{formatAttemptDate(latest.submittedAt)}</span>
+                            · <span className="text-slate-500">{formatAttemptDate(shown.submittedAt)}</span>
                           </p>
                         ) : (
                           <p className="mt-2 text-xs text-slate-400">ยังไม่เคยทำ</p>

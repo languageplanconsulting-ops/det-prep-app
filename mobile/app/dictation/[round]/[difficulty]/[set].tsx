@@ -13,7 +13,8 @@ import {
 import { LuxuryPressable } from "../../../../components/LuxuryPressable";
 import { useScoreReveal } from "../../../../hooks/useScoreReveal";
 import { API_BASE_URL } from "../../../../lib/config";
-import { fetchDictationItem, finishStudySession, startStudySession } from "../../../../lib/api";
+import { fetchDictationItem, finishStudySession, startStudySession, postPracticeAttempt } from "../../../../lib/api";
+import { buildContentKey } from "../../../../lib/practice-progress";
 import {
   diffDictationChars,
   dictationScoreFromDiff,
@@ -116,6 +117,14 @@ export default function DictationSessionScreen() {
     setScore(attained);
     setPhase("report");
 
+    // Same shape the website writes, so this score shows on web too.
+    void postPracticeAttempt({
+      taskType: "dictation",
+      scorePct: maxScore > 0 ? (attained / maxScore) * 100 : 0,
+      detail: {
+        contentKey: buildContentKey("dictation", diff, roundNum, setNumber),
+      },
+    });
     const duration = Math.max(1, Math.floor((Date.now() - startedAt.current) / 1000));
     try {
       await finishStudySession({

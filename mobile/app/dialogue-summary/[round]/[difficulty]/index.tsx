@@ -17,6 +17,7 @@ export default function DialogueSummarySetListScreen() {
       difficulty={diff}
       header={`Round ${roundNum} · ${difficulty} · max ${cap} pts`}
       href={(setNumber) => `/dialogue-summary/${round}/${difficulty}/${setNumber}`}
+      progress={{ taskType: "dialogue_summary", contentSkill: "dialogue_summary" }}
     />
   );
 }

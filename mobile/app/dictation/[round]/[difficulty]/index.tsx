@@ -20,6 +20,7 @@ export default function DictationSetListScreen() {
       difficulty={diff}
       header={`Round ${roundNum} · ${difficulty} · max ${cap} pts per set`}
       href={(setNumber) => `/dictation/${round}/${difficulty}/${setNumber}`}
+      progress={{ taskType: "dictation", contentSkill: "dictation" }}
     />
   );
 }

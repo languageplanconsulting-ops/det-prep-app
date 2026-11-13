@@ -10,7 +10,8 @@ import {
 
 import { useScoreReveal } from "../../../../../hooks/useScoreReveal";
 import { LuxuryPressable } from "../../../../../components/LuxuryPressable";
-import { fetchPracticeSet, finishStudySession, startStudySession } from "../../../../../lib/api";
+import { fetchPracticeSet, finishStudySession, startStudySession, postPracticeAttempt } from "../../../../../lib/api";
+import { buildContentKey, packSubIndexed } from "../../../../../lib/practice-progress";
 import { READING_DIFFICULTY_MAX } from "../../../../../lib/reading-constants";
 import { answersMatch, shuffleMcOptions } from "../../../../../lib/reading-utils";
 import type {
@@ -131,6 +132,16 @@ export default function ReadingSessionScreen() {
     setScore(attained);
     setPhase("report");
 
+    // Same shape the website writes, so this score shows on web too.
+    void postPracticeAttempt({
+      taskType: "reading_comprehension",
+      scorePct: maxScore > 0 ? (attained / maxScore) * 100 : 0,
+      detail: {
+        correct: correctCount,
+        total: 4,
+        contentKey: buildContentKey("reading", diff, roundNum, packSubIndexed(setNumber, examNumber)),
+      },
+    });
     const duration = Math.max(1, Math.floor((Date.now() - startedAt.current) / 1000));
     try {
       await finishStudySession({

@@ -17,6 +17,8 @@ import type {
   ConversationProgressRecord,
 } from "@/types/conversation";
 import { readContentBankItem, writeContentBankItem } from "@/lib/content-bank-store";
+import { buildContentKey, parseContentKey } from "@/lib/practice-attempts-contentkey";
+import { fetchPracticeAttempts, postPracticeAttempt } from "@/lib/practice-attempts-sync";
 
 export const CONVERSATION_LS_BANK_KEY = "ep-conversation-bank-v2";
 export const CONVERSATION_LS_BANK_LEGACY_KEY = "ep-conversation-bank-v1";
@@ -400,7 +402,54 @@ export function saveConversationProgress(args: {
   m[k] = next;
   localStorage.setItem(PROGRESS_KEY, JSON.stringify(m));
   emitConversationUpdate();
+  void postPracticeAttempt({
+    taskType: "interactive_listening",
+    scorePct: maxScore > 0 ? (score / maxScore) * 100 : 0,
+    detail: {
+      correct,
+      total: itemOk.length,
+      itemOk: [...itemOk],
+      contentKey: buildContentKey("conversation", difficulty, round, setNumber),
+    },
+  });
   return next;
+}
+
+/** Pull in conversation scores achieved on mobile/other browsers (best score wins). */
+export async function hydrateConversationProgressFromServer(): Promise<void> {
+  const attempts = await fetchPracticeAttempts("interactive_listening");
+  if (attempts.length === 0) return;
+  const m = loadConversationProgressMap();
+  let changed = false;
+  for (const a of attempts) {
+    const ck = a.detail?.contentKey;
+    if (typeof ck !== "string") continue;
+    const parsed = parseContentKey(ck);
+    if (!parsed || parsed.skill !== "conversation") continue;
+    const difficulty = parsed.difficulty as ConversationDifficulty;
+    if (!CONVERSATION_DIFFICULTIES.includes(difficulty)) continue;
+    const maxScore = CONVERSATION_MAX_SCORE[difficulty];
+    const attainedScore = Math.round(((a.score_pct ?? 0) / 100) * maxScore);
+    const k = progressKey(parsed.round, difficulty, parsed.setNum);
+    const prev = m[k];
+    if (!prev || attainedScore > prev.bestScore) {
+      const itemOk = a.detail?.itemOk;
+      m[k] = {
+        bestScore: Math.max(prev?.bestScore ?? 0, attainedScore),
+        maxScore: prev?.maxScore ?? maxScore,
+        lastItemOk:
+          prev?.lastItemOk ??
+          (Array.isArray(itemOk) ? itemOk.map(Boolean) : []),
+        updatedAt: prev?.updatedAt ?? a.created_at,
+        userId: prev?.userId,
+      };
+      changed = true;
+    }
+  }
+  if (changed) {
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(m));
+    emitConversationUpdate();
+  }
 }
 
 export function mergeConversationBankFromAdmin(text: string): { count: number } {

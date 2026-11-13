@@ -10,7 +10,13 @@ import {
 
 import { useScoreReveal } from "../../../../hooks/useScoreReveal";
 import { LuxuryPressable } from "../../../../components/LuxuryPressable";
-import { fetchPracticeSet, finishStudySession, startStudySession } from "../../../../lib/api";
+import {
+  fetchPracticeSet,
+  finishStudySession,
+  postPracticeAttempt,
+  startStudySession,
+} from "../../../../lib/api";
+import { buildContentKey } from "../../../../lib/practice-progress";
 import {
   CONVERSATION_FULL_SCORE,
   CONVERSATION_MAIN_Q_COUNT,
@@ -96,6 +102,17 @@ export default function ConversationSessionScreen() {
     setScore(attained);
     setStage("report");
 
+    // Same shape the website writes, so this score shows on web too.
+    void postPracticeAttempt({
+      taskType: "interactive_listening",
+      scorePct: maxScore > 0 ? (attained / maxScore) * 100 : 0,
+      detail: {
+        correct: correctCount,
+        total: ok.length,
+        itemOk: ok,
+        contentKey: buildContentKey("conversation", diff, roundNum, setNumber),
+      },
+    });
     const duration = Math.max(1, Math.floor((Date.now() - startedAt.current) / 1000));
     try {
       await finishStudySession({

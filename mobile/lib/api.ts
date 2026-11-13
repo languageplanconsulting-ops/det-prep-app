@@ -352,3 +352,47 @@ export async function synthesizeSpeech(text: string): Promise<string> {
   }
   throw new Error("No audio returned");
 }
+
+export type ServerPracticeAttempt = {
+  task_type: string;
+  score_pct: number | null;
+  detail: Record<string, unknown> | null;
+  source: string;
+  created_at: string;
+};
+
+/**
+ * Record a finished set in practice_attempts — the same table the website reads
+ * and writes, so a score earned here shows up on the web for the same account.
+ * Best-effort: never throws.
+ */
+export async function postPracticeAttempt(input: {
+  taskType: string;
+  scorePct: number;
+  detail?: Record<string, unknown>;
+}): Promise<void> {
+  try {
+    await apiFetch(`${API_BASE_URL}/api/practice-attempts/sync`, {
+      method: "POST",
+      headers: await authHeaders(),
+      body: JSON.stringify({ attempt: { ...input, source: "app" } }),
+    });
+  } catch {
+    /* best-effort */
+  }
+}
+
+/** Every attempt of one task type for the signed-in user (web + app). Empty on failure. */
+export async function fetchPracticeAttempts(taskType: string): Promise<ServerPracticeAttempt[]> {
+  try {
+    const res = await apiFetch(
+      `${API_BASE_URL}/api/practice-attempts/sync?taskType=${encodeURIComponent(taskType)}`,
+      { headers: await authHeaders() },
+    );
+    if (!res.ok) return [];
+    const body = (await res.json().catch(() => ({}))) as { attempts?: ServerPracticeAttempt[] };
+    return Array.isArray(body.attempts) ? body.attempts : [];
+  } catch {
+    return [];
+  }
+}

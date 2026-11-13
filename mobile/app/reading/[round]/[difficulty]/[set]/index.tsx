@@ -9,8 +9,10 @@ import {
 } from "react-native";
 
 import { LuxuryPressable } from "../../../../../components/LuxuryPressable";
+import { useBestScores } from "../../../../../hooks/useBestScores";
 import { useLuxuryRouter } from "../../../../../hooks/useLuxuryRouter";
 import { fetchPracticeSetMeta } from "../../../../../lib/api";
+import { packSubIndexed } from "../../../../../lib/practice-progress";
 import { READING_DIFFICULTY_MAX } from "../../../../../lib/reading-constants";
 import type { ReadingDifficulty, ReadingSet } from "../../../../../lib/types";
 
@@ -26,6 +28,12 @@ export default function ReadingExamListScreen() {
   const setNumber = Number(set);
   const [readingSet, setReadingSet] = useState<ReadingSet | null>(null);
   const [loading, setLoading] = useState(true);
+  const bestPct = useBestScores({
+    taskType: "reading_comprehension",
+    contentSkill: "reading",
+    round: roundNum,
+    difficulty: diff,
+  });
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -97,6 +105,10 @@ export default function ReadingExamListScreen() {
             Exam {item.examNumber}
             {item.exam.titleEn ? ` — ${item.exam.titleEn}` : ""}
           </Text>
+          {(() => {
+            const best = bestPct.get(packSubIndexed(setNumber, item.examNumber));
+            return best != null ? <Text style={styles.best}>Best {Math.round(best)}%</Text> : null;
+          })()}
           <Text style={styles.chev}>›</Text>
         </LuxuryPressable>
       )}
@@ -105,6 +117,7 @@ export default function ReadingExamListScreen() {
 }
 
 const styles = StyleSheet.create({
+  best: { color: "#004AAD", fontWeight: "800", marginRight: 8 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
   error: { color: "#b91c1c", fontWeight: "700", textAlign: "center" },
   retry: {

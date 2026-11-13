@@ -9,8 +9,10 @@ import {
 } from "react-native";
 
 import { LuxuryPressable } from "../../../../../components/LuxuryPressable";
+import { useBestScores } from "../../../../../hooks/useBestScores";
 import { useLuxuryRouter } from "../../../../../hooks/useLuxuryRouter";
 import { fetchPracticeSetMeta } from "../../../../../lib/api";
+import { packSubIndexed } from "../../../../../lib/practice-progress";
 import { VOCAB_SESSION_MAX } from "../../../../../lib/vocab-constants";
 import type { VocabSessionLevel, VocabSet } from "../../../../../lib/types";
 
@@ -26,6 +28,12 @@ export default function VocabPassageListScreen() {
   const setNumber = Number(set);
   const [vocabSet, setVocabSet] = useState<VocabSet | null>(null);
   const [loading, setLoading] = useState(true);
+  const bestPct = useBestScores({
+    taskType: "vocabulary_reading",
+    contentSkill: "vocab",
+    round: roundNum,
+    difficulty: sessionLevel,
+  });
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -100,6 +108,10 @@ export default function VocabPassageListScreen() {
             Passage {item.passageNumber}
             {item.titleEn ? ` — ${item.titleEn}` : ""}
           </Text>
+          {(() => {
+            const best = bestPct.get(packSubIndexed(setNumber, item.passageNumber));
+            return best != null ? <Text style={styles.best}>Best {Math.round(best)}%</Text> : null;
+          })()}
           <Text style={styles.chev}>›</Text>
         </LuxuryPressable>
       )}
@@ -108,6 +120,7 @@ export default function VocabPassageListScreen() {
 }
 
 const styles = StyleSheet.create({
+  best: { color: "#004AAD", fontWeight: "800", marginRight: 8 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
   error: { color: "#b91c1c", fontWeight: "700", textAlign: "center" },
   retry: {

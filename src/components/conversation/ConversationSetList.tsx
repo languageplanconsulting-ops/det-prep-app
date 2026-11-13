@@ -14,6 +14,7 @@ import { filterConversationExamsForPractice } from "@/lib/conversation-practice-
 import {
   conversationMaxForExam,
   getConversationProgress,
+  hydrateConversationProgressFromServer,
   loadConversationBank,
 } from "@/lib/conversation-storage";
 import { buildDefaultConversationBank } from "@/lib/conversation-default-data";
@@ -72,6 +73,8 @@ export function ConversationSetList({
     // A brand-new learner has no bank in this browser yet; the pull fires the storage
     // event above, so the list re-renders with the real sets instead of "COMING SOON".
     void ensureCanonicalPracticeContent().then(bump);
+    // Merge in scores earned on the mobile app / other browsers.
+    void hydrateConversationProgressFromServer();
     window.addEventListener("storage", bump);
     window.addEventListener("ep-conversation-storage", bump);
     return () => {

@@ -17,6 +17,7 @@ export default function FitbSetListScreen() {
       difficulty={diff}
       header={`Round ${roundNum} · ${difficulty} · max ${cap} pts`}
       href={(setNumber) => `/fitb/${round}/${difficulty}/${setNumber}`}
+      progress={{ taskType: "fill_in_blanks", contentSkill: "fitb" }}
     />
   );
 }

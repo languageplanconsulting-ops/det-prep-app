@@ -16,7 +16,9 @@ import {
   finishStudySession,
   startStudySession,
   submitDialogueSummaryReport,
+  postPracticeAttempt,
 } from "../../../../lib/api";
+import { buildContentKey } from "../../../../lib/practice-progress";
 import {
   DIALOGUE_SUMMARY_MAX_SCORE,
   DIALOGUE_SUMMARY_MIN_WORDS,
@@ -102,6 +104,15 @@ export default function DialogueSummarySessionScreen() {
       });
       setReport(r);
       setPhase("report");
+      // Same shape the website writes, so this score shows on web too.
+      void postPracticeAttempt({
+        taskType: "dialogue_summary",
+        scorePct: (r.score160 / 160) * 100,
+        detail: {
+          via: "dialogue_summary",
+          contentKey: buildContentKey("dialogue_summary", diff, roundNum, setNumber),
+        },
+      });
 
       const duration = Math.max(1, Math.floor((Date.now() - startedAt.current) / 1000));
       try {

@@ -16,6 +16,7 @@ export default function ConversationSetListScreen() {
       difficulty={diff}
       header={`Round ${roundNum} · ${difficulty} · max ${CONVERSATION_FULL_SCORE} pts`}
       href={(setNumber) => `/conversation/${round}/${difficulty}/${setNumber}`}
+      progress={{ taskType: "interactive_listening", contentSkill: "conversation" }}
     />
   );
 }

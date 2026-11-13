@@ -11,7 +11,8 @@ import {
 
 import { useScoreReveal } from "../../../../hooks/useScoreReveal";
 import { LuxuryPressable } from "../../../../components/LuxuryPressable";
-import { fetchPracticeSet, finishStudySession, startStudySession } from "../../../../lib/api";
+import { fetchPracticeSet, finishStudySession, startStudySession, postPracticeAttempt } from "../../../../lib/api";
+import { buildContentKey } from "../../../../lib/practice-progress";
 import { splitFitbPassage } from "../../../../lib/fitb-passage";
 import { fitbMaxScore } from "../../../../lib/fitb-constants";
 import {
@@ -129,6 +130,16 @@ export default function FitbSessionScreen() {
     setDetScore(score);
     setPhase("report");
 
+    // Same shape the website writes, so this score shows on web too.
+    void postPracticeAttempt({
+      taskType: "fill_in_blanks",
+      scorePct: maxScore > 0 ? (score / maxScore) * 100 : 0,
+      detail: {
+        correct: g.filter((x) => x === "exact").length,
+        total: g.length,
+        contentKey: buildContentKey("fitb", diff, roundNum, setNumber),
+      },
+    });
     const duration = Math.max(1, Math.floor((Date.now() - startedAt.current) / 1000));
     try {
       await finishStudySession({

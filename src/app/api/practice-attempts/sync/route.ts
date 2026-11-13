@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { getRequestAuthUser } from "@/lib/supabase-request-client";
 
 type AttemptPayload = {
   taskType: string;
@@ -8,6 +8,7 @@ type AttemptPayload = {
   detail?: Record<string, unknown>;
   setId?: string | null;
   stepIndex?: number | null;
+  source?: "web" | "app";
 };
 
 function isAttemptPayload(o: unknown): o is AttemptPayload {
@@ -19,14 +20,12 @@ function isAttemptPayload(o: unknown): o is AttemptPayload {
 /**
  * Insert one practice attempt (web-completed exam/daily-practice set). Shares
  * the same practice_attempts table the mobile app writes to, so scores sync
- * both directions between web and app for the same account.
+ * both directions between web and app for the same account. Accepts the web
+ * cookie session or a mobile Bearer token.
  */
 export async function POST(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await getRequestAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
 
     const { error } = await supabase.from("practice_attempts").insert({
       user_id: user.id,
-      source: "web",
+      source: attempt.source === "app" ? "app" : "web",
       set_id: attempt.setId ?? null,
       step_index: attempt.stepIndex ?? null,
       task_type: attempt.taskType,
@@ -67,10 +66,7 @@ export async function POST(req: Request) {
  */
 export async function GET(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await getRequestAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

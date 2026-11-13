@@ -9,6 +9,7 @@ import {
 
 import { LuxuryPressable } from "./LuxuryPressable";
 import { LuxuryTile } from "./LuxuryTile";
+import { useBestScores } from "../hooks/useBestScores";
 import { useLuxuryRouter } from "../hooks/useLuxuryRouter";
 import { fetchPracticeSetList } from "../lib/api";
 import type { PracticeSkillId } from "../lib/types";
@@ -19,13 +20,21 @@ type Props = {
   difficulty: string;
   header: string;
   href: (setNumber: number) => string;
+  /** When set, show each set's best score (shared with the website via practice_attempts). */
+  progress?: { taskType: string; contentSkill: string };
 };
 
-export function PracticeSetList({ skill, round, difficulty, header, href }: Props) {
+export function PracticeSetList({ skill, round, difficulty, header, href, progress }: Props) {
   const { push } = useLuxuryRouter();
   const [setNumbers, setSetNumbers] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const bestPct = useBestScores({
+    taskType: progress?.taskType,
+    contentSkill: progress?.contentSkill,
+    round,
+    difficulty,
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -77,10 +86,16 @@ export function PracticeSetList({ skill, round, difficulty, header, href }: Prop
       ListHeaderComponent={<Text style={styles.header}>{header}</Text>}
       renderItem={({ item: setNumber }) => {
         const available = setNumbers.includes(setNumber);
+        const best = bestPct.get(setNumber);
+        const subtitle = !available
+          ? "No data"
+          : best != null
+            ? `Best ${Math.round(best)}%`
+            : "Open";
         return (
           <LuxuryTile
             title={`Set ${setNumber}`}
-            subtitle={available ? "Open" : "No data"}
+            subtitle={subtitle}
             disabled={!available}
             onPress={() => push(href(setNumber))}
           />

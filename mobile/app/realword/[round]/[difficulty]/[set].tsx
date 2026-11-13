@@ -10,7 +10,13 @@ import {
 
 import { useScoreReveal } from "../../../../hooks/useScoreReveal";
 import { LuxuryPressable } from "../../../../components/LuxuryPressable";
-import { fetchPracticeSet, finishStudySession, startStudySession } from "../../../../lib/api";
+import {
+  fetchPracticeSet,
+  finishStudySession,
+  postPracticeAttempt,
+  startStudySession,
+} from "../../../../lib/api";
+import { buildContentKey } from "../../../../lib/practice-progress";
 import { REALWORD_MAX_SCORE } from "../../../../lib/realword-constants";
 import { realWordCounts, realWordRunScore } from "../../../../lib/realword-scoring";
 import type { RealWordDifficulty, RealWordSet } from "../../../../lib/types";
@@ -98,6 +104,17 @@ export default function RealWordSessionScreen() {
     if (!sessionSet || !report) return;
     setPhase("report");
     const duration = Math.max(1, Math.floor((Date.now() - startedAt.current) / 1000));
+    // Same shape the website writes, so this score shows on web too.
+    void postPracticeAttempt({
+      taskType: "real_english_word",
+      scorePct: maxScore > 0 ? (report.score / maxScore) * 100 : 0,
+      detail: {
+        hits: report.R,
+        wrong: report.M,
+        totalReal: report.UR + report.R,
+        contentKey: buildContentKey("realword", diff, roundNum, setNumber),
+      },
+    });
     try {
       await finishStudySession({
         sessionId: sessionIdRef.current ?? undefined,
