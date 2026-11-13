@@ -1,4 +1,4 @@
-import { Audio } from "expo-av";
+import { Sound } from "../../lib/audio-player";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -47,7 +47,7 @@ export default function CampusListeningLessonScreen() {
   const [notebookBusy, setNotebookBusy] = useState(false);
   const [notebookDone, setNotebookDone] = useState(false);
 
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef<Sound | null>(null);
   const audioUriRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function CampusListeningLessonScreen() {
         audioUriRef.current = await synthesizeSpeech(scenario.scenarioEn);
       }
       await unloadSound();
-      const { sound } = await Audio.Sound.createAsync({ uri: audioUriRef.current });
+      const { sound } = await Sound.createAsync({ uri: audioUriRef.current });
       soundRef.current = sound;
       sound.setOnPlaybackStatusUpdate((st) => {
         if (st.isLoaded && st.didJustFinish) setPlaying(false);

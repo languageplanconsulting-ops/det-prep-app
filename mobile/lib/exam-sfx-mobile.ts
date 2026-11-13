@@ -1,7 +1,7 @@
-import { Audio } from "expo-av";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
+import { ensurePlaybackMode, Sound } from "./audio-player";
 import { notesToWavBase64, type SynthNote } from "./wav-synth";
 
 const MUTE_KEY = "ep-mobile-sfx-muted";
@@ -24,7 +24,6 @@ const PRESETS: Record<string, SynthNote[]> = {
 };
 
 const uriCache: Partial<Record<keyof typeof PRESETS, string>> = {};
-let audioModeReady = false;
 
 async function readMutedFlag(): Promise<boolean> {
   try {
@@ -58,16 +57,6 @@ export async function setSfxMuted(muted: boolean): Promise<void> {
   await writeMutedFlag(muted);
 }
 
-async function ensureAudioMode(): Promise<void> {
-  if (audioModeReady) return;
-  await Audio.setAudioModeAsync({
-    playsInSilentModeIOS: true,
-    allowsRecordingIOS: false,
-    shouldDuckAndroid: true,
-  });
-  audioModeReady = true;
-}
-
 async function uriForPreset(name: keyof typeof PRESETS): Promise<string> {
   const cached = uriCache[name];
   if (cached) return cached;
@@ -91,7 +80,7 @@ async function uriForPreset(name: keyof typeof PRESETS): Promise<string> {
 }
 
 export async function preloadMobileSfx(): Promise<void> {
-  await ensureAudioMode();
+  await ensurePlaybackMode();
   await Promise.all(
     (Object.keys(PRESETS) as (keyof typeof PRESETS)[]).map((k) => uriForPreset(k)),
   );
@@ -100,9 +89,9 @@ export async function preloadMobileSfx(): Promise<void> {
 async function playPreset(name: keyof typeof PRESETS, volume = 0.85): Promise<void> {
   if (await getSfxMuted()) return;
   try {
-    await ensureAudioMode();
+    await ensurePlaybackMode();
     const uri = await uriForPreset(name);
-    const { sound } = await Audio.Sound.createAsync(
+    const { sound } = await Sound.createAsync(
       { uri },
       { shouldPlay: true, volume },
     );

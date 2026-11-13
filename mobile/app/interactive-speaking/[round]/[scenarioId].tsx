@@ -1,4 +1,3 @@
-import { Audio } from "expo-av";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -15,6 +14,8 @@ import {
   ensureMicPermission,
   startTurnRecording,
   stopTurnRecording,
+  useTurnRecorder,
+  type TurnRecorder,
 } from "../../../lib/audio-record";
 import {
   fetchInteractiveSpeakingScenario,
@@ -71,7 +72,8 @@ export default function InteractiveSpeakingSessionScreen() {
   const [transcript, setTranscript] = useState("");
   const [prepLeft, setPrepLeft] = useState(INTERACTIVE_SPEAKING_PREP_SECONDS);
   const [recLeft, setRecLeft] = useState(INTERACTIVE_SPEAKING_MAX_SPEAK_SECONDS);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const recorder = useTurnRecorder();
+  const [recording, setRecording] = useState<TurnRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [report, setReport] = useState<InteractiveSpeakingAttemptReport | null>(null);
@@ -155,7 +157,7 @@ export default function InteractiveSpeakingSessionScreen() {
       return;
     }
     try {
-      const rec = await startTurnRecording();
+      const rec = await startTurnRecording(recorder);
       setRecording(rec);
       setIsRecording(true);
       setPhase("record");
