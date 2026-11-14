@@ -1,0 +1,272 @@
+[
+ {
+  "id": "is-sharing-a-home",
+  "titleEn": "Sharing a home with others",
+  "titleTh": "การอยู่บ้านเดียวกันกับผู้อื่น",
+  "starterQuestionEn": "What do you think is the hardest part of sharing a home with other people? How would you deal with it?",
+  "starterQuestionTh": "คุณคิดว่าเรื่องที่ยากที่สุดของการอยู่บ้านเดียวกันกับคนอื่นคืออะไร? คุณจะรับมือกับเรื่องนั้นอย่างไร?",
+  "round": 3,
+  "thumbnail": "🏠"
+ },
+ {
+  "id": "is-teammate-not-helping",
+  "titleEn": "A teammate who is not helping",
+  "titleTh": "เพื่อนร่วมทีมที่ไม่ช่วยทำงาน",
+  "starterQuestionEn": "Imagine one person in your group is not doing their share of the work. What would you do?",
+  "starterQuestionTh": "ลองนึกภาพว่ามีคนหนึ่งในกลุ่มของคุณไม่ทำงานในส่วนของตัวเอง คุณจะทำอย่างไร?",
+  "round": 3,
+  "thumbnail": "🧩"
+ },
+ {
+  "id": "is-choosing-what-to-study",
+  "titleEn": "Choosing what to study",
+  "titleTh": "การเลือกสาขาที่จะเรียน",
+  "starterQuestionEn": "How did you choose what to study, or how are you going to choose? What matters most to you?",
+  "starterQuestionTh": "คุณเลือกสาขาที่เรียนอย่างไร หรือคุณจะเลือกอย่างไร? อะไรสำคัญที่สุดสำหรับคุณ?",
+  "round": 3,
+  "thumbnail": "📘"
+ },
+ {
+  "id": "is-losing-something",
+  "titleEn": "Losing something important",
+  "titleTh": "การทำของสำคัญหาย",
+  "starterQuestionEn": "Tell me about a time you lost something important, like your keys or your phone. What did you do?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับครั้งที่คุณทำของสำคัญหาย เช่น กุญแจหรือโทรศัพท์ คุณทำอย่างไร?",
+  "round": 3,
+  "thumbnail": "🔑"
+ },
+ {
+  "id": "is-product-or-service-problem",
+  "titleEn": "A problem with a product or service",
+  "titleTh": "ปัญหากับสินค้าหรือบริการ",
+  "starterQuestionEn": "Have you ever had a problem with something you bought or a service you used? What did you do about it?",
+  "starterQuestionTh": "คุณเคยมีปัญหากับของที่ซื้อมาหรือบริการที่ใช้ไหม? คุณจัดการกับปัญหานั้นอย่างไร?",
+  "round": 3,
+  "thumbnail": "🧾"
+ },
+ {
+  "id": "is-finding-your-way",
+  "titleEn": "Finding your way somewhere new",
+  "titleTh": "การหาทางไปในที่ที่ไม่คุ้นเคย",
+  "starterQuestionEn": "Tell me about a time you got lost or could not find a place. How did you find your way?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับครั้งที่คุณหลงทางหรือหาสถานที่ไม่เจอ สุดท้ายคุณหาทางไปถึงได้อย่างไร?",
+  "round": 3,
+  "thumbnail": "🧭"
+ },
+ {
+  "id": "is-planning-an-event",
+  "titleEn": "Planning a small event",
+  "titleTh": "การวางแผนจัดงานเล็กๆ",
+  "starterQuestionEn": "Imagine you have to organize a small party or event for your class or team. How would you plan it?",
+  "starterQuestionTh": "ลองนึกภาพว่าคุณต้องจัดงานเลี้ยงหรืองานเล็กๆ ให้ชั้นเรียนหรือทีมของคุณ คุณจะวางแผนอย่างไร?",
+  "round": 3,
+  "thumbnail": "🎈"
+ },
+ {
+  "id": "is-saving-up",
+  "titleEn": "Saving up for something",
+  "titleTh": "การเก็บเงินเพื่อซื้อสิ่งที่อยากได้",
+  "starterQuestionEn": "Tell me about something you saved money for, or would like to save for. How did you or will you do it?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับสิ่งที่คุณเคยเก็บเงินซื้อ หรืออยากเก็บเงินซื้อ คุณทำหรือจะทำอย่างไร?",
+  "round": 3,
+  "thumbnail": "💰"
+ },
+ {
+  "id": "is-moving-somewhere-new",
+  "titleEn": "Moving somewhere new",
+  "titleTh": "การย้ายไปอยู่ที่ใหม่",
+  "starterQuestionEn": "Have you ever moved to a new home, school, or city? What was difficult, and how did you get used to it?",
+  "starterQuestionTh": "คุณเคยย้ายบ้าน ย้ายโรงเรียน หรือย้ายเมืองไหม? อะไรที่ยาก และคุณปรับตัวได้อย่างไร?",
+  "round": 3,
+  "thumbnail": "📦"
+ },
+ {
+  "id": "is-volunteer-activity",
+  "titleEn": "Helping your community",
+  "titleTh": "การช่วยเหลือชุมชน",
+  "starterQuestionEn": "Is there a volunteer activity you have done or would like to do? Explain what it involves.",
+  "starterQuestionTh": "มีกิจกรรมจิตอาสาที่คุณเคยทำหรืออยากทำไหม? ช่วยอธิบายว่ากิจกรรมนั้นต้องทำอะไรบ้าง",
+  "round": 3,
+  "thumbnail": "🤲"
+ },
+ {
+  "id": "is-technology-lets-you-down",
+  "titleEn": "When technology lets you down",
+  "titleTh": "เมื่อเทคโนโลยีมีปัญหา",
+  "starterQuestionEn": "Tell me about a time your phone or computer stopped working at a bad moment. What did you do?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับครั้งที่โทรศัพท์หรือคอมพิวเตอร์ของคุณเสียในจังหวะที่ไม่ดี คุณทำอย่างไร?",
+  "round": 3,
+  "thumbnail": "💻"
+ },
+ {
+  "id": "is-changing-a-habit",
+  "titleEn": "Trying to change a habit",
+  "titleTh": "การพยายามเปลี่ยนนิสัย",
+  "starterQuestionEn": "Is there a habit you have tried to change, like going to bed late or using your phone too much? How did it go?",
+  "starterQuestionTh": "มีนิสัยอะไรที่คุณเคยพยายามเปลี่ยนไหม เช่น นอนดึกหรือเล่นโทรศัพท์มากเกินไป? ผลเป็นอย่างไร?",
+  "round": 3,
+  "thumbnail": "🔄"
+ },
+ {
+  "id": "is-asking-a-favor",
+  "titleEn": "Asking for a favor",
+  "titleTh": "การขอให้คนอื่นช่วย",
+  "starterQuestionEn": "When you need a favor from someone, how do you usually ask? Tell me about a time you did this.",
+  "starterQuestionTh": "เวลาคุณต้องการให้ใครช่วยอะไรสักอย่าง ปกติคุณขออย่างไร? เล่าให้ฟังถึงครั้งหนึ่งที่คุณทำแบบนั้น",
+  "round": 3,
+  "thumbnail": "🙏"
+ },
+ {
+  "id": "is-disagreeing-with-a-friend",
+  "titleEn": "Disagreeing with a friend",
+  "titleTh": "การเห็นไม่ตรงกับเพื่อน",
+  "starterQuestionEn": "Tell me about a time you disagreed with a friend. How did you work it out?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับครั้งที่คุณเห็นไม่ตรงกับเพื่อน พวกคุณตกลงกันได้อย่างไร?",
+  "round": 3,
+  "thumbnail": "🤔"
+ },
+ {
+  "id": "is-difficult-decision",
+  "titleEn": "A difficult decision",
+  "titleTh": "การตัดสินใจที่ยาก",
+  "starterQuestionEn": "Tell me about a difficult decision you had to make. How did you decide in the end?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับการตัดสินใจที่ยากครั้งหนึ่งของคุณ สุดท้ายคุณตัดสินใจอย่างไร?",
+  "round": 3,
+  "thumbnail": "🔀"
+ },
+ {
+  "id": "is-getting-ready-for-a-trip",
+  "titleEn": "Getting ready for a trip",
+  "titleTh": "การเตรียมตัวก่อนเดินทาง",
+  "starterQuestionEn": "When you get ready for a trip, what do you plan first, and what do you often forget?",
+  "starterQuestionTh": "เวลาเตรียมตัวเดินทาง คุณวางแผนเรื่องอะไรก่อน และมักลืมอะไร?",
+  "round": 3,
+  "thumbnail": "🧳"
+ },
+ {
+  "id": "is-teaching-someone",
+  "titleEn": "Teaching someone a skill",
+  "titleTh": "การสอนทักษะให้ผู้อื่น",
+  "starterQuestionEn": "Have you ever taught someone how to do something? How did you explain it to them?",
+  "starterQuestionTh": "คุณเคยสอนใครทำอะไรสักอย่างไหม? คุณอธิบายให้เขาเข้าใจอย่างไร?",
+  "round": 3,
+  "thumbnail": "📝"
+ },
+ {
+  "id": "is-great-service",
+  "titleEn": "Really good service",
+  "titleTh": "บริการที่ประทับใจ",
+  "starterQuestionEn": "Tell me about a time a shop or business gave you really good service. What did they do?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับครั้งที่ร้านค้าหรือธุรกิจให้บริการคุณได้ดีมาก พวกเขาทำอะไร?",
+  "round": 3,
+  "thumbnail": "⭐"
+ },
+ {
+  "id": "is-local-problem",
+  "titleEn": "A problem in your area",
+  "titleTh": "ปัญหาในย่านที่คุณอยู่",
+  "starterQuestionEn": "What is one problem in the area where you live, such as noise or traffic? What could people do about it?",
+  "starterQuestionTh": "ปัญหาหนึ่งในย่านที่คุณอยู่คืออะไร เช่น เสียงดังหรือรถติด? ผู้คนทำอะไรได้บ้างเพื่อแก้ปัญหานี้?",
+  "round": 3,
+  "thumbnail": "🚧"
+ },
+ {
+  "id": "is-saving-time",
+  "titleEn": "Ways to save time",
+  "titleTh": "วิธีประหยัดเวลา",
+  "starterQuestionEn": "What is something you do to save time in your daily life? Explain how it helps you.",
+  "starterQuestionTh": "คุณทำอะไรเพื่อประหยัดเวลาในชีวิตประจำวัน? ช่วยอธิบายว่ามันช่วยคุณอย่างไร",
+  "round": 3,
+  "thumbnail": "⏰"
+ },
+ {
+  "id": "is-staying-calm",
+  "titleEn": "Staying calm under pressure",
+  "titleTh": "การทำใจให้สงบเมื่อเจอแรงกดดัน",
+  "starterQuestionEn": "What do you do to stay calm when you feel nervous or stressed? Give me an example.",
+  "starterQuestionTh": "คุณทำอย่างไรให้ใจสงบเวลารู้สึกประหม่าหรือเครียด? ยกตัวอย่างให้ฟังหน่อย",
+  "round": 3,
+  "thumbnail": "🧘"
+ },
+ {
+  "id": "is-showing-a-visitor-around",
+  "titleEn": "Showing a visitor around",
+  "titleTh": "การพาแขกเที่ยวชมเมือง",
+  "starterQuestionEn": "Imagine a friend from another country is visiting your town for one day. Where would you take them, and why?",
+  "starterQuestionTh": "ลองนึกภาพว่ามีเพื่อนจากต่างประเทศมาเที่ยวเมืองของคุณหนึ่งวัน คุณจะพาเขาไปที่ไหน และเพราะอะไร?",
+  "round": 3,
+  "thumbnail": "🌏"
+ },
+ {
+  "id": "is-starting-a-project",
+  "titleEn": "Starting a small project",
+  "titleTh": "การเริ่มโปรเจกต์เล็กๆ",
+  "starterQuestionEn": "If you could start a small business or project with friends, what would it be? How would you begin?",
+  "starterQuestionTh": "ถ้าคุณได้เริ่มธุรกิจหรือโปรเจกต์เล็กๆ กับเพื่อน จะเป็นอะไร? คุณจะเริ่มต้นอย่างไร?",
+  "round": 3,
+  "thumbnail": "💡"
+ },
+ {
+  "id": "is-advice-from-an-elder",
+  "titleEn": "Advice from an older person",
+  "titleTh": "คำแนะนำจากผู้ใหญ่",
+  "starterQuestionEn": "Tell me about a piece of advice an older person once gave you. Did you follow it?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับคำแนะนำที่ผู้ใหญ่เคยให้คุณ คุณทำตามคำแนะนำนั้นไหม?",
+  "round": 3,
+  "thumbnail": "👵"
+ },
+ {
+  "id": "is-working-together-online",
+  "titleEn": "Working together online",
+  "titleTh": "การทำงานร่วมกันทางออนไลน์",
+  "starterQuestionEn": "Have you ever worked on something with people only through messages or video calls? What problems came up?",
+  "starterQuestionTh": "คุณเคยทำงานร่วมกับคนอื่นโดยคุยกันผ่านข้อความหรือวิดีโอคอลอย่างเดียวไหม? มีปัญหาอะไรเกิดขึ้นบ้าง?",
+  "round": 3,
+  "thumbnail": "📹"
+ },
+ {
+  "id": "is-being-a-beginner",
+  "titleEn": "Being a beginner",
+  "titleTh": "การเป็นมือใหม่",
+  "starterQuestionEn": "Think about a time you were a complete beginner at something. How did you feel, and what helped you improve?",
+  "starterQuestionTh": "นึกถึงตอนที่คุณเป็นมือใหม่ในเรื่องใดเรื่องหนึ่ง ตอนนั้นคุณรู้สึกอย่างไร และอะไรช่วยให้คุณเก่งขึ้น?",
+  "round": 3,
+  "thumbnail": "🌱"
+ },
+ {
+  "id": "is-reducing-waste-at-home",
+  "titleEn": "Reducing waste at home",
+  "titleTh": "การลดขยะในบ้าน",
+  "starterQuestionEn": "What do you do at home to reduce waste or recycle? Is it easy or hard to do?",
+  "starterQuestionTh": "คุณทำอะไรที่บ้านเพื่อลดขยะหรือรีไซเคิลบ้าง? ทำได้ง่ายหรือยาก?",
+  "round": 3,
+  "thumbnail": "🌿"
+ },
+ {
+  "id": "is-power-cut",
+  "titleEn": "A day without electricity",
+  "titleTh": "หนึ่งวันที่ไม่มีไฟฟ้าใช้",
+  "starterQuestionEn": "Imagine the electricity goes off in your area for a whole day. How would you manage?",
+  "starterQuestionTh": "ลองนึกภาพว่าไฟฟ้าในย่านของคุณดับทั้งวัน คุณจะใช้ชีวิตวันนั้นอย่างไร?",
+  "round": 3,
+  "thumbnail": "🔦"
+ },
+ {
+  "id": "is-public-service",
+  "titleEn": "A public service you use",
+  "titleTh": "บริการสาธารณะที่คุณใช้",
+  "starterQuestionEn": "Tell me about a public service you use, like buses or the post office. How could it be better?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับบริการสาธารณะที่คุณใช้ เช่น รถเมล์หรือไปรษณีย์ บริการนั้นจะดีขึ้นได้อย่างไร?",
+  "round": 3,
+  "thumbnail": "🚏"
+ },
+ {
+  "id": "is-choosing-a-place-to-live",
+  "titleEn": "Choosing a place to live",
+  "titleTh": "การเลือกที่อยู่อาศัย",
+  "starterQuestionEn": "If you were looking for a new place to live, what would matter most to you, and why?",
+  "starterQuestionTh": "ถ้าคุณกำลังหาที่อยู่ใหม่ อะไรจะสำคัญที่สุดสำหรับคุณ และเพราะอะไร?",
+  "round": 3,
+  "thumbnail": "🏢"
+ }
+]
