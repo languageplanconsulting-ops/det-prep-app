@@ -67,6 +67,19 @@ export default function PracticeHubScreen() {
         </Text>
       </FadeInItem>
 
+      <FadeInItem index={1} step={70}>
+        <LuxuryPressable style={styles.dailyCard} sound="tap" scaleTo={0.97} onPress={() => push("/daily" as Href)}>
+          <Text style={styles.dailyEmoji}>🎯</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.dailyTitle}>{t("ฝึกประจำวัน", "Daily practice")}</Text>
+            <Text style={styles.dailySub}>
+              {t("บอกเวลาที่มี แล้วเราสุ่มข้อที่คุณยังไม่เคยทำให้", "Tell us your time — we pick questions you haven't done")}
+            </Text>
+          </View>
+          <Text style={styles.dailyChev}>›</Text>
+        </LuxuryPressable>
+      </FadeInItem>
+
       <Section
         index={1}
         title={t("การอ่านเขียนพื้นฐาน", "Literacy")}
@@ -98,7 +111,7 @@ export default function PracticeHubScreen() {
       <Section
         index={5}
         title={t("การพูดและเขียน", "Production")}
-        sub={t("พูด & เขียน (AI ตรวจให้)", "Speaking & writing (AI graded)")}
+        sub={t("พูด & เขียน (ตรวจให้ทันที)", "Speaking & writing (instant feedback)")}
       >
         {rows(production(t))}
       </Section>
@@ -166,6 +179,21 @@ function HubRow({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F4F6FB" },
   content: { padding: 16, paddingBottom: 40 },
+  dailyCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#FFCC00",
+    borderRadius: 18,
+    borderWidth: 3,
+    borderColor: "#111",
+    padding: 16,
+    marginBottom: 20,
+  },
+  dailyEmoji: { fontSize: 30 },
+  dailyTitle: { fontSize: 18, fontWeight: "900", color: "#111" },
+  dailySub: { fontSize: 12, color: "#3f3f46", marginTop: 3, fontWeight: "700" },
+  dailyChev: { fontSize: 26, color: "#111", fontWeight: "900" },
   hero: {
     backgroundColor: "#004AAD",
     borderRadius: 20,

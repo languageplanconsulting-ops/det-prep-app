@@ -37,7 +37,7 @@ export default function ProfileScreen() {
         </Text>
         {quota ? (
           <Text style={styles.quota}>
-            {t("เครดิต AI", "AI credits")}: {quota.ai.totalRemaining} / {quota.ai.totalLimit}
+            {t("เครดิตการตรวจ", "Grading credits")}: {quota.ai.totalRemaining} / {quota.ai.totalLimit}
           </Text>
         ) : null}
       </View>
@@ -46,8 +46,8 @@ export default function ProfileScreen() {
         <Text style={styles.switchTitle}>{t("ปลดล็อกแอดมิน", "Admin unlock")}</Text>
         <Text style={styles.switchSub}>
           {t(
-            "ใส่รหัสแอดมินเพื่อใช้สิทธิ์ VIP (ทุกทักษะ, AI ตรวจไม่จำกัด)",
-            "Enter admin code for VIP access (all skills, unlimited AI grading).",
+            "ใส่รหัสแอดมินเพื่อใช้สิทธิ์ VIP (ทุกทักษะ, ตรวจได้ไม่จำกัด)",
+            "Enter admin code for VIP access (all skills, unlimited grading).",
           )}
         </Text>
         {adminUnlocked ? (

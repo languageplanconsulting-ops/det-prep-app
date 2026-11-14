@@ -6,9 +6,14 @@ function isPlaceholder(value: string | undefined): boolean {
   return !value || value.includes("${");
 }
 
+/**
+ * EXPO_PUBLIC_* from mobile/.env wins: it is inlined into the bundle at build time. `extra` comes
+ * from app.config.js, which under SDK 58 can be evaluated without .env loaded — it then holds the
+ * production fallback and would silently point a local build at the live API.
+ */
 function pickConfig(extraVal: string | undefined, envVal: string | undefined): string {
+  if (envVal && !isPlaceholder(envVal)) return envVal;
   if (!isPlaceholder(extraVal) && extraVal) return extraVal;
-  if (envVal) return envVal;
   return extraVal ?? "";
 }
 

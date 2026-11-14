@@ -10,7 +10,7 @@ export default function DialogueSummaryHubScreen() {
   return (
     <RoundDifficultyPicker
       title={t("ฟังแล้วสรุป", "Dialogue → summary")}
-      subtitle={t("ฟังบทสนทนาแล้วเขียนสรุป — AI ตรวจโดยใช้เครดิต VIP", "Listen, then write a summary — AI grading uses your VIP credits.")}
+      subtitle={t("ฟังบทสนทนาแล้วเขียนสรุป — ตรวจโดยใช้เครดิต VIP", "Listen, then write a summary — grading uses your VIP credits.")}
       basePath="/dialogue-summary"
       difficulties={[...DIALOGUE_SUMMARY_DIFFICULTIES]}
       maxScores={DIALOGUE_SUMMARY_MAX_SCORES}

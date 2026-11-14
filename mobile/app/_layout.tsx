@@ -145,6 +145,14 @@ function RootStack() {
             name="interactive-speaking/[round]/[scenarioId]"
             options={{ ...luxuryScreen, title: t("การพูด", "Speaking") }}
           />
+          <Stack.Screen
+            name="daily/index"
+            options={{ ...luxuryScreen, title: t("ฝึกประจำวัน", "Daily practice") }}
+          />
+          <Stack.Screen
+            name="daily/report"
+            options={{ ...luxuryScreen, title: t("รายงานการฝึก", "Practice report") }}
+          />
           <Stack.Screen name="lessons/index" options={{ ...luxuryScreen, title: t("บทเรียน", "Lessons") }} />
           <Stack.Screen
             name="lessons/[scenarioId]"

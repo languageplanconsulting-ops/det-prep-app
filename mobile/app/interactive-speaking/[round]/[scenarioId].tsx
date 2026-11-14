@@ -334,7 +334,7 @@ export default function InteractiveSpeakingSessionScreen() {
     return (
       <View style={styles.center}>
         {turn >= INTERACTIVE_SPEAKING_TURN_COUNT ? (
-          <MascotLoader grading label={t("AI กำลังตรวจคำตอบของคุณ", "Grading your answers")} />
+          <MascotLoader grading label={t("กำลังตรวจคำตอบของคุณ", "Grading your answers")} />
         ) : (
           <MascotLoader label={t("กำลังเตรียมคำถามถัดไป", "Preparing the next question")} />
         )}
@@ -349,8 +349,8 @@ export default function InteractiveSpeakingSessionScreen() {
         <Text style={styles.titleTh}>{scenario.titleTh}</Text>
         <Text style={styles.note}>
           {t(
-            `รอบ ${round} · 6 รอบคำถาม · ใช้เครดิต AI ของ VIP เมื่อส่งตรวจ`,
-            `Round ${round} · 6 turns · Uses VIP AI credits when you submit for feedback.`,
+            `รอบ ${round} · 6 รอบคำถาม · ใช้เครดิตการตรวจของ VIP เมื่อส่งตรวจ`,
+            `Round ${round} · 6 turns · Uses VIP grading credits when you submit for feedback.`,
           )}
         </Text>
         {error ? <Text style={styles.formError}>{error}</Text> : null}
@@ -418,7 +418,7 @@ export default function InteractiveSpeakingSessionScreen() {
             <Text style={styles.btnText}>
               {turn < INTERACTIVE_SPEAKING_TURN_COUNT
                 ? t("คำถามถัดไป →", "Next turn →")
-                : t("ส่งให้ AI ตรวจ", "Submit for grading")}
+                : t("ส่งตรวจ", "Submit for grading")}
             </Text>
           </LuxuryPressable>
         </>

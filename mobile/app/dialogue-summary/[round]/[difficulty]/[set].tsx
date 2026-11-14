@@ -173,9 +173,9 @@ export default function DialogueSummarySessionScreen() {
   if (phase === "grading") {
     return (
       <View style={styles.center}>
-        <MascotLoader grading label={t("AI กำลังตรวจสรุปของคุณ", "Grading your summary")} />
+        <MascotLoader grading label={t("กำลังตรวจสรุปของคุณ", "Grading your summary")} />
         <Text style={styles.gradingSub}>
-          {t("ใช้เครดิต AI ในบัญชีของคุณ", "Uses AI credits on your account.")}
+          {t("ใช้เครดิตการตรวจในบัญชีของคุณ", "Uses grading credits on your account.")}
         </Text>
       </View>
     );
@@ -198,11 +198,6 @@ export default function DialogueSummarySessionScreen() {
           format={(n, m) => scoreLine(t, n, m)}
           style={styles.score}
         />
-        {report.gradingSource ? (
-          <Text style={styles.source}>
-            {t("ตรวจโดย", "Graded via")} {report.gradingSource}
-          </Text>
-        ) : null}
         {criteria.map(({ key, r }, i) => (
           <FadeInItem key={key} index={i + 1} style={styles.criterion}>
             <Text style={styles.criterionTitle}>
@@ -277,7 +272,7 @@ export default function DialogueSummarySessionScreen() {
         disabled={!meetsMin}
         sound="submit" onPress={() => void submit()}
       >
-        <Text style={styles.btnText}>{t("ส่งให้ AI ตรวจ", "Submit for grading")}</Text>
+        <Text style={styles.btnText}>{t("ส่งตรวจ", "Submit for grading")}</Text>
       </LuxuryPressable>
     </ScrollView>
   );

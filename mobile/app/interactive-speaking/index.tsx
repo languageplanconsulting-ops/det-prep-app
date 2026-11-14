@@ -6,7 +6,7 @@ export default function InteractiveSpeakingRoundHubScreen() {
   return (
     <RoundHubScreen
       title={t("พูดโต้ตอบ", "Interactive speaking")}
-      subtitle={t("สถานการณ์ละ 6 รอบ · AI ถามต่อจากคำตอบ · ตรวจด้วยเครดิต VIP", "6 turns per scenario · AI follow-up questions · VIP grading.")}
+      subtitle={t("สถานการณ์ละ 6 รอบ · ถามต่อจากคำตอบของคุณ · ตรวจด้วยเครดิต VIP", "6 turns per scenario · follow-up questions · VIP grading.")}
       basePath="/interactive-speaking"
     />
   );
