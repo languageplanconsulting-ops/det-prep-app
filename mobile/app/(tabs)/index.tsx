@@ -132,16 +132,6 @@ export default function PracticeHubScreen() {
         {rows(production(t))}
       </Section>
 
-      <Text style={styles.footnote}>
-<<<<<<< HEAD
-        {t("ข้อสอบจำลอง — กำลังจะมาในแอปเร็วๆ นี้", "Mock test — coming to the app next.")}
-=======
-        {t(
-          "เขียนจากภาพ และพูดจากภาพ — กำลังจะมาในแอปเร็วๆ นี้",
-          "Write-about-photo and speak-about-photo — coming to the app next.",
-        )}
->>>>>>> refs/heads/claude/adoring-wright-03348c
-      </Text>
     </ScrollView>
   );
 }
