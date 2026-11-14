@@ -146,6 +146,34 @@ function RootStack() {
             options={{ ...luxuryScreen, title: t("การพูด", "Speaking") }}
           />
           <Stack.Screen
+            name="write-about-photo/index"
+            options={{ ...luxuryScreen, title: t("เขียนบรรยายภาพ", "Write about the photo") }}
+          />
+          <Stack.Screen
+            name="write-about-photo/[itemId]"
+            options={{ ...luxuryScreen, title: t("เขียนบรรยายภาพ", "Write about the photo") }}
+          />
+          <Stack.Screen
+            name="speak-about-photo/index"
+            options={{ ...luxuryScreen, title: t("พูดบรรยายภาพ", "Speak about the photo") }}
+          />
+          <Stack.Screen
+            name="speak-about-photo/[itemId]"
+            options={{ ...luxuryScreen, title: t("พูดบรรยายภาพ", "Speak about the photo") }}
+          />
+          <Stack.Screen
+            name="read-and-write/index"
+            options={{ ...luxuryScreen, title: t("อ่านแล้วเขียน", "Read, then write") }}
+          />
+          <Stack.Screen
+            name="read-and-write/[round]/index"
+            options={{ ...luxuryScreen, title: t("หัวข้อเรียงความ", "Essay topics") }}
+          />
+          <Stack.Screen
+            name="read-and-write/[round]/[topicId]"
+            options={{ ...luxuryScreen, title: t("เขียนเรียงความ", "Write an essay") }}
+          />
+          <Stack.Screen
             name="daily/index"
             options={{ ...luxuryScreen, title: t("ฝึกประจำวัน", "Daily practice") }}
           />

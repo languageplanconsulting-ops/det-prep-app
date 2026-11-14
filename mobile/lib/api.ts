@@ -12,7 +12,7 @@ import type {
   QuotaSummary,
 } from "./types";
 
-async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
+export async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
   try {
     return await fetch(input, init);
   } catch {
@@ -25,7 +25,7 @@ async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
   }
 }
 
-async function authHeaders(): Promise<HeadersInit> {
+export async function authHeaders(): Promise<HeadersInit> {
   const { data } = await getSupabase().auth.getSession();
   const token = data.session?.access_token;
   if (!token) throw new Error("Not signed in");

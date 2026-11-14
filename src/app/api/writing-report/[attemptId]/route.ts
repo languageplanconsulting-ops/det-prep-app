@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { getRequestAuthUser } from "@/lib/supabase-request-client";
 import type { WritingAttemptReport } from "@/types/writing";
 
 function looksLikeWritingReport(value: unknown): value is WritingAttemptReport {
@@ -14,7 +14,7 @@ function looksLikeWritingReport(value: unknown): value is WritingAttemptReport {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ attemptId: string }> },
 ) {
   try {
@@ -23,10 +23,8 @@ export async function GET(
       return NextResponse.json({ error: "attemptId required" }, { status: 400 });
     }
 
-    const supabase = await createRouteHandlerSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // Web cookie session or mobile Bearer JWT.
+    const { supabase, user } = await getRequestAuthUser(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
