@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 
 export const dynamic = "force-dynamic";
 
 /** Whether the signed-in user has ever finished a mini diagnosis (pretest). */
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const supabase = await createRouteHandlerSupabase();
+    const supabase = await createRequestSupabase(req);
     const {
       data: { user },
     } = await supabase.auth.getUser();

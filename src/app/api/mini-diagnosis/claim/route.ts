@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { recordBusinessEvent } from "@/lib/business-events";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 import { checkVIPEligibility, grantVIPOnSignup, normalizeEmail } from "@/lib/vip-access";
 
 const MIN_PASSWORD_LEN = 8;
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const routeSupabase = await createRouteHandlerSupabase();
+  const routeSupabase = await createRequestSupabase(request);
   const {
     data: { user },
   } = await routeSupabase.auth.getUser();

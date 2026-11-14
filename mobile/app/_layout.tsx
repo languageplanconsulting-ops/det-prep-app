@@ -181,6 +181,17 @@ function RootStack() {
             name="daily/report"
             options={{ ...luxuryScreen, title: t("รายงานการฝึก", "Practice report") }}
           />
+          <Stack.Screen name="mock-test/index" options={{ ...luxuryScreen, title: t("ศูนย์ข้อสอบจำลอง", "Mock test center") }} />
+          <Stack.Screen
+            name="mock-test/run/[sessionId]"
+            options={{ ...luxuryScreen, title: t("ข้อสอบจำลอง", "Mock test"), gestureEnabled: false }}
+          />
+          <Stack.Screen name="mock-test/report/[sessionId]" options={{ ...luxuryScreen, title: t("ผลสอบจำลอง", "Mock report") }} />
+          <Stack.Screen
+            name="mock-test/mini/[sessionId]"
+            options={{ ...luxuryScreen, title: t("เช็กระดับสั้น", "Mini diagnosis"), gestureEnabled: false }}
+          />
+          <Stack.Screen name="mock-test/mini-report/[sessionId]" options={{ ...luxuryScreen, title: t("ผลเช็กระดับ", "Diagnosis report") }} />
           <Stack.Screen name="lessons/index" options={{ ...luxuryScreen, title: t("บทเรียน", "Lessons") }} />
           <Stack.Screen
             name="lessons/[scenarioId]"

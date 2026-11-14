@@ -8,7 +8,7 @@ import { gradeFitbBlank, normalizeFitbCompare } from "@/lib/fitb-scoring";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { miniDiagnosisLevelLabel, scoreMiniDiagnosisBuckets } from "@/lib/mini-diagnosis/score-buckets";
 import { MINI_DIAGNOSIS_STEP_COUNT } from "@/lib/mini-diagnosis/sequence";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import type { FitbMissingWord } from "@/types/fitb";
 
@@ -303,7 +303,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const access = await getAdminAccess();
   const isSimpleAdmin = access.ok && access.simple === true;
 
-  const supabase = isSimpleAdmin ? createServiceRoleSupabase() : await createRouteHandlerSupabase();
+  const supabase = isSimpleAdmin ? createServiceRoleSupabase() : await createRequestSupabase(req);
   let userId: string | null = null;
   if (!isSimpleAdmin) {
     const {
