@@ -5,7 +5,7 @@ import { getAdminAccess } from "@/lib/admin-auth";
 import { ensureProfileForAuthUser } from "@/lib/ensure-profile";
 import { MINI_DIAGNOSIS_FREE_LIFETIME_LIMIT, MINI_DIAGNOSIS_STEP_COUNT } from "@/lib/mini-diagnosis/sequence";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 
 type StartBody = {
   setId?: string;
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ sessionId: data.id });
   }
 
-  const supabase = await createRouteHandlerSupabase();
+  const supabase = await createRequestSupabase(req);
   const {
     data: { user },
   } = await supabase.auth.getUser();

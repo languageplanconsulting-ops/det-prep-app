@@ -80,6 +80,19 @@ export default function PracticeHubScreen() {
         </LuxuryPressable>
       </FadeInItem>
 
+      <FadeInItem index={1} step={70}>
+        <LuxuryPressable style={styles.mockCard} sound="tap" scaleTo={0.97} onPress={() => push("/mock-test" as Href)}>
+          <Text style={styles.dailyEmoji}>📝</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.mockTitle}>{t("ศูนย์ข้อสอบจำลอง", "Mock test center")}</Text>
+            <Text style={styles.mockSub}>
+              {t("ข้อสอบจำลองเต็มชุด + เช็กระดับสั้น พร้อมคะแนนประมาณการ", "Full mock tests + mini diagnosis with an estimated score")}
+            </Text>
+          </View>
+          <Text style={[styles.dailyChev, { color: "#FFCC00" }]}>›</Text>
+        </LuxuryPressable>
+      </FadeInItem>
+
       <Section
         index={1}
         title={t("การอ่านเขียนพื้นฐาน", "Literacy")}
@@ -118,8 +131,8 @@ export default function PracticeHubScreen() {
 
       <Text style={styles.footnote}>
         {t(
-          "เขียนจากภาพ, พูดจากภาพ และข้อสอบจำลอง — กำลังจะมาในแอปเร็วๆ นี้",
-          "Write-about-photo, speak-about-photo, and mock test — coming to the app next.",
+          "เขียนจากภาพ และพูดจากภาพ — กำลังจะมาในแอปเร็วๆ นี้",
+          "Write-about-photo and speak-about-photo — coming to the app next.",
         )}
       </Text>
     </ScrollView>
@@ -191,6 +204,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dailyEmoji: { fontSize: 30 },
+  mockCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#004AAD",
+    borderRadius: 18,
+    borderWidth: 3,
+    borderColor: "#111",
+    padding: 16,
+    marginBottom: 20,
+  },
+  mockTitle: { fontSize: 18, fontWeight: "900", color: "#fff" },
+  mockSub: { fontSize: 12, color: "#E6F0FF", marginTop: 3, fontWeight: "700" },
   dailyTitle: { fontSize: 18, fontWeight: "900", color: "#111" },
   dailySub: { fontSize: 12, color: "#3f3f46", marginTop: 3, fontWeight: "700" },
   dailyChev: { fontSize: 26, color: "#111", fontWeight: "900" },

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { FIXED_MOCK_STEP_COUNT } from "@/lib/mock-test/fixed-sequence";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
-import { createRouteHandlerSupabase } from "@/lib/supabase-route";
+import { createRequestSupabase } from "@/lib/supabase-request-client";
 
 function mapCompleteSets(data: any[] | null | undefined) {
   return (data ?? [])
@@ -15,7 +15,7 @@ function mapCompleteSets(data: any[] | null | undefined) {
     .filter((row) => row.stepCount === FIXED_MOCK_STEP_COUNT);
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   const access = await getAdminAccess();
   if (access.ok && access.simple) {
     const supabase = createServiceRoleSupabase();
@@ -30,7 +30,8 @@ export async function GET() {
     return NextResponse.json({ sets });
   }
 
-  const supabase = await createRouteHandlerSupabase();
+  // Cookie session (web) or Bearer JWT (mobile app).
+  const supabase = await createRequestSupabase(req);
   const {
     data: { user },
   } = await supabase.auth.getUser();
