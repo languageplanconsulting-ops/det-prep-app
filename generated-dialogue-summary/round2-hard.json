@@ -1,0 +1,998 @@
+[
+  {
+    "id": "ds-r2-hard-s01",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 1,
+    "titleEn": "Pushing a landlord to fix damp walls",
+    "titleTh": "เร่งเจ้าของห้องให้ซ่อมผนังชื้น",
+    "scenarioSentences": [
+      "Your bedroom walls have been damp for weeks.",
+      "Now there is black mold near the window.",
+      "You have told your landlord twice.",
+      "His name is Mr. Fischer.",
+      "You call him again."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mr. Fischer, it's about the damp again. There's black mold on the bedroom wall now."
+      },
+      {
+        "speaker": "Mr. Fischer",
+        "text": "I'm sorry. I've been very busy, but I'll send someone soon."
+      },
+      {
+        "speaker": "You",
+        "text": "You said that last month. Mold isn't good for my health, so it can't wait."
+      },
+      {
+        "speaker": "Mr. Fischer",
+        "text": "You're right. The builder can come next Wednesday to repair the wall."
+      },
+      {
+        "speaker": "You",
+        "text": "That's still a week. What am I supposed to do until then?"
+      },
+      {
+        "speaker": "Mr. Fischer",
+        "text": "I'll bring you a machine that dries the air tomorrow. It should help a bit."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you. But if the repair doesn't happen next week, I'll report it to the housing office."
+      },
+      {
+        "speaker": "Mr. Fischer",
+        "text": "That's fair. I'll text you the builder's details tonight."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s02",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 2,
+    "titleEn": "Ending a phone contract early",
+    "titleTh": "ขอยกเลิกสัญญามือถือก่อนกำหนด",
+    "scenarioSentences": [
+      "You are moving abroad next month.",
+      "Your phone contract still has eight months left.",
+      "Ending it early costs a big fee.",
+      "Ms. Yamada works at the phone shop.",
+      "You ask her about your options."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi. I'm moving abroad next month, so I need to end my contract early."
+      },
+      {
+        "speaker": "Ms. Yamada",
+        "text": "I see. There are eight months left, so the fee would be two hundred dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "That's a lot. I won't even be in the country to use the phone."
+      },
+      {
+        "speaker": "Ms. Yamada",
+        "text": "I understand. If you can prove you're moving, the fee is lower."
+      },
+      {
+        "speaker": "You",
+        "text": "What kind of proof do you need?"
+      },
+      {
+        "speaker": "Ms. Yamada",
+        "text": "A work contract or a rental agreement from your new country would be fine."
+      },
+      {
+        "speaker": "You",
+        "text": "I have my job offer letter. How much would I pay then?"
+      },
+      {
+        "speaker": "Ms. Yamada",
+        "text": "Just fifty dollars. Bring the letter, and I'll close the account the same day."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s03",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 3,
+    "titleEn": "Deciding whether to allow a pet",
+    "titleTh": "ตัดสินใจเรื่องเลี้ยงหมาในบ้าน",
+    "scenarioSentences": [
+      "You share a house with Jordan.",
+      "Jordan wants to adopt a dog.",
+      "You are worried about noise and mess.",
+      "You also have exams soon.",
+      "You talk about it at dinner."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Jordan, I've been thinking about the dog. I'm not against it, but I have some worries."
+      },
+      {
+        "speaker": "Jordan",
+        "text": "I get it. What worries you most?"
+      },
+      {
+        "speaker": "You",
+        "text": "Barking while I study, and hair everywhere. I don't want to clean up after it."
+      },
+      {
+        "speaker": "Jordan",
+        "text": "I'd be responsible for everything: walks, feeding and cleaning. You wouldn't have to do anything."
+      },
+      {
+        "speaker": "You",
+        "text": "And if it barks all day while you're at work?"
+      },
+      {
+        "speaker": "Jordan",
+        "text": "How about a trial month? If it doesn't work, I'll find it another home."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, a trial month, as long as the dog stays out of my room."
+      },
+      {
+        "speaker": "Jordan",
+        "text": "Deal. I'll write the rules down so we're both clear."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s04",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 4,
+    "titleEn": "Replacing a speaker who canceled",
+    "titleTh": "หาวิทยากรแทนคนที่ยกเลิก",
+    "scenarioSentences": [
+      "You and Tomás run the business club together.",
+      "Your guest speaker just canceled.",
+      "The event is in two days.",
+      "Sixty students have signed up.",
+      "You call Tomás to make a plan."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Tomás, bad news. Our speaker canceled this morning. She's sick."
+      },
+      {
+        "speaker": "Tomás",
+        "text": "Oh no, two days before? Should we postpone the whole event?"
+      },
+      {
+        "speaker": "You",
+        "text": "I'd rather not. Sixty people signed up, and the room is booked."
+      },
+      {
+        "speaker": "Tomás",
+        "text": "Then we need someone fast. What about Sara? She was a member and now runs her own company."
+      },
+      {
+        "speaker": "You",
+        "text": "Good idea. But she works until five, and we start at four."
+      },
+      {
+        "speaker": "Tomás",
+        "text": "We could move the start time to six. Most students prefer evenings anyway."
+      },
+      {
+        "speaker": "You",
+        "text": "True. I'll call Sara now, and if she agrees, you email everyone about the new time."
+      },
+      {
+        "speaker": "Tomás",
+        "text": "Sounds good. I'll prepare the email so it's ready to send."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s05",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 5,
+    "titleEn": "Dealing with an overbooked hotel",
+    "titleTh": "เจอโรงแรมรับจองห้องเกิน",
+    "scenarioSentences": [
+      "You arrive at your hotel late at night.",
+      "You booked and paid weeks ago.",
+      "Mr. Lambert is at the reception desk.",
+      "He says there are no rooms left.",
+      "You need a bed tonight."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "I don't understand. I booked this room a month ago and paid in full."
+      },
+      {
+        "speaker": "Mr. Lambert",
+        "text": "I'm very sorry. The hotel is overbooked tonight, and there's nothing I can do here."
+      },
+      {
+        "speaker": "You",
+        "text": "It's nearly midnight. Where am I supposed to sleep?"
+      },
+      {
+        "speaker": "Mr. Lambert",
+        "text": "We have an agreement with a partner hotel nearby. I can book you a room there."
+      },
+      {
+        "speaker": "You",
+        "text": "Is it the same standard? I paid for a room with breakfast."
+      },
+      {
+        "speaker": "Mr. Lambert",
+        "text": "It's a similar hotel, and breakfast is included. We'll also pay for your taxi."
+      },
+      {
+        "speaker": "You",
+        "text": "All right. But I'd like a refund for tonight, since I'm not staying here."
+      },
+      {
+        "speaker": "Mr. Lambert",
+        "text": "Of course. I'll refund tonight's payment, and the taxi will be here in ten minutes."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s06",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 6,
+    "titleEn": "Reporting a stolen bike for insurance",
+    "titleTh": "แจ้งประกันเรื่องจักรยานถูกขโมย",
+    "scenarioSentences": [
+      "Your bike was stolen outside the gym yesterday.",
+      "It was locked to a post.",
+      "Luckily, you have home insurance.",
+      "Ms. Okoye is your insurance agent.",
+      "You call her to make a claim."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Okoye. My bike was stolen outside the gym yesterday. Am I covered?"
+      },
+      {
+        "speaker": "Ms. Okoye",
+        "text": "Let me check your policy. Yes, bikes are covered if they were locked."
+      },
+      {
+        "speaker": "You",
+        "text": "It was locked to a post, but they cut the lock."
+      },
+      {
+        "speaker": "Ms. Okoye",
+        "text": "Then you'll need a police report. Have you reported it yet?"
+      },
+      {
+        "speaker": "You",
+        "text": "Not yet. I'll go to the station this afternoon. What else do you need?"
+      },
+      {
+        "speaker": "Ms. Okoye",
+        "text": "The receipt for the bike, if you still have it, or a bank statement."
+      },
+      {
+        "speaker": "You",
+        "text": "I've got the receipt. How long will the claim take?"
+      },
+      {
+        "speaker": "Ms. Okoye",
+        "text": "About ten days once I have both documents. Email them to me as soon as possible."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s07",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 7,
+    "titleEn": "Negotiating the price of a used car",
+    "titleTh": "ต่อราคารถมือสอง",
+    "scenarioSentences": [
+      "You are looking for a used car.",
+      "Mr. Kaplan is selling one for six thousand dollars.",
+      "You test-drove it this morning.",
+      "It has old tires and a small dent.",
+      "You make him an offer."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mr. Kaplan, I like the car, but six thousand is too much for me."
+      },
+      {
+        "speaker": "Mr. Kaplan",
+        "text": "It's a fair price. The engine is in great condition."
+      },
+      {
+        "speaker": "You",
+        "text": "The engine is fine, but the tires need replacing soon, and there's that dent."
+      },
+      {
+        "speaker": "Mr. Kaplan",
+        "text": "The dent is tiny. What are you offering?"
+      },
+      {
+        "speaker": "You",
+        "text": "Five thousand. New tires alone will cost me about six hundred."
+      },
+      {
+        "speaker": "Mr. Kaplan",
+        "text": "That's too low. I could do fifty-five hundred, as long as you pay this week."
+      },
+      {
+        "speaker": "You",
+        "text": "If I pay by Friday, would you accept fifty-three hundred?"
+      },
+      {
+        "speaker": "Mr. Kaplan",
+        "text": "Fifty-four, and that's my final offer."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, fifty-four hundred. I'll transfer the money on Friday."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s08",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 8,
+    "titleEn": "Applying to sell food at a festival",
+    "titleTh": "สมัครขายอาหารในงานเทศกาล",
+    "scenarioSentences": [
+      "You make homemade dumplings with your cousin.",
+      "You want a food stall at the summer festival.",
+      "Ms. Lindqvist is the festival organizer.",
+      "You do not know the rules yet.",
+      "You call her to ask."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Lindqvist. My cousin and I would like a stall to sell dumplings."
+      },
+      {
+        "speaker": "Ms. Lindqvist",
+        "text": "Great. The stall fee is three hundred dollars for the whole weekend."
+      },
+      {
+        "speaker": "You",
+        "text": "That's more than we expected. Is there a cheaper option?"
+      },
+      {
+        "speaker": "Ms. Lindqvist",
+        "text": "You could share a stall with another seller and pay half."
+      },
+      {
+        "speaker": "You",
+        "text": "That could work. Are there any rules about cooking food?"
+      },
+      {
+        "speaker": "Ms. Lindqvist",
+        "text": "Yes. Anyone cooking needs a food safety certificate, and raw food must be kept cold."
+      },
+      {
+        "speaker": "You",
+        "text": "We don't have a certificate yet. How long does it take to get one?"
+      },
+      {
+        "speaker": "Ms. Lindqvist",
+        "text": "There's a one-day course. Get it first, then apply with a copy before May tenth."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s09",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 9,
+    "titleEn": "Planning an anniversary gift for parents",
+    "titleTh": "หารเงินซื้อของขวัญวันครบรอบให้พ่อแม่",
+    "scenarioSentences": [
+      "Your parents' thirtieth anniversary is next month.",
+      "You and your sister, Mei, want to buy a gift.",
+      "Mei earns much more than you.",
+      "You are still a student.",
+      "You discuss it on the phone."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mei, about Mom and Dad's anniversary. I'd love to do something big, but I'm on a student budget."
+      },
+      {
+        "speaker": "Mei",
+        "text": "I was thinking of a weekend trip to the mountains. It's about six hundred dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "That's a great idea, but I can't pay three hundred."
+      },
+      {
+        "speaker": "Mei",
+        "text": "What if we split it by income? I earn more, so I'll pay more."
+      },
+      {
+        "speaker": "You",
+        "text": "That's generous. Could I pay a third, so two hundred?"
+      },
+      {
+        "speaker": "Mei",
+        "text": "Sure. I'll cover four hundred, and you can plan the details."
+      },
+      {
+        "speaker": "You",
+        "text": "Deal. I'll find a hotel and book it this week."
+      },
+      {
+        "speaker": "Mei",
+        "text": "Perfect. Just keep it a secret until the day."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s10",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 10,
+    "titleEn": "Asking to work from home",
+    "titleTh": "ขอทำงานจากที่บ้าน",
+    "scenarioSentences": [
+      "You started a new office job in March.",
+      "Your commute takes ninety minutes each way.",
+      "You are often tired at work.",
+      "Your manager is Ms. Holloway.",
+      "You ask her for a meeting."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Ms. Holloway, could I work from home some days? My commute is three hours a day."
+      },
+      {
+        "speaker": "Ms. Holloway",
+        "text": "That's a long time. How many days were you thinking of?"
+      },
+      {
+        "speaker": "You",
+        "text": "Three days at home and two in the office, if possible."
+      },
+      {
+        "speaker": "Ms. Holloway",
+        "text": "Three is too many. The team needs you here for meetings."
+      },
+      {
+        "speaker": "You",
+        "text": "I understand. Would two days at home be acceptable?"
+      },
+      {
+        "speaker": "Ms. Holloway",
+        "text": "Possibly. Let's try it for one month and see how it goes."
+      },
+      {
+        "speaker": "You",
+        "text": "That's fair. Which days would you prefer?"
+      },
+      {
+        "speaker": "Ms. Holloway",
+        "text": "Mondays and Fridays. If your work stays on schedule, we'll make it permanent."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s11",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 11,
+    "titleEn": "Asking builders to change their hours",
+    "titleTh": "ขอให้คนงานก่อสร้างเลื่อนเวลาเริ่มงาน",
+    "scenarioSentences": [
+      "Builders are working next to your dorm.",
+      "The drilling starts at seven every morning.",
+      "Your final exams begin next week.",
+      "Mr. Doyle is the site manager.",
+      "You go to the site office."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Good morning, Mr. Doyle. I live in the dorm next door. The drilling starts very early."
+      },
+      {
+        "speaker": "Mr. Doyle",
+        "text": "Seven o'clock is within the legal hours, I'm afraid."
+      },
+      {
+        "speaker": "You",
+        "text": "I know, but we have final exams for the next two weeks. Nobody can sleep."
+      },
+      {
+        "speaker": "Mr. Doyle",
+        "text": "I understand, but if we start later, we'll finish late and go over budget."
+      },
+      {
+        "speaker": "You",
+        "text": "Could you start at nine, just for the exam period?"
+      },
+      {
+        "speaker": "Mr. Doyle",
+        "text": "We could start at nine, but then we'd need to work an hour later."
+      },
+      {
+        "speaker": "You",
+        "text": "That's fine, as long as the noise stops by six."
+      },
+      {
+        "speaker": "Mr. Doyle",
+        "text": "Agreed. Nine to six for two weeks. I'll put a notice in your dorm."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s12",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 12,
+    "titleEn": "Getting a faulty washing machine replaced",
+    "titleTh": "ขอเปลี่ยนเครื่องซักผ้าที่เสียบ่อย",
+    "scenarioSentences": [
+      "You bought a new washing machine last month.",
+      "It has already broken down twice.",
+      "The shop repaired it once.",
+      "Ms. Rossi is the shop manager.",
+      "You visit the shop to complain."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Rossi. My washing machine has broken down twice in four weeks."
+      },
+      {
+        "speaker": "Ms. Rossi",
+        "text": "I'm sorry. I can send a technician to repair it again this week."
+      },
+      {
+        "speaker": "You",
+        "text": "With respect, I don't want another repair. I'd like a replacement."
+      },
+      {
+        "speaker": "Ms. Rossi",
+        "text": "Our policy is to repair first, unless the fault can't be fixed."
+      },
+      {
+        "speaker": "You",
+        "text": "It's the same fault both times. Clearly, there's something wrong with this machine."
+      },
+      {
+        "speaker": "Ms. Rossi",
+        "text": "That's a fair point. Do you have the repair report from last time?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, here it is. It says the motor was replaced."
+      },
+      {
+        "speaker": "Ms. Rossi",
+        "text": "In that case, I'll approve a new machine. We'll deliver it on Thursday and take the old one away."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s13",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 13,
+    "titleEn": "Selling furniture before moving abroad",
+    "titleTh": "ขายเฟอร์นิเจอร์ก่อนย้ายไปต่างประเทศ",
+    "scenarioSentences": [
+      "You are moving abroad in two weeks.",
+      "You are selling your desk and bed.",
+      "You asked two hundred dollars for both.",
+      "Ethan comes to see them.",
+      "He likes them but wants a lower price."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Ethan. Come in. These are the desk and the bed."
+      },
+      {
+        "speaker": "Ethan",
+        "text": "They look good. But two hundred is a bit high for me. Would you take one twenty?"
+      },
+      {
+        "speaker": "You",
+        "text": "That's quite low. The bed is only two years old, and the desk is solid wood."
+      },
+      {
+        "speaker": "Ethan",
+        "text": "True. But I'd also have to rent a van to move them."
+      },
+      {
+        "speaker": "You",
+        "text": "I'd rather not go below one sixty. But I need them gone by Friday."
+      },
+      {
+        "speaker": "Ethan",
+        "text": "If I collect them on Friday morning, would you accept one fifty?"
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, one fifty, as long as you take both pieces and come before noon."
+      },
+      {
+        "speaker": "Ethan",
+        "text": "Deal. I'll pay you in cash when I pick them up."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s14",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 14,
+    "titleEn": "Planning care for Grandma after surgery",
+    "titleTh": "วางแผนดูแลคุณยายหลังผ่าตัด",
+    "scenarioSentences": [
+      "Your grandmother had hip surgery last week.",
+      "She comes home from the hospital on Monday.",
+      "She cannot be alone for a while.",
+      "Your cousin Liam lives nearby.",
+      "You call him to make a plan."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Liam, Grandma comes home on Monday. The doctor says she needs someone with her all the time."
+      },
+      {
+        "speaker": "Liam",
+        "text": "For how long?"
+      },
+      {
+        "speaker": "You",
+        "text": "At least three weeks. My classes are online, so I can be there on weekdays."
+      },
+      {
+        "speaker": "Liam",
+        "text": "And I'm free every weekend, so I'll take Saturdays and Sundays."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. But what about nights? Neither of us can stay over every night."
+      },
+      {
+        "speaker": "Liam",
+        "text": "We could hire a night nurse. It's expensive, but it's worth it."
+      },
+      {
+        "speaker": "You",
+        "text": "Agreed. If we split the cost, it's about two hundred each per week."
+      },
+      {
+        "speaker": "Liam",
+        "text": "That's fine. I'll call the care agency tomorrow, and you tell Grandma the plan."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s15",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 15,
+    "titleEn": "Chasing late pay from a summer job",
+    "titleTh": "ทวงค่าจ้างงานช่วงซัมเมอร์ที่ยังไม่ได้",
+    "scenarioSentences": [
+      "You worked at a summer camp in July.",
+      "Mr. Abbott was your boss there.",
+      "He still has not paid your last month.",
+      "It is now a month late.",
+      "You call him about it."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Mr. Abbott. I'm calling about my pay for July. I still haven't received it."
+      },
+      {
+        "speaker": "Mr. Abbott",
+        "text": "Really? I thought it went out weeks ago. There must have been a mistake."
+      },
+      {
+        "speaker": "You",
+        "text": "Nothing has arrived. I've checked my account every day."
+      },
+      {
+        "speaker": "Mr. Abbott",
+        "text": "I'm sorry. Our office changed payment systems, and some payments got stuck."
+      },
+      {
+        "speaker": "You",
+        "text": "I understand, but I need it for my rent. If it isn't paid soon, I'll report it."
+      },
+      {
+        "speaker": "Mr. Abbott",
+        "text": "There's no need for that. I'll make sure it's paid by Friday."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you. Could you confirm that in writing, by email?"
+      },
+      {
+        "speaker": "Mr. Abbott",
+        "text": "Yes, I'll email you today with the amount and the payment date."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s16",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 16,
+    "titleEn": "Correcting a mistake in the student newspaper",
+    "titleTh": "ขอแก้ข้อผิดพลาดในหนังสือพิมพ์นักศึกษา",
+    "scenarioSentences": [
+      "You write for the student newspaper.",
+      "Your article about rent prices came out today.",
+      "It said rents rose by forty percent.",
+      "The real number was fourteen percent.",
+      "You go to see Rachel, the editor."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Rachel, I made a mistake in my article. I wrote forty percent instead of fourteen."
+      },
+      {
+        "speaker": "Rachel",
+        "text": "Oh no. That's a big difference. Are you sure?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, I checked my notes. I must have typed it wrong."
+      },
+      {
+        "speaker": "Rachel",
+        "text": "Well, the paper copies are already printed, so we can't change those."
+      },
+      {
+        "speaker": "You",
+        "text": "Could we at least fix the online version today?"
+      },
+      {
+        "speaker": "Rachel",
+        "text": "Yes, I'll update it this afternoon and add a note explaining the change."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. Should we also print a correction?"
+      },
+      {
+        "speaker": "Rachel",
+        "text": "We should. It'll go on page two of the next issue, along with an apology."
+      },
+      {
+        "speaker": "You",
+        "text": "I'm really sorry. I'll double-check every number from now on."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s17",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 17,
+    "titleEn": "Negotiating a group climbing discount",
+    "titleTh": "ต่อรองส่วนลดกลุ่มที่ศูนย์ปีนผา",
+    "scenarioSentences": [
+      "You are planning a club trip.",
+      "Fifteen students want to try indoor climbing.",
+      "The normal price is thirty dollars each.",
+      "Ms. Carver runs the climbing center.",
+      "You call her to ask about prices."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Carver. I'd like to bring fifteen students for a climbing session. Do you offer group discounts?"
+      },
+      {
+        "speaker": "Ms. Carver",
+        "text": "We do. Groups of ten or more get ten percent off."
+      },
+      {
+        "speaker": "You",
+        "text": "That helps, but it's still a lot for students. Is there anything better?"
+      },
+      {
+        "speaker": "Ms. Carver",
+        "text": "Which day were you thinking of?"
+      },
+      {
+        "speaker": "You",
+        "text": "Saturday afternoon, ideally."
+      },
+      {
+        "speaker": "Ms. Carver",
+        "text": "That's our busiest time. If you came on a weekday morning, I could give you twenty-five percent off."
+      },
+      {
+        "speaker": "You",
+        "text": "Most of us have no classes on Wednesday mornings. Would that work?"
+      },
+      {
+        "speaker": "Ms. Carver",
+        "text": "Yes. Wednesday at ten, and that includes shoes and an instructor."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. I'll confirm the numbers by Friday."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s18",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 18,
+    "titleEn": "Leaving a French course early",
+    "titleTh": "ขอยกเลิกคอร์สภาษาฝรั่งเศสกลางคัน",
+    "scenarioSentences": [
+      "You paid for an evening French course.",
+      "You have just started a new job.",
+      "Your shifts are now in the evenings.",
+      "Ms. Moreau works at the language school.",
+      "You ask her about a refund."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Ms. Moreau. I got a job with evening shifts, so I can't come to class anymore."
+      },
+      {
+        "speaker": "Ms. Moreau",
+        "text": "That's good news about the job. How many classes have you attended?"
+      },
+      {
+        "speaker": "You",
+        "text": "Only three out of ten. Could I get a refund for the rest?"
+      },
+      {
+        "speaker": "Ms. Moreau",
+        "text": "We can't refund everything after the course starts. The best I can do is half."
+      },
+      {
+        "speaker": "You",
+        "text": "Half seems low, since I'll miss seven classes."
+      },
+      {
+        "speaker": "Ms. Moreau",
+        "text": "There's another option. You could move to our online class on Saturday mornings at no extra cost."
+      },
+      {
+        "speaker": "You",
+        "text": "So I'd keep the full value of the course?"
+      },
+      {
+        "speaker": "Ms. Moreau",
+        "text": "Exactly. You'd finish the remaining seven lessons online."
+      },
+      {
+        "speaker": "You",
+        "text": "In that case, I'd rather switch to online. Please sign me up."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s19",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 19,
+    "titleEn": "Proposing a community garden",
+    "titleTh": "เสนอทำสวนชุมชน",
+    "scenarioSentences": [
+      "An empty lot on your street is full of trash.",
+      "Your neighbors want to make it a garden.",
+      "The city owns it.",
+      "Mr. Nwosu works at the city council.",
+      "You go to see him."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mr. Nwosu, the empty lot on our street is full of trash. We'd like a garden there."
+      },
+      {
+        "speaker": "Mr. Nwosu",
+        "text": "Nice idea, but who would look after it? The city has no budget for that."
+      },
+      {
+        "speaker": "You",
+        "text": "The residents would. Twenty families have already signed up to help."
+      },
+      {
+        "speaker": "Mr. Nwosu",
+        "text": "Impressive. But the council may want to build there one day."
+      },
+      {
+        "speaker": "You",
+        "text": "Could we use it until then? We'd remove everything if you needed it back."
+      },
+      {
+        "speaker": "Mr. Nwosu",
+        "text": "I could approve a one-year trial, as long as you keep it clean and safe."
+      },
+      {
+        "speaker": "You",
+        "text": "That sounds fair. What do we need to do first?"
+      },
+      {
+        "speaker": "Mr. Nwosu",
+        "text": "Fill in this form with a simple plan, and I'll send it to the council."
+      }
+    ]
+  },
+  {
+    "id": "ds-r2-hard-s20",
+    "round": 2,
+    "difficulty": "hard",
+    "setNumber": 20,
+    "titleEn": "Handling an angry customer at the bakery",
+    "titleTh": "รับมือลูกค้าที่ไม่พอใจที่ร้านเบเกอรี่",
+    "scenarioSentences": [
+      "You work at a bakery on weekends.",
+      "Mrs. Hale ordered a large cake for a party.",
+      "Your coworker gave her a small one.",
+      "The party starts in two hours.",
+      "She comes back, very upset."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Mrs. Hale. Is something wrong with the cake?"
+      },
+      {
+        "speaker": "Mrs. Hale",
+        "text": "Yes! I ordered a large cake for thirty people. This one barely feeds ten."
+      },
+      {
+        "speaker": "You",
+        "text": "I'm so sorry. Let me check your order. You're right, it was our mistake."
+      },
+      {
+        "speaker": "Mrs. Hale",
+        "text": "The party starts in two hours. What am I supposed to do now?"
+      },
+      {
+        "speaker": "You",
+        "text": "We can make a large one in about an hour. Could you wait or come back?"
+      },
+      {
+        "speaker": "Mrs. Hale",
+        "text": "An hour? I'd rather not, but I suppose I have no choice."
+      },
+      {
+        "speaker": "You",
+        "text": "I'll bring it to your car myself. And we'll give you thirty percent off."
+      },
+      {
+        "speaker": "Mrs. Hale",
+        "text": "Fine. That helps. I'll come back at four, then."
+      }
+    ]
+  }
+]

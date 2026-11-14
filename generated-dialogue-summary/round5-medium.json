@@ -1,0 +1,572 @@
+[
+  {
+    "id": "ds-r5-medium-s11",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 11,
+    "titleEn": "Getting a SIM card in a new country",
+    "titleTh": "ซื้อซิมการ์ดในต่างประเทศ",
+    "scenarioSentences": [
+      "You arrived in a new country yesterday.",
+      "You need a local SIM card.",
+      "You use your phone for maps.",
+      "You go to a phone shop.",
+      "Ms. Kato works there."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, I'd like a SIM card. I've just arrived here."
+      },
+      {
+        "speaker": "Ms. Kato",
+        "text": "Welcome! How long are you staying?"
+      },
+      {
+        "speaker": "You",
+        "text": "About three weeks. I need lots of data for maps."
+      },
+      {
+        "speaker": "Ms. Kato",
+        "text": "We have a one-week plan and a one-month plan."
+      },
+      {
+        "speaker": "You",
+        "text": "What's the difference in price?"
+      },
+      {
+        "speaker": "Ms. Kato",
+        "text": "One week is fifteen dollars. One month is thirty, with twice the data."
+      },
+      {
+        "speaker": "You",
+        "text": "The monthly plan is better value, then. I'll take that one."
+      },
+      {
+        "speaker": "Ms. Kato",
+        "text": "Great. I'll need to see your passport, please."
+      },
+      {
+        "speaker": "You",
+        "text": "Here you are. Can you put the card in for me?"
+      },
+      {
+        "speaker": "Ms. Kato",
+        "text": "Of course. It'll be ready in five minutes."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-medium-s12",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 12,
+    "titleEn": "Starting a book club",
+    "titleTh": "ตั้งชมรมอ่านหนังสือ",
+    "scenarioSentences": [
+      "You and Elif both love reading.",
+      "You want to start a book club.",
+      "Some classmates are also interested.",
+      "You need to make a few decisions.",
+      "You meet Elif after class."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Elif, five people want to join our book club. When should we meet?"
+      },
+      {
+        "speaker": "Elif",
+        "text": "Once a week might be too much. People are busy."
+      },
+      {
+        "speaker": "You",
+        "text": "You're right. How about every two weeks?"
+      },
+      {
+        "speaker": "Elif",
+        "text": "That's better. It gives everyone enough time to finish the book."
+      },
+      {
+        "speaker": "You",
+        "text": "Which book should we start with?"
+      },
+      {
+        "speaker": "Elif",
+        "text": "Something short and fun. Maybe a mystery novel?"
+      },
+      {
+        "speaker": "You",
+        "text": "Good idea. I'll suggest three and everyone can vote."
+      },
+      {
+        "speaker": "Elif",
+        "text": "Where should we meet? My apartment is quite small."
+      },
+      {
+        "speaker": "You",
+        "text": "The library has a free room. Let's book it for next Friday."
+      },
+      {
+        "speaker": "Elif",
+        "text": "Perfect. I'll send a message to the group tonight."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-medium-s13",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 13,
+    "titleEn": "Renting a room in a shared house",
+    "titleTh": "ขอเช่าห้องในบ้านที่อยู่ร่วมกัน",
+    "scenarioSentences": [
+      "You need a cheaper place to live.",
+      "A room in a shared house is available.",
+      "Mr. Hardy owns the house.",
+      "You visit the room today.",
+      "You have some questions for him."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Thanks for showing me the room, Mr. Hardy. How much is the rent?"
+      },
+      {
+        "speaker": "Mr. Hardy",
+        "text": "It's four hundred dollars a month, including electricity and internet."
+      },
+      {
+        "speaker": "You",
+        "text": "That's fine. Are there any house rules?"
+      },
+      {
+        "speaker": "Mr. Hardy",
+        "text": "No parties, and keep the kitchen clean."
+      },
+      {
+        "speaker": "You",
+        "text": "No problem. I'm a quiet person. Do you need a deposit?"
+      },
+      {
+        "speaker": "Mr. Hardy",
+        "text": "Yes, one month's rent. You'll get it back when you leave."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. When could I move in?"
+      },
+      {
+        "speaker": "Mr. Hardy",
+        "text": "The room is free from the end of this month."
+      },
+      {
+        "speaker": "You",
+        "text": "So I could move in on the first of next month?"
+      },
+      {
+        "speaker": "Mr. Hardy",
+        "text": "Exactly. I'll send you the agreement tomorrow."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-medium-s14",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 14,
+    "titleEn": "Recovering from a sports injury",
+    "titleTh": "รักษาอาการบาดเจ็บจากการเล่นกีฬา",
+    "scenarioSentences": [
+      "You hurt your knee playing soccer.",
+      "It has been sore for a week.",
+      "You have a big game next month.",
+      "Dr. Kumar treats sports injuries.",
+      "You see her at the clinic."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Dr. Kumar, my knee still hurts a week after I fell."
+      },
+      {
+        "speaker": "Dr. Kumar",
+        "text": "Let me check. Does it hurt when you bend it?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, especially when I go down the stairs."
+      },
+      {
+        "speaker": "Dr. Kumar",
+        "text": "It's not broken, but the muscles around it are weak."
+      },
+      {
+        "speaker": "You",
+        "text": "Can I still play in next month's game?"
+      },
+      {
+        "speaker": "Dr. Kumar",
+        "text": "Maybe, if you're careful. No soccer for three weeks."
+      },
+      {
+        "speaker": "You",
+        "text": "Three weeks? What should I do instead?"
+      },
+      {
+        "speaker": "Dr. Kumar",
+        "text": "Do these exercises twice a day. Swimming is fine too."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. Should I come back for another check?"
+      },
+      {
+        "speaker": "Dr. Kumar",
+        "text": "Yes, in two weeks. We'll see how it's healing."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-medium-s15",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 15,
+    "titleEn": "Canceling a monthly movie service",
+    "titleTh": "ยกเลิกบริการดูหนังรายเดือน",
+    "scenarioSentences": [
+      "You pay for a movie service every month.",
+      "You have not watched anything for weeks.",
+      "You want to save some money.",
+      "You call customer service.",
+      "Ms. Jensen answers the phone."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Jensen. I'd like to cancel my movie plan, please."
+      },
+      {
+        "speaker": "Ms. Jensen",
+        "text": "I'm sorry to hear that. May I ask why?"
+      },
+      {
+        "speaker": "You",
+        "text": "I haven't used it for two months."
+      },
+      {
+        "speaker": "Ms. Jensen",
+        "text": "I understand. Would you like our cheaper five-dollar plan instead?"
+      },
+      {
+        "speaker": "You",
+        "text": "No, thanks. I really don't need it at the moment."
+      },
+      {
+        "speaker": "Ms. Jensen",
+        "text": "All right. Your plan will end on the thirtieth of this month."
+      },
+      {
+        "speaker": "You",
+        "text": "Will I get a refund for this month?"
+      },
+      {
+        "speaker": "Ms. Jensen",
+        "text": "No, but you can keep watching until the end of the month."
+      },
+      {
+        "speaker": "You",
+        "text": "That's fine. Can you send me an email to confirm?"
+      },
+      {
+        "speaker": "Ms. Jensen",
+        "text": "Of course. You'll get it in a few minutes."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-medium-s16",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 16,
+    "titleEn": "Planning a vegetarian menu for guests",
+    "titleTh": "วางเมนูมังสวิรัติให้แขก",
+    "scenarioSentences": [
+      "You and Rafael are having a dinner party.",
+      "Eight friends are coming.",
+      "Two of them do not eat meat.",
+      "You want to cook one main dish.",
+      "You plan the menu together."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Rafael, two of our guests don't eat meat. What should we cook?"
+      },
+      {
+        "speaker": "Rafael",
+        "text": "We could make chicken for most people and something else for them."
+      },
+      {
+        "speaker": "You",
+        "text": "That's two main dishes, though. It's too much work."
+      },
+      {
+        "speaker": "Rafael",
+        "text": "True. What about one vegetarian dish for everyone?"
+      },
+      {
+        "speaker": "You",
+        "text": "Good idea. How about a vegetable curry with rice?"
+      },
+      {
+        "speaker": "Rafael",
+        "text": "I love that. Is it too spicy for some people?"
+      },
+      {
+        "speaker": "You",
+        "text": "We can make it mild and put chili sauce on the table."
+      },
+      {
+        "speaker": "Rafael",
+        "text": "Perfect. I'll make a salad and bread too."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Let's go shopping on Friday after work."
+      },
+      {
+        "speaker": "Rafael",
+        "text": "Okay. I'll write the shopping list tonight."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-medium-s17",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 17,
+    "titleEn": "Moving a job interview to another day",
+    "titleTh": "ขอเลื่อนวันสัมภาษณ์งาน",
+    "scenarioSentences": [
+      "You applied for a part-time job.",
+      "Ms. Monroe invited you to an interview.",
+      "It is on Tuesday at ten.",
+      "You have a final exam then.",
+      "You call her to explain."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Monroe. Thank you for inviting me to the interview."
+      },
+      {
+        "speaker": "Ms. Monroe",
+        "text": "You're welcome. We're looking forward to meeting you on Tuesday."
+      },
+      {
+        "speaker": "You",
+        "text": "I'm sorry, but I have a final exam at that time."
+      },
+      {
+        "speaker": "Ms. Monroe",
+        "text": "I see. Could you come in the afternoon instead?"
+      },
+      {
+        "speaker": "You",
+        "text": "The exam goes until four, so that's too late."
+      },
+      {
+        "speaker": "Ms. Monroe",
+        "text": "Then how about Thursday? I'm free at ten or at three."
+      },
+      {
+        "speaker": "You",
+        "text": "Thursday at ten would be perfect."
+      },
+      {
+        "speaker": "Ms. Monroe",
+        "text": "Great. I'll change the time and send you an email."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you very much for your help."
+      },
+      {
+        "speaker": "Ms. Monroe",
+        "text": "No problem. Good luck with your exam!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-medium-s18",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 18,
+    "titleEn": "Learning to use the metro",
+    "titleTh": "หัดนั่งรถไฟใต้ดินในเมืองใหม่",
+    "scenarioSentences": [
+      "You moved to a new city.",
+      "You need the metro for work.",
+      "The map looks very confusing.",
+      "Your friend Tariq has lived here for years.",
+      "You ask him for help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Tariq, I need to take the metro to work. How do tickets work?"
+      },
+      {
+        "speaker": "Tariq",
+        "text": "You can buy single tickets, but a travel card is cheaper."
+      },
+      {
+        "speaker": "You",
+        "text": "Where can I get a travel card?"
+      },
+      {
+        "speaker": "Tariq",
+        "text": "At any station. You can add money to it later."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. My office is near the central market. Which line is best?"
+      },
+      {
+        "speaker": "Tariq",
+        "text": "Take line two. It's the green one on the map."
+      },
+      {
+        "speaker": "You",
+        "text": "Do I need to change lines?"
+      },
+      {
+        "speaker": "Tariq",
+        "text": "No, it goes straight there. It takes about twenty minutes."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. I'll buy a card at the station tomorrow morning."
+      },
+      {
+        "speaker": "Tariq",
+        "text": "Good. Avoid eight o'clock if you can. It's really crowded."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-medium-s19",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 19,
+    "titleEn": "Starting a small online shop",
+    "titleTh": "เปิดร้านค้าออนไลน์เล็ก ๆ",
+    "scenarioSentences": [
+      "Your friend Amara makes bags by hand.",
+      "People often ask to buy them.",
+      "She wants to sell them online.",
+      "She asks you for advice.",
+      "You are good at taking photos."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Amara, your bags are amazing. Have you thought about selling them online?"
+      },
+      {
+        "speaker": "Amara",
+        "text": "Yes, but I don't know where to start."
+      },
+      {
+        "speaker": "You",
+        "text": "First, you need good photos. I can take them for you."
+      },
+      {
+        "speaker": "Amara",
+        "text": "That would be great. What price should I ask?"
+      },
+      {
+        "speaker": "You",
+        "text": "Compare prices on other websites. Similar bags sell for about thirty dollars."
+      },
+      {
+        "speaker": "Amara",
+        "text": "Each bag takes me four hours, so thirty seems low."
+      },
+      {
+        "speaker": "You",
+        "text": "Then try forty and see if people buy them."
+      },
+      {
+        "speaker": "Amara",
+        "text": "Okay. How many bags should I make first?"
+      },
+      {
+        "speaker": "You",
+        "text": "Start with ten. If they sell quickly, you can make more."
+      },
+      {
+        "speaker": "Amara",
+        "text": "Good plan. Let's take the photos this Saturday."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-medium-s20",
+    "round": 5,
+    "difficulty": "medium",
+    "setNumber": 20,
+    "titleEn": "Getting help with a computer virus",
+    "titleTh": "ขอให้ช่างช่วยกำจัดไวรัสคอมพิวเตอร์",
+    "scenarioSentences": [
+      "Your laptop has become very slow.",
+      "Strange windows keep opening on the screen.",
+      "You think it has a virus.",
+      "Mr. Fraser is the IT technician.",
+      "You take it to him."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mr. Fraser, my laptop is slow, and strange ads keep popping up."
+      },
+      {
+        "speaker": "Mr. Fraser",
+        "text": "That sounds like a virus. Have you downloaded anything recently?"
+      },
+      {
+        "speaker": "You",
+        "text": "I downloaded a free game last week. Was that it?"
+      },
+      {
+        "speaker": "Mr. Fraser",
+        "text": "Probably. I'll remove it and clean the whole laptop."
+      },
+      {
+        "speaker": "You",
+        "text": "Will I lose my files? My project is on there."
+      },
+      {
+        "speaker": "Mr. Fraser",
+        "text": "I'll back up your files first, so they'll be safe."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you. How long will it take?"
+      },
+      {
+        "speaker": "Mr. Fraser",
+        "text": "About two hours. You can pick it up after lunch."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. How can I stop this from happening again?"
+      },
+      {
+        "speaker": "Mr. Fraser",
+        "text": "Only download from websites you trust, and back up every week."
+      }
+    ]
+  }
+]

@@ -1,0 +1,572 @@
+[
+  {
+    "id": "ds-r4-medium-s11",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 11,
+    "titleEn": "Choosing a way to learn Japanese",
+    "titleTh": "เลือกวิธีเรียนภาษาญี่ปุ่น",
+    "scenarioSentences": [
+      "You want to learn Japanese.",
+      "Your friend Aiko is Japanese.",
+      "You are not sure how to start.",
+      "You do not have much money.",
+      "You ask Aiko for advice."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Aiko, I want to learn Japanese. What's the best way to start?"
+      },
+      {
+        "speaker": "Aiko",
+        "text": "You could use an app, join a class, or find a tutor."
+      },
+      {
+        "speaker": "You",
+        "text": "An app is free, but I might give up quickly."
+      },
+      {
+        "speaker": "Aiko",
+        "text": "True. A tutor is faster, but it's expensive."
+      },
+      {
+        "speaker": "You",
+        "text": "What about the evening class at the community center?"
+      },
+      {
+        "speaker": "Aiko",
+        "text": "It's forty dollars a month, twice a week."
+      },
+      {
+        "speaker": "You",
+        "text": "That's cheaper than a tutor. Will I get enough speaking practice?"
+      },
+      {
+        "speaker": "Aiko",
+        "text": "Probably not. If you take the class, I'll practice with you on weekends."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks! I'll sign up tomorrow."
+      },
+      {
+        "speaker": "Aiko",
+        "text": "Great. Let's meet on Saturday for our first chat."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-medium-s12",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 12,
+    "titleEn": "Asking a neighbor to take a package",
+    "titleTh": "ฝากเพื่อนบ้านรับพัสดุแทน",
+    "scenarioSentences": [
+      "You ordered a new desk online.",
+      "It arrives tomorrow afternoon.",
+      "You will be at work all day.",
+      "Ms. Nolan lives next door.",
+      "She usually works from home."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Ms. Nolan. Could I ask you a small favor?"
+      },
+      {
+        "speaker": "Ms. Nolan",
+        "text": "Of course. What do you need?"
+      },
+      {
+        "speaker": "You",
+        "text": "A package is coming tomorrow, but I'll be at work until six."
+      },
+      {
+        "speaker": "Ms. Nolan",
+        "text": "No problem. I'm home all day. How big is it?"
+      },
+      {
+        "speaker": "You",
+        "text": "It's a desk, so the box is quite heavy."
+      },
+      {
+        "speaker": "Ms. Nolan",
+        "text": "Then I'll ask the driver to carry it into my hallway."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you. I'll put a note on my door with your apartment number."
+      },
+      {
+        "speaker": "Ms. Nolan",
+        "text": "Good idea. When will you pick it up?"
+      },
+      {
+        "speaker": "You",
+        "text": "Is seven o'clock okay? I'll come straight after dinner."
+      },
+      {
+        "speaker": "Ms. Nolan",
+        "text": "Seven is fine. I'll see you then."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-medium-s13",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 13,
+    "titleEn": "Making a farewell card for a coworker",
+    "titleTh": "ทำการ์ดอำลาให้เพื่อนร่วมงาน",
+    "scenarioSentences": [
+      "Your coworker Sara leaves next Friday.",
+      "She has been here for five years.",
+      "You want to give her a card.",
+      "Ivan sits near you.",
+      "You ask him to help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Ivan, Sara's last day is Friday. Should we make her a card?"
+      },
+      {
+        "speaker": "Ivan",
+        "text": "Yes, definitely. Who should sign it?"
+      },
+      {
+        "speaker": "You",
+        "text": "Everyone on our floor, I think. That's about twenty people."
+      },
+      {
+        "speaker": "Ivan",
+        "text": "I'll take it around the office on Wednesday."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Should we buy her a gift too?"
+      },
+      {
+        "speaker": "Ivan",
+        "text": "Maybe. People could give a few dollars each."
+      },
+      {
+        "speaker": "You",
+        "text": "She loves the plants on her desk. How about a small one?"
+      },
+      {
+        "speaker": "Ivan",
+        "text": "Perfect. It's cheaper than flowers and it lasts longer."
+      },
+      {
+        "speaker": "You",
+        "text": "I'll pick one up on Thursday and buy the card today."
+      },
+      {
+        "speaker": "Ivan",
+        "text": "And I'll collect the money and signatures. She'll be so surprised."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-medium-s14",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 14,
+    "titleEn": "Joining a weekend hiking group",
+    "titleTh": "สมัครเข้ากลุ่มเดินป่าวันหยุด",
+    "scenarioSentences": [
+      "You want to get more exercise.",
+      "A local hiking group meets every Sunday.",
+      "Sienna leads the group.",
+      "You have never hiked before.",
+      "You call her with some questions."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi Sienna, I'd like to join the hiking group, but I'm a beginner."
+      },
+      {
+        "speaker": "Sienna",
+        "text": "That's fine. Have you done any hiking before?"
+      },
+      {
+        "speaker": "You",
+        "text": "Not really. I walk to work, but that's all."
+      },
+      {
+        "speaker": "Sienna",
+        "text": "Then start with our easy walk next Sunday. It's about two hours."
+      },
+      {
+        "speaker": "You",
+        "text": "Sounds good. What should I bring?"
+      },
+      {
+        "speaker": "Sienna",
+        "text": "Water, a snack, and a rain jacket. Good shoes are the most important."
+      },
+      {
+        "speaker": "You",
+        "text": "I only have running shoes. Are they okay?"
+      },
+      {
+        "speaker": "Sienna",
+        "text": "For the easy walk, yes. You should buy proper hiking boots later."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Where do we meet?"
+      },
+      {
+        "speaker": "Sienna",
+        "text": "At the park gate at eight. See you there!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-medium-s15",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 15,
+    "titleEn": "Setting up a new printer",
+    "titleTh": "ติดตั้งเครื่องพิมพ์เครื่องใหม่",
+    "scenarioSentences": [
+      "You bought a printer yesterday.",
+      "It will not connect to your laptop.",
+      "Your essay is due tomorrow morning.",
+      "Your friend Victor is good with computers.",
+      "You call him for help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Victor, my new printer won't connect to my laptop. Can you help?"
+      },
+      {
+        "speaker": "Victor",
+        "text": "Sure. Are you trying to connect without a cable?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes. I've tried three times, but the laptop can't find it."
+      },
+      {
+        "speaker": "Victor",
+        "text": "First, turn both of them off and wait a minute."
+      },
+      {
+        "speaker": "You",
+        "text": "Done. They're back on now."
+      },
+      {
+        "speaker": "Victor",
+        "text": "Is the printer showing up now?"
+      },
+      {
+        "speaker": "You",
+        "text": "No, still nothing. And I have to print my essay tonight."
+      },
+      {
+        "speaker": "Victor",
+        "text": "Then use the cable in the box. Wireless can take longer to set up."
+      },
+      {
+        "speaker": "You",
+        "text": "Oh, I found it. It's printing now!"
+      },
+      {
+        "speaker": "Victor",
+        "text": "Great. I'll come over this weekend and fix the wireless for you."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-medium-s16",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 16,
+    "titleEn": "Getting a flu shot at the clinic",
+    "titleTh": "ไปฉีดวัคซีนไข้หวัดใหญ่ที่คลินิก",
+    "scenarioSentences": [
+      "Many people at work have the flu.",
+      "You want a flu shot this year.",
+      "You feel a little nervous.",
+      "Nurse Kaur works at the clinic.",
+      "You ask her some questions."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Nurse Kaur. I'd like a flu shot, but I'm a bit worried."
+      },
+      {
+        "speaker": "Nurse Kaur",
+        "text": "That's normal. What are you worried about?"
+      },
+      {
+        "speaker": "You",
+        "text": "Is it safe? I've never had one before."
+      },
+      {
+        "speaker": "Nurse Kaur",
+        "text": "Yes, it's very safe. Millions of people get one every year."
+      },
+      {
+        "speaker": "You",
+        "text": "Will I feel sick afterwards?"
+      },
+      {
+        "speaker": "Nurse Kaur",
+        "text": "Some people get a sore arm for a day or two. That's normal."
+      },
+      {
+        "speaker": "You",
+        "text": "Can I still go to the gym tonight?"
+      },
+      {
+        "speaker": "Nurse Kaur",
+        "text": "You should rest tonight. Light exercise is fine tomorrow."
+      },
+      {
+        "speaker": "You",
+        "text": "All right, I'll have it today, then."
+      },
+      {
+        "speaker": "Nurse Kaur",
+        "text": "Good. Please roll up your sleeve and sit here."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-medium-s17",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 17,
+    "titleEn": "Joining a community choir",
+    "titleTh": "สมัครร้องเพลงกับคณะประสานเสียงชุมชน",
+    "scenarioSentences": [
+      "You love singing at home.",
+      "A community choir meets on Wednesdays.",
+      "Ms. Abara leads the choir.",
+      "You are not sure you sing well.",
+      "You talk to her after a concert."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Ms. Abara, I enjoyed the concert. I'd love to join the choir."
+      },
+      {
+        "speaker": "Ms. Abara",
+        "text": "Wonderful! Have you sung in a choir before?"
+      },
+      {
+        "speaker": "You",
+        "text": "Never. I only sing at home, and I'm not sure I sing well."
+      },
+      {
+        "speaker": "Ms. Abara",
+        "text": "Don't worry. Most of our members started as beginners."
+      },
+      {
+        "speaker": "You",
+        "text": "Do I have to do a test?"
+      },
+      {
+        "speaker": "Ms. Abara",
+        "text": "No test. Just come to a free practice and see if you like it."
+      },
+      {
+        "speaker": "You",
+        "text": "That sounds less scary. What time does it start?"
+      },
+      {
+        "speaker": "Ms. Abara",
+        "text": "Seven o'clock on Wednesday, in the hall behind the library."
+      },
+      {
+        "speaker": "You",
+        "text": "I'll be there. Should I bring anything?"
+      },
+      {
+        "speaker": "Ms. Abara",
+        "text": "Just water. We'll give you the music."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-medium-s18",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 18,
+    "titleEn": "Planning a road trip route",
+    "titleTh": "วางแผนเส้นทางขับรถเที่ยว",
+    "scenarioSentences": [
+      "You and Nadia are driving to the beach.",
+      "You are leaving on Saturday morning.",
+      "There are two possible roads.",
+      "The highway is faster but boring.",
+      "You discuss the route together."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Nadia, which road should we take on Saturday?"
+      },
+      {
+        "speaker": "Nadia",
+        "text": "The highway is the fastest. We'd be there in three hours."
+      },
+      {
+        "speaker": "You",
+        "text": "True, but the coast road has amazing views."
+      },
+      {
+        "speaker": "Nadia",
+        "text": "How much longer does it take?"
+      },
+      {
+        "speaker": "You",
+        "text": "About an hour more, maybe a bit longer if there's traffic."
+      },
+      {
+        "speaker": "Nadia",
+        "text": "That's okay if we leave early. The drive should be fun too."
+      },
+      {
+        "speaker": "You",
+        "text": "We could stop at a fishing town for lunch."
+      },
+      {
+        "speaker": "Nadia",
+        "text": "Good idea. I've heard the seafood there is great."
+      },
+      {
+        "speaker": "You",
+        "text": "So let's take the coast road and leave at seven."
+      },
+      {
+        "speaker": "Nadia",
+        "text": "Perfect. I'll bring snacks and you choose the music."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-medium-s19",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 19,
+    "titleEn": "Teaching Grandma to use a smartphone",
+    "titleTh": "สอนคุณยายใช้สมาร์ตโฟน",
+    "scenarioSentences": [
+      "Grandma got her first smartphone last week.",
+      "She wants to message the family.",
+      "She also wants to see family photos.",
+      "You visit her on Saturday.",
+      "You offer to help her."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Grandma, shall we look at your new phone together?"
+      },
+      {
+        "speaker": "Grandma",
+        "text": "Yes, please. I can't even find the messages."
+      },
+      {
+        "speaker": "You",
+        "text": "It's this green icon. Tap it, then choose a name."
+      },
+      {
+        "speaker": "Grandma",
+        "text": "Oh, I see. Can I send a message to your mother?"
+      },
+      {
+        "speaker": "You",
+        "text": "Sure. Type your message here and press the arrow."
+      },
+      {
+        "speaker": "Grandma",
+        "text": "I did it! Now, how do I see the photos she sends?"
+      },
+      {
+        "speaker": "You",
+        "text": "They're here, in the photo album."
+      },
+      {
+        "speaker": "Grandma",
+        "text": "Lovely. Could I also see your faces when we talk?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, with a video call. Let's practice on Sunday when Mom calls."
+      },
+      {
+        "speaker": "Grandma",
+        "text": "Wonderful. I'll write the steps down."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-medium-s20",
+    "round": 4,
+    "difficulty": "medium",
+    "setNumber": 20,
+    "titleEn": "Giving directions to a lost tourist",
+    "titleTh": "บอกทางนักท่องเที่ยวที่หลงทาง",
+    "scenarioSentences": [
+      "You are walking through the old town.",
+      "A tourist, Mrs. Hart, looks lost.",
+      "She is holding a big suitcase.",
+      "She asks you for help.",
+      "She needs to find the train station."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello. You look a bit lost. Can I help you?"
+      },
+      {
+        "speaker": "Mrs. Hart",
+        "text": "Yes, please. I need to get to the train station."
+      },
+      {
+        "speaker": "You",
+        "text": "It's not far. You can walk there in about ten minutes."
+      },
+      {
+        "speaker": "Mrs. Hart",
+        "text": "My suitcase is very heavy, though. Is there a bus?"
+      },
+      {
+        "speaker": "You",
+        "text": "There's no bus, but the tram stops just across the road."
+      },
+      {
+        "speaker": "Mrs. Hart",
+        "text": "How often does it come?"
+      },
+      {
+        "speaker": "You",
+        "text": "Every five minutes. Take number three and get off after two stops."
+      },
+      {
+        "speaker": "Mrs. Hart",
+        "text": "Do I buy a ticket on the tram?"
+      },
+      {
+        "speaker": "You",
+        "text": "No, use the machine at the stop. It takes cards."
+      },
+      {
+        "speaker": "Mrs. Hart",
+        "text": "Thank you so much. I'll take the tram, then."
+      }
+    ]
+  }
+]

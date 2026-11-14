@@ -1,0 +1,572 @@
+[
+  {
+    "id": "ds-r3-medium-s11",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 11,
+    "titleEn": "Asking for a quieter hotel room",
+    "titleTh": "ขอเปลี่ยนห้องพักที่เงียบกว่า",
+    "scenarioSentences": [
+      "You are staying at a hotel for three nights.",
+      "Your room is next to the elevator.",
+      "It is noisy all night.",
+      "Mr. Hughes works at reception.",
+      "You go down to see him."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Good morning. Could I change rooms, please? Mine is very noisy."
+      },
+      {
+        "speaker": "Mr. Hughes",
+        "text": "I'm sorry to hear that. What's the problem?"
+      },
+      {
+        "speaker": "You",
+        "text": "It's right next to the elevator. I heard it all night."
+      },
+      {
+        "speaker": "Mr. Hughes",
+        "text": "That room is often noisy. Let me check what's free."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you. I'm here for two more nights."
+      },
+      {
+        "speaker": "Mr. Hughes",
+        "text": "I have a quiet room on the eighth floor, away from the elevator."
+      },
+      {
+        "speaker": "You",
+        "text": "That sounds much better. Is it the same price?"
+      },
+      {
+        "speaker": "Mr. Hughes",
+        "text": "Yes, it is. You can move after eleven o'clock today."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. Should I leave my old key here?"
+      },
+      {
+        "speaker": "Mr. Hughes",
+        "text": "Yes, please. I'll give you the new one now."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-medium-s12",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 12,
+    "titleEn": "Selling an old phone",
+    "titleTh": "ขายโทรศัพท์มือถือเครื่องเก่า",
+    "scenarioSentences": [
+      "You are selling your old phone online.",
+      "Ali is interested in buying it.",
+      "The phone has a small scratch.",
+      "Ali calls you with questions.",
+      "You hope to sell it this week."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Ali. Thanks for calling about the phone."
+      },
+      {
+        "speaker": "Ali",
+        "text": "Hi. Is it still for sale? And does it work well?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, it works perfectly. The battery lasts all day."
+      },
+      {
+        "speaker": "Ali",
+        "text": "Great. Are there any problems with it?"
+      },
+      {
+        "speaker": "You",
+        "text": "There's a small scratch on the back, but the screen is perfect."
+      },
+      {
+        "speaker": "Ali",
+        "text": "Hmm. Would you take one hundred seventy dollars, then?"
+      },
+      {
+        "speaker": "You",
+        "text": "How about one hundred eighty? I'll include the case and charger."
+      },
+      {
+        "speaker": "Ali",
+        "text": "Okay, that's fair. Where can we meet?"
+      },
+      {
+        "speaker": "You",
+        "text": "I'm on campus every day. Could we meet outside the library at noon?"
+      },
+      {
+        "speaker": "Ali",
+        "text": "Sure, tomorrow at noon. I'll bring cash."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-medium-s13",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 13,
+    "titleEn": "Changing a restaurant booking for more people",
+    "titleTh": "เพิ่มจำนวนคนในการจองร้านอาหาร",
+    "scenarioSentences": [
+      "You booked a table for four people.",
+      "Now eight friends want to come.",
+      "Ms. Dubois manages the restaurant.",
+      "You call her on Friday.",
+      "You hope she can help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Dubois. I booked a table for four at seven on Saturday."
+      },
+      {
+        "speaker": "Ms. Dubois",
+        "text": "Yes, I see it. How can I help?"
+      },
+      {
+        "speaker": "You",
+        "text": "Could we change it to eight people? More friends want to come."
+      },
+      {
+        "speaker": "Ms. Dubois",
+        "text": "Our tables for eight are full at seven."
+      },
+      {
+        "speaker": "You",
+        "text": "Oh no. Is there another time that might work?"
+      },
+      {
+        "speaker": "Ms. Dubois",
+        "text": "I have a big table by the window at eight o'clock."
+      },
+      {
+        "speaker": "You",
+        "text": "That's a bit late, but fine. Do we need to order early?"
+      },
+      {
+        "speaker": "Ms. Dubois",
+        "text": "No, but there's a small service charge for big groups."
+      },
+      {
+        "speaker": "You",
+        "text": "That's okay. Please change it to eight people at eight."
+      },
+      {
+        "speaker": "Ms. Dubois",
+        "text": "Done. See you on Saturday."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-medium-s14",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 14,
+    "titleEn": "Starting a running routine with a friend",
+    "titleTh": "เริ่มวิ่งออกกำลังกายกับเพื่อน",
+    "scenarioSentences": [
+      "You want to get fitter.",
+      "You have never run regularly before.",
+      "Your friend Jade runs every week.",
+      "She offers to run with you.",
+      "You meet for coffee to plan."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Jade, thanks for offering to run with me."
+      },
+      {
+        "speaker": "Jade",
+        "text": "No problem! How often can you run?"
+      },
+      {
+        "speaker": "You",
+        "text": "Maybe three times a week. Mornings are best for me."
+      },
+      {
+        "speaker": "Jade",
+        "text": "Mornings suit me too. How about Monday, Wednesday and Friday at seven?"
+      },
+      {
+        "speaker": "You",
+        "text": "That works. How far should we run at first?"
+      },
+      {
+        "speaker": "Jade",
+        "text": "Just two kilometers. If you start too far, you might get hurt."
+      },
+      {
+        "speaker": "You",
+        "text": "Two sounds easy enough. When can we go further?"
+      },
+      {
+        "speaker": "Jade",
+        "text": "We'll add a little each week, until you can run five."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. Should I buy new running shoes first?"
+      },
+      {
+        "speaker": "Jade",
+        "text": "Your old ones are fine for now. See you Monday!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-medium-s15",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 15,
+    "titleEn": "Volunteering at an animal shelter",
+    "titleTh": "เป็นอาสาสมัครที่ศูนย์พักพิงสัตว์",
+    "scenarioSentences": [
+      "You love animals.",
+      "You want to do some volunteer work.",
+      "There is an animal shelter near your home.",
+      "Mr. Ward is the shelter manager.",
+      "You visit him to ask about helping."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Mr. Ward. I'd like to volunteer here. How can I help?"
+      },
+      {
+        "speaker": "Mr. Ward",
+        "text": "We need people to clean, feed the animals or walk the dogs."
+      },
+      {
+        "speaker": "You",
+        "text": "I'd love to walk the dogs. I grew up with dogs."
+      },
+      {
+        "speaker": "Mr. Ward",
+        "text": "Great. How many hours can you give each week?"
+      },
+      {
+        "speaker": "You",
+        "text": "I have classes on weekdays, but I'm free on Saturday mornings."
+      },
+      {
+        "speaker": "Mr. Ward",
+        "text": "Saturdays are perfect. We walk the dogs from nine to twelve."
+      },
+      {
+        "speaker": "You",
+        "text": "That's great. Do I need any training first?"
+      },
+      {
+        "speaker": "Mr. Ward",
+        "text": "Yes, there's a one-hour lesson this Saturday."
+      },
+      {
+        "speaker": "You",
+        "text": "Sounds good. What should I wear?"
+      },
+      {
+        "speaker": "Mr. Ward",
+        "text": "Old clothes and comfortable shoes. The dogs get very excited!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-medium-s16",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 16,
+    "titleEn": "Learning to cook on a small budget",
+    "titleTh": "หัดทำอาหารแบบประหยัด",
+    "scenarioSentences": [
+      "You moved into your own apartment.",
+      "You spend too much money on takeout food.",
+      "Your friend Inés is a good cook.",
+      "She cooks cheap, healthy meals.",
+      "You ask her for advice."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Inés, can you teach me to cook? I spend too much on takeout."
+      },
+      {
+        "speaker": "Inés",
+        "text": "Of course! What do you usually eat?"
+      },
+      {
+        "speaker": "You",
+        "text": "Mostly burgers and pizza. They're expensive and not very healthy."
+      },
+      {
+        "speaker": "Inés",
+        "text": "Rice and vegetables are cheaper and healthier. They're a good start."
+      },
+      {
+        "speaker": "You",
+        "text": "But I don't know which vegetables to buy."
+      },
+      {
+        "speaker": "Inés",
+        "text": "Buy what's in season at the market. It's cheaper and fresher."
+      },
+      {
+        "speaker": "You",
+        "text": "How much should I spend each week?"
+      },
+      {
+        "speaker": "Inés",
+        "text": "About thirty dollars is enough if you plan your meals."
+      },
+      {
+        "speaker": "You",
+        "text": "Could we cook together this weekend so I can learn?"
+      },
+      {
+        "speaker": "Inés",
+        "text": "Sure. Come on Saturday, and we'll make vegetable fried rice."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-medium-s17",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 17,
+    "titleEn": "Fixing a leaking kitchen tap",
+    "titleTh": "เรียกช่างซ่อมก๊อกน้ำรั่ว",
+    "scenarioSentences": [
+      "Your kitchen tap is leaking.",
+      "It drips all night, so you can't sleep.",
+      "Mr. Burke is a plumber.",
+      "You call him in the evening.",
+      "You want it fixed soon."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Mr. Burke. My kitchen tap is leaking. Can you fix it?"
+      },
+      {
+        "speaker": "Mr. Burke",
+        "text": "Sure. How bad is the leak?"
+      },
+      {
+        "speaker": "You",
+        "text": "It drips all the time. I've put a bowl under it."
+      },
+      {
+        "speaker": "Mr. Burke",
+        "text": "I'm busy tonight, but I can come tomorrow morning at nine."
+      },
+      {
+        "speaker": "You",
+        "text": "That's fine. But what should I do until then?"
+      },
+      {
+        "speaker": "Mr. Burke",
+        "text": "Turn off the water under the sink. There's a small handle there."
+      },
+      {
+        "speaker": "You",
+        "text": "I see it. Should I turn it to the right?"
+      },
+      {
+        "speaker": "Mr. Burke",
+        "text": "Yes, turn it all the way. The dripping should stop."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. How much will the repair cost?"
+      },
+      {
+        "speaker": "Mr. Burke",
+        "text": "Probably about fifty dollars, if I don't need new parts."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-medium-s18",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 18,
+    "titleEn": "Finding a quiet place to study",
+    "titleTh": "หาที่เงียบ ๆ สำหรับอ่านหนังสือ",
+    "scenarioSentences": [
+      "You live in a busy dorm.",
+      "Your neighbors are loud every evening.",
+      "You have a big exam soon.",
+      "Paul is in your history class.",
+      "You ask him where he studies."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Paul, where do you study? My dorm is too noisy in the evenings."
+      },
+      {
+        "speaker": "Paul",
+        "text": "I usually go to the library. They have small study rooms upstairs."
+      },
+      {
+        "speaker": "You",
+        "text": "Really? I didn't know that. Are they free to use?"
+      },
+      {
+        "speaker": "Paul",
+        "text": "Yes, but you have to book them online first."
+      },
+      {
+        "speaker": "You",
+        "text": "How long can you keep a room?"
+      },
+      {
+        "speaker": "Paul",
+        "text": "Two hours at a time. In the evening, they're often empty."
+      },
+      {
+        "speaker": "You",
+        "text": "That's perfect. I'm usually busy until six anyway."
+      },
+      {
+        "speaker": "Paul",
+        "text": "I'm going at seven tonight. Book the room next to mine."
+      },
+      {
+        "speaker": "You",
+        "text": "Good idea. We could take a coffee break together."
+      },
+      {
+        "speaker": "Paul",
+        "text": "Sure. I'll send you the booking link now."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-medium-s19",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 19,
+    "titleEn": "Organizing a clothes swap",
+    "titleTh": "จัดงานแลกเสื้อผ้ากับเพื่อน",
+    "scenarioSentences": [
+      "Your closet is full of old clothes.",
+      "You rarely wear most of them.",
+      "Your friend Bella feels the same.",
+      "You want to plan a clothes swap.",
+      "You talk about it at lunch."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Bella, let's organize a clothes swap. We both have too many clothes."
+      },
+      {
+        "speaker": "Bella",
+        "text": "Great idea! Just us, or more people?"
+      },
+      {
+        "speaker": "You",
+        "text": "Our classmates too. Everyone can bring things they don't wear anymore."
+      },
+      {
+        "speaker": "Bella",
+        "text": "How many items should each person bring?"
+      },
+      {
+        "speaker": "You",
+        "text": "Maybe five, so the swap stays fair."
+      },
+      {
+        "speaker": "Bella",
+        "text": "Good. We'll need a big space for that."
+      },
+      {
+        "speaker": "You",
+        "text": "The student center has a free room on Friday afternoon. I've already asked."
+      },
+      {
+        "speaker": "Bella",
+        "text": "Perfect. What should we do with the clothes nobody takes?"
+      },
+      {
+        "speaker": "You",
+        "text": "We could give them to a charity."
+      },
+      {
+        "speaker": "Bella",
+        "text": "Nice. I'll make a poster and share it online tonight."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-medium-s20",
+    "round": 3,
+    "difficulty": "medium",
+    "setNumber": 20,
+    "titleEn": "Asking a neighbor about recycling days",
+    "titleTh": "ถามเพื่อนบ้านเรื่องวันทิ้งขยะรีไซเคิล",
+    "scenarioSentences": [
+      "You just moved into a new house.",
+      "You are not sure about the recycling rules.",
+      "Mrs. Gray lives next door.",
+      "She has lived there for years.",
+      "You knock on her door."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Mrs. Gray. I'm your new neighbor. Could I ask about recycling?"
+      },
+      {
+        "speaker": "Mrs. Gray",
+        "text": "Of course! Welcome to the street."
+      },
+      {
+        "speaker": "You",
+        "text": "Which bin is for plastic? There are three by my door."
+      },
+      {
+        "speaker": "Mrs. Gray",
+        "text": "The yellow one is for plastic, and the blue one is for paper."
+      },
+      {
+        "speaker": "You",
+        "text": "And the green one?"
+      },
+      {
+        "speaker": "Mrs. Gray",
+        "text": "That's for food waste. It's collected every Monday."
+      },
+      {
+        "speaker": "You",
+        "text": "When do they collect plastic and paper?"
+      },
+      {
+        "speaker": "Mrs. Gray",
+        "text": "Plastic goes on Tuesday, and paper on Friday. Put the bins out the night before."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. I might forget, so I'll write it on my calendar."
+      },
+      {
+        "speaker": "Mrs. Gray",
+        "text": "Good idea. If you forget, just ask me."
+      }
+    ]
+  }
+]

@@ -1,0 +1,544 @@
+[
+  {
+    "id": "ds-r4-easy-s11",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 11,
+    "titleEn": "Buying cream for a sunburn",
+    "titleTh": "ซื้อครีมทาผิวไหม้แดด",
+    "scenarioSentences": [
+      "You went to the beach yesterday.",
+      "Now your arms are red.",
+      "You have a bad sunburn.",
+      "You go to the pharmacy.",
+      "Ms. Young works there."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello. I have a bad sunburn on my arms."
+      },
+      {
+        "speaker": "Ms. Young",
+        "text": "Oh dear. Did you go to the beach?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, yesterday. I didn't wear any sunscreen."
+      },
+      {
+        "speaker": "Ms. Young",
+        "text": "This cream is good for sunburn. Use it three times a day."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. I'm on vacation. Can I go to the beach today?"
+      },
+      {
+        "speaker": "Ms. Young",
+        "text": "Yes, but wear a big hat. We sell sun hats here."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. I'll take the cream and a hat, please."
+      },
+      {
+        "speaker": "Ms. Young",
+        "text": "Sure. That's nineteen dollars, please."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-easy-s12",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 12,
+    "titleEn": "Taking a first guitar lesson",
+    "titleTh": "เรียนกีตาร์ครั้งแรก",
+    "scenarioSentences": [
+      "You are learning the guitar.",
+      "Today is your first lesson.",
+      "Mr. Dupont is your teacher.",
+      "Your fingers hurt a little.",
+      "You have some questions."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mr. Dupont, my fingers hurt. Is that normal?"
+      },
+      {
+        "speaker": "Mr. Dupont",
+        "text": "Yes, it's normal at the start. It stops after two weeks."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. How often do I need to practice?"
+      },
+      {
+        "speaker": "Mr. Dupont",
+        "text": "Every day, but only for twenty minutes."
+      },
+      {
+        "speaker": "You",
+        "text": "Only twenty minutes? That's not much."
+      },
+      {
+        "speaker": "Mr. Dupont",
+        "text": "A little practice every day really helps your fingers."
+      },
+      {
+        "speaker": "You",
+        "text": "What can I play at home?"
+      },
+      {
+        "speaker": "Mr. Dupont",
+        "text": "Play the easy song from today's lesson."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. I'll practice for twenty minutes every day."
+      },
+      {
+        "speaker": "Mr. Dupont",
+        "text": "Great. See you next Tuesday for your second lesson."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-easy-s13",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 13,
+    "titleEn": "Ordering a drink at a juice bar",
+    "titleTh": "สั่งน้ำผลไม้ที่ร้านน้ำปั่น",
+    "scenarioSentences": [
+      "It is a hot afternoon.",
+      "You are thirsty.",
+      "You go to a juice bar.",
+      "Tina works there.",
+      "You want a healthy drink."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi. What fruit juices do you have today?"
+      },
+      {
+        "speaker": "Tina",
+        "text": "We have orange, pineapple and mango."
+      },
+      {
+        "speaker": "You",
+        "text": "Mango sounds good. Does it have sugar in it?"
+      },
+      {
+        "speaker": "Tina",
+        "text": "Usually a little, but I can make it with no sugar."
+      },
+      {
+        "speaker": "You",
+        "text": "No sugar, please. How much is it?"
+      },
+      {
+        "speaker": "Tina",
+        "text": "A small is three dollars, and a large is five."
+      },
+      {
+        "speaker": "You",
+        "text": "A small one, please. Can I have ice too?"
+      },
+      {
+        "speaker": "Tina",
+        "text": "Sure. One small mango juice, no sugar, with ice."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. Here's three dollars."
+      },
+      {
+        "speaker": "Tina",
+        "text": "Thank you. It will be ready in two minutes."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-easy-s14",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 14,
+    "titleEn": "Getting a map at the tourist office",
+    "titleTh": "ขอแผนที่ที่ศูนย์ข้อมูลนักท่องเที่ยว",
+    "scenarioSentences": [
+      "You are visiting a new city.",
+      "You have one day here.",
+      "You go to the tourist office.",
+      "Mr. Moss works at the desk.",
+      "You want a map."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello. I'm only here for one day. What can I see?"
+      },
+      {
+        "speaker": "Mr. Moss",
+        "text": "The old town is lovely, and it's near here."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Do you have a map?"
+      },
+      {
+        "speaker": "Mr. Moss",
+        "text": "Yes, here's a free map. The old town walk is in red."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you. How long is the walk?"
+      },
+      {
+        "speaker": "Mr. Moss",
+        "text": "About two hours. It starts at the old church."
+      },
+      {
+        "speaker": "You",
+        "text": "Are there any good places to eat?"
+      },
+      {
+        "speaker": "Mr. Moss",
+        "text": "Yes, the market square has lots of small restaurants."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. I'll do the walk this morning and eat there."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-easy-s15",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 15,
+    "titleEn": "Going to a friend's barbecue",
+    "titleTh": "ไปงานบาร์บีคิวที่บ้านเพื่อน",
+    "scenarioSentences": [
+      "Your friend Eric is having a barbecue.",
+      "It is on Saturday afternoon.",
+      "You want to bring some food.",
+      "You do not know the way.",
+      "You call Eric."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Eric. Thanks for the invitation! What can I bring on Saturday?"
+      },
+      {
+        "speaker": "Eric",
+        "text": "We have lots of meat. Can you bring a salad?"
+      },
+      {
+        "speaker": "You",
+        "text": "Sure, I'll make a big salad."
+      },
+      {
+        "speaker": "Eric",
+        "text": "Great. And it starts at three."
+      },
+      {
+        "speaker": "You",
+        "text": "How do I get to your place? I don't have a car."
+      },
+      {
+        "speaker": "Eric",
+        "text": "Take bus 5 from the station. Get off at Park Road."
+      },
+      {
+        "speaker": "You",
+        "text": "How long is the ride?"
+      },
+      {
+        "speaker": "Eric",
+        "text": "About fifteen minutes. My house is next to the stop."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. See you at three, then."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-easy-s16",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 16,
+    "titleEn": "Buying flowers for a teacher",
+    "titleTh": "ซื้อดอกไม้ขอบคุณคุณครู",
+    "scenarioSentences": [
+      "Your English course ends tomorrow.",
+      "Your teacher was very kind.",
+      "You want to give her flowers.",
+      "You go to a flower shop.",
+      "Mrs. Flores owns the shop."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello. I'd like some flowers for my teacher, to say thank you."
+      },
+      {
+        "speaker": "Mrs. Flores",
+        "text": "How nice! How much do you want to spend?"
+      },
+      {
+        "speaker": "You",
+        "text": "Not much. About fifteen dollars."
+      },
+      {
+        "speaker": "Mrs. Flores",
+        "text": "Then a small bunch is good. What colors does she like?"
+      },
+      {
+        "speaker": "You",
+        "text": "She often wears yellow."
+      },
+      {
+        "speaker": "Mrs. Flores",
+        "text": "These yellow ones are fresh today. A small bunch is fourteen dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "They're beautiful. I'll take them."
+      },
+      {
+        "speaker": "Mrs. Flores",
+        "text": "Would you like a card with them?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, please. I'll write a thank-you message."
+      },
+      {
+        "speaker": "Mrs. Flores",
+        "text": "Here's a pen. I'll get the flowers ready."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-easy-s17",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 17,
+    "titleEn": "Checking into a hostel",
+    "titleTh": "เช็กอินเข้าพักที่โฮสเทล",
+    "scenarioSentences": [
+      "You are on a trip.",
+      "You arrive at a hostel.",
+      "You have a bed for two nights.",
+      "Pia works at the desk.",
+      "You go to check in."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi. I'd like to check in. I have a bed for two nights."
+      },
+      {
+        "speaker": "Pia",
+        "text": "Welcome! Your passport, please."
+      },
+      {
+        "speaker": "You",
+        "text": "Here you are. Where is my bed?"
+      },
+      {
+        "speaker": "Pia",
+        "text": "Room 3, bed 4. It's up the stairs."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. Is there breakfast in the morning?"
+      },
+      {
+        "speaker": "Pia",
+        "text": "Yes, it's free. It starts at seven in the kitchen."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Do I need a key for the room?"
+      },
+      {
+        "speaker": "Pia",
+        "text": "Yes. Here's your key card. Please give it back when you leave."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. I'll come down for breakfast at seven."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-easy-s18",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 18,
+    "titleEn": "Washing clothes in the laundry room",
+    "titleTh": "ซักผ้าที่ห้องซักรีดในหอพัก",
+    "scenarioSentences": [
+      "You live in a student dorm.",
+      "Your clothes are dirty.",
+      "You go to the laundry room.",
+      "You do not understand the machine.",
+      "Ahmed, your neighbor, is there."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Ahmed. How does this machine work?"
+      },
+      {
+        "speaker": "Ahmed",
+        "text": "It's easy. First, open the door and put your clothes in."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. Where do I put the soap?"
+      },
+      {
+        "speaker": "Ahmed",
+        "text": "In this small box at the top. Just one cup."
+      },
+      {
+        "speaker": "You",
+        "text": "And then I press the green button?"
+      },
+      {
+        "speaker": "Ahmed",
+        "text": "Not yet. You need coins first. It's two dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "Oh, I only have a five-dollar bill."
+      },
+      {
+        "speaker": "Ahmed",
+        "text": "There's a coin machine by the door. It takes bills."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. I'll get coins now. Thanks!"
+      },
+      {
+        "speaker": "Ahmed",
+        "text": "No problem. The wash takes about forty minutes."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-easy-s19",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 19,
+    "titleEn": "Buying a new desk lamp",
+    "titleTh": "ซื้อโคมไฟตั้งโต๊ะใหม่",
+    "scenarioSentences": [
+      "Your desk lamp is broken.",
+      "You study every night.",
+      "You need a new lamp.",
+      "You go to a home store.",
+      "Mr. Stone works there."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Excuse me. I'm looking for a desk lamp."
+      },
+      {
+        "speaker": "Mr. Stone",
+        "text": "Sure. Do you want a big one or a small one?"
+      },
+      {
+        "speaker": "You",
+        "text": "A small one, please. My desk is small."
+      },
+      {
+        "speaker": "Mr. Stone",
+        "text": "Then look at these two. The black one is only eighteen dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "Is it bright? I study at night."
+      },
+      {
+        "speaker": "Mr. Stone",
+        "text": "Not very. The white one is very bright, but it's twenty-two dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "I need good light for studying. I'll take the white one."
+      },
+      {
+        "speaker": "Mr. Stone",
+        "text": "Good choice. You can pay at the front, near the door."
+      }
+    ]
+  },
+  {
+    "id": "ds-r4-easy-s20",
+    "round": 4,
+    "difficulty": "easy",
+    "setNumber": 20,
+    "titleEn": "Visiting the zoo with a friend",
+    "titleTh": "ชวนเพื่อนไปเที่ยวสวนสัตว์",
+    "scenarioSentences": [
+      "You want to go to the zoo.",
+      "Your friend Rita wants to come.",
+      "You both love animals.",
+      "You are free this weekend.",
+      "You talk about your plan."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Rita, let's go to the zoo this weekend. Are you free?"
+      },
+      {
+        "speaker": "Rita",
+        "text": "Only on Saturday. I have to work on Sunday."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. Saturday morning or afternoon?"
+      },
+      {
+        "speaker": "Rita",
+        "text": "Morning. It's very hot in the afternoon."
+      },
+      {
+        "speaker": "You",
+        "text": "Right. Which animals do you want to see?"
+      },
+      {
+        "speaker": "Rita",
+        "text": "The elephants! There's a new baby elephant."
+      },
+      {
+        "speaker": "You",
+        "text": "Oh, cute! Let's see the elephants first, then."
+      },
+      {
+        "speaker": "Rita",
+        "text": "Yes. And then the monkeys."
+      },
+      {
+        "speaker": "You",
+        "text": "The zoo opens at nine. Let's meet at the gate."
+      },
+      {
+        "speaker": "Rita",
+        "text": "Perfect. See you on Saturday!"
+      }
+    ]
+  }
+]
