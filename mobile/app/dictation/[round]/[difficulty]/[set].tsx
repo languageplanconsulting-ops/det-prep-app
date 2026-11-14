@@ -1,4 +1,3 @@
-import { Sound } from "../../../../lib/audio-player";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -11,6 +10,7 @@ import {
 
 import { LuxuryPressable } from "../../../../components/LuxuryPressable";
 import { useScoreReveal } from "../../../../hooks/useScoreReveal";
+import { ListenCard } from "../../../../components/ListenCard";
 import { API_BASE_URL } from "../../../../lib/config";
 import { fetchDictationItem, finishStudySession, startStudySession, postPracticeAttempt } from "../../../../lib/api";
 import { buildContentKey } from "../../../../lib/practice-progress";
@@ -43,8 +43,6 @@ export default function DictationSessionScreen() {
   const [phase, setPhase] = useState<"practice" | "report">("practice");
   const [segments, setSegments] = useState<CharDisplaySegment[]>([]);
   const [score, setScore] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const soundRef = useRef<Sound | null>(null);
   const startedAt = useRef(Date.now());
   const sessionIdRef = useRef<string | null>(null);
 
@@ -76,9 +74,6 @@ export default function DictationSessionScreen() {
 
   useEffect(() => {
     void load();
-    return () => {
-      void soundRef.current?.unloadAsync();
-    };
   }, [load]);
 
   const audioUri = item?.audioUrl
@@ -86,31 +81,6 @@ export default function DictationSessionScreen() {
     : item?.audioPath
       ? `${API_BASE_URL}${item.audioPath}`
       : null;
-
-  const togglePlay = async () => {
-    if (!audioUri) return;
-    try {
-      if (soundRef.current) {
-        const status = await soundRef.current.getStatusAsync();
-        if (status.isLoaded && status.isPlaying) {
-          await soundRef.current.pauseAsync();
-          setPlaying(false);
-          return;
-        }
-      }
-      if (!soundRef.current) {
-        const { sound } = await Sound.createAsync({ uri: audioUri });
-        soundRef.current = sound;
-      }
-      await soundRef.current!.playAsync();
-      setPlaying(true);
-      soundRef.current!.setOnPlaybackStatusUpdate((st) => {
-        if (st.isLoaded && st.didJustFinish) setPlaying(false);
-      });
-    } catch {
-      setPlaying(false);
-    }
-  };
 
   const submit = async () => {
     if (!item) return;
@@ -197,34 +167,51 @@ export default function DictationSessionScreen() {
       <Text style={styles.meta}>
         {setLine(t, roundNum, difficulty, setNumber)}
       </Text>
-      <Text style={styles.hintText}>
-        {lang === "th" ? (item.hintTextTh ?? item.hintText) : item.hintText}
-      </Text>
-
-      <LuxuryPressable style={styles.playBtn} onPress={() => void togglePlay()}>
-        <Text style={styles.playBtnText}>{playing ? t("หยุด", "Pause") : t("เล่นเสียง", "Play audio")}</Text>
-      </LuxuryPressable>
-      {!audioUri ? (
-        <Text style={styles.warn}>
-          {t(
-            "ไม่พบไฟล์เสียง — ลองทำบนเว็บไซต์ หรือตรวจสอบการอัปโหลดของแอดมิน",
-            "No audio URL — use the website or check admin upload.",
-          )}
+      <View style={styles.hintChip}>
+        <Text style={styles.hintChipLabel}>{t("💡 คำใบ้", "💡 Hint")}</Text>
+        <Text style={styles.hintChipText}>
+          {lang === "th" ? (item.hintTextTh ?? item.hintText) : item.hintText}
         </Text>
-      ) : null}
+      </View>
 
-      <TextInput
-        style={styles.input}
-        multiline
-        placeholder={t("พิมพ์สิ่งที่ได้ยิน…", "Type what you hear…")}
-        value={userText}
-        onChangeText={setUserText}
-        autoCapitalize="none"
-        autoCorrect={false}
+      {/* the sentence stays hidden — that's the exercise */}
+      <ListenCard
+        text={item.transcript}
+        audioUri={audioUri}
+        label={t("ฟังประโยค แล้วพิมพ์ให้ตรงทุกคำ", "Listen, then type the sentence exactly")}
+        autoPlay={false}
+        revealable={false}
       />
 
-      <LuxuryPressable style={styles.btn} sound="submit" onPress={() => void submit()}>
-        <Text style={styles.btnText}>{t("ตรวจคำตอบ", "Check answer")}</Text>
+      <View style={styles.inputBox}>
+        <TextInput
+          style={styles.input}
+          multiline
+          placeholder={t("พิมพ์สิ่งที่ได้ยิน…", "Type what you hear…")}
+          placeholderTextColor="#9CA3AF"
+          value={userText}
+          onChangeText={setUserText}
+          autoCapitalize="none"
+          autoCorrect={false}
+          spellCheck={false}
+        />
+        <Text style={styles.counter}>
+          {t(
+            `${userText.trim() ? userText.trim().split(/\s+/).length : 0} คำ`,
+            `${userText.trim() ? userText.trim().split(/\s+/).length : 0} words`,
+          )}
+        </Text>
+      </View>
+
+      <LuxuryPressable
+        style={[styles.btn, !userText.trim() && styles.btnDisabled]}
+        disabled={!userText.trim()}
+        sound="submit"
+        onPress={() => void submit()}
+      >
+        <Text style={styles.btnText}>
+          {userText.trim() ? t("ตรวจคำตอบ", "Check answer") : t("พิมพ์ประโยคก่อน แล้วค่อยตรวจ", "Type the sentence to check")}
+        </Text>
       </LuxuryPressable>
     </ScrollView>
   );
@@ -237,6 +224,12 @@ const styles = StyleSheet.create({
   error: { color: "#b91c1c", fontWeight: "700", padding: 20, textAlign: "center" },
   meta: { fontWeight: "800", fontSize: 13, color: "#004AAD" },
   hintText: { marginTop: 8, color: "#6B7280", fontSize: 14 },
+  hintChip: { marginTop: 12, marginBottom: 14, borderRadius: 14, backgroundColor: "#FFFBEB", borderWidth: 1, borderColor: "#FCD34D", padding: 12 },
+  hintChipLabel: { fontSize: 12, fontWeight: "900", color: "#92400E", marginBottom: 4 },
+  hintChipText: { fontSize: 14, lineHeight: 21, color: "#111" },
+  inputBox: { borderWidth: 2, borderColor: "#111", borderRadius: 14, backgroundColor: "#fff", padding: 4 },
+  counter: { alignSelf: "flex-end", fontSize: 12, fontWeight: "800", color: "#6B7280", paddingHorizontal: 8, paddingBottom: 6 },
+  btnDisabled: { opacity: 0.55 },
   playBtn: {
     marginTop: 16,
     backgroundColor: "#06b6d4",
@@ -249,13 +242,10 @@ const styles = StyleSheet.create({
   playBtnText: { color: "#fff", fontWeight: "900", fontSize: 16 },
   warn: { marginTop: 8, color: "#b45309", fontSize: 12 },
   input: {
-    marginTop: 20,
-    minHeight: 140,
-    borderWidth: 2,
-    borderColor: "#111",
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
+    minHeight: 130,
+    padding: 12,
+    fontSize: 17,
+    lineHeight: 25,
     textAlignVertical: "top",
   },
   btn: {

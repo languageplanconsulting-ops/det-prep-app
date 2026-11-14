@@ -66,3 +66,14 @@ export async function stopTurnRecording(
   const mimeType = uri.endsWith(".caf") ? "audio/x-caf" : "audio/m4a";
   return { base64, mimeType };
 }
+
+/** Stops a recording and leaves record mode; returns the file uri (used by the quick mic check). */
+export async function stopRecordingToUri(recorder: TurnRecorder): Promise<string | null> {
+  await recorder.stop();
+  try {
+    await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+  } catch {
+    /* ignore */
+  }
+  return recorder.uri ?? null;
+}

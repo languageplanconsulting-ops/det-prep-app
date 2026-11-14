@@ -125,7 +125,13 @@ export async function GET(request: Request) {
     // A code-only admin has no Supabase session, so read the shared bank with the service role.
     const contentClient = !user && adminAccess.ok ? createServiceRoleSupabase() : supabase;
     const { snapshot, updatedAt } = await fetchPracticeContentSnapshot(contentClient);
-    const siteOrigin = getSiteUrl().origin;
+    // Audio links must use the address the client actually reached. In dev that's often the
+    // Mac's Wi-Fi IP (a phone can't reach "localhost"); production keeps the canonical site URL.
+    const reqHost = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+    const siteOrigin =
+      process.env.NODE_ENV !== "production" && reqHost
+        ? `${new URL(request.url).protocol}//${reqHost}`
+        : getSiteUrl().origin;
 
     if (listOnly) {
       const setNumbers = listLaneSetNumbers(snapshot, skill, round, difficulty);

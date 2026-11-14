@@ -39,18 +39,6 @@ export function PrefixLetterInput({
           </View>
         ))}
         <View style={[styles.inputWrap, focused && styles.inputWrapFocused]}>
-          <TextInput
-            style={styles.hiddenInput}
-            editable={!disabled}
-            value={typed}
-            maxLength={remainingLength}
-            autoCapitalize="none"
-            autoCorrect={false}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            onChangeText={(t) => onChange(t.slice(0, remainingLength))}
-            accessibilityLabel={`Blank ${index + 1}`}
-          />
           {Array.from({ length: remainingLength }, (_, k) => {
             const ch = typed[k];
             const isCursor =
@@ -69,6 +57,19 @@ export function PrefixLetterInput({
               </View>
             );
           })}
+          {/* last child = drawn on top, so a tap anywhere on the slots focuses it */}
+          <TextInput
+            style={styles.hiddenInput}
+            editable={!disabled}
+            value={typed}
+            maxLength={remainingLength}
+            autoCapitalize="none"
+            autoCorrect={false}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onChangeText={(t) => onChange(t.slice(0, remainingLength))}
+            accessibilityLabel={`Blank ${index + 1}`}
+          />
         </View>
       </View>
     </View>
@@ -129,6 +130,9 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     opacity: 0,
+    zIndex: 2,
+    // keep the native caret/selection from showing through
+    color: "transparent",
   },
   slot: {
     minWidth: 34,

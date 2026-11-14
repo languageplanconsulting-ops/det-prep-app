@@ -245,6 +245,16 @@ export default function FitbSessionScreen() {
   let blankCursor = 0;
 
   const hintWord = hintBlank != null ? fitbSet.missingWords[hintBlank] : null;
+  // Thai meaning first; never let the hint spell out the answer (phrasal verbs list it in brackets)
+  const hideAnswer = (text: string | undefined) => {
+    if (!text || !hintWord) return "";
+    const w = hintWord.correctWord.trim();
+    return w ? text.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), "___").trim() : text.trim();
+  };
+  const hintMeaning = hideAnswer(hintWord?.explanationThai);
+  const clueRaw = hideAnswer(hintWord?.clue);
+  // the clue is a second hint only when it adds something (often English, sometimes Thai)
+  const hintClue = clueRaw && clueRaw !== hintMeaning ? clueRaw : "";
 
   return (
     <View style={styles.screen}>
@@ -338,7 +348,8 @@ export default function FitbSessionScreen() {
       >
         <View style={{ flex: 1 }}>
           <Text style={styles.hintLabel}>{t(`💡 คำใบ้ช่องที่ ${hintBlank! + 1}`, `💡 Hint · blank ${hintBlank! + 1}`)}</Text>
-          <Text style={styles.hintText}>{hintWord.clue}</Text>
+          {hintMeaning ? <Text style={styles.hintMeaning}>{hintMeaning}</Text> : null}
+          {hintClue ? <Text style={styles.hintText}>{hintClue}</Text> : null}
         </View>
         <LuxuryPressable style={styles.hintClose} sound="tap" onPress={() => setHintBlank(null)}>
           <Text style={styles.hintCloseText}>✕</Text>
@@ -370,8 +381,8 @@ const styles = StyleSheet.create({
   slot: { fontWeight: "800", color: "#94A3B8", fontFamily: "Menlo" },
   slotFilled: { color: "#111" },
   slotCursor: { color: "#004AAD", textDecorationLine: "underline" },
-  clueIcon: { fontSize: 13, opacity: 0.55 },
-  clueIconOn: { opacity: 1 },
+  clueIcon: { fontSize: 15 },
+  clueIconOn: { backgroundColor: "#FFE88A" },
   keyInput: { position: "absolute", top: 0, left: 0, width: 1, height: 1, opacity: 0 },
   hintCard: {
     position: "absolute",
@@ -393,7 +404,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   hintLabel: { fontSize: 12, fontWeight: "900", color: "#004AAD", marginBottom: 4 },
-  hintText: { fontSize: 15, lineHeight: 22, color: "#111" },
+  hintMeaning: { fontSize: 18, lineHeight: 26, fontWeight: "900", color: "#111" },
+  hintText: { fontSize: 13, lineHeight: 19, color: "#4B5563", marginTop: 4 },
   hintClose: { width: 28, height: 28, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(17,24,39,0.06)" },
   hintCloseText: { fontSize: 13, fontWeight: "900", color: "#374151" },
   blankInput: {

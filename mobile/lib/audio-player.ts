@@ -71,6 +71,19 @@ export class Sound {
     return { sound };
   }
 
+  /**
+   * Resolves true once the source has loaded, false if it hasn't within `timeoutMs` — a missing
+   * file (404) never loads and never errors, so this is how callers detect it.
+   */
+  async waitUntilLoaded(timeoutMs = 2500): Promise<boolean> {
+    const until = Date.now() + timeoutMs;
+    while (!this.released && Date.now() < until) {
+      if (this.player.isLoaded && (this.player.duration > 0 || this.player.playing)) return true;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    return !this.released && this.player.isLoaded && this.player.duration > 0;
+  }
+
   async playAsync(): Promise<void> {
     if (this.released) return;
     await ensurePlaybackMode();

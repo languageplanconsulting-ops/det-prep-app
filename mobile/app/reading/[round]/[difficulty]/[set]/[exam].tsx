@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -83,10 +83,17 @@ export default function ReadingSessionScreen() {
   // Tapped passage highlight (word card) + words saved to the notebook this session.
   const [cardPhrase, setCardPhrase] = useState<string | null>(null);
   const [savedWords, setSavedWords] = useState<Set<string>>(() => new Set());
+  const [passageBig, setPassageBig] = useState(false);
+  const questionScroll = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const startedAt = useRef(Date.now());
   const sessionIdRef = useRef<string | null>(null);
 
   useScoreReveal(phase === "report");
+
+  // each new question starts at its top
+  useEffect(() => {
+    questionScroll.current?.scrollTo({ y: 0, animated: false });
+  }, [step]);
 
   const shuffledPerStep = useMemo(() => {
     if (!readingExam) return [];
@@ -261,86 +268,134 @@ export default function ReadingSessionScreen() {
     });
   };
 
-  return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.meta}>
-        {t(
-          `ชุดที่ ${setNumber} · ข้อสอบ ${examNumber} · ขั้นที่ ${step + 1}/4`,
-          `Set ${setNumber} · Exam ${examNumber} · Step ${step + 1}/4`,
-        )}
-      </Text>
+  const pickedNow = step === 0 ? answers.missingSentence : answers[current.key];
 
-      <View style={styles.passageBox}>
-        <RichPassageText
-          text={passage.p1}
-          style={styles.para}
-          savedWords={savedWords}
-          onPressWord={setCardPhrase}
-        />
-        {step === 0 && !q1Revealed ? (
-          <Text style={styles.paraHidden}>
-            {t("[ย่อหน้าที่ 2 จะแสดงหลังตอบข้อ 1]", "[Paragraph 2 hidden until Q1 answered]")}
-          </Text>
-        ) : (
+  return (
+    <View style={styles.screen}>
+      <View style={styles.topBar}>
+        <Text style={styles.metaTop}>
+          {t(`ชุดที่ ${setNumber} · ข้อสอบ ${examNumber}`, `Set ${setNumber} · Exam ${examNumber}`)}
+        </Text>
+        <View style={styles.dots}>
+          {ORDER.map((o, i) => (
+            <View
+              key={o.key}
+              style={[styles.dot, i < step && styles.dotDone, i === step && styles.dotNow]}
+            >
+              <Text style={[styles.dotText, (i < step || i === step) && styles.dotTextOn]}>
+                {i < step ? "✓" : i + 1}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* passage keeps its own scroll so the question below never leaves the screen */}
+      <View style={[styles.passageWrap, passageBig ? styles.passageWrapBig : null]}>
+        <View style={styles.passageHead}>
+          <Text style={styles.passageTitle}>{t("📖 บทความ", "📖 Passage")}</Text>
+          <LuxuryPressable sound="none" style={styles.sizeBtn} onPress={() => setPassageBig((b) => !b)}>
+            <Text style={styles.sizeBtnText}>
+              {passageBig ? t("ย่อบทความ ▴", "Smaller ▴") : t("ขยายบทความ ▾", "Bigger ▾")}
+            </Text>
+          </LuxuryPressable>
+        </View>
+        <ScrollView style={styles.passageScroll} contentContainerStyle={styles.passageInner}>
           <RichPassageText
-            text={passage.p2}
+            text={passage.p1}
             style={styles.para}
             savedWords={savedWords}
             onPressWord={setCardPhrase}
           />
-        )}
-        <RichPassageText
-          text={passage.p3}
-          style={styles.para}
-          savedWords={savedWords}
-          onPressWord={setCardPhrase}
-        />
+          {step === 0 && !q1Revealed ? (
+            <View style={styles.paraGap}>
+              <Text style={styles.paraHidden}>
+                {t("ย่อหน้าที่ 2 หายไป — เลือกจากตัวเลือกด้านล่าง", "Paragraph 2 is missing — pick it below")}
+              </Text>
+            </View>
+          ) : (
+            // like the website: the gap is filled with the real answer (stored p2 is often just a placeholder)
+            <RichPassageText
+              text={correctP2}
+              style={[styles.para, step === 0 ? styles.paraRevealed : null]}
+              savedWords={savedWords}
+              onPressWord={setCardPhrase}
+            />
+          )}
+          <RichPassageText
+            text={passage.p3}
+            style={styles.para}
+            savedWords={savedWords}
+            onPressWord={setCardPhrase}
+          />
+        </ScrollView>
       </View>
 
-      <Text style={styles.qLabel}>{questionLabel(t, current.key, current.label)}</Text>
-      <Text style={styles.question}>{stripStars(block.question)}</Text>
+      <ScrollView ref={questionScroll} style={styles.questionPane} contentContainerStyle={styles.questionInner}>
+        <Text style={styles.qLabel}>{questionLabel(t, current.key, current.label)}</Text>
+        <Text style={styles.question}>{stripStars(block.question)}</Text>
 
-      {shuffled.map((option) => (
+        {shuffled.map((option) => {
+          const picked = pickedNow === option;
+          // Q1 is checked on the spot (it reveals paragraph 2), so show ✓/✗ there.
+          const q1Mark = step === 0 && q1Revealed;
+          const q1Right = q1Mark && option === correctP2;
+          const q1Wrong = q1Mark && picked && option !== correctP2;
+          return (
+            <LuxuryPressable
+              key={option}
+              scaleTo={0.98}
+              style={[
+                styles.option,
+                picked && styles.optionSelected,
+                q1Right && styles.optionRight,
+                q1Wrong && styles.optionWrong,
+              ]}
+              onPress={() => {
+                if (step === 0) {
+                  // Q1 reveals the real paragraph 2 right away — chime right/wrong once.
+                  if (q1Revealed) return;
+                  if (option === correctP2) sfxCorrect();
+                  else sfxWrong();
+                  setAnswers((a) => ({ ...a, missingSentence: option }));
+                  setQ1Revealed(true);
+                } else {
+                  setAnswers((a) => ({ ...a, [current.key]: option }));
+                }
+              }}
+            >
+              <Text style={[styles.optionText, picked && styles.optionTextSelected]}>
+                {q1Right ? "✓  " : q1Wrong ? "✗  " : ""}
+                {stripStars(option)}
+              </Text>
+            </LuxuryPressable>
+          );
+        })}
+
+        {step === 0 && q1Revealed ? (
+          <Text style={[styles.revealNote, answers.missingSentence === correctP2 ? styles.ok : styles.bad]}>
+            {answers.missingSentence === correctP2
+              ? t("✓ ถูกต้อง! ย่อหน้าที่ 2 แสดงในบทความแล้ว", "✓ Correct! Paragraph 2 is now in the passage")
+              : t("✗ ยังไม่ใช่ — ย่อหน้าที่ถูกต้องแสดงในบทความแล้ว", "✗ Not this one — the real paragraph 2 is now in the passage")}
+          </Text>
+        ) : null}
+      </ScrollView>
+
+      <View style={styles.footer}>
         <LuxuryPressable
-          key={option}
-          style={({ pressed }) => [
-            styles.option,
-            pressed && styles.optionPressed,
-            step === 0 && answers.missingSentence === option && styles.optionSelected,
-            step > 0 && answers[current.key] === option && styles.optionSelected,
-          ]}
-          onPress={() => {
-            if (step === 0) {
-              // Q1 reveals the real paragraph 2 right away — chime right/wrong once.
-              if (!q1Revealed) {
-                if (option === correctP2) sfxCorrect();
-                else sfxWrong();
-              }
-              setAnswers((a) => ({ ...a, missingSentence: option }));
-              setQ1Revealed(true);
-            } else {
-              setAnswers((a) => ({ ...a, [current.key]: option }));
-            }
-          }}
+          style={[styles.btn, styles.btnFooter, !canAdvance && styles.btnDisabled]}
+          disabled={!canAdvance}
+          onPress={goNext}
         >
-          <Text style={styles.optionText}>{stripStars(option)}</Text>
+          <Text style={[styles.btnText, !canAdvance && styles.btnTextDisabled]}>
+            {!canAdvance
+              ? t("เลือกคำตอบก่อน", "Pick an answer first")
+              : step < 3
+                ? t(`ถัดไป → ข้อ ${step + 2}`, `Next → Q${step + 2}`)
+                : t("เสร็จสิ้น ดูผล", "Finish & see results")}
+          </Text>
         </LuxuryPressable>
-      ))}
-
-      {step === 0 && q1Revealed ? (
-        <Text style={styles.revealNote}>
-          {t("ย่อหน้าที่ 2 ที่ถูกต้อง", "Correct paragraph 2")}:{" "}
-          {answers.missingSentence === correctP2 ? "✓" : "✗"} {t("(แสดงด้านบนแล้ว)", "(revealed above)")}
-        </Text>
-      ) : null}
-
-      <LuxuryPressable
-        style={[styles.btn, !canAdvance && styles.btnDisabled]}
-        disabled={!canAdvance}
-        onPress={goNext}
-      >
-        <Text style={styles.btnText}>{step < 3 ? t("ถัดไป", "Next") : t("เสร็จสิ้น", "Finish")}</Text>
-      </LuxuryPressable>
+      </View>
 
       <WordCard
         phrase={cardPhrase}
@@ -349,7 +404,7 @@ export default function ReadingSessionScreen() {
         onSave={saveWord}
         onClose={() => setCardPhrase(null)}
       />
-    </ScrollView>
+    </View>
   );
 }
 
@@ -359,30 +414,94 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   error: { color: "#b91c1c", fontWeight: "700", padding: 20, textAlign: "center" },
   meta: { fontWeight: "800", fontSize: 13, color: "#004AAD", marginBottom: 12 },
-  passageBox: {
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 8,
+  },
+  metaTop: { fontWeight: "800", fontSize: 13, color: "#004AAD" },
+  dots: { flexDirection: "row", gap: 6 },
+  dot: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: "#D1D5DB",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  dotDone: { backgroundColor: "#059669", borderColor: "#059669" },
+  dotNow: { backgroundColor: "#004AAD", borderColor: "#004AAD" },
+  dotText: { fontSize: 12, fontWeight: "900", color: "#9CA3AF" },
+  dotTextOn: { color: "#fff" },
+  passageWrap: {
+    flex: 1,
+    marginHorizontal: 16,
     borderWidth: 2,
     borderColor: "#111",
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: 14,
     backgroundColor: "#f9fafb",
-    marginBottom: 16,
+    overflow: "hidden",
   },
+  passageWrapBig: { flex: 2.4 },
+  passageHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    backgroundColor: "#fff",
+  },
+  passageTitle: { fontSize: 13, fontWeight: "900", color: "#111" },
+  sizeBtn: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: "#EEF4FF" },
+  sizeBtnText: { fontSize: 12, fontWeight: "800", color: "#004AAD" },
+  passageScroll: { flex: 1 },
+  passageInner: { padding: 14, paddingBottom: 4 },
   para: { fontSize: 15, lineHeight: 24, marginBottom: 12 },
-  paraHidden: { fontSize: 14, fontStyle: "italic", color: "#9ca3af", marginBottom: 12 },
+  paraRevealed: { backgroundColor: "#FFF7D1" },
+  paraGap: {
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: "#C7D2FE",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: "#F5F7FF",
+  },
+  paraHidden: { fontSize: 13, fontWeight: "700", color: "#6366F1", textAlign: "center" },
+  questionPane: { flex: 1.2 },
+  questionInner: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 },
   qLabel: { fontSize: 12, fontWeight: "800", color: "#6B7280" },
-  question: { fontSize: 16, fontWeight: "700", marginTop: 4, marginBottom: 12 },
+  question: { fontSize: 16, fontWeight: "800", marginTop: 4, marginBottom: 10, lineHeight: 23 },
   option: {
     borderWidth: 2,
     borderColor: "#111",
-    borderRadius: 10,
-    padding: 14,
+    borderRadius: 12,
+    padding: 12,
     marginBottom: 8,
     backgroundColor: "#fff",
   },
   optionPressed: { backgroundColor: "#FFF7D1" },
   optionSelected: { backgroundColor: "#cde0ff", borderColor: "#004AAD" },
-  optionText: { fontSize: 15 },
-  revealNote: { fontSize: 12, color: "#6B7280", marginBottom: 8 },
+  optionRight: { backgroundColor: "#ECFDF5", borderColor: "#059669" },
+  optionWrong: { backgroundColor: "#FEF2F2", borderColor: "#FCA5A5" },
+  optionText: { fontSize: 14, lineHeight: 21, color: "#111" },
+  optionTextSelected: { fontWeight: "700" },
+  revealNote: { fontSize: 13, fontWeight: "800", marginTop: 2, marginBottom: 4 },
+  footer: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 18,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    backgroundColor: "#fff",
+  },
   btn: {
     marginTop: 12,
     backgroundColor: "#004AAD",
@@ -392,8 +511,10 @@ const styles = StyleSheet.create({
     borderColor: "#111",
     alignItems: "center",
   },
-  btnDisabled: { opacity: 0.45 },
+  btnFooter: { marginTop: 0 },
+  btnDisabled: { backgroundColor: "#E5E7EB", borderColor: "#D1D5DB" },
   btnText: { color: "#FFCC00", fontWeight: "900", fontSize: 16 },
+  btnTextDisabled: { color: "#6B7280" },
   score: { fontSize: 24, fontWeight: "900" },
   reportRow: {
     marginTop: 16,

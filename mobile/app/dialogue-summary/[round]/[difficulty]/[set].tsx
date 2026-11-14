@@ -30,6 +30,7 @@ import type {
 import { LOAD_FAILED, errorText, scoreLine, useI18n } from "../../../../lib/i18n";
 import { ScreenLoader } from "../../../../components/MascotLoader";
 import { MascotLoader } from "../../../../components/MascotLoader";
+import { ListenCard } from "../../../../components/ListenCard";
 import { AnimatedScore, FadeInItem, ResultMascot } from "../../../../components/Motion";
 
 function criterionLabel(t: (th: string, en: string) => string, key: string): string {
@@ -219,51 +220,54 @@ export default function DialogueSummarySessionScreen() {
       </Text>
       {exam.titleTh ? <Text style={styles.titleTh}>{exam.titleTh}</Text> : null}
 
-      <View style={styles.block}>
+      <View style={styles.scenarioCard}>
         <Text style={styles.blockTitle}>{t("สถานการณ์", "Scenario")}</Text>
-        {exam.scenarioSentences.map((s, i) => (
-          <Text key={i} style={styles.line}>
-            {s}
-          </Text>
-        ))}
+        <Text style={styles.scenarioText}>{exam.scenarioSentences.join(" ")}</Text>
       </View>
 
-      <View style={styles.block}>
-        <Text style={styles.blockTitle}>{t("บทสนทนา", "Dialogue")}</Text>
-        {exam.dialogue.map((t, i) => (
-          <View key={i} style={styles.turn}>
-            <Text style={styles.speaker}>{t.speaker}</Text>
-            <Text style={styles.line}>{t.text}</Text>
-          </View>
-        ))}
-      </View>
-
-      <Text style={styles.prompt}>
-        {t(
-          `เขียนสรุปด้วยคำของคุณเอง (อย่างน้อย ${DIALOGUE_SUMMARY_MIN_WORDS} คำ)`,
-          `Write a summary in your own words (min ${DIALOGUE_SUMMARY_MIN_WORDS} words).`,
-        )}
-      </Text>
-      <Text style={styles.wordCount}>
-        {t(`${wordCount} คำ`, `${wordCount} word${wordCount === 1 ? "" : "s"}`)}
-        {!meetsMin
-          ? t(
-              ` · ต้องเขียนเพิ่มอีก ${DIALOGUE_SUMMARY_MIN_WORDS - wordCount} คำ`,
-              ` · need ${DIALOGUE_SUMMARY_MIN_WORDS - wordCount} more`,
-            )
-          : ""}
-      </Text>
-
-      <TextInput
-        style={styles.input}
-        multiline
-        placeholder={t("สรุปของคุณ…", "Your summary…")}
-        value={summary}
-        onChangeText={setSummary}
-        autoCapitalize="sentences"
-        autoCorrect
-        textAlignVertical="top"
+      <ListenCard
+        text={exam.dialogue.map((turn) => `${turn.speaker}: ${turn.text}`).join("\n")}
+        label={t("ฟังบทสนทนา (แตะดูข้อความได้)", "Listen to the conversation (tap to show text)")}
+        autoPlay={false}
       />
+
+      <View style={styles.writeCard}>
+        <Text style={styles.prompt}>
+          {t(
+            `เขียนสรุปด้วยคำของคุณเอง (อย่างน้อย ${DIALOGUE_SUMMARY_MIN_WORDS} คำ)`,
+            `Write a summary in your own words (min ${DIALOGUE_SUMMARY_MIN_WORDS} words).`,
+          )}
+        </Text>
+        <View style={styles.wordTrack}>
+          <View
+            style={[
+              styles.wordFill,
+              { width: `${Math.min(100, (wordCount / DIALOGUE_SUMMARY_MIN_WORDS) * 100)}%` },
+              meetsMin && styles.wordFillDone,
+            ]}
+          />
+        </View>
+        <Text style={[styles.wordCount, meetsMin && styles.wordCountDone]}>
+          {t(`${wordCount} คำ`, `${wordCount} word${wordCount === 1 ? "" : "s"}`)}
+          {!meetsMin
+            ? t(
+                ` · ต้องเขียนเพิ่มอีก ${DIALOGUE_SUMMARY_MIN_WORDS - wordCount} คำ`,
+                ` · need ${DIALOGUE_SUMMARY_MIN_WORDS - wordCount} more`,
+              )
+            : t(" · พร้อมส่งแล้ว ✓", " · ready to submit ✓")}
+        </Text>
+        <TextInput
+          style={styles.input}
+          multiline
+          placeholder={t("สรุปของคุณ…", "Your summary…")}
+          placeholderTextColor="#9CA3AF"
+          value={summary}
+          onChangeText={setSummary}
+          autoCapitalize="sentences"
+          autoCorrect
+          textAlignVertical="top"
+        />
+      </View>
 
       {error ? <Text style={styles.formError}>{error}</Text> : null}
 
@@ -281,6 +285,13 @@ export default function DialogueSummarySessionScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#fff" },
   content: { padding: 16, paddingBottom: 40 },
+  scenarioCard: { borderRadius: 14, backgroundColor: "#F1F5FF", padding: 12, marginTop: 12, marginBottom: 14 },
+  scenarioText: { fontSize: 14, lineHeight: 21, color: "#1F2937" },
+  writeCard: { borderWidth: 2, borderColor: "#111", borderRadius: 16, padding: 12, backgroundColor: "#fff", marginBottom: 12 },
+  wordTrack: { height: 6, borderRadius: 999, backgroundColor: "#E7EAF1", overflow: "hidden", marginTop: 8 },
+  wordFill: { height: "100%", borderRadius: 999, backgroundColor: "#F59E0B" },
+  wordFillDone: { backgroundColor: "#059669" },
+  wordCountDone: { color: "#047857" },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
   error: { color: "#b91c1c", fontWeight: "700", textAlign: "center" },
   grading: { marginTop: 16, fontWeight: "800", fontSize: 16 },
@@ -299,16 +310,16 @@ const styles = StyleSheet.create({
   turn: { marginTop: 10 },
   speaker: { fontWeight: "800", fontSize: 12, color: "#004AAD" },
   line: { fontSize: 14, lineHeight: 22, marginTop: 2 },
-  prompt: { marginTop: 20, fontWeight: "700", fontSize: 14 },
+  prompt: { fontWeight: "800", fontSize: 14 },
   wordCount: { marginTop: 6, fontSize: 12, color: "#6B7280", fontWeight: "700" },
   input: {
-    marginTop: 12,
-    minHeight: 160,
-    borderWidth: 2,
-    borderColor: "#111",
-    borderRadius: 12,
-    padding: 14,
+    marginTop: 10,
+    minHeight: 170,
+    borderRadius: 10,
+    backgroundColor: "#F8FAFC",
+    padding: 12,
     fontSize: 16,
+    lineHeight: 24,
   },
   formError: { marginTop: 10, color: "#b91c1c", fontWeight: "700" },
   btn: {
