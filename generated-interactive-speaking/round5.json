@@ -1,0 +1,272 @@
+[
+ {
+  "id": "is-ai-tools-in-education",
+  "titleEn": "AI tools in education",
+  "titleTh": "เครื่องมือ AI ในการศึกษา",
+  "starterQuestionEn": "Some people say AI tools make students lazy, while others say they make learning better. Where do you stand, and why?",
+  "starterQuestionTh": "บางคนบอกว่าเครื่องมือ AI ทำให้นักเรียนขี้เกียจ แต่บางคนบอกว่ามันทำให้การเรียนดีขึ้น คุณเห็นด้วยกับฝ่ายไหน และเพราะอะไร?",
+  "round": 5,
+  "thumbnail": "🤖"
+ },
+ {
+  "id": "is-machines-replacing-jobs",
+  "titleEn": "Machines replacing jobs",
+  "titleTh": "เครื่องจักรที่เข้ามาแทนงานของคน",
+  "starterQuestionEn": "As more jobs are done by machines, what should happen to the people whose jobs disappear?",
+  "starterQuestionTh": "เมื่องานหลายอย่างถูกเครื่องจักรทำแทน คนที่งานของเขาหายไปควรได้รับการดูแลอย่างไร?",
+  "round": 5,
+  "thumbnail": "🏭"
+ },
+ {
+  "id": "is-online-privacy",
+  "titleEn": "Privacy in the digital age",
+  "titleTh": "ความเป็นส่วนตัวในยุคดิจิทัล",
+  "starterQuestionEn": "How much personal information should companies be allowed to collect about their users? Explain your position.",
+  "starterQuestionTh": "บริษัทควรได้รับอนุญาตให้เก็บข้อมูลส่วนตัวของผู้ใช้ได้มากแค่ไหน? อธิบายจุดยืนของคุณ",
+  "round": 5,
+  "thumbnail": "🔒"
+ },
+ {
+  "id": "is-who-protects-environment",
+  "titleEn": "Who should protect the environment",
+  "titleTh": "ใครควรรับผิดชอบดูแลสิ่งแวดล้อม",
+  "starterQuestionEn": "Is protecting the environment mainly the job of individuals, companies, or governments? Why?",
+  "starterQuestionTh": "การปกป้องสิ่งแวดล้อมเป็นหน้าที่หลักของใคร ระหว่างประชาชน บริษัท หรือรัฐบาล? เพราะอะไร?",
+  "round": 5,
+  "thumbnail": "🌍"
+ },
+ {
+  "id": "is-keeping-traditions-alive",
+  "titleEn": "Keeping traditions alive",
+  "titleTh": "การรักษาประเพณีไว้",
+  "starterQuestionEn": "As societies modernize, should we protect old traditions, or let them change naturally?",
+  "starterQuestionTh": "เมื่อสังคมทันสมัยขึ้น เราควรปกป้องประเพณีเก่าไว้ หรือปล่อยให้มันเปลี่ยนไปตามธรรมชาติ?",
+  "round": 5,
+  "thumbnail": "🏯"
+ },
+ {
+  "id": "is-meaning-of-success",
+  "titleEn": "What success means",
+  "titleTh": "ความหมายของความสำเร็จ",
+  "starterQuestionEn": "What does it mean to be successful in life? Has your idea of success changed as you have grown older?",
+  "starterQuestionTh": "การประสบความสำเร็จในชีวิตหมายถึงอะไร? ความคิดของคุณเรื่องความสำเร็จเปลี่ยนไปไหมเมื่อคุณโตขึ้น?",
+  "round": 5,
+  "thumbnail": "🎯"
+ },
+ {
+  "id": "is-space-exploration",
+  "titleEn": "Spending on space exploration",
+  "titleTh": "การใช้งบประมาณสำรวจอวกาศ",
+  "starterQuestionEn": "Should countries spend huge amounts of money exploring space while there are still problems on Earth? Explain your view.",
+  "starterQuestionTh": "ประเทศต่างๆ ควรใช้เงินจำนวนมหาศาลสำรวจอวกาศไหม ในเมื่อบนโลกยังมีปัญหาอยู่? อธิบายความคิดเห็นของคุณ",
+  "round": 5,
+  "thumbnail": "🚀"
+ },
+ {
+  "id": "is-free-university",
+  "titleEn": "Free university education",
+  "titleTh": "การเรียนมหาวิทยาลัยฟรี",
+  "starterQuestionEn": "Should university education be free for everyone? Think about who would pay for it.",
+  "starterQuestionTh": "การเรียนมหาวิทยาลัยควรฟรีสำหรับทุกคนไหม? ลองคิดด้วยว่าใครจะเป็นคนจ่าย",
+  "round": 5,
+  "thumbnail": "🎓"
+ },
+ {
+  "id": "is-car-free-city-center",
+  "titleEn": "Car-free city centers",
+  "titleTh": "ใจกลางเมืองปลอดรถยนต์",
+  "starterQuestionEn": "If your city banned cars from the city center, who would benefit and who would lose out?",
+  "starterQuestionTh": "ถ้าเมืองของคุณห้ามรถยนต์เข้าใจกลางเมือง ใครจะได้ประโยชน์ และใครจะเสียประโยชน์?",
+  "round": 5,
+  "thumbnail": "🚲"
+ },
+ {
+  "id": "is-white-lies",
+  "titleEn": "Telling a small lie",
+  "titleTh": "การโกหกเล็กๆ น้อยๆ",
+  "starterQuestionEn": "Is it ever acceptable to tell a small lie to protect someone's feelings? Explain your thinking.",
+  "starterQuestionTh": "การโกหกเล็กๆ น้อยๆ เพื่อถนอมน้ำใจคนอื่นเป็นสิ่งที่ยอมรับได้ไหม? อธิบายความคิดของคุณ",
+  "round": 5,
+  "thumbnail": "🎭"
+ },
+ {
+  "id": "is-global-culture",
+  "titleEn": "Global culture and local identity",
+  "titleTh": "วัฒนธรรมโลกกับอัตลักษณ์ท้องถิ่น",
+  "starterQuestionEn": "Are global brands, films, and music making cultures around the world too similar? What is lost or gained?",
+  "starterQuestionTh": "แบรนด์ ภาพยนตร์ และเพลงระดับโลกกำลังทำให้วัฒนธรรมทั่วโลกคล้ายกันเกินไปไหม? เราได้หรือเสียอะไรบ้าง?",
+  "round": 5,
+  "thumbnail": "🌐"
+ },
+ {
+  "id": "is-living-longer",
+  "titleEn": "Living longer",
+  "titleTh": "การที่ผู้คนมีอายุยืนขึ้น",
+  "starterQuestionEn": "People are living longer than ever before. What changes will society need to make because of this?",
+  "starterQuestionTh": "ทุกวันนี้ผู้คนมีอายุยืนกว่าที่เคย สังคมจะต้องปรับเปลี่ยนอะไรบ้างเพราะเรื่องนี้?",
+  "round": 5,
+  "thumbnail": "⏳"
+ },
+ {
+  "id": "is-experts-or-public",
+  "titleEn": "Experts or the public",
+  "titleTh": "ให้ผู้เชี่ยวชาญหรือประชาชนตัดสินใจ",
+  "starterQuestionEn": "When a big decision affects a whole city, should experts make it, or should ordinary people vote on it?",
+  "starterQuestionTh": "เมื่อมีการตัดสินใจครั้งใหญ่ที่กระทบคนทั้งเมือง ควรให้ผู้เชี่ยวชาญตัดสินใจ หรือให้ประชาชนทั่วไปลงคะแนน?",
+  "round": 5,
+  "thumbnail": "🙋"
+ },
+ {
+  "id": "is-money-and-happiness",
+  "titleEn": "Money and happiness",
+  "titleTh": "เงินกับความสุข",
+  "starterQuestionEn": "Does having more money make people happier? At what point does it stop making a difference?",
+  "starterQuestionTh": "การมีเงินมากขึ้นทำให้คนมีความสุขขึ้นไหม? ถึงจุดไหนที่เงินไม่ได้ทำให้มีความสุขเพิ่มขึ้นอีก?",
+  "round": 5,
+  "thumbnail": "💸"
+ },
+ {
+  "id": "is-online-anonymity",
+  "titleEn": "Anonymous accounts online",
+  "titleTh": "บัญชีออนไลน์แบบไม่เปิดเผยตัวตน",
+  "starterQuestionEn": "Should people be allowed to post online without using their real names? Consider both sides.",
+  "starterQuestionTh": "ผู้คนควรได้รับอนุญาตให้โพสต์ออนไลน์โดยไม่ใช้ชื่อจริงไหม? ลองพิจารณาทั้งสองด้าน",
+  "round": 5,
+  "thumbnail": "👤"
+ },
+ {
+  "id": "is-fast-fashion",
+  "titleEn": "Cheap fashion and waste",
+  "titleTh": "แฟชั่นราคาถูกกับปัญหาขยะ",
+  "starterQuestionEn": "Cheap clothing is popular but creates a lot of waste. Should shoppers change their habits, or is it up to the companies?",
+  "starterQuestionTh": "เสื้อผ้าราคาถูกได้รับความนิยมแต่สร้างขยะจำนวนมาก ผู้ซื้อควรเปลี่ยนพฤติกรรม หรือเป็นหน้าที่ของบริษัท?",
+  "round": 5,
+  "thumbnail": "👗"
+ },
+ {
+  "id": "is-nature-in-cities",
+  "titleEn": "Nature in cities",
+  "titleTh": "ธรรมชาติในเมือง",
+  "starterQuestionEn": "If you could redesign your city, how would you balance new buildings with parks and green space?",
+  "starterQuestionTh": "ถ้าคุณออกแบบเมืองของคุณใหม่ได้ คุณจะสร้างสมดุลระหว่างอาคารใหม่กับสวนและพื้นที่สีเขียวอย่างไร?",
+  "round": 5,
+  "thumbnail": "🌇"
+ },
+ {
+  "id": "is-what-a-test-score-shows",
+  "titleEn": "What a test score can show",
+  "titleTh": "คะแนนสอบบอกอะไรได้บ้าง",
+  "starterQuestionEn": "How well can a single test score show what a person can really do? Explain your view.",
+  "starterQuestionTh": "คะแนนสอบเพียงครั้งเดียวบอกได้ดีแค่ไหนว่าคนคนหนึ่งทำอะไรได้จริง? อธิบายความคิดเห็นของคุณ",
+  "round": 5,
+  "thumbnail": "📏"
+ },
+ {
+  "id": "is-own-or-share",
+  "titleEn": "Owning things or sharing them",
+  "titleTh": "เป็นเจ้าของหรือแบ่งกันใช้",
+  "starterQuestionEn": "Is it better to own things, or to rent and share them, like cars, tools, or even homes? Why?",
+  "starterQuestionTh": "การเป็นเจ้าของสิ่งของ หรือการเช่าและแบ่งกันใช้ เช่น รถ เครื่องมือ หรือแม้แต่บ้าน แบบไหนดีกว่ากัน? เพราะอะไร?",
+  "round": 5,
+  "thumbnail": "🔁"
+ },
+ {
+  "id": "is-street-art",
+  "titleEn": "Street art",
+  "titleTh": "ศิลปะบนท้องถนน",
+  "starterQuestionEn": "Is street art something cities should protect, or is it damage to property? Explain your view.",
+  "starterQuestionTh": "ศิลปะบนท้องถนนเป็นสิ่งที่เมืองควรอนุรักษ์ หรือเป็นการทำลายทรัพย์สิน? อธิบายความคิดเห็นของคุณ",
+  "round": 5,
+  "thumbnail": "🧱"
+ },
+ {
+  "id": "is-disappearing-languages",
+  "titleEn": "Disappearing languages",
+  "titleTh": "ภาษาที่กำลังจะสูญหาย",
+  "starterQuestionEn": "Many small languages are disappearing. Does it matter if the world ends up speaking fewer languages?",
+  "starterQuestionTh": "ภาษาเล็กๆ หลายภาษากำลังสูญหายไป ถ้าโลกเหลือภาษาที่ใช้พูดกันน้อยลงจะเป็นปัญหาไหม?",
+  "round": 5,
+  "thumbnail": "📜"
+ },
+ {
+  "id": "is-taxing-unhealthy-food",
+  "titleEn": "Taxing unhealthy food",
+  "titleTh": "การเก็บภาษีอาหารที่ไม่ดีต่อสุขภาพ",
+  "starterQuestionEn": "Should governments tax sugary drinks and junk food to improve public health? Weigh up the arguments.",
+  "starterQuestionTh": "รัฐบาลควรเก็บภาษีเครื่องดื่มที่มีน้ำตาลสูงและอาหารขยะเพื่อส่งเสริมสุขภาพของประชาชนไหม? ลองชั่งน้ำหนักเหตุผลแต่ละฝ่าย",
+  "round": 5,
+  "thumbnail": "🧃"
+ },
+ {
+  "id": "is-time-or-money",
+  "titleEn": "Giving time or giving money",
+  "titleTh": "การให้เวลาหรือการให้เงิน",
+  "starterQuestionEn": "Is it more valuable to give your time to a good cause or to give money? Explain your reasoning.",
+  "starterQuestionTh": "การสละเวลาให้กับงานการกุศลหรือการบริจาคเงิน แบบไหนมีคุณค่ามากกว่ากัน? อธิบายเหตุผลของคุณ",
+  "round": 5,
+  "thumbnail": "💝"
+ },
+ {
+  "id": "is-one-new-rule",
+  "titleEn": "One new rule",
+  "titleTh": "กฎใหม่หนึ่งข้อ",
+  "starterQuestionEn": "If you could introduce one new rule in your country to improve daily life, what would it be, and why?",
+  "starterQuestionTh": "ถ้าคุณออกกฎใหม่ได้หนึ่งข้อในประเทศของคุณเพื่อให้ชีวิตประจำวันดีขึ้น จะเป็นกฎอะไร และเพราะอะไร?",
+  "round": 5,
+  "thumbnail": "📣"
+ },
+ {
+  "id": "is-purpose-of-education",
+  "titleEn": "What schools are for",
+  "titleTh": "เป้าหมายของการศึกษา",
+  "starterQuestionEn": "Should schools focus more on preparing students for jobs or on helping them grow as people?",
+  "starterQuestionTh": "โรงเรียนควรเน้นเตรียมนักเรียนให้พร้อมสำหรับการทำงาน หรือเน้นช่วยให้พวกเขาเติบโตเป็นคนที่สมบูรณ์มากกว่ากัน?",
+  "round": 5,
+  "thumbnail": "🏫"
+ },
+ {
+  "id": "is-depending-on-technology",
+  "titleEn": "Depending on technology",
+  "titleTh": "การพึ่งพาเทคโนโลยี",
+  "starterQuestionEn": "Do people today depend too much on technology? What skills might we be losing?",
+  "starterQuestionTh": "ทุกวันนี้ผู้คนพึ่งพาเทคโนโลยีมากเกินไปไหม? เราอาจกำลังสูญเสียทักษะอะไรไปบ้าง?",
+  "round": 5,
+  "thumbnail": "🔌"
+ },
+ {
+  "id": "is-talent-moving-abroad",
+  "titleEn": "Talented people moving abroad",
+  "titleTh": "คนเก่งย้ายไปเรียนหรือทำงานต่างประเทศ",
+  "starterQuestionEn": "When talented young people move abroad to study or work, is that good or bad for their home country?",
+  "starterQuestionTh": "เมื่อคนหนุ่มสาวที่มีความสามารถย้ายไปเรียนหรือทำงานต่างประเทศ เป็นผลดีหรือผลเสียต่อประเทศบ้านเกิด?",
+  "round": 5,
+  "thumbnail": "🛫"
+ },
+ {
+  "id": "is-good-leader",
+  "titleEn": "What makes a good leader",
+  "titleTh": "อะไรทำให้เป็นผู้นำที่ดี",
+  "starterQuestionEn": "What makes someone a good leader? Are people born leaders, or can leadership be learned?",
+  "starterQuestionTh": "อะไรทำให้คนคนหนึ่งเป็นผู้นำที่ดี? ภาวะผู้นำเป็นสิ่งที่ติดตัวมาแต่เกิด หรือเรียนรู้ได้?",
+  "round": 5,
+  "thumbnail": "👑"
+ },
+ {
+  "id": "is-zoos-today",
+  "titleEn": "Zoos in the modern world",
+  "titleTh": "สวนสัตว์ในโลกยุคใหม่",
+  "starterQuestionEn": "Do zoos still have a place in the modern world? Explain your view with examples.",
+  "starterQuestionTh": "สวนสัตว์ยังจำเป็นในโลกยุคปัจจุบันไหม? อธิบายความคิดเห็นของคุณพร้อมยกตัวอย่าง",
+  "round": 5,
+  "thumbnail": "🦓"
+ },
+ {
+  "id": "is-young-peoples-own-choices",
+  "titleEn": "Young people making their own choices",
+  "titleTh": "การให้คนหนุ่มสาวตัดสินใจเอง",
+  "starterQuestionEn": "At what age should young people be allowed to make big decisions for themselves, such as what to study?",
+  "starterQuestionTh": "คนหนุ่มสาวควรได้ตัดสินใจเรื่องใหญ่ๆ ด้วยตัวเองตั้งแต่อายุเท่าไร เช่น จะเรียนอะไร?",
+  "round": 5,
+  "thumbnail": "🐣"
+ }
+]

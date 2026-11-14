@@ -1,0 +1,272 @@
+[
+ {
+  "id": "is-your-neighborhood",
+  "titleEn": "The area where you live",
+  "titleTh": "ย่านที่คุณอาศัยอยู่",
+  "starterQuestionEn": "Tell me about the area where you live. What do you like most about it?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับย่านที่คุณอาศัยอยู่ คุณชอบอะไรที่นั่นมากที่สุด?",
+  "round": 2,
+  "thumbnail": "🚶"
+ },
+ {
+  "id": "is-favorite-meal",
+  "titleEn": "A meal you love",
+  "titleTh": "อาหารที่คุณชอบมาก",
+  "starterQuestionEn": "What is a meal you really enjoy? Tell me what it is and when you usually eat it.",
+  "starterQuestionTh": "อาหารที่คุณชอบกินมากคืออะไร? เล่าให้ฟังว่าเป็นอาหารอะไร และปกติคุณกินตอนไหน",
+  "round": 2,
+  "thumbnail": "🍜"
+ },
+ {
+  "id": "is-cooking-at-home",
+  "titleEn": "Cooking at home",
+  "titleTh": "การทำอาหารกินเองที่บ้าน",
+  "starterQuestionEn": "Do you ever cook at home? Tell me about something you know how to make.",
+  "starterQuestionTh": "คุณเคยทำอาหารกินเองที่บ้านไหม? เล่าให้ฟังหน่อยว่าคุณทำอาหารอะไรเป็นบ้าง",
+  "round": 2,
+  "thumbnail": "🍳"
+ },
+ {
+  "id": "is-memorable-weekend",
+  "titleEn": "A weekend you enjoyed",
+  "titleTh": "วันหยุดสุดสัปดาห์ที่คุณประทับใจ",
+  "starterQuestionEn": "Tell me about a weekend you really enjoyed recently. What did you do?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับวันหยุดสุดสัปดาห์เมื่อไม่นานมานี้ที่คุณสนุกมาก คุณทำอะไรบ้าง?",
+  "round": 2,
+  "thumbnail": "🎉"
+ },
+ {
+  "id": "is-short-trip",
+  "titleEn": "A short trip",
+  "titleTh": "การไปเที่ยวระยะสั้น",
+  "starterQuestionEn": "Tell me about a place you visited recently, even somewhere close to home. What did you do there?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับสถานที่ที่คุณไปมาเมื่อไม่นานนี้ แม้จะเป็นที่ใกล้บ้านก็ได้ คุณไปทำอะไรที่นั่น?",
+  "round": 2,
+  "thumbnail": "📍"
+ },
+ {
+  "id": "is-special-celebration",
+  "titleEn": "A special day you celebrate",
+  "titleTh": "วันพิเศษที่คุณเฉลิมฉลอง",
+  "starterQuestionEn": "Tell me about a special day you celebrate with family or friends. What do you usually do?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับวันพิเศษที่คุณฉลองกับครอบครัวหรือเพื่อน ปกติพวกคุณทำอะไรกันบ้าง?",
+  "round": 2,
+  "thumbnail": "🎊"
+ },
+ {
+  "id": "is-favorite-weather",
+  "titleEn": "Your favorite kind of weather",
+  "titleTh": "อากาศแบบที่คุณชอบ",
+  "starterQuestionEn": "What kind of weather do you like best? What do you like to do on days like that?",
+  "starterQuestionTh": "คุณชอบอากาศแบบไหนมากที่สุด? ในวันที่อากาศแบบนั้นคุณชอบทำอะไร?",
+  "round": 2,
+  "thumbnail": "🌈"
+ },
+ {
+  "id": "is-getting-around-town",
+  "titleEn": "Getting around your town",
+  "titleTh": "การเดินทางในเมืองของคุณ",
+  "starterQuestionEn": "How do you usually get around your town or city? Tell me about a normal journey.",
+  "starterQuestionTh": "ปกติคุณเดินทางไปไหนมาไหนในเมืองอย่างไร? เล่าให้ฟังหน่อยว่าการเดินทางตามปกติของคุณเป็นอย่างไร",
+  "round": 2,
+  "thumbnail": "🚌"
+ },
+ {
+  "id": "is-everyday-shopping",
+  "titleEn": "Shopping for everyday things",
+  "titleTh": "การซื้อของใช้ในชีวิตประจำวัน",
+  "starterQuestionEn": "Where do you usually buy everyday things like food or clothes? Why do you shop there?",
+  "starterQuestionTh": "ปกติคุณซื้อของใช้ประจำวัน เช่น อาหารหรือเสื้อผ้า ที่ไหน? ทำไมถึงเลือกซื้อที่นั่น?",
+  "round": 2,
+  "thumbnail": "🛒"
+ },
+ {
+  "id": "is-memorable-gift",
+  "titleEn": "A gift you remember",
+  "titleTh": "ของขวัญที่คุณยังจำได้",
+  "starterQuestionEn": "Tell me about a gift you gave or received that you still remember. Why was it special?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับของขวัญที่คุณเคยให้หรือเคยได้รับแล้วยังจำได้ ทำไมมันถึงพิเศษ?",
+  "round": 2,
+  "thumbnail": "🎁"
+ },
+ {
+  "id": "is-animal-you-like",
+  "titleEn": "An animal you like",
+  "titleTh": "สัตว์ที่คุณชอบ",
+  "starterQuestionEn": "Do you have a pet, or is there an animal you really like? Tell me about it.",
+  "starterQuestionTh": "คุณเลี้ยงสัตว์ไหม หรือมีสัตว์ที่คุณชอบเป็นพิเศษไหม? เล่าให้ฟังหน่อย",
+  "round": 2,
+  "thumbnail": "🐾"
+ },
+ {
+  "id": "is-music-you-enjoy",
+  "titleEn": "Music you enjoy",
+  "titleTh": "เพลงที่คุณชอบฟัง",
+  "starterQuestionEn": "What kind of music do you enjoy, and when do you usually listen to it?",
+  "starterQuestionTh": "คุณชอบฟังเพลงแนวไหน และปกติคุณฟังเพลงตอนไหน?",
+  "round": 2,
+  "thumbnail": "🎧"
+ },
+ {
+  "id": "is-film-or-series",
+  "titleEn": "A movie or series you enjoyed",
+  "titleTh": "ภาพยนตร์หรือซีรีส์ที่คุณชอบ",
+  "starterQuestionEn": "Tell me about a movie or TV series you enjoyed recently. What was it about?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับภาพยนตร์หรือซีรีส์ที่คุณดูแล้วชอบเมื่อไม่นานนี้ เรื่องเกี่ยวกับอะไร?",
+  "round": 2,
+  "thumbnail": "🎬"
+ },
+ {
+  "id": "is-staying-active",
+  "titleEn": "Staying active",
+  "titleTh": "การออกกำลังกายในชีวิตประจำวัน",
+  "starterQuestionEn": "What do you do to stay active? Tell me about a sport or exercise you do or would like to try.",
+  "starterQuestionTh": "คุณทำอะไรเพื่อให้ร่างกายได้เคลื่อนไหว? เล่าให้ฟังเกี่ยวกับกีฬาหรือการออกกำลังกายที่คุณทำอยู่ หรืออยากลองทำ",
+  "round": 2,
+  "thumbnail": "🏃"
+ },
+ {
+  "id": "is-childhood-game",
+  "titleEn": "A game from your childhood",
+  "titleTh": "เกมที่คุณเล่นตอนเด็ก",
+  "starterQuestionEn": "What game did you enjoy playing when you were a child? How did you play it?",
+  "starterQuestionTh": "ตอนเด็กคุณชอบเล่นเกมอะไร? เกมนั้นเล่นอย่างไร?",
+  "round": 2,
+  "thumbnail": "🎲"
+ },
+ {
+  "id": "is-favorite-cafe",
+  "titleEn": "A café or restaurant you like",
+  "titleTh": "ร้านกาแฟหรือร้านอาหารที่คุณชอบ",
+  "starterQuestionEn": "Is there a café or restaurant you like to go to? Describe it and tell me why you like it.",
+  "starterQuestionTh": "มีร้านกาแฟหรือร้านอาหารที่คุณชอบไปไหม? ช่วยบรรยายร้านนั้น และบอกว่าทำไมคุณถึงชอบ",
+  "round": 2,
+  "thumbnail": "☕"
+ },
+ {
+  "id": "is-favorite-room",
+  "titleEn": "Your favorite room at home",
+  "titleTh": "ห้องโปรดในบ้านของคุณ",
+  "starterQuestionEn": "Describe your favorite room or corner at home. What do you usually do there?",
+  "starterQuestionTh": "ช่วยบรรยายห้องหรือมุมโปรดในบ้านของคุณ ปกติคุณทำอะไรที่นั่น?",
+  "round": 2,
+  "thumbnail": "🏡"
+ },
+ {
+  "id": "is-long-time-hobby",
+  "titleEn": "A hobby you have had for years",
+  "titleTh": "งานอดิเรกที่คุณทำมานาน",
+  "starterQuestionEn": "Tell me about a hobby you have enjoyed for a long time. How did you get started?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับงานอดิเรกที่คุณชอบทำมานาน คุณเริ่มต้นทำได้อย่างไร?",
+  "round": 2,
+  "thumbnail": "🎨"
+ },
+ {
+  "id": "is-taking-photos",
+  "titleEn": "Taking photos",
+  "titleTh": "การถ่ายรูป",
+  "starterQuestionEn": "Do you like taking photos? Tell me about a photo you took that you really like.",
+  "starterQuestionTh": "คุณชอบถ่ายรูปไหม? เล่าให้ฟังเกี่ยวกับรูปที่คุณถ่ายเองแล้วชอบมาก",
+  "round": 2,
+  "thumbnail": "📷"
+ },
+ {
+  "id": "is-helping-someone",
+  "titleEn": "A time you helped someone",
+  "titleTh": "ครั้งที่คุณได้ช่วยเหลือใครสักคน",
+  "starterQuestionEn": "Tell me about a time you helped someone. What did you do, and how did they feel?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับครั้งที่คุณได้ช่วยเหลือใครสักคน คุณทำอะไร และเขารู้สึกอย่างไร?",
+  "round": 2,
+  "thumbnail": "🙌"
+ },
+ {
+  "id": "is-local-park",
+  "titleEn": "A park or green space",
+  "titleTh": "สวนสาธารณะหรือพื้นที่สีเขียว",
+  "starterQuestionEn": "Is there a park or green space near where you live? What do people do there?",
+  "starterQuestionTh": "ใกล้ที่คุณอยู่มีสวนสาธารณะหรือพื้นที่สีเขียวไหม? ผู้คนไปทำอะไรกันที่นั่น?",
+  "round": 2,
+  "thumbnail": "🌳"
+ },
+ {
+  "id": "is-festival-you-enjoy",
+  "titleEn": "A festival or public event",
+  "titleTh": "เทศกาลหรืองานที่คุณชอบไป",
+  "starterQuestionEn": "Tell me about a festival or public event you enjoy. What happens there?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับเทศกาลหรืองานที่คุณชอบไป ในงานมีอะไรบ้าง?",
+  "round": 2,
+  "thumbnail": "🏮"
+ },
+ {
+  "id": "is-book-or-story",
+  "titleEn": "A book or story you enjoyed",
+  "titleTh": "หนังสือหรือเรื่องราวที่คุณชอบ",
+  "starterQuestionEn": "Tell me about a book, comic, or story you enjoyed. What did you like about it?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับหนังสือ การ์ตูน หรือเรื่องราวที่คุณชอบ คุณชอบอะไรในเรื่องนั้น?",
+  "round": 2,
+  "thumbnail": "📚"
+ },
+ {
+  "id": "is-plans-changed",
+  "titleEn": "A day when plans changed",
+  "titleTh": "วันที่แผนเปลี่ยนกะทันหัน",
+  "starterQuestionEn": "Tell me about a day when your plans suddenly changed. What happened?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับวันที่แผนของคุณเปลี่ยนกะทันหัน เกิดอะไรขึ้น?",
+  "round": 2,
+  "thumbnail": "☔"
+ },
+ {
+  "id": "is-learned-as-a-child",
+  "titleEn": "Something you learned as a child",
+  "titleTh": "สิ่งที่คุณหัดทำตอนเด็ก",
+  "starterQuestionEn": "Tell me about something you learned to do as a child, like swimming or riding a bike. Who taught you?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับสิ่งที่คุณหัดทำตอนเด็ก เช่น ว่ายน้ำหรือขี่จักรยาน ใครเป็นคนสอนคุณ?",
+  "round": 2,
+  "thumbnail": "🏊"
+ },
+ {
+  "id": "is-comfortable-clothes",
+  "titleEn": "Clothes you like to wear",
+  "titleTh": "เสื้อผ้าที่คุณชอบใส่",
+  "starterQuestionEn": "What kind of clothes do you feel most comfortable in? When do you usually wear them?",
+  "starterQuestionTh": "คุณรู้สึกสบายที่สุดเวลาใส่เสื้อผ้าแบบไหน? ปกติคุณใส่ตอนไหน?",
+  "round": 2,
+  "thumbnail": "👕"
+ },
+ {
+  "id": "is-keeping-in-touch",
+  "titleEn": "Keeping in touch",
+  "titleTh": "การติดต่อกับคนที่อยู่ไกล",
+  "starterQuestionEn": "How do you keep in touch with friends or family who live far away from you?",
+  "starterQuestionTh": "คุณติดต่อกับเพื่อนหรือครอบครัวที่อยู่ไกลจากคุณอย่างไร?",
+  "round": 2,
+  "thumbnail": "💬"
+ },
+ {
+  "id": "is-feeling-proud",
+  "titleEn": "Something you are proud of",
+  "titleTh": "สิ่งที่คุณภูมิใจ",
+  "starterQuestionEn": "Tell me about something you did recently that made you feel proud. What happened?",
+  "starterQuestionTh": "เล่าให้ฟังหน่อยเกี่ยวกับสิ่งที่คุณทำเมื่อไม่นานนี้แล้วรู้สึกภูมิใจ เกิดอะไรขึ้น?",
+  "round": 2,
+  "thumbnail": "🏅"
+ },
+ {
+  "id": "is-household-chores",
+  "titleEn": "Jobs around the house",
+  "titleTh": "งานบ้าน",
+  "starterQuestionEn": "Which household job do you do most often, like cleaning or washing the dishes? How do you feel about it?",
+  "starterQuestionTh": "งานบ้านอะไรที่คุณทำบ่อยที่สุด เช่น ทำความสะอาดหรือล้างจาน? คุณรู้สึกอย่างไรกับงานนั้น?",
+  "round": 2,
+  "thumbnail": "🧹"
+ },
+ {
+  "id": "is-dream-destination",
+  "titleEn": "A place you would love to visit",
+  "titleTh": "สถานที่ที่คุณอยากไปสักครั้ง",
+  "starterQuestionEn": "Is there a place you would really like to visit one day? Tell me about it and why you want to go.",
+  "starterQuestionTh": "มีสถานที่ไหนที่คุณอยากไปสักครั้งไหม? เล่าให้ฟังหน่อยว่าเป็นที่ไหน และทำไมคุณถึงอยากไป",
+  "round": 2,
+  "thumbnail": "🗼"
+ }
+]

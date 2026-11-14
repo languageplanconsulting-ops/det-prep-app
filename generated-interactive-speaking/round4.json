@@ -1,0 +1,272 @@
+[
+ {
+  "id": "is-city-or-countryside",
+  "titleEn": "City life or country life",
+  "titleTh": "ชีวิตในเมืองหรือชีวิตในชนบท",
+  "starterQuestionEn": "Would you rather live in a big city or in the countryside? Explain your reasons.",
+  "starterQuestionTh": "คุณอยากอยู่ในเมืองใหญ่หรือในชนบทมากกว่ากัน? อธิบายเหตุผลของคุณ",
+  "round": 4,
+  "thumbnail": "🌆"
+ },
+ {
+  "id": "is-trusting-online-reviews",
+  "titleEn": "Trusting online reviews",
+  "titleTh": "ความน่าเชื่อถือของรีวิวออนไลน์",
+  "starterQuestionEn": "When you choose a restaurant or a product, how much do you trust online reviews? Why?",
+  "starterQuestionTh": "เวลาเลือกร้านอาหารหรือสินค้า คุณเชื่อรีวิวออนไลน์มากแค่ไหน? เพราะอะไร?",
+  "round": 4,
+  "thumbnail": "🔍"
+ },
+ {
+  "id": "is-school-uniforms",
+  "titleEn": "School uniforms",
+  "titleTh": "เครื่องแบบนักเรียน",
+  "starterQuestionEn": "Do you think students should have to wear uniforms at school? Give your reasons.",
+  "starterQuestionTh": "คุณคิดว่านักเรียนควรต้องใส่เครื่องแบบไปโรงเรียนไหม? ให้เหตุผลประกอบ",
+  "round": 4,
+  "thumbnail": "👔"
+ },
+ {
+  "id": "is-home-or-office",
+  "titleEn": "Working from home or at the office",
+  "titleTh": "ทำงานที่บ้านหรือที่ออฟฟิศ",
+  "starterQuestionEn": "Do you think people do better work at home or in an office? Explain your view.",
+  "starterQuestionTh": "คุณคิดว่าคนเราทำงานได้ดีกว่าเมื่ออยู่บ้านหรืออยู่ที่ออฟฟิศ? อธิบายความคิดเห็นของคุณ",
+  "round": 4,
+  "thumbnail": "💼"
+ },
+ {
+  "id": "is-transport-spending",
+  "titleEn": "Public transportation or roads",
+  "titleTh": "ขนส่งสาธารณะหรือถนนสำหรับรถยนต์",
+  "starterQuestionEn": "Should cities spend more money on public transportation or on roads for cars? What do you think?",
+  "starterQuestionTh": "เมืองควรใช้เงินกับระบบขนส่งสาธารณะหรือกับถนนสำหรับรถยนต์มากกว่ากัน? คุณคิดอย่างไร?",
+  "round": 4,
+  "thumbnail": "🚇"
+ },
+ {
+  "id": "is-tourism-effects",
+  "titleEn": "The effects of tourism",
+  "titleTh": "ผลกระทบของการท่องเที่ยว",
+  "starterQuestionEn": "Do you think tourism does more good or more harm to popular places? Why?",
+  "starterQuestionTh": "คุณคิดว่าการท่องเที่ยวส่งผลดีหรือผลเสียต่อสถานที่ยอดนิยมมากกว่ากัน? เพราะอะไร?",
+  "round": 4,
+  "thumbnail": "📸"
+ },
+ {
+  "id": "is-cash-or-digital",
+  "titleEn": "Cash or digital payment",
+  "titleTh": "เงินสดหรือการจ่ายเงินแบบดิจิทัล",
+  "starterQuestionEn": "Is it better to pay with cash or with your phone? Compare the advantages of each.",
+  "starterQuestionTh": "จ่ายด้วยเงินสดหรือจ่ายผ่านโทรศัพท์ดีกว่ากัน? ลองเปรียบเทียบข้อดีของแต่ละแบบ",
+  "round": 4,
+  "thumbnail": "💳"
+ },
+ {
+  "id": "is-close-friends-or-many",
+  "titleEn": "A few close friends or many friends",
+  "titleTh": "เพื่อนสนิทไม่กี่คนหรือเพื่อนเยอะ",
+  "starterQuestionEn": "Is it better to have a few close friends or a large group of friends? Explain your view.",
+  "starterQuestionTh": "มีเพื่อนสนิทไม่กี่คน หรือมีเพื่อนกลุ่มใหญ่ ดีกว่ากัน? อธิบายความคิดเห็นของคุณ",
+  "round": 4,
+  "thumbnail": "👫"
+ },
+ {
+  "id": "is-rewarding-good-grades",
+  "titleEn": "Rewards for good grades",
+  "titleTh": "การให้รางวัลเมื่อได้เกรดดี",
+  "starterQuestionEn": "Should parents reward children with money or gifts for good grades? Explain your opinion.",
+  "starterQuestionTh": "พ่อแม่ควรให้เงินหรือของขวัญเป็นรางวัลเมื่อลูกได้เกรดดีไหม? อธิบายความคิดเห็นของคุณ",
+  "round": 4,
+  "thumbnail": "🍭"
+ },
+ {
+  "id": "is-celebrity-role-models",
+  "titleEn": "Famous people as role models",
+  "titleTh": "คนดังในฐานะแบบอย่าง",
+  "starterQuestionEn": "Do you think famous people have a responsibility to be good role models? Explain.",
+  "starterQuestionTh": "คุณคิดว่าคนดังมีหน้าที่ต้องเป็นแบบอย่างที่ดีไหม? อธิบาย",
+  "round": 4,
+  "thumbnail": "🌟"
+ },
+ {
+  "id": "is-gap-year",
+  "titleEn": "Taking a year off",
+  "titleTh": "การพักหนึ่งปีก่อนเรียนต่อหรือทำงาน",
+  "starterQuestionEn": "Is it a good idea for young people to take a year off before starting university or work? Why?",
+  "starterQuestionTh": "การที่คนหนุ่มสาวพักหนึ่งปีก่อนเข้ามหาวิทยาลัยหรือเริ่มทำงานเป็นความคิดที่ดีไหม? เพราะอะไร?",
+  "round": 4,
+  "thumbnail": "🎒"
+ },
+ {
+  "id": "is-phones-in-class",
+  "titleEn": "Phones in the classroom",
+  "titleTh": "โทรศัพท์มือถือในห้องเรียน",
+  "starterQuestionEn": "Should phones be banned in classrooms? Give reasons for your opinion.",
+  "starterQuestionTh": "ควรห้ามใช้โทรศัพท์ในห้องเรียนไหม? ให้เหตุผลประกอบความคิดเห็นของคุณ",
+  "round": 4,
+  "thumbnail": "📵"
+ },
+ {
+  "id": "is-young-people-today",
+  "titleEn": "Young people then and now",
+  "titleTh": "คนรุ่นใหม่กับคนรุ่นก่อน",
+  "starterQuestionEn": "In what ways is life easier or harder for young people today than it was for their parents?",
+  "starterQuestionTh": "ชีวิตของคนหนุ่มสาวในปัจจุบันง่ายขึ้นหรือยากขึ้นกว่าสมัยของพ่อแม่พวกเขาในด้านใดบ้าง?",
+  "round": 4,
+  "thumbnail": "👪"
+ },
+ {
+  "id": "is-studying-history",
+  "titleEn": "Why study history",
+  "titleTh": "ทำไมต้องเรียนประวัติศาสตร์",
+  "starterQuestionEn": "Do you think it is important for students to study history? Why or why not?",
+  "starterQuestionTh": "คุณคิดว่าการเรียนประวัติศาสตร์สำคัญสำหรับนักเรียนไหม? ทำไมจึงคิดเช่นนั้น?",
+  "round": 4,
+  "thumbnail": "🏺"
+ },
+ {
+  "id": "is-power-of-advertising",
+  "titleEn": "The power of advertising",
+  "titleTh": "อิทธิพลของโฆษณา",
+  "starterQuestionEn": "Does advertising help people make good choices, or does it make them buy things they don't need?",
+  "starterQuestionTh": "โฆษณาช่วยให้คนตัดสินใจได้ดีขึ้น หรือทำให้คนซื้อของที่ไม่จำเป็น?",
+  "round": 4,
+  "thumbnail": "📺"
+ },
+ {
+  "id": "is-cutting-plastic",
+  "titleEn": "Cutting down on plastic",
+  "titleTh": "การลดใช้พลาสติก",
+  "starterQuestionEn": "Should shops stop giving out plastic bags and straws? What are the good and bad sides?",
+  "starterQuestionTh": "ร้านค้าควรเลิกแจกถุงพลาสติกและหลอดไหม? มีข้อดีและข้อเสียอย่างไร?",
+  "round": 4,
+  "thumbnail": "🥤"
+ },
+ {
+  "id": "is-four-day-week",
+  "titleEn": "A four-day week",
+  "titleTh": "การทำงานหรือเรียนสัปดาห์ละสี่วัน",
+  "starterQuestionEn": "Would a four-day week be better for students and workers? What problems might it cause?",
+  "starterQuestionTh": "การทำงานหรือเรียนแค่สัปดาห์ละสี่วันจะดีกว่าสำหรับนักเรียนและคนทำงานไหม? อาจมีปัญหาอะไรตามมา?",
+  "round": 4,
+  "thumbnail": "📆"
+ },
+ {
+  "id": "is-paper-or-screen",
+  "titleEn": "Reading on paper or on a screen",
+  "titleTh": "อ่านบนกระดาษหรือบนหน้าจอ",
+  "starterQuestionEn": "Is reading on paper better than reading on a screen? Compare the two.",
+  "starterQuestionTh": "การอ่านบนกระดาษดีกว่าการอ่านบนหน้าจอไหม? ลองเปรียบเทียบทั้งสองแบบ",
+  "round": 4,
+  "thumbnail": "📖"
+ },
+ {
+  "id": "is-exams-or-projects",
+  "titleEn": "Exams or projects",
+  "titleTh": "การสอบหรือการทำโปรเจกต์",
+  "starterQuestionEn": "Which is a fairer way to judge students, exams or projects? Explain your choice.",
+  "starterQuestionTh": "ระหว่างการสอบกับการทำโปรเจกต์ แบบไหนวัดผลนักเรียนได้ยุติธรรมกว่า? อธิบายเหตุผลที่คุณเลือก",
+  "round": 4,
+  "thumbnail": "📊"
+ },
+ {
+  "id": "is-sports-at-school",
+  "titleEn": "Sports at school",
+  "titleTh": "กีฬาในโรงเรียน",
+  "starterQuestionEn": "Should schools give students more time for sports and physical activity? Why?",
+  "starterQuestionTh": "โรงเรียนควรให้เวลานักเรียนเล่นกีฬาและออกกำลังกายมากขึ้นไหม? เพราะอะไร?",
+  "round": 4,
+  "thumbnail": "⚽"
+ },
+ {
+  "id": "is-living-with-parents",
+  "titleEn": "Living with parents as an adult",
+  "titleTh": "การอยู่กับพ่อแม่เมื่อเป็นผู้ใหญ่",
+  "starterQuestionEn": "Is it better for young adults to live with their parents or on their own? Why?",
+  "starterQuestionTh": "สำหรับคนหนุ่มสาว การอยู่กับพ่อแม่หรือแยกไปอยู่เองดีกว่ากัน? เพราะอะไร?",
+  "round": 4,
+  "thumbnail": "🚪"
+ },
+ {
+  "id": "is-small-shops-or-supermarkets",
+  "titleEn": "Small shops or big supermarkets",
+  "titleTh": "ร้านค้าเล็กๆ หรือซูเปอร์มาร์เก็ตใหญ่",
+  "starterQuestionEn": "Is it better for a town to have many small shops or a few big supermarkets? Explain.",
+  "starterQuestionTh": "เมืองหนึ่งควรมีร้านค้าเล็กๆ หลายร้าน หรือมีซูเปอร์มาร์เก็ตใหญ่ไม่กี่แห่งดีกว่ากัน? อธิบาย",
+  "round": 4,
+  "thumbnail": "🏪"
+ },
+ {
+  "id": "is-travel-alone-or-together",
+  "titleEn": "Traveling alone or with others",
+  "titleTh": "เที่ยวคนเดียวหรือเที่ยวกับคนอื่น",
+  "starterQuestionEn": "Is it better to travel alone or with other people? Give reasons for your answer.",
+  "starterQuestionTh": "เที่ยวคนเดียวหรือเที่ยวกับคนอื่นดีกว่ากัน? ให้เหตุผลประกอบคำตอบของคุณ",
+  "round": 4,
+  "thumbnail": "🚆"
+ },
+ {
+  "id": "is-where-news-comes-from",
+  "titleEn": "Where people get their news",
+  "titleTh": "แหล่งข่าวของผู้คน",
+  "starterQuestionEn": "Where do most people you know get their news, and how reliable do you think those sources are?",
+  "starterQuestionTh": "คนส่วนใหญ่ที่คุณรู้จักรับข่าวสารจากที่ไหน และคุณคิดว่าแหล่งข่าวเหล่านั้นน่าเชื่อถือแค่ไหน?",
+  "round": 4,
+  "thumbnail": "📰"
+ },
+ {
+  "id": "is-children-screen-time",
+  "titleEn": "Children and screen time",
+  "titleTh": "เด็กกับการใช้หน้าจอ",
+  "starterQuestionEn": "Should parents limit how much time children spend on screens? Explain your opinion.",
+  "starterQuestionTh": "พ่อแม่ควรจำกัดเวลาที่ลูกใช้หน้าจอไหม? อธิบายความคิดเห็นของคุณ",
+  "round": 4,
+  "thumbnail": "🧒"
+ },
+ {
+  "id": "is-early-language-learning",
+  "titleEn": "Learning a second language young",
+  "titleTh": "การเรียนภาษาที่สองตั้งแต่เด็ก",
+  "starterQuestionEn": "Should children start learning a second language when they are very young? Why or why not?",
+  "starterQuestionTh": "เด็กควรเริ่มเรียนภาษาที่สองตั้งแต่อายุยังน้อยไหม? ทำไมจึงคิดเช่นนั้น?",
+  "round": 4,
+  "thumbnail": "🔤"
+ },
+ {
+  "id": "is-free-museums",
+  "titleEn": "Free entry to museums",
+  "titleTh": "การเข้าพิพิธภัณฑ์ฟรี",
+  "starterQuestionEn": "Should museums and other public attractions be free for everyone? What do you think?",
+  "starterQuestionTh": "พิพิธภัณฑ์และสถานที่ท่องเที่ยวสาธารณะควรให้ทุกคนเข้าฟรีไหม? คุณคิดอย่างไร?",
+  "round": 4,
+  "thumbnail": "🎫"
+ },
+ {
+  "id": "is-repair-or-replace",
+  "titleEn": "Repair it or buy a new one",
+  "titleTh": "ซ่อมของเก่าหรือซื้อของใหม่",
+  "starterQuestionEn": "When something breaks, is it better to repair it or buy a new one? Explain your view.",
+  "starterQuestionTh": "เมื่อของเสีย ซ่อมหรือซื้อใหม่ดีกว่ากัน? อธิบายความคิดเห็นของคุณ",
+  "round": 4,
+  "thumbnail": "🔧"
+ },
+ {
+  "id": "is-competition-between-students",
+  "titleEn": "Competition between students",
+  "titleTh": "การแข่งขันกันระหว่างนักเรียน",
+  "starterQuestionEn": "Is competition between students helpful or harmful? Explain with an example.",
+  "starterQuestionTh": "การแข่งขันกันระหว่างนักเรียนมีประโยชน์หรือเป็นโทษ? อธิบายพร้อมยกตัวอย่าง",
+  "round": 4,
+  "thumbnail": "🏆"
+ },
+ {
+  "id": "is-online-fame",
+  "titleEn": "Becoming famous online",
+  "titleTh": "การเป็นคนดังในโลกออนไลน์",
+  "starterQuestionEn": "Many young people dream of becoming famous online. Do you think that is a good goal for them, and why?",
+  "starterQuestionTh": "คนหนุ่มสาวหลายคนใฝ่ฝันอยากเป็นคนดังในโลกออนไลน์ คุณคิดว่านั่นเป็นเป้าหมายที่ดีสำหรับพวกเขาไหม และเพราะอะไร?",
+  "round": 4,
+  "thumbnail": "🎥"
+ }
+]
