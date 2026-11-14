@@ -1,5 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
 import {
   ScrollView,
   StyleSheet,
@@ -52,6 +53,10 @@ export default function FitbSessionScreen() {
   const [inputs, setInputs] = useState<string[]>([]);
   const [clueUsed, setClueUsed] = useState<boolean[]>([]);
   const [clueVisible, setClueVisible] = useState<boolean[]>([]);
+  /** Blank receiving keystrokes, and the blank whose hint card is floating (or null). */
+  const [activeBlank, setActiveBlank] = useState<number | null>(null);
+  const [hintBlank, setHintBlank] = useState<number | null>(null);
+  const keyInput = useRef<React.ComponentRef<typeof TextInput>>(null);
   const [grades, setGrades] = useState<FitbBlankGrade[]>([]);
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [detScore, setDetScore] = useState(0);
@@ -112,6 +117,7 @@ export default function FitbSessionScreen() {
   }, [fitbSet, inputs, n]);
 
   const toggleClue = (i: number) => {
+    setHintBlank((h) => (h === i ? null : i));
     setClueVisible((v) => {
       const nv = [...v];
       nv[i] = !nv[i];
@@ -123,6 +129,31 @@ export default function FitbSessionScreen() {
       nu[i] = true;
       return nu;
     });
+  };
+
+  const focusBlank = (i: number) => {
+    setActiveBlank(i);
+    // focus after the state flush so the hidden input carries this blank's value
+    setTimeout(() => keyInput.current?.focus(), 0);
+  };
+
+  const typeInto = (text: string) => {
+    if (activeBlank == null || !fitbSet) return;
+    const mw = fitbSet.missingWords[activeBlank]!;
+    const rem = fitbRemainderLength(mw);
+    const next = text.replace(/[^A-Za-z'-]/g, "").slice(0, rem);
+    setInputs((prev) => {
+      const cp = [...prev];
+      cp[activeBlank] = next;
+      return cp;
+    });
+    // word complete → move on to the next blank that still has empty slots
+    if (next.length === rem) {
+      const after = fitbSet.missingWords.findIndex(
+        (w, j) => j > activeBlank && (inputs[j] ?? "").length < fitbRemainderLength(w),
+      );
+      if (after >= 0) setActiveBlank(after);
+    }
   };
 
   const submit = async () => {
@@ -213,10 +244,27 @@ export default function FitbSessionScreen() {
 
   let blankCursor = 0;
 
+  const hintWord = hintBlank != null ? fitbSet.missingWords[hintBlank] : null;
+
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <View style={styles.screen}>
+    {/* one hidden input takes the keystrokes for whichever blank is active */}
+    <TextInput
+      ref={keyInput}
+      style={styles.keyInput}
+      value={activeBlank != null ? (inputs[activeBlank] ?? "") : ""}
+      onChangeText={typeInto}
+      autoCapitalize="none"
+      autoCorrect={false}
+      spellCheck={false}
+      onBlur={() => setActiveBlank(null)}
+    />
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <Text style={styles.meta}>
         {setLine(t, roundNum, difficulty, setNumber)}
+      </Text>
+      <Text style={styles.tip}>
+        {t("แตะที่คำเพื่อพิมพ์ตัวอักษรที่หายไป · 💡 = คำใบ้", "Tap a word to type the missing letters · 💡 = hint")}
       </Text>
 
       <View style={styles.passage}>
@@ -230,30 +278,40 @@ export default function FitbSessionScreen() {
             if (!mw) return <Text key={idx}>[?]</Text>;
             const prefix = fitbExpectedPrefix(mw);
             const rem = fitbRemainderLength(mw);
+            const typed = inputs[bi] ?? "";
+            const active = activeBlank === bi;
+            const slots = Array.from({ length: rem }, (_, k) => typed[k] ?? "_");
             return (
               <Text key={idx}>
-                <Text style={styles.prefix}>{prefix}</Text>
-                <TextInput
-                  style={styles.blankInput}
-                  value={inputs[bi] ?? ""}
-                  onChangeText={(t) => {
-                    const next = t.slice(0, rem);
-                    setInputs((prev) => {
-                      const cp = [...prev];
-                      cp[bi] = next;
-                      return cp;
-                    });
-                  }}
-                  maxLength={rem}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-                <LuxuryPressable onPress={() => toggleClue(bi)} style={styles.clueBtn}>
-                  <Text style={styles.clueBtnText}>{clueVisible[bi] ? t("ซ่อน", "Hide") : t("คำใบ้", "Clue")}</Text>
-                </LuxuryPressable>
-                {clueVisible[bi] ? (
-                  <Text style={styles.clueText}> {mw.clue}</Text>
-                ) : null}
+                <Text
+                  onPress={() => focusBlank(bi)}
+                  style={[styles.word, active && styles.wordActive]}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(`ช่องที่ ${bi + 1}`, `Blank ${bi + 1}`)}
+                >
+                  <Text style={styles.prefix}>{prefix}</Text>
+                  {slots.map((ch, k) => (
+                    <Text
+                      key={k}
+                      style={[
+                        styles.slot,
+                        ch !== "_" && styles.slotFilled,
+                        active && k === typed.length && styles.slotCursor,
+                      ]}
+                    >
+                      {ch}
+                      {k < rem - 1 ? "\u2009" : ""}
+                    </Text>
+                  ))}
+                </Text>
+                <Text
+                  onPress={() => toggleClue(bi)}
+                  style={[styles.clueIcon, hintBlank === bi && styles.clueIconOn]}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(`คำใบ้ช่องที่ ${bi + 1}`, `Hint for blank ${bi + 1}`)}
+                >
+                  {" 💡 "}
+                </Text>
               </Text>
             );
           })}
@@ -268,6 +326,26 @@ export default function FitbSessionScreen() {
         <Text style={styles.btnText}>{t("ตรวจคำตอบ", "Check answer")}</Text>
       </LuxuryPressable>
     </ScrollView>
+
+    {/* floating, see-through hint card: overlays the passage instead of pushing text around */}
+    {hintWord ? (
+      <Animated.View
+        key={hintBlank}
+        entering={FadeInDown.duration(240)}
+        exiting={FadeOutUp.duration(180)}
+        style={styles.hintCard}
+        pointerEvents="box-none"
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={styles.hintLabel}>{t(`💡 คำใบ้ช่องที่ ${hintBlank! + 1}`, `💡 Hint · blank ${hintBlank! + 1}`)}</Text>
+          <Text style={styles.hintText}>{hintWord.clue}</Text>
+        </View>
+        <LuxuryPressable style={styles.hintClose} sound="tap" onPress={() => setHintBlank(null)}>
+          <Text style={styles.hintCloseText}>✕</Text>
+        </LuxuryPressable>
+      </Animated.View>
+    ) : null}
+    </View>
   );
 }
 
@@ -285,7 +363,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
   },
   passageText: { fontSize: 16, lineHeight: 26 },
+  tip: { fontSize: 12, color: "#6B7280", marginBottom: 10 },
   prefix: { fontWeight: "800", color: "#004AAD" },
+  word: { borderRadius: 6 },
+  wordActive: { backgroundColor: "#FFF3B0" },
+  slot: { fontWeight: "800", color: "#94A3B8", fontFamily: "Menlo" },
+  slotFilled: { color: "#111" },
+  slotCursor: { color: "#004AAD", textDecorationLine: "underline" },
+  clueIcon: { fontSize: 13, opacity: 0.55 },
+  clueIconOn: { opacity: 1 },
+  keyInput: { position: "absolute", top: 0, left: 0, width: 1, height: 1, opacity: 0 },
+  hintCard: {
+    position: "absolute",
+    top: 10,
+    left: 12,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: 14,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderWidth: 1,
+    borderColor: "rgba(0,74,173,0.25)",
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+  hintLabel: { fontSize: 12, fontWeight: "900", color: "#004AAD", marginBottom: 4 },
+  hintText: { fontSize: 15, lineHeight: 22, color: "#111" },
+  hintClose: { width: 28, height: 28, borderRadius: 999, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(17,24,39,0.06)" },
+  hintCloseText: { fontSize: 13, fontWeight: "900", color: "#374151" },
   blankInput: {
     borderBottomWidth: 2,
     borderBottomColor: "#004AAD",

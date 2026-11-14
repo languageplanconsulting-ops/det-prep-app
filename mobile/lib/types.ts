@@ -102,7 +102,7 @@ export interface VocabPassageUnit {
   titleEn?: string;
   passageText: string;
   blanks: VocabBlankQuestion[];
-  correctWords: { word: string; synonyms: string[] }[];
+  correctWords: { word: string; synonyms: string[]; meaningTh?: string }[];
 }
 
 export interface VocabSet {

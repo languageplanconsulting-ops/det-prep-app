@@ -249,6 +249,9 @@ export default function DailyReportScreen() {
       <LuxuryPressable style={styles.primaryBtn} sound="submit" onPress={() => replace("/daily" as Href)}>
         <Text style={styles.primaryBtnText}>{t("กลับหน้าฝึกประจำวัน", "Back to daily practice")}</Text>
       </LuxuryPressable>
+      <LuxuryPressable style={styles.exitBtn} sound="tap" onPress={() => replace("/(tabs)" as Href)}>
+        <Text style={styles.exitText}>{t("ออกไปหน้าแรก", "Exit to home")}</Text>
+      </LuxuryPressable>
     </ScrollView>
   );
 }
@@ -301,5 +304,7 @@ const styles = StyleSheet.create({
   itemSub: { fontSize: 11, color: "#6B7280", marginTop: 2 },
   itemPct: { fontSize: 14, fontWeight: "900" },
   primaryBtn: { marginTop: 18, backgroundColor: "#FFCC00", borderRadius: 14, borderWidth: 3, borderColor: "#111", paddingVertical: 14, alignItems: "center", alignSelf: "stretch" },
+  exitBtn: { marginTop: 8, alignItems: "center", paddingVertical: 12 },
+  exitText: { color: "#6B7280", fontWeight: "800" },
   primaryBtnText: { fontSize: 16, fontWeight: "900", color: "#111" },
 });

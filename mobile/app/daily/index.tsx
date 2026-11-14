@@ -1,4 +1,4 @@
-import { useFocusEffect } from "expo-router";
+import { Stack, useFocusEffect } from "expo-router";
 import type { Href } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -30,9 +30,27 @@ import {
 import { sfxReveal } from "../../lib/exam-sfx-mobile";
 import { difficultyLabel, roundLabel, useI18n } from "../../lib/i18n";
 
+/** Leaves daily practice for the home tab (today's plan stays saved). */
+function ExitControls({ onExit }: { onExit: () => void }) {
+  const { t } = useI18n();
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <LuxuryPressable style={styles.headerExit} sound="tap" onPress={onExit}>
+              <Text style={styles.headerExitText}>{t("ออก", "Exit")}</Text>
+            </LuxuryPressable>
+          ),
+        }}
+      />
+    </>
+  );
+}
+
 export default function DailyPracticeScreen() {
   const { t } = useI18n();
-  const { push } = useLuxuryRouter();
+  const { push, replace } = useLuxuryRouter();
   const [loading, setLoading] = useState(true);
   const [building, setBuilding] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +112,8 @@ export default function DailyPracticeScreen() {
     }
   };
 
+  const exit = () => replace("/(tabs)" as Href);
+
   const reset = async () => {
     await clearTodayPlan();
     setPlan(null);
@@ -118,6 +138,7 @@ export default function DailyPracticeScreen() {
   if (!plan) {
     return (
       <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+        <ExitControls onExit={exit} />
         <FadeInItem index={0}>
           <Text style={styles.title}>{t("วันนี้มีเวลากี่นาที?", "How many minutes do you have today?")}</Text>
           <Text style={styles.sub}>
@@ -173,6 +194,10 @@ export default function DailyPracticeScreen() {
             </Text>
           </FadeInItem>
         ) : null}
+
+        <LuxuryPressable style={styles.exitBtn} sound="tap" onPress={exit}>
+          <Text style={styles.exitText}>{t("← ออกจากฝึกประจำวัน", "← Exit daily practice")}</Text>
+        </LuxuryPressable>
       </ScrollView>
     );
   }
@@ -185,6 +210,7 @@ export default function DailyPracticeScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <ExitControls onExit={exit} />
       <FadeInItem index={0} style={styles.hero}>
         <Text style={styles.heroLabel}>
           {plan.minutes === 60 ? t("1 ชั่วโมง", "1 hour") : t(`${plan.minutes} นาที`, `${plan.minutes} minutes`)}
@@ -252,6 +278,11 @@ export default function DailyPracticeScreen() {
 
       <LuxuryPressable style={styles.resetBtn} onPress={() => void reset()}>
         <Text style={styles.resetText}>{t("เปลี่ยนเวลา / สุ่มชุดใหม่", "Change time / new mix")}</Text>
+      </LuxuryPressable>
+      <LuxuryPressable style={styles.exitBtn} sound="tap" onPress={exit}>
+        <Text style={styles.exitText}>
+          {t("← ออกจากฝึกประจำวัน (ทำต่อได้ภายหลัง)", "← Exit daily practice (resume anytime)")}
+        </Text>
       </LuxuryPressable>
     </ScrollView>
   );
@@ -347,6 +378,10 @@ const styles = StyleSheet.create({
   },
   pastDate: { flex: 1, fontSize: 14, fontWeight: "800", color: "#111" },
   pastMeta: { fontSize: 13, fontWeight: "800", color: "#004AAD" },
+  headerExit: { marginRight: 12, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, borderWidth: 2, borderColor: "#FFCC00" },
+  headerExitText: { color: "#FFCC00", fontWeight: "900", fontSize: 13 },
+  exitBtn: { marginTop: 6, alignItems: "center", paddingVertical: 12 },
+  exitText: { color: "#6B7280", fontWeight: "800" },
   resetBtn: { marginTop: 14, alignItems: "center", paddingVertical: 12 },
   resetText: { color: "#004AAD", fontWeight: "800" },
 });

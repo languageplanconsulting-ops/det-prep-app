@@ -18,6 +18,8 @@ import { LOAD_FAILED, errorText, scoreLine, useI18n } from "../../../../../lib/i
 import { ScreenLoader } from "../../../../../components/MascotLoader";
 import { AnimatedScore, FadeInItem, ResultMascot } from "../../../../../components/Motion";
 import { sfxCorrect, sfxWrong } from "../../../../../lib/exam-sfx-mobile";
+import { AnswerSheet } from "../../../../../components/AnswerSheet";
+import { contextHint, grammarHint, meaningHint } from "../../../../../lib/vocab-hints";
 
 export default function VocabSessionScreen() {
   const { round, level, set, passage } = useLocalSearchParams<{
@@ -38,9 +40,11 @@ export default function VocabSessionScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState<"quiz" | "report">("quiz");
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [filledCorrect, setFilledCorrect] = useState<string[]>([]);
-  const [userPicks, setUserPicks] = useState<string[]>([]);
+  /** Picked option per blank (by blank index); undefined = not answered yet. */
+  const [picks, setPicks] = useState<(string | undefined)[]>([]);
+  /** Blank whose answer sheet is open, or null. */
+  const [openBlank, setOpenBlank] = useState<number | null>(null);
+  const [hintUsed, setHintUsed] = useState<Set<number>>(() => new Set());
   const [rows, setRows] = useState<VocabExamResultRow[]>([]);
   const [score, setScore] = useState(0);
   const startedAt = useRef(Date.now());
@@ -111,37 +115,23 @@ export default function VocabSessionScreen() {
     );
   }
 
-  const currentBlank = passageUnit.blanks[questionIndex]!;
-  const { shuffled } = shuffledPerBlank[questionIndex] ?? { shuffled: currentBlank.options };
+  const filledCorrect = passageUnit.blanks.map((b, i) => (picks[i] !== undefined ? b.correctAnswer : undefined));
+  const answered = picks.filter((p) => p !== undefined).length;
+  const nextBlank = passageUnit.blanks.findIndex((_, i) => picks[i] === undefined);
 
-  const selectOption = async (option: string) => {
-    const correct = currentBlank.correctAnswer;
-    // The right word is filled in straight away, so give right/wrong feedback now.
-    if (option === correct) sfxCorrect();
-    else sfxWrong();
-    const nextPicks = [...userPicks, option];
-    const nextFilled = [...filledCorrect, correct];
-
-    if (questionIndex < blankCount - 1) {
-      setUserPicks(nextPicks);
-      setFilledCorrect(nextFilled);
-      setQuestionIndex((i) => i + 1);
-      return;
-    }
-
+  const finish = async (finalPicks: (string | undefined)[]) => {
     const resultRows: VocabExamResultRow[] = passageUnit.blanks.map((b, i) => ({
       blankIndex: i + 1,
       question: b.question,
-      userAnswer: nextPicks[i] ?? "",
+      userAnswer: finalPicks[i] ?? "",
       correctAnswer: b.correctAnswer,
-      isCorrect: nextPicks[i] === b.correctAnswer,
+      isCorrect: finalPicks[i] === b.correctAnswer,
       explanationThai: b.explanationThai,
     }));
     const correctCount = resultRows.filter((r) => r.isCorrect).length;
-    const attained = Math.round((correctCount / 6) * maxScore);
+    // score against the real number of blanks (passages have 6–10)
+    const attained = Math.round((correctCount / blankCount) * maxScore);
 
-    setUserPicks(nextPicks);
-    setFilledCorrect(nextFilled);
     setRows(resultRows);
     setScore(attained);
     setPhase("report");
@@ -162,15 +152,38 @@ export default function VocabSessionScreen() {
         exerciseType: "vocabulary",
         setId,
         score: attained,
-        completed: correctCount === 6,
+        completed: correctCount === blankCount,
         duration_seconds: duration,
-        submission_payload: { picks: nextPicks },
+        submission_payload: { picks: finalPicks, hintsUsed: [...hintUsed] },
         report_payload: { score: attained, maxScore, correctCount },
       });
     } catch {
       /* best-effort */
     }
   };
+
+  const selectOption = (blank: number, option: string) => {
+    const correct = passageUnit.blanks[blank]!.correctAnswer;
+    // The right word is filled in straight away, so give right/wrong feedback now.
+    if (option === correct) sfxCorrect();
+    else sfxWrong();
+    const next = [...picks];
+    next[blank] = option;
+    setPicks(next);
+    setOpenBlank(null);
+    if (passageUnit.blanks.every((_, i) => next[i] !== undefined)) {
+      setTimeout(() => void finish(next), 700);
+    }
+  };
+
+  const sheetBlank = openBlank != null ? passageUnit.blanks[openBlank] : null;
+  const sheetHints = sheetBlank
+    ? {
+        meaning: meaningHint(passageUnit.correctWords?.[openBlank!], t),
+        context: contextHint(passageUnit.passageText, openBlank!, filledCorrect),
+        grammar: grammarHint(passageUnit.passageText, openBlank!, sheetBlank.correctAnswer, sheetBlank.options, t),
+      }
+    : { meaning: null, context: null, grammar: null };
 
   if (phase === "report") {
     return (
@@ -190,6 +203,7 @@ export default function VocabSessionScreen() {
             </Text>
             <Text style={styles.reportA}>
               {t("คุณตอบ", "You")}: {row.userAnswer}
+              {hintUsed.has(row.blankIndex - 1) ? t(" · ใช้คำใบ้", " · hint used") : ""}
             </Text>
             <Text style={styles.reportC}>
               {t("เฉลย", "Answer")}: {row.correctAnswer}
@@ -204,48 +218,75 @@ export default function VocabSessionScreen() {
   }
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.meta}>
-        {t(
-          `ชุดที่ ${setNumber} · บทความ ${passageNumber} · ช่องที่ ${questionIndex + 1}/${blankCount}`,
-          `Set ${setNumber} · Passage ${passageNumber} · Blank ${questionIndex + 1}/${blankCount}`,
-        )}
-      </Text>
-
-      <View style={styles.passageBox}>
-        <Text style={styles.passageText}>
-          {parts.map((segment, i) => (
-            <Text key={i}>
-              {segment}
-              {i < blankCount ? (
-                <Text style={styles.blank}>
-                  {filledCorrect[i] !== undefined ? filledCorrect[i] : "______"}
-                </Text>
-              ) : null}
-            </Text>
-          ))}
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.meta}>
+          {t(
+            `ชุดที่ ${setNumber} · บทความ ${passageNumber} · ตอบแล้ว ${answered}/${blankCount}`,
+            `Set ${setNumber} · Passage ${passageNumber} · ${answered}/${blankCount} answered`,
+          )}
         </Text>
-      </View>
+        <Text style={styles.tip}>{t("แตะช่องว่างเพื่อเลือกคำตอบ", "Tap a blank to choose the answer")}</Text>
 
-      <Text style={styles.question}>{currentBlank.question}</Text>
+        <View style={styles.passageBox}>
+          <Text style={styles.passageText}>
+            {parts.map((segment, i) => {
+              if (i >= blankCount) return <Text key={i}>{segment}</Text>;
+              const pick = picks[i];
+              const right = pick !== undefined && pick === passageUnit.blanks[i]!.correctAnswer;
+              const isNext = i === nextBlank;
+              return (
+                <Text key={i}>
+                  {segment}
+                  <Text
+                    onPress={pick === undefined ? () => setOpenBlank(i) : undefined}
+                    style={[
+                      styles.blank,
+                      pick === undefined ? (isNext ? styles.blankNext : styles.blankOpen) : right ? styles.blankRight : styles.blankWrong,
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={t(`ช่องที่ ${i + 1}`, `Blank ${i + 1}`)}
+                  >
+                    {pick === undefined
+                      ? ` ${i + 1} ▾ `
+                      : ` ${right ? "✓" : "✗"} ${passageUnit.blanks[i]!.correctAnswer} `}
+                  </Text>
+                </Text>
+              );
+            })}
+          </Text>
+        </View>
+      </ScrollView>
 
-      {shuffled.map((option) => (
-        <LuxuryPressable
-          key={option}
-          sound="none"
-          style={({ pressed }) => [styles.option, pressed && styles.optionPressed]}
-          onPress={() => void selectOption(option)}
-        >
-          <Text style={styles.optionText}>{option}</Text>
-        </LuxuryPressable>
-      ))}
-    </ScrollView>
+      {nextBlank >= 0 ? (
+        <View style={styles.bottomBar}>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${(answered / blankCount) * 100}%` }]} />
+          </View>
+          <LuxuryPressable style={styles.nextBtn} sound="tap" onPress={() => setOpenBlank(nextBlank)}>
+            <Text style={styles.nextBtnText}>
+              {t(`ตอบช่องที่ ${nextBlank + 1} →`, `Answer blank ${nextBlank + 1} →`)}
+            </Text>
+          </LuxuryPressable>
+        </View>
+      ) : null}
+
+      <AnswerSheet
+        blankNumber={openBlank != null ? openBlank + 1 : null}
+        total={blankCount}
+        options={openBlank != null ? (shuffledPerBlank[openBlank]?.shuffled ?? sheetBlank?.options ?? []) : []}
+        hints={sheetHints}
+        onPick={(o) => openBlank != null && selectOption(openBlank, o)}
+        onHint={() => openBlank != null && setHintUsed((s) => new Set(s).add(openBlank))}
+        onClose={() => setOpenBlank(null)}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#fff" },
-  content: { padding: 16, paddingBottom: 40 },
+  content: { padding: 16, paddingBottom: 140 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   error: { color: "#b91c1c", fontWeight: "700", padding: 20, textAlign: "center" },
   meta: { fontWeight: "800", fontSize: 13, color: "#004AAD", marginBottom: 12 },
@@ -257,9 +298,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
     marginBottom: 16,
   },
-  passageText: { fontSize: 15, lineHeight: 24 },
-  blank: { fontWeight: "900", color: "#004AAD", textDecorationLine: "underline" },
-  question: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
+  passageText: { fontSize: 16, lineHeight: 30 },
+  tip: { fontSize: 12, color: "#6B7280", marginBottom: 10 },
+  blank: { fontWeight: "900", borderRadius: 6, overflow: "hidden" },
+  blankOpen: { color: "#004AAD", backgroundColor: "#E7EFFF" },
+  blankNext: { color: "#111", backgroundColor: "#FFE88A" },
+  blankRight: { color: "#047857", backgroundColor: "#D1FAE5" },
+  blankWrong: { color: "#B91C1C", backgroundColor: "#FEE2E2" },
+  bottomBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 14,
+    paddingBottom: 22,
+    backgroundColor: "rgba(255,255,255,0.94)",
+    borderTopWidth: 1,
+    borderTopColor: "#E7EAF1",
+  },
+  progressTrack: { height: 6, borderRadius: 999, backgroundColor: "#E7EAF1", overflow: "hidden", marginBottom: 10 },
+  progressFill: { height: "100%", backgroundColor: "#004AAD", borderRadius: 999 },
+  nextBtn: { backgroundColor: "#004AAD", borderRadius: 14, paddingVertical: 14, alignItems: "center", borderWidth: 2, borderColor: "#111" },
+  nextBtnText: { color: "#FFCC00", fontWeight: "900", fontSize: 16 },
   option: {
     borderWidth: 2,
     borderColor: "#111",
