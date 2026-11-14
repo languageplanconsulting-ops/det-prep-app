@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 
 import { LanguageToggle } from "../../components/LanguageToggle";
 import { LuxuryPressable } from "../../components/LuxuryPressable";
 import { useLuxuryRouter } from "../../hooks/useLuxuryRouter";
 import { useAuth } from "../../lib/auth-context";
 import { getAdminToken } from "../../lib/admin-unlock";
-import { clearAdminUnlock, unlockWithAdminCode } from "../../lib/api";
+import { clearAdminUnlock, deleteMyAccount, unlockWithAdminCode } from "../../lib/api";
 import { getSfxMuted, setSfxMuted, sfxTap } from "../../lib/exam-sfx-mobile";
 import { useI18n } from "../../lib/i18n";
 
@@ -19,6 +19,9 @@ export default function ProfileScreen() {
   const [adminBusy, setAdminBusy] = useState(false);
   const [adminErr, setAdminErr] = useState<string | null>(null);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteErr, setDeleteErr] = useState<string | null>(null);
 
   useEffect(() => {
     void getSfxMuted().then(setSfxMutedState);
@@ -27,8 +30,22 @@ export default function ProfileScreen() {
 
   const displayTier = quota?.isAdmin || adminUnlocked ? "vip (admin)" : tier;
 
+  const confirmDelete = async () => {
+    setDeleteErr(null);
+    setDeleteBusy(true);
+    try {
+      await deleteMyAccount();
+      await clearAdminUnlock();
+      await signOut();
+      replace("/login");
+    } catch (e) {
+      setDeleteErr(e instanceof Error ? e.message : t("ลบบัญชีไม่สำเร็จ", "Could not delete account"));
+      setDeleteBusy(false);
+    }
+  };
+
   return (
-    <View style={styles.screen}>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.card}>
         <Text style={styles.label}>{t("เข้าสู่ระบบแล้ว", "Signed in")}</Text>
         <Text style={styles.email}>{user?.email ?? "—"}</Text>
@@ -37,11 +54,16 @@ export default function ProfileScreen() {
         </Text>
         {quota ? (
           <Text style={styles.quota}>
-            {t("เครดิตการตรวจ", "Grading credits")}: {quota.ai.totalRemaining} / {quota.ai.totalLimit}
+            {t("เครดิตการตรวจ", "Grading credits")}:{" "}
+            {quota.ai.totalRemaining >= 1_000_000
+              ? t("ไม่จำกัด", "Unlimited")
+              : `${quota.ai.totalRemaining} / ${quota.ai.totalLimit}`}
           </Text>
         ) : null}
       </View>
 
+      {/* Code unlocks are not allowed in store builds (App Store 3.1.1) — development only. */}
+      {__DEV__ ? (
       <View style={styles.card}>
         <Text style={styles.switchTitle}>{t("ปลดล็อกแอดมิน", "Admin unlock")}</Text>
         <Text style={styles.switchSub}>
@@ -102,6 +124,7 @@ export default function ProfileScreen() {
           </>
         )}
       </View>
+      ) : null}
 
       <View style={styles.card}>
         <Text style={styles.switchTitle}>{t("ภาษา", "Language")}</Text>
@@ -144,12 +167,51 @@ export default function ProfileScreen() {
       >
         <Text style={styles.btnText}>{t("ออกจากระบบ", "Sign out")}</Text>
       </LuxuryPressable>
-    </View>
+
+      {!deleteOpen ? (
+        <LuxuryPressable sound="none" style={styles.deleteLink} onPress={() => setDeleteOpen(true)}>
+          <Text style={styles.deleteLinkText}>{t("ลบบัญชี", "Delete account")}</Text>
+        </LuxuryPressable>
+      ) : (
+        <View style={styles.deleteCard}>
+          <Text style={styles.deleteTitle}>{t("ลบบัญชีถาวร?", "Delete your account permanently?")}</Text>
+          <Text style={styles.deleteText}>
+            {t(
+              "บัญชีนี้ คะแนน สมุดคำศัพท์ และประวัติการฝึกทั้งหมดจะถูกลบและกู้คืนไม่ได้ สิทธิ์ VIP หรือเครดิตที่เหลืออยู่จะหายไปด้วย",
+              "This account, your scores, notebook and practice history will be deleted and cannot be recovered. Any remaining VIP access or credits will be lost.",
+            )}
+          </Text>
+          {deleteErr ? <Text style={styles.adminErr}>{deleteErr}</Text> : null}
+          <View style={styles.deleteRow}>
+            <LuxuryPressable
+              style={[styles.deleteCancel]}
+              disabled={deleteBusy}
+              onPress={() => {
+                setDeleteOpen(false);
+                setDeleteErr(null);
+              }}
+            >
+              <Text style={styles.deleteCancelText}>{t("ยกเลิก", "Cancel")}</Text>
+            </LuxuryPressable>
+            <LuxuryPressable
+              style={[styles.deleteConfirm, deleteBusy && { opacity: 0.6 }]}
+              disabled={deleteBusy}
+              onPress={() => void confirmDelete()}
+            >
+              <Text style={styles.deleteConfirmText}>
+                {deleteBusy ? t("กำลังลบ…", "Deleting…") : t("ยืนยันลบบัญชี", "Delete account")}
+              </Text>
+            </LuxuryPressable>
+          </View>
+        </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#F4F6FB", padding: 16 },
+  screen: { flex: 1, backgroundColor: "#F4F6FB" },
+  content: { padding: 16, paddingBottom: 40 },
   card: {
     backgroundColor: "#fff",
     borderRadius: 16,
@@ -202,4 +264,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   btnText: { color: "#b91c1c", fontWeight: "800" },
+  deleteLink: { marginTop: 18, alignSelf: "center", paddingVertical: 8, paddingHorizontal: 12 },
+  deleteLinkText: { color: "#9CA3AF", fontWeight: "700", fontSize: 13, textDecorationLine: "underline" },
+  deleteCard: {
+    marginTop: 16,
+    borderRadius: 16,
+    padding: 16,
+    backgroundColor: "#FEF2F2",
+    borderWidth: 2,
+    borderColor: "#FCA5A5",
+  },
+  deleteTitle: { fontSize: 16, fontWeight: "900", color: "#991B1B" },
+  deleteText: { fontSize: 13, lineHeight: 20, color: "#7F1D1D", marginTop: 6, marginBottom: 12 },
+  deleteRow: { flexDirection: "row", gap: 10 },
+  deleteCancel: {
+    flex: 1,
+    borderRadius: 12,
+    padding: 14,
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 2,
+    borderColor: "#111",
+  },
+  deleteCancelText: { fontWeight: "800", color: "#111" },
+  deleteConfirm: { flex: 1, borderRadius: 12, padding: 14, alignItems: "center", backgroundColor: "#DC2626" },
+  deleteConfirmText: { fontWeight: "900", color: "#fff" },
 });

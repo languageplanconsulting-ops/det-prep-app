@@ -396,3 +396,16 @@ export async function fetchPracticeAttempts(taskType: string): Promise<ServerPra
     return [];
   }
 }
+
+/** Permanently deletes the signed-in account (App Store 5.1.1(v)). Throws with a readable message on failure. */
+export async function deleteMyAccount(): Promise<void> {
+  const res = await apiFetch(`${API_BASE_URL}/api/account/delete`, {
+    method: "POST",
+    headers: await authHeaders(),
+    body: JSON.stringify({ confirm: "DELETE" }),
+  });
+  if (!res.ok) {
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(data.error ?? `Delete failed (${res.status})`);
+  }
+}

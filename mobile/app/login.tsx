@@ -90,15 +90,27 @@ export default function LoginScreen() {
             )}
           </LuxuryPressable>
 
-          <Text style={styles.hint}>
-            {t(
-              "ยังไม่มีบัญชี? สมัครที่เว็บไซต์ แล้วใช้อีเมลและรหัสผ่านเดียวกันในแอปนี้",
-              "New here? Sign up on the website, then use the same email and password in this app.",
-            )}
-          </Text>
-          <Link href="https://www.languageplanprep.co/signup" style={styles.link}>
-            {t("สมัครบนเว็บไซต์", "Open signup on web")}
-          </Link>
+          {Platform.OS === "web" ? (
+            <>
+              <Text style={styles.hint}>
+                {t(
+                  "ยังไม่มีบัญชี? สมัครที่เว็บไซต์ แล้วใช้อีเมลและรหัสผ่านเดียวกันในแอปนี้",
+                  "New here? Sign up on the website, then use the same email and password in this app.",
+                )}
+              </Text>
+              <Link href="https://www.languageplanprep.co/signup" style={styles.link}>
+                {t("สมัครบนเว็บไซต์", "Open signup on web")}
+              </Link>
+            </>
+          ) : (
+            // Store builds: no link out to signup/pricing (App Store 3.1.1 / Play payments policy).
+            <Text style={styles.hint}>
+              {t(
+                "ใช้อีเมลและรหัสผ่านบัญชี English Plan ของคุณ",
+                "Use the email and password of your English Plan account.",
+              )}
+            </Text>
+          )}
 
           {__DEV__ ? (
             <View style={styles.devBox}>

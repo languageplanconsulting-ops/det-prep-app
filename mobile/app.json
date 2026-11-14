@@ -8,8 +8,11 @@
     "userInterfaceStyle": "light",
     "scheme": "englishplan",
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "co.languageplanprep.app"
+      "supportsTablet": false,
+      "bundleIdentifier": "co.languageplanprep.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "co.languageplanprep.app",
@@ -38,6 +41,9 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

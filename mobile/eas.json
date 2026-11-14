@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://www.languageplanprep.co",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://rrbraqbhbjishhvaedhl.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyYnJhcWJoYmppc2hodmFlZGhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NjgwMDgsImV4cCI6MjA5MTA0NDAwOH0.64DLmWbd0l4FyvMKprCV41Nuol1DtyZLgx_2Ic2wYxQ"
+      }
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "extends": "base",
+      "autoIncrement": true,
+      "channel": "production"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
