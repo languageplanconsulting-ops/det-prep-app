@@ -1,0 +1,528 @@
+[
+  {
+    "id": "ds-r3-hard-s11",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 11,
+    "titleEn": "Agreeing on overnight guests",
+    "titleTh": "ตกลงเรื่องเพื่อนมาค้างที่ห้อง",
+    "scenarioSentences": [
+      "You share an apartment with Owen.",
+      "His friend Leo stays over most nights.",
+      "Leo often eats your food.",
+      "You have no rules about guests yet.",
+      "You raise it with Owen tonight."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Owen, can we talk about Leo? He's stayed here almost every night this month."
+      },
+      {
+        "speaker": "Owen",
+        "text": "Is it a problem? He's between apartments right now."
+      },
+      {
+        "speaker": "You",
+        "text": "The bathroom's always busy in the morning, and my food keeps disappearing."
+      },
+      {
+        "speaker": "Owen",
+        "text": "That must have been him. Sorry, I'll replace it."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. I'd rather we had a clear rule, though. Guests two nights a week at most?"
+      },
+      {
+        "speaker": "Owen",
+        "text": "Could we make it three while he looks for a place?"
+      },
+      {
+        "speaker": "You",
+        "text": "Three is fine for two weeks, as long as you tell me first."
+      },
+      {
+        "speaker": "Owen",
+        "text": "That's fair. After that, it's two nights, and I'll always ask you first."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-hard-s12",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 12,
+    "titleEn": "Getting a bank late fee removed",
+    "titleTh": "ขอให้ธนาคารยกเลิกค่าปรับจ่ายช้า",
+    "scenarioSentences": [
+      "Your bank charged you a late fee.",
+      "You tried to pay on the due date.",
+      "However, the bank's website was down.",
+      "Mr. Ashford works at the customer desk.",
+      "You visit him about the fee."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi. I've been charged a late fee, but I don't think it's fair."
+      },
+      {
+        "speaker": "Mr. Ashford",
+        "text": "I see your payment arrived a day late. I could reduce the fee by half."
+      },
+      {
+        "speaker": "You",
+        "text": "I'd rather not pay anything. I tried to pay on time, but your website was down."
+      },
+      {
+        "speaker": "Mr. Ashford",
+        "text": "We did have a system problem that night. Do you have any evidence?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, I took a screenshot of the error message. It shows the time."
+      },
+      {
+        "speaker": "Mr. Ashford",
+        "text": "That's clear enough. In that case, I'll remove the whole fee."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you. Will the late payment affect my credit record?"
+      },
+      {
+        "speaker": "Mr. Ashford",
+        "text": "No, I'll delete it from your record as well. You'll get a letter confirming it."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-hard-s13",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 13,
+    "titleEn": "Planning a wedding speech with a friend",
+    "titleTh": "วางแผนกล่าวสุนทรพจน์งานแต่งพี่ชาย",
+    "scenarioSentences": [
+      "Your brother is getting married next month.",
+      "He has asked you to give a speech.",
+      "You are nervous about speaking in public.",
+      "Your friend Matteo gave one last year.",
+      "You ask him for advice."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "I'm giving the speech at my brother's wedding. How long should it be?"
+      },
+      {
+        "speaker": "Matteo",
+        "text": "Under five minutes. Otherwise, people stop listening, especially after dinner."
+      },
+      {
+        "speaker": "You",
+        "text": "I'd like to tell the story of how he met Anna."
+      },
+      {
+        "speaker": "Matteo",
+        "text": "Good. It's also worth adding one funny story from your childhood."
+      },
+      {
+        "speaker": "You",
+        "text": "I'd rather not embarrass him in front of her family, though."
+      },
+      {
+        "speaker": "Matteo",
+        "text": "Then pick something silly, not embarrassing, like his terrible cooking."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. And how should I end it?"
+      },
+      {
+        "speaker": "Matteo",
+        "text": "Thank both families and the guests, then ask everyone to raise their glasses."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. I'll write a short, funny draft and read it to you on Friday."
+      },
+      {
+        "speaker": "Matteo",
+        "text": "Sounds good. Practice it out loud a few times first."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-hard-s14",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 14,
+    "titleEn": "Planning a school open day",
+    "titleTh": "วางแผนงานวันเปิดบ้านของโรงเรียน",
+    "scenarioSentences": [
+      "Your school has an open day on Saturday.",
+      "You are leading the student helpers.",
+      "Last year's tour groups were too big.",
+      "Mr. Byrne is the teacher in charge.",
+      "You meet him to plan the day."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mr. Byrne, last year's tours had about thirty parents each. Many couldn't hear the guides."
+      },
+      {
+        "speaker": "Mr. Byrne",
+        "text": "I remember the complaints. What would you suggest this year?"
+      },
+      {
+        "speaker": "You",
+        "text": "If we had groups of ten, everyone could ask questions."
+      },
+      {
+        "speaker": "Mr. Byrne",
+        "text": "That would mean three times as many guides. Do we have enough students?"
+      },
+      {
+        "speaker": "You",
+        "text": "Twelve have signed up so far. I could ask the drama club for more."
+      },
+      {
+        "speaker": "Mr. Byrne",
+        "text": "As long as each guide gets training on Thursday, that's fine with me."
+      },
+      {
+        "speaker": "You",
+        "text": "And should the tours start every fifteen minutes instead of every hour?"
+      },
+      {
+        "speaker": "Mr. Byrne",
+        "text": "Yes, that's more flexible for families. Try to find eight more helpers by Wednesday."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-hard-s15",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 15,
+    "titleEn": "Choosing between the beach and mountains",
+    "titleTh": "เลือกเที่ยวทะเลหรือภูเขากับเพื่อน",
+    "scenarioSentences": [
+      "You and Arjun are planning a winter vacation.",
+      "You have one week off in December.",
+      "Arjun wants to go to the beach.",
+      "You prefer the mountains, but money is tight.",
+      "You discuss it at lunch."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Beach or mountains? We need to decide soon, or prices will go up."
+      },
+      {
+        "speaker": "Arjun",
+        "text": "Beach, definitely. I just want to lie in the sun for a week."
+      },
+      {
+        "speaker": "You",
+        "text": "I get that, but beach hotels in December cost almost twice as much."
+      },
+      {
+        "speaker": "Arjun",
+        "text": "Really? How much is the mountain place you found?"
+      },
+      {
+        "speaker": "You",
+        "text": "About forty dollars a night, and it has a kitchen, so we could cook."
+      },
+      {
+        "speaker": "Arjun",
+        "text": "That's much cheaper. But I'd be bored if we only went hiking."
+      },
+      {
+        "speaker": "You",
+        "text": "There's a lake with boats and a hot spring nearby. You'd love it."
+      },
+      {
+        "speaker": "Arjun",
+        "text": "Fine, you've convinced me. As long as we book soon, I'm in."
+      },
+      {
+        "speaker": "You",
+        "text": "If we book before Friday, there's a fifteen percent discount."
+      },
+      {
+        "speaker": "Arjun",
+        "text": "Then let's book it tonight."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-hard-s16",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 16,
+    "titleEn": "Reporting a dangerous road crossing",
+    "titleTh": "แจ้งปัญหาทางข้ามถนนอันตราย",
+    "scenarioSentences": [
+      "Your sister's school is on a busy road.",
+      "Cars drive fast there every morning.",
+      "There is no safe place to cross.",
+      "Mr. Clarke works at the city council.",
+      "You call him to report the problem."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello. I'm calling about the road outside the primary school. Cars drive dangerously fast there."
+      },
+      {
+        "speaker": "Mr. Clarke",
+        "text": "I'm sorry to hear that. Has anyone been hurt?"
+      },
+      {
+        "speaker": "You",
+        "text": "Not yet, but a boy was nearly hit last week. Children need a proper crossing."
+      },
+      {
+        "speaker": "Mr. Clarke",
+        "text": "I understand, but we can't approve a crossing without evidence of the traffic."
+      },
+      {
+        "speaker": "You",
+        "text": "How would you get that? I'd hate to wait until there's an accident."
+      },
+      {
+        "speaker": "Mr. Clarke",
+        "text": "We'll do a traffic survey this month to measure speed and the number of cars."
+      },
+      {
+        "speaker": "You",
+        "text": "And if the results are bad, will you build a crossing?"
+      },
+      {
+        "speaker": "Mr. Clarke",
+        "text": "Probably, though it depends on the budget. I'll email you the results either way."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-hard-s17",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 17,
+    "titleEn": "Comparing two laptops before buying",
+    "titleTh": "เปรียบเทียบแล็ปท็อปสองรุ่นก่อนซื้อ",
+    "scenarioSentences": [
+      "You need a laptop for your studies.",
+      "You have a budget of eight hundred dollars.",
+      "Two models in the shop look good.",
+      "Mr. Kwan, the shop assistant, comes over.",
+      "You ask him to compare them."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Could you explain the difference between these two laptops?"
+      },
+      {
+        "speaker": "Mr. Kwan",
+        "text": "The silver one is lighter, but the black one is more powerful."
+      },
+      {
+        "speaker": "You",
+        "text": "I carry it to class daily, so weight matters. What's the price difference?"
+      },
+      {
+        "speaker": "Mr. Kwan",
+        "text": "The silver one is six hundred. The black one is nine hundred."
+      },
+      {
+        "speaker": "You",
+        "text": "That's over my budget. Is the silver one fast enough for video editing?"
+      },
+      {
+        "speaker": "Mr. Kwan",
+        "text": "Not really, unless you add more memory. That's an extra hundred dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "So seven hundred in total, still cheaper than the black one."
+      },
+      {
+        "speaker": "Mr. Kwan",
+        "text": "And we can install the memory today, so you'd take it home tonight."
+      },
+      {
+        "speaker": "You",
+        "text": "In that case, I'll take the silver one with the extra memory."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-hard-s18",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 18,
+    "titleEn": "Dealing with a lost suitcase",
+    "titleTh": "แจ้งกระเป๋าเดินทางหายที่สนามบิน",
+    "scenarioSentences": [
+      "You have just landed after a long flight.",
+      "Your suitcase never appeared on the belt.",
+      "You have a job interview tomorrow morning.",
+      "Ms. Petrov works at the baggage desk.",
+      "You go to her for help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "My suitcase didn't arrive, and I have a job interview tomorrow at nine."
+      },
+      {
+        "speaker": "Ms. Petrov",
+        "text": "I'm sorry. It seems it was left behind at your last stop."
+      },
+      {
+        "speaker": "You",
+        "text": "My suit's in it. When will it get here?"
+      },
+      {
+        "speaker": "Ms. Petrov",
+        "text": "It'll be on tomorrow's first flight, so we can deliver it to your hotel by noon."
+      },
+      {
+        "speaker": "You",
+        "text": "That's too late. What am I supposed to wear?"
+      },
+      {
+        "speaker": "Ms. Petrov",
+        "text": "You can buy what you need tonight, and we'll pay you back."
+      },
+      {
+        "speaker": "You",
+        "text": "Is there a limit? A decent shirt and shoes aren't cheap."
+      },
+      {
+        "speaker": "Ms. Petrov",
+        "text": "Up to two hundred dollars, as long as you keep the receipts for your claim."
+      },
+      {
+        "speaker": "You",
+        "text": "That's fine. Please call me when the bag's on its way."
+      },
+      {
+        "speaker": "Ms. Petrov",
+        "text": "I will. Here's your reference number."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-hard-s19",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 19,
+    "titleEn": "Handling a double-booked meeting room",
+    "titleTh": "แก้ปัญหาห้องประชุมถูกจองซ้ำ",
+    "scenarioSentences": [
+      "Your team meets at two o'clock today.",
+      "You booked the big meeting room.",
+      "Your coworker Gemma says she booked it too.",
+      "Her team is already setting up inside.",
+      "You need to solve this quickly."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Gemma, I think there's been a mistake. I booked this room for two o'clock."
+      },
+      {
+        "speaker": "Gemma",
+        "text": "So did I. The system must have let us both book it."
+      },
+      {
+        "speaker": "You",
+        "text": "That's annoying. My team has eight people, and two are joining from home."
+      },
+      {
+        "speaker": "Gemma",
+        "text": "Mine's twelve people, and we're showing a new design to a client in person."
+      },
+      {
+        "speaker": "You",
+        "text": "Then you should probably keep it. We could have our meeting online instead."
+      },
+      {
+        "speaker": "Gemma",
+        "text": "Are you sure? I'd be happy to give you the room another day if you need it."
+      },
+      {
+        "speaker": "You",
+        "text": "Actually, Thursday would help. We have a big planning session that morning."
+      },
+      {
+        "speaker": "Gemma",
+        "text": "It's yours. I'll also report the booking problem so it doesn't happen again."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-hard-s20",
+    "round": 3,
+    "difficulty": "hard",
+    "setNumber": 20,
+    "titleEn": "Deciding whether to repair an old car",
+    "titleTh": "ตัดสินใจว่าจะซ่อมรถเก่าดีไหม",
+    "scenarioSentences": [
+      "Your car is twelve years old.",
+      "It failed its safety check this week.",
+      "Mr. Russo, your mechanic, has looked at it.",
+      "The repair is expensive.",
+      "You are not sure it is worth it."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "How bad is it, Mr. Russo?"
+      },
+      {
+        "speaker": "Mr. Russo",
+        "text": "The brakes need replacing, and there's an oil leak. About nine hundred dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "Nine hundred? The car's only worth two thousand."
+      },
+      {
+        "speaker": "Mr. Russo",
+        "text": "I know. If it were my car, I'd fix it and sell it next year."
+      },
+      {
+        "speaker": "You",
+        "text": "Why not sell it now?"
+      },
+      {
+        "speaker": "Mr. Russo",
+        "text": "With bad brakes, you'd get much less. And a reliable replacement costs at least eight thousand."
+      },
+      {
+        "speaker": "You",
+        "text": "I can't afford that yet. Could you do the brakes now and the leak later?"
+      },
+      {
+        "speaker": "Mr. Russo",
+        "text": "Sure. The leak can wait a few months, so that's about five hundred today."
+      },
+      {
+        "speaker": "You",
+        "text": "Then please fix the brakes. I'll sell it next year."
+      },
+      {
+        "speaker": "Mr. Russo",
+        "text": "Sensible. It'll be ready on Wednesday."
+      }
+    ]
+  }
+]

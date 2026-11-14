@@ -1,0 +1,544 @@
+[
+  {
+    "id": "ds-r3-easy-s11",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 11,
+    "titleEn": "Buying a train ticket to the coast",
+    "titleTh": "ซื้อตั๋วรถไฟไปเที่ยวทะเล",
+    "scenarioSentences": [
+      "You want to go to the coast.",
+      "You need a return ticket.",
+      "You go to the ticket office.",
+      "Mr. Barnes works there.",
+      "You ask about train times."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello. I'd like a return ticket to the coast, please."
+      },
+      {
+        "speaker": "Mr. Barnes",
+        "text": "Sure. When do you want to travel?"
+      },
+      {
+        "speaker": "You",
+        "text": "This Saturday. I want to come back on Sunday."
+      },
+      {
+        "speaker": "Mr. Barnes",
+        "text": "Okay. On Saturday, there are trains at nine and eleven."
+      },
+      {
+        "speaker": "You",
+        "text": "Nine is good. Can I take any train back?"
+      },
+      {
+        "speaker": "Mr. Barnes",
+        "text": "Yes, any train on Sunday. The ticket is twenty-four dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "Here you are. Which platform does the nine o'clock train leave from?"
+      },
+      {
+        "speaker": "Mr. Barnes",
+        "text": "Platform 3. Please be there ten minutes early."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-easy-s12",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 12,
+    "titleEn": "Ordering pizza for a movie night",
+    "titleTh": "สั่งพิซซ่ามากินคืนดูหนัง",
+    "scenarioSentences": [
+      "You are having a movie night.",
+      "Some friends are coming tonight.",
+      "You want to order pizza.",
+      "Nico is your friend.",
+      "He is helping you plan."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Let's order pizza for tonight. What kind do you like?"
+      },
+      {
+        "speaker": "Nico",
+        "text": "I like cheese pizza. But Mia doesn't eat meat."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. How about one cheese and one vegetable pizza?"
+      },
+      {
+        "speaker": "Nico",
+        "text": "Good idea. How many people are coming?"
+      },
+      {
+        "speaker": "You",
+        "text": "Seven, with us. Small pizzas or large ones?"
+      },
+      {
+        "speaker": "Nico",
+        "text": "Large ones. Seven people eat a lot!"
+      },
+      {
+        "speaker": "You",
+        "text": "Right, two large pizzas. That's twenty-four dollars."
+      },
+      {
+        "speaker": "Nico",
+        "text": "Fine. I can pay half."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks! I'll call the pizza shop now."
+      },
+      {
+        "speaker": "Nico",
+        "text": "Great. Ask them to bring it at seven."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-easy-s13",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 13,
+    "titleEn": "Choosing paint for a bedroom",
+    "titleTh": "เลือกสีทาห้องนอน",
+    "scenarioSentences": [
+      "You want to paint your bedroom.",
+      "The walls are dark gray.",
+      "You go to a paint shop.",
+      "Your sister Lena comes too.",
+      "You cannot choose a color."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Lena, I can't choose a color. Can you help?"
+      },
+      {
+        "speaker": "Lena",
+        "text": "Sure. Do you like blue, green or yellow?"
+      },
+      {
+        "speaker": "You",
+        "text": "I like blue, but my room is small and dark."
+      },
+      {
+        "speaker": "Lena",
+        "text": "Then choose a light color. Dark colors make a room look small."
+      },
+      {
+        "speaker": "You",
+        "text": "What about this light yellow?"
+      },
+      {
+        "speaker": "Lena",
+        "text": "Your curtains are orange. Yellow and orange won't look nice."
+      },
+      {
+        "speaker": "You",
+        "text": "True. How about light green, then?"
+      },
+      {
+        "speaker": "Lena",
+        "text": "Yes! Light green looks good with orange."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, light green. I'll buy two cans."
+      },
+      {
+        "speaker": "Lena",
+        "text": "Good. I can help you paint on Saturday."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-easy-s14",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 14,
+    "titleEn": "Renting a bike in the city",
+    "titleTh": "เช่าจักรยานเที่ยวในเมือง",
+    "scenarioSentences": [
+      "You are on vacation.",
+      "You want to see the city by bike.",
+      "You find a bike shop.",
+      "Mr. Costa works there.",
+      "You want to rent a bike."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi. I'd like to rent a bike, please. How much is it?"
+      },
+      {
+        "speaker": "Mr. Costa",
+        "text": "It's fifteen dollars a day, or twenty-five for two days."
+      },
+      {
+        "speaker": "You",
+        "text": "Two days, please. That's a good price."
+      },
+      {
+        "speaker": "Mr. Costa",
+        "text": "Good choice. Do you need a helmet too?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, please. Is there an extra cost for the helmet?"
+      },
+      {
+        "speaker": "Mr. Costa",
+        "text": "No, the helmet is free. You just need to show your passport."
+      },
+      {
+        "speaker": "You",
+        "text": "Here it is. When do I bring the bike back?"
+      },
+      {
+        "speaker": "Mr. Costa",
+        "text": "Please bring it back by six on Sunday evening."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-easy-s15",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 15,
+    "titleEn": "Asking about a yoga class",
+    "titleTh": "สอบถามเรื่องคลาสโยคะ",
+    "scenarioSentences": [
+      "You want to try yoga.",
+      "You are a beginner.",
+      "There is a class near your home.",
+      "Ms. Rao is the teacher.",
+      "You visit her studio."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Rao. I'd like to join your yoga class."
+      },
+      {
+        "speaker": "Ms. Rao",
+        "text": "Great! Is this your first time?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, it is. Is the class okay for beginners?"
+      },
+      {
+        "speaker": "Ms. Rao",
+        "text": "Yes. My Monday class at six is for beginners."
+      },
+      {
+        "speaker": "You",
+        "text": "What do I need to wear?"
+      },
+      {
+        "speaker": "Ms. Rao",
+        "text": "Comfortable clothes, like a T-shirt and soft pants."
+      },
+      {
+        "speaker": "You",
+        "text": "Do I need to bring a mat?"
+      },
+      {
+        "speaker": "Ms. Rao",
+        "text": "No, we have mats. But bring a bottle of water."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. I'll come on Monday at six."
+      },
+      {
+        "speaker": "Ms. Rao",
+        "text": "Lovely. Please come ten minutes early."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-easy-s16",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 16,
+    "titleEn": "Buying a warm winter jacket",
+    "titleTh": "ซื้อเสื้อแจ็กเก็ตกันหนาว",
+    "scenarioSentences": [
+      "Winter is coming soon.",
+      "Your jacket is old and thin.",
+      "You want a warm one.",
+      "You visit a clothes store.",
+      "Pedro works there."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Excuse me. I need a warm jacket for the winter."
+      },
+      {
+        "speaker": "Pedro",
+        "text": "Sure. These jackets are very warm. What size do you wear?"
+      },
+      {
+        "speaker": "You",
+        "text": "Medium, I think. Can I try this one?"
+      },
+      {
+        "speaker": "Pedro",
+        "text": "Of course. The fitting room is over there."
+      },
+      {
+        "speaker": "You",
+        "text": "It fits well. Does it come in other colors?"
+      },
+      {
+        "speaker": "Pedro",
+        "text": "Yes, in gray, red and dark blue."
+      },
+      {
+        "speaker": "You",
+        "text": "Dark blue, please. It goes with my jeans."
+      },
+      {
+        "speaker": "Pedro",
+        "text": "Here you are. It's sixty-five dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, I'll take the dark blue jacket."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-easy-s17",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 17,
+    "titleEn": "Borrowing a camping tent",
+    "titleTh": "ขอยืมเต็นท์เพื่อนไปตั้งแคมป์",
+    "scenarioSentences": [
+      "You are going camping this weekend.",
+      "You do not have a tent.",
+      "Your friend Hugo has one.",
+      "You call him.",
+      "You want to borrow it."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Hugo. Can I borrow your tent this weekend?"
+      },
+      {
+        "speaker": "Hugo",
+        "text": "Sure. Where are you going?"
+      },
+      {
+        "speaker": "You",
+        "text": "To the lake with my cousin. We're leaving on Saturday morning."
+      },
+      {
+        "speaker": "Hugo",
+        "text": "Okay. The tent is for two people. Is that okay?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, that's perfect. When can I get it?"
+      },
+      {
+        "speaker": "Hugo",
+        "text": "Come to my house on Friday evening."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. I'll bring it back on Monday."
+      },
+      {
+        "speaker": "Hugo",
+        "text": "That's fine. Please dry it before you bring it back."
+      },
+      {
+        "speaker": "You",
+        "text": "No problem. I'll dry it in the sun on Sunday."
+      },
+      {
+        "speaker": "Hugo",
+        "text": "Thanks. Have fun at the lake!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-easy-s18",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 18,
+    "titleEn": "Taking the wrong bus",
+    "titleTh": "ขึ้นรถเมล์ผิดสาย",
+    "scenarioSentences": [
+      "You want to go to the library.",
+      "You get on a bus.",
+      "Soon, the streets look different.",
+      "Mr. Lee is the driver.",
+      "You ask him for help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Excuse me. Does this bus go to the city library?"
+      },
+      {
+        "speaker": "Mr. Lee",
+        "text": "No, sorry. This bus goes the other way."
+      },
+      {
+        "speaker": "You",
+        "text": "Oh no! What can I do?"
+      },
+      {
+        "speaker": "Mr. Lee",
+        "text": "Get off at the next stop. Then take bus 12."
+      },
+      {
+        "speaker": "You",
+        "text": "Where is the bus 12 stop?"
+      },
+      {
+        "speaker": "Mr. Lee",
+        "text": "It's across the street, in front of the bank."
+      },
+      {
+        "speaker": "You",
+        "text": "How long is the ride to the library?"
+      },
+      {
+        "speaker": "Mr. Lee",
+        "text": "About twenty minutes. Bus 12 comes every ten minutes."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, I'll get off at the next stop. Thank you!"
+      },
+      {
+        "speaker": "Mr. Lee",
+        "text": "You're welcome. Here's the stop now."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-easy-s19",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 19,
+    "titleEn": "Planning a video call with family",
+    "titleTh": "นัดวิดีโอคอลคุยกับครอบครัว",
+    "scenarioSentences": [
+      "You study in another country.",
+      "Your family lives far away.",
+      "There is a time difference.",
+      "Noah is your brother.",
+      "You want to plan a video call."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Noah. Let's have a video call with the family this weekend."
+      },
+      {
+        "speaker": "Noah",
+        "text": "Good idea! But remember, when it's noon there, it's six here."
+      },
+      {
+        "speaker": "You",
+        "text": "I know. Is Saturday at two, my time, okay?"
+      },
+      {
+        "speaker": "Noah",
+        "text": "That's eight in the evening here. Dad works late on Saturdays."
+      },
+      {
+        "speaker": "You",
+        "text": "Then how about Sunday at the same time?"
+      },
+      {
+        "speaker": "Noah",
+        "text": "Sunday at eight is perfect. Everyone is home then."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Can Grandma join us too?"
+      },
+      {
+        "speaker": "Noah",
+        "text": "Yes, she comes for dinner on Sundays."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. So, Sunday at eight your time. I'll call you."
+      }
+    ]
+  },
+  {
+    "id": "ds-r3-easy-s20",
+    "round": 3,
+    "difficulty": "easy",
+    "setNumber": 20,
+    "titleEn": "Buying a ticket to a museum",
+    "titleTh": "ซื้อบัตรเข้าชมพิพิธภัณฑ์",
+    "scenarioSentences": [
+      "You are at the city museum.",
+      "You are a student.",
+      "You want to see the paintings.",
+      "Ms. Fox works at the desk.",
+      "You ask her for help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello. Can I get a student ticket, please?"
+      },
+      {
+        "speaker": "Ms. Fox",
+        "text": "Sure. Can I see your student ID?"
+      },
+      {
+        "speaker": "You",
+        "text": "Here it is. How much is it?"
+      },
+      {
+        "speaker": "Ms. Fox",
+        "text": "It's eight dollars for students."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Where are the old paintings?"
+      },
+      {
+        "speaker": "Ms. Fox",
+        "text": "Upstairs, on the second floor. Take the stairs on your left."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. What time does the museum close today?"
+      },
+      {
+        "speaker": "Ms. Fox",
+        "text": "At six o'clock, so you have about three hours."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. I'll go upstairs and look at the paintings first."
+      }
+    ]
+  }
+]

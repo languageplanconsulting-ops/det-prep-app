@@ -1,0 +1,761 @@
+[
+  {
+    "id": "ds-r1-hard-s01",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 1,
+    "titleEn": "Getting a rental deposit back",
+    "titleTh": "ขอเงินมัดจำห้องเช่าคืน",
+    "scenarioSentences": [
+      "You recently moved out of an apartment.",
+      "Your landlord, Mr. Walsh, kept half your deposit.",
+      "He says you stained the carpet.",
+      "You believe the stain was there before.",
+      "You call him to sort it out."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Mr. Walsh. I'm calling because half my deposit is missing."
+      },
+      {
+        "speaker": "Mr. Walsh",
+        "text": "I kept it to clean the stain on the carpet."
+      },
+      {
+        "speaker": "You",
+        "text": "But that stain was already there when I moved in."
+      },
+      {
+        "speaker": "Mr. Walsh",
+        "text": "Can you prove that? I don't remember it."
+      },
+      {
+        "speaker": "You",
+        "text": "I took photos on my first day, and the stain is clearly visible."
+      },
+      {
+        "speaker": "Mr. Walsh",
+        "text": "I see. Could you email them to me today?"
+      },
+      {
+        "speaker": "You",
+        "text": "Sure. If they show the stain, will you return the full amount?"
+      },
+      {
+        "speaker": "Mr. Walsh",
+        "text": "If it's the same stain, yes. But the kitchen shelf is broken too."
+      },
+      {
+        "speaker": "You",
+        "text": "That's fair. I did break it, so take the repair cost from the deposit."
+      },
+      {
+        "speaker": "Mr. Walsh",
+        "text": "All right. I'll check the photos and send you the rest by Friday."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s02",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 2,
+    "titleEn": "Discussing a rent increase",
+    "titleTh": "ต่อรองค่าเช่าที่จะขึ้น",
+    "scenarioSentences": [
+      "Your lease ends soon.",
+      "Your landlord, Ms. Duarte, wants to raise the rent.",
+      "She is asking for fifteen percent more.",
+      "You like the apartment, but that is too much.",
+      "You go to see her."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Ms. Duarte, fifteen percent is a big jump. I'm not sure I can manage it."
+      },
+      {
+        "speaker": "Ms. Duarte",
+        "text": "I understand, but my repair costs and taxes have gone up this year."
+      },
+      {
+        "speaker": "You",
+        "text": "I've always paid on time. Would you accept a smaller rise?"
+      },
+      {
+        "speaker": "Ms. Duarte",
+        "text": "What did you have in mind?"
+      },
+      {
+        "speaker": "You",
+        "text": "Five percent. Otherwise, I'll have to look for somewhere cheaper."
+      },
+      {
+        "speaker": "Ms. Duarte",
+        "text": "Five is too low. But if you signed for two years, I could accept eight."
+      },
+      {
+        "speaker": "You",
+        "text": "Eight percent is reasonable, as long as it stays fixed for both years."
+      },
+      {
+        "speaker": "Ms. Duarte",
+        "text": "Agreed. I'll put that in the new contract and email it by Friday."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s03",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 3,
+    "titleEn": "Agreeing on cleaning rules with a roommate",
+    "titleTh": "ตกลงกติกาทำความสะอาดกับรูมเมท",
+    "scenarioSentences": [
+      "You share an apartment with Alex.",
+      "The kitchen is always messy.",
+      "Dirty dishes stay in the sink for days.",
+      "You are tired of cleaning up after him.",
+      "You bring it up tonight."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Alex, can we talk about the kitchen? Those dishes have been in the sink since Monday."
+      },
+      {
+        "speaker": "Alex",
+        "text": "Sorry, I've been working late. I was going to wash them this weekend."
+      },
+      {
+        "speaker": "You",
+        "text": "I understand, but I always end up cleaning everything. It isn't fair."
+      },
+      {
+        "speaker": "Alex",
+        "text": "You're right. Should we make a weekly cleaning schedule?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes. We could take turns with the kitchen each week."
+      },
+      {
+        "speaker": "Alex",
+        "text": "Honestly, I'd rather clean the bathroom every week than do the kitchen."
+      },
+      {
+        "speaker": "You",
+        "text": "In that case, the bathroom is yours, and I'll do the kitchen. But wash your own dishes the same day."
+      },
+      {
+        "speaker": "Alex",
+        "text": "That's reasonable. I'll start with the bathroom on Saturday."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s04",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 4,
+    "titleEn": "Asking a manager to cut work hours",
+    "titleTh": "ขอลดกะทำงานช่วงสอบ",
+    "scenarioSentences": [
+      "You work part-time at a bookstore.",
+      "Your manager is Mr. Fowler.",
+      "Your final exams start in three weeks.",
+      "You need more time to study.",
+      "You ask him for a quick chat."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mr. Fowler, my final exams start soon. Could I work fewer shifts for a while?"
+      },
+      {
+        "speaker": "Mr. Fowler",
+        "text": "How many fewer? We're already short of staff this month."
+      },
+      {
+        "speaker": "You",
+        "text": "I'm working four shifts a week now. Two would really help."
+      },
+      {
+        "speaker": "Mr. Fowler",
+        "text": "Two is difficult. Could you manage three if one was on Sunday?"
+      },
+      {
+        "speaker": "You",
+        "text": "Sundays are fine, as long as they're short. I'd rather study in the mornings."
+      },
+      {
+        "speaker": "Mr. Fowler",
+        "text": "Okay. Three shifts, including a short Sunday afternoon. How long do you need?"
+      },
+      {
+        "speaker": "You",
+        "text": "Just one month. My last exam is at the end of May."
+      },
+      {
+        "speaker": "Mr. Fowler",
+        "text": "In that case, you'll go back to four shifts in June. Is that fair?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, thank you. That's a reasonable compromise."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s05",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 5,
+    "titleEn": "Rebooking after a missed connection",
+    "titleTh": "เปลี่ยนเที่ยวบินหลังตกเครื่องต่อ",
+    "scenarioSentences": [
+      "Your first flight landed an hour late.",
+      "You missed your connecting flight home.",
+      "You are stuck at the airport.",
+      "Ms. Varga works at the airline desk.",
+      "You ask her for help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi. My first flight was an hour late, so I missed my connection."
+      },
+      {
+        "speaker": "Ms. Varga",
+        "text": "I'm sorry. The next flight with free seats leaves at nine tonight."
+      },
+      {
+        "speaker": "You",
+        "text": "That's a seven-hour wait. Is there anything earlier?"
+      },
+      {
+        "speaker": "Ms. Varga",
+        "text": "There's one at four, but it stops twice and arrives later."
+      },
+      {
+        "speaker": "You",
+        "text": "Then I'd rather take the direct one. Do I get anything for the long wait?"
+      },
+      {
+        "speaker": "Ms. Varga",
+        "text": "Since the delay was our fault, I can give you a meal voucher for the airport restaurants."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you. Could you also make sure my bag goes on the new flight?"
+      },
+      {
+        "speaker": "Ms. Varga",
+        "text": "Yes, it'll go on the new flight. Here's your boarding pass for gate twelve."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s06",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 6,
+    "titleEn": "Claiming for a damaged package",
+    "titleTh": "เคลมพัสดุที่แตกเสียหาย",
+    "scenarioSentences": [
+      "You sent a glass vase to your aunt.",
+      "It arrived in pieces.",
+      "You paid extra for careful handling.",
+      "Mr. Bell works at the post office.",
+      "You go to see him."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello. I sent a vase last week with careful handling, and it arrived broken."
+      },
+      {
+        "speaker": "Mr. Bell",
+        "text": "I'm sorry to hear that. Was it packed in a strong box with padding?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, I wrapped it carefully. My aunt took photos of the box and the pieces."
+      },
+      {
+        "speaker": "Mr. Bell",
+        "text": "Good, that's useful evidence. You'll need to fill in a claim form."
+      },
+      {
+        "speaker": "You",
+        "text": "Fine. Will I get the full value back, or only the delivery cost?"
+      },
+      {
+        "speaker": "Mr. Bell",
+        "text": "Both, as long as you have the receipt for the vase."
+      },
+      {
+        "speaker": "You",
+        "text": "I do. How long does it usually take?"
+      },
+      {
+        "speaker": "Mr. Bell",
+        "text": "About two weeks. Please attach the photos, and I'll send the claim today."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s07",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 7,
+    "titleEn": "Sharing the cost of a fence repair",
+    "titleTh": "หารค่าซ่อมรั้วกับเพื่อนบ้าน",
+    "scenarioSentences": [
+      "A storm broke the fence behind your house.",
+      "You share the fence with your neighbor, Mr. Dalton.",
+      "It needs to be fixed quickly.",
+      "Nobody has discussed the cost yet.",
+      "You knock on his door."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Mr. Dalton. Did you see the fence? The storm broke three sections."
+      },
+      {
+        "speaker": "Mr. Dalton",
+        "text": "I did. It's a mess. My dog could get out, so it needs fixing soon."
+      },
+      {
+        "speaker": "You",
+        "text": "I agree. Since it's a shared fence, should we split the cost?"
+      },
+      {
+        "speaker": "Mr. Dalton",
+        "text": "That seems fair. Do you know a builder? I don't want someone too expensive."
+      },
+      {
+        "speaker": "You",
+        "text": "Not really. I'm busy all week, so could you find someone?"
+      },
+      {
+        "speaker": "Mr. Dalton",
+        "text": "Fine. I'll get two quotes and pick the cheaper one, if that's okay."
+      },
+      {
+        "speaker": "You",
+        "text": "That works, as long as it's under four hundred dollars in total."
+      },
+      {
+        "speaker": "Mr. Dalton",
+        "text": "Reasonable. I'll call some builders tomorrow and let you know the price."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s08",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 8,
+    "titleEn": "Planning a trip with different budgets",
+    "titleTh": "วางแผนเที่ยวทั้งที่งบไม่เท่ากัน",
+    "scenarioSentences": [
+      "You and your friend Nina are planning a beach trip.",
+      "You will be away for four nights.",
+      "Nina wants to stay in hotels.",
+      "You can only afford hostels.",
+      "You talk it over at lunch."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Nina, I've checked prices. Four nights in a hotel would use up my whole budget."
+      },
+      {
+        "speaker": "Nina",
+        "text": "But hostels are so noisy. I'd rather pay more and actually sleep."
+      },
+      {
+        "speaker": "You",
+        "text": "I understand. What if we stayed in a hostel with private rooms?"
+      },
+      {
+        "speaker": "Nina",
+        "text": "That could work, but I'd still like one special night somewhere nice."
+      },
+      {
+        "speaker": "You",
+        "text": "Fair enough. Three nights in a hostel, then a hotel on the last night?"
+      },
+      {
+        "speaker": "Nina",
+        "text": "Perfect. And since the hotel was my idea, I'll pay a bigger share."
+      },
+      {
+        "speaker": "You",
+        "text": "That's really kind. Then I'll book the hostel tonight, and you choose the hotel."
+      },
+      {
+        "speaker": "Nina",
+        "text": "Deal. I'll send you a few options tomorrow."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s09",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 9,
+    "titleEn": "Challenging a parking fine",
+    "titleTh": "โต้แย้งใบสั่งจอดรถ",
+    "scenarioSentences": [
+      "You got a parking fine on campus yesterday.",
+      "The area was a no-parking zone.",
+      "However, a tree was covering the sign.",
+      "Officer Ruiz works at the parking office.",
+      "You go there to explain."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Officer Ruiz. I got a fine yesterday, but I don't think it's fair."
+      },
+      {
+        "speaker": "Officer Ruiz",
+        "text": "Where were you parked? The fine says it was a no-parking zone."
+      },
+      {
+        "speaker": "You",
+        "text": "Behind the library. The sign is completely hidden by a tree, so I couldn't see it."
+      },
+      {
+        "speaker": "Officer Ruiz",
+        "text": "Drivers are responsible for checking. Do you have any evidence?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, I took these photos this morning. You can't see the sign from the road."
+      },
+      {
+        "speaker": "Officer Ruiz",
+        "text": "Let me look. You're right, the branches cover it completely."
+      },
+      {
+        "speaker": "You",
+        "text": "So will you cancel the fine?"
+      },
+      {
+        "speaker": "Officer Ruiz",
+        "text": "Yes, I'll cancel it today. I'll also ask the gardeners to cut that tree back."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s10",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 10,
+    "titleEn": "Deciding whether to take a gap year",
+    "titleTh": "ตัดสินใจเรื่องพักเรียนหนึ่งปี",
+    "scenarioSentences": [
+      "You have a university place for September.",
+      "You also want to work and travel first.",
+      "Your parents think it is a bad idea.",
+      "Ms. Kowalski is your careers advisor.",
+      "You ask for her advice."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Ms. Kowalski, I'm thinking about a gap year, but I don't want to lose my university place."
+      },
+      {
+        "speaker": "Ms. Kowalski",
+        "text": "Many universities will hold your place for a year. Have you asked yours?"
+      },
+      {
+        "speaker": "You",
+        "text": "Not yet. My parents are worried I'll never go back."
+      },
+      {
+        "speaker": "Ms. Kowalski",
+        "text": "That happens if the year has no plan. What would you actually do?"
+      },
+      {
+        "speaker": "You",
+        "text": "Work for six months to save money, then travel and maybe volunteer."
+      },
+      {
+        "speaker": "Ms. Kowalski",
+        "text": "That's a reasonable plan, as long as you set a budget and dates."
+      },
+      {
+        "speaker": "You",
+        "text": "So should I ask the university to hold my place until next year?"
+      },
+      {
+        "speaker": "Ms. Kowalski",
+        "text": "Yes, before the deadline in March. Then show your parents a written plan."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s11",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 11,
+    "titleEn": "Fixing an error in the club budget",
+    "titleTh": "แก้ตัวเลขผิดในงบชมรม",
+    "scenarioSentences": [
+      "You look after the money for the photography club.",
+      "Leah is the club president.",
+      "The budget report goes to members on Friday.",
+      "You just found a mistake in it.",
+      "You call Leah right away."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Leah, I found a mistake in the budget. The bus for the trip was counted twice."
+      },
+      {
+        "speaker": "Leah",
+        "text": "Oh no. How much difference does that make?"
+      },
+      {
+        "speaker": "You",
+        "text": "Three hundred dollars. We actually have more money left than the report says."
+      },
+      {
+        "speaker": "Leah",
+        "text": "Well, that's better than less. But members will notice if the numbers change later."
+      },
+      {
+        "speaker": "You",
+        "text": "I know. I'd rather fix it now than explain it at the meeting."
+      },
+      {
+        "speaker": "Leah",
+        "text": "Agreed. Can you send me a corrected version by Thursday evening?"
+      },
+      {
+        "speaker": "You",
+        "text": "Sure. Should I mention the change in the email to members?"
+      },
+      {
+        "speaker": "Leah",
+        "text": "Yes, just a short note. Otherwise, people might think we're hiding something."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s12",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 12,
+    "titleEn": "Asking a coach for more playing time",
+    "titleTh": "ขอโค้ชให้ได้ลงเล่นมากขึ้น",
+    "scenarioSentences": [
+      "You play on the college basketball team.",
+      "Coach Bennett is in charge of the team.",
+      "You never miss training.",
+      "But you sit on the bench in most games.",
+      "You ask to speak with him."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Coach, can I ask you something? I train hard, but I hardly play in games."
+      },
+      {
+        "speaker": "Coach Bennett",
+        "text": "I've noticed how hard you work. Your shooting has really improved."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. So what's stopping you from putting me in?"
+      },
+      {
+        "speaker": "Coach Bennett",
+        "text": "Your defense. You lose your player too easily, and that costs us points."
+      },
+      {
+        "speaker": "You",
+        "text": "That's fair. What can I do to fix it?"
+      },
+      {
+        "speaker": "Coach Bennett",
+        "text": "Stay after training on Tuesdays and Thursdays. We'll work on defense together."
+      },
+      {
+        "speaker": "You",
+        "text": "I'll be there. If I get better, will I play more?"
+      },
+      {
+        "speaker": "Coach Bennett",
+        "text": "If I see real progress, you'll start getting ten minutes a game next month."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s13",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 13,
+    "titleEn": "Asking a friend to repay a loan",
+    "titleTh": "ทวงเงินที่เพื่อนยืม",
+    "scenarioSentences": [
+      "Your friend Marco borrowed money two months ago.",
+      "He promised to pay it back soon.",
+      "He has not mentioned it since.",
+      "Now you need the money for rent.",
+      "You bring it up over coffee."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Marco, this is a bit awkward, but do you remember the three hundred dollars?"
+      },
+      {
+        "speaker": "Marco",
+        "text": "Of course. I'm sorry, I meant to pay you back weeks ago."
+      },
+      {
+        "speaker": "You",
+        "text": "It's okay, but my rent is due on the first, and I'm short."
+      },
+      {
+        "speaker": "Marco",
+        "text": "I understand. The problem is that I can't pay it all right now."
+      },
+      {
+        "speaker": "You",
+        "text": "How much could you manage this month?"
+      },
+      {
+        "speaker": "Marco",
+        "text": "I could give you one fifty on Friday, and the rest at the end of the month."
+      },
+      {
+        "speaker": "You",
+        "text": "That works, as long as the second part really comes on time."
+      },
+      {
+        "speaker": "Marco",
+        "text": "It will, I promise. I'll send it the day I get paid."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s14",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 14,
+    "titleEn": "Getting permission for a charity run",
+    "titleTh": "ขออนุญาตจัดงานวิ่งการกุศล",
+    "scenarioSentences": [
+      "Your student group is organizing a charity run.",
+      "The route goes through the old town.",
+      "The city must approve it.",
+      "Mr. Haddad works at the city events office.",
+      "You meet him to discuss it."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mr. Haddad, we'd like to hold a charity run on the last Sunday of April."
+      },
+      {
+        "speaker": "Mr. Haddad",
+        "text": "Let me see your route. This part goes through the market street."
+      },
+      {
+        "speaker": "You",
+        "text": "Yes. Is that a problem?"
+      },
+      {
+        "speaker": "Mr. Haddad",
+        "text": "The market is open on Sundays, so it isn't safe for runners."
+      },
+      {
+        "speaker": "You",
+        "text": "We could go along the river instead. It's a bit longer, though."
+      },
+      {
+        "speaker": "Mr. Haddad",
+        "text": "That's much better. How many volunteers will you have at the crossings?"
+      },
+      {
+        "speaker": "You",
+        "text": "About twenty. Would that be enough?"
+      },
+      {
+        "speaker": "Mr. Haddad",
+        "text": "Yes, as long as each one wears a safety vest. Submit the application by April first."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. I'll send it with the new route map next week."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-hard-s15",
+    "round": 1,
+    "difficulty": "hard",
+    "setNumber": 15,
+    "titleEn": "Reporting a suspicious bank message",
+    "titleTh": "แจ้งธนาคารเรื่องข้อความน่าสงสัย",
+    "scenarioSentences": [
+      "You got a strange text this morning.",
+      "It looked like it came from your bank.",
+      "It asked you to click a link.",
+      "You did not click it.",
+      "You call Ms. Price at your bank."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Price. I got a text saying my account was locked, with a link."
+      },
+      {
+        "speaker": "Ms. Price",
+        "text": "We never send links by text. Did you click on it?"
+      },
+      {
+        "speaker": "You",
+        "text": "No, it looked suspicious, so I called you instead."
+      },
+      {
+        "speaker": "Ms. Price",
+        "text": "Good decision. Did you reply or share any card details?"
+      },
+      {
+        "speaker": "You",
+        "text": "No. But they knew my name, which worries me."
+      },
+      {
+        "speaker": "Ms. Price",
+        "text": "That's common with fake messages. To be safe, I'd suggest blocking your card."
+      },
+      {
+        "speaker": "You",
+        "text": "I'd rather not. I need it this week."
+      },
+      {
+        "speaker": "Ms. Price",
+        "text": "I understand, but it's safer. A new card will arrive in three days."
+      },
+      {
+        "speaker": "You",
+        "text": "All right, block it. Can I still take out cash at the branch?"
+      },
+      {
+        "speaker": "Ms. Price",
+        "text": "Yes, with your ID. I'm blocking it now."
+      }
+    ]
+  }
+]

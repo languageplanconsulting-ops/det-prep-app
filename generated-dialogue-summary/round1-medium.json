@@ -1,0 +1,857 @@
+[
+  {
+    "id": "ds-r1-medium-s01",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 1,
+    "titleEn": "Asking a neighbor to keep the noise down",
+    "titleTh": "ขอให้เพื่อนบ้านลดเสียงดังตอนกลางคืน",
+    "scenarioSentences": [
+      "You live in a small apartment.",
+      "Your neighbor Carlos plays loud music late.",
+      "You have exams next week.",
+      "You are not sleeping well.",
+      "You knock on his door politely."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi Carlos, sorry to bother you. Do you have a minute?"
+      },
+      {
+        "speaker": "Carlos",
+        "text": "Sure. Is something wrong?"
+      },
+      {
+        "speaker": "You",
+        "text": "Your music is quite loud at night. I can hear it through the wall."
+      },
+      {
+        "speaker": "Carlos",
+        "text": "Oh, I'm sorry. I didn't realize the walls were so thin."
+      },
+      {
+        "speaker": "You",
+        "text": "It's usually fine, but I have exams next week and need more sleep."
+      },
+      {
+        "speaker": "Carlos",
+        "text": "I understand. I've been practicing for a band concert."
+      },
+      {
+        "speaker": "You",
+        "text": "Could you stop playing by ten o'clock on weeknights?"
+      },
+      {
+        "speaker": "Carlos",
+        "text": "That's fair. I'll use headphones after ten."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you so much. Good luck with your concert!"
+      },
+      {
+        "speaker": "Carlos",
+        "text": "Thanks. Tell me if it's still too loud."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s02",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 2,
+    "titleEn": "Discussing shifts for a café job",
+    "titleTh": "คุยเรื่องกะงานร้านกาแฟ",
+    "scenarioSentences": [
+      "You applied for a part-time café job.",
+      "Ms. Novak is the café manager.",
+      "She wants to discuss your shifts.",
+      "You have classes every Tuesday.",
+      "You meet her at the café."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi Ms. Novak. I'd like to talk about my shifts."
+      },
+      {
+        "speaker": "Ms. Novak",
+        "text": "Of course. Which days can you work?"
+      },
+      {
+        "speaker": "You",
+        "text": "I'm free on weekends, but I have classes all day on Tuesdays."
+      },
+      {
+        "speaker": "Ms. Novak",
+        "text": "That's fine. We're busiest on Saturdays and Sundays anyway."
+      },
+      {
+        "speaker": "You",
+        "text": "How long would each shift be?"
+      },
+      {
+        "speaker": "Ms. Novak",
+        "text": "Six hours, from eight until two. Have you made coffee before?"
+      },
+      {
+        "speaker": "You",
+        "text": "Not in a café, but I've worked in a restaurant kitchen."
+      },
+      {
+        "speaker": "Ms. Novak",
+        "text": "Then let's do a trial shift this Saturday. Can you come at eight?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, I can. Should I bring anything?"
+      },
+      {
+        "speaker": "Ms. Novak",
+        "text": "Just wear black shoes. We'll give you the rest."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s03",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 3,
+    "titleEn": "Splitting the electricity bill",
+    "titleTh": "หารค่าไฟกับรูมเมต",
+    "scenarioSentences": [
+      "You share an apartment with Priya.",
+      "The electricity bill is much higher this month.",
+      "You usually split the bill equally.",
+      "You think you know the reason.",
+      "You talk to Priya at dinner."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Priya, have you seen the electricity bill? It's almost double this month."
+      },
+      {
+        "speaker": "Priya",
+        "text": "Really? I haven't checked it yet. How much is it?"
+      },
+      {
+        "speaker": "You",
+        "text": "It's ninety dollars. Last month it was only fifty."
+      },
+      {
+        "speaker": "Priya",
+        "text": "Oh no. I think it's my heater. I've used it every night."
+      },
+      {
+        "speaker": "You",
+        "text": "That might be it. It's been really cold."
+      },
+      {
+        "speaker": "Priya",
+        "text": "Should I pay more this time?"
+      },
+      {
+        "speaker": "You",
+        "text": "Maybe we could split it by use instead of half and half."
+      },
+      {
+        "speaker": "Priya",
+        "text": "That's fair. What if I pay sixty and you pay thirty?"
+      },
+      {
+        "speaker": "You",
+        "text": "Sounds good. Let's compare the next bill too."
+      },
+      {
+        "speaker": "Priya",
+        "text": "Okay. I'll try to use the heater less."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s04",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 4,
+    "titleEn": "Getting the wrong online order",
+    "titleTh": "ได้ของที่สั่งออนไลน์ผิดสี",
+    "scenarioSentences": [
+      "You ordered a lamp online last week.",
+      "It arrived this morning.",
+      "You wanted a white lamp, but it's green.",
+      "Mr. Evans works in customer service.",
+      "You call him about the problem."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, I'm calling because I received the wrong lamp."
+      },
+      {
+        "speaker": "Mr. Evans",
+        "text": "I'm sorry about that. What exactly happened?"
+      },
+      {
+        "speaker": "You",
+        "text": "I ordered a white lamp, but a green one arrived this morning."
+      },
+      {
+        "speaker": "Mr. Evans",
+        "text": "I can see our mistake here. Would you like a refund or a new lamp?"
+      },
+      {
+        "speaker": "You",
+        "text": "I'd prefer a white lamp. How long will delivery take?"
+      },
+      {
+        "speaker": "Mr. Evans",
+        "text": "About three days. I'll email you a free return label today."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. Should I send the green one back first?"
+      },
+      {
+        "speaker": "Mr. Evans",
+        "text": "No, you can send it anytime this month."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. Thanks for sorting it out so quickly."
+      },
+      {
+        "speaker": "Mr. Evans",
+        "text": "You're welcome. Sorry again for the trouble."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s05",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 5,
+    "titleEn": "Missing the last train home",
+    "titleTh": "ตกรถไฟเที่ยวสุดท้าย",
+    "scenarioSentences": [
+      "You are out with your friend Jake.",
+      "You stayed too late at a concert.",
+      "The last train has already left.",
+      "You both live far away.",
+      "You need another way home."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Jake, I think we've missed the last train."
+      },
+      {
+        "speaker": "Jake",
+        "text": "Oh no. What should we do now?"
+      },
+      {
+        "speaker": "You",
+        "text": "We could share a taxi, or we could wait for the night bus."
+      },
+      {
+        "speaker": "Jake",
+        "text": "A taxi would be faster. How much would it cost?"
+      },
+      {
+        "speaker": "You",
+        "text": "Probably around forty dollars. That's too expensive for me."
+      },
+      {
+        "speaker": "Jake",
+        "text": "Me too. When does the night bus come?"
+      },
+      {
+        "speaker": "You",
+        "text": "There's one every thirty minutes. The next one comes in twenty minutes."
+      },
+      {
+        "speaker": "Jake",
+        "text": "It's slower, but it's much cheaper. Let's take it together."
+      },
+      {
+        "speaker": "You",
+        "text": "Good idea. The stop is just across the street."
+      },
+      {
+        "speaker": "Jake",
+        "text": "Let's go now so we don't miss this one too."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s06",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 6,
+    "titleEn": "Planning a surprise party",
+    "titleTh": "วางแผนงานวันเกิดเซอร์ไพรส์",
+    "scenarioSentences": [
+      "Your friend Mei's birthday is next Friday.",
+      "You want to plan a surprise party.",
+      "Hana is Mei's close friend too.",
+      "You meet Hana after class.",
+      "You ask for her help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hana, Mei's birthday is next Friday. Should we plan a surprise party?"
+      },
+      {
+        "speaker": "Hana",
+        "text": "I love that idea! Where could we have it?"
+      },
+      {
+        "speaker": "You",
+        "text": "My room is too small, and restaurants are expensive."
+      },
+      {
+        "speaker": "Hana",
+        "text": "We could use my apartment. It has a big living room."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. How many people should we invite?"
+      },
+      {
+        "speaker": "Hana",
+        "text": "Maybe twelve. If everyone brings food, we'll spend less."
+      },
+      {
+        "speaker": "You",
+        "text": "Good idea. I can buy the cake and decorations."
+      },
+      {
+        "speaker": "Hana",
+        "text": "Sounds fun. But how do we keep it secret?"
+      },
+      {
+        "speaker": "You",
+        "text": "I'll invite Mei to watch a movie at your place."
+      },
+      {
+        "speaker": "Hana",
+        "text": "Nice. She'll never guess!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s07",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 7,
+    "titleEn": "Pausing a gym membership",
+    "titleTh": "ขอพักสมาชิกฟิตเนสชั่วคราว",
+    "scenarioSentences": [
+      "You have a gym membership.",
+      "You're traveling for all of next month.",
+      "Ms. Reed works at the gym desk.",
+      "You ask her about your options.",
+      "You don't want to cancel."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi Ms. Reed. I'm traveling next month. Can I pause my membership?"
+      },
+      {
+        "speaker": "Ms. Reed",
+        "text": "Yes, you can freeze it. How long will you be away?"
+      },
+      {
+        "speaker": "You",
+        "text": "Exactly four weeks. I leave on the first."
+      },
+      {
+        "speaker": "Ms. Reed",
+        "text": "That's fine. Freezing costs a small fee of ten dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "That's cheaper than a whole month. What about my locker?"
+      },
+      {
+        "speaker": "Ms. Reed",
+        "text": "You can keep it, but you have to empty it first."
+      },
+      {
+        "speaker": "You",
+        "text": "No problem. Do I need to fill in a form?"
+      },
+      {
+        "speaker": "Ms. Reed",
+        "text": "Yes, just sign here. Your payments will start again after four weeks."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks a lot. See you when I get back."
+      },
+      {
+        "speaker": "Ms. Reed",
+        "text": "Have a good trip!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s08",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 8,
+    "titleEn": "Repairing a cracked laptop screen",
+    "titleTh": "ซ่อมจอแล็ปท็อปที่แตก",
+    "scenarioSentences": [
+      "You dropped your laptop this morning.",
+      "Now its screen is cracked.",
+      "You use it for all your homework.",
+      "Mr. Okafor fixes computers on campus.",
+      "You bring the laptop to him."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Mr. Okafor. I dropped my laptop and the screen cracked. Can you repair it?"
+      },
+      {
+        "speaker": "Mr. Okafor",
+        "text": "Let me look. Yes, we can replace the screen."
+      },
+      {
+        "speaker": "You",
+        "text": "How much will it cost?"
+      },
+      {
+        "speaker": "Mr. Okafor",
+        "text": "It's eighty, with the campus discount."
+      },
+      {
+        "speaker": "You",
+        "text": "That's okay. How long will the repair take?"
+      },
+      {
+        "speaker": "Mr. Okafor",
+        "text": "About seven days. We have to order a new screen."
+      },
+      {
+        "speaker": "You",
+        "text": "Seven days? I have an essay due on Thursday."
+      },
+      {
+        "speaker": "Mr. Okafor",
+        "text": "Don't worry. You can borrow one of our laptops until yours is fixed."
+      },
+      {
+        "speaker": "You",
+        "text": "That's so helpful. Should I return it when I collect mine?"
+      },
+      {
+        "speaker": "Mr. Okafor",
+        "text": "Exactly. Just leave your phone number so we can call you."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s09",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 9,
+    "titleEn": "Comparing two apartments",
+    "titleTh": "เลือกระหว่างอพาร์ตเมนต์สองแห่ง",
+    "scenarioSentences": [
+      "You are looking for a new apartment.",
+      "You have found two options.",
+      "One is cheap but far from campus.",
+      "Your friend Sofia has seen both.",
+      "You ask for her opinion."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Sofia, I can't decide between the two apartments."
+      },
+      {
+        "speaker": "Sofia",
+        "text": "The first one is cheaper. How far is it from campus?"
+      },
+      {
+        "speaker": "You",
+        "text": "It's about forty minutes by bike. The other one is only ten."
+      },
+      {
+        "speaker": "Sofia",
+        "text": "Forty minutes is a long ride, especially when it rains."
+      },
+      {
+        "speaker": "You",
+        "text": "True, but the near one costs a hundred dollars more each month."
+      },
+      {
+        "speaker": "Sofia",
+        "text": "Have you thought about bus fares if you can't cycle?"
+      },
+      {
+        "speaker": "You",
+        "text": "Not really. That might cost almost as much."
+      },
+      {
+        "speaker": "Sofia",
+        "text": "Then the near one is better. You'll save time too."
+      },
+      {
+        "speaker": "You",
+        "text": "You're right. I'll call the landlord and say yes today."
+      },
+      {
+        "speaker": "Sofia",
+        "text": "Good luck with the move!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s10",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 10,
+    "titleEn": "Ordering food with a nut allergy",
+    "titleTh": "สั่งอาหารเมื่อแพ้ถั่ว",
+    "scenarioSentences": [
+      "You are having dinner at a restaurant.",
+      "You are allergic to nuts.",
+      "You want to order the chicken pasta.",
+      "Paolo is your waiter tonight.",
+      "You ask him about the sauce."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Excuse me. I have a nut allergy. Is the chicken pasta safe?"
+      },
+      {
+        "speaker": "Paolo",
+        "text": "I'm not sure. The sauce might have nuts."
+      },
+      {
+        "speaker": "You",
+        "text": "Could you check with the kitchen? It's quite serious."
+      },
+      {
+        "speaker": "Paolo",
+        "text": "Of course. Wait here, I'll ask the chef."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. I'll look at the menu while I wait."
+      },
+      {
+        "speaker": "Paolo",
+        "text": "The chef says the sauce has nuts, so please don't order it."
+      },
+      {
+        "speaker": "You",
+        "text": "Good to know. Which dishes are safe for me?"
+      },
+      {
+        "speaker": "Paolo",
+        "text": "The grilled fish and the tomato soup have no nuts at all."
+      },
+      {
+        "speaker": "You",
+        "text": "I'll have the grilled fish, then."
+      },
+      {
+        "speaker": "Paolo",
+        "text": "Good choice. I'll tell the kitchen about your allergy too."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s16",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 16,
+    "titleEn": "Sharing a car for a weekend trip",
+    "titleTh": "ติดรถเพื่อนไปเที่ยวสุดสัปดาห์",
+    "scenarioSentences": [
+      "You and Ravi are classmates.",
+      "You are both going to the beach this weekend.",
+      "Ravi has a car.",
+      "You want to travel with him.",
+      "You discuss the plan after class."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Ravi, can I come with you to the beach on Saturday?"
+      },
+      {
+        "speaker": "Ravi",
+        "text": "Sure! It's a three-hour drive, so company would be nice."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. I'd like to pay for some of the gas."
+      },
+      {
+        "speaker": "Ravi",
+        "text": "That's kind. Should we just split it fifty-fifty?"
+      },
+      {
+        "speaker": "You",
+        "text": "Sounds fair. I can also drive part of the way if you're tired."
+      },
+      {
+        "speaker": "Ravi",
+        "text": "Great. You drive there, and I'll drive back."
+      },
+      {
+        "speaker": "You",
+        "text": "What time should we leave?"
+      },
+      {
+        "speaker": "Ravi",
+        "text": "Early, so we can avoid traffic. How about seven?"
+      },
+      {
+        "speaker": "You",
+        "text": "Seven is too early for me. Could we leave at eight instead?"
+      },
+      {
+        "speaker": "Ravi",
+        "text": "Okay, eight it is. I'll pick you up outside your dorm."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s17",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 17,
+    "titleEn": "Paying a library fine",
+    "titleTh": "จ่ายค่าปรับคืนหนังสือห้องสมุดช้า",
+    "scenarioSentences": [
+      "You borrowed three books last month.",
+      "You forgot to return them on time.",
+      "Now you have a fine.",
+      "Mrs. Chen is the librarian.",
+      "You call to ask her about it."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Mrs. Chen. I got an email about a fine for three books."
+      },
+      {
+        "speaker": "Mrs. Chen",
+        "text": "Yes, they're two weeks late. That's twelve dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "Twelve dollars? Sorry, I completely forgot."
+      },
+      {
+        "speaker": "Mrs. Chen",
+        "text": "It happens. Do you still have the books?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, they're in my bag. I can bring them this afternoon."
+      },
+      {
+        "speaker": "Mrs. Chen",
+        "text": "If you return them today, I can reduce the fine to five dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "That would be great. Can I pay by card?"
+      },
+      {
+        "speaker": "Mrs. Chen",
+        "text": "Yes, at the front desk. Please come before six o'clock."
+      },
+      {
+        "speaker": "You",
+        "text": "I will. Could you remind me next time by text?"
+      },
+      {
+        "speaker": "Mrs. Chen",
+        "text": "Of course. I'll add your phone number to your account."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s18",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 18,
+    "titleEn": "Looking after a friend's cat",
+    "titleTh": "ช่วยเลี้ยงแมวให้เพื่อน",
+    "scenarioSentences": [
+      "Your friend Emma is away next week.",
+      "She has a cat named Bean.",
+      "Bean is old and takes medicine.",
+      "Emma asks you to help.",
+      "You meet her at her apartment."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi Emma. So, what does Bean need while you're away?"
+      },
+      {
+        "speaker": "Emma",
+        "text": "Thanks for helping! She eats twice a day, at eight and at six."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. How much food should I give her?"
+      },
+      {
+        "speaker": "Emma",
+        "text": "Half a cup each time, even if she asks for more."
+      },
+      {
+        "speaker": "You",
+        "text": "Got it. You said she takes medicine, right?"
+      },
+      {
+        "speaker": "Emma",
+        "text": "Yes, one pill every morning. Hide it in a little cheese."
+      },
+      {
+        "speaker": "You",
+        "text": "That sounds easy enough. Should I change her water too?"
+      },
+      {
+        "speaker": "Emma",
+        "text": "Yes, please. Fresh water every visit."
+      },
+      {
+        "speaker": "You",
+        "text": "Then I'll come twice a day, before class and after dinner."
+      },
+      {
+        "speaker": "Emma",
+        "text": "Perfect. I'll leave the spare key with you tonight."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s19",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 19,
+    "titleEn": "Booking driving lessons",
+    "titleTh": "จองเรียนขับรถ",
+    "scenarioSentences": [
+      "You want to learn to drive.",
+      "You have never driven a car before.",
+      "Mr. Brooks is a driving instructor.",
+      "You call to ask about lessons.",
+      "You are free most evenings."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Mr. Brooks. I'd like to book some driving lessons."
+      },
+      {
+        "speaker": "Mr. Brooks",
+        "text": "Sure. Have you had any lessons before?"
+      },
+      {
+        "speaker": "You",
+        "text": "No, I'm a complete beginner. How many lessons will I need?"
+      },
+      {
+        "speaker": "Mr. Brooks",
+        "text": "Most beginners need about ten before the test."
+      },
+      {
+        "speaker": "You",
+        "text": "And how much does each lesson cost?"
+      },
+      {
+        "speaker": "Mr. Brooks",
+        "text": "Forty dollars an hour, or three hundred fifty for ten."
+      },
+      {
+        "speaker": "You",
+        "text": "The package is cheaper, so I'll take ten. When can we start?"
+      },
+      {
+        "speaker": "Mr. Brooks",
+        "text": "I have evenings free next week. Is Monday at six okay?"
+      },
+      {
+        "speaker": "You",
+        "text": "Monday works for me. When could I take the test?"
+      },
+      {
+        "speaker": "Mr. Brooks",
+        "text": "If you practice well, you could book it for next month."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-medium-s20",
+    "round": 1,
+    "difficulty": "medium",
+    "setNumber": 20,
+    "titleEn": "Taking a first-aid course",
+    "titleTh": "สมัครเรียนปฐมพยาบาล",
+    "scenarioSentences": [
+      "You want to learn first aid.",
+      "It will help with your summer job.",
+      "Ms. Cole organizes the courses.",
+      "You visit her office to ask.",
+      "You work during the week."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Ms. Cole. When does your next first-aid course start?"
+      },
+      {
+        "speaker": "Ms. Cole",
+        "text": "There's an evening course this month and a weekend course next month."
+      },
+      {
+        "speaker": "You",
+        "text": "I work on weekdays, so the weekend suits me. How long is it?"
+      },
+      {
+        "speaker": "Ms. Cole",
+        "text": "Two full days, Saturday and Sunday, from nine to five."
+      },
+      {
+        "speaker": "You",
+        "text": "How much does it cost?"
+      },
+      {
+        "speaker": "Ms. Cole",
+        "text": "It's sixty dollars, including the book and the lunch."
+      },
+      {
+        "speaker": "You",
+        "text": "That's not bad. Will I get a certificate at the end?"
+      },
+      {
+        "speaker": "Ms. Cole",
+        "text": "Yes, if you pass the short test on Sunday afternoon."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Please put my name down for the weekend course."
+      },
+      {
+        "speaker": "Ms. Cole",
+        "text": "Done. You can pay here before it starts."
+      }
+    ]
+  }
+]

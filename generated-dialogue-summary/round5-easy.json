@@ -1,0 +1,564 @@
+[
+  {
+    "id": "ds-r5-easy-s11",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 11,
+    "titleEn": "Buying bread at a bakery",
+    "titleTh": "ซื้อขนมปังที่ร้านเบเกอรี่",
+    "scenarioSentences": [
+      "You are at a small bakery.",
+      "You need bread for lunch.",
+      "There are many kinds of bread.",
+      "Mrs. Russell owns the bakery.",
+      "You ask her for help."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Good morning. I need some bread for a family lunch."
+      },
+      {
+        "speaker": "Mrs. Russell",
+        "text": "Of course. Do you want white or brown bread?"
+      },
+      {
+        "speaker": "You",
+        "text": "Which one is fresh today?"
+      },
+      {
+        "speaker": "Mrs. Russell",
+        "text": "Both are fresh. I made them at five this morning."
+      },
+      {
+        "speaker": "You",
+        "text": "My parents like brown bread. Is it soft?"
+      },
+      {
+        "speaker": "Mrs. Russell",
+        "text": "Yes, it's soft inside. It's still warm too."
+      },
+      {
+        "speaker": "You",
+        "text": "We are eight people. How many loaves do I need?"
+      },
+      {
+        "speaker": "Mrs. Russell",
+        "text": "Two loaves are good for eight people."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, two brown loaves, please."
+      },
+      {
+        "speaker": "Mrs. Russell",
+        "text": "Here you are. That's six dollars."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-easy-s12",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 12,
+    "titleEn": "Taking a dance class",
+    "titleTh": "สมัครเรียนเต้นสำหรับมือใหม่",
+    "scenarioSentences": [
+      "You want to learn to dance.",
+      "You are a beginner.",
+      "You find a dance school.",
+      "Ms. Santos is a teacher there.",
+      "You ask her about classes."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Santos. I want to learn to dance, but I'm a beginner."
+      },
+      {
+        "speaker": "Ms. Santos",
+        "text": "No problem! Everyone starts at the beginning."
+      },
+      {
+        "speaker": "You",
+        "text": "Which class is good for me?"
+      },
+      {
+        "speaker": "Ms. Santos",
+        "text": "We have two beginner classes, on Tuesday and Thursday evenings."
+      },
+      {
+        "speaker": "You",
+        "text": "I work late on Tuesdays. What time is the Thursday class?"
+      },
+      {
+        "speaker": "Ms. Santos",
+        "text": "It's from seven to eight."
+      },
+      {
+        "speaker": "You",
+        "text": "That's perfect. Do I need special shoes?"
+      },
+      {
+        "speaker": "Ms. Santos",
+        "text": "Not for the first class. Just wear comfortable shoes."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. I'll join the Thursday class this week."
+      },
+      {
+        "speaker": "Ms. Santos",
+        "text": "Wonderful. See you on Thursday at seven!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-easy-s13",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 13,
+    "titleEn": "Flying a kite in the park",
+    "titleTh": "ไปเล่นว่าวที่สวนสาธารณะ",
+    "scenarioSentences": [
+      "You have a new kite.",
+      "It is very windy today.",
+      "You want to fly the kite.",
+      "Your friend Arlo is with you.",
+      "You need a good place."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Arlo, it's really windy today. Let's fly my new kite!"
+      },
+      {
+        "speaker": "Arlo",
+        "text": "Great idea! Where can we go?"
+      },
+      {
+        "speaker": "You",
+        "text": "What about the small park near my house?"
+      },
+      {
+        "speaker": "Arlo",
+        "text": "That park has a lot of trees. That's bad for kites."
+      },
+      {
+        "speaker": "You",
+        "text": "You're right. How about the big park on the hill?"
+      },
+      {
+        "speaker": "Arlo",
+        "text": "Yes! It's open and very windy up there."
+      },
+      {
+        "speaker": "You",
+        "text": "How do we get there?"
+      },
+      {
+        "speaker": "Arlo",
+        "text": "We can ride our bikes. It's only ten minutes."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. Let's go after lunch, at one o'clock."
+      },
+      {
+        "speaker": "Arlo",
+        "text": "Sounds good. I'll bring some water and snacks."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-easy-s14",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 14,
+    "titleEn": "Going fishing with Grandpa",
+    "titleTh": "ไปตกปลากับคุณปู่",
+    "scenarioSentences": [
+      "You are staying with your grandparents.",
+      "Grandpa loves fishing.",
+      "He wants to take you tomorrow.",
+      "It is your first time.",
+      "You ask him about the trip."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Grandpa, what time are we going fishing tomorrow?"
+      },
+      {
+        "speaker": "Grandpa",
+        "text": "Early. Let's leave at six. Fish eat in the morning."
+      },
+      {
+        "speaker": "You",
+        "text": "Six? That's very early! Can we go at eight?"
+      },
+      {
+        "speaker": "Grandpa",
+        "text": "Sorry, eight is late. We won't catch anything."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, six o'clock. What do I need to bring?"
+      },
+      {
+        "speaker": "Grandpa",
+        "text": "I have everything for fishing. Just bring a hat."
+      },
+      {
+        "speaker": "You",
+        "text": "A hat? Why?"
+      },
+      {
+        "speaker": "Grandpa",
+        "text": "The sun is very strong on the lake."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. I'll get my hat ready tonight."
+      },
+      {
+        "speaker": "Grandpa",
+        "text": "Good. I'll wake you up at half past five."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-easy-s15",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 15,
+    "titleEn": "Buying ice cream on a hot day",
+    "titleTh": "ซื้อไอศกรีมกินวันอากาศร้อน",
+    "scenarioSentences": [
+      "It is a very hot day.",
+      "You are walking in the park.",
+      "You see an ice cream stand.",
+      "Luis is selling ice cream.",
+      "You want something cold."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi. What flavors do you have today?"
+      },
+      {
+        "speaker": "Luis",
+        "text": "We have chocolate, vanilla, strawberry and mango."
+      },
+      {
+        "speaker": "You",
+        "text": "Hmm. Is the mango one sweet?"
+      },
+      {
+        "speaker": "Luis",
+        "text": "Yes, it's sweet. But many people buy chocolate today."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, chocolate, please. How much is it?"
+      },
+      {
+        "speaker": "Luis",
+        "text": "Three dollars. Do you want a cup or a cone?"
+      },
+      {
+        "speaker": "You",
+        "text": "A cone, please. I love cones."
+      },
+      {
+        "speaker": "Luis",
+        "text": "Sure. Eat it fast, because it's very hot today!"
+      },
+      {
+        "speaker": "You",
+        "text": "I will! Here's three dollars."
+      },
+      {
+        "speaker": "Luis",
+        "text": "Thanks. Here's your chocolate cone. Enjoy!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-easy-s16",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 16,
+    "titleEn": "Visiting a night market",
+    "titleTh": "ไปเที่ยวตลาดนัดกลางคืน",
+    "scenarioSentences": [
+      "There is a night market in town.",
+      "It is open on Fridays.",
+      "Your friend Becky wants to go.",
+      "You want to go too.",
+      "You make a plan."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Becky, let's go to the night market on Friday!"
+      },
+      {
+        "speaker": "Becky",
+        "text": "Yes! I want to try the street food there."
+      },
+      {
+        "speaker": "You",
+        "text": "Me too. I also need a bag for my mom."
+      },
+      {
+        "speaker": "Becky",
+        "text": "Good. There are lots of bags and clothes there."
+      },
+      {
+        "speaker": "You",
+        "text": "What time does it open?"
+      },
+      {
+        "speaker": "Becky",
+        "text": "At five. But it's very hot before seven."
+      },
+      {
+        "speaker": "You",
+        "text": "Then let's go at seven. We can eat first and shop after."
+      },
+      {
+        "speaker": "Becky",
+        "text": "Good plan. Bring cash. Many sellers don't take cards."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. Let's meet at the bus stop at six thirty."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-easy-s17",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 17,
+    "titleEn": "Going to an art class",
+    "titleTh": "เตรียมตัวไปเรียนวาดรูป",
+    "scenarioSentences": [
+      "You joined an art class.",
+      "Your first class is on Wednesday.",
+      "Mr. Gill is the art teacher.",
+      "You are new to painting.",
+      "You call him with questions."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Mr. Gill. What do I need for Wednesday's class?"
+      },
+      {
+        "speaker": "Mr. Gill",
+        "text": "Not much. We have paint, brushes and paper for everyone."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. What are we going to paint?"
+      },
+      {
+        "speaker": "Mr. Gill",
+        "text": "Flowers. I'll bring some from my garden."
+      },
+      {
+        "speaker": "You",
+        "text": "That sounds nice. But I'm not very good at art."
+      },
+      {
+        "speaker": "Mr. Gill",
+        "text": "Don't worry. It's a class for beginners."
+      },
+      {
+        "speaker": "You",
+        "text": "Do I need special clothes?"
+      },
+      {
+        "speaker": "Mr. Gill",
+        "text": "Yes, bring an old shirt. Paint can get on your clothes."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. I'll bring my dad's old shirt."
+      },
+      {
+        "speaker": "Mr. Gill",
+        "text": "Good idea. See you on Wednesday at four."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-easy-s18",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 18,
+    "titleEn": "Waiting for a friend who is late",
+    "titleTh": "รอเพื่อนที่มาสาย",
+    "scenarioSentences": [
+      "You are meeting your friend Josh.",
+      "You are at the station at noon.",
+      "Josh is not there.",
+      "You wait for ten minutes.",
+      "Then you call him."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Josh. I'm at the station. Where are you?"
+      },
+      {
+        "speaker": "Josh",
+        "text": "I'm so sorry! I missed my bus."
+      },
+      {
+        "speaker": "You",
+        "text": "Oh no. When is the next one?"
+      },
+      {
+        "speaker": "Josh",
+        "text": "In fifteen minutes. So I'll be there at about twelve thirty."
+      },
+      {
+        "speaker": "You",
+        "text": "It's very cold here. I don't want to stand outside."
+      },
+      {
+        "speaker": "Josh",
+        "text": "There's a small café next to the station. Wait there."
+      },
+      {
+        "speaker": "You",
+        "text": "Good idea. I'll get a hot drink."
+      },
+      {
+        "speaker": "Josh",
+        "text": "Great. I'll buy lunch for you to say sorry."
+      },
+      {
+        "speaker": "You",
+        "text": "Ha, okay! See you in the café."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-easy-s19",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 19,
+    "titleEn": "Looking after a younger sister",
+    "titleTh": "ดูแลน้องสาวตอนแม่ไม่อยู่บ้าน",
+    "scenarioSentences": [
+      "Your mom is going out tonight.",
+      "You will look after your sister.",
+      "She is six years old.",
+      "Mom is getting ready.",
+      "She tells you the plan."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mom, what do I need to do tonight?"
+      },
+      {
+        "speaker": "Mom",
+        "text": "First, give your sister dinner at six. It's in the fridge."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. Do I just heat it up?"
+      },
+      {
+        "speaker": "Mom",
+        "text": "Yes, five minutes in the microwave."
+      },
+      {
+        "speaker": "You",
+        "text": "Can she watch TV after dinner?"
+      },
+      {
+        "speaker": "Mom",
+        "text": "Yes, for one hour. Then a bath at seven thirty."
+      },
+      {
+        "speaker": "You",
+        "text": "And what time does she go to bed?"
+      },
+      {
+        "speaker": "Mom",
+        "text": "At eight. Please read her a short story first."
+      },
+      {
+        "speaker": "You",
+        "text": "No problem. When are you coming home?"
+      },
+      {
+        "speaker": "Mom",
+        "text": "At about eleven. You can call me anytime."
+      }
+    ]
+  },
+  {
+    "id": "ds-r5-easy-s20",
+    "round": 5,
+    "difficulty": "easy",
+    "setNumber": 20,
+    "titleEn": "Buying a board game for a cousin",
+    "titleTh": "ซื้อเกมเป็นของขวัญให้ลูกพี่ลูกน้อง",
+    "scenarioSentences": [
+      "Your cousin's birthday is next week.",
+      "He is turning eight.",
+      "You want to buy him a game.",
+      "You go to a toy store.",
+      "Ollie works there."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi. I'm looking for a game for my cousin. He's turning eight."
+      },
+      {
+        "speaker": "Ollie",
+        "text": "Nice. Does he like board games?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, but long games are boring for him."
+      },
+      {
+        "speaker": "Ollie",
+        "text": "Then this card game is great. It takes only fifteen minutes."
+      },
+      {
+        "speaker": "You",
+        "text": "Is it easy to learn?"
+      },
+      {
+        "speaker": "Ollie",
+        "text": "Very easy. The rules are on one small card."
+      },
+      {
+        "speaker": "You",
+        "text": "How many people can play?"
+      },
+      {
+        "speaker": "Ollie",
+        "text": "Two to six players. It's good for families."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect, I'll take it. How much is it?"
+      },
+      {
+        "speaker": "Ollie",
+        "text": "Twelve dollars. Do you want a gift bag?"
+      }
+    ]
+  }
+]

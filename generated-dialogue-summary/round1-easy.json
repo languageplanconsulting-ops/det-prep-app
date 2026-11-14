@@ -1,0 +1,857 @@
+[
+  {
+    "id": "ds-r1-easy-s06",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 6,
+    "titleEn": "Replacing a lost student card",
+    "titleTh": "ทำบัตรนักศึกษาใหม่แทนใบที่หาย",
+    "scenarioSentences": [
+      "You are a new student.",
+      "You lost your student card yesterday.",
+      "You need it for the library.",
+      "You visit the student office.",
+      "Ms. Park works at the desk."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Ms. Park. I lost my student card yesterday."
+      },
+      {
+        "speaker": "Ms. Park",
+        "text": "Oh no. Do you want a new one?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, please. I need it for the library."
+      },
+      {
+        "speaker": "Ms. Park",
+        "text": "No problem. Please fill in this form first."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. Do I need a new photo?"
+      },
+      {
+        "speaker": "Ms. Park",
+        "text": "Yes. We can take it here. Look at the camera, please."
+      },
+      {
+        "speaker": "You",
+        "text": "Is there a fee for the new card?"
+      },
+      {
+        "speaker": "Ms. Park",
+        "text": "Yes, it is ten dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "Here you are. When can I get it?"
+      },
+      {
+        "speaker": "Ms. Park",
+        "text": "Come back on Friday afternoon. It will be ready."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s07",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 7,
+    "titleEn": "Buying a monthly bus pass",
+    "titleTh": "ซื้อบัตรรถเมล์รายเดือน",
+    "scenarioSentences": [
+      "You take the bus to school.",
+      "Each ride costs two dollars.",
+      "You want to save money.",
+      "Your friend Tom has a pass.",
+      "You see him at lunch."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Tom, you have a monthly bus pass, right?"
+      },
+      {
+        "speaker": "Tom",
+        "text": "Yes. It's cheaper than buying a ticket every time."
+      },
+      {
+        "speaker": "You",
+        "text": "How much is it?"
+      },
+      {
+        "speaker": "Tom",
+        "text": "Forty dollars a month for students."
+      },
+      {
+        "speaker": "You",
+        "text": "I pay about sixty dollars a month now."
+      },
+      {
+        "speaker": "Tom",
+        "text": "Then get the pass. You can save twenty dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "Good idea. Where can I buy one?"
+      },
+      {
+        "speaker": "Tom",
+        "text": "At the ticket office in the bus station. Bring your student card."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. I'll go there after class today."
+      },
+      {
+        "speaker": "Tom",
+        "text": "Great. It's open until six."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s08",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 8,
+    "titleEn": "Ordering a birthday cake",
+    "titleTh": "สั่งเค้กวันเกิดให้รูมเมต",
+    "scenarioSentences": [
+      "Your roommate's birthday is on Saturday.",
+      "You want to surprise her.",
+      "You go to a small bakery.",
+      "Mr. Sato works there.",
+      "You want to order a cake."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Mr. Sato. I'd like to order a birthday cake."
+      },
+      {
+        "speaker": "Mr. Sato",
+        "text": "Of course. What kind of cake would you like?"
+      },
+      {
+        "speaker": "You",
+        "text": "Chocolate, please. It's for my roommate."
+      },
+      {
+        "speaker": "Mr. Sato",
+        "text": "Nice. What size? We have small and large."
+      },
+      {
+        "speaker": "You",
+        "text": "Small, please. It's for four people."
+      },
+      {
+        "speaker": "Mr. Sato",
+        "text": "Okay. Do you want a name on top?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, please. Her name is Emma."
+      },
+      {
+        "speaker": "Mr. Sato",
+        "text": "No problem. When do you need it?"
+      },
+      {
+        "speaker": "You",
+        "text": "On Saturday morning. Can I pick it up at ten?"
+      },
+      {
+        "speaker": "Mr. Sato",
+        "text": "Yes, it will be ready at ten. It's twenty dollars."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s09",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 9,
+    "titleEn": "Asking a neighbor to water plants",
+    "titleTh": "ฝากเพื่อนบ้านรดน้ำต้นไม้",
+    "scenarioSentences": [
+      "You are going away this weekend.",
+      "You have many plants at home.",
+      "They need water every day.",
+      "Mrs. Lopez lives next door.",
+      "You knock on her door."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Mrs. Lopez. Can I ask you a favor?"
+      },
+      {
+        "speaker": "Mrs. Lopez",
+        "text": "Of course. What is it?"
+      },
+      {
+        "speaker": "You",
+        "text": "I'm visiting my family this weekend. Could you water my plants?"
+      },
+      {
+        "speaker": "Mrs. Lopez",
+        "text": "Sure, I can do that. How many plants do you have?"
+      },
+      {
+        "speaker": "You",
+        "text": "Six. They're all in the living room."
+      },
+      {
+        "speaker": "Mrs. Lopez",
+        "text": "Okay. How much water do they need?"
+      },
+      {
+        "speaker": "You",
+        "text": "Just one glass each, in the morning."
+      },
+      {
+        "speaker": "Mrs. Lopez",
+        "text": "That's easy. But how can I get in?"
+      },
+      {
+        "speaker": "You",
+        "text": "Here's my key. I'll come back on Sunday night."
+      },
+      {
+        "speaker": "Mrs. Lopez",
+        "text": "Great. Have a nice trip!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s10",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 10,
+    "titleEn": "Starting beginner swimming lessons",
+    "titleTh": "สมัครเรียนว่ายน้ำที่สระ",
+    "scenarioSentences": [
+      "You want to learn to swim.",
+      "The school has a swimming pool.",
+      "You go there after class.",
+      "Coach Rivera teaches swimming.",
+      "You ask her about classes."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Coach Rivera. Do you have classes for beginners?"
+      },
+      {
+        "speaker": "Coach Rivera",
+        "text": "Yes. There's one on Tuesday and one on Friday."
+      },
+      {
+        "speaker": "You",
+        "text": "What time are they?"
+      },
+      {
+        "speaker": "Coach Rivera",
+        "text": "Tuesday at six p.m. and Friday at seven a.m."
+      },
+      {
+        "speaker": "You",
+        "text": "Tuesday is better. I have class on Friday mornings."
+      },
+      {
+        "speaker": "Coach Rivera",
+        "text": "Okay. I'll put your name on the Tuesday list."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. What do I need to bring?"
+      },
+      {
+        "speaker": "Coach Rivera",
+        "text": "A towel and a swim cap."
+      },
+      {
+        "speaker": "You",
+        "text": "I don't have a swim cap."
+      },
+      {
+        "speaker": "Coach Rivera",
+        "text": "You can buy one at the pool shop. It's five dollars."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s11",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 11,
+    "titleEn": "Booking a haircut",
+    "titleTh": "จองคิวตัดผม",
+    "scenarioSentences": [
+      "Your hair is very long now.",
+      "You want a short haircut.",
+      "You call a hair salon.",
+      "Kate answers the phone.",
+      "You want to book a time."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Kate. I'd like to book a haircut, please."
+      },
+      {
+        "speaker": "Kate",
+        "text": "Sure. What kind of haircut do you want?"
+      },
+      {
+        "speaker": "You",
+        "text": "A short one. My hair is too long now."
+      },
+      {
+        "speaker": "Kate",
+        "text": "Okay. A short cut is twenty dollars."
+      },
+      {
+        "speaker": "You",
+        "text": "That's fine. Are you free on Wednesday?"
+      },
+      {
+        "speaker": "Kate",
+        "text": "Sorry, we're busy all day Wednesday. How about Thursday?"
+      },
+      {
+        "speaker": "You",
+        "text": "Thursday is okay. Do you have a time after three?"
+      },
+      {
+        "speaker": "Kate",
+        "text": "Yes, I'm free at four o'clock."
+      },
+      {
+        "speaker": "You",
+        "text": "Perfect. Please book me for Thursday at four."
+      },
+      {
+        "speaker": "Kate",
+        "text": "Done. See you on Thursday!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s12",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 12,
+    "titleEn": "Returning a shirt that is too small",
+    "titleTh": "เปลี่ยนเสื้อที่เล็กเกินไป",
+    "scenarioSentences": [
+      "You bought a shirt last week.",
+      "It is too small for you.",
+      "You still have the receipt.",
+      "You return to the shop.",
+      "Ben works at the counter."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Ben. I bought this shirt here last week."
+      },
+      {
+        "speaker": "Ben",
+        "text": "Okay. Is there a problem with it?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes. It's too small. I'd like to change it."
+      },
+      {
+        "speaker": "Ben",
+        "text": "No problem. Do you have the receipt?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, here it is."
+      },
+      {
+        "speaker": "Ben",
+        "text": "Thanks. What size is it?"
+      },
+      {
+        "speaker": "You",
+        "text": "It's a medium. Do you have a large?"
+      },
+      {
+        "speaker": "Ben",
+        "text": "Let me check. Yes, we have a large in blue."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Can I change it for the large one?"
+      },
+      {
+        "speaker": "Ben",
+        "text": "Of course. Here you are. It's the same price."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s13",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 13,
+    "titleEn": "Reporting a broken shower",
+    "titleTh": "แจ้งฝักบัวในหอเสีย",
+    "scenarioSentences": [
+      "You live in a dorm.",
+      "Your shower has no hot water.",
+      "This started two days ago.",
+      "Mr. Grant is the dorm manager.",
+      "You go to his office."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Mr. Grant. My shower is broken."
+      },
+      {
+        "speaker": "Mr. Grant",
+        "text": "Oh, I'm sorry. What's wrong with it?"
+      },
+      {
+        "speaker": "You",
+        "text": "There's only cold water. It started two days ago."
+      },
+      {
+        "speaker": "Mr. Grant",
+        "text": "What's your room number?"
+      },
+      {
+        "speaker": "You",
+        "text": "Room 305, on the third floor."
+      },
+      {
+        "speaker": "Mr. Grant",
+        "text": "Okay. Someone can fix it tomorrow morning."
+      },
+      {
+        "speaker": "You",
+        "text": "Tomorrow? What can I do tonight?"
+      },
+      {
+        "speaker": "Mr. Grant",
+        "text": "You can use the shower on the second floor. It works well."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay, thank you. Do I need to be in my room tomorrow?"
+      },
+      {
+        "speaker": "Mr. Grant",
+        "text": "No. I have a key. I'll let him in."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s14",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 14,
+    "titleEn": "Looking for a lost umbrella",
+    "titleTh": "ตามหาร่มที่ลืมไว้",
+    "scenarioSentences": [
+      "You had lunch in the cafeteria.",
+      "It was raining this morning.",
+      "You left your umbrella there.",
+      "Now you cannot find it.",
+      "Amy works at the counter."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Excuse me, Amy. I think I left my umbrella here."
+      },
+      {
+        "speaker": "Amy",
+        "text": "Oh no. When were you here?"
+      },
+      {
+        "speaker": "You",
+        "text": "At lunch, about twelve o'clock. I sat near the window."
+      },
+      {
+        "speaker": "Amy",
+        "text": "What does your umbrella look like?"
+      },
+      {
+        "speaker": "You",
+        "text": "It's blue with white stars."
+      },
+      {
+        "speaker": "Amy",
+        "text": "Let me look in the lost and found box."
+      },
+      {
+        "speaker": "You",
+        "text": "Thank you. It was a present from my mom."
+      },
+      {
+        "speaker": "Amy",
+        "text": "Is this it? Someone found it on a chair."
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, that's mine! Thank you so much."
+      },
+      {
+        "speaker": "Amy",
+        "text": "You're welcome. Don't forget it again!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s15",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 15,
+    "titleEn": "Planning a weekend picnic",
+    "titleTh": "วางแผนไปปิกนิกวันหยุด",
+    "scenarioSentences": [
+      "It is Thursday evening.",
+      "The weather is nice this week.",
+      "You want to have a picnic.",
+      "You call your friend Lily.",
+      "You plan it together."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Lily. Do you want to have a picnic on Saturday?"
+      },
+      {
+        "speaker": "Lily",
+        "text": "Yes! Where do you want to go?"
+      },
+      {
+        "speaker": "You",
+        "text": "What about the big park near the river?"
+      },
+      {
+        "speaker": "Lily",
+        "text": "Nice. What time can we meet?"
+      },
+      {
+        "speaker": "You",
+        "text": "Let's meet at eleven at the park gate."
+      },
+      {
+        "speaker": "Lily",
+        "text": "Okay. What food do we need?"
+      },
+      {
+        "speaker": "You",
+        "text": "I can make sandwiches. Can you bring some fruit and drinks?"
+      },
+      {
+        "speaker": "Lily",
+        "text": "Sure. But what if it rains?"
+      },
+      {
+        "speaker": "You",
+        "text": "Then we can eat at my place and play cards."
+      },
+      {
+        "speaker": "Lily",
+        "text": "Sounds good. See you at eleven!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s16",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 16,
+    "titleEn": "Meeting a new roommate",
+    "titleTh": "ทำความรู้จักรูมเมตคนใหม่",
+    "scenarioSentences": [
+      "You moved into a dorm today.",
+      "Jun is your new roommate.",
+      "You just met him.",
+      "You want to be good roommates.",
+      "You talk in your room."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Jun. Nice to meet you. What do you study?"
+      },
+      {
+        "speaker": "Jun",
+        "text": "Art. My classes are in the afternoon."
+      },
+      {
+        "speaker": "You",
+        "text": "Mine start at eight, so I go to bed at eleven."
+      },
+      {
+        "speaker": "Jun",
+        "text": "Okay. I'll be quiet after eleven."
+      },
+      {
+        "speaker": "You",
+        "text": "Thanks. And can we share the fridge?"
+      },
+      {
+        "speaker": "Jun",
+        "text": "Sure. You take the top shelf, and I'll take the bottom."
+      },
+      {
+        "speaker": "You",
+        "text": "Good. Let's clean the room together on Sundays, too."
+      },
+      {
+        "speaker": "Jun",
+        "text": "Fine with me."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. Quiet after eleven, and cleaning on Sundays."
+      },
+      {
+        "speaker": "Jun",
+        "text": "Yes. I think we'll be good roommates."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s17",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 17,
+    "titleEn": "Finding the post office",
+    "titleTh": "ถามทางไปไปรษณีย์",
+    "scenarioSentences": [
+      "You need to send a package.",
+      "You cannot find the post office.",
+      "You are lost.",
+      "A man named Sam walks by.",
+      "You ask him the way."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi there. I'm lost. Where is the post office?"
+      },
+      {
+        "speaker": "Sam",
+        "text": "It's not far from here."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. How do I get there?"
+      },
+      {
+        "speaker": "Sam",
+        "text": "Go straight down this road. Walk past the bank."
+      },
+      {
+        "speaker": "You",
+        "text": "Past the bank. And then?"
+      },
+      {
+        "speaker": "Sam",
+        "text": "Turn left at the corner. The post office is beside a flower shop."
+      },
+      {
+        "speaker": "You",
+        "text": "Is it far to walk?"
+      },
+      {
+        "speaker": "Sam",
+        "text": "No, it's very close. But hurry, it closes at five."
+      },
+      {
+        "speaker": "You",
+        "text": "Oh, it's four thirty now. Thank you very much!"
+      },
+      {
+        "speaker": "Sam",
+        "text": "No problem. Good luck!"
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s18",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 18,
+    "titleEn": "Seeing the campus nurse for a cold",
+    "titleTh": "ไปหาพยาบาลเพราะเป็นหวัด",
+    "scenarioSentences": [
+      "You feel sick today.",
+      "Your throat hurts, and you have a headache.",
+      "You go to the health center.",
+      "Nurse Adams works there.",
+      "She asks how you feel."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hello, Nurse Adams. I don't feel well today."
+      },
+      {
+        "speaker": "Nurse Adams",
+        "text": "I'm sorry. What's the problem?"
+      },
+      {
+        "speaker": "You",
+        "text": "I have a sore throat and a headache."
+      },
+      {
+        "speaker": "Nurse Adams",
+        "text": "When did it start?"
+      },
+      {
+        "speaker": "You",
+        "text": "Yesterday evening. I didn't sleep well last night."
+      },
+      {
+        "speaker": "Nurse Adams",
+        "text": "Let me check your temperature. It's a little high. You have a cold."
+      },
+      {
+        "speaker": "You",
+        "text": "What can I do?"
+      },
+      {
+        "speaker": "Nurse Adams",
+        "text": "Rest at home and drink lots of water."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. Can I go to class tomorrow?"
+      },
+      {
+        "speaker": "Nurse Adams",
+        "text": "Stay home tomorrow. Do you still feel bad on Friday? Then come back."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s19",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 19,
+    "titleEn": "Doing the weekly food shopping",
+    "titleTh": "ไปซื้อของกินประจำสัปดาห์",
+    "scenarioSentences": [
+      "Your fridge is almost empty.",
+      "You share it with Mia.",
+      "She is your roommate.",
+      "You both need food for the week.",
+      "You talk about shopping."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Mia, there's nothing in the fridge. We need to go shopping."
+      },
+      {
+        "speaker": "Mia",
+        "text": "You're right. Let's make a short list first."
+      },
+      {
+        "speaker": "You",
+        "text": "Okay. We need rice, chicken, and some vegetables."
+      },
+      {
+        "speaker": "Mia",
+        "text": "And bread and fruit, too."
+      },
+      {
+        "speaker": "You",
+        "text": "How do we pay? Can we share the cost?"
+      },
+      {
+        "speaker": "Mia",
+        "text": "Sure. Let's pay half each."
+      },
+      {
+        "speaker": "You",
+        "text": "Good. When can we go? I'm busy on Saturday."
+      },
+      {
+        "speaker": "Mia",
+        "text": "What about Sunday morning? The market is cheaper than the supermarket."
+      },
+      {
+        "speaker": "You",
+        "text": "Yes, let's go to the market on Sunday."
+      },
+      {
+        "speaker": "Mia",
+        "text": "Great. I'll bring the shopping bags."
+      }
+    ]
+  },
+  {
+    "id": "ds-r1-easy-s20",
+    "round": 1,
+    "difficulty": "easy",
+    "setNumber": 20,
+    "titleEn": "Buying tickets for a school concert",
+    "titleTh": "ซื้อตั๋วคอนเสิร์ตของโรงเรียน",
+    "scenarioSentences": [
+      "Your school has a concert next Friday.",
+      "You want to take a friend.",
+      "You go to the ticket desk.",
+      "Leo sells the tickets.",
+      "You ask about prices."
+    ],
+    "dialogue": [
+      {
+        "speaker": "You",
+        "text": "Hi, Leo. I'd like tickets for the concert on Friday."
+      },
+      {
+        "speaker": "Leo",
+        "text": "Sure. How many do you need?"
+      },
+      {
+        "speaker": "You",
+        "text": "Two, please. How much are they?"
+      },
+      {
+        "speaker": "Leo",
+        "text": "Normal tickets are fifteen dollars. Students pay ten."
+      },
+      {
+        "speaker": "You",
+        "text": "We're both students here. Here's my card."
+      },
+      {
+        "speaker": "Leo",
+        "text": "Thanks. Where do you want to sit?"
+      },
+      {
+        "speaker": "You",
+        "text": "Near the front, please. Are there any good seats left?"
+      },
+      {
+        "speaker": "Leo",
+        "text": "Yes. There are two seats in row three, in the middle."
+      },
+      {
+        "speaker": "You",
+        "text": "Great. I'll take them."
+      },
+      {
+        "speaker": "Leo",
+        "text": "That's twenty dollars. Enjoy the concert!"
+      }
+    ]
+  }
+]
