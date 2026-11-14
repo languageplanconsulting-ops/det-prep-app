@@ -42,6 +42,9 @@ const lessons = (t: Translate): Row[] => [
 ];
 
 const production = (t: Translate): Row[] => [
+  row(t, "เขียนบรรยายภาพ", "Write about the photo", "/write-about-photo"),
+  row(t, "พูดบรรยายภาพ", "Speak about the photo", "/speak-about-photo"),
+  row(t, "อ่านแล้วเขียน (เรียงความ)", "Read, then write (essay)", "/read-and-write"),
   row(t, "พูดโต้ตอบ", "Interactive speaking", "/interactive-speaking"),
 ];
 
@@ -111,16 +114,13 @@ export default function PracticeHubScreen() {
       <Section
         index={5}
         title={t("การพูดและเขียน", "Production")}
-        sub={t("พูด & เขียน (ตรวจให้ทันที)", "Speaking & writing (instant feedback)")}
+        sub={t("เขียนและพูดจากภาพ · เรียงความ · พูดโต้ตอบ (ตรวจให้ทันที)", "Photo tasks · essay · interactive speaking (instant feedback)")}
       >
         {rows(production(t))}
       </Section>
 
       <Text style={styles.footnote}>
-        {t(
-          "เขียนจากภาพ, พูดจากภาพ และข้อสอบจำลอง — กำลังจะมาในแอปเร็วๆ นี้",
-          "Write-about-photo, speak-about-photo, and mock test — coming to the app next.",
-        )}
+        {t("ข้อสอบจำลอง — กำลังจะมาในแอปเร็วๆ นี้", "Mock test — coming to the app next.")}
       </Text>
     </ScrollView>
   );
