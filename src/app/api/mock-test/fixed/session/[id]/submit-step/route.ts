@@ -2,6 +2,14 @@ import { NextResponse, after } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
 import {
+  adaptiveDictationScore,
+  dictationAccuracy,
+  dictationTypedText,
+  presentSessionItems,
+  resolveDictationStep,
+  type AdaptiveDictationMeta,
+} from "@/lib/mock-test/adaptive-dictation";
+import {
   captureGradingRequest,
   finalizeMockFixedResultIfReady,
   gradeStepInBackground,
@@ -12,7 +20,14 @@ import {
 import { createRequestSupabase } from "@/lib/supabase-request-client";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 
-type SubmitBody = { stepIndex?: number; answer?: unknown };
+type SubmitBody = {
+  stepIndex?: number;
+  answer?: unknown;
+  /** Set by clients that handle adaptive dictation. */
+  adaptiveDictation?: boolean;
+  /** The dictation sentence the client actually played. */
+  servedSentence?: unknown;
+};
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -96,15 +111,52 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     !isAdminSkippedAnswer(body.answer) &&
     !singleStepPreview;
 
+  // Adaptive dictation: score against the sentence the SERVER chose for this
+  // step (re-derived from earlier answers — never the client's copy), at that
+  // level's cap. Gaps are allowed here so previews/retakes still resolve; a
+  // normal run always has every earlier dictation answered.
+  const dictation =
+    step.task_type === "dictation"
+      ? resolveDictationStep({
+          items: setItems,
+          responses: prev,
+          stepIndex: body.stepIndex,
+          allowGaps: true,
+        })
+      : null;
+  // Score adaptively only when the client played the sentence the server
+  // chose. A client that doesn't support adaptive dictation (the mobile app, a
+  // stale web bundle) played the step's FIXED sentence — score that, record no
+  // adaptive meta, and the rest of the run stays on fixed sentences too.
+  const clientSupportsAdaptive =
+    body.adaptiveDictation === true &&
+    typeof body.servedSentence === "string" &&
+    dictation?.kind === "adaptive" &&
+    body.servedSentence.trim() === dictation.variant.sentence;
+  let adaptive: AdaptiveDictationMeta | null = null;
+  if (dictation?.kind === "adaptive" && clientSupportsAdaptive) {
+    const accuracy = isAdminSkippedAnswer(body.answer)
+      ? 0
+      : dictationAccuracy(dictation.variant.sentence, dictationTypedText(body.answer));
+    adaptive = {
+      level: dictation.level,
+      variant_index: dictation.variantIndex,
+      accuracy,
+      sentence: dictation.variant.sentence,
+    };
+  }
+
   const score = backgroundGrade
     ? null
-    : await scoreAnswerWithNormalCriteria({
-        req,
-        taskType: step.task_type,
-        answer: body.answer,
-        correct: step.correct_answer,
-        step,
-      });
+    : adaptive
+      ? adaptiveDictationScore(adaptive.level, adaptive.accuracy)
+      : await scoreAnswerWithNormalCriteria({
+          req,
+          taskType: step.task_type,
+          answer: body.answer,
+          correct: step.correct_answer,
+          step,
+        });
 
   const entry = {
     step_index: body.stepIndex,
@@ -112,6 +164,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     answer: body.answer,
     score,
     ...(backgroundGrade ? { ai_pending: true } : {}),
+    ...(adaptive ? { adaptive } : {}),
   };
   const next = isRetake
     ? [
@@ -186,10 +239,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     await finalizeMockFixedResultIfReady(id);
   }
 
+  // The client keeps all 20 items locally and advances without a re-fetch, so
+  // hand it the next dictation sentence now that its level is known.
+  const nextStepIndex = Number(patch.current_step);
+  const nextItem =
+    !isComplete && nextStepIndex !== body.stepIndex
+      ? setItems.find((x: { step_index: number }) => x.step_index === nextStepIndex)
+      : undefined;
+  const nextDictationItem =
+    nextItem?.task_type === "dictation" && body.adaptiveDictation === true
+      ? presentSessionItems(setItems, next, singleStepPreview || isRetake).find(
+          (x: { step_index: number }) => x.step_index === nextStepIndex,
+        )
+      : undefined;
+
   return NextResponse.json({
     ok: true,
     complete: isComplete,
     singleStepPreview,
+    ...(nextDictationItem ? { nextDictationItem } : {}),
     stepScore: score,
     pendingScore: backgroundGrade,
     stepIndex: body.stepIndex,

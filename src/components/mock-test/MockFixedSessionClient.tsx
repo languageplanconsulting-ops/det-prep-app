@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { QuestionRouter } from "@/components/mock-test/questions/QuestionRouter";
@@ -180,7 +180,9 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     try {
       const ctl = new AbortController();
       const t = window.setTimeout(() => ctl.abort(), 20000);
-      const res = await fetch(`/api/mock-test/fixed/session/${sessionId}`, {
+      // adaptive=1: this client handles adaptive dictation (older/mobile
+      // clients omit it and get the fixed sentences).
+      const res = await fetch(`/api/mock-test/fixed/session/${sessionId}?adaptive=1`, {
         cache: "no-store",
         credentials: "same-origin",
         signal: ctl.signal,
@@ -224,6 +226,19 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     void load("init");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
+
+  // Safety net for adaptive dictation: never play a dictation step whose
+  // sentence the server hasn't chosen yet (e.g. the rest screen advanced
+  // locally). One reload per step; the server resolves it from saved answers.
+  const pendingReloadedFor = useRef<number | null>(null);
+  useEffect(() => {
+    if (loading || !current || current.task_type !== "dictation") return;
+    if ((current.content as { adaptive_pending?: unknown } | null)?.adaptive_pending !== true) return;
+    if (pendingReloadedFor.current === current.step_index) return;
+    pendingReloadedFor.current = current.step_index;
+    void load("adapting");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, loading]);
 
   // Auto-dismiss the recoverable notice so it doesn't linger over later steps.
   useEffect(() => {
@@ -343,6 +358,8 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
       stepScore?: number;
       stepIndex?: number;
       taskType?: string;
+      /** Adaptive dictation: the next step's sentence, chosen from this answer. */
+      nextDictationItem?: SessionPayload["mock_fixed_set_items"][number];
     };
     let res: Response;
     let json: SubmitStepResponse;
@@ -364,7 +381,21 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ stepIndex: current.step_index, answer }),
+        body: JSON.stringify({
+          stepIndex: current.step_index,
+          answer,
+          // Adaptive dictation: tell the server which sentence was actually
+          // played, so it scores against that one (and falls back to the fixed
+          // sentence if they ever disagree).
+          ...(current.task_type === "dictation"
+            ? {
+                adaptiveDictation: true,
+                servedSentence: String(
+                  (current.content as { reference_sentence?: unknown } | null)?.reference_sentence ?? "",
+                ),
+              }
+            : {}),
+        }),
         signal: ctl.signal,
       });
       window.clearTimeout(t);
@@ -449,7 +480,17 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
     // this one + 1" is wrong. Let the server say where to go.
     const retakeSteps = session?.targets?.retakeSteps;
     const isRetakeRun = Array.isArray(retakeSteps) && retakeSteps.length > 0;
-    const instantAdvance = soft && current.step_index !== 13 && !isRetakeRun;
+    // Adaptive dictation: the next dictation sentence depends on this answer.
+    // The server normally sends it back; if it didn't, re-fetch rather than
+    // play a step whose sentence isn't known yet.
+    const nextLocal = session?.mock_fixed_set_items?.find(
+      (i) => i.step_index === current.step_index + 1,
+    );
+    const nextNeedsReload =
+      nextLocal?.task_type === "dictation" &&
+      (nextLocal.content as { adaptive_pending?: unknown } | null)?.adaptive_pending === true &&
+      !json.nextDictationItem;
+    const instantAdvance = soft && current.step_index !== 13 && !isRetakeRun && !nextNeedsReload;
     if (!instantAdvance) {
       await load("adapting");
       return;
@@ -461,6 +502,11 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
         ? {
             ...prev,
             current_step: submittedStep + 1,
+            mock_fixed_set_items: json.nextDictationItem
+              ? prev.mock_fixed_set_items.map((i) =>
+                  i.step_index === json.nextDictationItem!.step_index ? json.nextDictationItem! : i,
+                )
+              : prev.mock_fixed_set_items,
             responses: prev.responses.some((r) => r.step_index === submittedStep)
               ? prev.responses
               : [...prev.responses, { step_index: submittedStep, task_type: submittedTask, answer }],
@@ -475,7 +521,13 @@ export function MockFixedSessionClient({ sessionId }: { sessionId: string }) {
   };
 
   if (error) return <div className="p-8 text-center font-bold text-red-700">{error}</div>;
-  if (loading || !session || !question)
+  // Adaptive dictation: a dictation step whose sentence isn't chosen yet must
+  // never render (it would show "no audio" and could start the clock early) —
+  // hold the loader while the reload effect fetches the real sentence.
+  const currentDictationPending =
+    current?.task_type === "dictation" &&
+    (current.content as { adaptive_pending?: unknown } | null)?.adaptive_pending === true;
+  if (loading || !session || !question || currentDictationPending)
     return (
       <MascotLoader
         label={

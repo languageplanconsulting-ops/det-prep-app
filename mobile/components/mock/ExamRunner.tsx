@@ -225,7 +225,15 @@ export function ExamRunner({ kind, sessionId }: { kind: RunnerKind; sessionId: s
       try {
         const res =
           kind === "mock"
-            ? await submitMockStep(sessionId, current.step_index, answer, timeoutMs)
+            ? await submitMockStep(
+                sessionId,
+                current.step_index,
+                answer,
+                timeoutMs,
+                current.task_type === "dictation"
+                  ? { servedSentence: String(current.content?.reference_sentence ?? "") }
+                  : undefined,
+              )
             : await submitMiniStep(sessionId, current.step_index, answer, timeoutMs);
         if (res.complete) {
           timer.stop();
@@ -242,8 +250,14 @@ export function ExamRunner({ kind, sessionId }: { kind: RunnerKind; sessionId: s
           setSubmitting(false);
           return;
         }
+        // Adaptive dictation: the next dictation sentence depends on this answer.
+        // The server normally returns it; if not, re-fetch rather than play an
+        // unknown sentence.
+        const nextDictationItem = kind === "mock" && "nextDictationItem" in res ? res.nextDictationItem : undefined;
+        const nextNeedsReload =
+          nextItem?.task_type === "dictation" && nextItem.content?.adaptive_pending === true && !nextDictationItem;
         // Step 13 feeds step 14, retakes jump between steps, mini re-reads its state: ask the server.
-        if (kind === "mini" || current.step_index === 13 || retakeSteps.length > 0) {
+        if (kind === "mini" || current.step_index === 13 || retakeSteps.length > 0 || nextNeedsReload) {
           await load();
           return;
         }
@@ -253,6 +267,9 @@ export function ExamRunner({ kind, sessionId }: { kind: RunnerKind; sessionId: s
             ? {
                 ...prev,
                 current_step: submitted.step_index + 1,
+                items: nextDictationItem
+                  ? prev.items.map((i) => (i.step_index === nextDictationItem.step_index ? nextDictationItem : i))
+                  : prev.items,
                 responses: prev.responses.some((r) => r.step_index === submitted.step_index)
                   ? prev.responses
                   : [...prev.responses, { step_index: submitted.step_index, task_type: submitted.task_type, answer }],
@@ -296,6 +313,17 @@ export function ExamRunner({ kind, sessionId }: { kind: RunnerKind; sessionId: s
     [current, goReport, kind, load, retakeSteps.length, session, sessionId, skipTimer, t, timer],
   );
 
+  // Safety net for adaptive dictation: never play a dictation step whose
+  // sentence the server hasn't chosen yet. One reload per step.
+  const pendingReloadedFor = useRef<number | null>(null);
+  useEffect(() => {
+    if (loading || !current || current.task_type !== "dictation") return;
+    if (current.content?.adaptive_pending !== true) return;
+    if (pendingReloadedFor.current === current.step_index) return;
+    pendingReloadedFor.current = current.step_index;
+    void load();
+  }, [current, loading, load]);
+
   // Rest finished → continue.
   useEffect(() => {
     if (!resting || !timer.expired) return;
@@ -335,7 +363,11 @@ export function ExamRunner({ kind, sessionId }: { kind: RunnerKind; sessionId: s
       </View>
     );
   }
-  if (loading) return <MascotLoader label={t("กำลังเตรียมข้อต่อไป…", "Preparing the next question…")} />;
+  // Adaptive dictation: hold the loader while a not-yet-chosen dictation
+  // sentence is fetched, so the task never shows "no audio" or starts its clock.
+  const currentDictationPending = current?.task_type === "dictation" && current.content?.adaptive_pending === true;
+  if (loading || currentDictationPending)
+    return <MascotLoader label={t("กำลังเตรียมข้อต่อไป…", "Preparing the next question…")} />;
   if (!session || !current) {
     return (
       <View style={st.center}>

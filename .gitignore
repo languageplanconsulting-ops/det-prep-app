@@ -70,3 +70,8 @@ content-bank-snapshot-backup-*.json
 conversation-bank-backup-*.json
 generated-reading-exams/
 .env*
+
+# Adaptive dictation answer banks / mock answer exports — repo is public, keep answers out of git
+scripts/data/adaptive-dictation-bank.json
+docs/adaptive-dictation-bank.md
+docs/mock-4-7-reading-vocab.md

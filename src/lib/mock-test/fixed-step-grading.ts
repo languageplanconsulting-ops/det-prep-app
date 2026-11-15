@@ -6,9 +6,16 @@ import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
 import { generatePhotoSpeakReportWithGemini } from "@/lib/gemini-photo-speak";
 import { generateSpeakingReportWithGemini } from "@/lib/gemini-speaking";
 import { generateWritingReportWithGemini } from "@/lib/gemini-writing";
+import {
+  buildModelLadder,
+  gradeWithEscalation,
+  gradingDeadlineFrom,
+} from "@/lib/grading-escalation";
 import { resolveGradingKeysFromRequest } from "@/lib/grading-request-keys";
+import type { GradingLlmUsage } from "@/types/grading-llm-usage";
 import { INTERACTIVE_SPEAKING_TURN_COUNT } from "@/lib/interactive-speaking-constants";
 import { scoreBuckets } from "@/lib/mock-test/fixed-mock-score-buckets";
+import { dictationScoreFromDiff, diffDictationChars } from "@/lib/dictation-diff";
 import { gradeFitbBlank, normalizeFitbCompare } from "@/lib/fitb-scoring";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import type { DialogueSummaryExam } from "@/types/dialogue-summary";
@@ -28,12 +35,12 @@ import type { WritingTopic } from "@/types/writing";
  * the safety net that re-grades stragglers inline.
  */
 
-const MOCK_GRADING_MODEL_FALLBACKS = [
-  "gemini-3.6-flash",
-  "gemini-3.1-flash-lite",
-  "gpt-4o-mini",
-  "claude-haiku-4-5",
-] as const;
+/**
+ * Time budget for one AI-graded mock step. The mock grades in the background
+ * (`after()`), so this only bounds how long the escalation ladder may keep
+ * trying other models before giving up.
+ */
+const MOCK_GRADING_BUDGET_SEC = 120;
 
 /** Tasks scored locally/rule-based — synchronous and instant. Everything else
  *  goes through the LLM grader and is eligible for background grading. */
@@ -77,28 +84,9 @@ function normalizeText(v: unknown): string {
   return String(v ?? "").trim().toLowerCase();
 }
 
-function normalizeDictationText(v: unknown): string {
-  return String(v ?? "")
-    .normalize("NFKC")
-    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
-    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
-    .toLowerCase()
-    .replace(/'/g, "")
-    .replace(/[^a-z0-9,\s]+/g, " ")
-    .replace(/\s*,\s*/g, ", ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function normalize160(v: number): number {
   if (!Number.isFinite(v)) return 0;
   return Math.max(0, Math.min(160, v));
-}
-
-function tokenizeDictationForScoring(v: unknown): string[] {
-  const s = normalizeDictationText(v);
-  const tokens = s.match(/[a-z0-9]+|,/g);
-  return tokens ?? [];
 }
 
 function fitbHeuristicScore160(answer: unknown, correct: unknown, content?: Record<string, unknown> | null): number {
@@ -164,18 +152,16 @@ function fallbackHeuristicScore160(taskType: string, answer: unknown, correct: u
       (correct as { answer?: unknown })?.answer ??
       (content as { reference_sentence?: unknown } | null)?.reference_sentence ??
       correct;
-    const normalizedActual = normalizeDictationText(actualRaw);
-    const normalizedExpected = normalizeDictationText(expectedRaw);
-    if (normalizedActual && normalizedExpected && normalizedActual === normalizedExpected) {
-      return 160;
-    }
-    const actualTokens = tokenizeDictationForScoring(actualRaw);
-    const expectedTokens = tokenizeDictationForScoring(expectedRaw);
-    if (expectedTokens.length === 0) return 0;
-    const matched = expectedTokens.reduce((acc, token, idx) => {
-      return acc + (actualTokens[idx] === token ? 1 : 0);
-    }, 0);
-    return normalize160((matched / expectedTokens.length) * 160);
+    // Score exactly like practice dictation (DictationSessionClient): a
+    // character-level alignment, so one missing or extra word costs only that
+    // word. The old word-by-POSITION match shifted every later word out of
+    // place after a single slip — "left a busy airport" vs "left the busy
+    // airport" was fine, but dropping one early word scored the rest as wrong.
+    const { correctChars, totalChars } = diffDictationChars(
+      String(expectedRaw ?? ""),
+      String(actualRaw ?? ""),
+    );
+    return normalize160(dictationScoreFromDiff(correctChars, totalChars, 160));
   }
   if (taskType === "vocabulary_reading") {
     const score = Number((answer as { averageScore0To100?: unknown })?.averageScore0To100);
@@ -252,27 +238,27 @@ export async function scoreAnswerWithNormalCriteria({
   }
 
   try {
+    // Grade exactly like the practice routes (/api/writing-report,
+    // /api/photo-speak-report, …): same admin-selected model, same escalation
+    // ladder. The mock used to run its own chain that could land on
+    // flash-lite / gpt-4o-mini, so the same answer scored differently here.
     const preferred = await resolveGeminiTextModel();
-    const modelChain = [preferred, ...MOCK_GRADING_MODEL_FALLBACKS].filter(
-      (m, i, arr) => m && arr.indexOf(m) === i,
-    );
     const keys = resolveGradingKeysFromRequest(req, preferred);
+    const models = buildModelLadder(preferred, keys);
+    const deadlineAt = gradingDeadlineFrom(Date.now(), MOCK_GRADING_BUDGET_SEC);
     const attemptId = typeof crypto !== "undefined" && crypto.randomUUID
       ? crypto.randomUUID()
       : `mock-${Date.now()}-${step.step_index}`;
 
-    const runWithFallback = async <T>(runner: (model: string) => Promise<T>): Promise<T> => {
-      let lastError: unknown = null;
-      for (const model of modelChain) {
-        try {
-          return await runner(model);
-        } catch (err) {
-          lastError = err;
-          console.warn("[mock-fixed-submit-step] grading fallback model failed", model, err);
-        }
-      }
-      throw lastError instanceof Error ? lastError : new Error("All grading fallback models failed.");
-    };
+    const runWithFallback = async <T>(
+      runner: (model: string, deadlineAt: number) => Promise<{ report: T; usage: GradingLlmUsage | null }>,
+    ): Promise<{ report: T }> =>
+      gradeWithEscalation({
+        operation: `mock_fixed_${taskType}`,
+        models,
+        deadlineAt,
+        runAi: runner,
+      });
 
     if (taskType === "read_and_write") {
       const topic: WritingTopic = {
@@ -283,16 +269,16 @@ export async function scoreAnswerWithNormalCriteria({
         promptTh: String(content.prompt_th ?? content.instruction_th ?? "อ่านแล้วเขียนตามโจทย์"),
       };
       const essay = String((answer as { text?: unknown })?.text ?? answer ?? "");
-      const { report } = await runWithFallback((model) =>
+      const { report } = await runWithFallback((model, deadlineAt) =>
         generateWritingReportWithGemini({
           apiKey: keys.geminiApiKey,
           anthropicApiKey: keys.anthropicApiKey,
-          openAiApiKey: keys.openAiApiKey,
           model,
           attemptId,
           topic,
           essay,
           prepMinutes: 0,
+          deadlineAt,
         }),
       );
       return normalize160(report.score160);
@@ -301,19 +287,18 @@ export async function scoreAnswerWithNormalCriteria({
     if (taskType === "write_about_photo" || taskType === "speak_about_photo") {
       const transcript = String((answer as { text?: unknown })?.text ?? answer ?? "");
       const imageUrl = String(content.image_url ?? "");
-      const allPhotoCategories = ["people", "place", "landscape", "animal", "nature"];
-      const keywordSet = new Set<string>(
-        Array.isArray(content.keywords)
-          ? content.keywords.map((x) => String(x).trim().toLowerCase()).filter(Boolean)
-          : [],
-      );
-      for (const c of allPhotoCategories) keywordSet.add(c);
-      const { report } = await runWithFallback((model) =>
+      // Same as practice: only the item's own keywords. (The mock used to pad
+      // every photo with all five category tags, which the practice grader
+      // never sees.)
+      const taskKeywords = Array.isArray(content.keywords)
+        ? content.keywords.map((x) => String(x).trim()).filter(Boolean)
+        : [];
+      const { report } = await runWithFallback((model, deadlineAt) =>
         generatePhotoSpeakReportWithGemini({
           apiKey: keys.geminiApiKey,
           anthropicApiKey: keys.anthropicApiKey,
-          openAiApiKey: keys.openAiApiKey,
           model,
+          deadlineAt,
           attemptId,
           itemId: `mock-fixed-step-${step.step_index}`,
           titleEn: String(content.title_en ?? content.titleEn ?? `${taskType} mock item`),
@@ -321,7 +306,7 @@ export async function scoreAnswerWithNormalCriteria({
           promptEn: String(content.prompt_en ?? content.instruction ?? "Respond based on the photo."),
           promptTh: String(content.prompt_th ?? content.instruction_th ?? "ตอบจากภาพ"),
           imageUrl: imageUrl || "https://example.com/mock-photo.jpg",
-          taskKeywords: [...keywordSet],
+          taskKeywords,
           prepMinutes: 0,
           transcript,
           originHub: taskType === "write_about_photo" ? "write-about-photo" : "speak-about-photo",

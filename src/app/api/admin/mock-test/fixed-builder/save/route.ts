@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
+import { ADAPTIVE_DICTATION_KEY } from "@/lib/mock-test/adaptive-dictation";
 import { parseFixedMockUploadJson } from "@/lib/mock-test/fixed-upload";
 import { ensureMockImageBucket, mirrorImagesInContent } from "@/lib/mock-test/mirror-image";
 import { synthesizeEnglishSpeechWithDeepgram } from "@/lib/deepgram-synthesize";
@@ -187,6 +188,29 @@ export async function POST(req: Request) {
     .eq("id", setRow.id);
   if (deactivateErr) {
     return NextResponse.json({ error: deactivateErr.message }, { status: 500 });
+  }
+
+  // Adaptive dictation: the sentence bank lives on the set's first dictation
+  // row and isn't part of the builder JSON. A re-save deletes and re-inserts
+  // every row, so carry the bank over instead of silently dropping it (which
+  // would turn this mock back into fixed dictation).
+  const { data: oldDictationRows } = await supabase
+    .from("mock_fixed_set_items")
+    .select("step_index,bank:content->adaptive_dictation")
+    .eq("set_id", setRow.id)
+    .eq("task_type", "dictation")
+    .order("step_index", { ascending: true });
+  const carriedBank = (oldDictationRows ?? []).find((r: { bank?: unknown }) => r.bank)?.bank;
+  if (carriedBank) {
+    const firstDictation = parsed.rows
+      .filter((r) => r.task_type === "dictation")
+      .sort((a, b) => a.step_index - b.step_index)[0];
+    if (firstDictation) {
+      const c = (firstDictation.content ?? {}) as Record<string, unknown>;
+      if (!c[ADAPTIVE_DICTATION_KEY]) {
+        firstDictation.content = { ...c, [ADAPTIVE_DICTATION_KEY]: carriedBank };
+      }
+    }
   }
 
   const { error: deleteErr } = await supabase.from("mock_fixed_set_items").delete().eq("set_id", setRow.id);

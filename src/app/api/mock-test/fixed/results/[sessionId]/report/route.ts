@@ -3,6 +3,39 @@ import { NextResponse } from "next/server";
 import { createRequestSupabase } from "@/lib/supabase-request-client";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
+import { stripAdaptiveBank } from "@/lib/mock-test/adaptive-dictation";
+
+type ReportItem = {
+  step_index: number;
+  task_type: string;
+  content?: Record<string, unknown> | null;
+  correct_answer?: unknown;
+};
+
+/**
+ * Adaptive dictation: each learner heard a different sentence per dictation
+ * step, recorded on their response. Show THAT sentence in the report (not the
+ * set's default one), and never ship the sentence bank.
+ */
+function reportItems(result: { report_payload?: unknown }, items: ReportItem[]): ReportItem[] {
+  const responses = (result.report_payload as { responses?: unknown } | null)?.responses;
+  const served = new Map<number, string>();
+  if (Array.isArray(responses)) {
+    for (const r of responses as Array<{ step_index?: number; adaptive?: { sentence?: unknown } }>) {
+      const sentence = r?.adaptive?.sentence;
+      if (typeof sentence === "string" && sentence) served.set(Number(r.step_index), sentence);
+    }
+  }
+  return stripAdaptiveBank(items).map((item) => {
+    const sentence = item.task_type === "dictation" ? served.get(item.step_index) : undefined;
+    if (!sentence) return item;
+    return {
+      ...item,
+      content: { ...(item.content ?? {}), reference_sentence: sentence },
+      correct_answer: { answer: sentence },
+    };
+  });
+}
 
 export async function GET(req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
@@ -23,7 +56,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ sessionI
       .eq("set_id", data.set_id)
       .order("step_index", { ascending: true });
     if (itemsErr) return NextResponse.json({ error: itemsErr.message }, { status: 500 });
-    return NextResponse.json({ result: data, stepItems: items ?? [] });
+    return NextResponse.json({ result: data, stepItems: reportItems(data, items ?? []) });
   }
 
   const supabase = await createRequestSupabase(req);
@@ -46,5 +79,5 @@ export async function GET(req: Request, { params }: { params: Promise<{ sessionI
     .eq("set_id", data.set_id)
     .order("step_index", { ascending: true });
   if (itemsErr) return NextResponse.json({ error: itemsErr.message }, { status: 500 });
-  return NextResponse.json({ result: data, stepItems: items ?? [] });
+  return NextResponse.json({ result: data, stepItems: reportItems(data, items ?? []) });
 }

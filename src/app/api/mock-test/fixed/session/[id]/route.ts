@@ -1,8 +1,31 @@
 import { NextResponse } from "next/server";
 
 import { getAdminAccess } from "@/lib/admin-auth";
+import { presentSessionItems, stripAdaptiveBank } from "@/lib/mock-test/adaptive-dictation";
 import { createServiceRoleSupabase } from "@/lib/supabase-admin";
 import { createRequestSupabase } from "@/lib/supabase-request-client";
+
+/**
+ * Adaptive dictation: inject the sentence each dictation step should play
+ * (chosen from this session's earlier answers) and drop the sentence bank,
+ * which holds every level's answer and audio.
+ */
+function presentItemsForSession<
+  T extends { step_index: number; task_type: string; content?: Record<string, unknown> | null },
+>(req: Request, session: { responses?: unknown; targets?: unknown }, items: T[]): T[] {
+  // Only clients that know about adaptive dictation get it. Others (the mobile
+  // app, a stale web bundle) play the fixed sentence they were given, so they
+  // must be served — and scored against — exactly that.
+  if (new URL(req.url).searchParams.get("adaptive") !== "1") return stripAdaptiveBank(items);
+  const targets = (session.targets ?? {}) as Record<string, unknown>;
+  const allowGaps =
+    targets.singleStepPreview === true ||
+    (Array.isArray(targets.retakeSteps) && targets.retakeSteps.length > 0);
+  const responses = Array.isArray(session.responses)
+    ? (session.responses as Array<{ step_index?: number; adaptive?: unknown }>)
+    : [];
+  return presentSessionItems(items, responses, allowGaps);
+}
 
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -60,7 +83,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         session: {
           ...session,
           mock_fixed_sets: setRow,
-          mock_fixed_set_items: items,
+          mock_fixed_set_items: presentItemsForSession(req, session, items),
         },
       },
       { headers: NO_STORE_HEADERS },
@@ -118,7 +141,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       session: {
         ...session,
         mock_fixed_sets: setRow,
-        mock_fixed_set_items: items,
+        mock_fixed_set_items: presentItemsForSession(req, session, items),
       },
     },
     { headers: NO_STORE_HEADERS },

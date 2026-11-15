@@ -96,7 +96,10 @@ export async function startMockSession(args: {
 
 export async function fetchMockSession(sessionId: string): Promise<MockSessionPayload> {
   const body = await call<{ session: MockSessionPayload }>(
-    `/api/mock-test/fixed/session/${encodeURIComponent(sessionId)}`,
+    // adaptive=1: this app handles adaptive dictation (the server picks each
+    // dictation sentence from earlier answers). Older app builds omit it and
+    // keep the fixed sentences.
+    `/api/mock-test/fixed/session/${encodeURIComponent(sessionId)}?adaptive=1`,
     { timeoutMs: 20000 },
   );
   return body.session;
@@ -116,6 +119,8 @@ export type SubmitStepResponse = {
   pendingScore?: boolean;
   stepIndex?: number;
   taskType?: string;
+  /** Adaptive dictation: the next step's sentence, chosen from this answer. */
+  nextDictationItem?: MockStepItem;
 };
 
 export async function submitMockStep(
@@ -123,10 +128,20 @@ export async function submitMockStep(
   stepIndex: number,
   answer: unknown,
   timeoutMs: number,
+  /** For dictation: the sentence actually played, so the server scores against it. */
+  dictation?: { servedSentence: string },
 ): Promise<SubmitStepResponse> {
   return call<SubmitStepResponse>(
     `/api/mock-test/fixed/session/${encodeURIComponent(sessionId)}/submit-step`,
-    { method: "POST", body: { stepIndex, answer }, timeoutMs },
+    {
+      method: "POST",
+      body: {
+        stepIndex,
+        answer,
+        ...(dictation ? { adaptiveDictation: true, servedSentence: dictation.servedSentence } : {}),
+      },
+      timeoutMs,
+    },
   );
 }
 
