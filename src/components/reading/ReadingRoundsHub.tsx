@@ -68,7 +68,8 @@ export function ReadingRoundsHub() {
           subtitle="Reading"
           tip={
             <>
-              ฝึก <strong>จับใจความ + หา title + main idea</strong> — ออกสอบ DET บ่อยสุดครับ ·
+              ฝึก <strong>Interactive Reading ครบ 6 ขั้นตอนเหมือนข้อสอบจริง</strong> — เติมคำ · เติมประโยค ·
+              ไฮไลต์ 2 ข้อ · แนวคิดที่กล่าวถึง · ชื่อเรื่อง ในเวลาเดียว 8 นาที ·
               ตอบผิดข้อไหน อ่านเหตุผลให้เข้าใจ แล้วเก็บคำศัพท์ลง Notebook
             </>
           }

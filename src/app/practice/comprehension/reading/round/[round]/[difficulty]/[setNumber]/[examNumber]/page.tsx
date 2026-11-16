@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ReadingSessionGate } from "@/components/reading/ReadingSessionGate";
 import { READING_DIFFICULTIES } from "@/lib/reading-constants";
 import { parseDifficultyParam, parseExamNumberParam } from "@/lib/reading-constants";
+import { pickReadingExamIrSet } from "@/lib/reading-exam-ir-pick";
 import type { ReadingRoundNum } from "@/types/reading";
 
 function parseRound(s: string): ReadingRoundNum | undefined {
@@ -40,6 +41,7 @@ export default async function ReadingExamPage({
         difficulty={difficulty}
         setNumber={setNumber}
         examNumber={examNumber}
+        irSet={pickReadingExamIrSet({ round, difficulty, setNumber, examNumber })}
       />
     </main>
   );

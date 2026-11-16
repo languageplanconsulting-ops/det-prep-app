@@ -1,0 +1,1002 @@
+[
+  {
+    "sentence": "We need to leave home by six to get to the {blank} two hours before our flight takes off.",
+    "answer": "airport",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "noun",
+    "meaningTh": "สนามบิน",
+    "hintTh": "สถานที่ที่เราไปขึ้นเครื่องบิน",
+    "explanationTh": "คำว่า flight และ takes off บอกว่าเป็นสถานที่ขึ้นเครื่องบิน และหลัง the ต้องเป็นคำนาม"
+  },
+  {
+    "sentence": "I usually skip {blank} on weekdays because I don't have time to eat before my first class.",
+    "answer": "breakfast",
+    "prefixLen": 4,
+    "level": "A2",
+    "pos": "noun",
+    "meaningTh": "อาหารเช้า",
+    "hintTh": "มื้ออาหารมื้อแรกของวัน",
+    "explanationTh": "before my first class และ time to eat บอกว่าเป็นมื้อตอนเช้า หลังกริยา skip ต้องเป็นคำนาม"
+  },
+  {
+    "sentence": "We're throwing a surprise party for my sister's twenty-first {blank} next Saturday.",
+    "answer": "birthday",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "noun",
+    "meaningTh": "วันเกิด",
+    "hintTh": "วันที่ครบรอบปีที่เกิดมา",
+    "explanationTh": "surprise party และ twenty-first (อายุ 21) บอกว่าเป็นงานฉลองวันเกิด ต้องเป็นคำนามหลังคำแสดงลำดับ"
+  },
+  {
+    "sentence": "My tooth has been hurting for several days, so I finally made an appointment with the {blank}.",
+    "answer": "dentist",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "ทันตแพทย์ / หมอฟัน",
+    "hintTh": "แพทย์ที่รักษาฟัน",
+    "explanationTh": "tooth has been hurting บอกว่าต้องไปหาหมอที่รักษาฟัน หลัง the ต้องเป็นคำนาม"
+  },
+  {
+    "sentence": "She packed enough {blank} for a week, including two warm jackets and a pair of jeans.",
+    "answer": "clothes",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "noun",
+    "meaningTh": "เสื้อผ้า",
+    "hintTh": "สิ่งที่เราสวมใส่ เช่น เสื้อ กางเกง",
+    "explanationTh": "jackets และ jeans เป็นตัวอย่างของสิ่งที่สวมใส่ คำนี้เป็นคำนามพหูพจน์เสมอ"
+  },
+  {
+    "sentence": "The old {blank} over the river was closed, so we had to drive all the way across town.",
+    "answer": "bridge",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "noun",
+    "meaningTh": "สะพาน",
+    "hintTh": "สิ่งก่อสร้างที่ใช้ข้ามแม่น้ำ",
+    "explanationTh": "over the river และต้องขับอ้อมเมืองเมื่อมันปิด บอกว่าเป็นทางข้ามแม่น้ำ หลัง The old ต้องเป็นคำนามเอกพจน์ (was)"
+  },
+  {
+    "sentence": "My grandmother's {blank} is the best; nobody makes soup as delicious as hers.",
+    "answer": "cooking",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "noun",
+    "meaningTh": "การทำอาหาร / ฝีมือทำอาหาร",
+    "hintTh": "ฝีมือการปรุงอาหารของใครสักคน",
+    "explanationTh": "makes soup as delicious บอกว่าพูดถึงฝีมือทำอาหาร และกริยา is เอกพจน์ จึงเป็นคำนาม -ing ไม่ใช่ cookies ซึ่งเป็นพหูพจน์"
+  },
+  {
+    "sentence": "She has loved {blank} since she was a child and now takes ballet classes twice a week.",
+    "answer": "dancing",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "noun",
+    "meaningTh": "การเต้นรำ",
+    "hintTh": "กิจกรรมเคลื่อนไหวร่างกายตามจังหวะเพลง",
+    "explanationTh": "ballet classes บอกว่าเป็นการเต้น หลัง loved ใช้ gerund (-ing) ทำหน้าที่เป็นคำนาม"
+  },
+  {
+    "sentence": "My professor gave me some useful {blank} about how to organize my final paper.",
+    "answer": "advice",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "คำแนะนำ",
+    "hintTh": "สิ่งที่คนอื่นบอกเราว่าควรทำอย่างไร",
+    "explanationTh": "gave me some useful ... about how to บอกว่าเป็นคำแนะนำ คำนี้เป็นคำนามนับไม่ได้ จึงใช้กับ some ได้โดยไม่เติม s"
+  },
+  {
+    "sentence": "I had to cancel my doctor's {blank} because I was stuck in a long meeting.",
+    "answer": "appointment",
+    "prefixLen": 4,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "การนัดหมาย",
+    "hintTh": "การนัดเวลาพบใครสักคน เช่น นัดหมอ",
+    "explanationTh": "cancel my doctor's ... เป็นวลีที่ใช้บ่อยหมายถึงยกเลิกนัดหมอ ต้องเป็นคำนามลงท้าย -ment"
+  },
+  {
+    "sentence": "We have a limited {blank}, so we'll have to find a cheaper hotel for the trip.",
+    "answer": "budget",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "งบประมาณ",
+    "hintTh": "จำนวนเงินที่วางแผนไว้ว่าจะใช้",
+    "explanationTh": "limited และ find a cheaper hotel บอกว่าเงินที่มีจำกัด หลัง a limited ต้องเป็นคำนาม"
+  },
+  {
+    "sentence": "She earned a {blank} in computer science and then found a job at a tech company.",
+    "answer": "degree",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "ปริญญา / วุฒิการศึกษา",
+    "hintTh": "สิ่งที่ได้รับเมื่อเรียนจบมหาวิทยาลัย",
+    "explanationTh": "earned a ... in computer science เป็นการพูดถึงวุฒิการศึกษา ต้องเป็นคำนามเอกพจน์หลัง a"
+  },
+  {
+    "sentence": "Learning to drive in a busy city was a real {blank}, but I finally passed my test.",
+    "answer": "challenge",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "ความท้าทาย / เรื่องยาก",
+    "hintTh": "สิ่งที่ยากและต้องใช้ความพยายามมาก",
+    "explanationTh": "but I finally passed แสดงความขัดแย้งว่าเป็นเรื่องยากแต่ทำได้ หลัง a real ต้องเป็นคำนาม"
+  },
+  {
+    "sentence": "Good leaders make difficult {blank} quickly, even when they don't have all the information.",
+    "answer": "decisions",
+    "prefixLen": 4,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "การตัดสินใจ",
+    "hintTh": "สิ่งที่เราเลือกหลังจากคิดแล้ว",
+    "explanationTh": "make a decision เป็น collocation และไม่มี a นำหน้า จึงต้องเป็นพหูพจน์เติม -s"
+  },
+  {
+    "sentence": "Her {blank} to stay calm under pressure made her the perfect choice for team captain.",
+    "answer": "ability",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "ความสามารถ",
+    "hintTh": "การที่ทำบางอย่างได้",
+    "explanationTh": "รูป ... to stay calm คือ ability to do something หลัง Her ต้องเป็นคำนาม"
+  },
+  {
+    "sentence": "I often have lunch with my {blank} from the marketing department on Fridays.",
+    "answer": "colleagues",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "เพื่อนร่วมงาน",
+    "hintTh": "คนที่ทำงานที่เดียวกับเรา",
+    "explanationTh": "from the marketing department บอกว่าเป็นคนในที่ทำงาน ต้องเป็นคำนามพหูพจน์เพราะกินข้าวกับหลายคน"
+  },
+  {
+    "sentence": "The {blank} clapped loudly when the band came back on stage for one more song.",
+    "answer": "audience",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "ผู้ชม / ผู้ฟัง",
+    "hintTh": "กลุ่มคนที่มาดูการแสดง",
+    "explanationTh": "clapped loudly และ the band came back on stage บอกว่าเป็นกลุ่มคนที่ดูคอนเสิร์ต ทำหน้าที่ประธานจึงเป็นคำนาม"
+  },
+  {
+    "sentence": "I asked a stranger for {blank} because the map app on my phone had stopped working.",
+    "answer": "directions",
+    "prefixLen": 4,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "เส้นทาง / การบอกทาง",
+    "hintTh": "คำอธิบายว่าจะไปยังที่ใดที่หนึ่งได้อย่างไร",
+    "explanationTh": "ask for ... และ map app stopped working บอกว่าถามทาง ในความหมายนี้ใช้รูปพหูพจน์ -s"
+  },
+  {
+    "sentence": "I stayed up late to finish my history {blank}, which was due at nine the next morning.",
+    "answer": "assignment",
+    "prefixLen": 4,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "งานที่ได้รับมอบหมาย / การบ้าน",
+    "hintTh": "งานที่อาจารย์สั่งให้ส่ง",
+    "explanationTh": "history และ was due บอกว่าเป็นงานที่ต้องส่งอาจารย์ ต้องเป็นคำนามเอกพจน์ลงท้าย -ment"
+  },
+  {
+    "sentence": "The storm caused serious {blank} to the roofs of several houses in our neighborhood.",
+    "answer": "damage",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "ความเสียหาย",
+    "hintTh": "ผลเสียที่เกิดกับสิ่งของจากเหตุการณ์รุนแรง",
+    "explanationTh": "cause damage to something เป็น collocation และ storm บอกถึงผลเสียหาย คำนี้เป็นคำนามนับไม่ได้"
+  },
+  {
+    "sentence": "Students can get a ten percent {blank} at the bookstore if they show their ID card.",
+    "answer": "discount",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "ส่วนลด",
+    "hintTh": "ราคาที่ถูกลงจากปกติ",
+    "explanationTh": "ten percent และ show their ID card บอกว่าเป็นการลดราคา หลัง a ten percent ต้องเป็นคำนาม"
+  },
+  {
+    "sentence": "At only five dollars, this winter jacket was a real {blank}.",
+    "answer": "bargain",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "noun",
+    "meaningTh": "ของถูกคุ้มค่า",
+    "hintTh": "ของที่ซื้อได้ในราคาถูกกว่าที่ควรเป็นมาก",
+    "explanationTh": "only five dollars สำหรับเสื้อกันหนาวแสดงว่าถูกมาก a real ... เป็นสำนวนว่าคุ้มสุด ๆ ต้องเป็นคำนาม"
+  },
+  {
+    "sentence": "To the fans' {blank}, the concert was canceled just hours before it was supposed to start.",
+    "answer": "disappointment",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "ความผิดหวัง",
+    "hintTh": "ความรู้สึกเสียใจเมื่อสิ่งที่หวังไว้ไม่เกิดขึ้น",
+    "explanationTh": "the concert was canceled ทำให้แฟน ๆ รู้สึกผิดหวัง สำนวน to someone's + คำนาม ต้องใช้คำนามลงท้าย -ment"
+  },
+  {
+    "sentence": "One {blank} of living near campus is that you never have to worry about traffic.",
+    "answer": "advantage",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "ข้อดี / ข้อได้เปรียบ",
+    "hintTh": "ด้านบวกของบางสิ่ง",
+    "explanationTh": "never have to worry about traffic เป็นผลดี จึงเป็นข้อดี หลัง One ต้องเป็นคำนามเอกพจน์"
+  },
+  {
+    "sentence": "After hours of discussion, the two companies finally reached an {blank} on the price.",
+    "answer": "agreement",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "ข้อตกลง",
+    "hintTh": "ผลที่ทั้งสองฝ่ายเห็นตรงกัน",
+    "explanationTh": "reach an agreement เป็น collocation และ After hours of discussion บอกว่าคุยจนตกลงกันได้ ต้องเป็นคำนามขึ้นต้นด้วยสระเพราะใช้ an"
+  },
+  {
+    "sentence": "If you ignore the warning signs, you may have to deal with serious {blank} later.",
+    "answer": "consequences",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "ผลที่ตามมา",
+    "hintTh": "สิ่งที่เกิดขึ้นตามมาจากการกระทำ มักเป็นผลเสีย",
+    "explanationTh": "ignore the warning signs และ serious บอกถึงผลเสียที่ตามมา ไม่มี a จึงใช้รูปพหูพจน์"
+  },
+  {
+    "sentence": "Practicing her speech in front of friends gave her the {blank} to speak at the conference.",
+    "answer": "confidence",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "ความมั่นใจ",
+    "hintTh": "ความรู้สึกเชื่อว่าตัวเองทำได้",
+    "explanationTh": "การซ้อมพูดทำให้กล้าพูดบนเวที gave her the ... to speak ต้องเป็นคำนาม (ไม่ใช่ adjective confident)"
+  },
+  {
+    "sentence": "The rapid {blank} of the city has led to higher rents and heavier traffic.",
+    "answer": "development",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "การพัฒนา / การเติบโต",
+    "hintTh": "การที่เมืองขยายตัวและเปลี่ยนแปลง",
+    "explanationTh": "rapid และผลคือค่าเช่าสูงขึ้น รถติดขึ้น บอกว่าเมืองเติบโต หลัง The rapid ... of ต้องเป็นคำนาม -ment"
+  },
+  {
+    "sentence": "The campaign aims to raise {blank} about the dangers of texting while driving.",
+    "answer": "awareness",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "การตระหนักรู้",
+    "hintTh": "การที่ผู้คนรู้และเข้าใจถึงปัญหาบางอย่าง",
+    "explanationTh": "raise awareness about เป็น collocation ที่ใช้กับแคมเปญรณรงค์ ต้องเป็นคำนามลงท้าย -ness"
+  },
+  {
+    "sentence": "The hotel received several {blank} about noise from the construction site next door.",
+    "answer": "complaints",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "คำร้องเรียน",
+    "hintTh": "การแจ้งว่าไม่พอใจในบางสิ่ง",
+    "explanationTh": "about noise บอกว่าลูกค้าไม่พอใจ several ต้องตามด้วยคำนามพหูพจน์"
+  },
+  {
+    "sentence": "Out of {blank}, I opened the old box in the attic to see what was inside.",
+    "answer": "curiosity",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "ความอยากรู้อยากเห็น",
+    "hintTh": "ความรู้สึกอยากรู้ว่ามีอะไรอยู่",
+    "explanationTh": "to see what was inside บอกถึงความอยากรู้ สำนวน out of + คำนาม หมายถึง เพราะความรู้สึกนั้น"
+  },
+  {
+    "sentence": "Graduating from college while working full-time was a remarkable {blank} for my mother.",
+    "answer": "achievement",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "noun",
+    "meaningTh": "ความสำเร็จ",
+    "hintTh": "สิ่งที่ทำสำเร็จได้ด้วยความพยายาม",
+    "explanationTh": "เรียนจบไปพร้อมทำงานเต็มเวลาเป็นเรื่องที่น่าภูมิใจ หลัง a remarkable ต้องเป็นคำนาม -ment"
+  },
+  {
+    "sentence": "In a healthy friendship, both people respect each other's personal {blank}.",
+    "answer": "boundaries",
+    "prefixLen": 4,
+    "level": "C1",
+    "pos": "noun",
+    "meaningTh": "ขอบเขต (ส่วนตัว)",
+    "hintTh": "เส้นแบ่งที่บอกว่าอะไรยอมรับได้หรือไม่ได้สำหรับเรา",
+    "explanationTh": "respect each other's personal ... เป็น collocation เรื่องเคารพพื้นที่ส่วนตัว ต้องเป็นคำนามพหูพจน์"
+  },
+  {
+    "sentence": "The {blank} of the contract's wording led to a long legal dispute between the partners.",
+    "answer": "ambiguity",
+    "prefixLen": 4,
+    "level": "C1",
+    "pos": "noun",
+    "meaningTh": "ความกำกวม / ความคลุมเครือ",
+    "hintTh": "การที่ความหมายตีความได้มากกว่าหนึ่งแบบ",
+    "explanationTh": "wording ที่ทำให้เกิด legal dispute แสดงว่าถ้อยคำไม่ชัดเจน หลัง The ... of ต้องเป็นคำนาม"
+  },
+  {
+    "sentence": "Although remote work saves commuting time, it has some {blank}, such as feeling isolated.",
+    "answer": "drawbacks",
+    "prefixLen": 4,
+    "level": "C1",
+    "pos": "noun",
+    "meaningTh": "ข้อเสีย",
+    "hintTh": "ด้านลบของบางสิ่ง",
+    "explanationTh": "Although แสดงความขัดแย้งกับข้อดี และ feeling isolated เป็นตัวอย่างข้อเสีย หลัง some ใช้คำนามพหูพจน์"
+  },
+  {
+    "sentence": "Our bus was late, so we {blank} at the museum after it had already closed.",
+    "answer": "arrived",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "verb",
+    "meaningTh": "มาถึง",
+    "hintTh": "การไปถึงสถานที่ปลายทาง",
+    "explanationTh": "arrive at a place เป็น collocation และ was late บอกว่าเป็นอดีต จึงใช้ past tense -ed"
+  },
+  {
+    "sentence": "Can I {blank} your pen for a minute? I left mine at home.",
+    "answer": "borrow",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "verb",
+    "meaningTh": "ยืม",
+    "hintTh": "ขอใช้ของคนอื่นชั่วคราวแล้วคืน",
+    "explanationTh": "I left mine at home บอกว่าต้องขอใช้ของคนอื่น หลัง Can I ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "Could you help me {blank} these heavy boxes up to the third floor?",
+    "answer": "carry",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "verb",
+    "meaningTh": "ถือ / แบก / ขน",
+    "hintTh": "การยกของแล้วพาไปที่อื่น",
+    "explanationTh": "heavy boxes up to the third floor บอกว่าต้องยกขึ้นไป help me + กริยารูปปกติ"
+  },
+  {
+    "sentence": "It was raining heavily, so we {blank} to stay inside and watch a movie.",
+    "answer": "decided",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "verb",
+    "meaningTh": "ตัดสินใจ",
+    "hintTh": "การเลือกว่าจะทำอะไรหลังจากคิดแล้ว",
+    "explanationTh": "decide to do something และ It was raining เป็นอดีต จึงใช้ past tense -ed"
+  },
+  {
+    "sentence": "Nobody {blank} the phone when I called the office this morning.",
+    "answer": "answered",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "รับ (โทรศัพท์) / ตอบ",
+    "hintTh": "การยกหูรับสายเมื่อโทรศัพท์ดัง",
+    "explanationTh": "answer the phone เป็น collocation และ I called เป็นอดีต จึงใช้ past tense -ed"
+  },
+  {
+    "sentence": "We {blank} a table for four at the new Italian restaurant downtown.",
+    "answer": "booked",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "จอง",
+    "hintTh": "การสำรองที่ไว้ล่วงหน้า",
+    "explanationTh": "a table for four at the restaurant เป็นการจองโต๊ะ ใช้ past tense -ed"
+  },
+  {
+    "sentence": "He fell off his bike and {blank} his arm, so he couldn't play tennis for weeks.",
+    "answer": "broke",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "ทำ (กระดูก) หัก",
+    "hintTh": "การที่กระดูกแตกจากอุบัติเหตุ",
+    "explanationTh": "fell off his bike และ couldn't play tennis บอกว่าแขนหัก fell เป็นอดีต จึงใช้ past tense แบบไม่ปกติ"
+  },
+  {
+    "sentence": "I spent the whole morning {blank} the bathroom with soap and a brush because guests were coming.",
+    "answer": "cleaning",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "ทำความสะอาด",
+    "hintTh": "การขัดล้างให้หมดสิ่งสกปรก",
+    "explanationTh": "with soap and a brush บอกว่าขัดล้าง และ spend time + V-ing จึงต้องเติม -ing"
+  },
+  {
+    "sentence": "At first he said no, but eventually he {blank} to help us move the furniture.",
+    "answer": "agreed",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "ตกลง / ยอม",
+    "hintTh": "การตอบรับว่าจะทำตามที่ขอ",
+    "explanationTh": "At first he said no, but eventually แสดงการเปลี่ยนใจเป็นยอม agree to do และเป็นอดีตจึงเติม -ed"
+  },
+  {
+    "sentence": "Try to {blank} eating heavy meals late at night if you want to sleep well.",
+    "answer": "avoid",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "หลีกเลี่ยง",
+    "hintTh": "การไม่ทำบางอย่างโดยตั้งใจ",
+    "explanationTh": "avoid + V-ing (eating) และ if you want to sleep well บอกว่าไม่ควรทำ หลัง try to ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "She {blank} for three jobs last week and already has an interview tomorrow.",
+    "answer": "applied",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "สมัคร",
+    "hintTh": "การยื่นใบสมัครเพื่อขอทำงาน",
+    "explanationTh": "apply for a job เป็น collocation และ last week เป็นอดีต y เปลี่ยนเป็น i แล้วเติม -ed"
+  },
+  {
+    "sentence": "My neighbors always {blank} about the noise, even when we only play music quietly.",
+    "answer": "complain",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "บ่น / ร้องเรียน",
+    "hintTh": "การพูดว่าไม่พอใจในบางสิ่ง",
+    "explanationTh": "complain about เป็น collocation และ even when we only play quietly แสดงว่าเขาไม่พอใจโดยไม่สมเหตุผล ประธาน neighbors พหูพจน์จึงไม่เติม s"
+  },
+  {
+    "sentence": "The witness {blank} the thief as a tall man wearing a black cap.",
+    "answer": "described",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "verb",
+    "meaningTh": "บรรยาย / อธิบายลักษณะ",
+    "hintTh": "การบอกว่าบางคนหรือบางสิ่งมีลักษณะอย่างไร",
+    "explanationTh": "รูป ... someone as + ลักษณะ ใช้กับกริยานี้ และพยานเล่าเหตุการณ์ที่ผ่านมาแล้วจึงใช้ past tense"
+  },
+  {
+    "sentence": "All new employees must {blank} a training session during their first week.",
+    "answer": "attend",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "เข้าร่วม",
+    "hintTh": "การไปร่วมกิจกรรมหรือการประชุม",
+    "explanationTh": "attend a training session เป็น collocation หลัง must ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "I keep {blank} my email because I'm waiting for an important reply from the university.",
+    "answer": "checking",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "ตรวจดู / เช็ก",
+    "hintTh": "การเปิดดูว่ามีอะไรใหม่หรือไม่",
+    "explanationTh": "waiting for an important reply ทำให้ต้องเปิดดูอีเมลบ่อย ๆ keep + V-ing จึงเติม -ing"
+  },
+  {
+    "sentence": "Whether we have the picnic {blank} on the weather tomorrow.",
+    "answer": "depends",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "ขึ้นอยู่กับ",
+    "hintTh": "การที่ผลลัพธ์ถูกกำหนดโดยอีกสิ่งหนึ่ง",
+    "explanationTh": "depend on เป็น collocation ประธานคือประโยค Whether ... ซึ่งนับเป็นเอกพจน์ จึงเติม -s"
+  },
+  {
+    "sentence": "I can't {blank} you finished a whole marathon after only three months of training!",
+    "answer": "believe",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "เชื่อ",
+    "hintTh": "การยอมรับว่าเป็นเรื่องจริง",
+    "explanationTh": "I can't ... ! แสดงความประหลาดใจกับเรื่องที่ยากจะเป็นจริง หลัง can't ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "Volunteers will {blank} donations of food and clothing at the community center.",
+    "answer": "collect",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "รวบรวม / เก็บ",
+    "hintTh": "การรับสิ่งของจากหลายคนมาไว้ที่เดียวกัน",
+    "explanationTh": "collect donations เป็น collocation และอาสาสมัครรับของบริจาค หลัง will ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "Before buying the laptop, I {blank} the prices on three different websites.",
+    "answer": "compared",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "verb",
+    "meaningTh": "เปรียบเทียบ",
+    "hintTh": "การดูความเหมือนและความต่างของหลายสิ่ง",
+    "explanationTh": "the prices on three different websites บอกว่าดูราคาหลายที่เทียบกัน เป็นเรื่องที่ทำไปแล้วจึงใช้ past tense -ed"
+  },
+  {
+    "sentence": "I {blank} with you; I think the movie was actually much better than the book.",
+    "answer": "disagree",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "verb",
+    "meaningTh": "ไม่เห็นด้วย",
+    "hintTh": "การมีความคิดเห็นต่างจากอีกคน",
+    "explanationTh": "disagree with someone และ I think ... actually much better แสดงความเห็นที่ตรงข้าม ประธาน I ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "It took a long time to {blank} my parents that studying abroad was a good idea.",
+    "answer": "convince",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "verb",
+    "meaningTh": "โน้มน้าว / ทำให้เชื่อ",
+    "hintTh": "การพูดจนอีกฝ่ายยอมเชื่อตาม",
+    "explanationTh": "รูป ... someone that + ประโยค ใช้กับกริยาโน้มน้าว และ It took a long time บอกว่าพ่อแม่ไม่ยอมเชื่อง่าย หลัง to ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "After working so hard all year, you really {blank} a long vacation.",
+    "answer": "deserve",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "verb",
+    "meaningTh": "สมควรได้รับ",
+    "hintTh": "การควรได้สิ่งดี ๆ เพราะสิ่งที่ทำมา",
+    "explanationTh": "After working so hard เป็นเหตุผลว่าทำไมควรได้พักร้อน ประธาน you ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "After weeks of criticism, the politician finally {blank} that he had made a mistake.",
+    "answer": "admitted",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "verb",
+    "meaningTh": "ยอมรับ (ความผิด)",
+    "hintTh": "การยอมพูดว่าตัวเองทำผิด",
+    "explanationTh": "finally และ that he had made a mistake บอกว่ายอมรับผิดในที่สุด เป็นอดีตจึงเติม -ed (ซ้อน t)"
+  },
+  {
+    "sentence": "With enough practice and good study habits, you can {blank} a high score on the test.",
+    "answer": "achieve",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "verb",
+    "meaningTh": "บรรลุ / ทำได้สำเร็จ",
+    "hintTh": "การไปถึงเป้าหมายด้วยความพยายาม",
+    "explanationTh": "achieve a high score เป็น collocation และ With enough practice เป็นเงื่อนไขของความสำเร็จ หลัง can ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "Every member of the team {blank} useful ideas to the final project.",
+    "answer": "contributed",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "verb",
+    "meaningTh": "มีส่วนร่วม / ช่วยเสนอ",
+    "hintTh": "การให้ส่วนของตัวเองเพื่อช่วยงานส่วนรวม",
+    "explanationTh": "รูป ... ideas to the project ใช้กับกริยานี้ และพูดถึงโปรเจกต์ที่เสร็จแล้วจึงใช้ past tense -ed"
+  },
+  {
+    "sentence": "Sales of printed newspapers have {blank} sharply as more people read the news online.",
+    "answer": "declined",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "verb",
+    "meaningTh": "ลดลง",
+    "hintTh": "การที่จำนวนน้อยลง",
+    "explanationTh": "as more people read online เป็นเหตุให้ยอดขายลดลง have + V3 จึงใช้รูป -ed"
+  },
+  {
+    "sentence": "Scientists are trying to {blank} what caused the sudden drop in the fish population.",
+    "answer": "determine",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "verb",
+    "meaningTh": "หาคำตอบ / ระบุให้แน่ชัด",
+    "hintTh": "การค้นหาจนรู้แน่ชัดว่าเกิดจากอะไร",
+    "explanationTh": "Scientists และ what caused บอกว่ากำลังหาสาเหตุ หลัง trying to ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "The hikers {blank} their plan to reach the summit when the storm moved in.",
+    "answer": "abandoned",
+    "prefixLen": 4,
+    "level": "C1",
+    "pos": "verb",
+    "meaningTh": "ล้มเลิก / ทิ้ง",
+    "hintTh": "การยกเลิกแผนกลางคันเพราะทำต่อไม่ได้",
+    "explanationTh": "when the storm moved in เป็นเหตุให้เลิกแผนขึ้นยอดเขา abandon a plan เป็น collocation และเป็นอดีตจึงเติม -ed"
+  },
+  {
+    "sentence": "The new subway line is expected to {blank} traffic congestion in the city center.",
+    "answer": "alleviate",
+    "prefixLen": 4,
+    "level": "C1",
+    "pos": "verb",
+    "meaningTh": "บรรเทา / ทำให้เบาลง",
+    "hintTh": "การทำให้ปัญหาลดความรุนแรงลง",
+    "explanationTh": "รถไฟใต้ดินสายใหม่ช่วยให้รถติดน้อยลง ... traffic congestion เป็น collocation หลัง to ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "Even small criticisms can {blank} a child's motivation if they are repeated too often.",
+    "answer": "diminish",
+    "prefixLen": 3,
+    "level": "C1",
+    "pos": "verb",
+    "meaningTh": "ลดทอน / ทำให้ลดลง",
+    "hintTh": "การทำให้บางสิ่งน้อยลงหรืออ่อนลง",
+    "explanationTh": "criticisms ที่ repeated too often ทำให้แรงจูงใจลดลง หลัง can ใช้กริยารูปปกติ"
+  },
+  {
+    "sentence": "My dad was {blank} when I came home three hours late without calling.",
+    "answer": "angry",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "adjective",
+    "meaningTh": "โกรธ",
+    "hintTh": "อารมณ์ไม่พอใจอย่างแรง",
+    "explanationTh": "three hours late without calling เป็นเหตุให้พ่อไม่พอใจ หลัง was ใช้ adjective บอกอารมณ์"
+  },
+  {
+    "sentence": "Sorry, I can't talk right now; I'm really {blank} with work.",
+    "answer": "busy",
+    "prefixLen": 2,
+    "level": "A2",
+    "pos": "adjective",
+    "meaningTh": "ยุ่ง / ไม่ว่าง",
+    "hintTh": "มีงานต้องทำมากจนไม่มีเวลา",
+    "explanationTh": "I can't talk right now และ with work บอกว่าไม่ว่าง หลัง I'm really ใช้ adjective"
+  },
+  {
+    "sentence": "The food at the campus cafeteria is {blank}, but it isn't very tasty.",
+    "answer": "cheap",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "adjective",
+    "meaningTh": "ถูก (ราคา)",
+    "hintTh": "ราคาไม่แพง",
+    "explanationTh": "but แสดงว่าคำนี้เป็นข้อดีที่ตรงข้ามกับไม่อร่อย และโรงอาหารมักราคาไม่แพง หลัง is ใช้ adjective"
+  },
+  {
+    "sentence": "The chocolate cake was so {blank} that everyone asked for a second piece.",
+    "answer": "delicious",
+    "prefixLen": 4,
+    "level": "A2",
+    "pos": "adjective",
+    "meaningTh": "อร่อย",
+    "hintTh": "รสชาติดีมาก",
+    "explanationTh": "everyone asked for a second piece แสดงว่ารสชาติดีมาก โครงสร้าง so + adjective + that"
+  },
+  {
+    "sentence": "The lecture was so {blank} that half the students fell asleep.",
+    "answer": "boring",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "adjective",
+    "meaningTh": "น่าเบื่อ",
+    "hintTh": "ไม่น่าสนใจเลย",
+    "explanationTh": "half the students fell asleep เป็นผลของการบรรยายที่ไม่น่าสนใจ ใช้รูป -ing เพราะบอกลักษณะของสิ่งของ (lecture)"
+  },
+  {
+    "sentence": "My little brother is {blank} of the dark, so he sleeps with a light on.",
+    "answer": "afraid",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "adjective",
+    "meaningTh": "กลัว",
+    "hintTh": "ความรู้สึกไม่กล้าเพราะคิดว่าอันตราย",
+    "explanationTh": "... of the dark เป็นสำนวนกลัวความมืด และ sleeps with a light on เป็นผล หลัง is ใช้ adjective"
+  },
+  {
+    "sentence": "Be {blank} when you cross this street; the cars here drive very fast.",
+    "answer": "careful",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "adjective",
+    "meaningTh": "ระมัดระวัง",
+    "hintTh": "การตั้งใจไม่ให้เกิดอันตราย",
+    "explanationTh": "the cars drive very fast เป็นเหตุผลที่ต้องระวัง หลัง Be ใช้ adjective"
+  },
+  {
+    "sentence": "It's {blank} to swim in the river after heavy rain because the current is very strong.",
+    "answer": "dangerous",
+    "prefixLen": 4,
+    "level": "B1",
+    "pos": "adjective",
+    "meaningTh": "อันตราย",
+    "hintTh": "อาจทำให้บาดเจ็บหรือเสียชีวิตได้",
+    "explanationTh": "the current is very strong เป็นเหตุผลว่าทำไมไม่ปลอดภัย โครงสร้าง It's + adjective + to do"
+  },
+  {
+    "sentence": "These shoes are so {blank} that I can wear them all day without any pain.",
+    "answer": "comfortable",
+    "prefixLen": 4,
+    "level": "B1",
+    "pos": "adjective",
+    "meaningTh": "สบาย",
+    "hintTh": "ใส่หรือใช้แล้วรู้สึกดี ไม่เจ็บ",
+    "explanationTh": "wear them all day without any pain บอกว่าใส่สบาย โครงสร้าง so + adjective + that"
+  },
+  {
+    "sentence": "I'm sorry, but there are no rooms {blank} on those dates; the hotel is fully booked.",
+    "answer": "available",
+    "prefixLen": 4,
+    "level": "B1",
+    "pos": "adjective",
+    "meaningTh": "ว่าง / มีให้ใช้",
+    "hintTh": "พร้อมให้จองหรือใช้งานได้",
+    "explanationTh": "fully booked บอกว่าไม่มีห้องว่าง adjective นี้วางหลังคำนาม rooms ได้"
+  },
+  {
+    "sentence": "The train was so {blank} that I had to stand for the whole trip.",
+    "answer": "crowded",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "adjective",
+    "meaningTh": "แออัด / คนเยอะ",
+    "hintTh": "มีคนอยู่มากจนแน่น",
+    "explanationTh": "had to stand for the whole trip เพราะไม่มีที่นั่ง โครงสร้าง so + adjective + that"
+  },
+  {
+    "sentence": "The weather forecast wasn't very {blank}; it said sunny, but it rained all afternoon.",
+    "answer": "accurate",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "adjective",
+    "meaningTh": "แม่นยำ / ถูกต้อง",
+    "hintTh": "ตรงกับความจริง ไม่ผิดพลาด",
+    "explanationTh": "it said sunny, but it rained แสดงว่าพยากรณ์ผิด หลัง wasn't very ใช้ adjective"
+  },
+  {
+    "sentence": "Could you give me a {blank} summary of the article? I only have five minutes.",
+    "answer": "brief",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "adjective",
+    "meaningTh": "สั้น ๆ / กระชับ",
+    "hintTh": "ใช้เวลาหรือความยาวไม่มาก",
+    "explanationTh": "I only have five minutes บอกว่าต้องการสรุปแบบสั้น adjective วางหน้าคำนาม summary"
+  },
+  {
+    "sentence": "Getting enough sleep is {blank} for students who want to perform well on exams.",
+    "answer": "crucial",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "adjective",
+    "meaningTh": "สำคัญมาก",
+    "hintTh": "จำเป็นอย่างยิ่งต่อความสำเร็จ",
+    "explanationTh": "... for students who want to perform well บอกว่าการนอนพอเป็นสิ่งจำเป็นมาก หลัง is ใช้ adjective"
+  },
+  {
+    "sentence": "After two days without food, the lost hikers were {blank} for help.",
+    "answer": "desperate",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "adjective",
+    "meaningTh": "สิ้นหวังจนต้องการอย่างมาก",
+    "hintTh": "ต้องการบางอย่างอย่างรุนแรงเพราะอยู่ในสถานการณ์แย่มาก",
+    "explanationTh": "two days without food และ lost บอกว่าสถานการณ์แย่มาก ... for help เป็น collocation หลัง were ใช้ adjective"
+  },
+  {
+    "sentence": "Many young people are moving out of big cities in search of more {blank} housing.",
+    "answer": "affordable",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "adjective",
+    "meaningTh": "ราคาพอจ่ายได้",
+    "hintTh": "ราคาที่คนทั่วไปมีเงินพอซื้อหรือเช่า",
+    "explanationTh": "ย้ายออกจากเมืองใหญ่เพราะที่อยู่อาศัยแพง ... housing เป็น collocation adjective วางหน้าคำนาม"
+  },
+  {
+    "sentence": "Investors are being {blank} because nobody knows how the economy will change next year.",
+    "answer": "cautious",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "adjective",
+    "meaningTh": "ระมัดระวัง (ไม่เสี่ยง)",
+    "hintTh": "คิดก่อนทำเพราะกลัวความเสี่ยง",
+    "explanationTh": "nobody knows how the economy will change ความไม่แน่นอนทำให้ไม่กล้าเสี่ยง หลัง are being ใช้ adjective"
+  },
+  {
+    "sentence": "She is extremely {blank} and hopes to run her own company before she turns thirty.",
+    "answer": "ambitious",
+    "prefixLen": 4,
+    "level": "C1",
+    "pos": "adjective",
+    "meaningTh": "มีความทะเยอทะยาน",
+    "hintTh": "มีความปรารถนาแรงกล้าที่จะประสบความสำเร็จ",
+    "explanationTh": "hopes to run her own company before thirty เป็นเป้าหมายที่สูง หลัง is extremely ใช้ adjective ลงท้าย -ous"
+  },
+  {
+    "sentence": "Spending too many hours on social media can be {blank} to teenagers' mental health.",
+    "answer": "detrimental",
+    "prefixLen": 4,
+    "level": "C1",
+    "pos": "adjective",
+    "meaningTh": "เป็นผลเสีย / เป็นอันตราย",
+    "hintTh": "ก่อให้เกิดความเสียหาย",
+    "explanationTh": "too many hours บอกถึงผลเสีย ... to someone's health เป็น collocation หลัง can be ใช้ adjective"
+  },
+  {
+    "sentence": "Employees felt the new rules were {blank}, since no one explained the reasons behind them.",
+    "answer": "arbitrary",
+    "prefixLen": 4,
+    "level": "C1",
+    "pos": "adjective",
+    "meaningTh": "ตามอำเภอใจ / ไม่มีเหตุผลรองรับ",
+    "hintTh": "ถูกตัดสินขึ้นมาโดยไม่มีหลักการหรือเหตุผล",
+    "explanationTh": "no one explained the reasons บอกว่ากฎดูไม่มีเหตุผล หลัง were ใช้ adjective"
+  },
+  {
+    "sentence": "I {blank} missed the bus this morning, but luckily the driver waited for me.",
+    "answer": "almost",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "adverb",
+    "meaningTh": "เกือบจะ",
+    "hintTh": "เกือบเกิดขึ้นแต่ไม่ได้เกิด",
+    "explanationTh": "but the driver waited แสดงว่าไม่ได้พลาดจริง adverb นี้วางหน้ากริยา missed เพื่อบอกว่าเกือบเกิดขึ้น"
+  },
+  {
+    "sentence": "He played {blank} in the first half, but he scored two goals after the break.",
+    "answer": "badly",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "adverb",
+    "meaningTh": "อย่างแย่ / ไม่ดี",
+    "hintTh": "ทำได้ไม่ดีเลย",
+    "explanationTh": "but he scored two goals แสดงความตรงข้ามกับครึ่งแรก ต้องเป็น adverb (-ly) เพราะขยายกริยา played"
+  },
+  {
+    "sentence": "I {blank} forgot about the meeting until my boss called to ask where I was.",
+    "answer": "completely",
+    "prefixLen": 4,
+    "level": "B1",
+    "pos": "adverb",
+    "meaningTh": "โดยสิ้นเชิง / อย่างสมบูรณ์",
+    "hintTh": "ทั้งหมด ไม่เหลือเลย",
+    "explanationTh": "until my boss called แสดงว่าลืมสนิท ต้องเป็น adverb (-ly) เพราะขยายกริยา forgot"
+  },
+  {
+    "sentence": "This medicine should be taken twice {blank}, once in the morning and once at night.",
+    "answer": "daily",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "adverb",
+    "meaningTh": "ทุกวัน / ต่อวัน",
+    "hintTh": "เกิดขึ้นในแต่ละวัน",
+    "explanationTh": "once in the morning and once at night บอกว่าเป็นวันละสองครั้ง twice ... เป็น adverb บอกความถี่"
+  },
+  {
+    "sentence": "Everyone thinks he's shy, but he's {blank} very talkative once you get to know him.",
+    "answer": "actually",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "adverb",
+    "meaningTh": "จริง ๆ แล้ว",
+    "hintTh": "ใช้บอกความจริงที่ต่างจากที่คนคิด",
+    "explanationTh": "Everyone thinks ... but แสดงว่าความจริงตรงข้ามกับที่คนคิด adverb นี้ใช้แก้ความเข้าใจผิด"
+  },
+  {
+    "sentence": "I'll {blank} come to your party; I wouldn't miss it for anything.",
+    "answer": "definitely",
+    "prefixLen": 4,
+    "level": "B1",
+    "pos": "adverb",
+    "meaningTh": "แน่นอน",
+    "hintTh": "ไม่มีข้อสงสัยเลย",
+    "explanationTh": "I wouldn't miss it for anything แสดงความมั่นใจเต็มที่ adverb วางระหว่าง will กับกริยา come"
+  },
+  {
+    "sentence": "It was so foggy that we could {blank} see the car in front of us.",
+    "answer": "barely",
+    "prefixLen": 3,
+    "level": "B2",
+    "pos": "adverb",
+    "meaningTh": "แทบจะไม่",
+    "hintTh": "ทำได้แค่นิดเดียว เกือบทำไม่ได้",
+    "explanationTh": "so foggy ทำให้มองเห็นได้น้อยมาก adverb นี้ขยายกริยา see และมีความหมายเชิงปฏิเสธ"
+  },
+  {
+    "sentence": "The price of houses in this area has increased {blank} over the past five years.",
+    "answer": "dramatically",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "adverb",
+    "meaningTh": "อย่างมาก / อย่างก้าวกระโดด",
+    "hintTh": "เปลี่ยนแปลงมากและรวดเร็วจนเห็นได้ชัด",
+    "explanationTh": "increased ... เป็น collocation บอกการเพิ่มขึ้นมาก ต้องเป็น adverb (-ally) เพราะขยายกริยา increased"
+  },
+  {
+    "sentence": "I {blank} deleted the file, so I had to write the whole report again.",
+    "answer": "accidentally",
+    "prefixLen": 4,
+    "level": "B2",
+    "pos": "adverb",
+    "meaningTh": "โดยไม่ได้ตั้งใจ / โดยบังเอิญ",
+    "hintTh": "เกิดขึ้นโดยไม่ได้ตั้งใจทำ",
+    "explanationTh": "had to write the whole report again แสดงว่าไม่ได้ตั้งใจลบ ต้องเป็น adverb (-ally) เพราะขยายกริยา deleted"
+  },
+  {
+    "sentence": "She has {blank} been one of the top students, earning high grades every semester.",
+    "answer": "consistently",
+    "prefixLen": 4,
+    "level": "C1",
+    "pos": "adverb",
+    "meaningTh": "อย่างสม่ำเสมอ",
+    "hintTh": "เหมือนเดิมทุกครั้งต่อเนื่อง ไม่เปลี่ยน",
+    "explanationTh": "every semester บอกว่าเป็นแบบนี้ตลอด adverb วางระหว่าง has กับ been เพื่อขยายกริยา"
+  },
+  {
+    "sentence": "Please turn off your phones {blank} the movie so you don't disturb other people.",
+    "answer": "during",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "preposition",
+    "meaningTh": "ระหว่าง (ช่วงเวลา)",
+    "hintTh": "ในช่วงเวลาที่บางสิ่งกำลังเกิดขึ้น",
+    "explanationTh": "the movie เป็นช่วงเวลาที่กำลังฉาย preposition นี้ใช้หน้าคำนามบอกช่วงเวลา"
+  },
+  {
+    "sentence": "The parking lot is {blank} the building, so walk around to the back.",
+    "answer": "behind",
+    "prefixLen": 3,
+    "level": "A2",
+    "pos": "preposition",
+    "meaningTh": "ข้างหลัง",
+    "hintTh": "ตำแหน่งด้านหลังของบางสิ่ง",
+    "explanationTh": "walk around to the back บอกว่าที่จอดรถอยู่ด้านหลังตึก preposition บอกตำแหน่ง"
+  },
+  {
+    "sentence": "The singer is very popular {blank} teenagers, but older people have never heard of her.",
+    "answer": "among",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "preposition",
+    "meaningTh": "ในหมู่ / ท่ามกลาง",
+    "hintTh": "ในกลุ่มคนจำนวนมาก",
+    "explanationTh": "popular ... teenagers หมายถึงเป็นที่นิยมในกลุ่มวัยรุ่น และ but older people ตัดกับกลุ่มอื่น ใช้กับกลุ่มคนมากกว่าสอง"
+  },
+  {
+    "sentence": "The game continued {blank} the heavy rain, and our team won in the final minute.",
+    "answer": "despite",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "preposition",
+    "meaningTh": "แม้ว่า / ทั้ง ๆ ที่",
+    "hintTh": "คำแสดงความขัดแย้ง ตามด้วยคำนาม",
+    "explanationTh": "ฝนตกหนักแต่เกมยังเล่นต่อ จึงเป็นความขัดแย้ง หลังช่องว่างเป็นคำนาม the heavy rain จึงใช้ preposition ไม่ใช่ although"
+  },
+  {
+    "sentence": "I really enjoyed the trip, {blank} the hotel was a bit noisy at night.",
+    "answer": "although",
+    "prefixLen": 3,
+    "level": "B1",
+    "pos": "conjunction",
+    "meaningTh": "แม้ว่า",
+    "hintTh": "คำเชื่อมแสดงความขัดแย้ง ตามด้วยประโยค",
+    "explanationTh": "enjoyed กับ noisy ขัดแย้งกัน หลังช่องว่างเป็นประโยคเต็ม (the hotel was ...) จึงใช้คำเชื่อม ไม่ใช่ despite"
+  }
+]

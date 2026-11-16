@@ -7,6 +7,7 @@ import type {
   PhotoItem,
   PhotoTaskType,
   WritingAttemptReport,
+  WritingFollowUpPrompt,
   WritingTopic,
 } from "./production-types";
 
@@ -174,12 +175,30 @@ export function submitPhotoReport(
   );
 }
 
+/**
+ * Interactive Writing step 2. The server never fails this (it falls back to an authored or generic
+ * same-topic follow-up), but a network error still lands here, so callers keep their own fallback.
+ */
+export async function fetchWritingFollowUp(topic: WritingTopic, essay: string): Promise<WritingFollowUpPrompt> {
+  const res = await apiFetch(`${API_BASE_URL}/api/writing-followup`, {
+    method: "POST",
+    headers: await authHeaders(),
+    body: JSON.stringify({ topic, essay }),
+  });
+  const data = (await res.json().catch(() => ({}))) as Partial<WritingFollowUpPrompt>;
+  if (!res.ok || !data.promptEn) throw new Error(`Could not load the follow-up (${res.status})`);
+  return { promptEn: data.promptEn, promptTh: data.promptTh ?? "" };
+}
+
 export function submitWritingReport(
   args: {
     attemptId: string;
     topic: WritingTopic;
     essay: string;
     followUpAnswers: string[];
+    /** "interactive" = DET Interactive Writing (follow-up revealed after the main response). */
+    format?: "interactive";
+    prepMinutes?: number;
   },
   onPending?: () => void,
 ): Promise<GradingOutcome<WritingAttemptReport>> {
@@ -190,7 +209,8 @@ export function submitWritingReport(
       topic: args.topic,
       essay: args.essay,
       followUpAnswers: args.followUpAnswers,
-      prepMinutes: 0,
+      ...(args.format ? { format: args.format } : {}),
+      prepMinutes: args.prepMinutes ?? 0,
       redeemed: false,
       previousScore160: null,
     },

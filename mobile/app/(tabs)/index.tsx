@@ -20,6 +20,7 @@ const row = (t: Translate, th: string, en: string, href: Href): Row => ({
 const literacy = (t: Translate): Row[] => [
   row(t, "ตามคำบอก", "Dictation", "/dictation"),
   row(t, "เติมคำในช่องว่าง", "Fill in the blank", "/fitb"),
+  row(t, "เติมคำในประโยค 🆕", "Fill in the blanks · sentence", "/sentence-fill" as Href),
   row(t, "คำจริง / คำลวง", "Real word", "/realword"),
 ];
 
@@ -99,7 +100,7 @@ export default function PracticeHubScreen() {
       <Section
         index={1}
         title={t("การอ่านเขียนพื้นฐาน", "Literacy")}
-        sub={t("ตามคำบอก · เติมคำ · คำจริง", "Dictation · Fill in the blank · Real word")}
+        sub={t("ตามคำบอก · เติมคำ · เติมคำในประโยค · คำจริง", "Dictation · Fill in the blank · Sentence blanks · Real word")}
       >
         {rows(literacy(t))}
       </Section>

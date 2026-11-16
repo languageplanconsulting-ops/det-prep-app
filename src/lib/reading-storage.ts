@@ -327,8 +327,10 @@ export function saveReadingAttempt(args: {
   attainedScore: number;
   maxScore: number;
   correctCount: number;
+  /** How many questions `correctCount` is out of: 6 for the Interactive Reading exam, 4 for the old format. */
+  total?: number;
 }): ReadingProgressRecord {
-  const { round, difficulty, setNumber, examNumber, attainedScore, maxScore, correctCount } = args;
+  const { round, difficulty, setNumber, examNumber, attainedScore, maxScore, correctCount, total = 4 } = args;
   const m = readReadingProgressMap();
   const k = progressExamKey(round, difficulty, setNumber, examNumber);
   const prev = m[k];
@@ -349,7 +351,7 @@ export function saveReadingAttempt(args: {
     scorePct: maxScore > 0 ? (attainedScore / maxScore) * 100 : 0,
     detail: {
       correct: correctCount,
-      total: 4,
+      total,
       contentKey: buildContentKey("reading", difficulty, round, packSubIndexed(setNumber, examNumber)),
     },
   });

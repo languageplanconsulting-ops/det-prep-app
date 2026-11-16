@@ -80,15 +80,25 @@ export default function ReadingExamListScreen() {
     <FlatList
       style={styles.list}
       contentContainerStyle={styles.listContent}
-      data={exams.map((exam, i) => ({ exam, examNumber: i + 1 }))}
+      // Rows are numbered only: the exam opens an Interactive Reading passage from the site's bank,
+      // so the uploaded exam's own title would name a different text (and give away step 6).
+      data={exams.map((_exam, i) => ({ examNumber: i + 1 }))}
       keyExtractor={(row) => String(row.examNumber)}
       ListHeaderComponent={
-        <Text style={styles.header}>
-          {t(
-            `ชุดที่ ${setNumber} · ${exams.length} ข้อสอบ · ข้อสอบละสูงสุด ${cap} คะแนน`,
-            `Set ${setNumber} · ${exams.length} exam(s) · max ${cap} pts each`,
-          )}
-        </Text>
+        <View style={styles.headerWrap}>
+          <Text style={styles.header}>
+            {t(
+              `ชุดที่ ${setNumber} · ${exams.length} ข้อสอบ · ข้อสอบละสูงสุด ${cap} คะแนน`,
+              `Set ${setNumber} · ${exams.length} exam(s) · max ${cap} pts each`,
+            )}
+          </Text>
+          <Text style={styles.format}>
+            {t(
+              "แต่ละข้อสอบคือ Interactive Reading เหมือนข้อสอบจริง: บทอ่าน 1 เรื่อง 6 ขั้นตอนในเวลาเดียว 8 นาที — เติมคำ · เติมประโยค · ไฮไลต์ 2 ข้อ · แนวคิดที่กล่าวถึง · ชื่อเรื่อง",
+              "Each exam is a real-format Interactive Reading task: one passage, six steps on one 8-minute clock — missing words · missing sentence · 2 highlights · idea expressed · best title",
+            )}
+          </Text>
+        </View>
       }
       ListEmptyComponent={<Text style={styles.empty}>{t("ชุดนี้ยังไม่มีข้อสอบ", "No exams in this set yet.")}</Text>}
       renderItem={({ item }) => (
@@ -102,7 +112,6 @@ export default function ReadingExamListScreen() {
         >
           <Text style={styles.rowTitle}>
             {t(`ข้อสอบ ${item.examNumber}`, `Exam ${item.examNumber}`)}
-            {item.exam.titleEn ? ` — ${item.exam.titleEn}` : ""}
           </Text>
           {(() => {
             const best = bestPct.get(packSubIndexed(setNumber, item.examNumber));
@@ -131,7 +140,9 @@ const styles = StyleSheet.create({
   retryText: { color: "#FFCC00", fontWeight: "800" },
   list: { flex: 1, backgroundColor: "#F4F6FB" },
   listContent: { padding: 12 },
-  header: { fontWeight: "800", marginBottom: 12, paddingHorizontal: 4 },
+  headerWrap: { marginBottom: 12, paddingHorizontal: 4 },
+  header: { fontWeight: "800" },
+  format: { marginTop: 6, fontSize: 13, lineHeight: 19, color: "#475569" },
   empty: { textAlign: "center", color: "#6B7280", marginTop: 24 },
   row: {
     flexDirection: "row",

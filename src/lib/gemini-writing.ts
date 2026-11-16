@@ -158,11 +158,18 @@ studySentences (max 7), studyVocabulary (max 10): bilingual revision tied to thi
 Return ONLY valid JSON (no markdown).${rungRules}${GEMINI_PRODUCTION_THAI_STYLE}`;
 }
 
+/** "interactive" = DET Interactive Writing: the follow-up was only shown after the main response was submitted. */
+export type WritingTaskFormat = "standard" | "interactive";
+
+const INTERACTIVE_FORMAT_NOTE =
+  "DET Interactive Writing: the learner wrote the main response in 5 minutes, then saw the single follow-up question only AFTER submitting it and answered it in 3 more minutes. Score both parts together. Task relevancy: the follow-up answer must directly answer the follow-up question and EXTEND the main response with new ideas (repeating the main response earns little). Coherence: the follow-up should read as a natural continuation. Judge the follow-up's length against 3 minutes of typing (about 40–80 words is normal), not against an essay.";
+
 function buildUserPayload(
   topic: WritingTopic,
   mainEssayRaw: string,
   followUpRaw: string[],
   prepMinutes: number,
+  format: WritingTaskFormat = "standard",
 ): string {
   const fus = topic.followUps ?? [];
   const sections = fus.map((p, i) => ({
@@ -174,6 +181,7 @@ function buildUserPayload(
   return JSON.stringify(
     {
       task: "analyze_typed_writing",
+      ...(format === "interactive" ? { taskFormat: INTERACTIVE_FORMAT_NOTE } : {}),
       topicTitleEn: topic.titleEn,
       topicTitleTh: topic.titleTh,
       mainPromptEn: topic.promptEn,
@@ -346,6 +354,7 @@ export async function generateWritingReportWithGemini(params: {
   essay: string;
   followUpAnswers?: string[];
   prepMinutes: number;
+  format?: WritingTaskFormat;
   /** Wall-clock deadline for internal retries (Date.now() ms). */
   deadlineAt?: number;
 }): Promise<{ report: WritingAttemptReport; usage: GradingLlmUsage | null }> {
@@ -366,7 +375,7 @@ export async function generateWritingReportWithGemini(params: {
       openAiApiKey: params.openAiApiKey,
     },
     systemInstruction: buildSystemInstruction(countWords(essay)),
-    userPayload: buildUserPayload(topic, essay, followUpRaw, prepMinutes),
+    userPayload: buildUserPayload(topic, essay, followUpRaw, prepMinutes, params.format),
     temperature: 0.35,
     operation: "writing_report",
     deadlineAt: params.deadlineAt,
@@ -594,6 +603,7 @@ export async function generateWritingReportWithGemini(params: {
     prepMinutes,
     essay: essay.trim(),
     ...(followUpResponses ? { followUpResponses } : {}),
+    ...(params.format === "interactive" ? { taskFormat: "interactive" as const } : {}),
     punctuatedEssay: punctuatedMain,
     ...(hasSectionHighlights
       ? {

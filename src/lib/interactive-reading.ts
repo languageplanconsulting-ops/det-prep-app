@@ -172,6 +172,35 @@ export function paragraphChunks(text: string): ({ kind: "text"; text: string } |
 
 export const IR_STEP_COUNT = 6;
 
+/**
+ * Display order for an option list — a stable shuffle seeded by `seed` (e.g. `${set.id}:gap`).
+ *
+ * The bank is authored with the key FIRST in every list (every blank, gap, idea and title option),
+ * so showing lists in stored order let a learner score 100% by always tapping the top option.
+ * Seeded rather than random so the server render and the client hydrate agree, and a retry of the
+ * same set shows the same order. Returns indices into the original list; grading keeps using them.
+ */
+export function irOptionOrder(seed: string, n: number): number[] {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  let a = h >>> 0;
+  const rand = () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const out = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
+}
+
 /** Short Thai names for the six steps — used in the report and in the drill hub. */
 export const IR_STEP_LABELS_TH = ["เติมคำในช่องว่าง", "เติมประโยคที่หายไป", "ไฮไลต์คำตอบ (ข้อ 1)", "ไฮไลต์คำตอบ (ข้อ 2)", "แนวคิดที่กล่าวถึง", "ชื่อเรื่อง"];
 

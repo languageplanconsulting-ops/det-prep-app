@@ -191,6 +191,8 @@ export interface WritingAttemptReport {
   topicTitleEn: string;
   topicTitleTh: string;
   prepMinutes: number;
+  /** "interactive" = DET Interactive Writing (follow-up shown only after the main response). */
+  taskFormat?: "interactive";
   /** Task score includes +10 (capped at 100) when learner used personal or hypothetical personal experience. */
   taskPersonalExperienceBoostApplied?: boolean;
   /** Main task response only (first writing box) — raw as typed. */

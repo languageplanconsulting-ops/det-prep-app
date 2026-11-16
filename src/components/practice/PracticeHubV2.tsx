@@ -376,11 +376,11 @@ export function PracticeHubV2({
               <div className="flex items-center gap-2">
                 <DiffPill level="easy">ง่าย</DiffPill>
                 <span className="text-xs font-semibold text-amber-700">
-                  3 รูปแบบข้อสอบ
+                  4 รูปแบบข้อสอบ
                 </span>
               </div>
             </header>
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid gap-2 sm:grid-cols-2">
               <ToolRow
                 title="🎧 Dictation"
                 sub="ฟังแล้วพิมพ์ตาม"
@@ -395,6 +395,11 @@ export function PracticeHubV2({
                 title="🔤 Real word"
                 sub="แยกคำจริง/ปลอม"
                 href="/practice/literacy/real-word"
+              />
+              <ToolRow
+                title="🆕 Fill in the blanks (ประโยค)"
+                sub="เติมคำในประโยค · 20 วิ/ข้อ แบบสอบจริง"
+                href="/practice/literacy/sentence-fill"
               />
             </div>
             <CoachTip>

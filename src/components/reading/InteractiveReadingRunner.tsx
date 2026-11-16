@@ -42,6 +42,7 @@ import {
 import {
   IR_STEP_COUNT,
   IR_STEP_LABELS_TH,
+  irOptionOrder,
   irRemainingLabel,
   irSeconds,
   irStepPromptEn,
@@ -428,11 +429,14 @@ function TaskCard({
   }
 
   function choiceList(list: { text: string; correct: boolean }[], pick: number | null, set_: (i: number) => void) {
+    // the bank stores the key first — show a stable shuffle instead (see irOptionOrder)
+    const order = irOptionOrder(`${set.id}:${step}`, list.length);
     return (
       <div className="space-y-2.5">
-        {list.map((o, i) =>
-          card(o.text, pick === i, () => set_(i), i, submitted ? (o.correct ? "key" : pick === i ? "miss" : undefined) : undefined),
-        )}
+        {order.map((i) => {
+          const o = list[i]!;
+          return card(o.text, pick === i, () => set_(i), i, submitted ? (o.correct ? "key" : pick === i ? "miss" : undefined) : undefined);
+        })}
       </div>
     );
   }
@@ -462,7 +466,7 @@ function TaskCard({
                 </button>
                 {open && !submitted ? (
                   <div className="mt-1 overflow-hidden rounded-xl border-2 border-slate-200">
-                    {b.options.map((o) => (
+                    {irOptionOrder(`${set.id}:b${b.n}`, b.options.length).map((k) => b.options[k]!).map((o) => (
                       <button
                         key={o}
                         type="button"
@@ -715,6 +719,7 @@ export function InteractiveReadingRunner({
   glossary,
   onFinish,
   onStepDone,
+  onTimeUp,
   hideReport = false,
   hostOwnsProgress = false,
 }: {
@@ -734,6 +739,12 @@ export function InteractiveReadingRunner({
    * score a half-finished attempt as zero.
    */
   onStepDone?: (result: IrStepResult, all: IrStepResult[]) => void;
+  /**
+   * Called once if the set's clock (full-set mode only) reaches zero before the last step, with the
+   * steps answered so far. The step on screen is dropped, as on DET. The reading exam uses it to
+   * record the attempt — onFinish never fires on a time-up.
+   */
+  onTimeUp?: (answered: IrStepResult[]) => void;
   /** The mock renders its own report, so suppress ours. */
   hideReport?: boolean;
   /**
@@ -752,7 +763,11 @@ export function InteractiveReadingRunner({
   const [results, setResults] = useState<IrStepResult[]>([]);
   const [finished, setFinished] = useState(false);
   const [left, setLeft] = useState(() => (sets[0] ? irSeconds(sets[0]) : 480));
+  const [timedOut, setTimedOut] = useState(false);
   const rewarded = useRef(false);
+  const resultsRef = useRef<IrStepResult[]>([]);
+  const onTimeUpRef = useRef(onTimeUp);
+  onTimeUpRef.current = onTimeUp;
 
   const finish = useCallback(
     (all: number[]) => {
@@ -776,6 +791,7 @@ export function InteractiveReadingRunner({
       setLeft((s) => {
         if (s <= 1) {
           clearInterval(t);
+          setTimedOut(true);
           setScores((cur) => {
             finish(cur);
             return cur;
@@ -788,9 +804,19 @@ export function InteractiveReadingRunner({
     return () => clearInterval(t);
   }, [timed, finished, finish]);
 
+  // fired from an effect, not the interval's state updater, so it runs exactly once
+  const reportedTimeUp = useRef(false);
+  useEffect(() => {
+    if (!timedOut || reportedTimeUp.current) return;
+    reportedTimeUp.current = true;
+    onTimeUpRef.current?.(resultsRef.current);
+  }, [timedOut]);
+
   function onDone(r: IrStepResult) {
+    if (finished) return;
     const all = [...scores, r.score];
     const allR = [...results, r];
+    resultsRef.current = allR;
     setScores(all);
     setResults(allR);
     onStepDone?.(r, allR);
@@ -823,6 +849,9 @@ export function InteractiveReadingRunner({
           <p className="text-center text-4xl font-black" style={{ color: BRAND }}>
             {pct}%
           </p>
+          {timedOut ? (
+            <p className="mt-1 text-center text-xs font-bold text-rose-500">หมดเวลา — ข้อที่ยังไม่ได้ตอบนับเป็น 0</p>
+          ) : null}
           <div className="mt-4 space-y-1.5">
             {plan.map((slot, idx) => {
               const s = scores[idx] ?? 0;
@@ -832,9 +861,14 @@ export function InteractiveReadingRunner({
                     {sets.length > 1 ? `${slot.set.topicTh} · ` : `${idx + 1}. `}
                     {IR_STEP_LABELS_TH[slot.step]}
                   </span>
-                  <span className={s === 1 ? "text-emerald-600" : s > 0 ? "text-amber-600" : "text-rose-500"}>
-                    {s === 1 ? "ถูก" : s > 0 ? `${Math.round(s * 100)}%` : "ยังไม่ถูก"}
-                  </span>
+                  {idx >= scores.length ? (
+                    // only after a time-up: the clock ran out before this step was answered
+                    <span className="text-slate-400">ไม่ได้ตอบ</span>
+                  ) : (
+                    <span className={s === 1 ? "text-emerald-600" : s > 0 ? "text-amber-600" : "text-rose-500"}>
+                      {s === 1 ? "ถูก" : s > 0 ? `${Math.round(s * 100)}%` : "ยังไม่ถูก"}
+                    </span>
+                  )}
                 </div>
               );
             })}

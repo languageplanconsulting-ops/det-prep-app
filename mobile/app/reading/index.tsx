@@ -7,7 +7,7 @@ export default function ReadingHubScreen() {
   return (
     <RoundDifficultyPicker
       title={t("การอ่าน", "Reading")}
-      subtitle={t("อ่านแล้วตอบคำถาม — ข้อสอบละ 4 คำถาม", "Read and answer — 4 questions per exam.")}
+      subtitle={t("Interactive Reading เหมือนข้อสอบจริง — บทอ่านละ 6 ขั้นตอน ในเวลา 8 นาที", "Real-format Interactive Reading — 6 steps per passage on an 8-minute clock.")}
       basePath="/reading"
       difficulties={READING_DIFFICULTIES}
       maxScores={READING_DIFFICULTY_MAX}

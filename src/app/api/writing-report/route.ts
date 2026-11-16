@@ -74,6 +74,7 @@ export async function POST(req: Request) {
   const previousScore160 = o.previousScore160;
   // The one-time skill-placement probe shouldn't cost the learner's monthly AI-feedback quota.
   const isPlacement = o.source === "placement";
+  const format = o.format === "interactive" ? "interactive" : "standard";
 
   if (typeof attemptId !== "string" || !attemptId) {
     return NextResponse.json({ error: "attemptId required" }, { status: 400 });
@@ -87,7 +88,12 @@ export async function POST(req: Request) {
   const followUpAnswerStrings = Array.isArray(followUpAnswers)
     ? followUpAnswers.map((x) => String(x ?? ""))
     : undefined;
-  const wordCount = essay.trim().split(/\s+/).filter(Boolean).length;
+  const countWords = (t: string) => t.trim().split(/\s+/).filter(Boolean).length;
+  // Interactive Writing is two timed parts, so the minimum applies to both together.
+  const wordCount =
+    o.format === "interactive"
+      ? countWords(essay) + (followUpAnswerStrings ?? []).reduce((n, a) => n + countWords(a), 0)
+      : countWords(essay);
   if (wordCount < 50) {
     return NextResponse.json(
       { error: "essay must contain at least 50 words" },
@@ -119,7 +125,7 @@ export async function POST(req: Request) {
       userId,
       surface: "read_then_write",
       attemptId,
-      payload: { topic, essay, followUpAnswers: followUpAnswerStrings, prepMinutes },
+      payload: { topic, essay, followUpAnswers: followUpAnswerStrings, prepMinutes, format },
     });
     // Idempotency: a double-tap or client retry returns the finished report
     // instead of grading — and charging — twice.
@@ -142,6 +148,7 @@ export async function POST(req: Request) {
           essay,
           followUpAnswers: followUpAnswerStrings,
           prepMinutes,
+          format,
           deadlineAt,
         }),
     });

@@ -83,7 +83,9 @@ export function ReadingSetExamList({
         <h1 className="mt-2 text-2xl font-black tracking-tight">Choose an exam</h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-600">
           This set has <strong>{examCount}</strong> exam{examCount === 1 ? "" : "s"}. Each exam is one
-          passage with four questions. Pick one to start.
+          Interactive Reading passage with six steps on one clock (8 minutes), as on the real DET: fill
+          the missing words, complete the passage, highlight two answers, pick the idea expressed and
+          the best title. Pick one to start.
         </p>
         {belowRecommended ? (
           <p className="mt-3 border-l-4 border-ep-yellow bg-ep-yellow/20 px-3 py-2 text-sm font-semibold text-neutral-800">
@@ -94,9 +96,11 @@ export function ReadingSetExamList({
       </header>
 
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {set.exams.map((exam, index) => {
+        {set.exams.map((_exam, index) => {
           const examNumber = index + 1;
-          const label = exam.titleEn?.trim() || `Exam ${examNumber}`;
+          // Not `exam.titleEn`: the exam now opens an Interactive Reading passage from the bank, so the
+          // uploaded title would name a different text (and give away the step-6 answer).
+          const label = `Exam ${examNumber}`;
           const prog = getReadingExamProgress(round, difficulty, setNumber, examNumber);
           const href = `/practice/comprehension/reading/round/${round}/${difficulty}/${setNumber}/${examNumber}`;
           return (

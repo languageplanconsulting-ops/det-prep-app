@@ -31,7 +31,15 @@ import {
   subscribeWritingTopics,
   subscribeReadWriteTopicProgress,
 } from "@/lib/writing-storage";
-import type { WritingAttemptReport, WritingTopic } from "@/types/writing";
+import {
+  IW_FOLLOW_SECONDS,
+  IW_LAUNCH_TH,
+  IW_MAIN_SECONDS,
+  IW_MIN_TOTAL_WORDS,
+  IW_PREP_SECONDS,
+  type WritingPracticeMode,
+} from "@/lib/interactive-writing";
+import type { WritingAttemptReport, WritingFollowUpPrompt, WritingTopic } from "@/types/writing";
 
 const MAX_SCORE = 160;
 
@@ -67,7 +75,14 @@ export function ReadWriteSession({
   const [topic, setTopic] = useState<WritingTopic | null>(null);
   const [progress, setProgress] = useState<ReturnType<typeof getReadWriteTopicProgress> | null>(null);
   const [prepChoice, setPrepChoice] = useState(3);
-  const [phase, setPhase] = useState<"prep-pick" | "prep-run" | "write">("prep-pick");
+  // Course and placement flows keep the classic essay; the practice page offers both formats.
+  const offerModes = !embedded && !attemptSource;
+  const [mode, setMode] = useState<WritingPracticeMode>("standard");
+  const [phase, setPhase] = useState<
+    "mode-pick" | "prep-pick" | "prep-run" | "write" | "iw-prep" | "iw-write" | "iw-loading" | "iw-follow"
+  >(offerModes ? "mode-pick" : "prep-pick");
+  const [iwFollowUp, setIwFollowUp] = useState<WritingFollowUpPrompt | null>(null);
+  const [iwAnswer, setIwAnswer] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [essay, setEssay] = useState("");
   const [followUpAnswers, setFollowUpAnswers] = useState<string[]>([]);
@@ -123,19 +138,21 @@ export function ReadWriteSession({
     return unsubscribe;
   }, [mounted, topicId]);
 
+  const ticking = phase === "prep-run" || phase === "iw-prep" || phase === "iw-write" || (phase === "iw-follow" && !submitting);
   useEffect(() => {
-    if (phase !== "prep-run") return;
+    if (!ticking) return;
     const id = window.setInterval(() => {
       setSecondsLeft((s) => Math.max(0, s - 1));
     }, 1000);
     return () => window.clearInterval(id);
-  }, [phase]);
+  }, [ticking]);
 
   useEffect(() => {
     if (phase === "prep-run" && secondsLeft === 0) setPhase("write");
   }, [phase, secondsLeft]);
 
   const wc = countWords(essay);
+  const iwTotalWords = wc + countWords(iwAnswer);
   const followUps = topic?.followUps ?? [];
   const canSubmit = Boolean(topic) && wc >= 50;
 
@@ -184,7 +201,10 @@ export function ReadWriteSession({
     setPhase("prep-run");
   };
 
-  const goToReport = async (report: WritingAttemptReport) => {
+  const goToReport = async (
+    report: WritingAttemptReport,
+    interactive?: { followUp: WritingFollowUpPrompt; answer: string },
+  ) => {
     try {
       await finalizeLatestStudySession({
         exerciseType: "read_then_write",
@@ -197,7 +217,8 @@ export function ReadWriteSession({
           titleEn: topic.titleEn,
           titleTh: topic.titleTh,
           essay,
-          followUpAnswers,
+          followUpAnswers: interactive ? [interactive.answer] : followUpAnswers,
+          ...(interactive ? { format: "interactive", followUpPromptEn: interactive.followUp.promptEn } : {}),
         },
         reportPayload: report,
       });
@@ -214,8 +235,9 @@ export function ReadWriteSession({
     }
   };
 
-  const submitWithGemini = async () => {
-    if (!canSubmit || !topic) return;
+  const submitWithGemini = async (interactive?: { followUp: WritingFollowUpPrompt; answer: string }) => {
+    if (!topic) return;
+    if (!interactive && !canSubmit) return;
     if (!vipGate.confirmBeforeAiSubmit()) return;
     const id =
       typeof crypto !== "undefined" && crypto.randomUUID
@@ -234,10 +256,12 @@ export function ReadWriteSession({
         },
         body: JSON.stringify({
           attemptId: id,
-          topic,
+          // Interactive Writing grades the generated follow-up as the topic's single follow-up.
+          topic: interactive ? { ...topic, followUps: [interactive.followUp] } : topic,
           essay,
-          followUpAnswers,
-          prepMinutes: prepChoice,
+          followUpAnswers: interactive ? [interactive.answer] : followUpAnswers,
+          prepMinutes: interactive ? IW_PREP_SECONDS / 60 : prepChoice,
+          ...(interactive ? { format: "interactive" } : {}),
           redeemed: startWithRedeem && Boolean(progress),
           previousScore160: startWithRedeem ? progress?.latestScore160 ?? null : null,
           source: attemptSource,
@@ -268,7 +292,7 @@ export function ReadWriteSession({
         throw new Error("Invalid response from grading service");
       }
       vipGate.recordSuccessfulAiSubmit();
-      await goToReport(report);
+      await goToReport(report, interactive);
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -276,8 +300,74 @@ export function ReadWriteSession({
     }
   };
 
+  const startInteractive = () => {
+    setMode("interactive");
+    setEssay("");
+    setIwAnswer("");
+    setIwFollowUp(null);
+    setSubmitError(null);
+    setSecondsLeft(IW_PREP_SECONDS);
+    setPhase("iw-prep");
+  };
+
+  const startStandard = () => {
+    setMode("standard");
+    setPhase("prep-pick");
+  };
+
+  /** Step 1 → 2: the follow-up is only revealed once the main response is in (as on the real test). */
+  const requestFollowUp = async () => {
+    setPhase("iw-loading");
+    let next: WritingFollowUpPrompt;
+    try {
+      const geminiKey = getStoredGeminiKey();
+      const res = await fetch("/api/writing-followup", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          ...(geminiKey ? { "x-gemini-api-key": geminiKey } : {}),
+        },
+        body: JSON.stringify({ topic, essay }),
+      });
+      const j = (await res.json()) as Partial<WritingFollowUpPrompt>;
+      if (!res.ok || !j.promptEn) throw new Error("no follow-up");
+      next = { promptEn: j.promptEn, promptTh: j.promptTh ?? "" };
+    } catch {
+      next = topic.followUps?.[0] ?? {
+        promptEn:
+          "What is the strongest argument against your opinion on this topic, and how would you respond to it? Explain your thoughts.",
+        promptTh: "ลองมองจากมุมตรงข้าม ข้อโต้แย้งที่หนักแน่นที่สุดต่อความเห็นของคุณคืออะไร และคุณจะตอบกลับอย่างไร",
+      };
+    }
+    setIwFollowUp(next);
+    setSecondsLeft(IW_FOLLOW_SECONDS);
+    setPhase("iw-follow");
+  };
+
+  const submitInteractive = () => {
+    if (!iwFollowUp) return;
+    if (iwTotalWords < IW_MIN_TOTAL_WORDS) {
+      setSubmitError(`ต้องมีอย่างน้อย ${IW_MIN_TOTAL_WORDS} คำรวมทั้งสองส่วนจึงจะตรวจได้ (ตอนนี้ ${iwTotalWords} คำ)`);
+      return;
+    }
+    void submitWithGemini({ followUp: iwFollowUp, answer: iwAnswer });
+  };
+
+  const fmtClock = (n: number) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}`;
+
   return (
     <StudySessionBoundary skill="production" exerciseType="read_then_write" setId={topicId}>
+    <InteractiveWritingClock
+      phase={phase}
+      secondsLeft={secondsLeft}
+      onPrepDone={() => {
+        setSecondsLeft(IW_MAIN_SECONDS);
+        setPhase("iw-write");
+      }}
+      onMainDone={() => void requestFollowUp()}
+      onFollowDone={submitInteractive}
+    />
     {!embedded ? <PersistentWeaknessModal skill="writing" /> : null}
     <div className={embedded ? "relative space-y-6" : "relative mx-auto max-w-3xl space-y-6 px-4 py-8"}>
       {submitting ? (
@@ -293,7 +383,7 @@ export function ReadWriteSession({
           ← Topics
         </Link>
       ) : null}
-      {soft ? (
+      {soft && mode === "standard" && phase !== "mode-pick" ? (
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#004AAD] text-xl font-extrabold text-[#FFCC00] ring-[2.5px] ring-[#FFCC00]">
             D
@@ -325,6 +415,151 @@ export function ReadWriteSession({
         <h1 className="text-2xl font-black">{topic.titleEn}</h1>
         <p className="text-neutral-600">{topic.titleTh}</p>
       </header>
+
+      {phase === "mode-pick" ? (
+        <BrutalPanel title="เลือกรูปแบบการฝึก">
+          <p className="mb-4 text-sm text-neutral-700">{topic.promptEn}</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={startInteractive}
+              className="relative rounded-xl border-2 border-black bg-[#FFF8D6] p-4 text-left shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-[3px_3px_0_0_#000]"
+            >
+              <span className="absolute right-3 top-3 rounded-full bg-[#004AAD] px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-[#FFCC00]">
+                รูปแบบใหม่
+              </span>
+              <p className="text-base font-black text-[#004AAD]">Interactive Writing</p>
+              <p className="mt-1 text-xs font-bold text-neutral-800">
+                รูปแบบที่ใช้ในข้อสอบ DET จริงตั้งแต่ {IW_LAUNCH_TH} (แทน Read, Then Write แบบเดิม)
+              </p>
+              <ul className="mt-3 space-y-1 text-xs text-neutral-700">
+                <li>⏱ อ่านโจทย์ 30 วินาที → เขียน 5 นาที</li>
+                <li>➕ ส่งแล้วจะได้ “คำถามต่อ” 1 ข้อ เขียนต่ออีก 3 นาที</li>
+                <li>📊 ตรวจรวมทั้งสองส่วน เหมือนสอบจริง</li>
+              </ul>
+            </button>
+            <button
+              type="button"
+              onClick={startStandard}
+              className="rounded-xl border-2 border-black bg-white p-4 text-left shadow-[4px_4px_0_0_#000] hover:translate-x-px hover:translate-y-px hover:shadow-[3px_3px_0_0_#000]"
+            >
+              <p className="text-base font-black text-neutral-900">เขียนเรียงความปกติ</p>
+              <p className="mt-1 text-xs font-bold text-neutral-600">แบบเดิม เหมาะกับฝึกโครงเรียงความ</p>
+              <ul className="mt-3 space-y-1 text-xs text-neutral-700">
+                <li>🧠 เลือกเวลาวางแผน 1–5 นาที</li>
+                <li>✍️ เขียนเรียงความเดียว อย่างน้อย 50 คำ ไม่จับเวลาเขียน</li>
+              </ul>
+            </button>
+          </div>
+        </BrutalPanel>
+      ) : null}
+
+
+      {phase === "iw-prep" ? (
+        <BrutalPanel title="Interactive Writing · อ่านโจทย์" variant="accent">
+          <p className="text-sm text-neutral-600">คุณจะได้เขียน 5 นาที แล้วตามด้วยคำถามต่ออีก 3 นาที</p>
+          <p className="mt-4 rounded-lg border-2 border-black bg-white p-4 text-base font-medium text-neutral-900">
+            {topic.promptEn}
+          </p>
+          {topic.promptTh ? <p className="mt-2 text-sm text-neutral-600">{topic.promptTh}</p> : null}
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <p className="ep-stat text-3xl font-black text-ep-blue">{fmtClock(secondsLeft)}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setSecondsLeft(IW_MAIN_SECONDS);
+                setPhase("iw-write");
+              }}
+              className="border-2 border-black bg-ep-blue px-4 py-2 text-sm font-black text-white shadow-[3px_3px_0_0_#000]"
+            >
+              เริ่มเขียนเลย →
+            </button>
+          </div>
+        </BrutalPanel>
+      ) : null}
+
+      {phase === "iw-write" || phase === "iw-loading" || phase === "iw-follow" ? (
+        <BrutalPanel title={phase === "iw-follow" ? "ขั้นที่ 2 · คำถามต่อ (3 นาที)" : "ขั้นที่ 1 · เขียนตอบโจทย์ (5 นาที)"}>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex gap-2 text-[11px] font-black uppercase tracking-wide">
+              <span className={`rounded-full px-2.5 py-1 ${phase === "iw-follow" ? "bg-emerald-100 text-emerald-800" : "bg-[#004AAD] text-[#FFCC00]"}`}>
+                {phase === "iw-follow" ? "✓ " : "1 · "}เขียน 5 นาที
+              </span>
+              <span className={`rounded-full px-2.5 py-1 ${phase === "iw-follow" ? "bg-[#004AAD] text-[#FFCC00]" : "bg-neutral-200 text-neutral-500"}`}>
+                2 · คำถามต่อ 3 นาที
+              </span>
+            </div>
+            {phase !== "iw-loading" ? (
+              <p className={`ep-stat text-2xl font-black ${secondsLeft <= 30 ? "text-red-600" : "text-ep-blue"}`}>
+                {fmtClock(secondsLeft)}
+              </p>
+            ) : null}
+          </div>
+          <div className={phase === "iw-follow" ? "grid gap-4 md:grid-cols-2" : ""}>
+            <div>
+              <p className="text-sm font-bold text-neutral-900">{topic.promptEn}</p>
+              <textarea
+                value={essay}
+                onChange={(e) => setEssay(e.target.value)}
+                readOnly={phase !== "iw-write"}
+                rows={phase === "iw-follow" ? 10 : 14}
+                autoFocus
+                className={`mt-2 w-full border-2 border-black p-3 text-sm outline-none focus:ring-2 focus:ring-ep-blue ${phase === "iw-write" ? "bg-white" : "bg-neutral-100 text-neutral-600"}`}
+                placeholder="Type here…"
+              />
+              <p className="ep-stat mt-1 text-xs text-neutral-500">{wc} words</p>
+            </div>
+            {phase === "iw-follow" && iwFollowUp ? (
+              <div>
+                <p className="text-sm font-bold text-[#004AAD]">{iwFollowUp.promptEn}</p>
+                {iwFollowUp.promptTh ? <p className="mt-1 text-xs text-neutral-600">{iwFollowUp.promptTh}</p> : null}
+                <textarea
+                  value={iwAnswer}
+                  onChange={(e) => setIwAnswer(e.target.value)}
+                  rows={10}
+                  autoFocus
+                  className="mt-2 w-full border-2 border-black bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-ep-blue"
+                  placeholder="Write your follow-up response here…"
+                />
+                <p className="ep-stat mt-1 text-xs text-neutral-500">
+                  {countWords(iwAnswer)} words · รวม {iwTotalWords} คำ
+                </p>
+              </div>
+            ) : null}
+          </div>
+          {phase === "iw-loading" ? (
+            <p className="mt-4 text-sm font-bold text-neutral-700">กำลังเตรียมคำถามต่อ…</p>
+          ) : null}
+          <div className="mt-4 space-y-3">
+            <VipAiFeedbackQuotaBanner />
+          </div>
+          <StickyExamCTA>
+            {phase === "iw-write" ? (
+              <button
+                type="button"
+                onClick={() => void requestFollowUp()}
+                className="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90"
+              >
+                ส่งส่วนที่ 1 → ไปคำถามต่อ
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={phase !== "iw-follow" || submitting}
+                onClick={submitInteractive}
+                className="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90 disabled:opacity-50"
+              >
+                {submitting ? "กำลังตรวจ…" : "ส่งตรวจทั้งสองส่วน →"}
+              </button>
+            )}
+          </StickyExamCTA>
+          {submitError ? (
+            <div className="mt-4 rounded-sm border-2 border-red-600 bg-red-50 p-3 text-sm">
+              <p className="font-bold text-red-900">{submitError}</p>
+            </div>
+          ) : null}
+        </BrutalPanel>
+      ) : null}
 
       <EssayHintPanel unlocked={forceUnlockHints || effectiveTier === "vip"} />
 
@@ -483,7 +718,7 @@ export function ReadWriteSession({
               <button
                 type="button"
                 disabled={!canSubmit || submitting}
-                onClick={submitWithGemini}
+                onClick={() => void submitWithGemini()}
                 className="border-2 border-black bg-ep-blue px-6 py-3 text-sm font-black text-white shadow-[4px_4px_0_0_#000] disabled:opacity-40"
               >
                 {submitting ? "Grading…" : "Submit"}
@@ -495,7 +730,7 @@ export function ReadWriteSession({
               <button
                 type="button"
                 disabled={!canSubmit || submitting}
-                onClick={submitWithGemini}
+                onClick={() => void submitWithGemini()}
                 className="w-full rounded-xl bg-[#004AAD] py-3.5 text-base font-bold text-[#FFCC00] hover:opacity-90 disabled:opacity-50"
               >
                 {submitting ? "กำลังตรวจ…" : "ส่งคำตอบ →"}
@@ -515,4 +750,29 @@ export function ReadWriteSession({
     </div>
     </StudySessionBoundary>
   );
+}
+
+/** Fires the Interactive Writing phase changes when a clock reaches zero (kept out of the render body). */
+function InteractiveWritingClock({
+  phase,
+  secondsLeft,
+  onPrepDone,
+  onMainDone,
+  onFollowDone,
+}: {
+  phase: string;
+  secondsLeft: number;
+  onPrepDone: () => void;
+  onMainDone: () => void;
+  onFollowDone: () => void;
+}) {
+  useEffect(() => {
+    if (secondsLeft !== 0) return;
+    if (phase === "iw-prep") onPrepDone();
+    else if (phase === "iw-write") onMainDone();
+    else if (phase === "iw-follow") onFollowDone();
+    // only the zero crossing matters; the callbacks change every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, secondsLeft]);
+  return null;
 }

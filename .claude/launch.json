@@ -75,6 +75,15 @@
         "/Users/ongjui/det-video-build/web/preview/serve.mjs"
       ],
       "port": 8899
+    },
+    {
+      "name": "mobile-expo-web-api-local",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/natchanon/Developer/det-prep-app/mobile && EXPO_PUBLIC_API_BASE_URL=http://localhost:3000 npx expo start --web --port 8084"
+      ],
+      "port": 8084
     }
   ]
 }

@@ -73,6 +73,7 @@ export async function runGradingJob(
             ? strArray(p.followUpAnswers)
             : undefined,
           prepMinutes: num(p.prepMinutes),
+          format: p.format === "interactive" ? "interactive" : "standard",
           deadlineAt,
         });
         return { report: report as unknown as Record<string, unknown>, usage };
