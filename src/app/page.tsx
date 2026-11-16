@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { FastTrackLanding } from "@/components/landing/FastTrackLanding";
+import { OldSchoolLanding } from "@/components/landing/OldSchoolLanding";
 
 export const metadata: Metadata = {
   title: "Duolingo English Test Prep Thailand | Mock Test, Instant Feedback, Guide",
@@ -18,5 +18,5 @@ export default async function Home({ searchParams }: HomeProps) {
   const initialFastTrackOpen =
     ftRaw === "1" || (Array.isArray(ftRaw) && ftRaw[0] === "1");
 
-  return <FastTrackLanding initialFastTrackOpen={initialFastTrackOpen} />;
+  return <OldSchoolLanding initialFastTrackOpen={initialFastTrackOpen} />;
 }
