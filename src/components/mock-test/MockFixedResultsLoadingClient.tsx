@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { mt } from "@/lib/mock-test/mock-test-styles";
@@ -90,6 +90,12 @@ export function MockFixedResultsLoadingClient({ sessionId }: { sessionId: string
     return () => window.clearInterval(id);
   }, [router, sessionId, storageKey]);
 
+  // The poller reads the countdown through a ref: depending on `remaining`
+  // (which ticks every second) restarted the effect — and fired a status call —
+  // every second instead of every 5.
+  const remainingRef = useRef(remaining);
+  remainingRef.current = remaining;
+
   useEffect(() => {
     let mounted = true;
     const poll = async () => {
@@ -102,7 +108,7 @@ export function MockFixedResultsLoadingClient({ sessionId }: { sessionId: string
         if (!mounted || !res.ok) return;
         if (json.adminPreviewMode === true) setAdminPreviewMode(true);
         if (json.ready === true) {
-          if (json.adminPreviewMode === true && remaining > 0) {
+          if (json.adminPreviewMode === true && remainingRef.current > 0) {
             setReportReadyEarly(true);
           } else {
             window.localStorage.removeItem(storageKey);
@@ -119,7 +125,7 @@ export function MockFixedResultsLoadingClient({ sessionId }: { sessionId: string
       mounted = false;
       window.clearInterval(id);
     };
-  }, [remaining, router, sessionId, storageKey]);
+  }, [router, sessionId, storageKey]);
 
   useEffect(() => {
     const id = window.setInterval(() => {

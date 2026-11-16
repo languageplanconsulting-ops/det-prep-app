@@ -156,6 +156,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           answer: body.answer,
           correct: step.correct_answer,
           step,
+          usageLog: { userId: (session as { user_id?: string | null }).user_id ?? null, sessionId: id },
         });
 
   const entry = {
@@ -226,6 +227,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       gradeStepInBackground({
         gradingReq,
         sessionId: id,
+        userId: (session as { user_id?: string | null }).user_id ?? null,
         step: bgStep,
         answer: body.answer,
       }),

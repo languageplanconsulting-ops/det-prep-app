@@ -1,5 +1,6 @@
 import "server-only";
 
+import { logApiUsageEvent } from "@/lib/api-usage-log";
 import { generateDialogueSummaryReportWithGemini } from "@/lib/gemini-dialogue-summary";
 import { generateInteractiveSpeakingReportWithGemini } from "@/lib/gemini-interactive-speaking-report";
 import { resolveGeminiTextModel } from "@/lib/gemini-model-resolve";
@@ -212,12 +213,15 @@ export async function scoreAnswerWithNormalCriteria({
   answer,
   correct,
   step,
+  usageLog,
 }: {
   req: Request;
   taskType: string;
   answer: unknown;
   correct: unknown;
   step: { step_index: number; content?: Record<string, unknown> | null };
+  /** Who to bill the AI call to in api_usage_logs (the practice routes log theirs). */
+  usageLog?: { userId: string | null; sessionId: string };
 }): Promise<number> {
   if (isAdminSkippedAnswer(answer)) {
     // Preview skips should behave like a learner leaving the task blank.
@@ -252,13 +256,33 @@ export async function scoreAnswerWithNormalCriteria({
 
     const runWithFallback = async <T>(
       runner: (model: string, deadlineAt: number) => Promise<{ report: T; usage: GradingLlmUsage | null }>,
-    ): Promise<{ report: T }> =>
-      gradeWithEscalation({
+    ): Promise<{ report: T }> => {
+      const graded = await gradeWithEscalation({
         operation: `mock_fixed_${taskType}`,
         models,
         deadlineAt,
         runAi: runner,
       });
+      // Mock grades never reached api_usage_logs, so the cost dashboard left
+      // out every AI-graded mock step. Awaited (not fire-and-forget): this runs
+      // inside after(), which can freeze as soon as the grade resolves.
+      if (graded.usage) {
+        await logApiUsageEvent({
+          userId: usageLog?.userId ?? null,
+          operation: `mock_fixed_${taskType}`,
+          provider: graded.usage.provider,
+          model: graded.usage.model,
+          inputTokens: graded.usage.inputTokens,
+          outputTokens: graded.usage.outputTokens,
+          meta: {
+            sessionId: usageLog?.sessionId ?? null,
+            stepIndex: step.step_index,
+            ...(graded.failures.length ? { failures: graded.failures } : {}),
+          },
+        }).catch((e) => console.error("[mock grading] usage log", e instanceof Error ? e.message : e));
+      }
+      return graded;
+    };
 
     if (taskType === "read_and_write") {
       const topic: WritingTopic = {
@@ -568,6 +592,7 @@ export async function writeStepScoreWithRetry(
 export async function gradeStepInBackground(params: {
   gradingReq: Request;
   sessionId: string;
+  userId: string | null;
   step: MockFixedStepItem;
   answer: unknown;
 }): Promise<void> {
@@ -578,6 +603,7 @@ export async function gradeStepInBackground(params: {
       answer: params.answer,
       correct: params.step.correct_answer,
       step: params.step,
+      usageLog: { userId: params.userId, sessionId: params.sessionId },
     });
     await writeStepScoreWithRetry(params.sessionId, params.step.step_index, score);
     await finalizeMockFixedResultIfReady(params.sessionId);
@@ -661,7 +687,7 @@ export async function gradePendingStepsAndFinalize(
   const supabase = createServiceRoleSupabase();
   const { data: session } = await supabase
     .from("mock_fixed_sessions")
-    .select("id,set_id,status,responses")
+    .select("id,user_id,set_id,status,responses")
     .eq("id", sessionId)
     .maybeSingle();
   if (!session || session.status !== "completed") return false;
@@ -685,6 +711,7 @@ export async function gradePendingStepsAndFinalize(
         answer: entry.answer,
         correct: step.correct_answer,
         step,
+        usageLog: { userId: (session as { user_id?: string | null }).user_id ?? null, sessionId },
       });
       await writeStepScoreWithRetry(sessionId, entry.step_index, score);
     }

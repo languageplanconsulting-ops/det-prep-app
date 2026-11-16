@@ -175,7 +175,12 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
 
   const recommendations: string[] = [];
   const scoreGap = desiredScore - totalScore;
-  if (scoreGap > 0) {
+  if (desiredScore <= 0) {
+    // No target was set at the start — don't congratulate them on "reaching 0".
+    recommendations.push(
+      `ตอนนี้คุณได้ ${totalScore} คะแนน — ครั้งหน้าลองตั้งเป้าคะแนนตอนเริ่ม Mock ระบบจะบอกได้ว่ายังห่างเป้าอีกกี่คะแนนครับ`,
+    );
+  } else if (scoreGap > 0) {
     recommendations.push(
       `ตอนนี้คุณได้ ${totalScore} คะแนน ห่างจากเป้าหมาย ${desiredScore} อยู่ ${scoreGap} คะแนน — เก็บ 2 จุดที่อ่อนที่สุดให้ได้ก่อน คะแนนรวมจะขยับขึ้นเร็วที่สุดครับ`,
     );
@@ -284,7 +289,9 @@ export function MockFixedResultsClient({ sessionId }: { sessionId: string }) {
                 type: "production",
                 content: [
                   "DET fixed mock (20 steps) — full report snapshot",
-                  `Total: ${totalScore}/160 (target ${desiredScore}/160)`,
+                  desiredScore > 0
+                    ? `Total: ${totalScore}/160 (target ${desiredScore}/160)`
+                    : `Total: ${totalScore}/160`,
                   `Listening ${listening}/160 · Speaking ${speaking}/160 · Reading ${reading}/160 · Writing ${writing}/160`,
                   "",
                   "Strength (top 3 task averages):",
